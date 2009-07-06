@@ -30,6 +30,8 @@
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 #define H5EA_PACKAGE		/*suppress error about including H5EApkg  */
 #define H5EA_TESTING		/*suppress warning about H5EA testing funcs*/
+#define H5FA_PACKAGE		/*suppress error about including H5FApkg  */
+#define H5FA_TESTING		/*suppress warning about H5FA testing funcs*/
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
@@ -42,6 +44,7 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FSprivate.h"	/* Free space manager			*/
 #include "H5Gpkg.h"		/* Groups				*/
@@ -161,6 +164,41 @@ get_H5EA_class(const uint8_t *sig)
 
     return(cls);
 } /* end get_H5EA_class() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    get_H5FA_class
+ *
+ * Purpose:	Determine the fixed array class from the buffer read in.
+ *              Extensible arrays are debugged through the array subclass.
+ *              The subclass identifier is two bytes after the signature.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 11 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static const H5FA_class_t *
+get_H5FA_class(const uint8_t *sig)
+{
+    H5FA_cls_id_t clsid = (H5FA_cls_id_t)sig[H5_SIZEOF_MAGIC + 1];
+    const H5FA_class_t *cls;
+
+    switch(clsid) {
+        case H5FA_CLS_TEST_ID:
+            cls = H5FA_CLS_TEST;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDexit(4);
+    } /* end switch */
+
+    return(cls);
+} /* end get_H5FA_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -493,6 +531,40 @@ main(int argc, char *argv[])
         } /* end if */
 
         status = H5EA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2);
+
+    } else if(!HDmemcmp(sig, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /*
+         * Debug a fixed array header.
+         */
+        const H5FA_class_t *cls = get_H5FA_class(sig);
+        HDassert(cls);
+
+	/* Check for enough valid parameters */
+        if(extra == 0) {            
+	    fprintf(stderr, "ERROR: Need object header address containing the layout messagein order to dump header\n");
+            fprintf(stderr, "Fixed array header block usage:\n");            
+	    fprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5FA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
+
+    } else if(!HDmemcmp(sig, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /*
+         * Debug a fixed array data block.
+         */
+        const H5FA_class_t *cls = get_H5FA_class(sig);
+        HDassert(cls);
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need fixed array header address and object header address containing the layout message in order to dump data block\n");
+            fprintf(stderr, "fixed array data block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <object header address>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5FA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

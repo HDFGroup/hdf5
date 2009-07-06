@@ -13,10 +13,10 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              Thursday, August 28, 2008
+/* 
+ * Programmer:  
  *
- * Purpose:	Extensible array testing functions.
+ * Purpose:	Fixed array testing functions.
  *
  */
 
@@ -24,8 +24,8 @@
 /* Module Declaration */
 /**********************/
 
-#define H5EA_MODULE
-#define H5EA_TESTING
+#define H5FA_MODULE
+#define H5FA_TESTING
 
 
 /***********************/
@@ -38,7 +38,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Vprivate.h"         /* Vector functions			*/
 
@@ -48,17 +48,18 @@
 /****************/
 
 /* Sanity checking value for callback contexts */
-#define H5EA__TEST_BOGUS_VAL    42
+#define H5FA__TEST_BOGUS_VAL    42
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
 /* Callback context */
-typedef struct H5EA__test_ctx_t {
+typedef struct H5FA__test_ctx_t {
     uint32_t    bogus;          /* Placeholder field to verify that context is working */
-    H5EA__ctx_cb_t *cb;         /* Pointer to context's callback action */
-} H5EA__test_ctx_t;
+} H5FA__test_ctx_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -69,15 +70,15 @@ typedef struct H5EA__test_ctx_t {
 /* Local Prototypes */
 /********************/
 
-/* Extensible array class callbacks */
-static void *H5EA__test_crt_context(void *udata);
-static herr_t H5EA__test_dst_context(void *ctx);
-static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
-static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts,
+/* Fixed array class callbacks */
+static void *H5FA__test_crt_context(void *udata);
+static herr_t H5FA__test_dst_context(void *ctx);
+static herr_t H5FA__test_fill(void *nat_blk, size_t nelmts);
+static herr_t H5FA__test_encode(void *raw, const void *elmt, size_t nelmts,
     void *ctx);
-static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts,
+static herr_t H5FA__test_decode(const void *raw, void *elmt, size_t nelmts,
     void *ctx);
-static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
+static herr_t H5FA__test_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
 
 
@@ -85,16 +86,17 @@ static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
 /* Package Variables */
 /*********************/
 
-/* Extensible array testing class information */
-const H5EA_class_t H5EA_CLS_TEST[1]={{
-    H5EA_CLS_TEST_ID,           /* Type of Extensible array */
+/* Fixed array testing class information */
+const H5FA_class_t H5FA_CLS_TEST[1]={{
+    H5FA_CLS_TEST_ID,           /* Type of Fixed array */
+    "Testing",                  /* Name of fixed array class */
     sizeof(uint64_t),           /* Size of native element */
-    H5EA__test_crt_context,     /* Create context */
-    H5EA__test_dst_context,     /* Destroy context */
-    H5EA__test_fill,            /* Fill block of missing elements callback */
-    H5EA__test_encode,          /* Element encoding callback */
-    H5EA__test_decode,          /* Element decoding callback */
-    H5EA__test_debug            /* Element debugging callback */
+    H5FA__test_crt_context,     /* Create context */
+    H5FA__test_dst_context,     /* Destroy context */
+    H5FA__test_fill,            /* Fill block of missing elements callback */
+    H5FA__test_encode,          /* Element encoding callback */
+    H5FA__test_decode,          /* Element decoding callback */
+    H5FA__test_debug            /* Element debugging callback */
 }};
 
 
@@ -107,98 +109,97 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage the H5EA__test_ctx_t struct */
-H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
+/* Declare a free list to manage the H5FA__test_ctx_t struct */
+H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
 
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_crt_context
+ * Function:	H5FA__test_crt_context
  *
  * Purpose:	Create context for callbacks
  *
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January 27, 2009
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__test_crt_context(void *_udata))
+H5FA__test_crt_context(void UNUSED *udata))
 
     /* Local variables */
-    H5EA__test_ctx_t *ctx;              /* Context for callbacks */
-    H5EA__ctx_cb_t *udata = (H5EA__ctx_cb_t *)_udata;   /* User data for context */
+    H5FA__test_ctx_t *ctx;              /* Context for callbacks */
 
     /* Sanity checks */
+    HDassert(udata);
 
     /* Allocate new context structure */
-    if(NULL == (ctx = H5FL_MALLOC(H5EA__test_ctx_t)))
-	H5E_THROW(H5E_CANTALLOC, "can't allocate extensible array client callback context")
+    if(NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
+	H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
 
     /* Initialize the context */
-    ctx->bogus = H5EA__TEST_BOGUS_VAL;
-    ctx->cb = udata;
+    ctx->bogus = H5FA__TEST_BOGUS_VAL;
 
     /* Set return value */
     ret_value = ctx;
 
 CATCH
 
-END_FUNC(STATIC)  /* end H5EA__test_crt_context() */
+END_FUNC(STATIC)  /* end H5FA__test_crt_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_dst_context
+ * Function:	H5FA__test_dst_context
  *
  * Purpose:	Destroy context for callbacks
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January 27, 2009
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_dst_context(void *_ctx))
+H5FA__test_dst_context(void *_ctx))
 
     /* Local variables */
-    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx;   /* Callback context to destroy */
 
     /* Sanity checks */
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Release context structure */
-    ctx = H5FL_FREE(H5EA__test_ctx_t, ctx);
+    ctx = H5FL_FREE(H5FA__test_ctx_t, ctx);
 
-END_FUNC(STATIC)  /* end H5EA__test_dst_context() */
+END_FUNC(STATIC)  /* end H5FA__test_dst_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_fill
+ * Function:	H5FA__test_fill
  *
  * Purpose:	Fill "missing elements" in block of elements
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_fill(void *nat_blk, size_t nelmts))
+H5FA__test_fill(void *nat_blk, size_t nelmts))
 
     /* Local variables */
-    uint64_t fill_val = H5EA_TEST_FILL;          /* Value to fill elements with */
+    uint64_t fill_val = H5FA_TEST_FILL;          /* Value to fill elements with */
 
     /* Sanity checks */
     HDassert(nat_blk);
@@ -206,41 +207,35 @@ H5EA__test_fill(void *nat_blk, size_t nelmts))
 
     H5V_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
 
-END_FUNC(STATIC)  /* end H5EA__test_fill() */
+END_FUNC(STATIC)  /* end H5FA__test_fill() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_encode
+ * Function:	H5FA__test_encode
  *
  * Purpose:	Encode an element from "native" to "raw" form
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
+BEGIN_FUNC(STATIC, NOERR,
+herr_t, SUCCEED, -,
+H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
 
     /* Local variables */
-    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx;   /* Callback context to destroy */
     const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
 
     /* Sanity checks */
     HDassert(raw);
     HDassert(elmt);
     HDassert(nelmts);
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
-
-    /* Check for callback action */
-    if(ctx->cb) {
-        if((*ctx->cb->encode)(elmt, nelmts, ctx->cb->udata) < 0)
-            H5E_THROW(H5E_BADVALUE, "extensible array testing callback action failed")
-    } /* end if */
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Encode native elements into raw elements */
     while(nelmts) {
@@ -255,30 +250,28 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
         nelmts--;
     } /* end while */
 
-CATCH
-
-END_FUNC(STATIC)  /* end H5EA__test_encode() */
+END_FUNC(STATIC)  /* end H5FA__test_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_decode
+ * Function:	H5FA__test_decode
  *
  * Purpose:	Decode an element from "raw" to "native" form
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
+H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
 
     /* Local variables */
-    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+    H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx;   /* Callback context to destroy */
     uint64_t *elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
@@ -286,7 +279,7 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
     HDassert(raw);
     HDassert(elmt);
     HDassert(nelmts);
-    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+    HDassert(H5FA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Decode raw elements into native elements */
     while(nelmts) {
@@ -301,25 +294,25 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
         nelmts--;
     } /* end while */
 
-END_FUNC(STATIC)  /* end H5EA__test_decode() */
+END_FUNC(STATIC)  /* end H5FA__test_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA__test_debug
+ * Function:	H5FA__test_debug
  *
  * Purpose:	Display an element for debugging
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
+H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     const void *elmt))
 
     /* Local variables */
@@ -334,57 +327,53 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
         (unsigned long long)*(const uint64_t *)elmt);
 
-END_FUNC(STATIC)  /* end H5EA__test_debug() */
+END_FUNC(STATIC)  /* end H5FA__test_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_get_cparam_test
+ * Function:	H5FA_get_cparam_test
  *
- * Purpose:	Retrieve the parameters used to create the extensible array
+ * Purpose:	Retrieve the parameters used to create the fixed array
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, NOERR,
 herr_t, SUCCEED, -,
-H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
+H5FA_get_cparam_test(const H5FA_t *fa, H5FA_create_t *cparam))
 
     /* Check arguments. */
-    HDassert(ea);
+    HDassert(fa);
     HDassert(cparam);
 
-    /* Get extensible array creation parameters */
-    cparam->raw_elmt_size = ea->hdr->cparam.raw_elmt_size;
-    cparam->max_nelmts_bits = ea->hdr->cparam.max_nelmts_bits;
-    cparam->idx_blk_elmts = ea->hdr->cparam.idx_blk_elmts;
-    cparam->sup_blk_min_data_ptrs = ea->hdr->cparam.sup_blk_min_data_ptrs;
-    cparam->data_blk_min_elmts = ea->hdr->cparam.data_blk_min_elmts;
-    cparam->max_dblk_page_nelmts_bits = ea->hdr->cparam.max_dblk_page_nelmts_bits;
+    /* Get fixed array creation parameters */
+    cparam->raw_elmt_size = fa->hdr->cparam.raw_elmt_size;
+    cparam->nelmts = fa->hdr->cparam.nelmts;
 
-END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
+END_FUNC(PRIV)  /* end H5FA_get_cparam_test() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_cmp_cparam_test
+ * Function:	H5FA_cmp_cparam_test
  *
- * Purpose:	Compare the parameters used to create the extensible array
+ * Purpose:	Compare the parameters used to create the fixed array
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERRCATCH,
 int, 0, -,
-H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2))
+H5FA_cmp_cparam_test(const H5FA_create_t *cparam1, const H5FA_create_t *cparam2))
 
     /* Check arguments. */
     HDassert(cparam1);
@@ -395,28 +384,8 @@ H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2)
         H5_LEAVE(-1)
     else if(cparam1->raw_elmt_size > cparam2->raw_elmt_size)
         H5_LEAVE(1)
-    if(cparam1->max_nelmts_bits < cparam2->max_nelmts_bits)
-        H5_LEAVE(-1)
-    else if(cparam1->max_nelmts_bits > cparam2->max_nelmts_bits)
-        H5_LEAVE(1)
-    if(cparam1->idx_blk_elmts < cparam2->idx_blk_elmts)
-        H5_LEAVE(-1)
-    else if(cparam1->idx_blk_elmts > cparam2->idx_blk_elmts)
-        H5_LEAVE(1)
-    if(cparam1->sup_blk_min_data_ptrs < cparam2->sup_blk_min_data_ptrs)
-        H5_LEAVE(-1)
-    else if(cparam1->sup_blk_min_data_ptrs > cparam2->sup_blk_min_data_ptrs)
-        H5_LEAVE(1)
-    if(cparam1->data_blk_min_elmts < cparam2->data_blk_min_elmts)
-        H5_LEAVE(-1)
-    else if(cparam1->data_blk_min_elmts > cparam2->data_blk_min_elmts)
-        H5_LEAVE(1)
-    if(cparam1->max_dblk_page_nelmts_bits < cparam2->max_dblk_page_nelmts_bits)
-        H5_LEAVE(-1)
-    else if(cparam1->max_dblk_page_nelmts_bits > cparam2->max_dblk_page_nelmts_bits)
-        H5_LEAVE(1)
 
 CATCH
 
-END_FUNC(PRIV)  /* end H5EA_cmp_cparam_test() */
+END_FUNC(PRIV)  /* end H5FA_cmp_cparam_test() */
 

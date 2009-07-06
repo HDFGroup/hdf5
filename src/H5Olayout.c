@@ -390,6 +390,10 @@ H5O_layout_copy(const void *_mesg, void *_dest)
         HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
     } /* end if */
 
+    /* Reset the pointer of the chunked storage index but not the address */
+    if(dest->type == H5D_CHUNKED && dest->u.chunk.ops)
+	H5D_chunk_idx_reset(dest, FALSE);
+
     /* Set return value */
     ret_value = dest;
 
@@ -517,7 +521,7 @@ H5O_layout_free(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -526,6 +530,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
     /* check args */
     HDassert(f);
+    HDassert(open_oh);
     HDassert(mesg);
 
     /* Perform different actions, depending on the type of storage */
@@ -542,7 +547,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
-            if(H5D_chunk_delete(f, dxpl_id, mesg) < 0)
+            if(H5D_chunk_delete(f, dxpl_id, open_oh, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -625,13 +630,30 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
         case H5D_CHUNKED:
             if(H5D_chunk_is_space_alloc(layout_src)) {
+                hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Curr. size of dataset dimensions */
+                int sndims;                 /* Rank of dataspace */
+                unsigned ndims;             /* Rank of dataspace */
+
                 /* Layout is not created in the destination file, reset index address */
-                if(H5D_chunk_idx_reset(layout_dst) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to reset chunked storage index in dest")
+                if(H5D_chunk_idx_reset(layout_dst, TRUE) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset chunked storage index in dest")
+
+                /* Get the dim info for dataset */
+                if((sndims = H5S_extent_get_dims(udata->src_space_extent, curr_dims, NULL)) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get dataspace dimensions")
+                H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
+
+                /* Set the source layout chunk information */
+                if(H5D_chunk_set_info_real(layout_src, ndims, curr_dims) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set layout's chunk info")
+
+                /* Set the dest. layout chunk info also */
+                if(H5D_chunk_set_info_real(layout_dst, ndims, curr_dims) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set layout's chunk info")
 
                 /* Create chunked layout */
                 if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy chunked storage")
             } /* if ( H5F_addr_defined(layout_srct->u.chunk.addr)) */
             break;
 

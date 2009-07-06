@@ -198,6 +198,7 @@ H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 
 /* Operations on dataspace extents */
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
+H5_DLL int H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[]);
 H5_DLL htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 /* Operations on selections */

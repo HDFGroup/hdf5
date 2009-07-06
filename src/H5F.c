@@ -949,13 +949,23 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
         if(!H5F_addr_defined(f->shared->maxaddr))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad maximum address from VFD")
-        f->shared->tmp_addr = f->shared->maxaddr;
         if(H5FD_get_feature_flags(lf, &f->shared->feature_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get feature flags from VFD")
         if(H5FD_get_fs_type_map(lf, f->shared->fs_type_map) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get free space type mapping from VFD")
         if(H5MF_init_merge_flags(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "problem initializing free space merge flags")
+        f->shared->tmp_addr = f->shared->maxaddr;
+        /* Disable temp. space allocation for parallel I/O (for now) */
+        /* (When we've arranged to have the relocated metadata addresses (and
+         *      sizes) broadcast during the "end of epoch" metadata operations,
+         *      this can be enabled - QAK)
+         */
+        /* (This should be disabled when the metadata journaling branch is
+         *      merged into the trunk and journaling is enabled, at least until
+         *      we make it work. - QAK)
+         */
+        f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
 
         /* Bump superblock version if we are to use the latest version of the format */
         if(f->shared->latest_format)
@@ -1491,11 +1501,15 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if (!filename || !*filename)
+    if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
-    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    /* In this routine, we only accept the following flags:
+     *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_DEBUG
+     */
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
-    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
+    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
@@ -1595,6 +1609,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Check/fix arguments. */
     if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+    /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")

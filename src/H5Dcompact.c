@@ -57,8 +57,7 @@
 /********************/
 
 /* Layout operation callbacks */
-static herr_t H5D_compact_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
-    const H5P_genplist_t *dc_plist);
+static herr_t H5D_compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D_compact_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -78,6 +77,7 @@ static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
 /* Compact storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D_compact_construct,
+    NULL,
     H5D_compact_is_space_alloc,
     H5D_compact_io_init,
     H5D_contig_read,
@@ -167,8 +167,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5D_compact_construct(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
-    const H5P_genplist_t UNUSED *dc_plist)
+H5D_compact_construct(H5F_t *f, H5D_t *dset)
 {
     hssize_t tmp_size;          /* Temporary holder for raw data size */
     hsize_t comp_data_size;     /* Size of compact data */
@@ -179,7 +178,6 @@ H5D_compact_construct(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_
     /* Sanity checks */
     HDassert(f);
     HDassert(dset);
-    HDassert(dc_plist);
 
     /*
      * Compact dataset is stored in dataset object header message of

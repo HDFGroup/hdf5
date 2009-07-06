@@ -346,9 +346,12 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     /* Updated the dataset's info if the dataspace was successfully extended */
     if(changed) {
         /* Update the index values for the cached chunks for this dataset */
-        if(H5D_CHUNKED == dataset->shared->layout.type)
+        if(H5D_CHUNKED == dataset->shared->layout.type) {
+            if(H5D_chunk_set_info(dataset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
             if(H5D_chunk_update_cache(dataset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+        } /* end if */
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         fill = &dataset->shared->dcpl_cache.fill;

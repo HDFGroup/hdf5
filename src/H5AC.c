@@ -496,6 +496,9 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "extensible array super blocks",
     "extensible array data blocks",
     "extensible array data block pages",
+    "fixed array headers",
+    "fixed array data block",
+    "fixed array data block pages",
     "test entry"	/* for testing only -- not used for actual files */
 };
 
@@ -1623,7 +1626,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC_mark_pinned_entry_dirty() */
+} /* H5AC_mark_pinned_or_protected_entry_dirty() */
 
 
 /*-------------------------------------------------------------------------

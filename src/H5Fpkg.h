@@ -61,7 +61,7 @@
 #define H5F_SUPER_ALL_FLAGS             (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_FILE_OK)
 
 /* Mask for removing private file access flags */
-#define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
+#define H5F_ACC_PUBLIC_FLAGS 	        0x001fu
 
 /* Free space section+aggregator merge flags */
 #define H5F_FS_MERGE_METADATA           0x01    /* Section can merge with metadata aggregator */
@@ -162,9 +162,10 @@ typedef struct H5F_file_t {
     haddr_t     root_addr;      /* Root group address                   */
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
-    haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
 
     /* File space allocation information */
+    hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
+    haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
     H5F_fs_state_t fs_state[H5FD_MEM_NTYPES];   /* State of free space manager for each type */
     haddr_t fs_addr[H5FD_MEM_NTYPES];   /* Address of free space manager info for each type */

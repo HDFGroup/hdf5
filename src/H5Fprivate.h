@@ -265,6 +265,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
+#define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
 #else /* H5F_PACKAGE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
@@ -288,6 +289,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
+#define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
 #endif /* H5F_PACKAGE */
 
@@ -427,6 +429,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5EA_IBLOCK_MAGIC               "EAIB"          /* Index block */
 #define H5EA_SBLOCK_MAGIC               "EASB"          /* Super block */
 #define H5EA_DBLOCK_MAGIC               "EADB"          /* Data block */
+
+/* Fixed array signatures */
+#define H5FA_HDR_MAGIC                  "FAHD"          /* Header */
+#define H5FA_DBLOCK_MAGIC               "FADB"          /* Data block */
 
 /* Free space signatures */
 #define H5FS_HDR_MAGIC                  "FSHD"          /* Header */
