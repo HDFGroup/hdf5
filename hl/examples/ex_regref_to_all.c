@@ -22,7 +22,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define filename "File.h5"
+#define filename "ex_regref_to_all.h5"
 #define dsetnamev "MY_DATA" /* dataset name */
 #define dsetnamer "MY_REF" /* region references name */
 

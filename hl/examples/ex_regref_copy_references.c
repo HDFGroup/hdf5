@@ -25,7 +25,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define filename "File.h5"
+#define filename "ex_regref_copy_references.h5"
 #define dsetname "DS"         /* dataset name */
 #define dsetname_ref "REF"    /* dataset name of region references */
 

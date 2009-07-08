@@ -29,7 +29,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define filename "File.h5"
+#define filename "ex_bitfield.h5"
 #define DIM0            4
 #define DIM1            7
 #define num_flags       4

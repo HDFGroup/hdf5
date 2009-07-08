@@ -25,7 +25,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define filename "File.h5"
+#define filename "ex_lite_read_region.h5"
 #define DSETNAME "DS"     /* dataset name */
 
 #define DIM0  5   /* dataset dimensions */

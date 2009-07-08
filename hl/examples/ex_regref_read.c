@@ -30,7 +30,7 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define filename "File.h5"
+#define filename "ex_regref_read.h5"
 #define dsetname "/DS"     /* dataset name */
 #define dsetname_ref "MY_REF"    /* dataset name of region references */
 
