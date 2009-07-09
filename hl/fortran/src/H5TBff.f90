@@ -136,9 +136,9 @@ subroutine h5tbmake_table_f(table_title,&
   field_names)
 
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBMAKE_TABLE_C'::h5tbmake_table_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBMAKE_TABLE_C'::h5tbmake_table_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: table_title
   character(len=*), intent(in) :: table_title                      ! name of the dataset 
@@ -231,9 +231,9 @@ subroutine h5tbwrite_field_name_f_int(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_INT_C'::h5tbwrite_field_name_int_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_INT_C'::h5tbwrite_field_name_int_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -306,9 +306,9 @@ subroutine h5tbwrite_field_name_f_float(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_FL_C'::h5tbwrite_field_name_fl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_FL_C'::h5tbwrite_field_name_fl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -383,9 +383,9 @@ subroutine h5tbwrite_field_name_f_double(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_DL_C'::h5tbwrite_field_name_dl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_DL_C'::h5tbwrite_field_name_dl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -458,9 +458,9 @@ subroutine h5tbwrite_field_name_f_string(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_ST_C'::h5tbwrite_field_name_st_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_NAME_ST_C'::h5tbwrite_field_name_st_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -534,9 +534,9 @@ subroutine h5tbread_field_name_f_int(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_INT_C'::h5tbread_field_name_int_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_INT_C'::h5tbread_field_name_int_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -609,9 +609,9 @@ subroutine h5tbread_field_name_f_float(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_FL_C'::h5tbread_field_name_fl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_FL_C'::h5tbread_field_name_fl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -684,9 +684,9 @@ subroutine h5tbread_field_name_f_double(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_DL_C'::h5tbread_field_name_dl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_DL_C'::h5tbread_field_name_dl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -759,9 +759,9 @@ subroutine h5tbread_field_name_f_string(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_ST_C'::h5tbread_field_name_st_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_NAME_ST_C'::h5tbread_field_name_st_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -834,9 +834,9 @@ subroutine h5tbwrite_field_index_f_int(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_INT_C'::h5tbwrite_field_index_int_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_INT_C'::h5tbwrite_field_index_int_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -905,9 +905,9 @@ subroutine h5tbwrite_field_index_f_float(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_FL_C'::h5tbwrite_field_index_fl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_FL_C'::h5tbwrite_field_index_fl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -978,9 +978,9 @@ subroutine h5tbwrite_field_index_f_double(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_DL_C'::h5tbwrite_field_index_dl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_DL_C'::h5tbwrite_field_index_dl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1049,9 +1049,9 @@ subroutine h5tbwrite_field_index_f_string(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_ST_C'::h5tbwrite_field_index_st_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBWRITE_FIELD_INDEX_ST_C'::h5tbwrite_field_index_st_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1121,9 +1121,9 @@ subroutine h5tbread_field_index_f_int(loc_id,&
   start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_INT_C'::h5tbread_field_index_int_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_INT_C'::h5tbread_field_index_int_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1192,9 +1192,9 @@ subroutine h5tbread_field_index_f_float(loc_id,&
    start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_FL_C'::h5tbread_field_index_fl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_FL_C'::h5tbread_field_index_fl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1263,9 +1263,9 @@ subroutine h5tbread_field_index_f_double(loc_id,&
    start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_DL_C'::h5tbread_field_index_dl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_DL_C'::h5tbread_field_index_dl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1334,9 +1334,9 @@ subroutine h5tbread_field_index_f_string(loc_id,&
    start,nrecords,type_size,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_ST_C'::h5tbread_field_index_st_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBREAD_FIELD_INDEX_ST_C'::h5tbread_field_index_st_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
   character(len=*), intent(in) :: dset_name                        ! name of the dataset 
@@ -1405,9 +1405,9 @@ subroutine h5tbinsert_field_f_int(loc_id,&
    field_type,field_index,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_INT_C'::h5tbinsert_field_int_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_INT_C'::h5tbinsert_field_int_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1478,9 +1478,9 @@ subroutine h5tbinsert_field_f_float(loc_id,&
    field_type,field_index,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_FL_C'::h5tbinsert_field_fl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_FL_C'::h5tbinsert_field_fl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1551,9 +1551,9 @@ subroutine h5tbinsert_field_f_double(loc_id,&
    field_type,field_index,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_DL_C'::h5tbinsert_field_dl_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_DL_C'::h5tbinsert_field_dl_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1625,9 +1625,9 @@ subroutine h5tbinsert_field_f_string(loc_id,&
    field_type,field_index,buf)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_ST_C'::h5tbinsert_field_st_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBINSERT_FIELD_ST_C'::h5tbinsert_field_st_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(hid_t),   intent(in) :: loc_id                           ! file or group identifier 
@@ -1692,9 +1692,9 @@ subroutine h5tbdelete_field_f(loc_id,&
   integer function h5tbdelete_field_c(loc_id,namelen,dset_name,namelen1,field_name)
  
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBDELETE_FIELD_C'::h5tbdelete_field_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBDELETE_FIELD_C'::h5tbdelete_field_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: field_name
   integer(HID_T),   intent(IN) :: loc_id                           ! file or group identifier 
@@ -1756,9 +1756,9 @@ subroutine h5tbget_table_info_f(loc_id,&
  interface
   integer function h5tbget_table_info_c(loc_id,namelen,dset_name,nfields,nrecords)
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBGET_TABLE_INFO_C'::h5tbget_table_info_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBGET_TABLE_INFO_C'::h5tbget_table_info_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
   character(len=*), intent(in) :: dset_name          ! name of the dataset 
@@ -1826,9 +1826,9 @@ subroutine h5tbget_field_info_f(loc_id,&
    field_sizes,field_offsets,type_size,namelen2,field_names)
 
   use h5global
-  !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TBGET_FIELD_INFO_C'::h5tbget_field_info_c
-  !DEC$ ENDIF
+  !DEC$IF DEFINED(HDF5F90_WINDOWS)
+  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TBGET_FIELD_INFO_C'::h5tbget_field_info_c
+  !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                                ! file or group identifier 
   character(len=*), intent(in) :: dset_name                             ! name of the dataset 
