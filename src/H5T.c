@@ -2923,6 +2923,10 @@ H5T_decode(const unsigned char *buf)
     if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, NULL, H5O_DTYPE_ID, buf)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
+    /* Mark datatype as being in memory now */
+    if(H5T_set_loc(ret_value, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+
 done:
     /* Release fake file structure */
     if(f && H5F_fake_free(f) < 0)
@@ -4029,8 +4033,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
         case H5T_VLEN:
             assert(dt1->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt1->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
             assert(dt2->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt2->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
-            assert(dt1->shared->u.vlen.loc>H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
-            assert(dt2->shared->u.vlen.loc>H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            assert(dt1->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            assert(dt2->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
             if (dt1->shared->u.vlen.type==H5T_VLEN_SEQUENCE &&
@@ -4047,7 +4051,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             } else if (dt1->shared->u.vlen.loc==H5T_LOC_DISK &&
                     dt2->shared->u.vlen.loc==H5T_LOC_MEMORY) {
                 HGOTO_DONE(1);
+            } else if (dt1->shared->u.vlen.loc==H5T_LOC_BADLOC &&
+                    dt2->shared->u.vlen.loc!=H5T_LOC_BADLOC) {
+                HGOTO_DONE(1);
             }
+
             /* Don't allow VL types in different files to compare as equal */
             if (dt1->shared->u.vlen.f < dt2->shared->u.vlen.f)
                 HGOTO_DONE(-1);
@@ -4969,7 +4977,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     FUNC_ENTER_NOAPI(H5T_set_loc, FAIL);
 
     assert(dt);
-    assert(loc>H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
+    assert(loc>=H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
 
     /* Datatypes can't change in size if the force_conv flag is not set */
     if(dt->shared->force_conv) {

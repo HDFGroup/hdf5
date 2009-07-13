@@ -633,7 +633,7 @@ H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_type,
+H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
@@ -646,6 +646,12 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
     HDassert(file_dst);
     HDassert(cpy_info);
     HDassert(!cpy_info->copy_without_attr);
+
+    /* Mark datatype as being on disk now.  This step used to be done in a lower level 
+     * by H5O_dtype_decode.  But it has been moved up.  Not an ideal place, but no better 
+     * place than here. */
+    if(H5T_set_loc(((H5A_t *)native_src)->shared->dt, file_src, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
 
     if ( NULL == (ret_value=H5A_attr_copy_file((H5A_t *)native_src, file_dst, recompute_size, cpy_info,  dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy attribute")

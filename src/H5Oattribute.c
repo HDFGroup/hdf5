@@ -536,6 +536,11 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             HDassert(udata.attr);
             ret_value = udata.attr;
         } /* end else */
+
+        /* Mark datatype as being on disk now */
+        if(H5T_set_loc(ret_value->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "invalid datatype location")
+
     } /* end else */
 
 done:
@@ -641,6 +646,10 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
             if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
+        } else {
+            /* Mark datatype as being on disk now */
+            if(H5T_set_loc(ret_value->shared->dt, loc->file, H5T_LOC_DISK) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
         } /* end if */
     } /* end if */
 

@@ -1345,6 +1345,10 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     /* Get the type and space */
     if(NULL == (dataset->shared->type = (H5T_t *)H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load type info from dataset header")
+
+    if(H5T_set_loc(dataset->shared->type, dataset->oloc.file, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+
     if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc), dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
 
