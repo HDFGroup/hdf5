@@ -243,6 +243,8 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     else
         heap->nused = 1;
 
+    HDassert(max_idx < heap->nused);
+
     /*
      * Add the new heap to the CWFS list, removing some other entry if
      * necessary to make room. We remove the right-most entry that has less

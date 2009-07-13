@@ -321,6 +321,8 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
                 break;
     } /* end else */
 
+    HDassert(idx < heap->nused);
+
     /* Check if we need more room to store heap objects */
     if(idx>=heap->nalloc) {
         size_t new_alloc;       /* New allocation number */
