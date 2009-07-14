@@ -72,7 +72,7 @@ $ CALL TOOLTEST  "fp1.txt -c textfp32.conf -o" test6.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
-$ CALL TOOLTEST  "fp2.txt -c textfp64.conf -o" tes7.h5
+$ CALL TOOLTEST  "fp2.txt -c textfp64.conf -o" test7.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE
