@@ -69,7 +69,8 @@ $ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -vp -s simple -d /A/B2/simple2"
 $ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -vp -s /grp_dsets/simple -d /C/D/simple"
 $!CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -vp -s /grp_dsets -d /E/F/grp_dsets"
 $!CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -vp -s /grp_nested -d /G/H/grp_nested"
-
+$!
+$ del *out.h5;*
 $ !
 $TOOLTEST: SUBROUTINE
 
@@ -99,8 +100,5 @@ $     del *.err;*
 $ endif
 $ !
 $  write sys$output line
-$ ! 
-$ del *out.h5;*
 $ !
 $ENDSUBROUTINE
-
