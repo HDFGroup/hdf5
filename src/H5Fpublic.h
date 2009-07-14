@@ -54,10 +54,18 @@
                                                  * single-writer/multi-reader (SWMR)
                                                  * scenario.  Note that the
                                                  * process(es) opening the file
-                                                 * reading shouldn't open the
-                                                 * for RDWR access, although a
-                                                 * special "SWMR_READ" access
-                                                 * flag is not necessary. */
+                                                 * for reading must open the file
+                                                 * with RDONLY access, and use
+                                                 * the special "SWMR_READ" access
+                                                 * flag. */
+#define H5F_ACC_SWMR_READ	(H5CHECK 0x0040u) /*indicate that this file is
+                                                 * open for reading in a
+                                                 * single-writer/multi-reader (SWMR)
+                                                 * scenario.  Note that the
+                                                 * process(es) opening the file
+                                                 * for SWMR reading must also
+                                                 * open the file with the RDONLY
+                                                 * flag.  */
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */
