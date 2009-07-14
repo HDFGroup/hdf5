@@ -520,15 +520,10 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
             dt->shared->force_conv=TRUE;
 
-#ifdef TMP
             /* Mark location this type as undefined for now.  The caller function should
              * decide the location. */
             if(H5T_set_loc(dt, f, H5T_LOC_BADLOC) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
-else
-            if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
-#endif
             break;
 
         case H5T_ARRAY:  /* Array datatypes */
