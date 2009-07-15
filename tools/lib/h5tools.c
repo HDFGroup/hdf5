@@ -2921,12 +2921,12 @@ h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
 
     case H5S_SIMPLE:
         /* simple dataspace */
-        h5tools_str_append(buffer, "%s %s { %s %u",
+        h5tools_str_append(buffer, "%s %s { %s %" H5_PRINTF_LL_WIDTH "u",
                 h5tools_dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
                 h5tools_dump_header_format->dataspacedimbegin, size[0]);
 
         for(i = 1; i < ndims; i++)
-            h5tools_str_append(buffer, ", %u", size[i]);
+            h5tools_str_append(buffer, ", %" H5_PRINTF_LL_WIDTH "u", size[i]);
 
         h5tools_str_append(buffer, " %s / ", h5tools_dump_header_format->dataspacedimend);
 
@@ -2935,14 +2935,14 @@ h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
                     h5tools_dump_header_format->dataspacedimbegin,
                     "H5S_UNLIMITED");
         else
-            h5tools_str_append(buffer, "%s %u",
+            h5tools_str_append(buffer, "%s %" H5_PRINTF_LL_WIDTH "u",
                     h5tools_dump_header_format->dataspacedimbegin, maxsize[0]);
 
         for(i = 1; i < ndims; i++)
             if(maxsize[i] == H5S_UNLIMITED)
                 h5tools_str_append(buffer, ", %s", "H5S_UNLIMITED");
             else
-                h5tools_str_append(buffer, ", %u", maxsize[i]);
+                h5tools_str_append(buffer, ", %" H5_PRINTF_LL_WIDTH "u", maxsize[i]);
 
         h5tools_str_append(buffer, " %s }", h5tools_dump_header_format->dataspacedimend);
         break;
