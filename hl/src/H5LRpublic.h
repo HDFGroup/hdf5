@@ -64,7 +64,7 @@ H5_HLDLL herr_t H5LRcopy_region(hid_t obj_id,
 				const hsize_t *block_coord);
 
 H5_HLDLL herr_t H5LRcreate_regref_to_all(hid_t loc_id, const char *group_path,
-					 const char *ds_path, H5_index_t index_type, H5_iter_order_t order);
+					 const char *ds_path, H5_index_t index_type, H5_iter_order_t order, H5R_type_t ref_type);
 
 /*-------------------------------------------------------------------------
  *
