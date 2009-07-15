@@ -539,7 +539,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
         /* Mark datatype as being on disk now */
         if(H5T_set_loc(ret_value->shared->dt, loc->file, H5T_LOC_DISK) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "invalid datatype location")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location")
 
     } /* end else */
 
