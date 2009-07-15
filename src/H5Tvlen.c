@@ -214,7 +214,7 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
     /* check parameters */
     HDassert(dt);
-    HDassert(loc > H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
+    HDassert(loc >= H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
 
     /* Only change the location if it's different */
     if(loc != dt->shared->u.vlen.loc || f != dt->shared->u.vlen.f) {
@@ -279,6 +279,12 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                 /* Set file ID (since this VL is on disk) */
                 dt->shared->u.vlen.f = f;
+                break;
+            
+            case H5T_LOC_BADLOC:
+                /* Allow undefined location. In H5Odtype.c, H5O_dtype_decode sets undefined
+                 * location for VL type and leaves it for the caller to decide.
+                 */  
                 break;
 
             default:

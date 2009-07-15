@@ -741,6 +741,10 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
         /* Point to shared datatype info */
         dt->shared = shared_fo;
 
+        /* Mark any datatypes as being in memory now */
+        if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+
         /* Increment ref. count on shared info */
         shared_fo->fo_count++;
 
