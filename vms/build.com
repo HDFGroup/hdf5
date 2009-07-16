@@ -51,12 +51,12 @@ $ set def 'hdf5toolstest_h5repack'
 $ copy [-]check_h5repack.com check_h5repack.com
 $@check_h5repack.com
 $!
-$! set def 'hdf5toolstest_h5copy'
-$! copy [-]check_h5copy.com check_h5copy.com
-$!@check_h5copy.com
+$ set def 'hdf5toolstest_h5copy'
+$ copy [-]check_h5copy.com check_h5copy.com
+$@check_h5copy.com
 $!
-$! set def 'hdf5toolstest_h5import'
-$! copy [-]check_h5import.com check_h5import.com
-$!@check_h5import.com
+$ set def 'hdf5toolstest_h5import'
+$ copy [-]check_h5import.com check_h5import.com
+$@check_h5import.com
 $!
 $ exit
