@@ -111,21 +111,8 @@ int main(void)
    */
   
   status = H5LRcreate_regref_to_all(file_id, "/",
-				    "/NEW_DATA", H5_INDEX_NAME, H5_ITER_INC);
-  
-  /*
-   * Read the newly created data set and print it.
-   */
-  
-  status = H5LTread_dataset(file_id,"/NEW_DATA",H5T_NATIVE_INT,rdata);
-  
-  printf(" DATA FROM RECURSIVELY ALL THE REGION REFERENCES STARTING AT TOP LEVEL / :\n");
-  printf("[ ");
-  for (i=0; i<18; i++) {
-    printf("%02d ", rdata[i]);
-  }
-  printf("] \n");
-  
+				    "/NEW_DATA", H5_INDEX_NAME, H5_ITER_INC, H5R_DATASET_REGION);
+
   return 0;
 }
 
