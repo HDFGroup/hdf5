@@ -25,7 +25,6 @@
  * so we include the private headers here.
  */
 #include "H5private.h"
-#include "H5Eprivate.h"
 
 /* Include generic testing header also */
 #include "h5test.h"
