@@ -68,12 +68,6 @@ hid_t   H5_MY_PKG_ERR;
 /* Package initialization flag */
 hbool_t H5_H5LT_init_g = FALSE;
 
-/* High-Level API error class */
-  hid_t H5HL_ERR_CLS_g = (-1);
-
-/* Major error codes */
-  hid_t H5E_HL_g = (-1);
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
