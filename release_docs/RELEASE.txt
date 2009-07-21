@@ -1,4 +1,4 @@
-HDF5 version 1.9.43-FA_a2 currently under development
+HDF5 version 1.9.44-FA_a2 currently under development
 ================================================================================
 
 
@@ -39,6 +39,8 @@ New Features
 
     Configuration:
     -------------
+    - Changed default Gnu fortran compiler from g95 to gfortran since
+      gfortran is more likely installed with gcc now. -AKC 2009/07/19- 
     - Added libtool version numbers to generated c++, fortran, and 
       hl libraries. MAM 2009/04/19.
     - Regenerated Makefile.ins using Automake 1.10.2. MAM 2009/04/19.

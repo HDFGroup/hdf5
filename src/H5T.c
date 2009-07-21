@@ -2120,7 +2120,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if(size <= 0 && size != H5T_VARIABLE)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive")
-    if(size == H5T_VARIABLE && dt->shared->type != H5T_STRING)
+    if(size == H5T_VARIABLE && !H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length")
     if(H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
@@ -2922,6 +2922,10 @@ H5T_decode(const unsigned char *buf)
     /* Decode the serialized datatype message */
     if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, NULL, H5O_DTYPE_ID, buf)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
+
+    /* Mark datatype as being in memory now */
+    if(H5T_set_loc(ret_value, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
 done:
     /* Release fake file structure */
@@ -4029,8 +4033,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
         case H5T_VLEN:
             assert(dt1->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt1->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
             assert(dt2->shared->u.vlen.type>H5T_VLEN_BADTYPE && dt2->shared->u.vlen.type<H5T_VLEN_MAXTYPE);
-            assert(dt1->shared->u.vlen.loc>H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
-            assert(dt2->shared->u.vlen.loc>H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            assert(dt1->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt1->shared->u.vlen.loc<H5T_LOC_MAXLOC);
+            assert(dt2->shared->u.vlen.loc>=H5T_LOC_BADLOC && dt2->shared->u.vlen.loc<H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
             if (dt1->shared->u.vlen.type==H5T_VLEN_SEQUENCE &&
@@ -4047,7 +4051,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             } else if (dt1->shared->u.vlen.loc==H5T_LOC_DISK &&
                     dt2->shared->u.vlen.loc==H5T_LOC_MEMORY) {
                 HGOTO_DONE(1);
+            } else if (dt1->shared->u.vlen.loc==H5T_LOC_BADLOC &&
+                    dt2->shared->u.vlen.loc!=H5T_LOC_BADLOC) {
+                HGOTO_DONE(1);
             }
+
             /* Don't allow VL types in different files to compare as equal */
             if (dt1->shared->u.vlen.f < dt2->shared->u.vlen.f)
                 HGOTO_DONE(-1);
@@ -4969,7 +4977,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     FUNC_ENTER_NOAPI(H5T_set_loc, FAIL);
 
     assert(dt);
-    assert(loc>H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
+    assert(loc>=H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
 
     /* Datatypes can't change in size if the force_conv flag is not set */
     if(dt->shared->force_conv) {
