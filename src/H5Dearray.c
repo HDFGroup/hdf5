@@ -931,7 +931,6 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(idx_info->layout->u.chunk.ndims == 2);     /* (for now) */
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(udata);
 
@@ -945,8 +944,9 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Compute array index for chunk offset */
-    idx = udata->common.offset[0] / idx_info->layout->u.chunk.dim[0];
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1076,7 +1076,6 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(idx_info->layout->u.chunk.ndims == 2);     /* (for now) */
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(udata);
 
@@ -1090,8 +1089,9 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Compute array index for chunk offset */
-    idx = udata->common.offset[0] / idx_info->layout->u.chunk.dim[0];
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1273,8 +1273,9 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Compute array index for chunk offset */
-    idx = udata->offset[0] / idx_info->layout->u.chunk.dim[0];
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1636,8 +1637,9 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Compute array index for chunk offset */
-    idx = udata->offset[0] / idx_info->layout->u.chunk.dim[0];
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Create flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.
@@ -1688,8 +1690,9 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Compute array index for chunk offset */
-    idx = udata->offset[0] / idx_info->layout->u.chunk.dim[0];
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Remove flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.

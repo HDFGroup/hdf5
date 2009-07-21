@@ -1132,6 +1132,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5V_array_calc_pre
+ *
+ * Purpose:	Given a linear offset in an array, the dimensions of that
+ *              array and the pre-computed 'down' (accumulator) sizes, this
+ *              function computes the coordinates of that offset in the array.
+ *
+ *		The dimensionality of the whole array, and the coordinates is N.
+ *              The array dimensions are TOTAL_SIZE and the coordinates
+ *              are returned in COORD.  The linear offset is in OFFSET.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, July 16, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *total_size,
+    const hsize_t *down, hsize_t *coords)
+{
+    unsigned    u;                      /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_calc_pre)
+
+    /* Sanity check */
+    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(total_size);
+    HDassert(coords);
+
+    /* Compute the coordinates from the offset */
+    for(u = 0; u < n; u++) {
+        coords[u] = offset / down[u];
+        offset %= down[u];
+    } /* end for */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5V_array_calc_pre() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5V_array_calc
  *
  * Purpose:	Given a linear offset in an array and the dimensions of that
@@ -1155,31 +1196,25 @@ herr_t
 H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *coords)
 {
     hsize_t	idx[H5V_HYPER_NDIMS];	/* Size of each dimension in bytes */
-    hsize_t     acc;                    /* Size accumulator */
-    unsigned    u;                      /* Local index variable */
-    int         i;                      /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_calc)
+    FUNC_ENTER_NOAPI(H5V_array_calc, FAIL)
 
     /* Sanity check */
-    assert(n <= H5V_HYPER_NDIMS);
-    assert(total_size);
-    assert(coords);
+    HDassert(n <= H5V_HYPER_NDIMS);
+    HDassert(total_size);
+    HDassert(coords);
 
     /* Build the sizes of each dimension in the array */
-    /* (From fastest to slowest) */
-    for(i=(int)(n-1),acc=1; i>=0; i--) {
-        idx[i]=acc;
-        acc *= total_size[i];
-    } /* end for */
+    if(H5V_array_down(n, total_size, idx) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute down sizes")
 
     /* Compute the coordinates from the offset */
-    for(u=0; u<n; u++) {
-        coords[u]=offset/idx[u];
-        offset %= idx[u];
-    } /* end for */
+    if(H5V_array_calc_pre(offset, n, total_size, idx, coords) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute coordinates")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5V_array_calc() */
 
 

@@ -83,6 +83,8 @@ H5_DLL hsize_t H5V_array_offset_pre(unsigned n,
     const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
     const hsize_t *offset);
+H5_DLL herr_t H5V_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *total_size,
+    const hsize_t *down, hsize_t *coords);
 H5_DLL herr_t H5V_array_calc(hsize_t offset, unsigned n,
     const hsize_t *total_size, hsize_t *coords);
 H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hsize_t *coord,
