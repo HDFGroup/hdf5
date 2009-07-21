@@ -124,8 +124,6 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
-
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
@@ -137,7 +135,6 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 
     if (strlen(fmt) == 0) {
         /* nothing to print */
-        va_end(ap);
         return str->s;
     }
 
@@ -145,17 +142,18 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
     while (1) {
         /* How many bytes available for new value, counting the new NUL */
         size_t avail = str->nalloc - str->len;
+        int nchars = -1;
 
-        int nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+        va_start(ap, fmt);
+        nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+        va_end(ap);
 
         if (nchars < 0) {
             /* failure, such as bad format */
-            va_end(ap);
             return NULL;
         }
 
-    if ((size_t)nchars>=avail ||
-        (0==nchars && (strcmp(fmt,"%s") ))) {
+        if ((size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -174,7 +172,6 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
             break;
         }
     }
-    va_end(ap);
     return str->s;
 }
 
