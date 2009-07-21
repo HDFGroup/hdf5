@@ -1202,6 +1202,10 @@ print_datatype(hid_t type,unsigned in_group)
 
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
+                /* BNF states that the the type of reference should be displayed. 
+                 * Therefore add the missing type if region command line option 
+                 * is used. This change will not cause a change to the display 
+                 * for use without the region option. */
                 if(display_region) {
                     if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
                         printf(" { H5T_STD_REF_DSETREG }");
@@ -2429,6 +2433,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         hid_t f_type = H5Dget_type(obj_id);
 
         if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+            /* For the region option, correct the display of indices */
             if (display_region) {
                 if (display_index) {
                     outputformat->pindex = 1;
