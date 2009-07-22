@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh
+TEST_SCRIPT = testerror.sh $(srcdir)/testswmr.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -43,6 +43,8 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf earray btree2 fheap
+
+bin_PROGRAMS=swmr_generator swmr_reader swmr_writer
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -69,7 +71,7 @@ endif
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
