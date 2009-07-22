@@ -671,6 +671,77 @@ static void test_read_vl_string_attribute()
     }
 } // test_read_vl_string_attribute
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_vl_stringarray_attribute
+ *
+ * Purpose:	Test writing/reading VL string array to/from attributes.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		July, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string ATTRSTRARR_NAME("StringArray_attr");
+
+static void test_vl_stringarray_attribute()
+{
+    const char *string_att_array[SPACE1_DIM1]= {
+        "Line 1", "Line 2", "Line 3", "Line 4"
+        };   // Information to write
+
+    // Output message about test being performed
+    SUBTEST("Testing writing/reading VL String Array on attribute");
+
+    try {
+	// Open the file
+	H5File file1(FILENAME, H5F_ACC_RDWR);
+
+	// Create a datatype to refer to.
+	StrType tid1(0, H5T_VARIABLE);
+
+	// Open the root group.
+	Group root = file1.openGroup("/");
+
+        // Create dataspace for datasets.
+        hsize_t dims1[] = {SPACE1_DIM1};
+        DataSpace att_space(SPACE1_RANK, dims1);
+
+	// Create an attribute for the root group.
+	Attribute gr_attr = root.createAttribute(ATTRSTRARR_NAME, tid1, att_space);
+
+	// Write data to the attribute.
+	gr_attr.write(tid1, string_att_array);
+
+	// Read and verify the attribute string as a string of chars.
+	// Note: reading by array of H5std_string doesn't work yet.
+	char *string_att_check[SPACE1_DIM1];
+	gr_attr.read(tid1, &string_att_check);
+
+	int ii;
+	for (ii = 0; ii < SPACE1_DIM1; ii++)
+	{
+	    if(HDstrcmp(string_att_check[ii], string_att_array[ii])!=0)
+		TestErrPrintf("Line %d: Attribute data different: written=%s,read=%s\n",__LINE__, string_att_check[ii], string_att_check[ii]);
+
+	    HDfree(string_att_check[ii]);  // note: no need for std::string test
+	}
+
+	// Close group's attribute.
+	gr_attr.close();
+	file1.close();
+
+	PASSED();
+    } // end try block
+
+    // Catch all exceptions.
+    catch (Exception E) {
+	issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_vl_stringarray_attribute()
+
 /* Helper routine for test_vl_rewrite() */
 static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 				char *name, char *data)
@@ -823,6 +894,9 @@ void test_vlstrings()
     // Test using VL strings in attributes
     test_write_vl_string_attribute();
     test_read_vl_string_attribute();
+
+    // Test using VL string array in attributes
+    test_vl_stringarray_attribute();
 
     // Test writing VL datasets in files with lots of unlinking
     test_vl_rewrite();
