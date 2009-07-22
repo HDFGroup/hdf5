@@ -87,6 +87,16 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// defined in AbstractDs for generic datatype and specific
 	// sub-types
 	virtual hid_t p_get_type() const;
+
+	// Reads variable or fixed len strings
+	void p_read_variable_len(const DataType& mem_type, H5std_string& strg) const;
+	void p_read_fixed_len(const DataType& mem_type, H5std_string& strg) const;
+
+	// do not inherit H5Object::iterateAttrs
+	int iterateAttrs() { return 0; }
+
+	// do not inherit H5Object::renameAttr
+	void renameAttr() {}
 };
 #ifndef H5_NO_NAMESPACE
 }
