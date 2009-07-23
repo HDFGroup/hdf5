@@ -287,6 +287,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - The --enable-static-exec flag has been fixed and will now generate
+      static executables within the installed bin directory when used.
+      MAM - 2009/07/23 - BZ #1583
     - The --includedir=DIR configuration option now works as intended, and can
       be used to specify the location to install C header files. The default
       location remains unchanged, residing at ${prefix}/include. 

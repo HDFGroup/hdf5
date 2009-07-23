@@ -30,6 +30,10 @@ else
   bin_PROGRAMS=h5perf_serial
 endif
 
+# Add h5perf and h5perf_serial specific linker flags here
+h5perf_LDFLAGS = $(LT_STATIC_EXEC)
+h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
