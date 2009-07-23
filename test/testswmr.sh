@@ -29,13 +29,23 @@ Nsecs=5			# number of seconds per read interval
 nerrors=0
 
 ###############################################################################
-## short hands
+## short hands and function definitions
 ###############################################################################
 DPRINT=:	# Set to "echo Debug:" for debugging printing, 
 		# else ":" for noop. 
 IFDEBUG=:	# Set to null to turn on debugging, else ":" for noop. 
 
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
 
+###############################################################################
+## Main
+###############################################################################
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.
@@ -53,22 +63,21 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-# Print a line-line message left justified in a field of 70 characters
-# beginning with the word "Testing".
-#
-TESTING() {
-   SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
-}
-
+# Launch the Generator
 echo launch the swmr_generator
 ./swmr_generator
+if test $? -ne 0; then
+    echo generator had error
+    nerrors=`expr $nerrors + 1`
+fi
+
+# Launch the Writer
 echo launch the swmr_writer
 ./swmr_writer $Nrecords &
 pid_writer=$!
 $DPRINT pid_writer=$pid_writer
 
-# launch readers
+# Launch the Readers
 n=0
 echo launch $Nreaders swmr_readers
 while [ $n -lt $Nreaders ]; do
@@ -79,7 +88,8 @@ done
 $DPRINT pid_readers=$pid_readers
 $IFDEBUG ps
 
-# collect exit code of the readers.
+# Collect exit code of the readers first because they usually finish
+# before the writer.
 for xpid in $pid_readers; do
     $DPRINT checked reader $xpid
     wait $xpid
@@ -88,7 +98,8 @@ for xpid in $pid_readers; do
 	nerrors=`expr $nerrors + 1`
     fi
 done
-# collect exit code of the writer
+
+# Collect exit code of the writer
 $DPRINT checked writer $pid_writer
 wait $pid_writer
 if test $? -ne 0; then
@@ -96,13 +107,15 @@ if test $? -ne 0; then
     nerrors=`expr $nerrors + 1`
 fi
 
-# ##############################################################################
-# # END
-# ##############################################################################
+###############################################################################
+## Report and exit
+###############################################################################
 
 $DPRINT nerrors=$nerrors
 if test $nerrors -eq 0 ; then
-   echo "SWMR tests passed."
+    echo "SWMR tests passed."
+    exit 0
+else
+    echo "SWMR tests failed with $nerrors errors."
+    exit 1
 fi
-
-exit $nerrors
