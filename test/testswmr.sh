@@ -56,19 +56,42 @@ TESTING() {
 ./swmr_generator
 echo launch the swmr_writer
 ./swmr_writer $Nrecords &
+pid_write=$!
+
 # launch readers
 n=0
 echo launch $Nreaders swmr_readers
 while [ $n -lt $Nreaders ]; do
     ./swmr_reader $Nsecs &
+    pid_readers="$pid_readers $!"
     n=`expr $n + 1`
 done
-wait
+echo pid_write=$pid_write
+echo pid_readers=$pid_readers
+ps
+
+# collect exit code of the readers.
+for xpid in $pid_readers; do
+    echo checked reader $xpid
+    wait $xpid
+    if test $? -ne 0; then
+	echo reader had error
+	nerrors=`expr $nerrors + 1`
+    fi
+done
+# collect exit code of the writer
+echo checked write $pid_writer
+wait $pid_writer
+if test $? -ne 0; then
+    echo writer had error
+    nerrors=`expr $nerrors + 1`
+fi
 
 # ##############################################################################
 # # END
 # ##############################################################################
 
+echo nerrors=$nerrors
 if test $nerrors -eq 0 ; then
    echo "SWMR tests passed."
 fi
