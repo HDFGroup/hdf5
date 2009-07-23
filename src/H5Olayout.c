@@ -738,29 +738,8 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
         case H5D_CHUNKED:
             if(H5D_chunk_is_space_alloc(layout_src)) {
-                hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Curr. size of dataset dimensions */
-                int sndims;                 /* Rank of dataspace */
-                unsigned ndims;             /* Rank of dataspace */
-
-                /* Layout is not created in the destination file, reset index address */
-                if(H5D_chunk_idx_reset(layout_dst, TRUE) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset chunked storage index in dest")
-
-                /* Get the dim info for dataset */
-                if((sndims = H5S_extent_get_dims(udata->src_space_extent, curr_dims, NULL)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get dataspace dimensions")
-                H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
-
-                /* Set the source layout chunk information */
-                if(H5D_chunk_set_info_real(layout_src, ndims, curr_dims) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set layout's chunk info")
-
-                /* Set the dest. layout chunk info also */
-                if(H5D_chunk_set_info_real(layout_dst, ndims, curr_dims) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set layout's chunk info")
-
                 /* Create chunked layout */
-                if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
+                if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy chunked storage")
             } /* if ( H5F_addr_defined(layout_srct->u.chunk.addr)) */
             break;

@@ -35,6 +35,11 @@ SCRIPT_DEPEND=h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
 bin_PROGRAMS=h5debug h5repart h5mkgrp
 bin_SCRIPTS=h5redeploy
 
+# Add h5debug, h5repart, and h5mkgrp specific linker flags here
+h5debug_LDFLAGS = $(LT_STATIC_EXEC)
+h5repart_LDFLAGS = $(LT_STATIC_EXEC)
+h5mkgrp_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Tell automake to clean h5redeploy script
 CLEANFILES=h5redeploy
 

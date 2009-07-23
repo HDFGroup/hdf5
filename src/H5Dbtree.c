@@ -136,7 +136,7 @@ static herr_t H5D_btree_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info,
-    haddr_t dset_ohdr_addr);
+    const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_btree_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_btree_idx_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_btree_idx_insert(const H5D_chk_idx_info_t *idx_info,
@@ -172,6 +172,7 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
     H5D_btree_idx_is_space_alloc,
     H5D_btree_idx_insert,
     H5D_btree_idx_get_addr,
+    NULL,
     H5D_btree_idx_iterate,
     H5D_btree_idx_remove,
     H5D_btree_idx_delete,
@@ -846,7 +847,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info, haddr_t UNUSED dset_ohdr_addr)
+H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space,
+    haddr_t UNUSED dset_ohdr_addr)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 

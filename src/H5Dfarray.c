@@ -159,6 +159,7 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
     H5D_farray_idx_is_space_alloc,
     H5D_farray_idx_insert,
     H5D_farray_idx_get_addr,
+    NULL,
     H5D_farray_idx_iterate,
     H5D_farray_idx_remove,
     H5D_farray_idx_delete,

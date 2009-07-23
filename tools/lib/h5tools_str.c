@@ -125,57 +125,55 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
-
     /* Make sure we have some memory into which to print */
     if (!str->s || str->nalloc <= 0) {
-    str->nalloc = STR_INIT_LEN;
-    str->s = malloc(str->nalloc);
-    assert(str->s);
-    str->s[0] = '\0';
-    str->len = 0;
+        str->nalloc = STR_INIT_LEN;
+        str->s = malloc(str->nalloc);
+        assert(str->s);
+        str->s[0] = '\0';
+        str->len = 0;
     }
 
     if (strlen(fmt) == 0) {
         /* nothing to print */
-        va_end(ap);
         return str->s;
     }
 
-     /* Format the arguments and append to the value already in `str' */
-     while (1) {
+    /* Format the arguments and append to the value already in `str' */
+    while (1) {
         /* How many bytes available for new value, counting the new NUL */
-    size_t avail = str->nalloc - str->len;
+        size_t avail = str->nalloc - str->len;
+        int nchars = -1;
 
-    int nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+        va_start(ap, fmt);
+        nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
+        va_end(ap);
 
-    if (nchars<0) {
+        if (nchars < 0) {
             /* failure, such as bad format */
-            va_end(ap);
-        return NULL;
+            return NULL;
         }
 
-    if ((size_t)nchars>=avail ||
-        (0==nchars && (strcmp(fmt,"%s") ))) {
-       /* Truncation return value as documented by C99, or zero return value with either of the
-            * following conditions, each of which indicates that the proper C99 return value probably
-            *  should have been positive when the format string is
-            *  something other than "%s"
-            * Alocate at least twice as much space and try again.
-            */
-       size_t newsize = MAX(str->len+nchars+1, 2*str->nalloc);
-       assert(newsize > str->nalloc); /*overflow*/
-       str->s = realloc(str->s, newsize);
-       assert(str->s);
-       str->nalloc = newsize;
-    } else {
-       /* Success */
-       str->len += nchars;
-       break;
+        if ((size_t) nchars >= avail || (0 == nchars && (strcmp(fmt, "%s")))) {
+            /* Truncation return value as documented by C99, or zero return value with either of the
+             * following conditions, each of which indicates that the proper C99 return value probably
+             *  should have been positive when the format string is
+             *  something other than "%s"
+             * Alocate at least twice as much space and try again.
+             */
+            size_t newsize = MAX(str->len+nchars+1, 2*str->nalloc);
+            assert(newsize > str->nalloc); /*overflow*/
+            str->s = realloc(str->s, newsize);
+            assert(str->s);
+            str->nalloc = newsize;
         }
-     }
-     va_end(ap);
-     return str->s;
+        else {
+            /* Success */
+            str->len += nchars;
+            break;
+        }
+    }
+    return str->s;
 }
 
 /*-------------------------------------------------------------------------

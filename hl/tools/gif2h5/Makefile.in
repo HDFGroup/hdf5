@@ -71,10 +71,16 @@ am_gif2h5_OBJECTS = gif2hdf.$(OBJEXT) gif2mem.$(OBJEXT) \
 gif2h5_OBJECTS = $(am_gif2h5_OBJECTS)
 gif2h5_LDADD = $(LDADD)
 gif2h5_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+gif2h5_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(gif2h5_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h52gif_OBJECTS = hdf2gif.$(OBJEXT) hdfgifwr.$(OBJEXT)
 h52gif_OBJECTS = $(am_h52gif_OBJECTS)
 h52gif_LDADD = $(LDADD)
 h52gif_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+h52gif_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h52gif_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h52gifgentst_OBJECTS = h52gifgentst.$(OBJEXT)
 h52gifgentst_OBJECTS = $(am_h52gifgentst_OBJECTS)
 h52gifgentst_LDADD = $(LDADD)
@@ -352,6 +358,10 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 # These are our main targets, the tools
 TEST_SCRIPT = $(srcdir)/h52giftest.sh
 check_SCRIPTS = $(TEST_SCRIPT)
+
+# Add h52gif and gif2h5 specific linker flags here
+h52gif_LDFLAGS = $(LT_STATIC_EXEC)
+gif2h5_LDFLAGS = $(LT_STATIC_EXEC)
 gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c 
 h52gifgentst_SOURCES = h52gifgentst.c 
@@ -445,10 +455,10 @@ clean-noinstPROGRAMS:
 	done
 gif2h5$(EXEEXT): $(gif2h5_OBJECTS) $(gif2h5_DEPENDENCIES) 
 	@rm -f gif2h5$(EXEEXT)
-	$(LINK) $(gif2h5_OBJECTS) $(gif2h5_LDADD) $(LIBS)
+	$(gif2h5_LINK) $(gif2h5_OBJECTS) $(gif2h5_LDADD) $(LIBS)
 h52gif$(EXEEXT): $(h52gif_OBJECTS) $(h52gif_DEPENDENCIES) 
 	@rm -f h52gif$(EXEEXT)
-	$(LINK) $(h52gif_OBJECTS) $(h52gif_LDADD) $(LIBS)
+	$(h52gif_LINK) $(h52gif_OBJECTS) $(h52gif_LDADD) $(LIBS)
 h52gifgentst$(EXEEXT): $(h52gifgentst_OBJECTS) $(h52gifgentst_DEPENDENCIES) 
 	@rm -f h52gifgentst$(EXEEXT)
 	$(LINK) $(h52gifgentst_OBJECTS) $(h52gifgentst_LDADD) $(LIBS)

@@ -71,6 +71,9 @@ h5import_SOURCES = h5import.c
 h5import_OBJECTS = h5import.$(OBJEXT)
 h5import_LDADD = $(LDADD)
 h5import_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5import_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5import_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5importtest_SOURCES = h5importtest.c
 h5importtest_OBJECTS = h5importtest.$(OBJEXT)
 h5importtest_LDADD = $(LDADD)
@@ -350,6 +353,9 @@ TEST_SCRIPT = $(srcdir)/h5importtestutil.sh
 check_SCRIPT = h5importtestutil.sh
 SCRIPT_DEPEND = h5import$(EXEEXT)
 
+# Add h5import specific linker flags here
+h5import_LDFLAGS = $(LT_STATIC_EXEC)
+
 # All programs depend on the main hdf5 library and the tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
@@ -438,7 +444,7 @@ clean-checkPROGRAMS:
 	done
 h5import$(EXEEXT): $(h5import_OBJECTS) $(h5import_DEPENDENCIES) 
 	@rm -f h5import$(EXEEXT)
-	$(LINK) $(h5import_OBJECTS) $(h5import_LDADD) $(LIBS)
+	$(h5import_LINK) $(h5import_OBJECTS) $(h5import_LDADD) $(LIBS)
 h5importtest$(EXEEXT): $(h5importtest_OBJECTS) $(h5importtest_DEPENDENCIES) 
 	@rm -f h5importtest$(EXEEXT)
 	$(LINK) $(h5importtest_OBJECTS) $(h5importtest_LDADD) $(LIBS)

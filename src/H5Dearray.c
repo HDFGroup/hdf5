@@ -115,7 +115,7 @@ static herr_t H5D_earray_filt_debug(FILE *stream, int indent, int fwidth,
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info,
-    haddr_t dset_ohdr_addr);
+    const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_earray_idx_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info,
@@ -155,6 +155,7 @@ const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     H5D_earray_idx_is_space_alloc,
     H5D_earray_idx_insert,
     H5D_earray_idx_get_addr,
+    NULL,
     H5D_earray_idx_iterate,
     H5D_earray_idx_remove,
     H5D_earray_idx_delete,
@@ -776,7 +777,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, haddr_t dset_ohdr_addr)
+H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
+    haddr_t dset_ohdr_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_init)
 
@@ -785,6 +787,7 @@ H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, haddr_t dset_ohdr_addr)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
+    HDassert(space);
     HDassert(H5F_addr_defined(dset_ohdr_addr));
 
     /* Store the dataset's object header address for later */
@@ -1760,15 +1763,17 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the extensible array is open */
     if(idx_info->layout->u.chunk.u.earray.ea) {
-        /* Sanity check */
-        HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.dset_ohdr_addr));
-
         /* Check for SWMR writes to the file */
         if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+            /* Sanity check */
+            HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.dset_ohdr_addr));
+
+            /* Remove flush dependency between extensible array and dataset' object header */
             if(H5D_earray_idx_undepend(idx_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
         } /* end if */
 
+        /* Close extensible array */
         if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
         idx_info->layout->u.chunk.u.earray.ea = NULL;

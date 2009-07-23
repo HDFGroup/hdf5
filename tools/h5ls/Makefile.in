@@ -69,6 +69,9 @@ h5ls_SOURCES = h5ls.c
 h5ls_OBJECTS = h5ls.$(OBJEXT)
 h5ls_LDADD = $(LDADD)
 h5ls_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5ls_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5ls_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -343,6 +346,9 @@ TEST_SCRIPT = testh5ls.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5ls$(EXEEXT)
 
+# Add h5ls specific linker flags here
+h5ls_LDFLAGS = $(LT_STATIC_EXEC)
+
 # All programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
@@ -426,7 +432,7 @@ clean-binPROGRAMS:
 	done
 h5ls$(EXEEXT): $(h5ls_OBJECTS) $(h5ls_DEPENDENCIES) 
 	@rm -f h5ls$(EXEEXT)
-	$(LINK) $(h5ls_OBJECTS) $(h5ls_LDADD) $(LIBS)
+	$(h5ls_LINK) $(h5ls_OBJECTS) $(h5ls_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

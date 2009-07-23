@@ -71,6 +71,9 @@ h5copy_SOURCES = h5copy.c
 h5copy_OBJECTS = h5copy.$(OBJEXT)
 h5copy_LDADD = $(LDADD)
 h5copy_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5copy_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5copy_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h5copygentest_OBJECTS = h5copygentest.$(OBJEXT)
 h5copygentest_OBJECTS = $(am_h5copygentest_OBJECTS)
 h5copygentest_LDADD = $(LDADD)
@@ -353,6 +356,9 @@ TEST_SCRIPT = $(srcdir)/testh5copy.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5copy$(EXEEXT)
 
+# Add h5copy specific linker flags here
+h5copy_LDFLAGS = $(LT_STATIC_EXEC)
+
 # source file for the test file generator
 h5copygentest_SOURCES = h5copygentest.c
 
@@ -444,7 +450,7 @@ clean-checkPROGRAMS:
 	done
 h5copy$(EXEEXT): $(h5copy_OBJECTS) $(h5copy_DEPENDENCIES) 
 	@rm -f h5copy$(EXEEXT)
-	$(LINK) $(h5copy_OBJECTS) $(h5copy_LDADD) $(LIBS)
+	$(h5copy_LINK) $(h5copy_OBJECTS) $(h5copy_LDADD) $(LIBS)
 h5copygentest$(EXEEXT): $(h5copygentest_OBJECTS) $(h5copygentest_DEPENDENCIES) 
 	@rm -f h5copygentest$(EXEEXT)
 	$(LINK) $(h5copygentest_OBJECTS) $(h5copygentest_LDADD) $(LIBS)

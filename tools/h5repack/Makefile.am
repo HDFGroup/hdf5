@@ -36,6 +36,9 @@ SCRIPT_DEPEND=h5repack$(EXEEXT)
 # Our main target, h5repack tool
 bin_PROGRAMS=h5repack
 
+# Add h5repack specific linker flags here
+h5repack_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Depend on the hdf5 library, the tools library, the test library
 LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 

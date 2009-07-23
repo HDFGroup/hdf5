@@ -691,15 +691,14 @@
 !    The following subroutine tests h5fget_freespace_f
 !
 
-        SUBROUTINE file_space(cleanup, total_error)
+        SUBROUTINE file_space(filename, cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
+          CHARACTER(*), INTENT(IN) :: filename
           LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
           INTEGER              :: error
-     
           !
-          CHARACTER(LEN=10), PARAMETER :: filename = "file_space"
           CHARACTER(LEN=3), PARAMETER :: grpname = "grp"
           CHARACTER(LEN=80)  :: fix_filename 
 
