@@ -266,13 +266,14 @@ typedef int (*H5D_chunk_cb_func_t)(const H5D_chunk_rec_t *chunk_rec,
 
 /* Typedefs for chunk operations */
 typedef herr_t (*H5D_chunk_init_func_t)(const H5D_chk_idx_info_t *idx_info,
-    haddr_t dset_ohdr_addr);
+    const H5S_t *space, haddr_t dset_ohdr_addr);
 typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef hbool_t (*H5D_chunk_is_space_alloc_func_t)(const H5O_layout_t *layout);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
+typedef herr_t (*H5D_chunk_resize_func_t)(H5O_layout_t *layout);
 typedef int (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 typedef herr_t (*H5D_chunk_remove_func_t)(const H5D_chk_idx_info_t *idx_info,
@@ -296,6 +297,7 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage/index is allocated */
     H5D_chunk_insert_func_t insert;         /* Routine to insert a chunk into an index */
     H5D_chunk_get_addr_func_t get_addr;     /* Routine to retrieve address of chunk in file */
+    H5D_chunk_resize_func_t resize;         /* Routine to update chunk index info after resizing dataset */
     H5D_chunk_iterate_func_t iterate;       /* Routine to iterate over chunks */
     H5D_chunk_remove_func_t remove;         /* Routine to remove a chunk from an index */
     H5D_chunk_delete_func_t idx_delete;     /* Routine to delete index & all chunks from file*/
@@ -576,8 +578,6 @@ H5_DLL htri_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_set_info(const H5D_t *dset);
-H5_DLL herr_t H5D_chunk_set_info_real(H5O_layout_t *layout, unsigned ndims,
-    const hsize_t *curr_dims);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_layout_t *layout);
@@ -598,8 +598,9 @@ H5_DLL herr_t H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src,
-    H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype,
-    H5O_copy_t *cpy_info, H5O_pline_t *pline, hid_t dxpl_id);
+    H5F_t *f_dst, H5O_layout_t *layout_dst, const H5S_extent_t *ds_extent_src,
+    const H5T_t *dt_src, const H5O_pline_t *pline_src,
+    H5O_copy_t *cpy_info, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     const H5O_pline_t *pline, hsize_t *btree_size);
 H5_DLL herr_t H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
