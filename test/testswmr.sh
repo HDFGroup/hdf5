@@ -1,4 +1,4 @@
-#! /bin/sh -x
+#! /bin/sh
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -24,9 +24,17 @@
 ###############################################################################
 
 Nreaders=5		# number of readers to launch
-Nrecords=1000000	# number of records to write
+Nrecords=200000		# number of records to write
 Nsecs=5			# number of seconds per read interval
 nerrors=0
+
+###############################################################################
+## short hands
+###############################################################################
+DPRINT=:	# Set to "echo Debug:" for debugging printing, 
+		# else ":" for noop. 
+IFDEBUG=:	# Set to null to turn on debugging, else ":" for noop. 
+
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -53,10 +61,12 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+echo launch the swmr_generator
 ./swmr_generator
 echo launch the swmr_writer
 ./swmr_writer $Nrecords &
-pid_write=$!
+pid_writer=$!
+$DPRINT pid_writer=$pid_writer
 
 # launch readers
 n=0
@@ -66,13 +76,12 @@ while [ $n -lt $Nreaders ]; do
     pid_readers="$pid_readers $!"
     n=`expr $n + 1`
 done
-echo pid_write=$pid_write
-echo pid_readers=$pid_readers
-ps
+$DPRINT pid_readers=$pid_readers
+$IFDEBUG ps
 
 # collect exit code of the readers.
 for xpid in $pid_readers; do
-    echo checked reader $xpid
+    $DPRINT checked reader $xpid
     wait $xpid
     if test $? -ne 0; then
 	echo reader had error
@@ -80,7 +89,7 @@ for xpid in $pid_readers; do
     fi
 done
 # collect exit code of the writer
-echo checked write $pid_writer
+$DPRINT checked writer $pid_writer
 wait $pid_writer
 if test $? -ne 0; then
     echo writer had error
@@ -91,7 +100,7 @@ fi
 # # END
 # ##############################################################################
 
-echo nerrors=$nerrors
+$DPRINT nerrors=$nerrors
 if test $nerrors -eq 0 ; then
    echo "SWMR tests passed."
 fi
