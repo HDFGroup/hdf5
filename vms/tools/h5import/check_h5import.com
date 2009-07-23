@@ -64,7 +64,7 @@ $ CALL TOOLTEST  "txtuin32.txt -c txtuin32.conf -o" txtuin32.h5
 $ !
 $ type sys$input 
                Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
-$ CALL TOOLTEST  "txtuin32.txt -c txtuin16.conf -o" txtuin32.h5
+$ CALL TOOLTEST  "txtuin32.txt -c txtuin16.conf -o" txtuin16.h5
 $ !
 $ type sys$input 
                Testing ASCII F32 - rank 3 - Output LE 
@@ -115,8 +115,8 @@ $
 $ ! Delete temporary files
 $ del *_out.h5;*
 $ del *.h5importtxt;*
-$ del b*.;*
-$ del txti*.;*
+$ del b*.h5;*
+$ del txti*.h5;*
 $ del *.dif;*
 $ !
 $ 
