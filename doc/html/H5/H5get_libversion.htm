@@ -2,6 +2,11 @@
 <!-- HEADER RIGHT "H5get_libversion" -->
 <hr>
 <dl>
+
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 24 July 2009
+      </i></font></div>
+
 <dt><strong>Name:</strong> <a name="Library-Version">H5get_libversion</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5get_libversion</code>(<em>unsigned *</em><code>majnum</code>,
@@ -32,7 +37,7 @@
 <dt><strong>Fortran90 Interface:</strong> h5get_libversion_f
     <dd>
 	<pre>
-SUBROUTINE h5get_libversion_f(hdferr) 
+SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, hdferr) 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: majnum      ! The major version of the library
   INTEGER, INTENT(OUT) :: minnum      ! The minor version of the library
