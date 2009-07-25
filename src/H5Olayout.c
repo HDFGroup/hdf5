@@ -1027,12 +1027,8 @@ H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
         /* If we have only 1 unlimited dimension, we can use extensible array index */
         if(1 == unlim_count) {
-            /* Check for slowest changing dimension being unlimited */
-            /* (non-slowest-changing dim. not supported yet) */
-            if(max_dims[0] == H5S_UNLIMITED) {
-                /* Set the chunk index type */
-                layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-            } /* end if */
+            /* Set the chunk index type */
+            layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
         } /* end if */
         /* Chunked datasets with fixed dimensions */
         else if(layout->type == H5D_CHUNKED && fixed) {

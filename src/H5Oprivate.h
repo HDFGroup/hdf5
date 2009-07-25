@@ -368,6 +368,8 @@ struct H5EA_t;                          /* Defined in H5EAprivate.h          */
 typedef struct H5O_layout_chunk_earray_t {
     haddr_t	addr;			/* File address of extensible array  */
     haddr_t	dset_ohdr_addr;		/* File address dataset's object header */
+    unsigned    unlim_dim;              /* Rank of unlimited dimension for dataset */
+    hsize_t    	swizzled_down_chunks[H5O_LAYOUT_NDIMS];	/* swizzled "down" size of number of chunks in each dimension */
     struct H5EA_t *ea;                  /* Pointer to extensible array struct */
 } H5O_layout_chunk_earray_t;
 

@@ -197,10 +197,10 @@ const char *FILENAME[] = {
 
 /* Parameters for testing extensible array chunk indices */
 #define EARRAY_MAX_RANK         3
-#define EARRAY_DSET_DIM         30
+#define EARRAY_DSET_DIM         15
 #define EARRAY_CHUNK_DIM        3
-#define EARRAY_EXTEND_INCR      30
-#define EARRAY_MAX_EXTEND       150
+#define EARRAY_EXTEND_INCR      15
+#define EARRAY_MAX_EXTEND       75
  
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -6944,6 +6944,9 @@ test_chunk_fast(hid_t fapl)
     hid_t       sid = -1;       /* Dataspace ID */
     hid_t       scalar_sid = -1;/* Scalar dataspace ID */
     hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     fill;           /* Temporary value, for filling arrays */
+    hsize_t     hs_size[EARRAY_MAX_RANK];   /* Hyperslab size */
+    hsize_t     chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
     H5F_libver_t low;           /* File format low bound */
     hbool_t     swmr;           /* Whether file should be written with SWMR access enabled */
 
@@ -6972,6 +6975,14 @@ test_chunk_fast(hid_t fapl)
     /* Create scalar dataspace */
     if((scalar_sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
 
+    /* Initialize chunk dimensions */
+    fill = EARRAY_CHUNK_DIM;
+    H5V_array_fill(chunk_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+
+    /* Initialize hyperslab size */
+    fill = 1;
+    H5V_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
+
     /* Loop over using SWMR access to write */
     for(swmr = FALSE; swmr <= TRUE; swmr++) {
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -6988,27 +6999,12 @@ test_chunk_fast(hid_t fapl)
 
                 /* Loop over dataspace ranks to test */
                 for(ndims = 1; ndims < (EARRAY_MAX_RANK + 1); ndims++) {
-                    H5D_chunk_index_t idx_type; /* Dataset chunk index type */
-                    hsize_t fill;           /* Temporary value, for filling arrays */
-                    hsize_t chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
-                    hsize_t dim[EARRAY_MAX_RANK], max_dim[EARRAY_MAX_RANK]; /* Dataset dimensions */
-                    hsize_t down[EARRAY_MAX_RANK];      /* 'down' sizes, for computing array index */
-                    hsize_t hs_offset[EARRAY_MAX_RANK];      /* Hyperslab offset */
-                    hsize_t hs_size[EARRAY_MAX_RANK];        /* Hyperslab size */
-                    hssize_t snpoints;      /* # of points in dataspace extent (signed) */
-                    hsize_t npoints;        /* # of points in dataspace extent */
-                    unsigned write_elem, read_elem;  /* Element written/read */
-                    hsize_t u;             /* Local index variable */
-
-                    /* Create file */
-                    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0), H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
+                    unsigned unlim_dim;
 
                     /* Create dataset creation property list */
                     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
 
                     /* Set chunking & chunk dims */
-                    fill = EARRAY_CHUNK_DIM;
-                    H5V_array_fill(chunk_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
                     if(H5Pset_chunk(dcpl, (int)ndims, chunk_dim) < 0) FAIL_STACK_ERROR
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -7023,90 +7019,62 @@ test_chunk_fast(hid_t fapl)
                     /* Set allocation time */
                     if(H5Pset_alloc_time(dcpl, alloc_time) < 0) FAIL_STACK_ERROR
 
-                    /* Create n-D dataspace */
-                    fill = EARRAY_DSET_DIM;
-                    H5V_array_fill(dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
-                    fill = EARRAY_DSET_DIM;
-                    H5V_array_fill(max_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
-                    max_dim[0] = H5S_UNLIMITED;
-                    if((sid = H5Screate_simple((int)ndims, dim, max_dim)) < 0) FAIL_STACK_ERROR
+                    /* Loop over which dimension is unlimited */
+                    for(unlim_dim = 0; unlim_dim < ndims; unlim_dim++) {
+                        H5D_chunk_index_t idx_type; /* Dataset chunk index type */
+                        hsize_t dim[EARRAY_MAX_RANK], max_dim[EARRAY_MAX_RANK]; /* Dataset dimensions */
+                        hsize_t swizzled_dim[EARRAY_MAX_RANK];      /* Dimensions, with unlimited dimension moved to rank 0 */
+                        hsize_t down[EARRAY_MAX_RANK];      /* 'down' sizes, for computing array index */
+                        hsize_t hs_offset[EARRAY_MAX_RANK];      /* Hyperslab offset */
+                        hssize_t snpoints;      /* # of points in dataspace extent (signed) */
+                        hsize_t npoints;        /* # of points in dataspace extent */
+                        unsigned write_elem, read_elem;  /* Element written/read */
+                        hsize_t u;             /* Local index variable */
 
-                    /* Get the number of points in the dataspace */
-                    if((snpoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
-                    npoints = (hsize_t)snpoints;
+                        /* Create file */
+                        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0), H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
 
-                    /* Compute the "down" dimension values */
-                    if(H5V_array_down(ndims, dim, down) < 0) FAIL_STACK_ERROR
+                        /* Create n-D dataspace */
+                        fill = EARRAY_DSET_DIM;
+                        H5V_array_fill(dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        fill = EARRAY_DSET_DIM;
+                        H5V_array_fill(max_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        max_dim[unlim_dim] = H5S_UNLIMITED;
+                        fill = EARRAY_DSET_DIM;
+                        H5V_array_fill(swizzled_dim, &fill, sizeof(fill), EARRAY_MAX_RANK);
+                        if((sid = H5Screate_simple((int)ndims, dim, max_dim)) < 0) FAIL_STACK_ERROR
 
-                    /* Create chunked dataset */
-                    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                        FAIL_STACK_ERROR
+                        /* Get the number of points in the dataspace */
+                        if((snpoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
+                        npoints = (hsize_t)snpoints;
 
-                    /* Get the chunk index type */
-                    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                        /* Compute the "down" dimension values */
+                        if(H5V_array_down(ndims, dim, down) < 0) FAIL_STACK_ERROR
 
-                    /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
-                    if(low == H5F_LIBVER_LATEST) {
-                        /* Verify index type */
-                        if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
-                    } /* end if */
-                    else {
-                        /* Verify index type */
-                        if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
-                    } /* end else */
+                        /* Create chunked dataset */
+                        if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                            FAIL_STACK_ERROR
 
-                    /* Fill existing elements */
-                    fill = 1;
-                    H5V_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
-                    for(u = 0; u < npoints; u++) {
-                        /* Compute the coordinate from the linear offset */
-                        if(H5V_array_calc_pre(u, ndims, dim, down, hs_offset) < 0) FAIL_STACK_ERROR
+                        /* Get the chunk index type */
+                        if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
-                        /* Select a single element in the dataset */
-                        if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
+                        /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
+                        if(low == H5F_LIBVER_LATEST) {
+                            /* Verify index type */
+                            if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                        } /* end if */
+                        else {
+                            /* Verify index type */
+                            if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                        } /* end else */
 
-                        /* Read (unwritten) element from dataset */
-                        read_elem = 1;
-                        if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
-
-                        /* Verify unwritten element is fill value (0) */
-                        if(read_elem != 0) FAIL_PUTS_ERROR("invalid unwritten element read");
-
-                        /* Write element to dataset */
-                        write_elem = (unsigned)u;
-                        if(H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0) FAIL_STACK_ERROR
-
-                        /* Read element from dataset */
-                        read_elem = write_elem + 1;
-                        if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
-
-                        /* Verify written element is read in */
-                        if(read_elem != write_elem) FAIL_PUTS_ERROR("invalid written element read");
-                    } /* end for */
-
-                    /* Incrementally extend dataset and verify write/reads */
-                    while(dim[0] < EARRAY_MAX_EXTEND) {
-                        hssize_t snew_npoints;      /* # of points in dataspace extent (signed) */
-                        hsize_t new_npoints;        /* # of points in dataspace extent */
-
-                        /* Extend dataset */
-                        dim[0] += EARRAY_EXTEND_INCR;
-                        if(H5Dset_extent(dsid, dim) < 0) FAIL_STACK_ERROR
-
-                        /* Close old dataspace */
-                        if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-
-                        /* Get dataspace for dataset now */
-                        if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
-
-                        /* Get the new number of points in the dataspace */
-                        if((snew_npoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
-                        new_npoints = (hsize_t)snew_npoints;
-
-                        /* Fill new elements */
-                        for(u = npoints; u < new_npoints; u++) {
+                        /* Fill existing elements */
+                        for(u = 0; u < npoints; u++) {
                             /* Compute the coordinate from the linear offset */
-                            if(H5V_array_calc(u, ndims, dim, hs_offset) < 0) FAIL_STACK_ERROR
+                            if(H5V_array_calc_pre(u, ndims, dim, down, hs_offset) < 0) FAIL_STACK_ERROR
+
+                            /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
+                            H5V_unswizzle_coords(hs_offset, unlim_dim);
 
                             /* Select a single element in the dataset */
                             if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
@@ -7130,83 +7098,139 @@ test_chunk_fast(hid_t fapl)
                             if(read_elem != write_elem) FAIL_PUTS_ERROR("invalid written element read");
                         } /* end for */
 
-                        /* Update the number of points in the dataspace */
-                        npoints = new_npoints;
-                    } /* end while */
+                        /* Incrementally extend dataset and verify write/reads */
+                        while(dim[unlim_dim] < EARRAY_MAX_EXTEND) {
+                            hssize_t snew_npoints;      /* # of points in dataspace extent (signed) */
+                            hsize_t new_npoints;        /* # of points in dataspace extent */
 
-                    /* Close everything */
-                    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
-                    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-                    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+                            /* Extend dataset */
+                            dim[unlim_dim] += EARRAY_EXTEND_INCR;
+                            swizzled_dim[0] += EARRAY_EXTEND_INCR;
+                            if(H5Dset_extent(dsid, dim) < 0) FAIL_STACK_ERROR
+
+                            /* Close old dataspace */
+                            if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+                            /* Get dataspace for dataset now */
+                            if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+
+                            /* Get the new number of points in the dataspace */
+                            if((snew_npoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
+                            new_npoints = (hsize_t)snew_npoints;
+
+                            /* Fill new elements */
+                            for(u = npoints; u < new_npoints; u++) {
+                                /* Compute the coordinate from the linear offset */
+                                if(H5V_array_calc(u, ndims, swizzled_dim, hs_offset) < 0) FAIL_STACK_ERROR
+
+                                /* Un-swizzle hyperslab offset in same way as swizzled dimensions */
+                                H5V_unswizzle_coords(hs_offset, unlim_dim);
+
+                                /* Select a single element in the dataset */
+                                if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
+
+                                /* Read (unwritten) element from dataset */
+                                read_elem = 1;
+                                if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
+
+                                /* Verify unwritten element is fill value (0) */
+                                if(read_elem != 0) FAIL_PUTS_ERROR("invalid unwritten element read");
+
+                                /* Write element to dataset */
+                                write_elem = (unsigned)u;
+                                if(H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0) FAIL_STACK_ERROR
+
+                                /* Read element from dataset */
+                                read_elem = write_elem + 1;
+                                if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
+
+                                /* Verify written element is read in */
+                                if(read_elem != write_elem) FAIL_PUTS_ERROR("invalid written element read");
+                            } /* end for */
+
+                            /* Update the number of points in the dataspace */
+                            npoints = new_npoints;
+                        } /* end while */
+
+                        /* Close everything */
+                        if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+                        if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+                        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
 
-                    /* Re-open file & dataset */
-                    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | (swmr ? H5F_ACC_SWMR_READ : 0), my_fapl)) < 0) FAIL_STACK_ERROR
+                        /* Re-open file & dataset */
+                        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | (swmr ? H5F_ACC_SWMR_READ : 0), my_fapl)) < 0) FAIL_STACK_ERROR
 
-                    /* Open dataset */
-                    if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                        /* Open dataset */
+                        if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-                    /* Get the chunk index type */
-                    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                        /* Get the chunk index type */
+                        if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
-                    /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
-                    if(low == H5F_LIBVER_LATEST) {
-                        /* Verify index type */
-                        if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
-                    } /* end if */
-                    else {
-                        /* Verify index type */
-                        if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
-                    } /* end else */
+                        /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
+                        if(low == H5F_LIBVER_LATEST) {
+                            /* Verify index type */
+                            if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                        } /* end if */
+                        else {
+                            /* Verify index type */
+                            if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                        } /* end else */
 
-                    /* Get dataspace for dataset now */
-                    if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+                        /* Get dataspace for dataset now */
+                        if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
 
-                    /* Get the number of points in the dataspace */
-                    if((snpoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
-                    npoints = (hsize_t)snpoints;
+                        /* Get the number of points in the dataspace */
+                        if((snpoints = H5Sget_simple_extent_npoints(sid)) < 0) FAIL_STACK_ERROR
+                        npoints = (hsize_t)snpoints;
 
-                    /* Get the current dimensions */
-                    if(H5Sget_simple_extent_dims(sid, dim, NULL) < 0) FAIL_STACK_ERROR
+                        /* Get the current dimensions into swizzled_dim array */
+                        if(H5Sget_simple_extent_dims(sid, swizzled_dim, NULL) < 0) FAIL_STACK_ERROR
 
-                    /* Compute the "down" dimension values */
-                    if(H5V_array_down(ndims, dim, down) < 0) FAIL_STACK_ERROR
+                        /* Generate the swizzled dimensions */
+                        H5V_swizzle_coords(swizzled_dim, unlim_dim);
 
-                    /* Read elements */
-                    for(u = 0; u < npoints; u++) {
-                        /* Compute the coordinate from the linear offset */
-                        if(H5V_array_calc_pre(u, ndims, dim, down, hs_offset) < 0) FAIL_STACK_ERROR
+                        /* Compute the "down" dimension values */
+                        if(H5V_array_down(ndims, swizzled_dim, down) < 0) FAIL_STACK_ERROR
 
-                        /* Select a single element in the dataset */
-                        if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
+                        /* Read elements */
+                        for(u = 0; u < npoints; u++) {
+                            /* Compute the coordinate from the linear offset */
+                            if(H5V_array_calc_pre(u, ndims, swizzled_dim, down, hs_offset) < 0) FAIL_STACK_ERROR
 
-                        /* Read written element from dataset */
-                        read_elem = (unsigned)(u + 1);
-                        if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
+                            /* Unswizzle hyperslab offset in same way as swizzled dimensions */
+                            H5V_unswizzle_coords(hs_offset, unlim_dim);
 
-                        /* Verify written element is correct */
-                        if(read_elem != u) FAIL_PUTS_ERROR("invalid element read");
+                            /* Select a single element in the dataset */
+                            if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0) FAIL_STACK_ERROR
+
+                            /* Read written element from dataset */
+                            read_elem = (unsigned)(u + 1);
+                            if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) FAIL_STACK_ERROR
+
+                            /* Verify written element is correct */
+                            if(read_elem != u) FAIL_PUTS_ERROR("invalid element read");
+                        } /* end for */
+
+                        /* Close everything */
+                        if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+                        if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+                        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+
+                        /* Re-open file */
+                        if((fid = H5Fopen(filename, H5F_ACC_RDWR, my_fapl)) < 0) FAIL_STACK_ERROR
+
+                        /* Delete dataset */
+                        if(H5Ldelete(fid, "dset", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+                        /* Close everything */
+                        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
                     } /* end for */
 
                     /* Close everything */
-                    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
-                    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-                    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-
-                    /* Re-open file */
-                    if((fid = H5Fopen(filename, H5F_ACC_RDWR, my_fapl)) < 0) FAIL_STACK_ERROR
-
-                    /* Delete dataset */
-                    if(H5Ldelete(fid, "dset", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-
-                    /* Close everything */
-                    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
+                    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
                 } /* end for */
-
-                /* Close everything */
-                if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
             } /* end for */
 #ifdef H5_HAVE_FILTER_DEFLATE
         } /* end for */

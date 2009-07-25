@@ -13,7 +13,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     hsize_t start, count = 1;   /* Hyperslab selection values */
 
     /* Open dataset for symbol */
-    if((dsid = H5Dopen(fid, sym_name, H5P_DEFAULT)) < 0)
+    if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
         return(-1);
 
     /* Get the dataset's dataspace */

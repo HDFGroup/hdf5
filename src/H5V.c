@@ -1287,6 +1287,75 @@ H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5V_swizzle_coords
+ *
+ * Purpose:	Given a coordinate offset array (COORDS), move the unlimited
+ *		dimension (UNLIM_DIM) value to offset 0, sliding any
+ *		intermediate values down one position.
+ *
+ * Return:	None
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5V_swizzle_coords(hsize_t *coords, unsigned unlim_dim)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_swizzle_coords)
+
+    /* Sanity check */
+    HDassert(coords);
+
+    /* Nothing to do when unlimited dimension is at position 0 */
+    if(0 != unlim_dim) {
+        hsize_t tmp = coords[unlim_dim];
+
+        HDmemmove(&coords[1], &coords[0], sizeof(coords[0]) * unlim_dim);
+        coords[0] = tmp;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5V_swizzle_coords() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_unswizzle_coords
+ *
+ * Purpose:	Given a coordinate offset array (COORDS), move the value at
+ *		offset 0 to offset of the unlimied dimension (UNLIM_DIM),
+ *		sliding any intermediate values up one position.  Undoes the
+ *		"swizzle_coords" operation.
+ *
+ * Return:	None
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5V_unswizzle_coords(hsize_t *coords, unsigned unlim_dim)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_unswizzle_coords)
+
+    /* Sanity check */
+    HDassert(coords);
+
+    /* Nothing to do when unlimited dimension is at position 0 */
+    if(0 != unlim_dim) {
+        hsize_t tmp = coords[0];
+
+        HDmemmove(&coords[0], &coords[1], sizeof(coords[0]) * unlim_dim);
+        coords[unlim_dim] = tmp;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5V_unswizzle_coords() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5V_memcpyvv
  *
  * Purpose:	Given source and destination buffers in memory (SRC & DST)

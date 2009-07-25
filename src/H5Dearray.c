@@ -122,6 +122,7 @@ static herr_t H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
+static herr_t H5D_earray_idx_resize(H5O_layout_t *layout);
 static int H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 static herr_t H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info,
@@ -155,7 +156,7 @@ const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     H5D_earray_idx_is_space_alloc,
     H5D_earray_idx_insert,
     H5D_earray_idx_get_addr,
-    NULL,
+    H5D_earray_idx_resize,
     H5D_earray_idx_iterate,
     H5D_earray_idx_remove,
     H5D_earray_idx_delete,
@@ -780,7 +781,14 @@ static herr_t
 H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
     haddr_t dset_ohdr_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_init)
+    hsize_t max_dims[H5O_LAYOUT_NDIMS];    /* Max. size of dataset dimensions */
+    int unlim_dim;              /* Rank of the dataset's unlimited dimension */
+    int sndims;                 /* Rank of dataspace */
+    unsigned ndims;             /* Rank of dataspace */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_init)
 
     /* Check args */
     HDassert(idx_info);
@@ -790,10 +798,37 @@ H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
     HDassert(space);
     HDassert(H5F_addr_defined(dset_ohdr_addr));
 
+    /* Get the dim info for dataset */
+    if((sndims = H5S_get_simple_extent_dims(space, NULL, max_dims)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
+    H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
+
+    /* Find the rank of the unlimited dimension */
+    unlim_dim = (-1);
+    for(u = 0; u < ndims; u++) {
+        /* Check for unlimited dimension */
+        if(H5S_UNLIMITED == max_dims[u]) {
+            /* Check if we've already found an unlimited dimension */
+            if(unlim_dim >= 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_ALREADYINIT, FAIL, "already found unlimited dimension")
+
+            /* Set the unlimited dimension */
+            unlim_dim = (int)u;
+        } /* end if */
+    } /* end for */
+
+    /* Check if we didn't find an unlimited dimension */
+    if(unlim_dim < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNINITIALIZED, FAIL, "didn't find unlimited dimension")
+
+    /* Set the unlimited dimension for the layout's future use */
+    idx_info->layout->u.chunk.u.earray.unlim_dim = (unsigned)unlim_dim;
+
     /* Store the dataset's object header address for later */
     idx_info->layout->u.chunk.u.earray.dset_ohdr_addr = dset_ohdr_addr;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_init() */
 
 
@@ -947,9 +982,24 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    /* Check for unlimited dim. not being the slowest-changing dim. */
+    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+
+        /* Set up the swizzled chunk coordinates */
+        HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end if */
+    else {
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end else */
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1092,9 +1142,24 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    /* Check for unlimited dim. not being the slowest-changing dim. */
+    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+
+        /* Set up the swizzled chunk coordinates */
+        HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end if */
+    else {
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end else */
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1122,6 +1187,46 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_earray_idx_get_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_resize
+ *
+ * Purpose:	Calculate/setup the swizzled down chunk array, used for chunk
+ *              index calculations.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 23, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_resize(H5O_layout_t *layout)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_resize)
+
+    /* Check args */
+    HDassert(layout);
+
+    /* Set up the swizzled "down" chunk information */
+    if(layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_chunks[H5O_LAYOUT_NDIMS];    /* Swizzled form of # of chunks in each dimension */
+
+        HDmemcpy(swizzled_chunks, layout->u.chunk.chunks, (layout->u.chunk.ndims - 1) * sizeof(swizzled_chunks[0]));
+        H5V_swizzle_coords(swizzled_chunks, layout->u.chunk.u.earray.unlim_dim);
+
+        /* Get the swizzled "down" sizes for each dimension */
+        if(H5V_array_down((layout->u.chunk.ndims - 1), swizzled_chunks, layout->u.chunk.u.earray.swizzled_down_chunks) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_idx_resize() */
 
 
 /*-------------------------------------------------------------------------
@@ -1276,9 +1381,24 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    /* Check for unlimited dim. not being the slowest-changing dim. */
+    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+
+        /* Set up the swizzled chunk coordinates */
+        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end if */
+    else {
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end else */
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
@@ -1640,9 +1760,24 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    /* Check for unlimited dim. not being the slowest-changing dim. */
+    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+
+        /* Set up the swizzled chunk coordinates */
+        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end if */
+    else {
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end else */
 
     /* Create flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.
@@ -1693,9 +1828,24 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->layout->u.chunk.u.earray.ea;
 
-    /* Calculate the index of this chunk */
-    if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    /* Check for unlimited dim. not being the slowest-changing dim. */
+    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+        hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
+        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+
+        /* Set up the swizzled chunk coordinates */
+        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end if */
+    else {
+        /* Calculate the index of this chunk */
+        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    } /* end else */
 
     /* Remove flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.
