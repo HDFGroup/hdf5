@@ -198,35 +198,37 @@ void Attribute::read(const DataType& mem_type, H5std_string& strg) const
 //--------------------------------------------------------------------------
 size_t Attribute::getInMemDataSize() const
 {
+    char *func = "Attribute::getInMemDataSize";
+
     // Get the data type of this attribute
     hid_t mem_type_id = H5Aget_type(id);
-    if (mem_type_id <= 0)
+    if( mem_type_id < 0 )
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Aget_type failed");
+	throw AttributeIException(func, "H5Aget_type failed");
     }
 
     // Get the data type's size
     hid_t native_type = H5Tget_native_type(mem_type_id, H5T_DIR_DEFAULT);
     if (native_type < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Tget_native_type failed");
+	throw AttributeIException(func, "H5Tget_native_type failed");
     }
     size_t type_size = H5Tget_size(native_type);
     if (type_size == 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Tget_size failed");
+	throw AttributeIException(func, "H5Tget_size failed");
     }
 
     // Get number of elements of the attribute
     hid_t space_id = H5Aget_space(id);
     if (space_id < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Aget_space failed");
+	throw AttributeIException(func, "H5Aget_space failed");
     }
     hssize_t num_elements = H5Sget_simple_extent_npoints(space_id);
     if (num_elements < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Sget_simple_extent_npoints failed");
+	throw AttributeIException(func, "H5Sget_simple_extent_npoints failed");
     }
 
     // Calculate and return the size of the data
