@@ -64,6 +64,18 @@
 
 #define H5D_CHUNK_HASH(D, ADDR) H5F_addr_hash(ADDR, (D)->cache.chunk.nslots)
 
+/* Default creation parameters for chunk index data structures */
+
+/* Fixed array creation values */
+#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS  10  /* i.e. 1024 elements per data block page */
+
+/* Extensible array creation values */
+#define H5D_EARRAY_MAX_NELMTS_BITS         32                      /* i.e. 4 giga-elements */
+#define H5D_EARRAY_IDX_BLK_ELMTS           4
+#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   4
+#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      16
+#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS     10              /* i.e. 1024 elements per data block page */
+
 
 /****************************/
 /* Package Private Typedefs */

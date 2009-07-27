@@ -50,13 +50,6 @@
 #define H5D_EARRAY_FILL         HADDR_UNDEF
 #define H5D_EARRAY_FILT_FILL    {HADDR_UNDEF, 0, 0}
 
-/* Extensible array creation values */
-#define H5D_EARRAY_MAX_NELMTS_BITS         32                      /* i.e. 4 giga-elements */
-#define H5D_EARRAY_IDX_BLK_ELMTS           4
-#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   4
-#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      16
-#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS     10              /* i.e. 1024 elements per data block page */
-
 
 /******************/
 /* Local Typedefs */
@@ -885,11 +878,16 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
         cparam.cls = H5EA_CLS_CHUNK;
         cparam.raw_elmt_size = (uint8_t)H5F_SIZEOF_ADDR(idx_info->f);
     } /* end else */
-    cparam.max_nelmts_bits = H5D_EARRAY_MAX_NELMTS_BITS;
-    cparam.idx_blk_elmts = H5D_EARRAY_IDX_BLK_ELMTS;
-    cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
-    cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
-    cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
+    cparam.max_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_nelmts_bits;
+    HDassert(cparam.max_nelmts_bits > 0);
+    cparam.idx_blk_elmts = idx_info->layout->u.chunk.u.earray.cparam.idx_blk_elmts;
+    HDassert(cparam.idx_blk_elmts > 0);
+    cparam.sup_blk_min_data_ptrs = idx_info->layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
+    HDassert(cparam.sup_blk_min_data_ptrs > 0);
+    cparam.data_blk_min_elmts = idx_info->layout->u.chunk.u.earray.cparam.data_blk_min_elmts;
+    HDassert(cparam.data_blk_min_elmts > 0);
+    cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+    HDassert(cparam.max_dblk_page_nelmts_bits > 0);
 
     /* Set up the user data */
     udata.f = idx_info->f;

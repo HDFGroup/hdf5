@@ -366,6 +366,15 @@ typedef struct H5O_layout_chunk_btree_t {
 struct H5EA_t;                          /* Defined in H5EAprivate.h          */
 
 typedef struct H5O_layout_chunk_earray_t {
+    /* Creation parameters for extensible array data structure */
+    struct {
+        uint8_t max_nelmts_bits;            /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
+        uint8_t idx_blk_elmts;              /* # of elements to store in index block */
+        uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
+        uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
+        uint8_t max_dblk_page_nelmts_bits;       /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
+    } cparam;
+
     haddr_t	addr;			/* File address of extensible array  */
     haddr_t	dset_ohdr_addr;		/* File address dataset's object header */
     unsigned    unlim_dim;              /* Rank of unlimited dimension for dataset */
@@ -377,6 +386,13 @@ typedef struct H5O_layout_chunk_earray_t {
 struct H5FA_t;                          /* Defined in H5FAprivate.h          */
 
 typedef struct H5O_layout_chunk_farray_t {
+    /* Creation parameters for fixed array data structure */
+    struct {
+        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
+                                               i.e. # of bits needed to store max. # of elements 
+                                               in a data block page */
+    } cparam;
+
     haddr_t	addr;			/* File address of fixed index array  */
     struct H5FA_t *fa;                  /* Pointer to fixed index array struct */
 } H5O_layout_chunk_farray_t;

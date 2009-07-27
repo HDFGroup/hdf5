@@ -49,9 +49,6 @@
 #define H5D_FARRAY_FILL         HADDR_UNDEF
 #define H5D_FARRAY_FILT_FILL    {HADDR_UNDEF, 0, 0}
 
-/* Fixed array creation values */
-#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS  10  /* i.e. 1024 elements per data block page */
-
 
 /******************/
 /* Local Typedefs */
@@ -704,7 +701,8 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
         cparam.cls = H5FA_CLS_CHUNK;
         cparam.raw_elmt_size = (uint8_t)H5F_SIZEOF_ADDR(idx_info->f);
     } /* end else */
-    cparam.max_dblk_page_nelmts_bits = H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
+    cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
+    HDassert(cparam.max_dblk_page_nelmts_bits > 0);
     cparam.nelmts = idx_info->layout->u.chunk.nchunks;
 
     /* Set up the user data */
