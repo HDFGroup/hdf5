@@ -66,6 +66,7 @@ static hbool_t H5D_contig_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
+static herr_t H5D_contig_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
 
 /* Helper routines */
 static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
@@ -90,6 +91,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
 #endif /* H5_HAVE_PARALLEL */
     H5D_contig_readvv,
     H5D_contig_writevv,
+    H5D_contig_flush,
     NULL
 }};
 
@@ -1170,6 +1172,37 @@ if(dset_contig->sieve_size > size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_contig_writevv() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_contig_flush
+ *
+ * Purpose:	Writes all dirty data to disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 27, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_contig_flush(H5D_t *dset, hid_t dxpl_id, unsigned UNUSED flags)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_flush)
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Flush any data in sieve buffer */
+    if(H5D_flush_sieve_buf(dset, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_contig_flush() */
 
 
 /*-------------------------------------------------------------------------
