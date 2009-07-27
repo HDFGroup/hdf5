@@ -207,8 +207,6 @@ static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
-static herr_t H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
-    const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t flush);
 
