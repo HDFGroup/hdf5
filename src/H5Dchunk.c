@@ -181,6 +181,7 @@ static herr_t H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type
 static herr_t H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
+static herr_t H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
 static herr_t H5D_chunk_io_term(const H5D_chunk_map_t *fm);
 
 /* "Nonexistent" layout operation callback */
@@ -206,7 +207,10 @@ static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
-
+static herr_t H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
+    const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
+static herr_t H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
+    const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t flush);
 
 
 /*********************/
@@ -227,6 +231,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 #endif /* H5_HAVE_PARALLEL */
     NULL,
     NULL,
+    H5D_chunk_flush,
     H5D_chunk_io_term
 }};
 
@@ -248,6 +253,7 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
 #endif /* H5_HAVE_PARALLEL */
     H5D_nonexistent_readvv,
+    NULL,
     NULL,
     NULL
 }};
@@ -1939,6 +1945,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_flush
+ *
+ * Purpose:	Writes all dirty chunks to disk and optionally preempts them
+ *		from the cache.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags)
+{
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
+    unsigned		nerrors = 0;
+    H5D_rdcc_ent_t	*ent, *next;
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_flush)
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Flush any data caught in sieve buffer */
+    if(H5D_flush_sieve_buf(dset, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer")
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+    /* Loop over all entries in the chunk cache */
+    for(ent = rdcc->head; ent; ent = next) {
+	next = ent->next;
+	if((flags & H5F_FLUSH_INVALIDATE)) {
+	    if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
+		nerrors++;
+	} else {
+	    if(H5D_chunk_flush_entry(dset, dxpl_id, dxpl_cache, ent, FALSE) < 0)
+		nerrors++;
+	}
+    } /* end for */
+    if(nerrors)
+	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_flush() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_chunk_io_term
  *
  * Purpose:	Destroy I/O operation information.
@@ -2989,54 +3050,6 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_unlock() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_chunk_flush
- *
- * Purpose:	Writes all dirty chunks to disk and optionally preempts them
- *		from the cache.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags)
-{
-    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
-    H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);
-    unsigned		nerrors = 0;
-    H5D_rdcc_ent_t	*ent, *next;
-    herr_t ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_chunk_flush, FAIL)
-
-    /* Fill the DXPL cache values for later use */
-    if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
-    /* Loop over all entries in the chunk cache */
-    for(ent = rdcc->head; ent; ent = next) {
-	next = ent->next;
-	if((flags & H5F_FLUSH_INVALIDATE)) {
-	    if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
-		nerrors++;
-	} else {
-	    if(H5D_chunk_flush_entry(dset, dxpl_id, dxpl_cache, ent, FALSE) < 0)
-		nerrors++;
-	}
-    } /* end for */
-    if(nerrors)
-	HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_flush() */
 
 
 /*-------------------------------------------------------------------------

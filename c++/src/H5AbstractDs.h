@@ -51,6 +51,9 @@ class H5_DLLCPP AbstractDs {
 	StrType getStrType() const;
 	VarLenType getVarLenType() const;
 
+	// Gets the size in memory of this abstract dataset.
+	virtual size_t getInMemDataSize() const = 0;
+
 	// Gets the dataspace of this abstract dataset - pure virtual.
 	virtual DataSpace getSpace() const = 0;
 

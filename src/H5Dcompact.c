@@ -68,6 +68,7 @@ static ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
 static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+static herr_t H5D_compact_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
 
 
 /*********************/
@@ -88,6 +89,7 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
 #endif /* H5_HAVE_PARALLEL */
     H5D_compact_readvv,
     H5D_compact_writevv,
+    H5D_compact_flush,
     NULL
 }};
 
@@ -329,6 +331,40 @@ H5D_compact_writevv(const H5D_io_info_t *io_info,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5D_compact_writevv() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_compact_flush
+ *
+ * Purpose:	Writes dirty compact data to object header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, July 27, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_compact_flush(H5D_t *dset, hid_t dxpl_id, unsigned UNUSED flags)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_flush)
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Check if the buffered compact information is dirty */
+    if(dset->shared->layout.u.compact.dirty) {
+        if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
+        dset->shared->layout.u.compact.dirty = FALSE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compact_flush() */
 
 
 /*-------------------------------------------------------------------------
