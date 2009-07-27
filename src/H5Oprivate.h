@@ -340,7 +340,12 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_3	3
 
-/* This version adds different types of indices to chunked datasets */
+/* This version adds different types of indices to chunked datasets, allows
+ *      for larger chunk dimensions, stores chunk indices into their own
+ *      message (the "layout index" message), adds features for compact/dense
+ *      storage of elements and/or chunk records, adds features for abbreviating
+ *      the storage used for partial chunks on boundaries, etc.
+ */
 #define H5O_LAYOUT_VERSION_4	4
 
 /* The latest version of the format.  Look through the 'encode'
