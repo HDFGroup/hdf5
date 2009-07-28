@@ -192,11 +192,11 @@ void Attribute::read(const DataType& mem_type, H5std_string& strg) const
 
     if (!is_variable_len)       // only allocate for fixed-len string
     {
-        p_read_fixed_len(mem_type, strg);
+        p_read_fixed_len(mem_type.getId(), strg);
     }
     else
     {
-        p_read_variable_len(mem_type, strg);
+        p_read_variable_len(mem_type.getId(), strg);
     }
 }
 
@@ -209,35 +209,37 @@ void Attribute::read(const DataType& mem_type, H5std_string& strg) const
 //--------------------------------------------------------------------------
 size_t Attribute::getInMemDataSize() const
 {
+    char *func = "Attribute::getInMemDataSize";
+
     // Get the data type of this attribute
     hid_t mem_type_id = H5Aget_type(id);
-    if (mem_type_id <= 0)
+    if( mem_type_id < 0 )
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Aget_type failed");
+	throw AttributeIException(func, "H5Aget_type failed");
     }
 
     // Get the data type's size
     hid_t native_type = H5Tget_native_type(mem_type_id, H5T_DIR_DEFAULT);
     if (native_type < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Tget_native_type failed");
+	throw AttributeIException(func, "H5Tget_native_type failed");
     }
     size_t type_size = H5Tget_size(native_type);
     if (type_size == 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Tget_size failed");
+	throw AttributeIException(func, "H5Tget_size failed");
     }
 
     // Get number of elements of the attribute
     hid_t space_id = H5Aget_space(id);
     if (space_id < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Aget_space failed");
+	throw AttributeIException(func, "H5Aget_space failed");
     }
     hssize_t num_elements = H5Sget_simple_extent_npoints(space_id);
     if (num_elements < 0)
     {
-	throw AttributeIException("Attribute::getInMemDataSize", "H5Sget_simple_extent_npoints failed");
+	throw AttributeIException(func, "H5Sget_simple_extent_npoints failed");
     }
 
     // Calculate and return the size of the data
@@ -459,8 +461,8 @@ hid_t Attribute::p_get_type() const
 //--------------------------------------------------------------------------
 // Function:	Attribute::p_read_fixed_len (private)
 // brief	Reads a fixed length \a H5std_string from an attribute.
-// param	mem_type  - IN: Attribute datatype (in memory)
-// param	strg      - IN: Buffer for read string
+// param	mem_type_id - IN: Attribute datatype id (in memory)
+// param	strg        - IN: Buffer for read string
 // exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Jul, 2009
 // Modification
@@ -468,7 +470,7 @@ hid_t Attribute::p_get_type() const
 //		Separated the fixed length case from the original
 //		Attribute::read
 //--------------------------------------------------------------------------
-void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) const
+void Attribute::p_read_fixed_len(const hid_t mem_type_id, H5std_string& strg) const
 {
     // Only allocate for fixed-len string.
 
@@ -481,7 +483,7 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 	char *strg_C = NULL;
 
 	strg_C = new char [(size_t)attr_size+1];
-	herr_t ret_value = H5Aread(id, mem_type.getId(), strg_C);
+	herr_t ret_value = H5Aread(id, mem_type_id, strg_C);
 
 	if( ret_value < 0 )
 	{
@@ -498,7 +500,7 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 //--------------------------------------------------------------------------
 // Function:	Attribute::p_read_variable_len (private)
 // brief	Reads a variable length \a H5std_string from an attribute.
-// param	mem_type  - IN: Attribute datatype (in memory)
+// param	mem_type_id - IN: Attribute datatype id (in memory)
 // param	strg      - IN: Buffer for read string
 // exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Jul, 2009
@@ -507,14 +509,14 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 //		Separated the variable length case from the original
 //		Attribute::read
 //--------------------------------------------------------------------------
-void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg) const
+void Attribute::p_read_variable_len(const hid_t mem_type_id, H5std_string& strg) const
 {
 
     // Prepare and call C API to read attribute.
     char *strg_C;
 
     // Read attribute, no allocation for variable-len string; C library will
-    herr_t ret_value = H5Aread(id, mem_type.getId(), &strg_C);
+    herr_t ret_value = H5Aread(id, mem_type_id, &strg_C);
 
     if( ret_value < 0 )
     {

@@ -49,7 +49,10 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	void getSpaceStatus(H5D_space_status_t& status) const;
 
 	// Returns the amount of storage size required for this dataset.
-	hsize_t getStorageSize() const;
+	virtual hsize_t getStorageSize() const;
+
+	// Returns the in memory size of this attribute's data.
+	virtual size_t getInMemDataSize() const;
 
 	// Returns the number of bytes required to store VL data.
 	hsize_t getVlenBufSize( DataType& type, DataSpace& space ) const;
@@ -114,6 +117,10 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// defined in AbstractDs for generic datatype and specific
 	// sub-types
 	virtual hid_t p_get_type() const;
+
+	// Reads variable or fixed len strings from this dataset.
+	void p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id, const hid_t file_space_id, const hid_t xfer_plist_id, H5std_string& strg) const;
+	void p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space_id, const hid_t file_space_id, const hid_t xfer_plist_id, H5std_string& strg) const;
 };
 #ifndef H5_NO_NAMESPACE
 }
