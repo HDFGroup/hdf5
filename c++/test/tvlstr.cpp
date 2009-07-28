@@ -39,7 +39,7 @@
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif
 
 #include "h5cpputil.h"  // C++ utilility header file
@@ -58,29 +58,29 @@ void test_vlstr_free_custom(void *mem, void *info);
 /****************************************************************
 **
 **  test_vlstr_alloc_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses malloc to
-**      allocate the memory and increments the amount of memory
-**      allocated.  It is passed into setVlenMemManager.
+**	allocation routines.  This routine just uses malloc to
+**	allocate the memory and increments the amount of memory
+**	allocated.  It is passed into setVlenMemManager.
 **
 **  Note: exact copy from the C version.
 **
 ****************************************************************/
 void *test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *ret_value = NULL;   	// Pointer to return
-    size_t *mem_used = (size_t *)info;  // Get the pointer to the memory used
-    size_t extra;           	// Extra space needed
+    void *ret_value=NULL;	// Pointer to return
+    size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
+    size_t extra;		// Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
 
-    extra = MAX(sizeof(void *),sizeof(size_t));
+    extra=MAX(sizeof(void *),sizeof(size_t));
 
-    if((ret_value = HDmalloc(extra + size)) != NULL) {
-        *(size_t *)ret_value = size;
-        *mem_used += size;
+    if((ret_value=HDmalloc(extra+size))!=NULL) {
+	*(size_t *)ret_value=size;
+	*mem_used+=size;
     } // end if
     ret_value = ((unsigned char *)ret_value) + extra;
 
@@ -90,9 +90,9 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 /****************************************************************
 **
 **  test_vlstr_free_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses free to
-**      release the memory and decrements the amount of memory
-**      allocated.  It is passed into setVlenMemManager.
+**	allocation routines.  This routine just uses free to
+**	release the memory and decrements the amount of memory
+**	allocated.  It is passed into setVlenMemManager.
 **
 **  Note: exact copy from the C version.
 **
@@ -101,7 +101,7 @@ void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
     size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
-    size_t extra;           	// Extra space needed
+    size_t extra;		// Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -348,8 +348,8 @@ static void test_vlstrings_special()
 
 	// Check data read in.
 	hsize_t i;      	// counting variable
-	for(i = 0; i < SPACE1_DIM1; i++)
-	    if(rdata[i] != NULL)
+	for (i=0; i<SPACE1_DIM1; i++)
+	    if(rdata[i]!=NULL)
 		TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
 
 	// Write dataset to disk, then read it back.
@@ -357,7 +357,7 @@ static void test_vlstrings_special()
 	dataset.read(rdata, vlst);
 
 	// Compare data read in.
-	for(i = 0; i < SPACE1_DIM1; i++) {
+	for (i = 0; i < SPACE1_DIM1; i++) {
 	    size_t wlen = HDstrlen(wdata[i]);
 	    size_t rlen = HDstrlen(rdata[i]);
 	    if(wlen != rlen) {
@@ -395,8 +395,8 @@ static void test_vlstrings_special()
 
 	// Check data read in.
 	for (i=0; i<SPACE1_DIM1; i++)
-	  if(rdata[i] != NULL)
-	    TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i, rdata[i]);
+	  if(rdata[i]!=NULL)
+	    TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
 
 	// Try to write nil strings to disk.
 	dataset.write(wdata2, vlst);
@@ -421,7 +421,7 @@ static void test_vlstrings_special()
     // Catch all exceptions.
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstrings_special()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_vlstrings_special
 
@@ -463,7 +463,7 @@ static void test_vlstring_type()
 	H5T_class_t type_class = vlst.getClass();
 	verify_val(type_class, H5T_STRING, "DataType::getClass", __LINE__, __FILE__);
 	bool is_variable_str = vlst.isVariableStr();
-	verify_val(is_variable_str, TRUE, "DataType::isVariableStr", __LINE__, __FILE__);
+	verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__);
 
 	// Check default character set and padding.
 	H5T_cset_t cset = vlst.getCset();
@@ -599,7 +599,7 @@ static void test_compact_vlstring()
  *
  *-------------------------------------------------------------------------
  */
-// String for testing attributes
+// String for writing to attribute
 static char *string_att_write=NULL;
 
 // Info for a string attribute
@@ -735,7 +735,6 @@ static void test_read_vl_string_attribute()
 	issue_fail_msg("test_read_vl_string_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_read_vl_string_attribute
-
 
 /*-------------------------------------------------------------------------
  * Function:	test_vlstring_array_attribute
@@ -958,7 +957,6 @@ void test_vlstrings()
 
     // Test using VL strings in attributes
     test_vlstring_attribute();
-  //  test_read_vl_string_attribute();
 
     // Test using VL string array in attributes and datasets
     test_vlstring_array_attribute();
