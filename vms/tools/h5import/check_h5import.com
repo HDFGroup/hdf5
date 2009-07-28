@@ -108,10 +108,10 @@ $ CALL TOOLTEST "str.txt -c textstr.conf -o" test14.h5
 
 $
 $ ! Delete temporary files
-$ del *_out.h5;*
+$ del *.h5;*
 $ del *.h5importtxt;*
-$ del b*.;*
-$ del txti*.;*
+$ del *.bin;*
+$ del *.txt;*
 $ del *.dif;*
 $ !
 $ 
