@@ -326,6 +326,14 @@ TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
 TESTING $H5DIFF -v $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_17.txt -v $FILE1 $FILE2   
 
+# 1.8 test 32-bit INFINITY
+TESTING $H5DIFF $SRCFILE1 $SRCFILE1 /g1/fp19
+TOOLTEST h5diff_171.txt -v $SRCFILE1 $SRCFILE1 /g1/fp19
+
+# 1.8 test 64-bit INFINITY
+TESTING $H5DIFF $SRCFILE1 $SRCFILE1 /g1/fp20
+TOOLTEST h5diff_172.txt -v $SRCFILE1 $SRCFILE1 /g1/fp20
+
 # 1.8 quiet mode 
 TESTING $H5DIFF -q $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
@@ -541,7 +549,7 @@ TOOLTEST h5diff_627.txt --count=200 $FILE1 $FILE2 g1/dset3 g1/dset4
 TESTING $H5DIFF -n 1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_628.txt -n 1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
-# Disabling this test as it hangs in parallel tests - LRK 20090618
+# Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
 #TESTING $H5DIFF file1.h6 file2.h6
 #TOOLTEST h5diff_629.txt file1.h6 file2.h6

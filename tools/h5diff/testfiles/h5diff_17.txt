@@ -7,6 +7,8 @@ file1     file2
     x           /g1/d2         
     x      x    /g1/dset1      
     x           /g1/dset10     
+    x           /g1/dset11     
+    x           /g1/dset12     
            x    /g1/dset2      
     x           /g1/dset3      
            x    /g1/dset4      
@@ -20,7 +22,9 @@ file1     file2
     x           /g1/fp16       
     x           /g1/fp17       
     x           /g1/fp18       
+    x           /g1/fp19       
     x           /g1/fp2        
+    x           /g1/fp20       
     x           /g1/ld         
            x    /g2            
            x    /g2/dset1      
