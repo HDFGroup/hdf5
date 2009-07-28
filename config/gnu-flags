@@ -26,8 +26,10 @@
 #   cc_version:   Version number: 2.91.60, 2.7.2.1
 #
 if test X = "X$cc_flags_set"; then
-    cc_version="`$CC $CFLAGS -v 2>&1 |grep 'gcc version' |\
-	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+    # PathScale compiler spits out gcc version string too. Need to
+    # filter it out.
+    cc_version="`$CC $CFLAGS $H5_CFLAGS -v 2>&1 | grep -v 'PathScale' |\
+	grep 'gcc version' | sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
     cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
     cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
     if test X = "X$cc_vendor" -a X != "X$cc_version"; then
