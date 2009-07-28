@@ -16,8 +16,6 @@ rem access to either file, you may request a copy from help@hdfgroup.org.
 rem File Name: hdf5bt.bat
 rem This batch file is used to build and test HDF5 Libraries and Tools.
 rem This batch file takes the following options:
-rem .  /vs7              Build HDF5 using Visual Studio .NET 2003 
-rem .                    Note: Default is Visual Studio 2005
 rem .  /vs9              Build HDF5 using Visual Studio 2008
 rem .                    Note: Default is Visual Studio 2005
 rem .  /fort             Build and test HDF5 with Fortran libraries
@@ -63,8 +61,6 @@ rem Print a help message
     echo.
     echo Usage: %~nx0 [OPTION]
     echo.
-    echo.   /vs7              Build HDF5 using Visual Studio .NET 2003 
-    echo.                     Note: Default is Visual Studio 2005
     echo.   /vs9              Build HDF5 using Visual Studio 2008
     echo.                     Note: Default is Visual Studio 2005
     echo.   /fort             Build and test HDF5 with Fortran libraries
@@ -82,8 +78,10 @@ rem Parse through the parameters sent to file, and set appropriate variables
 
     for %%a in (%*) do (
         if "%%a"=="/vs7" (
-            rem Use Visual Studio .NET to build
-            set hdf5_vnet=true
+            rem Visual Studio .NET not supported
+            rem Set errorlevel 1 and send to help
+            call :help
+            exit /b 1
     
         ) else if "%%a"=="/vs9" (
             rem Use Visual Studio 2008 to build
