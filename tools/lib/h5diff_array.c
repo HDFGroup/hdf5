@@ -3055,14 +3055,10 @@ hsize_t diff_float(unsigned char *mem1,
   */
     else
     {
-
-
-
         for ( i = 0; i < nelmts; i++)
         {
             memcpy(&temp1_float, mem1, sizeof(float));
             memcpy(&temp2_float, mem2, sizeof(float));
-
 
             if (equal_float(temp1_float,temp2_float,options)==FALSE)
             {
@@ -5547,6 +5543,9 @@ hbool_t equal_double(double value, double expected, diff_opt_t *options)
     if (is_zero)
         return(equal_double(expected,value,options));
 
+    if (value == expected)
+        return TRUE;
+
     if ( ABS( (value-expected) / expected) < H5DIFF_DBL_EPSILON)
         return TRUE;
     else
@@ -5607,6 +5606,9 @@ hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *optio
     IS_ZERO(expected)
     if (is_zero)
         return(equal_ldouble(expected,value,options));
+
+    if (value == expected)
+        return TRUE;
 
     if ( ABS( (value-expected) / expected) < H5DIFF_DBL_EPSILON)
         return TRUE;
@@ -5671,6 +5673,9 @@ hbool_t equal_float(float value, float expected, diff_opt_t *options)
     IS_ZERO(expected)
     if (is_zero)
         return(equal_float(expected,value,options));
+
+    if (value == expected)
+        return TRUE;
 
     if ( ABS( (value-expected) / expected) < H5DIFF_FLT_EPSILON)
         return TRUE;
