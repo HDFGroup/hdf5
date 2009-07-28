@@ -1285,6 +1285,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Dlayout.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Dmpio.c">
 				<FileConfiguration
 					Name="Debug|Win32">
