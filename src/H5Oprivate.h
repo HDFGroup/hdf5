@@ -321,6 +321,7 @@ typedef struct H5O_efl_t {
     H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
+
 /*
  * Data Layout Message.
  * (Data structure in file)
@@ -352,13 +353,41 @@ typedef struct H5O_efl_t {
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
 struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
 
-typedef struct H5O_layout_contig_t {
+typedef struct H5O_storage_contig_t {
     haddr_t	addr;			/* File address of data              */
+} H5O_storage_contig_t;
+
+typedef struct H5O_storage_chunk_btree_t {
+    haddr_t	addr;			/* File address of B-tree            */
+} H5O_storage_chunk_btree_t;
+
+typedef struct H5O_storage_chunk_t {
+    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
+    union {
+        H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
+    } u;
+} H5O_storage_chunk_t;
+
+typedef struct H5O_storage_compact_t {
+    hbool_t     dirty;                  /* Dirty flag for compact dataset    */
+    size_t      size;                   /* Size of buffer in bytes           */
+    void        *buf;                   /* Buffer for compact dataset        */
+} H5O_storage_compact_t;
+
+typedef struct H5O_storage_t {
+    H5D_layout_t type;			/* Type of layout                    */
+    union {
+        H5O_storage_contig_t contig;    /* Information for contiguous storage */
+        H5O_storage_chunk_t chunk;      /* Information for chunked storage    */
+        H5O_storage_compact_t compact;  /* Information for compact storage    */
+    } u;
+} H5O_storage_t;
+
+typedef struct H5O_layout_contig_t {
     hsize_t     size;                   /* Size of data in bytes             */
 } H5O_layout_contig_t;
 
 typedef struct H5O_layout_chunk_btree_t {
-    haddr_t	addr;			/* File address of B-tree            */
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
 } H5O_layout_chunk_btree_t;
 
@@ -376,12 +405,6 @@ typedef struct H5O_layout_chunk_t {
     } u;
 } H5O_layout_chunk_t;
 
-typedef struct H5O_layout_compact_t {
-    hbool_t     dirty;                  /* Dirty flag for compact dataset    */
-    size_t      size;                   /* Size of buffer in bytes           */
-    void        *buf;                   /* Buffer for compact dataset        */
-} H5O_layout_compact_t;
-
 typedef struct H5O_layout_t {
     H5D_layout_t type;			/* Type of layout                    */
     unsigned version;                   /* Version of message                */
@@ -389,8 +412,8 @@ typedef struct H5O_layout_t {
     union {
         H5O_layout_contig_t contig;     /* Information for contiguous layout */
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
-        H5O_layout_compact_t compact;   /* Information for compact layout    */
     } u;
+    H5O_storage_t store;                /* Information for storing dataset elements */
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */

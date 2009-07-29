@@ -127,16 +127,16 @@ H5D_compact_fill(H5D_t *dset, hid_t dxpl_id)
     /* Check args */
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
     HDassert(dset && H5D_COMPACT == dset->shared->layout.type);
-    HDassert(dset->shared->layout.u.compact.buf);
+    HDassert(dset->shared->layout.store.u.compact.buf);
     HDassert(dset->shared->type);
     HDassert(dset->shared->space);
 
     /* Initialize the fill value buffer */
     /* (use the compact dataset storage buffer as the fill value buffer) */
-    if(H5D_fill_init(&fb_info, dset->shared->layout.u.compact.buf, FALSE,
+    if(H5D_fill_init(&fb_info, dset->shared->layout.store.u.compact.buf, FALSE,
             NULL, NULL, NULL, NULL,
             &dset->shared->dcpl_cache.fill, dset->shared->type,
-            dset->shared->type_id, (size_t)0, dset->shared->layout.u.compact.size, dxpl_id) < 0)
+            dset->shared->type_id, (size_t)0, dset->shared->layout.store.u.compact.size, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
     fb_info_init = TRUE;
 
@@ -186,13 +186,13 @@ H5D_compact_construct(H5F_t *f, H5D_t *dset)
      * layout.
      */
     tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(dset->shared->type);
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.compact.size, tmp_size, hssize_t, size_t);
+    H5_ASSIGN_OVERFLOW(dset->shared->layout.store.u.compact.size, tmp_size, hssize_t, size_t);
 
     /* Verify data size is smaller than maximum header message size
      * (64KB) minus other layout message fields.
      */
     comp_data_size = H5O_MESG_MAX_SIZE - H5O_layout_meta_size(f, &(dset->shared->layout));
-    if(dset->shared->layout.u.compact.size > comp_data_size)
+    if(dset->shared->layout.store.u.compact.size > comp_data_size)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "compact dataset size is bigger than header message maximum size")
 
 done:
@@ -244,8 +244,8 @@ H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compact_io_init)
 
-    io_info->store->compact.buf = io_info->dset->shared->layout.u.compact.buf;
-    io_info->store->compact.dirty = &io_info->dset->shared->layout.u.compact.dirty;
+    io_info->store->compact.buf = io_info->dset->shared->layout.store.u.compact.buf;
+    io_info->store->compact.dirty = &io_info->dset->shared->layout.store.u.compact.dirty;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_compact_io_init() */
@@ -356,10 +356,10 @@ H5D_compact_flush(H5D_t *dset, hid_t dxpl_id, unsigned UNUSED flags)
     HDassert(dset);
 
     /* Check if the buffered compact information is dirty */
-    if(dset->shared->layout.u.compact.dirty) {
+    if(dset->shared->layout.store.u.compact.dirty) {
         if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-        dset->shared->layout.u.compact.dirty = FALSE;
+        dset->shared->layout.store.u.compact.dirty = FALSE;
     } /* end if */
 
 done:
@@ -449,7 +449,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         max_dt_size = MAX(max_dt_size, tmp_dt_size);
 
         /* Set number of whole elements that fit in buffer */
-        if(0 == (nelmts = layout_src->u.compact.size / src_dt_size))
+        if(0 == (nelmts = layout_src->store.u.compact.size / src_dt_size))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "element size too large")
 
         /* Set up number of bytes to copy, and initial buffer size */
@@ -476,7 +476,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-        HDmemcpy(buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+        HDmemcpy(buf, layout_src->store.u.compact.buf, layout_src->store.u.compact.size);
 
         /* Convert from source file to memory */
         if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
@@ -492,7 +492,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
-        HDmemcpy(layout_dst->u.compact.buf, buf, layout_dst->u.compact.size);
+        HDmemcpy(layout_dst->store.u.compact.buf, buf, layout_dst->store.u.compact.size);
 
         if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
@@ -504,24 +504,24 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
                 size_t ref_count;
 
                 /* Determine # of reference elements to copy */
-                ref_count = layout_src->u.compact.size / H5T_get_size(dt_src);
+                ref_count = layout_src->store.u.compact.size / H5T_get_size(dt_src);
 
                 /* Copy objects referenced in source buffer to destination file and set destination elements */
-                if(H5O_copy_expand_ref(f_src, layout_src->u.compact.buf, dxpl_id, f_dst,
-                        layout_dst->u.compact.buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
+                if(H5O_copy_expand_ref(f_src, layout_src->store.u.compact.buf, dxpl_id, f_dst,
+                        layout_dst->store.u.compact.buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(layout_dst->u.compact.buf, 0, layout_src->u.compact.size);
+                HDmemset(layout_dst->store.u.compact.buf, 0, layout_src->store.u.compact.size);
         } /* end if */
         else
             /* Type conversion not necessary */
-            HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+            HDmemcpy(layout_dst->store.u.compact.buf, layout_src->store.u.compact.buf, layout_src->store.u.compact.size);
     } /* end if */
     else
         /* Type conversion not necessary */
-        HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
+        HDmemcpy(layout_dst->store.u.compact.buf, layout_src->store.u.compact.buf, layout_src->store.u.compact.size);
 
 done:
     if(buf_sid > 0 && H5I_dec_ref(buf_sid, FALSE) < 0)

@@ -784,7 +784,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
 
     /* Add the dataset's raw data size to the size of the header, if the raw data will be stored as compact */
     if(layout->type == H5D_COMPACT)
-        ohdr_size += layout->u.compact.size;
+        ohdr_size += layout->store.u.compact.size;
 
     /* Create an object header for the dataset */
     if(H5O_create(file, dxpl_id, ohdr_size, dset->shared->dcpl_id, oloc/*out*/) < 0)
@@ -1403,7 +1403,7 @@ H5D_close(H5D_t *dataset)
 
             case H5D_COMPACT:
                 /* Free the buffer for the raw data for compact datasets */
-                dataset->shared->layout.u.compact.buf = H5MM_xfree(dataset->shared->layout.u.compact.buf);
+                dataset->shared->layout.store.u.compact.buf = H5MM_xfree(dataset->shared->layout.store.u.compact.buf);
                 break;
 
             default:
@@ -1617,14 +1617,14 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
 
             case H5D_COMPACT:
                 /* Check if space is already allocated */
-                if(layout->u.compact.buf==NULL) {
+                if(NULL == layout->store.u.compact.buf) {
                     /* Reserve space in layout header message for the entire array. */
-                    HDassert(layout->u.compact.size > 0);
-                    if(NULL == (layout->u.compact.buf = H5MM_malloc(layout->u.compact.size)))
+                    HDassert(layout->store.u.compact.size > 0);
+                    if(NULL == (layout->store.u.compact.buf = H5MM_malloc(layout->store.u.compact.size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for compact dataset")
                     if(!full_overwrite)
-                        HDmemset(layout->u.compact.buf, 0, layout->u.compact.size);
-                    layout->u.compact.dirty = TRUE;
+                        HDmemset(layout->store.u.compact.buf, 0, layout->store.u.compact.size);
+                    layout->store.u.compact.dirty = TRUE;
 
                     /* Indicate that we should initialize storage space */
                     must_init_space = TRUE;
@@ -1790,7 +1790,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
             break;
 
         case H5D_COMPACT:
-            ret_value = dset->shared->layout.u.compact.size;
+            ret_value = dset->shared->layout.store.u.compact.size;
             break;
 
         default:
@@ -1834,9 +1834,9 @@ H5D_get_offset(const H5D_t *dset)
         case H5D_CONTIGUOUS:
             /* If dataspace hasn't been allocated or dataset is stored in
              * an external file, the value will be HADDR_UNDEF. */
-            if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.u.contig.addr))
+            if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.store.u.contig.addr))
                 /* Return the absolute dataset offset from the beginning of file. */
-                ret_value = dset->shared->layout.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
+                ret_value = dset->shared->layout.store.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
 
         default:
