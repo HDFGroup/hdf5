@@ -137,7 +137,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
             mesg->ops = H5D_LOPS_CONTIG;
         } /* end if */
         else if(mesg->type == H5D_CHUNKED) {
-            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.btree.addr));
+            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.idx_addr));
 
             /* Set the layout operations */
             mesg->ops = H5D_LOPS_CHUNK;
@@ -219,7 +219,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
 
                 /* B-tree address */
-                H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.btree.addr));
+                H5F_addr_decode(f, &p, &(mesg->store.u.chunk.idx_addr));
 
                 /* Chunk dimensions */
                 for(u = 0; u < mesg->u.chunk.ndims; u++)
@@ -332,7 +332,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
             *p++ = (uint8_t)mesg->u.chunk.ndims;
 
             /* B-tree address */
-            H5F_addr_encode(f, &p, mesg->store.u.chunk.u.btree.addr);
+            H5F_addr_encode(f, &p, mesg->store.u.chunk.idx_addr);
 
             /* Dimension sizes */
             for(u = 0; u < mesg->u.chunk.ndims; u++)
@@ -705,7 +705,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
                     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                              "B-tree address:", mesg->store.u.chunk.u.btree.addr);
+                              "B-tree address:", mesg->store.u.chunk.idx_addr);
                     break;
 
                 default:

@@ -898,13 +898,13 @@ H5D_btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(!H5F_addr_defined(idx_info->layout->store.u.chunk.u.btree.addr));
+    HDassert(!H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
 
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.mesg = idx_info->layout;
 
     /* Create the v1 B-tree for the chunk index */
-    if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, &(idx_info->layout->store.u.chunk.u.btree.addr)/*out*/) < 0)
+    if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, &(idx_info->layout->store.u.chunk.idx_addr)/*out*/) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
 
 done:
@@ -935,7 +935,7 @@ H5D_btree_idx_is_space_alloc(const H5O_layout_t *layout)
     HDassert(layout);
 
     /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(layout->store.u.chunk.u.btree.addr);
+    ret_value = (hbool_t)H5F_addr_defined(layout->store.u.chunk.idx_addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_btree_idx_is_space_alloc() */
@@ -965,14 +965,14 @@ H5D_btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.u.btree.addr));
+    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
     HDassert(udata);
 
     /*
      * Create the chunk it if it doesn't exist, or reallocate the chunk if
      * its size changed.
      */
-    if(H5B_insert(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.u.btree.addr, udata) < 0)
+    if(H5B_insert(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
 
 done:
@@ -1009,7 +1009,7 @@ H5D_btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     HDassert(udata);
 
     /* Go get the chunk information from the B-tree */
-    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.u.btree.addr, udata) < 0)
+    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
 done:
@@ -1091,7 +1091,7 @@ H5D_btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.u.btree.addr));
+    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
     HDassert(chunk_cb);
     HDassert(chunk_udata);
 
@@ -1102,7 +1102,7 @@ H5D_btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     udata.udata = chunk_udata;
 
     /* Iterate over existing chunks */
-    if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.u.btree.addr, H5D_btree_idx_iterate_cb, &udata)) < 0)
+    if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.idx_addr, H5D_btree_idx_iterate_cb, &udata)) < 0)
         HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk B-tree");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1132,13 +1132,13 @@ H5D_btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.u.btree.addr));
+    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
     HDassert(udata);
 
     /* Remove the chunk from the v1 B-tree index and release the space for the
      * chunk (in the B-tree callback).
      */
-    if(H5B_remove(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.u.btree.addr, udata) < 0)
+    if(H5B_remove(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.idx_addr, udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to remove chunk entry")
 
 done:
@@ -1174,7 +1174,7 @@ H5D_btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->layout);
 
     /* Check if the index data structure has been allocated */
-    if(H5F_addr_defined(idx_info->layout->store.u.chunk.u.btree.addr)) {
+    if(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr)) {
         H5O_layout_t tmp_layout;        /* Local copy of layout info */
         H5D_btree_ud0_t	udata;          /* User data for B-tree iterator call */
 
@@ -1188,7 +1188,7 @@ H5D_btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
         /* Delete entire B-tree */
-        if(H5B_delete(idx_info->f, idx_info->dxpl_id, H5B_BTREE, tmp_layout.store.u.chunk.u.btree.addr, &udata) < 0)
+        if(H5B_delete(idx_info->f, idx_info->dxpl_id, H5B_BTREE, tmp_layout.store.u.chunk.idx_addr, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk B-tree")
 
         /* Free the raw B-tree node buffer */
@@ -1231,7 +1231,7 @@ H5D_btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(idx_info_dst->f);
     HDassert(idx_info_dst->pline);
     HDassert(idx_info_dst->layout);
-    HDassert(!H5F_addr_defined(idx_info_dst->layout->store.u.chunk.u.btree.addr));
+    HDassert(!H5F_addr_defined(idx_info_dst->layout->store.u.chunk.idx_addr));
 
     /* Create shared B-tree info for each file */
     if(H5D_btree_shared_create(idx_info_src->f, idx_info_src->layout) < 0)
@@ -1242,7 +1242,7 @@ H5D_btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     /* Create the root of the B-tree that describes chunked storage in the dest. file */
     if(H5D_btree_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
-    HDassert(H5F_addr_defined(idx_info_dst->layout->store.u.chunk.u.btree.addr));
+    HDassert(H5F_addr_defined(idx_info_dst->layout->store.u.chunk.idx_addr));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1323,7 +1323,7 @@ H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     udata.mesg = idx_info->layout;
 
     /* Get metadata information for B-tree */
-    if(H5B_get_info(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.u.btree.addr, &bt_info, NULL, &udata) < 0)
+    if(H5B_get_info(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->layout->store.u.chunk.idx_addr, &bt_info, NULL, &udata) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
 
     /* Set the size of the B-tree */
@@ -1362,7 +1362,7 @@ H5D_btree_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 
     /* Reset index info */
     if(reset_addr)
-	layout->store.u.chunk.u.btree.addr = HADDR_UNDEF;
+	layout->store.u.chunk.idx_addr = HADDR_UNDEF;
     layout->u.chunk.u.btree.shared = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1392,7 +1392,7 @@ H5D_btree_idx_dump(const H5D_chk_idx_info_t *idx_info, FILE *stream)
     HDassert(idx_info->layout);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", idx_info->layout->store.u.chunk.u.btree.addr);
+    HDfprintf(stream, "    Address: %a\n", idx_info->layout->store.u.chunk.idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_btree_idx_dump() */
