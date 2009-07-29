@@ -132,7 +132,7 @@ H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
     HDassert(layout);
 
     /* Allocate space for the contiguous data */
-    if(HADDR_UNDEF == (layout->u.contig.addr = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.size)))
+    if(HADDR_UNDEF == (layout->store.u.contig.addr = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.size)))
         HGOTO_ERROR(H5E_IO, H5E_NOSPACE, FAIL, "unable to reserve file space")
 
 done:
@@ -179,7 +179,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     /* Check args */
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
     HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
-    HDassert(H5F_addr_defined(dset->shared->layout.u.contig.addr));
+    HDassert(H5F_addr_defined(dset->shared->layout.store.u.contig.addr));
     HDassert(dset->shared->layout.u.contig.size > 0);
     HDassert(dset->shared->space);
     HDassert(dset->shared->type);
@@ -214,7 +214,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Initialize storage info for this dataset */
-    store.contig.dset_addr = dset->shared->layout.u.contig.addr;
+    store.contig.dset_addr = dset->shared->layout.store.u.contig.addr;
     store.contig.dset_size = dset->shared->layout.u.contig.size;
 
     /* Get the number of elements in the dataset's dataspace */
@@ -328,7 +328,7 @@ H5D_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
     HDassert(layout);
 
     /* Free the file space for the chunk */
-    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->u.contig.addr, layout->u.contig.size) < 0)
+    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, layout->store.u.contig.addr, layout->u.contig.size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
 
 done:
@@ -357,7 +357,7 @@ H5D_contig_get_addr(const H5D_t *dset)
     HDassert(dset);
     HDassert(dset->shared->layout.type == H5D_CONTIGUOUS);
 
-    FUNC_LEAVE_NOAPI(dset->shared->layout.u.contig.addr)
+    FUNC_LEAVE_NOAPI(dset->shared->layout.store.u.contig.addr)
 } /* end H5D_contig_get_addr() */
 
 
@@ -456,7 +456,7 @@ H5D_contig_is_space_alloc(const H5O_layout_t *layout)
     HDassert(layout);
 
     /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(layout->u.contig.addr);
+    ret_value = (hbool_t)H5F_addr_defined(layout->store.u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_is_space_alloc() */
@@ -481,7 +481,7 @@ H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *t
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_contig_io_init)
 
-    io_info->store->contig.dset_addr = io_info->dset->shared->layout.u.contig.addr;
+    io_info->store->contig.dset_addr = io_info->dset->shared->layout.store.u.contig.addr;
     io_info->store->contig.dset_size = io_info->dset->shared->layout.u.contig.size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1365,8 +1365,8 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     } /* end if */
 
     /* Loop over copying data */
-    addr_src = layout_src->u.contig.addr;
-    addr_dst = layout_dst->u.contig.addr;
+    addr_src = layout_src->store.u.contig.addr;
+    addr_dst = layout_dst->store.u.contig.addr;
     while(total_src_nbytes > 0) {
         /* Check if we should reduce the number of bytes to transfer */
         if(total_src_nbytes < src_nbytes) {

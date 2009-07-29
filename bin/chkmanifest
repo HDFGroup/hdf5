@@ -171,7 +171,7 @@ EOF
     exit 1
 fi
 
-if [ $errcode > 0 ]; then
+if [ $errcode > '0' >/dev/null ]; then
     exit $errcode
 fi 
 

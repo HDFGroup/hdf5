@@ -49,22 +49,27 @@
 /****************/
 
 /* Define default layout information */
-#define H5D_DEF_LAYOUT_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
-#define H5D_DEF_LAYOUT_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
-#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, NULL, {{HADDR_UNDEF, NULL}}}
+#define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
+#define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF}
+#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, {{HADDR_UNDEF}}}
+#define H5D_DEF_LAYOUT_CONTIG_INIT   {(hsize_t)0}
+#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, NULL, {{NULL}}}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, { .compact = H5D_DEF_LAYOUT_COMPACT_INIT }}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, { .contig = H5D_DEF_LAYOUT_CONTIG_INIT }}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, { .chunk = H5D_DEF_LAYOUT_CHUNK_INIT }}
+#define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
+#define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
+#define H5D_DEF_STORAGE_CHUNK    {H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, { .contig = H5D_DEF_LAYOUT_CONTIG_INIT }, H5D_DEF_STORAGE_COMPACT}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, { .contig = H5D_DEF_LAYOUT_CONTIG_INIT }, H5D_DEF_STORAGE_CONTIG}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, { .chunk = H5D_DEF_LAYOUT_CHUNK_INIT }, H5D_DEF_STORAGE_CHUNK}
 #else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 /* Note that the compact & chunked layout initialization values are using the
  *      contiguous layout initialization in the union, because the contiguous
  *      layout is first in the union.  These values are overridden in the
  *      H5P_init_def_layout() routine. -QAK
  */
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
@@ -269,12 +274,12 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
     dst_layout.ops = NULL;
     switch(dst_layout.type) {
         case H5D_COMPACT:
-            dst_layout.u.compact.buf = H5MM_xfree(dst_layout.u.compact.buf);
-            HDmemset(&dst_layout.u.compact, 0, sizeof(dst_layout.u.compact));
+            dst_layout.store.u.compact.buf = H5MM_xfree(dst_layout.store.u.compact.buf);
+            HDmemset(&dst_layout.store.u.compact, 0, sizeof(dst_layout.store.u.compact));
             break;
 
         case H5D_CONTIGUOUS:
-            dst_layout.u.contig.addr = HADDR_UNDEF;
+            dst_layout.store.u.contig.addr = HADDR_UNDEF;
             dst_layout.u.contig.size = 0;
             break;
 
@@ -767,14 +772,18 @@ done:
 static herr_t
 H5P_init_def_layout(void)
 {
-    const H5O_layout_compact_t def_compact = H5D_DEF_LAYOUT_COMPACT_INIT;
-    const H5O_layout_chunk_t def_chunk = H5D_DEF_LAYOUT_CHUNK_INIT;
+    const H5O_layout_compact_t def_layout_compact = H5D_DEF_LAYOUT_COMPACT_INIT;
+    const H5O_layout_chunk_t def_layout_chunk = H5D_DEF_LAYOUT_CHUNK_INIT;
+    const H5O_storage_compact_t def_store_compact = H5D_DEF_STORAGE_COMPACT_INIT;
+    const H5O_storage_chunk_t def_store_chunk = H5D_DEF_STORAGE_CHUNK_INIT;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_init_def_layout)
 
     /* Initialize the default layout info for non-contigous layouts */
-    H5D_def_layout_compact_g.u.compact = def_compact;
+    H5D_def_layout_compact_g.u.compact = def_layout_compact;
+    H5D_def_layout_compact_g.store.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_chunk;
+    H5D_def_layout_compact_g.store.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */
     H5P_dcrt_def_layout_init_g = TRUE;
