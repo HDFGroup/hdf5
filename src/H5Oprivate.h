@@ -357,15 +357,8 @@ typedef struct H5O_storage_contig_t {
     haddr_t	addr;			/* File address of data              */
 } H5O_storage_contig_t;
 
-typedef struct H5O_storage_chunk_btree_t {
-    haddr_t	addr;			/* File address of B-tree            */
-} H5O_storage_chunk_btree_t;
-
 typedef struct H5O_storage_chunk_t {
-    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
-    union {
-        H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
-    } u;
+    haddr_t	idx_addr;		/* File address of chunk index       */
 } H5O_storage_chunk_t;
 
 typedef struct H5O_storage_compact_t {
