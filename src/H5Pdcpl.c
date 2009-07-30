@@ -51,8 +51,8 @@
 /* Define default layout information */
 #define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
-#define H5D_DEF_STORAGE_CHUNK_INIT    {HADDR_UNDEF}
-#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, NULL, {{NULL}}}
+#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{NULL}}}
+#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {{(uint8_t)0}}, {{NULL}}}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
@@ -273,13 +273,13 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
     dst_layout.ops = NULL;
     switch(dst_layout.type) {
         case H5D_COMPACT:
-            dst_layout.store.u.compact.buf = H5MM_xfree(dst_layout.store.u.compact.buf);
-            HDmemset(&dst_layout.store.u.compact, 0, sizeof(dst_layout.store.u.compact));
+            dst_layout.storage.u.compact.buf = H5MM_xfree(dst_layout.storage.u.compact.buf);
+            HDmemset(&dst_layout.storage.u.compact, 0, sizeof(dst_layout.storage.u.compact));
             break;
 
         case H5D_CONTIGUOUS:
-            dst_layout.store.u.contig.addr = HADDR_UNDEF;
-            dst_layout.store.u.contig.size = 0;
+            dst_layout.storage.u.contig.addr = HADDR_UNDEF;
+            dst_layout.storage.u.contig.size = 0;
             break;
 
         case H5D_CHUNKED:
@@ -287,13 +287,13 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
             dst_layout.u.chunk.size = 0;
 
             /* Reset index info, if the chunk ops are set */
-            if(dst_layout.u.chunk.ops)
+            if(dst_layout.storage.u.chunk.ops)
 		/* Reset address and pointer of the array struct for the chunked storage index */
-                if(H5D_chunk_idx_reset(&dst_layout, TRUE) < 0)
+                if(H5D_chunk_idx_reset(&dst_layout.storage.u.chunk, TRUE) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to reset chunked storage index in dest")
 
             /* Reset chunk index ops */
-            dst_layout.u.chunk.ops = NULL;
+            dst_layout.storage.u.chunk.ops = NULL;
             break;
 
         default:
@@ -780,9 +780,9 @@ H5P_init_def_layout(void)
 
     /* Initialize the default layout info for non-contigous layouts */
     H5D_def_layout_compact_g.u.compact = def_layout_compact;
-    H5D_def_layout_compact_g.store.u.compact = def_store_compact;
+    H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_chunk;
-    H5D_def_layout_compact_g.store.u.chunk = def_store_chunk;
+    H5D_def_layout_compact_g.storage.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */
     H5P_dcrt_def_layout_init_g = TRUE;

@@ -356,12 +356,13 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     idx_info.f = dset->oloc.file;
     idx_info.dxpl_id = dxpl_id;
     idx_info.pline = &(dset->shared->dcpl_cache.pline);
-    idx_info.layout = &(dset->shared->layout);
+    idx_info.layout = &(dset->shared->layout.u.chunk);
+    idx_info.storage = &(dset->shared->layout.storage.u.chunk);
 
     /* Create a flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((dset->shared->layout.u.chunk.ops->support)(&idx_info, udata, (H5AC_info_t *)proxy) < 0)
+    if((dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, udata, (H5AC_info_t *)proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
 
 done:
@@ -412,16 +413,18 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     idx_info.f = dset->oloc.file;
     idx_info.dxpl_id = dxpl_id;
     idx_info.pline = &(dset->shared->dcpl_cache.pline);
-    idx_info.layout = &(dset->shared->layout);
+    idx_info.layout = &(dset->shared->layout.u.chunk);
+    idx_info.storage = &(dset->shared->layout.storage.u.chunk);
 
     /* Compose user-data for chunk */
-    udata.mesg = &(dset->shared->layout);
+    udata.layout = &(dset->shared->layout.u.chunk);
+    udata.storage = &(dset->shared->layout.storage.u.chunk);
     udata.offset = ent->offset;
 
     /* Remove flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((dset->shared->layout.u.chunk.ops->unsupport)(&idx_info, &udata, (H5AC_info_t *)proxy) < 0)
+    if((dset->shared->layout.storage.u.chunk.ops->unsupport)(&idx_info, &udata, (H5AC_info_t *)proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
 
     /* Unpin & delete chunk proxy from metadata cache, taking ownership of it */

@@ -128,7 +128,7 @@ H5D_layout_contig_size_test(hid_t did, hsize_t *size)
 
     if(size) {
         HDassert(dset->shared->layout.type == H5D_CONTIGUOUS);
-        *size = dset->shared->layout.store.u.contig.size;
+        *size = dset->shared->layout.storage.u.contig.size;
     } /* end if */
 
 done:

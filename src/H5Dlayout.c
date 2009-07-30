@@ -98,15 +98,15 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
             /* Set the chunk operations */
             switch(dataset->shared->layout.u.chunk.idx_type) {
                 case H5D_CHUNK_IDX_BTREE:
-                    dataset->shared->layout.u.chunk.ops = H5D_COPS_BTREE;
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
-                    dataset->shared->layout.u.chunk.ops = H5D_COPS_FARRAY;
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_FARRAY;
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
-                    dataset->shared->layout.u.chunk.ops = H5D_COPS_EARRAY;
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_EARRAY;
                     break;
 
                 default:
@@ -162,7 +162,7 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
             /* Size of raw data */
             ret_value += 2;
             if(include_compact_data)
-                ret_value += layout->store.u.compact.size;/* data for compact dataset             */
+                ret_value += layout->storage.u.compact.size;/* data for compact dataset             */
             break;
 
         case H5D_CONTIGUOUS:
@@ -564,7 +564,7 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
                     HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
 
                 /* Assign the dataset's contiguous storage size */
-                dataset->shared->layout.store.u.contig.size = tmp_size;
+                dataset->shared->layout.storage.u.contig.size = tmp_size;
             } /* end if */
 
             /* Get the sieve buffer size for this dataset */

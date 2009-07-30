@@ -58,7 +58,7 @@
 /* Extensible array create/open user data */
 typedef struct H5D_earray_ctx_ud_t {
     const H5F_t *f;             /* Pointer to file info */
-    const H5O_layout_t *layout; /* Pointer to layout info */
+    const H5O_layout_chunk_t *layout; /* Pointer to layout info */
 } H5D_earray_ctx_ud_t;
 
 /* Extensible array callback context */
@@ -110,12 +110,12 @@ static herr_t H5D_earray_filt_debug(FILE *stream, int indent, int fwidth,
 static herr_t H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info);
-static hbool_t H5D_earray_idx_is_space_alloc(const H5O_layout_t *layout);
+static hbool_t H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
-static herr_t H5D_earray_idx_resize(H5O_layout_t *layout);
+static herr_t H5D_earray_idx_resize(H5O_layout_chunk_t *layout);
 static int H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 static herr_t H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info,
@@ -123,11 +123,11 @@ static herr_t H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst);
-static herr_t H5D_earray_idx_copy_shutdown(H5O_layout_t *layout_src,
-    H5O_layout_t *layout_dst, hid_t dxpl_id);
+static herr_t H5D_earray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
+    H5O_storage_chunk_t *storage_dst, hid_t dxpl_id);
 static herr_t H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
-static herr_t H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr);
+static herr_t H5D_earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 static herr_t H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
@@ -239,7 +239,7 @@ H5D_earray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->layout->u.chunk.size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->layout->size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -621,21 +621,23 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
-    HDassert(idx_info->layout->u.chunk.u.earray.ea);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.earray.ea);
 
     /* Set up object header location for dataset */
     H5O_loc_reset(&oloc);
     oloc.file = idx_info->f;
-    oloc.addr = idx_info->layout->u.chunk.u.earray.dset_ohdr_addr;
+    oloc.addr = idx_info->storage->u.earray.dset_ohdr_addr;
 
     /* Pin the dataset's object header */
     if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
     /* Make the extensible array a child flush dependency of the dataset's object header */
-    if(H5EA_depend((H5AC_info_t *)oh, idx_info->layout->u.chunk.u.earray.ea) < 0)
+    if(H5EA_depend((H5AC_info_t *)oh, idx_info->storage->u.earray.ea) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
 done:
@@ -676,21 +678,23 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
-    HDassert(idx_info->layout->u.chunk.u.earray.ea);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.earray.ea);
 
     /* Set up object header location for dataset */
     H5O_loc_reset(&oloc);
     oloc.file = idx_info->f;
-    oloc.addr = idx_info->layout->u.chunk.u.earray.dset_ohdr_addr;
+    oloc.addr = idx_info->storage->u.earray.dset_ohdr_addr;
 
     /* Pin the dataset's object header */
     if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
     /* Remove the extensible array as a child flush dependency of the dataset's object header */
-    if(H5EA_undepend((H5AC_info_t *)oh, idx_info->layout->u.chunk.u.earray.ea) < 0)
+    if(H5EA_undepend((H5AC_info_t *)oh, idx_info->storage->u.earray.ea) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
 
 done:
@@ -734,9 +738,11 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
-    HDassert(NULL == idx_info->layout->u.chunk.u.earray.ea);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(NULL == idx_info->storage->u.earray.ea);
 
     /* Set up the user data */
     udata.f = idx_info->f;
@@ -744,7 +750,7 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Open the extensible array for the chunk index */
     cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->store.u.chunk.idx_addr, cls, &udata)))
+    if(NULL == (idx_info->storage->u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, cls, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
 
     /* Check for SWMR writes to the file */
@@ -788,6 +794,7 @@ H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
     HDassert(space);
     HDassert(H5F_addr_defined(dset_ohdr_addr));
 
@@ -815,10 +822,10 @@ H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
         HGOTO_ERROR(H5E_DATASET, H5E_UNINITIALIZED, FAIL, "didn't find unlimited dimension")
 
     /* Set the unlimited dimension for the layout's future use */
-    idx_info->layout->u.chunk.u.earray.unlim_dim = (unsigned)unlim_dim;
+    idx_info->layout->u.earray.unlim_dim = (unsigned)unlim_dim;
 
     /* Store the dataset's object header address for later */
-    idx_info->layout->u.chunk.u.earray.dset_ohdr_addr = dset_ohdr_addr;
+    idx_info->storage->u.earray.dset_ohdr_addr = dset_ohdr_addr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -857,8 +864,9 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(!H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
-    HDassert(NULL == idx_info->layout->u.chunk.u.earray.ea);
+    HDassert(idx_info->storage);
+    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(NULL == idx_info->storage->u.earray.ea);
 
     /* General parameters */
     if(idx_info->pline->nused > 0) {
@@ -867,7 +875,7 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->u.chunk.size) + 8) / 8);
+        chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -878,15 +886,15 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
         cparam.cls = H5EA_CLS_CHUNK;
         cparam.raw_elmt_size = (uint8_t)H5F_SIZEOF_ADDR(idx_info->f);
     } /* end else */
-    cparam.max_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_nelmts_bits;
+    cparam.max_nelmts_bits = idx_info->layout->u.earray.cparam.max_nelmts_bits;
     HDassert(cparam.max_nelmts_bits > 0);
-    cparam.idx_blk_elmts = idx_info->layout->u.chunk.u.earray.cparam.idx_blk_elmts;
+    cparam.idx_blk_elmts = idx_info->layout->u.earray.cparam.idx_blk_elmts;
     HDassert(cparam.idx_blk_elmts > 0);
-    cparam.sup_blk_min_data_ptrs = idx_info->layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
+    cparam.sup_blk_min_data_ptrs = idx_info->layout->u.earray.cparam.sup_blk_min_data_ptrs;
     HDassert(cparam.sup_blk_min_data_ptrs > 0);
-    cparam.data_blk_min_elmts = idx_info->layout->u.chunk.u.earray.cparam.data_blk_min_elmts;
+    cparam.data_blk_min_elmts = idx_info->layout->u.earray.cparam.data_blk_min_elmts;
     HDassert(cparam.data_blk_min_elmts > 0);
-    cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+    cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.earray.cparam.max_dblk_page_nelmts_bits;
     HDassert(cparam.max_dblk_page_nelmts_bits > 0);
 
     /* Set up the user data */
@@ -894,11 +902,11 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     udata.layout = idx_info->layout;
 
     /* Create the extensible array for the chunk index */
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, &udata)))
+    if(NULL == (idx_info->storage->u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
 
     /* Get the address of the extensible array in file */
-    if(H5EA_get_addr(idx_info->layout->u.chunk.u.earray.ea, &(idx_info->layout->store.u.chunk.idx_addr)) < 0)
+    if(H5EA_get_addr(idx_info->storage->u.earray.ea, &(idx_info->storage->idx_addr)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address")
 
     /* Check for SWMR writes to the file */
@@ -925,17 +933,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5D_earray_idx_is_space_alloc(const H5O_layout_t *layout)
+H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
     hbool_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_is_space_alloc)
 
     /* Check args */
-    HDassert(layout);
+    HDassert(storage);
 
     /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(layout->store.u.chunk.idx_addr);
+    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_is_space_alloc() */
@@ -967,35 +975,36 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
-    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
-        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+        unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1009,7 +1018,7 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        allow_chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->u.chunk.size) + 8) / 8);
+        allow_chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->size) + 8) / 8);
         if(allow_chunk_size_len > 8)
             allow_chunk_size_len = 8;
 
@@ -1068,7 +1077,7 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     } /* end if */
     else {
         HDassert(!H5F_addr_defined(udata->addr));
-        HDassert(udata->nbytes == idx_info->layout->u.chunk.size);
+        HDassert(udata->nbytes == idx_info->layout->size);
 
 #ifndef NDEBUG
 {
@@ -1127,35 +1136,36 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
-    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
-        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+        unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->common.offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->common.offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1178,7 +1188,7 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
         /* Update the other (constant) information for the chunk */
-        udata->nbytes = idx_info->layout->u.chunk.size;
+        udata->nbytes = idx_info->layout->size;
         udata->filter_mask = 0;
     } /* end else */
 
@@ -1201,7 +1211,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_resize(H5O_layout_t *layout)
+H5D_earray_idx_resize(H5O_layout_chunk_t *layout)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1211,14 +1221,14 @@ H5D_earray_idx_resize(H5O_layout_t *layout)
     HDassert(layout);
 
     /* Set up the swizzled "down" chunk information */
-    if(layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_chunks[H5O_LAYOUT_NDIMS];    /* Swizzled form of # of chunks in each dimension */
 
-        HDmemcpy(swizzled_chunks, layout->u.chunk.chunks, (layout->u.chunk.ndims - 1) * sizeof(swizzled_chunks[0]));
-        H5V_swizzle_coords(swizzled_chunks, layout->u.chunk.u.earray.unlim_dim);
+        HDmemcpy(swizzled_chunks, layout->chunks, (layout->ndims - 1) * sizeof(swizzled_chunks[0]));
+        H5V_swizzle_coords(swizzled_chunks, layout->u.earray.unlim_dim);
 
         /* Get the swizzled "down" sizes for each dimension */
-        if(H5V_array_down((layout->u.chunk.ndims - 1), swizzled_chunks, layout->u.chunk.u.earray.swizzled_down_chunks) < 0)
+        if(H5V_array_down((layout->ndims - 1), swizzled_chunks, layout->u.earray.swizzled_down_chunks) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute swizzled 'down' chunk size value")
     } /* end if */
 
@@ -1258,19 +1268,20 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(chunk_cb);
     HDassert(chunk_udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Get the extensible array statistics */
     if(H5EA_get_stats(ea, &ea_stat) < 0)
@@ -1288,7 +1299,7 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
             /* Loop over array elements */
             /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
+            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->dim[0]) {
                 H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
 
                 /* Get the info about the chunk for the index */
@@ -1311,12 +1322,12 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         else {
             /* Prepare common fields of chunk record for callback */
             HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
-            chunk_rec.nbytes = idx_info->layout->u.chunk.size;
+            chunk_rec.nbytes = idx_info->layout->size;
             chunk_rec.filter_mask = 0;
 
             /* Loop over array elements */
             /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
+            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->dim[0]) {
                 haddr_t addr;       /* Chunk address */
 
                 /* Get the address of the chunk for the index */
@@ -1366,35 +1377,36 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
-    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
-        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+        unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1428,8 +1440,8 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
 
         /* Remove raw data chunk from file */
         HDassert(H5F_addr_defined(addr));
-        H5_CHECK_OVERFLOW(idx_info->layout->u.chunk.size, /*From: */uint32_t, /*To: */hsize_t);
-        if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, addr, (hsize_t)idx_info->layout->u.chunk.size) < 0)
+        H5_CHECK_OVERFLOW(idx_info->layout->size, /*From: */uint32_t, /*To: */hsize_t);
+        if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, addr, (hsize_t)idx_info->layout->size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
 
         /* Reset the address of the chunk for the index */
@@ -1511,9 +1523,10 @@ H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
 
     /* Check if the index data structure has been allocated */
-    if(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr)) {
+    if(H5F_addr_defined(idx_info->storage->idx_addr)) {
         H5D_earray_ud_t udata;         /* User data for callback */
 
         /* Initialize user data for callback */
@@ -1525,17 +1538,17 @@ H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses")
 
         /* Close extensible array */
-        if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
+        if(H5EA_close(idx_info->storage->u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
-        idx_info->layout->u.chunk.u.earray.ea = NULL;
+        idx_info->storage->u.earray.ea = NULL;
 
         /* Delete extensible array */
-        if(H5EA_delete(idx_info->f, idx_info->dxpl_id, idx_info->layout->store.u.chunk.idx_addr) < 0)
+        if(H5EA_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk extensible array")
-        idx_info->layout->store.u.chunk.idx_addr = HADDR_UNDEF;
+        idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */
     else
-        HDassert(NULL == idx_info->layout->u.chunk.u.earray.ea);
+        HDassert(NULL == idx_info->storage->u.earray.ea);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1567,14 +1580,16 @@ H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(idx_info_src->f);
     HDassert(idx_info_src->pline);
     HDassert(idx_info_src->layout);
+    HDassert(idx_info_src->storage);
     HDassert(idx_info_dst);
     HDassert(idx_info_dst->f);
     HDassert(idx_info_dst->pline);
     HDassert(idx_info_dst->layout);
-    HDassert(!H5F_addr_defined(idx_info_dst->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info_dst->storage);
+    HDassert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source extensible array is open yet */
-    if(NULL == idx_info_src->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info_src->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
@@ -1583,7 +1598,7 @@ H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     /* Create the extensible array that describes chunked storage in the dest. file */
     if(H5D_earray_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
-    HDassert(H5F_addr_defined(idx_info_dst->layout->store.u.chunk.idx_addr));
+    HDassert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1603,26 +1618,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_copy_shutdown(H5O_layout_t *layout_src, H5O_layout_t *layout_dst,
-    hid_t dxpl_id)
+H5D_earray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
+    H5O_storage_chunk_t *storage_dst, hid_t dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_copy_shutdown)
 
     /* Check args */
-    HDassert(layout_src);
-    HDassert(layout_src->u.chunk.u.earray.ea);
-    HDassert(layout_dst);
-    HDassert(layout_dst->u.chunk.u.earray.ea);
+    HDassert(storage_src);
+    HDassert(storage_src->u.earray.ea);
+    HDassert(storage_dst);
+    HDassert(storage_dst->u.earray.ea);
 
     /* Close extensible arrays */
-    if(H5EA_close(layout_src->u.chunk.u.earray.ea, dxpl_id) < 0)
+    if(H5EA_close(storage_src->u.earray.ea, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
-    layout_src->u.chunk.u.earray.ea = NULL;
-    if(H5EA_close(layout_dst->u.chunk.u.earray.ea, dxpl_id) < 0)
+    storage_src->u.earray.ea = NULL;
+    if(H5EA_close(storage_dst->u.earray.ea, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
-    layout_dst->u.chunk.u.earray.ea = NULL;
+    storage_dst->u.earray.ea = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1656,7 +1671,8 @@ H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5F_addr_defined(idx_info->layout->store.u.chunk.idx_addr));
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(index_size);
 
     /* Open the extensible array in file */
@@ -1664,7 +1680,7 @@ H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Get the extensible array statistics */
     if(H5EA_get_stats(ea, &ea_stat) < 0)
@@ -1675,10 +1691,10 @@ H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
             + ea_stat.stored.super_blk_size + ea_stat.stored.data_blk_size;
 
 done:
-    if(idx_info->layout->u.chunk.u.earray.ea) {
-        if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
+    if(idx_info->storage->u.earray.ea) {
+        if(H5EA_close(idx_info->storage->u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
-        idx_info->layout->u.chunk.u.earray.ea = NULL;
+        idx_info->storage->u.earray.ea = NULL;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1702,19 +1718,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
+H5D_earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_reset)
 
     /* Check args */
-    HDassert(layout);
+    HDassert(storage);
 
     /* Reset index info */
     if(reset_addr) {
-	layout->store.u.chunk.idx_addr = HADDR_UNDEF;
-        layout->u.chunk.u.earray.dset_ohdr_addr = HADDR_UNDEF;
+	storage->idx_addr = HADDR_UNDEF;
+        storage->u.earray.dset_ohdr_addr = HADDR_UNDEF;
     } /* end if */
-    layout->u.chunk.u.earray.ea = NULL;
+    storage->u.earray.ea = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_earray_idx_reset() */
@@ -1745,35 +1761,37 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
 
     /* Check args */
     HDassert(idx_info);
+    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
     HDassert(udata);
     HDassert(child_entry);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
-    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
-        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+        unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1813,35 +1831,37 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
 
     /* Check args */
     HDassert(idx_info);
+    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
     HDassert(udata);
     HDassert(child_entry);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D_earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
 
     /* Set convenience pointer to extensible array structure */
-    ea = idx_info->layout->u.chunk.u.earray.ea;
+    ea = idx_info->storage->u.earray.ea;
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
-    if(idx_info->layout->u.chunk.u.earray.unlim_dim > 0) {
+    if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
-        unsigned ndims = (idx_info->layout->u.chunk.ndims - 1); /* Number of dimensions */
+        unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
 
         /* Set up the swizzled chunk coordinates */
         HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
-        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.chunk.u.earray.unlim_dim);
+        H5V_swizzle_coords(swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.u.earray.swizzled_down_chunks, &idx) < 0)
+        if(H5V_chunk_index(ndims, swizzled_coords, idx_info->layout->dim, idx_info->layout->u.earray.swizzled_down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index((idx_info->layout->u.chunk.ndims - 1), udata->offset, idx_info->layout->u.chunk.dim, idx_info->layout->u.chunk.down_chunks, &idx) < 0)
+        if(H5V_chunk_index((idx_info->layout->ndims - 1), udata->offset, idx_info->layout->dim, idx_info->layout->down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
     } /* end else */
 
@@ -1876,10 +1896,10 @@ H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info, FILE *stream)
     /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
-    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", idx_info->layout->store.u.chunk.idx_addr);
+    HDfprintf(stream, "    Address: %a\n", idx_info->storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_earray_idx_dump() */
@@ -1907,14 +1927,14 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
-    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
 
     /* Check if the extensible array is open */
-    if(idx_info->layout->u.chunk.u.earray.ea) {
+    if(idx_info->storage->u.earray.ea) {
         /* Check for SWMR writes to the file */
         if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
             /* Sanity check */
-            HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.dset_ohdr_addr));
+            HDassert(H5F_addr_defined(idx_info->storage->u.earray.dset_ohdr_addr));
 
             /* Remove flush dependency between extensible array and dataset' object header */
             if(H5D_earray_idx_undepend(idx_info) < 0)
@@ -1922,9 +1942,9 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
         } /* end if */
 
         /* Close extensible array */
-        if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
+        if(H5EA_close(idx_info->storage->u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
-        idx_info->layout->u.chunk.u.earray.ea = NULL;
+        idx_info->storage->u.earray.ea = NULL;
     } /* end if */
 
 done:
