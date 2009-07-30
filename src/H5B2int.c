@@ -3210,8 +3210,6 @@ done:
 static herr_t
 H5B2_assert_leaf(H5B2_shared_t *shared, H5B2_leaf_t *leaf)
 {
-    unsigned u,v;       /* Local index variables */
-
     /* General sanity checking on node */
     HDassert(leaf->nrec<=shared->node_info->split_nrec);
 
@@ -3235,8 +3233,6 @@ H5B2_assert_leaf(H5B2_shared_t *shared, H5B2_leaf_t *leaf)
 static herr_t
 H5B2_assert_leaf2(H5B2_shared_t *shared, H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2)
 {
-    unsigned u,v;       /* Local index variables */
-
     /* General sanity checking on node */
     HDassert(leaf->nrec<=shared->node_info->split_nrec);
 

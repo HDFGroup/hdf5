@@ -144,7 +144,7 @@ return -1;
 
 const H5L_class_t UD_link_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    MY_LINKCLASS,             /* Link type id number            */
+    (H5L_type_t)MY_LINKCLASS, /* Link type id number            */
     "UD link class",          /* name for debugging             */
     NULL,                     /* Creation callback              */
     NULL,                     /* Move/rename callback           */
@@ -517,9 +517,9 @@ static void gent_udlink(void)
 
     /* This ud link will dangle, but that's okay */
     fid = H5Fcreate(FILE54, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    H5Lcreate_ud(fid, "udlink1", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid, "udlink1", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
     strcpy(buf, "foo");
-    H5Lcreate_ud(fid, "udlink2", MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid, "udlink2", (H5L_type_t)MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Fclose(fid);
 }
@@ -1032,7 +1032,7 @@ static void gent_all(void)
 
     /* user-defined link */
     H5Lregister(UD_link_class);
-    H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid, "/g2/udlink", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Fclose(fid);
 }
@@ -1282,7 +1282,7 @@ static void gent_many(void)
   /* Create dangling external and UD links */
   H5Lcreate_external("somefile", "somepath", fid, "/g8/elink", H5P_DEFAULT, H5P_DEFAULT);
   H5Lregister(UD_link_class);
-  H5Lcreate_ud(fid, "/g8/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_ud(fid, "/g8/udlink", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
   /* Create links to external and UD links */
   ret= H5Lcreate_soft("/g8/elink", fid, "/g7/slink5", H5P_DEFAULT, H5P_DEFAULT);
@@ -5096,7 +5096,7 @@ static void gent_fcontents(void)
     assert(ret >= 0);
 
     /* dangling udlink */
-    ret = H5Lcreate_ud(fid, "udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+    ret = H5Lcreate_ud(fid, "udlink", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
     assert(ret >= 0);
 
     /*-------------------------------------------------------------------------

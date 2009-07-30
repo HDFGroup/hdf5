@@ -2167,7 +2167,7 @@ int H5SL_term_interface(void)
         H5SL_fac_nused_g = 0;
 
         /* Free the list of factories */
-        H5SL_fac_g = (H5FL_reg_head_t **)H5MM_xfree((void *)H5SL_fac_g);
+        H5SL_fac_g = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
         H5SL_fac_nalloc_g = 0;
 
         /* Mark the interface as uninitialized */

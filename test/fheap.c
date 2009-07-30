@@ -15792,7 +15792,7 @@ curr_test = FHEAP_TEST_NORMAL;
             /* "Re-open heap" testing parameters */
             case FHEAP_TEST_REOPEN:
                 puts("Testing with reopen heap flag set");
-                tparam.reopen_heap = TRUE;
+                tparam.reopen_heap = FHEAP_TEST_REOPEN;
                 break;
 
             /* An unknown test? */

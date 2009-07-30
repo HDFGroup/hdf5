@@ -171,7 +171,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
      * as well as some reserved bytes.
      */
     if(attr->shared->version >= H5O_ATTR_VERSION_3)
-        attr->shared->encoding = *p++;
+        attr->shared->encoding = (H5T_cset_t)*p++;
 
     /* Decode and store the name */
     if(NULL == (attr->shared->name = H5MM_strdup((const char *)p)))

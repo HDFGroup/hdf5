@@ -1796,12 +1796,8 @@ test_attr_duplicate_ids(hid_t fapl)
     hid_t		gid1, gid2;	/* Group ID			*/
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hid_t		attr, attr2;	    /* Attribute ID		*/
-    hsize_t             attr_size;  /* storage size for attribute       */
-    ssize_t             attr_name_size; /* size of attribute name       */
-    char                *attr_name=NULL;    /* name of attribute        */
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {ATTR1_DIM1};
-    hsize_t		dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
     int                 read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
     int                 rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
     int                 i;
@@ -2081,7 +2077,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
         VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
         if(HDstrcmp(check_name, attrname))
-            TestErrPrintf("attribute name different: attr_name = '%s', should be '%s'\n", check_name, attrname);
+            TestErrPrintf("attribute name different: attrname = '%s', should be '%s'\n", check_name, attrname);
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);

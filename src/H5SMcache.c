@@ -186,7 +186,7 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
             HGOTO_ERROR(H5E_FILE, H5E_VERSION, NULL, "bad shared message list version number")
 
         /* Type of the index (list or B-tree) */
-        table->indexes[x].index_type= *p++;
+        table->indexes[x].index_type= (H5SM_index_type_t)*p++;
 
         /* Type of messages in the index */
         UINT16DECODE(p, table->indexes[x].mesg_types);

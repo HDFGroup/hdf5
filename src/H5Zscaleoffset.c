@@ -916,7 +916,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     unsigned dtype_class;           /* datatype class */
     unsigned dtype_sign;            /* integer datatype sign */
     unsigned filavail;              /* flag indicating if fill value is defined or not */
-    H5Z_SO_scale_type_t scale_type = 0;/* scale type */
+    H5Z_SO_scale_type_t scale_type = H5Z_SO_FLOAT_DSCALE;/* scale type */
     int scale_factor = 0;           /* scale factor */
     double D_val = 0.0;             /* decimal scale factor */
     uint32_t minbits = 0;           /* minimum number of bits to store values */
@@ -955,8 +955,8 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     dtype_class  = cd_values[H5Z_SCALEOFFSET_PARM_CLASS];
     dtype_sign   = cd_values[H5Z_SCALEOFFSET_PARM_SIGN];
     filavail     = cd_values[H5Z_SCALEOFFSET_PARM_FILAVAIL];
-    scale_factor = (int) cd_values[H5Z_SCALEOFFSET_PARM_SCALEFACTOR];
-    scale_type   = cd_values[H5Z_SCALEOFFSET_PARM_SCALETYPE];
+    scale_factor = (int)cd_values[H5Z_SCALEOFFSET_PARM_SCALEFACTOR];
+    scale_type   = (H5Z_SO_scale_type_t)cd_values[H5Z_SCALEOFFSET_PARM_SCALETYPE];
 
     /* check and assign proper values set by user to related parameters
      * scale type can be H5Z_SO_FLOAT_DSCALE (0), H5Z_SO_FLOAT_ESCALE (1) or H5Z_SO_INT (other)
