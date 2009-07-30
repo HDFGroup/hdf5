@@ -159,7 +159,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
             mesg->ops = H5D_LOPS_CONTIG;
         } /* end if */
         else if(mesg->type == H5D_CHUNKED) {
-            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.btree.addr));
+            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.idx_addr));
 
             /* Set the layout operations */
             mesg->ops = H5D_LOPS_CHUNK;
@@ -242,7 +242,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
 
                     /* B-tree address */
-                    H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.btree.addr));
+                    H5F_addr_decode(f, &p, &(mesg->store.u.chunk.idx_addr));
 
                     /* Chunk dimensions */
                     for(u = 0; u < mesg->u.chunk.ndims; u++)
@@ -289,15 +289,15 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                         mesg->u.chunk.size *= mesg->u.chunk.dim[u];
 
                     /* Chunk index type */
-                    mesg->u.chunk.idx_type = *p++;
+                    mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
                     if(mesg->u.chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown chunk index type")
 
+                    /* Chunk index address */
+                    H5F_addr_decode(f, &p, &(mesg->store.u.chunk.idx_addr));
+
                     switch(mesg->u.chunk.idx_type) {
                         case H5D_CHUNK_IDX_BTREE:       /* Remove this when v2 B-tree indices added */
-                            /* B-tree address */
-                            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.btree.addr));
-
                             /* Set the chunk operations */
                             mesg->u.chunk.ops = H5D_COPS_BTREE;
                             break;
@@ -307,9 +307,6 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
                             if(0 == mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid fixed array creation parameter")
-
-                            /* Fixed array header address */
-                            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.farray.addr));
 
                             /* Set the chunk operations */
                             mesg->u.chunk.ops = H5D_COPS_FARRAY;
@@ -332,9 +329,6 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
                             if(0 == mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
-
-                            /* Extensible array header address */
-                            H5F_addr_decode(f, &p, &(mesg->store.u.chunk.u.earray.addr));
 
                             /* Set the chunk operations */
                             mesg->u.chunk.ops = H5D_COPS_EARRAY;
@@ -449,7 +443,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 *p++ = (uint8_t)mesg->u.chunk.ndims;
 
                 /* B-tree address */
-                H5F_addr_encode(f, &p, mesg->store.u.chunk.u.btree.addr);
+                H5F_addr_encode(f, &p, mesg->store.u.chunk.idx_addr);
 
                 /* Dimension sizes */
                 for(u = 0; u < mesg->u.chunk.ndims; u++)
@@ -474,18 +468,17 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 /* Chunk index type */
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
 
+                /* Chunk index address */
+                H5F_addr_encode(f, &p, mesg->store.u.chunk.idx_addr);
+
                 switch(mesg->u.chunk.idx_type) {
-                    case H5D_CHUNK_IDX_BTREE:   /* Remove this when v2 B-tree indices added */
-                        /* B-tree address */
-                        H5F_addr_encode(f, &p, mesg->store.u.chunk.u.btree.addr);
+                    case H5D_CHUNK_IDX_BTREE:       /* Remove this when v2 B-tree indices added */
+                        /* Nothing to do */
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
                         *p++ = mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
-
-                        /* Fixed array header address */
-                        H5F_addr_encode(f, &p, mesg->store.u.chunk.u.farray.addr);
                         break;
 
                     case H5D_CHUNK_IDX_EARRAY:
@@ -495,9 +488,6 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                         *p++ = mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
                         *p++ = mesg->u.chunk.u.earray.cparam.data_blk_min_elmts;
                         *p++ = mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
-
-                        /* Extensible array header address */
-                        H5F_addr_encode(f, &p, mesg->store.u.chunk.u.earray.addr);
                         break;
 
                     default:
@@ -879,22 +869,16 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
-                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                              "B-tree address:", mesg->store.u.chunk.u.btree.addr);
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Fixed Array");
-                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                              "Fixed Array address:", mesg->store.u.chunk.u.farray.addr);
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Extensible Array");
-                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                              "Extensible Array address:", mesg->store.u.chunk.u.earray.addr);
                     break;
 
                 default:
@@ -902,6 +886,8 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
+            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                      "Index address:", mesg->store.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
