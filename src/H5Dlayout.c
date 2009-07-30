@@ -114,6 +114,69 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_layout_meta_size
+ *
+ * Purpose:     Returns the size of the raw message in bytes except raw data
+ *              part for compact dataset.  This function doesn't take into
+ *              account message alignment.
+ *
+ * Return:      Success:        Message data size in bytes
+ *              Failure:        0
+ *
+ * Programmer:  Raymond Lu
+ *              August 14, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
+{
+    size_t                  ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_layout_meta_size)
+
+    /* check args */
+    HDassert(f);
+    HDassert(layout);
+
+    ret_value = 1 +                     /* Version number                       */
+                1;                      /* layout class type                    */
+
+    switch(layout->type) {
+        case H5D_COMPACT:
+            /* Size of raw data */
+            ret_value += 2;
+            if(include_compact_data)
+                ret_value += layout->store.u.compact.size;/* data for compact dataset             */
+            break;
+
+        case H5D_CONTIGUOUS:
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
+            break;
+
+        case H5D_CHUNKED:
+            /* Number of dimensions (1 byte) */
+            HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+            ret_value++;
+
+            /* Dimension sizes */
+            ret_value += layout->u.chunk.ndims * 4;
+
+            /* B-tree address */
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_layout_meta_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_layout_oh_create
  *
  * Purpose:	Create layout/pline/efl information for dataset

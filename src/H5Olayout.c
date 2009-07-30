@@ -430,9 +430,9 @@ H5O_layout_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg
     HDassert(f);
     HDassert(mesg);
 
-    ret_value = H5O_layout_meta_size(f, mesg);
-    if(H5D_COMPACT == mesg->type)
-        ret_value += mesg->store.u.compact.size;/* data for compact dataset             */
+    /* Compute serialized size */
+    /* (including possibly compact data) */
+    ret_value = H5D_layout_meta_size(f, mesg, TRUE);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_size() */
@@ -739,67 +739,4 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_layout_debug() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5O_layout_meta_size
- *
- * Purpose:     Returns the size of the raw message in bytes except raw data
- *              part for compact dataset.  This function doesn't take into
- *              account message alignment.
- *
- * Return:      Success:        Message data size in bytes(except raw data
- *                              for compact dataset)
- *              Failure:        0
- *
- * Programmer:  Raymond Lu
- *              August 14, 2002
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
-{
-    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
-    size_t                  ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_meta_size)
-
-    /* check args */
-    HDassert(f);
-    HDassert(mesg);
-
-    ret_value = 1 +                     /* Version number                       */
-                1;                      /* layout class type                    */
-
-    switch(mesg->type) {
-        case H5D_COMPACT:
-            /* Size of raw data */
-            ret_value += 2;
-            break;
-
-        case H5D_CONTIGUOUS:
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
-            ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
-            break;
-
-        case H5D_CHUNKED:
-            /* Number of dimensions (1 byte) */
-            HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            ret_value++;
-
-            /* Dimension sizes */
-            ret_value += mesg->u.chunk.ndims * 4;
-
-            /* B-tree address */
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class")
-    } /* end switch */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_meta_size() */
 
