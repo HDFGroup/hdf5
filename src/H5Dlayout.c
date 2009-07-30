@@ -564,7 +564,7 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
                     HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
 
                 /* Assign the dataset's contiguous storage size */
-                dataset->shared->layout.u.contig.size = tmp_size;
+                dataset->shared->layout.store.u.contig.size = tmp_size;
             } /* end if */
 
             /* Get the sieve buffer size for this dataset */

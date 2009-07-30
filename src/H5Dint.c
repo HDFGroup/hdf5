@@ -1788,7 +1788,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
         case H5D_CONTIGUOUS:
             /* Datasets which are not allocated yet are using no space on disk */
             if((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout))
-                ret_value = dset->shared->layout.u.contig.size;
+                ret_value = dset->shared->layout.store.u.contig.size;
             else
                 ret_value = 0;
             break;
