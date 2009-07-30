@@ -219,7 +219,7 @@ static int test_regref_hyper( void )
     int data_out2[3][2];
     hsize_t block_coord_3D[6] ={ 0, 1, 2, 1, 2, 3};
     hsize_t block_coord[4] ={ 3, 3, 5, 4};
-    hsize_t num_elem;
+    size_t num_elem;
     char *path[2];
     hsize_t block_coord_6[8] ={ 3, 6, 5, 7, 0, 0, 2, 1};
     hsize_t block_coord_4[4] ={ 1, 3, 3, 4};
@@ -748,7 +748,7 @@ static int test_regref_hyper( void )
     /* check the regions and check they were made correctly */
 
     kk = 0;
-    for (iii=0; iii< (hsize_t)num_elem; iii++) {
+    for (iii=0; iii< num_elem; iii++) {
       status = H5LRread_region(file_id,
 			       (const hdset_reg_ref_t*)ref6[iii],
 			       H5T_NATIVE_INT,
