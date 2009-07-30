@@ -94,9 +94,16 @@ DESCRIPTION
 static herr_t
 H5G_init_int_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_init_int_interface)
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_LEAVE_NOAPI(H5G_init())
+    FUNC_ENTER_NOAPI(H5G_init_int_interface, FAIL)
+
+    /* Funnel all work to H5G_init() */
+    if(H5G_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "interface initialization failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5G_init_int_interface() */
 
 

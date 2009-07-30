@@ -1911,7 +1911,7 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
 
-    message->location = *raw++;
+    message->location = (H5SM_storage_loc_t)*raw++;
     UINT32DECODE(raw, message->hash);
 
     if(message->location == H5SM_IN_HEAP) {

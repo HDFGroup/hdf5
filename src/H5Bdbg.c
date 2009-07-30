@@ -36,6 +36,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /*-------------------------------------------------------------------------
@@ -190,7 +191,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
-    FUNC_ENTER_NOAPI(H5B_assert, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5B_assert)
 
     if (0==ncalls++) {
 	if (H5DEBUG(B)) {
@@ -277,7 +278,6 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	head = tmp;
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5B_DEBUG */

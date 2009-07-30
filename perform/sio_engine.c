@@ -840,7 +840,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         break;
 
         case HDF5:
-        sprintf(dname, "Dataset_%ld", parms->num_bytes);
+        sprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
         h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
         if (h5ds_id < 0) {
             HDfprintf(stderr, "HDF5 Dataset open failed\n");

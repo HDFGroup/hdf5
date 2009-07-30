@@ -236,10 +236,10 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown flag for fill value message")
 
         /* Space allocation time */
-        fill->alloc_time = (flags >> H5O_FILL_SHIFT_ALLOC_TIME) & H5O_FILL_MASK_ALLOC_TIME;
+        fill->alloc_time = (H5D_alloc_time_t)((flags >> H5O_FILL_SHIFT_ALLOC_TIME) & H5O_FILL_MASK_ALLOC_TIME);
 
         /* Fill value write time */
-        fill->fill_time = (flags >> H5O_FILL_SHIFT_FILL_TIME) & H5O_FILL_MASK_FILL_TIME;
+        fill->fill_time = (H5D_fill_time_t)((flags >> H5O_FILL_SHIFT_FILL_TIME) & H5O_FILL_MASK_FILL_TIME);
 
         /* Check for undefined fill value */
         if(flags & H5O_FILL_FLAG_UNDEFINED_VALUE) {
