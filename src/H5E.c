@@ -1273,7 +1273,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 {
     va_list     ap;             /* Varargs info */
     H5E_t       *estack;        /* Pointer to error stack to modify */
-    H5E_msg_t   *maj_ptr, *min_ptr;     /* Pointer to major and minor error info */
 #ifndef H5_HAVE_VASPRINTF
     int         tmp_len;        /* Current size of description buffer */
     int         desc_len;       /* Actual length of description when formatted */
@@ -1295,14 +1294,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
-
-    /* Check for mis-matches in major & minor error classes */
-    if(NULL == (maj_ptr = (H5E_msg_t *)H5I_object_verify(maj_id, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(NULL == (min_ptr = (H5E_msg_t *)H5I_object_verify(min_id, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(maj_ptr->cls != min_ptr->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
 
     /* Format the description */
     va_start(ap, fmt);
