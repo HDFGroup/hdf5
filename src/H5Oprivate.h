@@ -358,8 +358,17 @@ typedef struct H5O_storage_contig_t {
     hsize_t     size;                   /* Size of data in bytes             */
 } H5O_storage_contig_t;
 
+typedef struct H5O_storage_chunk_btree_t {
+    H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
+} H5O_storage_chunk_btree_t;
+
 typedef struct H5O_storage_chunk_t {
+    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     haddr_t	idx_addr;		/* File address of chunk index       */
+    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
+    union {
+        H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
+    } u;
 } H5O_storage_chunk_t;
 
 typedef struct H5O_storage_compact_t {
@@ -377,22 +386,13 @@ typedef struct H5O_storage_t {
     } u;
 } H5O_storage_t;
 
-typedef struct H5O_layout_chunk_btree_t {
-    H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
-} H5O_layout_chunk_btree_t;
-
 typedef struct H5O_layout_chunk_t {
-    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
     hsize_t     nchunks;                /* Number of chunks in dataset	     */
     hsize_t     chunks[H5O_LAYOUT_NDIMS]; /* # of chunks in dataset dimensions */
     hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];	/* "down" size of number of chunks in each dimension */
-    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
-    union {
-        H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */
-    } u;
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_t {
@@ -402,7 +402,7 @@ typedef struct H5O_layout_t {
     union {
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
     } u;
-    H5O_storage_t store;                /* Information for storing dataset elements */
+    H5O_storage_t storage;              /* Information for storing dataset elements */
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */
