@@ -1273,7 +1273,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 {
     va_list     ap;             /* Varargs info */
     H5E_t       *estack;        /* Pointer to error stack to modify */
-    H5E_msg_t   *maj_ptr, *min_ptr;     /* Pointer to major and minor error info */
 #ifndef H5_HAVE_VASPRINTF
     int         tmp_len;        /* Current size of description buffer */
     int         desc_len;       /* Actual length of description when formatted */
