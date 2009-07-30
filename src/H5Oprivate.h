@@ -355,6 +355,7 @@ struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
 
 typedef struct H5O_storage_contig_t {
     haddr_t	addr;			/* File address of data              */
+    hsize_t     size;                   /* Size of data in bytes             */
 } H5O_storage_contig_t;
 
 typedef struct H5O_storage_chunk_t {
@@ -375,10 +376,6 @@ typedef struct H5O_storage_t {
         H5O_storage_compact_t compact;  /* Information for compact storage    */
     } u;
 } H5O_storage_t;
-
-typedef struct H5O_layout_contig_t {
-    hsize_t     size;                   /* Size of data in bytes             */
-} H5O_layout_contig_t;
 
 typedef struct H5O_layout_chunk_btree_t {
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
@@ -403,7 +400,6 @@ typedef struct H5O_layout_t {
     unsigned version;                   /* Version of message                */
     const struct H5D_layout_ops_t *ops; /* Pointer to data layout I/O operations */
     union {
-        H5O_layout_contig_t contig;     /* Information for contiguous layout */
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
     } u;
     H5O_storage_t store;                /* Information for storing dataset elements */

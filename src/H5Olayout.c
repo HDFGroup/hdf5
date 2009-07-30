@@ -206,7 +206,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
             case H5D_CONTIGUOUS:
                 H5F_addr_decode(f, &p, &(mesg->store.u.contig.addr));
-                H5F_DECODE_LENGTH(f, p, mesg->u.contig.size);
+                H5F_DECODE_LENGTH(f, p, mesg->store.u.contig.size);
 
                 /* Set the layout operations */
                 mesg->ops = H5D_LOPS_CONTIG;
@@ -323,7 +323,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
 
         case H5D_CONTIGUOUS:
             H5F_addr_encode(f, &p, mesg->store.u.contig.addr);
-            H5F_ENCODE_LENGTH(f, p, mesg->u.contig.size);
+            H5F_ENCODE_LENGTH(f, p, mesg->store.u.contig.size);
             break;
 
         case H5D_CHUNKED:
@@ -616,7 +616,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
              * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
              */
             if(layout_src->version < 3)
-                layout_dst->u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
+                layout_dst->store.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
                                         H5T_get_size(udata->src_dtype);
 
             if(H5F_addr_defined(layout_src->store.u.contig.addr)) {
@@ -721,7 +721,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
             HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                       "Data address:", mesg->store.u.contig.addr);
             HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-                      "Data Size:", mesg->u.contig.size);
+                      "Data Size:", mesg->store.u.contig.size);
             break;
 
         case H5D_COMPACT:

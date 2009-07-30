@@ -128,7 +128,7 @@ H5D_layout_contig_size_test(hid_t did, hsize_t *size)
 
     if(size) {
         HDassert(dset->shared->layout.type == H5D_CONTIGUOUS);
-        *size = dset->shared->layout.u.contig.size;
+        *size = dset->shared->layout.store.u.contig.size;
     } /* end if */
 
 done:
@@ -142,7 +142,7 @@ done:
  PURPOSE
     Determine current the size of the dataset's chunk cache
  USAGE
-    herr_t H5D_layout_contig_size_test(did, size)
+    herr_t H5D_current_cache_size_test(did, size)
         hid_t did;              IN: Dataset to query
         hsize_t *size;          OUT: Pointer to location to place size info
  RETURNS
