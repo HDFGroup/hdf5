@@ -41,7 +41,7 @@ int main(void)
     int data[DIM0][DIM1]; /* data */
     int i, j;
     int rdata[6][2]; /* buffer to read the data into */
-    hsize_t num_elem; /* number of region references to create */
+    size_t num_elem; /* number of region references to create */
     const char *path[2]; /* paths to the data for the region references */
     hsize_t block_coord[8] ={ 2, 5, 4, 6, 0, 0, 2, 1}; /* hyperslab coordinates defining region references */
     hdset_reg_ref_t ref[2]; /* region references */
@@ -103,7 +103,7 @@ int main(void)
     /*
      * We are creating the data set in the same file so fill the file_id path with the same file id.
      */
-    for (i=0; i< (hsize_t)num_elem; i++) 
+    for (i=0; i< num_elem; i++) 
       file_id_array[i] = file_id;
 
     /*
