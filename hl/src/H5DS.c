@@ -1626,7 +1626,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
 
         /* free the ptr that will be replaced by label */
         if (buf[idx])
-            free(buf[idx]);
+            free((void *)buf[idx]);
 
         /* store the label information in the required index */
         buf[idx] = label;
@@ -1642,7 +1642,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
         for (i = 0; i < (unsigned int) rank; i++) 
         {
             if (buf[i])
-                free(buf[i]);
+                free((void *)buf[i]);
         }
 
         /* close */
@@ -1669,7 +1669,7 @@ out:
         for (i = 0; i < (unsigned int) rank; i++) 
         {
             if (buf[i])
-                free(buf[i]);
+                free((void *)buf[i]);
         }
         free(buf);
     }

@@ -291,7 +291,7 @@ H5HF_tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op,
         HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
 
 done:
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_tiny_op_real() */
 
 

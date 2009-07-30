@@ -2077,7 +2077,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
         VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
         if(HDstrcmp(check_name, attrname))
-            TestErrPrintf("attribute name different: attr_name = '%s', should be '%s'\n", check_name, attrname);
+            TestErrPrintf("attribute name different: attrname = '%s', should be '%s'\n", check_name, attrname);
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);

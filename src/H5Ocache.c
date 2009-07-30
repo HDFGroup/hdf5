@@ -187,10 +187,16 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* Time fields */
         if(oh->flags & H5O_HDR_STORE_TIMES) {
-            UINT32DECODE(p, oh->atime);
-            UINT32DECODE(p, oh->mtime);
-            UINT32DECODE(p, oh->ctime);
-            UINT32DECODE(p, oh->btime);
+            uint32_t tmp;       /* Temporary value */
+
+            UINT32DECODE(p, tmp);
+            oh->atime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->mtime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->ctime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->btime = (time_t)tmp;
         } /* end if */
         else
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;

@@ -419,7 +419,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                     H5Z_SO_scale_type_t scale_type;
                     int                 scale_factor;
 
-                    scale_type   = obj.filter[i].cd_values[0];
+                    scale_type   = (H5Z_SO_scale_type_t)obj.filter[i].cd_values[0];
                     scale_factor = obj.filter[i].cd_values[1];
 
                     if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)

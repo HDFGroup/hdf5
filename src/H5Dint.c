@@ -1018,7 +1018,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
 
         /* Set the latest version for the layout message */
-        if(H5O_layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space) < 0)
+        if(H5D_layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
     } /* end if */
 

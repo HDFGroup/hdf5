@@ -119,7 +119,6 @@ static int
 test_close_one(void)
 {
     H5MP_pool_t *mp;            /* Memory pool */
-    void *spc1;                 /* Pointer to space allocated */
 
     /*
      * Test memory pool closing
@@ -131,7 +130,7 @@ test_close_one(void)
         TEST_ERROR
 
     /* Allocate space in pool */
-    if(NULL == (spc1 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
+    if(NULL == H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK))
         TEST_ERROR
 
     /* Close the memory pool */
