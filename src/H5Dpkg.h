@@ -559,6 +559,8 @@ H5_DLL herr_t H5D_scatgath_write(const H5D_io_info_t *io_info,
 
 /* Functions that operate on dataset's layout information */
 H5_DLL herr_t H5D_layout_set_io_ops(const H5D_t *dataset);
+H5_DLL size_t H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
+    hbool_t include_compact_data);
 H5_DLL herr_t H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh,
     H5D_t *dset, hid_t dapl_id);
 H5_DLL herr_t H5D_layout_oh_read(H5D_t *dset, hid_t dxpl_id, hid_t dapl_id,

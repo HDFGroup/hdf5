@@ -172,7 +172,7 @@ static herr_t
 H5D_compact_construct(H5F_t *f, H5D_t *dset)
 {
     hssize_t tmp_size;          /* Temporary holder for raw data size */
-    hsize_t comp_data_size;     /* Size of compact data */
+    hsize_t max_comp_data_size; /* Max. allowed size of compact data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_compact_construct)
@@ -191,8 +191,8 @@ H5D_compact_construct(H5F_t *f, H5D_t *dset)
     /* Verify data size is smaller than maximum header message size
      * (64KB) minus other layout message fields.
      */
-    comp_data_size = H5O_MESG_MAX_SIZE - H5O_layout_meta_size(f, &(dset->shared->layout));
-    if(dset->shared->layout.store.u.compact.size > comp_data_size)
+    max_comp_data_size = H5O_MESG_MAX_SIZE - H5D_layout_meta_size(f, &(dset->shared->layout), FALSE);
+    if(dset->shared->layout.store.u.compact.size > max_comp_data_size)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "compact dataset size is bigger than header message maximum size")
 
 done:
