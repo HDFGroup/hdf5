@@ -4290,9 +4290,8 @@ done:
 herr_t
 H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     H5O_layout_chunk_t *layout_src, H5F_t *f_dst, H5O_storage_chunk_t *storage_dst,
-    H5O_layout_chunk_t *layout_dst, const H5S_extent_t *ds_extent_src,
-    const H5T_t *dt_src, const H5O_pline_t *pline_src,
-    H5O_copy_t *cpy_info, hid_t dxpl_id)
+    const H5S_extent_t *ds_extent_src, const H5T_t *dt_src,
+    const H5O_pline_t *pline_src, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     H5D_chunk_it_ud3_t udata;           /* User data for iteration callback */
     H5D_chk_idx_info_t idx_info_dst;    /* Dest. chunked index info */
@@ -4319,10 +4318,9 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
 
     /* Check args */
     HDassert(f_src);
-    HDassert(layout_src);
     HDassert(storage_src);
+    HDassert(layout_src);
     HDassert(f_dst);
-    HDassert(layout_dst);
     HDassert(storage_dst);
     HDassert(ds_extent_src);
     HDassert(dt_src);
@@ -4353,10 +4351,6 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
         /* Set the source layout chunk information */
         if(H5D_chunk_set_info_real(layout_src, ndims, curr_dims) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
-
-        /* Set the dest. layout chunk info also */
-        if(H5D_chunk_set_info_real(layout_dst, ndims, curr_dims) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
     } /* end block */
 
     /* Compose source & dest chunked index info structs */
@@ -4369,7 +4363,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     idx_info_dst.f = f_dst;
     idx_info_dst.dxpl_id = dxpl_id;
     idx_info_dst.pline = pline;     /* Use same I/O filter pipeline for dest. */
-    idx_info_dst.layout = layout_dst;
+    idx_info_dst.layout = layout_src /* Use same layout for dest. */;
     idx_info_dst.storage = storage_dst;
 
     /* Call the index-specific "copy setup" routine */
