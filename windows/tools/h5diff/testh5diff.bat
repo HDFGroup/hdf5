@@ -247,6 +247,14 @@ rem ############################################################################
     call :testing %h5diff% -v %srcfile1% %srcfile2%
     call :tooltest h5diff_17.txt -v %file1% %file2% 
 
+    rem 1.71 test 32-bit INFINITY
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp19
+    call :tooltest h5diff_171.txt -v %file1% %file1% /g1/fp19 
+
+    rem 1.72 test 64-bit INFINITY
+    call :testing %h5diff% -v %srcfile1% %srcfile1% /g1/fp20
+    call :tooltest h5diff_172.txt -v %file1% %file1% /g1/fp20 
+
     rem 1.8 quiet mode 
     call :testing %h5diff% -q %srcfile1% %srcfile2%
     call :tooltest h5diff_18.txt -q %file1% %file2% 
