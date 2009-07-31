@@ -298,6 +298,7 @@ TOOLTEST tarray4.ddl tarray4.h5
 TOOLTEST tarray5.ddl tarray5.h5
 TOOLTEST tarray6.ddl tarray6.h5
 TOOLTEST tarray7.ddl tarray7.h5
+TOOLTEST tarray8.ddl tarray8.h5
 
 # test for files with empty data
 TOOLTEST tempty.ddl tempty.h5
