@@ -777,7 +777,7 @@ H5P_init_def_layout(void)
     H5D_def_layout_compact_g.u.compact = def_layout_compact;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_chunk;
-    H5D_def_layout_compact_g.storage.u.chunk = def_store_chunk;
+    H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */
     H5P_dcrt_def_layout_init_g = TRUE;

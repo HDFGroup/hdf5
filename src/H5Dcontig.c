@@ -62,7 +62,6 @@
 
 /* Layout operation callbacks */
 static herr_t H5D_contig_construct(H5F_t *f, H5D_t *dset);
-static hbool_t H5D_contig_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
@@ -121,7 +120,7 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
+H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_storage_contig_t *storage /*out */ )
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -129,10 +128,10 @@ H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
 
     /* check args */
     HDassert(f);
-    HDassert(layout);
+    HDassert(storage);
 
     /* Allocate space for the contiguous data */
-    if(HADDR_UNDEF == (layout->storage.u.contig.addr = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, layout->storage.u.contig.size)))
+    if(HADDR_UNDEF == (storage->addr = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, storage->size)))
         HGOTO_ERROR(H5E_IO, H5E_NOSPACE, FAIL, "unable to reserve file space")
 
 done:
@@ -445,18 +444,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
-H5D_contig_is_space_alloc(const H5O_layout_t *layout)
+hbool_t
+H5D_contig_is_space_alloc(const H5O_storage_t *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_contig_is_space_alloc)
 
     /* Sanity checks */
-    HDassert(layout);
+    HDassert(storage);
 
     /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(layout->storage.u.contig.addr);
+    ret_value = (hbool_t)H5F_addr_defined(storage->u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_is_space_alloc() */
@@ -1215,14 +1214,12 @@ done:
  * Programmer:  Quincey Koziol
  *	        Monday, November 21, 2005
  *
- * Modifier:    Peter Cao
- *              Saturday, January 07, 2006
- *              Add case to deal with compressed variable length datasets
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
-    H5O_layout_t *layout_dst, H5T_t *dt_src, H5O_copy_t *cpy_info, hid_t dxpl_id)
+H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
+    H5F_t *f_dst, H5O_storage_contig_t *storage_dst, H5T_t *dt_src,
+    H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     haddr_t     addr_src;               /* File offset in source dataset */
     haddr_t     addr_dst;               /* File offset in destination dataset */
@@ -1256,18 +1253,18 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
 
     /* Check args */
     HDassert(f_src);
-    HDassert(layout_src && H5D_CONTIGUOUS == layout_src->type);
+    HDassert(storage_src);
     HDassert(f_dst);
-    HDassert(layout_dst && H5D_CONTIGUOUS == layout_dst->type);
+    HDassert(storage_dst);
     HDassert(dt_src);
 
     /* Allocate space for destination raw data */
-    if(H5D_contig_alloc(f_dst, dxpl_id, layout_dst) < 0)
+    if(H5D_contig_alloc(f_dst, dxpl_id, storage_dst) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to allocate contiguous storage")
 
     /* Set up number of bytes to copy, and initial buffer size */
     /* (actually use the destination size, which has been fixed up, if necessary) */
-    total_src_nbytes = layout_dst->storage.u.contig.size;
+    total_src_nbytes = storage_dst->size;
     H5_CHECK_OVERFLOW(total_src_nbytes, hsize_t, size_t);
     buf_size = MIN(H5D_TEMP_BUF_SIZE, (size_t)total_src_nbytes);
 
@@ -1365,8 +1362,8 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     } /* end if */
 
     /* Loop over copying data */
-    addr_src = layout_src->storage.u.contig.addr;
-    addr_dst = layout_dst->storage.u.contig.addr;
+    addr_src = storage_src->addr;
+    addr_dst = storage_dst->addr;
     while(total_src_nbytes > 0) {
         /* Check if we should reduce the number of bytes to transfer */
         if(total_src_nbytes < src_nbytes) {
