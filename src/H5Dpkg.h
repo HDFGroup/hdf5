@@ -113,7 +113,7 @@ struct H5D_chunk_map_t;
 typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
 typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
-typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_layout_t *layout);
+typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
 typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
@@ -604,7 +604,9 @@ H5_DLL herr_t H5D_layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh,
     unsigned update_flags);
 
 /* Functions that operate on contiguous storage */
-H5_DLL herr_t H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
+H5_DLL herr_t H5D_contig_alloc(H5F_t *f, hid_t dxpl_id,
+    H5O_storage_contig_t *storage);
+H5_DLL hbool_t H5D_contig_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D_contig_fill(H5D_t *dset, hid_t dxpl_id);
 H5_DLL haddr_t H5D_contig_get_addr(const H5D_t *dset);
 H5_DLL herr_t H5D_contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
@@ -619,8 +621,9 @@ H5_DLL ssize_t H5D_contig_readvv(const H5D_io_info_t *io_info,
 H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
-    H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
+    H5F_t *f_dst, H5O_storage_contig_t *storage_dst, H5T_t *src_dtype,
+    H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on chunked dataset storage */
 H5_DLL htri_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
@@ -630,7 +633,7 @@ H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_set_info(const H5D_t *dset);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
-H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_layout_t *layout);
+H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
@@ -648,8 +651,9 @@ H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
 H5_DLL herr_t H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id);
-H5_DLL herr_t H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src,
-    H5F_t *f_dst, H5O_layout_t *layout_dst, const H5S_extent_t *ds_extent_src,
+H5_DLL herr_t H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
+    H5O_layout_chunk_t *layout_src, H5F_t *f_dst, H5O_storage_chunk_t *storage_dst,
+    H5O_layout_chunk_t *layout_dst, const H5S_extent_t *ds_extent_src,
     const H5T_t *dt_src, const H5O_pline_t *pline_src,
     H5O_copy_t *cpy_info, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
@@ -662,8 +666,9 @@ H5_DLL herr_t H5D_chunk_stats(const H5D_t *dset, hbool_t headers);
 
 /* Functions that operate on compact dataset storage */
 H5_DLL herr_t H5D_compact_fill(H5D_t *dset, hid_t dxpl_id);
-H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
-    H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src,
+    H5F_t *f_dst, H5O_storage_compact_t *storage_dst, H5T_t *src_dtype,
+    H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that perform fill value operations on datasets */
 H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,

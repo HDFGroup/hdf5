@@ -17,6 +17,7 @@
 #define H5T_PACKAGE		/*prevent warning from including H5Tpkg   */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists				*/

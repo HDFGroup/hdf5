@@ -132,7 +132,7 @@ static herr_t H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
-static herr_t H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_earray_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
@@ -1889,17 +1889,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info, FILE *stream)
+H5D_earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_dump)
 
     /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->storage);
+    HDassert(storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", idx_info->storage->idx_addr);
+    HDfprintf(stream, "    Address: %a\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_earray_idx_dump() */

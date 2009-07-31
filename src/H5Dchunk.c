@@ -191,7 +191,7 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
 /* Helper routines */
-static herr_t H5D_chunk_set_info_real(H5O_layout_t *layout, unsigned ndims,
+static herr_t H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     const hsize_t *curr_dims);
 static void *H5D_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_chunk_xfree(void *chk, const H5O_pline_t *pline);
@@ -285,8 +285,8 @@ H5FL_DEFINE_STATIC(H5D_chunk_prune_stack_t);
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5D_chunk_set_info_real(H5O_layout_t *layout, unsigned ndims, const hsize_t *curr_dims)
+static herr_t
+H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -299,16 +299,16 @@ H5D_chunk_set_info_real(H5O_layout_t *layout, unsigned ndims, const hsize_t *cur
     HDassert(curr_dims);
 
     /* Compute the # of chunks in dataset dimensions */
-    for(u = 0, layout->u.chunk.nchunks = 1; u < ndims; u++) {
+    for(u = 0, layout->nchunks = 1; u < ndims; u++) {
         /* Round up to the next integer # of chunks, to accomodate partial chunks */
-	layout->u.chunk.chunks[u] = ((curr_dims[u] + layout->u.chunk.dim[u]) - 1) / layout->u.chunk.dim[u];
+	layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
 
         /* Accumulate the # of chunks */
-	layout->u.chunk.nchunks *= layout->u.chunk.chunks[u];
+	layout->nchunks *= layout->chunks[u];
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(ndims, layout->u.chunk.chunks, layout->u.chunk.down_chunks) < 0)
+    if(H5V_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
 
 done:
@@ -347,7 +347,7 @@ H5D_chunk_set_info(const H5D_t *dset)
     H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
 
     /* Set the base layout information */
-    if(H5D_chunk_set_info_real(&dset->shared->layout, ndims, curr_dims) < 0)
+    if(H5D_chunk_set_info_real(&dset->shared->layout.u.chunk, ndims, curr_dims) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
 
     /* Call the index's "resize" callback */
@@ -540,23 +540,23 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5D_chunk_is_space_alloc(const H5O_layout_t *layout)
+H5D_chunk_is_space_alloc(const H5O_storage_t *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5D_chunk_is_space_alloc)
 
     /* Sanity checks */
-    HDassert(layout);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout->storage.u.chunk.ops));
+    HDassert(storage);
+    HDassert((H5D_CHUNK_IDX_EARRAY == storage->u.chunk.idx_type && 
+                H5D_COPS_EARRAY == storage->u.chunk.ops) ||
+            (H5D_CHUNK_IDX_FARRAY == storage->u.chunk.idx_type && 
+                H5D_COPS_FARRAY == storage->u.chunk.ops) ||
+            (H5D_CHUNK_IDX_BTREE == storage->u.chunk.idx_type && 
+                H5D_COPS_BTREE == storage->u.chunk.ops));
 
     /* Query index layer */
-    ret_value = (layout->storage.u.chunk.ops->is_space_alloc)(&layout->storage.u.chunk);
+    ret_value = (storage->u.chunk.ops->is_space_alloc)(&storage->u.chunk);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_is_space_alloc() */
@@ -4395,8 +4395,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
-    H5O_layout_t *layout_dst, const H5S_extent_t *ds_extent_src,
+H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
+    H5O_layout_chunk_t *layout_src, H5F_t *f_dst, H5O_storage_chunk_t *storage_dst,
+    H5O_layout_chunk_t *layout_dst, const H5S_extent_t *ds_extent_src,
     const H5T_t *dt_src, const H5O_pline_t *pline_src,
     H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
@@ -4425,21 +4426,23 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
 
     /* Check args */
     HDassert(f_src);
+    HDassert(layout_src);
+    HDassert(storage_src);
+    HDassert((H5D_CHUNK_IDX_EARRAY == storage_src->idx_type && 
+                H5D_COPS_EARRAY == storage_src->ops) ||
+            (H5D_CHUNK_IDX_FARRAY == storage_src->idx_type && 
+                H5D_COPS_FARRAY == storage_src->ops) ||
+            (H5D_CHUNK_IDX_BTREE == storage_src->idx_type && 
+                H5D_COPS_BTREE == storage_src->ops));
     HDassert(f_dst);
-    HDassert(layout_src && H5D_CHUNKED == layout_src->type);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout_src->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout_src->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout_src->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout_src->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout_src->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout_src->storage.u.chunk.ops));
-    HDassert(layout_dst && H5D_CHUNKED == layout_dst->type);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout_dst->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout_dst->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout_dst->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout_dst->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout_dst->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout_dst->storage.u.chunk.ops));
+    HDassert(layout_dst);
+    HDassert(storage_dst);
+    HDassert((H5D_CHUNK_IDX_EARRAY == storage_dst->idx_type && 
+                H5D_COPS_EARRAY == storage_dst->ops) ||
+            (H5D_CHUNK_IDX_FARRAY == storage_dst->idx_type && 
+                H5D_COPS_FARRAY == storage_dst->ops) ||
+            (H5D_CHUNK_IDX_BTREE == storage_dst->idx_type && 
+                H5D_COPS_BTREE == storage_dst->ops));
     HDassert(ds_extent_src);
     HDassert(dt_src);
 
@@ -4452,7 +4455,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         pline = pline_src;
 
     /* Layout is not created in the destination file, reset index address */
-    if(H5D_chunk_idx_reset(&layout_dst->storage.u.chunk, TRUE) < 0)
+    if(H5D_chunk_idx_reset(storage_dst, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to reset chunked storage index in dest")
 
     /* Initialize layout information */
@@ -4479,17 +4482,17 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     idx_info_src.f = f_src;
     idx_info_src.dxpl_id = dxpl_id;
     idx_info_src.pline = pline;
-    idx_info_src.layout = &layout_src->u.chunk;
-    idx_info_src.storage = &layout_src->storage.u.chunk;
+    idx_info_src.layout = layout_src;
+    idx_info_src.storage = storage_src;
 
     idx_info_dst.f = f_dst;
     idx_info_dst.dxpl_id = dxpl_id;
     idx_info_dst.pline = pline;     /* Use same I/O filter pipeline for dest. */
-    idx_info_dst.layout = &layout_dst->u.chunk;
-    idx_info_dst.storage = &layout_dst->storage.u.chunk;
+    idx_info_dst.layout = layout_dst;
+    idx_info_dst.storage = storage_dst;
 
     /* Call the index-specific "copy setup" routine */
-    if((layout_src->storage.u.chunk.ops->copy_setup)(&idx_info_src, &idx_info_dst) < 0)
+    if((storage_src->ops->copy_setup)(&idx_info_src, &idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up index-specific chunk copying information")
     copy_setup_done = TRUE;
 
@@ -4539,8 +4542,8 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
 
         /* Compute the number of elements per chunk */
         nelmts = 1;
-        for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
-            nelmts *= layout_src->u.chunk.dim[u];
+        for(u = 0;  u < (layout_src->ndims - 1); u++)
+            nelmts *= layout_src->dim[u];
 
         /* Create the space and set the initial extent */
         buf_dim = nelmts;
@@ -4570,7 +4573,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             do_convert = TRUE;
         } /* end if */
 
-        H5_ASSIGN_OVERFLOW(buf_size, layout_src->u.chunk.size, uint32_t, size_t);
+        H5_ASSIGN_OVERFLOW(buf_size, layout_src->size, uint32_t, size_t);
         reclaim_buf_size = 0;
     } /* end else */
 
@@ -4593,8 +4596,8 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
 
     /* Initialize the callback structure for the source */
     HDmemset(&udata, 0, sizeof udata);
-    udata.common.layout = &layout_src->u.chunk;
-    udata.common.storage = &layout_src->storage.u.chunk;
+    udata.common.layout = layout_src;
+    udata.common.storage = storage_src;
     udata.file_src = f_src;
     udata.idx_info_dst = &idx_info_dst;
     udata.buf = buf;
@@ -4615,7 +4618,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     udata.cpy_info = cpy_info;
 
     /* Iterate over chunks to copy data */
-    if((layout_src->storage.u.chunk.ops->iterate)(&idx_info_src, H5D_chunk_copy_cb, &udata) < 0)
+    if((storage_src->ops->iterate)(&idx_info_src, H5D_chunk_copy_cb, &udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to copy data")
 
     /* I/O buffers may have been re-allocated */
@@ -4643,7 +4646,7 @@ done:
 
     /* Clean up any index information */
     if(copy_setup_done)
-        if((layout_src->storage.u.chunk.ops->copy_shutdown)(&layout_src->storage.u.chunk, &layout_dst->storage.u.chunk, dxpl_id) < 0)
+        if((storage_src->ops->copy_shutdown)(storage_src, storage_dst, dxpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to shut down index copying info")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -17,6 +17,7 @@
 #define H5S_PACKAGE		/*prevent warning from including H5Spkg.h */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gprivate.h"		/* Groups			  	*/

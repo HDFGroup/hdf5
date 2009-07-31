@@ -27,6 +27,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
@@ -35,7 +36,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -51,24 +52,24 @@
 /* Define default layout information */
 #define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
-#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{NULL}}}
-#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {{(uint8_t)0}}, {{NULL}}}
+#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF, H5D_COPS_BTREE, {{NULL}}}
+#define H5D_DEF_LAYOUT_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (unsigned)0, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {{{(uint8_t)0}}}}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
 #define H5D_DEF_STORAGE_CHUNK    {H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }}
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_COMPACT}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CONTIG}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, H5D_LOPS_COMPACT, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_COMPACT}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, H5D_LOPS_CONTIG, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CONTIG}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK}
 #else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 /* Note that the compact & chunked layout initialization values are using the
  *      contiguous layout initialization in the union, because the contiguous
  *      layout is first in the union.  These values are overridden in the
  *      H5P_init_def_layout() routine. -QAK
  */
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, H5D_LOPS_COMPACT, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, H5D_LOPS_CONTIG, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
@@ -782,7 +783,7 @@ H5P_init_def_layout(void)
     H5D_def_layout_compact_g.u.compact = def_layout_compact;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_chunk;
-    H5D_def_layout_compact_g.storage.u.chunk = def_store_chunk;
+    H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */
     H5P_dcrt_def_layout_init_g = TRUE;

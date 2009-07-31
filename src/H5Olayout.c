@@ -537,7 +537,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     /* check args */
     HDassert(mesg);
     if(!dest && NULL == (dest = H5FL_MALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     *dest = *mesg;
@@ -546,7 +546,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     if(mesg->type == H5D_COMPACT && mesg->storage.u.compact.size > 0) {
         /* Allocate memory for the raw data */
         if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
         /* Copy over the raw data */
         HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
@@ -754,23 +754,18 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
     /* Allocate space for the destination layout */
     if(NULL == (layout_dst = H5FL_MALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Copy the "top level" information */
-    HDmemcpy(layout_dst, layout_src, sizeof(H5O_layout_t));
+    *layout_dst = *layout_src;
 
     /* Copy the layout type specific information */
     switch(layout_src->type) {
         case H5D_COMPACT:
 	    if(layout_src->storage.u.compact.buf) {
-            	if(NULL == (layout_dst->storage.u.compact.buf = H5MM_malloc(layout_src->storage.u.compact.size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
-
                 /* copy compact raw data */
-                if(H5D_compact_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
-
-            	layout_dst->storage.u.compact.dirty = TRUE;
+                if(H5D_compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
 	    } /* end if */
             break;
 
@@ -783,18 +778,18 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 layout_dst->storage.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
                                         H5T_get_size(udata->src_dtype);
 
-            if(H5F_addr_defined(layout_src->storage.u.contig.addr)) {
-                /* create contig layout */
-                if(H5D_contig_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy contiguous storage")
+            if(H5D_contig_is_space_alloc(&layout_src->storage)) {
+                /* copy contiguous raw data */
+                if(H5D_contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
             } /* end if */
             break;
 
         case H5D_CHUNKED:
-            if(H5D_chunk_is_space_alloc(layout_src)) {
+            if(H5D_chunk_is_space_alloc(&layout_src->storage)) {
                 /* Create chunked layout */
-                if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy chunked storage")
+                if(H5D_chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, &layout_dst->u.chunk, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
             } /* end if */
             break;
 

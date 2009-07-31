@@ -1303,7 +1303,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
      * be fully allocated before I/O can happen.
      */
     if((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR)
-            && !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout)
+            && !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
             && IS_H5FD_MPI(dataset->oloc.file)) {
         if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
@@ -1584,9 +1584,9 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
 
         switch(layout->type) {
             case H5D_CONTIGUOUS:
-                if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout)) {
+                if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                     /* Reserve space in the file for the entire array */
-                    if(H5D_contig_alloc(f, dxpl_id, layout/*out*/) < 0)
+                    if(H5D_contig_alloc(f, dxpl_id, &layout->storage.u.contig/*out*/) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
 
                     /* Indicate that we set the storage addr */
@@ -1598,7 +1598,7 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
                 break;
 
             case H5D_CHUNKED:
-                if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout)) {
+                if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                     /* Create the root of the B-tree that describes chunked storage */
                     if(H5D_chunk_create(dset /*in,out*/, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
@@ -1777,7 +1777,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
 
     switch(dset->shared->layout.type) {
         case H5D_CHUNKED:
-            if((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout)) {
+            if((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                 if(H5D_chunk_allocated(dset, dxpl_id, &ret_value) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve chunked dataset allocated size")
             } /* end if */
@@ -1787,7 +1787,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
 
         case H5D_CONTIGUOUS:
             /* Datasets which are not allocated yet are using no space on disk */
-            if((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout))
+            if((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage))
                 ret_value = dset->shared->layout.storage.u.contig.size;
             else
                 ret_value = 0;
@@ -2168,7 +2168,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          *-------------------------------------------------------------------------
          */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type &&
-                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout)) {
+                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
              /* Remove excess chunks */
              if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
                  HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
