@@ -79,11 +79,11 @@ hbool_t H5_H5LR_init_g = FALSE;
 /* Local Variables */
 /*******************/
 
-/* THE FOLLOWING ARE USED BY HL API: H5LRcreate_regref_to_all */
+/* THE FOLLOWING ARE USED BY HL API: H5LRcreate_ref_to_all */
 
-/* starting index counter for placing region references into 1D array, used by H5LRcreate_regref_to_all */
+/* starting index counter for placing region references into 1D array, used by H5LRcreate_ref_to_all */
 static size_t  _regref_to_all_start;
-/* size of the 1D array needed to hold all the region references created by H5LRcreate_regref_to_all */
+/* size of the 1D array needed to hold all the region references created by H5LRcreate_ref_to_all */
 static hsize_t _regref_to_all_size;
 /* type of data to create region references for */
 static H5R_type_t _regref_type;
@@ -97,7 +97,7 @@ static H5R_type_t _regref_type;
 
 /************************************************************
 
-  Operator function used by HL API H5LRcreate_regref_to_all:
+  Operator function used by HL API H5LRcreate_ref_to_all:
      (1) Finds the size (_regref_to_all_size) of the array needed to hold the 
          region references by finding: the number of datasets 
          (for _regref_type == H5R_DATASET_REGION) or number of objects
@@ -179,7 +179,7 @@ op_func(hid_t loc_id, const char *name, const H5O_info_t *info, void *operator_d
 /************************************************************
 
   Operator function for H5Lvisit_by_name, used by
-  the HL API H5LRcreate_regref_to_all.  This function simply
+  the HL API H5LRcreate_ref_to_all.  This function simply
   retrieves the info for the object the current link points
   to, and calls the operator function, op_func.
 
@@ -1387,7 +1387,7 @@ END_FUNC(PUB)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5LRcreate_regref_to_all
+ * Function: H5LRcreate_ref_to_all
  *
  * Purpose: Create a dataset with the region references to all datasets or
  *          objects recursively located under a specified group in a file.
@@ -1402,7 +1402,7 @@ END_FUNC(PUB)
  */
 BEGIN_FUNC(PUB, ERR,
 herr_t, SUCCEED, FAIL,
-H5LRcreate_regref_to_all(hid_t loc_id, const char *group_path,
+H5LRcreate_ref_to_all(hid_t loc_id, const char *group_path,
     const char *ds_path, H5_index_t index_type, H5_iter_order_t order, H5R_type_t ref_type))
 
     herr_t status; /* API return status */
