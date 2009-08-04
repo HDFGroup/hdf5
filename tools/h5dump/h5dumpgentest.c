@@ -2849,7 +2849,7 @@ static void gent_array8(void)
     /*
      * Create array datatypes for file and memory.
      */
-    filetype = H5Tarray_create (H5T_NATIVE_INT, 1, tdims);
+    filetype = H5Tarray_create2 (H5T_NATIVE_INT, 1, tdims);
 
     /*
      * Create dataspace.  Setting maximum size to NULL sets the maximum
@@ -2861,7 +2861,7 @@ static void gent_array8(void)
      * Create the dataset and write the array data to it.
      */
     if(file>=0 && filetype>=0 && space>=0) {
-        dset = H5Dcreate (file, F64_DATASET, filetype, space, H5P_DEFAULT, H5P_DEFAULT,
+        dset = H5Dcreate2 (file, F64_DATASET, filetype, space, H5P_DEFAULT, H5P_DEFAULT,
                 H5P_DEFAULT);
         if(dset>=0)
             status = H5Dwrite (dset, filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
