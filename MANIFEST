@@ -527,6 +527,8 @@
 ./doc/html/Intro/Makefile.in
 
 ./doc/html/PSandPDF/Dependencies
+./doc/html/PSandPDF/HDF5_UG_r166.pdf
+./doc/html/PSandPDF/HDF5_RM_r166.pdf
 ./doc/html/PSandPDF/Makefile.in
 
 ./doc/html/TechNotes.html
