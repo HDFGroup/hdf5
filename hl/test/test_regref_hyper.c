@@ -27,7 +27,7 @@
 #define dsetnamer "R1"
 
 /* used by H5Lvisit_by_name */ 
-static size_t  _regref_to_all_start;  /* starting index counter for placing data into 1D array, used by H5LRcreate_regref_to_all */ 
+static size_t  _regref_to_all_start;  /* starting index counter for placing data into 1D array, used by H5LRcreate_ref_to_all */ 
 static H5R_type_t _regref_type;       /* type of data to create region references for */
 
 
@@ -775,12 +775,12 @@ static int test_regref_hyper( void )
 
 
     /*-------------------------------------------------------------------------
-     *  Testing H5LRcreate_regref_to_all
+     *  Testing H5LRcreate_ref_to_all
      *-------------------------------------------------------------------------
      */
 
-    TESTING("H5LRcreate_regref_to_all Region Reference Datatset");
-    status = H5LRcreate_regref_to_all(file_id, "/","/RegRef", H5_INDEX_NAME, H5_ITER_INC, H5R_DATASET_REGION);
+    TESTING("H5LRcreate_ref_to_all Region Reference Datatset");
+    status = H5LRcreate_ref_to_all(file_id, "/","/RegRef", H5_INDEX_NAME, H5_ITER_INC, H5R_DATASET_REGION);
 
     if(status < 0) goto out;
 
@@ -794,8 +794,8 @@ static int test_regref_hyper( void )
 
     PASSED();
 
-    TESTING("H5LRcreate_regref_to_all Region Reference Object");
-    status = H5LRcreate_regref_to_all(file_id, "/","/ObjRef", H5_INDEX_NAME, H5_ITER_INC, H5R_OBJECT);
+    TESTING("H5LRcreate_ref_to_all Region Reference Object");
+    status = H5LRcreate_ref_to_all(file_id, "/","/ObjRef", H5_INDEX_NAME, H5_ITER_INC, H5R_OBJECT);
 
     if(status < 0) goto out;
 
