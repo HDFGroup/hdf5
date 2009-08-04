@@ -1147,6 +1147,8 @@
 ./tools/testfiles/tarray6.h5
 ./tools/testfiles/tarray7.ddl
 ./tools/testfiles/tarray7.h5
+./tools/testfiles/tarray8.ddl
+./tools/testfiles/tarray8.h5
 ./tools/testfiles/tattr-1.ddl
 ./tools/testfiles/tattr-2.ddl
 ./tools/testfiles/tattr-3.ddl
