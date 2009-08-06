@@ -308,7 +308,6 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
                    hsize_t elmtno, unsigned ndims, hsize_t min_idx[],
                    hsize_t max_idx[], h5tools_context_t *ctx)
 {
-    hsize_t p_prod[H5S_MAX_RANK];
     size_t i = 0;
     hsize_t curr_pos = elmtno;
 
@@ -352,11 +351,6 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
  * Return:  Success:    Pointer to the prefix.
  *
  *      Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -413,14 +407,10 @@ h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *i
  *
  *      Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-int h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
+int 
+h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         const h5tool_format_t *info, h5tools_context_t *ctx) 
 {
     hssize_t   nblocks;
@@ -485,14 +475,10 @@ int h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
  *
  *      Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Monday, June  7, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-int h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
+int 
+h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         const h5tool_format_t *info, h5tools_context_t *ctx) 
 {
     hssize_t   npoints;
@@ -662,27 +648,6 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
-void h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
-        hid_t container, void *vp, h5tools_context_t *ctx) 
-{
-    hid_t   obj, region;
-    char    ref_name[1024];
-
-    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
-    if (obj >= 0) {
-        region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-        if (region >= 0) {
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*) ref_name, 1024);
-
-            h5tools_str_append(str, info->dset_format, ref_name);
-            h5tools_str_dump_region_blocks(str, region, info, ctx);
-            h5tools_str_dump_region_points(str, region, info, ctx);
-
-            H5Sclose(region);
-        }
-        H5Dclose(obj);
-    }
-}
 
 char *
 h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
@@ -1003,11 +968,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         }
     }
     else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
-        /*
-         * Dataset region reference -- show the type and OID of the referenced
-         * object, but we are unable to show the region yet because there
-         * isn't enough support in the data space layer.  - rpm 19990604
-         */
         if (h5tools_str_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         }
@@ -1177,6 +1137,38 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
 
     return h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_sprint_region
+ *
+ * Purpose: Dataset region reference -- show the type and data of the referenced
+ * object.
+ *
+ * Return:  Nothing
+ *-------------------------------------------------------------------------
+ */
+void h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
+        hid_t container, void *vp, h5tools_context_t *ctx) 
+{
+    hid_t   obj, region;
+    char    ref_name[1024];
+
+    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
+    if (obj >= 0) {
+        region = H5Rget_region(container, H5R_DATASET_REGION, vp);
+        if (region >= 0) {
+            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*) ref_name, 1024);
+
+            h5tools_str_append(str, info->dset_format, ref_name);
+            h5tools_str_dump_region_blocks(str, region, info, ctx);
+            h5tools_str_dump_region_points(str, region, info, ctx);
+
+            H5Sclose(region);
+        }
+        H5Dclose(obj);
+    }
 }
 
 /*-------------------------------------------------------------------------
