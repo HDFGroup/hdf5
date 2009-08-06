@@ -875,6 +875,11 @@
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/stab.c
+./test/swmr_common.c
+./test/swmr_common.h
+./test/swmr_generator.c
+./test/swmr_reader.c
+./test/swmr_writer.c
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
@@ -888,6 +893,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testmeta.c
+./test/testswmr.sh
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
