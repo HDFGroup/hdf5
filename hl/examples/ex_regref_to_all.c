@@ -16,7 +16,7 @@
   This program shows how to create a dataset and region references associated
   with hyperslabs. It then creates a new dataset composed of data from the 
   data associated with a recursive loop over all the region references. 
-  Main illustrative function: H5LRcreate_regref_to_all
+  Main illustrative function: H5LRcreate_ref_to_all
 */
 
 #include "hdf5.h"
@@ -110,7 +110,7 @@ int main(void)
    * Create the "/MY_DATAc" dataset from regions of data.
    */
   
-  status = H5LRcreate_regref_to_all(file_id, "/",
+  status = H5LRcreate_ref_to_all(file_id, "/",
 				    "/NEW_DATA", H5_INDEX_NAME, H5_ITER_INC, H5R_DATASET_REGION);
 
   return 0;
