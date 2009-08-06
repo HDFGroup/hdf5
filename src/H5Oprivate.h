@@ -150,7 +150,7 @@ typedef struct H5O_copy_t {
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
 #define H5O_LINK_ID     0x0006          /* Link Message. */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
-#define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
+#define H5O_LAYOUT_ID	0x0008          /* Data Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
 #define H5O_GINFO_ID	0x000a          /* Group info Message.  */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
@@ -167,6 +167,7 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_UNKNOWN_ID  0x0017          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
+#define H5O_STORAGE_ID	0x0018          /* Data Storage message.  */
 
 
 /* Shared object message types.
@@ -727,6 +728,12 @@ H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
+
+/* Storage operators */
+H5_DLL void *H5O_storage_copy(const void *mesg, void *dest);
+H5_DLL herr_t H5O_storage_reset(void *mesg);
+H5_DLL size_t H5O_storage_meta_size(const H5F_t *f, const H5O_storage_t *storage,
+    hbool_t include_compact_data);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);

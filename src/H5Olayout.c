@@ -64,6 +64,8 @@ static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
+static herr_t H5O_layout_pre_copy_file(H5F_t *file_src,
+    const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
     void *udata, hid_t dxpl_id);
@@ -80,15 +82,15 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_layout_encode,      	/*encode message                */
     H5O_layout_copy,        	/*copy the native value         */
     H5O_layout_size,        	/*size of message on disk       */
-    H5O_layout_reset,           /*reset method                  */
+    H5O_layout_reset,		/*reset method                  */
     H5O_layout_free,        	/*free the struct		*/
     H5O_layout_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file */
-    H5O_layout_copy_file,       /* copy native value to file    */
-    NULL,		        /* post copy native value to file    */
+    H5O_layout_pre_copy_file,	/* pre copy native value to file */
+    H5O_layout_copy_file,	/* copy native value to file    */
+    NULL,		        /* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_layout_debug       	/*debug the message             */
@@ -131,6 +133,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     /* decode */
     if(NULL == (mesg = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    mesg->storage.type = H5D_LAYOUT_ERROR;
 
     mesg->version = *p++;
     if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
@@ -147,6 +150,9 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
         /* Layout class */
         mesg->type = (H5D_layout_t)*p++;
         assert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type || H5D_COMPACT == mesg->type);
+
+        /* Set the storage type */
+        mesg->storage.type = mesg->type;
 
         /* Reserved bytes */
         p += 5;
@@ -166,7 +172,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
             /* Set the chunk operations */
             /* (Only "btree" indexing type currently supported in this version) */
-            mesg->storage.u.chunk.idx_type = H5D_CHUNK_BTREE;
+            mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
             mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
         } /* end if */
         else {
@@ -214,12 +220,21 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
             case H5D_COMPACT:
-                UINT16DECODE(p, mesg->storage.u.compact.size);
-                if(mesg->storage.u.compact.size > 0) {
-                    if(NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for compact data buffer")
-                    HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
-                    p += mesg->storage.u.compact.size;
+                /* Check which version to decode */
+                /* (layout versions >= 4 have the compact data in the 'storage' message) */
+                if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                    /* Set the storage type */
+                    mesg->storage.type = mesg->type;
+
+                    /* Compact data size */
+                    UINT16DECODE(p, mesg->storage.u.compact.size);
+
+                    if(mesg->storage.u.compact.size > 0) {
+                        if(NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for compact data buffer")
+                        HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
+                        p += mesg->storage.u.compact.size;
+                    } /* end if */
                 } /* end if */
 
                 /* Set the layout operations */
@@ -227,8 +242,18 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                 break;
 
             case H5D_CONTIGUOUS:
-                H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
-                H5F_DECODE_LENGTH(f, p, mesg->storage.u.contig.size);
+                /* Check which version to decode */
+                /* (layout versions >= 4 have the contiguous storage address in the 'storage' message) */
+                if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                    /* Set the storage type */
+                    mesg->storage.type = mesg->type;
+
+                    /* Contiguous storage address */
+                    H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
+
+                    /* Contiguous storage size */
+                    H5F_DECODE_LENGTH(f, p, mesg->storage.u.contig.size);
+                } /* end if */
 
                 /* Set the layout operations */
                 mesg->ops = H5D_LOPS_CONTIG;
@@ -236,6 +261,9 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
             case H5D_CHUNKED:
                 if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                    /* Set the storage type */
+                    mesg->storage.type = mesg->type;
+
                     /* Dimensionality */
                     mesg->u.chunk.ndims = *p++;
                     if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
@@ -294,13 +322,9 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown chunk index type")
                     mesg->storage.u.chunk.idx_type = mesg->u.chunk.idx_type;
 
-                    /* Chunk index address */
-                    H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
-
                     switch(mesg->u.chunk.idx_type) {
                         case H5D_CHUNK_IDX_BTREE:       /* Remove this when v2 B-tree indices added */
-                            /* Set the chunk operations */
-                            mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
+                            /* Nothing to do */
                             break;
 
                         case H5D_CHUNK_IDX_FARRAY:
@@ -308,9 +332,6 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
                             if(0 == mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid fixed array creation parameter")
-
-                            /* Set the chunk operations */
-                            mesg->storage.u.chunk.ops = H5D_COPS_FARRAY;
                             break;
 
                         case H5D_CHUNK_IDX_EARRAY:
@@ -330,9 +351,6 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
                             if(0 == mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
-
-                            /* Set the chunk operations */
-                            mesg->storage.u.chunk.ops = H5D_COPS_EARRAY;
                             break;
 
                         default:
@@ -419,22 +437,31 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
     /* Write out layout class specific information */
     switch(mesg->type) {
         case H5D_COMPACT:
-            /* Size of raw data */
-            UINT16ENCODE(p, mesg->storage.u.compact.size);
+            /* This information is stored in 'storage' message when version >= 4 */
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* Size of raw data */
+                UINT16ENCODE(p, mesg->storage.u.compact.size);
 
-            /* Raw data */
-            if(mesg->storage.u.compact.size > 0) {
-                if(mesg->storage.u.compact.buf)
-                    HDmemcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
-                else
-                    HDmemset(p, 0, mesg->storage.u.compact.size);
-                p += mesg->storage.u.compact.size;
+                /* Raw data */
+                if(mesg->storage.u.compact.size > 0) {
+                    if(mesg->storage.u.compact.buf)
+                        HDmemcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
+                    else
+                        HDmemset(p, 0, mesg->storage.u.compact.size);
+                    p += mesg->storage.u.compact.size;
+                } /* end if */
             } /* end if */
             break;
 
         case H5D_CONTIGUOUS:
-            H5F_addr_encode(f, &p, mesg->storage.u.contig.addr);
-            H5F_ENCODE_LENGTH(f, p, mesg->storage.u.contig.size);
+            /* This information is stored in 'storage' message when version >= 4 */
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* Contiguous storage address */
+                H5F_addr_encode(f, &p, mesg->storage.u.contig.addr);
+
+                /* Contiguous storage size */
+                H5F_ENCODE_LENGTH(f, p, mesg->storage.u.contig.size);
+            } /* end if */
             break;
 
         case H5D_CHUNKED:
@@ -468,9 +495,6 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
 
                 /* Chunk index type */
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
-
-                /* Chunk index address */
-                H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
 
                 switch(mesg->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:       /* Remove this when v2 B-tree indices added */
@@ -617,19 +641,23 @@ static herr_t
 H5O_layout_reset(void *_mesg)
 {
     H5O_layout_t     *mesg = (H5O_layout_t *)_mesg;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_reset)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_reset)
 
     if(mesg) {
-        /* Free the compact storage buffer */
-        if(H5D_COMPACT == mesg->type)
-            mesg->storage.u.compact.buf = H5MM_xfree(mesg->storage.u.compact.buf);
+        /* Reset associated storage information, if it's been initialized */
+        if(H5D_LAYOUT_ERROR != mesg->storage.type) {
+            if(H5O_storage_reset(&mesg->storage) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free message resources")
+        } /* end if */
 
         /* Reset the message */
         mesg->type = H5D_CONTIGUOUS;
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_reset() */
 
 
@@ -691,31 +719,75 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     HDassert(open_oh);
     HDassert(mesg);
 
-    /* Perform different actions, depending on the type of storage */
-    switch(mesg->type) {
-        case H5D_COMPACT:       /* Compact data storage */
-            /* Nothing required */
-            break;
+    /* Check version #, older versions are in charge of storage also */
+    if(mesg->version < H5O_LAYOUT_VERSION_4) {
+        /* Perform different actions, depending on the type of storage */
+        switch(mesg->type) {
+            case H5D_COMPACT:       /* Compact data storage */
+                /* Nothing required */
+                break;
 
-        case H5D_CONTIGUOUS:    /* Contiguous block on disk */
-            /* Free the file space for the raw data */
-            if(H5D_contig_delete(f, dxpl_id, &mesg->storage) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
-            break;
+            case H5D_CONTIGUOUS:    /* Contiguous block on disk */
+                /* Free the file space for the raw data */
+                if(H5D_contig_delete(f, dxpl_id, &mesg->storage) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
+                break;
 
-        case H5D_CHUNKED:       /* Chunked blocks on disk */
-            /* Free the file space for the index & chunk raw data */
-            if(H5D_chunk_delete(f, dxpl_id, open_oh, &mesg->storage) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
-            break;
+            case H5D_CHUNKED:       /* Chunked blocks on disk */
+                /* Free the file space for the index & chunk raw data */
+                if(H5D_chunk_delete(f, dxpl_id, open_oh, &mesg->storage) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
+                break;
 
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type")
-    } /* end switch */
+            default:
+                HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "not valid storage type")
+        } /* end switch */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_layout_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              July 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_layout_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
+    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
+{
+    const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src;    /* Source layout */
+    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
+    herr_t             ret_value = SUCCEED;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_layout_pre_copy_file)
+
+    /* check args */
+    HDassert(layout_src);
+
+    /* If the user data is non-NULL, assume we are copying a dataset
+     * and make a copy of the layout for later in the object copying process,
+     * if the layout version is late enough that we know it will be needed
+     * by the 'storage' message.
+     */
+    if(udata && layout_src->version >= H5O_LAYOUT_VERSION_4)
+        if(NULL == (udata->src_layout = (H5O_layout_t *)H5O_layout_copy(layout_src, NULL)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy layout")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_pre_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -729,10 +801,6 @@ done:
  *
  * Programmer:  Peter Cao
  *              July 23, 2005
- *
- * Modifications:
- *      Vailin Choi; April 2009
- *      Reset address and pointer of the array struct for the chunked storage index
  *
  *-------------------------------------------------------------------------
  */
@@ -749,56 +817,62 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy_file)
 
     /* check args */
+    HDassert(file_src);
     HDassert(layout_src);
     HDassert(file_dst);
 
-    /* Allocate space for the destination layout */
-    if(NULL == (layout_dst = H5FL_MALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
+    /* Copy the layout information */
+    if(NULL == (layout_dst = (H5O_layout_t *)H5O_layout_copy(layout_src, NULL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy layout")
 
-    /* Copy the "top level" information */
-    *layout_dst = *layout_src;
+    /* Check if using version of layout message that encodes storage info */
+    if(layout_src->version < H5O_LAYOUT_VERSION_4) {
+        /* Copy the layout type specific information */
+        switch(layout_src->type) {
+            case H5D_COMPACT:
+                if(layout_src->storage.u.compact.buf) {
+                    /* copy compact raw data */
+                    if(H5D_compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
+                } /* end if */
+                break;
 
-    /* Copy the layout type specific information */
-    switch(layout_src->type) {
-        case H5D_COMPACT:
-	    if(layout_src->storage.u.compact.buf) {
-                /* copy compact raw data */
-                if(H5D_compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
-	    } /* end if */
-            break;
+            case H5D_CONTIGUOUS:
+                /* Compute the size of the contiguous storage for versions of the
+                 * layout message less than version 3 because versions 1 & 2 would
+                 * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
+                 */
+                if(layout_src->version < 3)
+                    layout_dst->storage.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
+                                            H5T_get_size(udata->src_dtype);
 
-        case H5D_CONTIGUOUS:
-            /* Compute the size of the contiguous storage for versions of the
-             * layout message less than version 3 because versions 1 & 2 would
-             * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
-             */
-            if(layout_src->version < 3)
-                layout_dst->storage.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
-                                        H5T_get_size(udata->src_dtype);
+                if(H5D_contig_is_space_alloc(&layout_src->storage)) {
+                    /* copy contiguous raw data */
+                    if(H5D_contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
+                } /* end if */
+                break;
 
-            if(H5D_contig_is_space_alloc(&layout_src->storage)) {
-                /* copy contiguous raw data */
-                if(H5D_contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
-            } /* end if */
-            break;
+            case H5D_CHUNKED:
+                if(H5D_chunk_is_space_alloc(&layout_src->storage)) {
+                    /* Create chunked layout */
+                    if(H5D_chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
+                } /* end if */
+                break;
 
-        case H5D_CHUNKED:
-            if(H5D_chunk_is_space_alloc(&layout_src->storage)) {
-                /* Create chunked layout */
-                if(H5D_chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
-            } /* end if */
-            break;
+            default:
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
+        } /* end switch */
 
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid layout class")
-    } /* end switch */
-
-    /* Freed by copy routine */
-    udata->src_dtype = NULL;
+        /* Freed by copy routine */
+        udata->src_dtype = NULL;
+    } /* end if */
+    else {
+        /* Dataset's raw data will be copied using the 'storage' message, reset storage her */
+        if(H5O_storage_reset(&layout_dst->storage) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to free message resources")
+    } /* end else */
 
     /* Set return value */
     ret_value = layout_dst;
@@ -859,7 +933,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
             HDfprintf(stream, "}\n");
 
             /* Index information */
-            switch(mesg->storage.u.chunk.idx_type) {
+            switch(mesg->u.chunk.idx_type) {
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
@@ -877,27 +951,31 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
 
                 default:
                     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
-                              "Index Type:", "Unknown", (unsigned)mesg->storage.u.chunk.idx_type);
+                              "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                      "Index address:", mesg->storage.u.chunk.idx_addr);
+            if(mesg->version < H5O_LAYOUT_VERSION_4)
+                HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                          "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                       "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                      "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.contig.size);
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                          "Data address:", mesg->storage.u.contig.addr);
+                HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+                          "Data Size:", mesg->storage.u.contig.size);
+            } /* end if */
             break;
 
         case H5D_COMPACT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                       "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.compact.size);
+            if(mesg->version < H5O_LAYOUT_VERSION_4)
+                HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+                          "Data Size:", mesg->storage.u.compact.size);
             break;
 
         default:

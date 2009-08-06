@@ -125,6 +125,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
     H5O_MSG_UNKNOWN,		/*0x0017 Placeholder for unknown message */
+    H5O_MSG_STORAGE,		/*0x0018 Placeholder for unknown message */
 };
 
 /* Header object ID to class mapping */

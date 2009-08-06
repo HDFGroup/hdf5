@@ -155,6 +155,10 @@ H5O_dset_free_copy_file_udata(void *_udata)
     if(udata->src_pline)
         H5O_msg_free(H5O_PLINE_ID, udata->src_pline);
 
+    /* Release copy of dataset's layout, if it was set */
+    if(udata->src_layout)
+        H5O_msg_free(H5O_LAYOUT_ID, udata->src_layout);
+
     /* Release space for 'copy file' user data */
     (void)H5FL_FREE(H5D_copy_file_ud_t, udata);
 
@@ -374,6 +378,15 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Get the layout message from the object header */
     if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
+
+    /* Check for newer version of the layout message, which indicates that some
+     * information is stored in the 'storage' message.
+     */
+    if(layout.version >= H5O_LAYOUT_VERSION_4) {
+        /* Retrieve the storage information */
+        if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_STORAGE_ID, &(layout.storage)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to read data storage message")
+    } /* end if */
 
     /* Check for chunked dataset storage */
     if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout.storage)) {

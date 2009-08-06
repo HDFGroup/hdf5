@@ -4019,12 +4019,12 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
+                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
+                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
+                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops));
     HDassert(chunk_addr);
 
     /* Set up user data for B-tree callback */
