@@ -351,9 +351,9 @@ typedef struct H5HF_hdr_t {
     hbool_t     huge_ids_direct; /* Flag to indicate that 'huge' object's offset & length are stored directly in heap ID */
     size_t      tiny_max_len;   /* Max. size of tiny objects for this heap */
     hbool_t     tiny_len_extended; /* Flag to indicate that 'tiny' object's length is stored in extended form (i.e. w/extra byte) */
-    unsigned char huge_id_size; /* Size of 'huge' heap IDs (in bytes) */
-    unsigned char heap_off_size; /* Size of heap offsets (in bytes) */
-    unsigned char heap_len_size; /* Size of heap ID lengths (in bytes) */
+    uint8_t     huge_id_size; /* Size of 'huge' heap IDs (in bytes) */
+    uint8_t     heap_off_size; /* Size of heap offsets (in bytes) */
+    uint8_t     heap_len_size; /* Size of heap ID lengths (in bytes) */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -639,6 +639,15 @@ H5_DLL herr_t H5HF_huge_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 H5_DLL herr_t H5HF_huge_remove(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id);
 H5_DLL herr_t H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
+
+/* 'Huge' object v2 B-tree function callbacks */
+H5_DLL herr_t H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_dir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
 
 /* 'Tiny' object routines */
 H5_DLL herr_t H5HF_tiny_init(H5HF_hdr_t *hdr);

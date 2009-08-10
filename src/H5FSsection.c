@@ -27,6 +27,7 @@
 
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -36,14 +37,10 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
+
 /****************/
 /* Local Macros */
 /****************/
-
-/* #define QAK */
-
-/* Default starting size of section buffer */
-#define H5FS_SINFO_SIZE_DEFAULT  64
 
 
 /******************/
@@ -86,6 +83,7 @@ static herr_t H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect,
     void *op_data);
 static htri_t H5FS_sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node);
 static herr_t H5FS_sect_serialize_size(H5FS_t *fspace);
+
 
 /*********************/
 /* Package Variables */
@@ -178,8 +176,9 @@ done:
         /* Release bins for skip lists */
         if(sinfo->bins)
             sinfo->bins = H5FL_SEQ_FREE(H5FS_bin_t, sinfo->bins);
+
         /* Release free space section info */
-        H5FL_FREE(H5FS_sinfo_t, sinfo);
+        sinfo = H5FL_FREE(H5FS_sinfo_t, sinfo);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

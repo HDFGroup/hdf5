@@ -498,6 +498,7 @@ H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
+H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);

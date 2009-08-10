@@ -299,31 +299,31 @@ static herr_t
 H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
 		void UNUSED *_udata, void *_rt_key, haddr_t *addr_p/*out*/)
 {
-    H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
-    H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
-    H5G_node_t		   *sym = NULL;
-    hsize_t		    size = 0;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
+    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
+    H5G_node_t		*sym = NULL;
+    hsize_t		size = 0;
+    herr_t              ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_create);
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5B_INS_FIRST == op);
+    HDassert(f);
+    HDassert(H5B_INS_FIRST == op);
 
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     size = H5G_node_size_real(f);
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space")
 
     sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)));
-    if(NULL==sym->entry)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if(NULL == sym->entry)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     if(H5AC_set(f, dxpl_id, H5AC_SNODE, *addr_p, sym, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to cache symbol table leaf node");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to cache symbol table leaf node")
     /*
      * The left and right symbols in an empty tree are both the
      * empty string stored at offset zero by the H5G functions. This
@@ -339,13 +339,13 @@ done:
     if(ret_value < 0) {
         if(sym != NULL) {
             if(sym->entry != NULL)
-                H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
-            (void)H5FL_FREE(H5G_node_t, sym);
+                sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+            sym = H5FL_FREE(H5G_node_t, sym);
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -636,7 +636,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
      */
     rt = sn->nsyms;
     while(lt < rt) {
-	idx = (lt + rt) / 2;
+	idx = (int)((lt + rt) / 2);
         s = base + sn->entry[idx].name_off;
 
         /* Check if symbol is already present */
@@ -644,9 +644,9 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "symbol is already present in symbol table")
 
 	if (cmp < 0)
-	    rt = idx;
+	    rt = (unsigned)idx;
 	else
-	    lt = idx + 1;
+	    lt = (unsigned)(idx + 1);
     } /* end while */
     idx += cmp > 0 ? 1 : 0;
 
@@ -689,15 +689,17 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	    insert_into = sn;
 	    if(idx == (int)H5F_SYM_LEAF_K(f))
 		md_key->offset = ent.name_off;
-	} else {
+	} /* end if */
+        else {
 	    idx -= H5F_SYM_LEAF_K(f);
 	    insert_into = snrt;
-	    if(idx == (int)H5F_SYM_LEAF_K (f)) {
+	    if(idx == (int)H5F_SYM_LEAF_K(f)) {
 		rt_key->offset = ent.name_off;
 		*rt_key_changed = TRUE;
 	    } /* end if */
 	} /* end else */
-    } else {
+    } /* end if */
+    else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
         sn_flags |= H5AC__DIRTIED_FLAG;

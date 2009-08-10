@@ -2824,8 +2824,9 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
-        /* Allocate first block from meta_aggr */
         type = H5FD_MEM_SUPER;
+
+        /* Allocate first block from meta_aggr */
         addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -5798,11 +5799,11 @@ error:
 int
 main(void)
 {
-    hid_t       	fapl = -1;	/* File access property list for data files */
-    hid_t       	new_fapl = -1;	/* File access property list for alignment & aggr setting */
-    unsigned    	nerrors = 0;    /* Cumulative error count */
-    test_type_t		curr_test;
-    const char          *env_h5_drvr;   /* File Driver value from environment */
+    hid_t       fapl = -1;	   /* File access property list for data files */
+    hid_t       new_fapl = -1;	   /* File access property list for alignment & aggr setting */
+    unsigned    nerrors = 0;       /* Cumulative error count */
+    test_type_t	curr_test;	   /* Current test being worked on */
+    const char  *env_h5_drvr;      /* File Driver value from environment */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
@@ -5849,10 +5850,7 @@ main(void)
     nerrors += test_mf_aggr_extend(env_h5_drvr, fapl);
     nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
 
-    /*
-     * tests for alignment
-     */
-
+    /* Tests for alignment */
     for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
 
 	switch(curr_test) {
@@ -5869,6 +5867,7 @@ main(void)
 
             default:
                 TEST_ERROR;
+		break;
 	} /* end switch */
 
 	nerrors += test_mf_align_eoa(env_h5_drvr, fapl, new_fapl);

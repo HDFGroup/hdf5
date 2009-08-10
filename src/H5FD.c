@@ -1717,7 +1717,6 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     FUNC_ENTER_NOAPI(H5FD_get_fs_type_map, FAIL)
 
     /* Sanity check */
-    HDassert(file);
     HDassert(file && file->cls);
     HDassert(type_map);
 
