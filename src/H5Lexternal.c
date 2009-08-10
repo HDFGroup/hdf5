@@ -482,7 +482,7 @@ H5L_extern_query(const char UNUSED * link_name, const void *_udata, size_t udata
     } /* end if */
 
     /* Set return value */
-    ret_value = udata_size;
+    ret_value = (ssize_t)udata_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

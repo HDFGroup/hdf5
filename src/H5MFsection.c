@@ -528,4 +528,3 @@ done:
     FUNC_LEAVE_NOAPI((H5FS_section_info_t *)ret_value)
 } /* end H5MF_sect_simple_split() */
 
-

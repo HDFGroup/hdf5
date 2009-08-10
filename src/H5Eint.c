@@ -275,7 +275,7 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 	        fprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-        fprintf(stream, "thread %lu", HDpthread_self_ulong());
+        fprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
         fprintf(stream, "thread 0");
 #endif
@@ -392,7 +392,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 	        fprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-        fprintf(stream, "thread %lu", HDpthread_self_ulong());
+        fprintf(stream, "thread %lu", (unsigned long)HDpthread_self_ulong());
 #else
         fprintf(stream, "thread 0");
 #endif

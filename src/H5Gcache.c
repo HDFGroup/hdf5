@@ -311,7 +311,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
         /* entries */
         if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
-        HDmemset(p, 0, size - (p - node));
+        HDmemset(p, 0, size - (size_t)(p - node));
 
 	/* Write the serialized symbol table node. */
         if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)

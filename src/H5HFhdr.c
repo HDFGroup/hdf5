@@ -43,6 +43,7 @@
 /* Local Macros */
 /****************/
 
+#ifndef NDEBUG
 /* Limit on the size of the max. direct block size */
 /* (This is limited to 32-bits currently, because I think it's unlikely to
  *      need to be larger, the 32-bit limit for H5V_log2_of2(n), and
@@ -55,6 +56,8 @@
  *      need to be larger, and its encoded with a maxiumum of 16-bits  - QAK)
  */
 #define H5HF_WIDTH_LIMIT (64 * 1024)
+#endif /* NDEBUG */
+
 
 /******************/
 /* Local Typedefs */
@@ -219,7 +222,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* Compute/cache some values */
-    hdr->heap_off_size = H5HF_SIZEOF_OFFSET_BITS(hdr->man_dtable.cparam.max_index);
+    hdr->heap_off_size = (uint8_t)H5HF_SIZEOF_OFFSET_BITS(hdr->man_dtable.cparam.max_index);
     if(H5HF_dtable_init(&hdr->man_dtable) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 

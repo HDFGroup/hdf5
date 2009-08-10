@@ -508,7 +508,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 HDassert(nullcnt == 0);
 
                 /* Set gap information for chunk */
-                oh->chunk[chunkno].gap = (eom_ptr - p);
+                oh->chunk[chunkno].gap = (size_t)(eom_ptr - p);
 
                 /* Increment location in chunk */
                 p += oh->chunk[chunkno].gap;

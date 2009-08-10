@@ -26,23 +26,8 @@
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
 
-/*
- * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
- * should not change other than adding new types to the end. These numbers
- * might appear in files.
- */
-typedef enum H5FD_mem_t {
-    H5FD_MEM_NOLIST	= -1,			/*must be negative*/
-    H5FD_MEM_DEFAULT	= 0,			/*must be zero*/
-    H5FD_MEM_SUPER      = 1,
-    H5FD_MEM_BTREE      = 2,
-    H5FD_MEM_DRAW       = 3,
-    H5FD_MEM_GHEAP      = 4,
-    H5FD_MEM_LHEAP      = 5,
-    H5FD_MEM_OHDR       = 6,
-
-    H5FD_MEM_NTYPES				/*must be last*/
-} H5FD_mem_t;
+/* Types of allocation requests: see H5Fpublic.h  */
+typedef enum H5F_mem_t	H5FD_mem_t;
 
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar

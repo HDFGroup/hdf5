@@ -543,7 +543,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Check if the chunk's data portion is too small */
     dst_oh_gap = dst_oh_null = 0;
     if(dst_oh_size < H5O_MIN_SIZE) {
-        size_t delta = (H5O_MIN_SIZE - dst_oh_size);    /* Delta in chunk size needed */
+        size_t delta = (size_t)(H5O_MIN_SIZE - dst_oh_size);    /* Delta in chunk size needed */
 
         /* Sanity check */
         HDassert((oh_dst->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);

@@ -111,6 +111,24 @@ typedef struct H5F_info_t {
     } sohm;
 } H5F_info_t;
 
+/*
+ * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
+ * should not change other than adding new types to the end. These numbers
+ * might appear in files.
+ */
+typedef enum H5F_mem_t {
+    H5FD_MEM_NOLIST	= -1,			/*must be negative*/
+    H5FD_MEM_DEFAULT	= 0,			/*must be zero*/
+    H5FD_MEM_SUPER      = 1,
+    H5FD_MEM_BTREE      = 2,
+    H5FD_MEM_DRAW       = 3,
+    H5FD_MEM_GHEAP      = 4,
+    H5FD_MEM_LHEAP      = 5,
+    H5FD_MEM_OHDR       = 6,
+
+    H5FD_MEM_NTYPES				/*must be last*/
+} H5F_mem_t;
+
 /* Library's file format versions */
 typedef enum H5F_libver_t {
     H5F_LIBVER_EARLIEST,        /* Use the earliest possible format for storing objects */

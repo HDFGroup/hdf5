@@ -378,11 +378,11 @@ H5HP_create(H5HP_type_t heap_type)
 
 done:
     /* Error cleanup */
-    if(ret_value==NULL) {
-        if(new_heap!=NULL) {
-            if(new_heap->heap!=NULL)
-                H5FL_SEQ_FREE(H5HP_ent_t,new_heap->heap);
-            (void)H5FL_FREE(H5HP_t,new_heap);
+    if(NULL ==ret_value) {
+        if(NULL != new_heap) {
+            if(NULL != new_heap->heap)
+                new_heap->heap = H5FL_SEQ_FREE(H5HP_ent_t, new_heap->heap);
+            new_heap = H5FL_FREE(H5HP_t, new_heap);
         } /* end if */
     } /* end if */
 
@@ -772,20 +772,20 @@ H5HP_incr(H5HP_t *heap, unsigned amt, void *_obj)
     assert(heap->heap[0].obj==NULL);
 
     /* Get the location of the object in the heap */
-    obj_loc=obj->heap_loc;
-    assert(obj_loc>0 && obj_loc<=heap->nobjs);
+    obj_loc = obj->heap_loc;
+    assert(obj_loc > 0 && obj_loc <= heap->nobjs);
 
     /* Change the heap object's priority */
-    heap->heap[obj_loc].val+=amt;
+    heap->heap[obj_loc].val += (int)amt;
 
     /* Restore heap condition */
-    if(heap->type==H5HP_MAX_HEAP) {
-        if(H5HP_swim_max(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
+    if(H5HP_MAX_HEAP == heap->type) {
+        if(H5HP_swim_max(heap, obj_loc) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition")
     } /* end if */
     else {
-        if(H5HP_sink_min(heap,obj_loc)<0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition");
+        if(H5HP_sink_min(heap, obj_loc) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESTORE, FAIL, "unable to restore heap condition")
     } /* end else */
 
 done:
@@ -910,10 +910,10 @@ H5HP_close(H5HP_t *heap)
     HDassert(NULL == heap->heap[0].obj);
 
     /* Free internal structures for heap */
-    H5FL_SEQ_FREE(H5HP_ent_t, heap->heap);
+    heap->heap = H5FL_SEQ_FREE(H5HP_ent_t, heap->heap);
 
     /* Free actual heap object */
-    (void)H5FL_FREE(H5HP_t, heap);
+    heap = H5FL_FREE(H5HP_t, heap);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HP_close() */

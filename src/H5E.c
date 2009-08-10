@@ -336,7 +336,7 @@ H5E_get_stack(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
-    estack = pthread_getspecific(H5TS_errstk_key_g);
+    estack = (H5E_t *)pthread_getspecific(H5TS_errstk_key_g);
 
     if(!estack) {
         /* no associated value with current thread - create one */

@@ -13,6 +13,7 @@ File information
 Object header size: (total/unused)
 	Groups: 5145147/3220092
 	Datasets: 414/312
+	Datatypes: 0/0
 Storage information:
 	Groups:
 		B-tree/List: 470054

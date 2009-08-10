@@ -377,7 +377,7 @@ H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
                     if((cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL, (size_t)0)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "query buffer size callback returned failure")
 
-                    info->u.val_size = cb_ret;
+                    info->u.val_size = (size_t)cb_ret;
                 } /* end if */
                 else
                     info->u.val_size = 0;

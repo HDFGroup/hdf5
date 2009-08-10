@@ -163,7 +163,7 @@ H5O_add_gap(H5O_t *oh, unsigned chunkno, unsigned idx,
             /* Check if we need to extend message table to hold the new null message */
             if(oh->nmesgs >= oh->alloc_nmesgs)
                 if(H5O_alloc_msgs(oh, (size_t)1) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "can't allocate more space for messages")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
             /* Increment new gap size */
             oh->chunk[chunkno].gap += new_gap_size;
@@ -329,7 +329,7 @@ H5O_alloc_null(H5O_t *oh, unsigned null_idx, const H5O_msg_class_t *new_type,
 
             /* Add the gap to the chunk */
             if(H5O_add_gap(oh, alloc_msg->chunkno, null_idx, alloc_msg->raw + alloc_msg->raw_size, gap_size) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, UFAIL, "can't insert gap in chunk")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
         } /* end if */
         else {
             size_t  new_mesg_size = new_size + H5O_SIZEOF_MSGHDR_OH(oh); /* Total size of newly allocated message */
@@ -338,7 +338,7 @@ H5O_alloc_null(H5O_t *oh, unsigned null_idx, const H5O_msg_class_t *new_type,
             /* Check if we need to extend message table to hold the new null message */
             if(oh->nmesgs >= oh->alloc_nmesgs) {
                 if(H5O_alloc_msgs(oh, (size_t)1) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "can't allocate more space for messages")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
 
                 /* "Retarget" 'alloc_msg' pointer into newly re-allocated array of messages */
                 alloc_msg = &oh->mesg[null_idx];
@@ -361,7 +361,7 @@ H5O_alloc_null(H5O_t *oh, unsigned null_idx, const H5O_msg_class_t *new_type,
                 if(H5O_eliminate_gap(oh, null_msg,
                         ((oh->chunk[null_chunkno].image + oh->chunk[null_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[null_chunkno].gap)),
                         oh->chunk[null_chunkno].gap) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, UFAIL, "can't eliminate gap in chunk")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
 
                 /* Set the gap size to zero for the chunk */
                 oh->chunk[null_chunkno].gap = 0;

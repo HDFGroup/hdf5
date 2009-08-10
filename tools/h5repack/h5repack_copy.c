@@ -930,16 +930,12 @@ int do_copy_objects(hid_t fidin,
                             /* only print the compression ration if there was a filter request */
                             if (apply_s && apply_f && req_filter)
                             {
-                                hssize_t a, b;
-
                                 /* get the storage size of the output dataset */
                                 dsize_out=H5Dget_storage_size(dset_out);
 
                                 /* compression ratio = uncompressed size /  compressed size */
-
-                                a = dsize_in; b = dsize_out;
-                                if (b!=0)
-                                    ratio = (double) a / (double) b;
+                                if (dsize_out!=0)
+                                    ratio = (double) dsize_in / (double) dsize_out;
 
                                 print_dataset_info(dcpl_out,travt->objs[i].name,ratio,1);
                             }
