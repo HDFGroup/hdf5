@@ -420,7 +420,7 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     /* Check if the free space manager for the file has been initialized */
     if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
         if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize file free space")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
 
     /* Search for large enough space in the free space manager */
     if(f->shared->fs_man[fs_type]) {
@@ -768,8 +768,8 @@ H5MF_sects_dump(f, dxpl_id, stderr);
  *
  *-------------------------------------------------------------------------
  */
-hssize_t
-H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
+herr_t
+H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_size)
 {
     haddr_t eoa;                /* End of allocated space in the file */
     haddr_t ma_addr = HADDR_UNDEF;    /* Base "metadata aggregator" address */
@@ -777,8 +777,9 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
     haddr_t sda_addr = HADDR_UNDEF;    /* Base "small data aggregator" address */
     hsize_t sda_size = 0;       /* Size of "small data aggregator" */
     hsize_t tot_fs_size = 0;    /* Amount of all free space managed */
+    hsize_t tot_meta_size = 0;  /* Amount of metadata for free space managers */
     H5FD_mem_t type;            /* Memory type for iteration */
-    hssize_t ret_value;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_get_freespace, FAIL)
 
@@ -801,7 +802,6 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
 
     /* Iterate over all the free space types that have managers and get each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
-        hsize_t type_fs_size = 0;    /* Amount of free space managed for each type */
 	hbool_t fs_started = FALSE;
 
 	/* Check if the free space for the file has been initialized */
@@ -812,13 +812,21 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
             fs_started = TRUE;
         } /* end if */
 
-        /* Retrieve free space size from free space manager */
-        if(f->shared->fs_man[type])
-            if((ret_value = H5FS_sect_stats(f->shared->fs_man[type], &type_fs_size, NULL)) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
+	/* Check if there's free space of this type */
+        if(f->shared->fs_man[type]) {
+            hsize_t type_fs_size = 0;    /* Amount of free space managed for each type */
+            hsize_t type_meta_size = 0;  /* Amount of free space metadata for each type */
 
-        /* Increment total free space for types */
-        tot_fs_size += type_fs_size;
+            /* Retrieve free space size from free space manager */
+            if(H5FS_sect_stats(f->shared->fs_man[type], &type_fs_size, NULL) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
+            if(H5FS_size(f, f->shared->fs_man[type], &type_meta_size) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space metadata stats")
+
+            /* Increment total free space for types */
+            tot_fs_size += type_fs_size;
+            tot_meta_size += type_meta_size;
+	} /* end if */
 
 	/* Close the free space manager, if we opened it here */
         if(fs_started)
@@ -826,15 +834,12 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
     } /* end for */
 
-    /* Start computing value to return */
-    ret_value = tot_fs_size;
-
     /* Check for aggregating metadata allocations */
     if(ma_size > 0) {
         /* Add in the reserved space for metadata to the available free space */
         /* (if it's not at the tail of the file) */
         if(H5F_addr_ne(ma_addr + ma_size, eoa))
-            ret_value += ma_size;
+            tot_fs_size += ma_size;
     } /* end if */
 
     /* Check for aggregating small data allocations */
@@ -842,8 +847,14 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
         /* Add in the reserved space for metadata to the available free space */
         /* (if it's not at the tail of the file) */
         if(H5F_addr_ne(sda_addr + sda_size, eoa))
-            ret_value += sda_size;
+            tot_fs_size += sda_size;
     } /* end if */
+
+    /* Set the value(s) to return */
+    if(tot_space)
+	*tot_space = tot_fs_size;
+    if(meta_size)
+	*meta_size = tot_meta_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

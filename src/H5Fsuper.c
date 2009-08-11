@@ -112,6 +112,7 @@
 /********************/
 static herr_t H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr);
 static herr_t H5F_super_ext_open(H5F_t *f, H5O_loc_t *ext_ptr);
+static herr_t H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create);
 static herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr);
 
 
@@ -1109,7 +1110,6 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
         /* Check for driver info message */
         H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
         if(driver_size > 0) {
-            H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
             H5O_drvinfo_t drvinfo;      /* Driver info */
             uint8_t dbuf[H5F_MAX_DRVINFOBLOCK_SIZE];  /* Driver info block encoding buffer */
 
@@ -1120,19 +1120,11 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
             if(H5FD_sb_encode(f->shared->lf, drvinfo.name, dbuf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
 
-            /* Open the superblock extension */
-            if(H5F_super_ext_open(f, &ext_loc) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to start file's superblock extension")
-
             /* Write driver info information to the superblock extension */
             drvinfo.len = driver_size;
             drvinfo.buf = dbuf;
-            if(H5O_msg_write(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update driver info header message")
-
-            /* Close superblock extension */
-	    if(H5F_super_ext_close(f, &ext_loc) < 0)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+	    if(H5F_super_ext_write_msg(f, dxpl_id, &drvinfo, H5O_DRVINFO_ID, FALSE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
         } /* end if */
     } /* end if */
 
@@ -1180,4 +1172,67 @@ H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_size)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_super_ext_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_write_msg()
+ *
+ * Purpose:     Write the message with ID to the superblock extension
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create)
+{
+    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
+    htri_t 	status;       	/* Indicate whether the message exists or not */
+    herr_t 	ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_write_msg)
+
+    /* Open/create the superblock extension object header */
+    if(H5F_addr_defined(f->shared->extension_addr)) {
+	if(H5F_super_ext_open(f, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
+    } /* end if */
+    else {
+        HDassert(may_create);
+	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
+    } /* end else */
+    HDassert(H5F_addr_defined(ext_loc.addr));
+
+    /* Check if message with ID does not exist in the object header */
+    if((status = H5O_msg_exists(&ext_loc, id, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check object header for message or message exists")
+
+    /* Check for creating vs. writing */
+    if(may_create) {
+	if(status)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should not exist")
+
+	/* Create the message with ID in the superblock extension */
+	if(H5O_msg_create(&ext_loc, id, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to create the message in object header")
+    } /* end if */
+    else {
+	if(!status)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "Message should exist")
+
+	/* Update the message with ID in the superblock extension */
+	if(H5O_msg_write(&ext_loc, id, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, mesg, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to write the message in object header")
+    } /* end else */
+
+    /* Close the superblock extension object header */
+    if(H5F_super_ext_close(f, &ext_loc) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close file's superblock extension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_write_msg() */
 
