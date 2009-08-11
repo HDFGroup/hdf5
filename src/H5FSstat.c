@@ -82,7 +82,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_stat_info(const H5FS_t *frsp, H5FS_stat_t *stats)
+H5FS_stat_info(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *stats)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_stat_info)
 
@@ -95,7 +95,11 @@ H5FS_stat_info(const H5FS_t *frsp, H5FS_stat_t *stats)
     stats->tot_sect_count = frsp->tot_sect_count;
     stats->serial_sect_count = frsp->serial_sect_count;
     stats->ghost_sect_count = frsp->ghost_sect_count;
-    /* can add more metadata statistics for the free-space manager */
+    stats->addr = frsp->addr;
+    stats->hdr_size = H5FS_HEADER_SIZE(f);
+    stats->sect_addr = frsp->sect_addr;
+    stats->alloc_sect_size = frsp->alloc_sect_size;
+    stats->sect_size = frsp->sect_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_stat_info() */

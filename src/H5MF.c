@@ -75,6 +75,10 @@ typedef enum {
 /* Local Prototypes */
 /********************/
 
+/* Allocator routines */
+static herr_t H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+static herr_t H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+
 
 /*********************/
 /* Package Variables */
@@ -195,11 +199,10 @@ H5MF_init_merge_flags(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_alloc_start
+ * Function:	H5MF_alloc_open
  *
- * Purpose:	"Start up" free space for file - open existing free space
- *              structure if one exists, otherwise create a new free space
- *              structure
+ * Purpose:	Open an existing free space manager of TYPE for file by
+ *		creating a free-space structure
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -208,17 +211,110 @@ H5MF_init_merge_flags(H5F_t *f)
  *		koziol@hdfgroup.org
  *		Jan  8 2008
  *
- * Modifications:
- *	Vailin Choi, July 29th, 2008
- *	  Pass values of alignment and threshold to FS_create() for handling alignment
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+{
+    const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for file */
+        H5MF_FSPACE_SECT_CLS_SIMPLE};
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_open)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
+
+    /* Open an existing free space structure for the file */
+    if(NULL == (f->shared->fs_man[type] = H5FS_open(f, dxpl_id, f->shared->fs_addr[type],
+	    NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
+
+    /* Set the state for the free space manager to "open", if it is now */
+    if(f->shared->fs_man[type])
+        f->shared->fs_state[type] = H5F_FS_STATE_OPEN;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_alloc_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_alloc_create
+ *
+ * Purpose:	Create free space manager of TYPE for the file by creating 
+ *		a free-space structure
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jan  8 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+{
+    const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for file */
+        H5MF_FSPACE_SECT_CLS_SIMPLE};
+    herr_t ret_value = SUCCEED;         /* Return value */
+    H5FS_create_t fs_create; 		/* Free space creation parameters */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_create)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
+
+    /* Set the free space creation parameters */
+    fs_create.client = H5FS_CLIENT_FILE_ID;
+    fs_create.shrink_percent = H5MF_FSPACE_SHRINK;
+    fs_create.expand_percent = H5MF_FSPACE_EXPAND;
+    fs_create.max_sect_addr = 1 + H5V_log2_gen((uint64_t)f->shared->maxaddr);
+    fs_create.max_sect_size = f->shared->maxaddr;
+
+    if(NULL == (f->shared->fs_man[type] = H5FS_create(f, dxpl_id, NULL,
+	    &fs_create, NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
+
+
+    /* Set the state for the free space manager to "open", if it is now */
+    if(f->shared->fs_man[type])
+        f->shared->fs_state[type] = H5F_FS_STATE_OPEN;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_alloc_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_alloc_start
+ *
+ * Purpose:	Open or create a free space manager of a given type
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, hbool_t may_create)
+H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
-    const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for file */
-        H5MF_FSPACE_SECT_CLS_SIMPLE};
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_start)
@@ -229,47 +325,59 @@ H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, hbool_t may_create)
     HDassert(f);
     HDassert(f->shared);
 
-    /* Check for creating free space info for the file */
+    /* Check if the free space manager exists already */
     if(H5F_addr_defined(f->shared->fs_addr[type])) {
-        /* Open an existing free space structure for the file */
-        HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
-        if(NULL == (f->shared->fs_man[type] = H5FS_open(f, dxpl_id, f->shared->fs_addr[type],
-                NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
+        /* Open existing free space manager */
+        if(H5MF_alloc_open(f, dxpl_id, type) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space")
     } /* end if */
     else {
-        /* Check if we are allowed to create the free space manager */
-        if(may_create) {
-            H5FS_create_t fs_create;        /* Free space creation parameters */
-
-            /* Set the free space creation parameters */
-            fs_create.client = H5FS_CLIENT_FILE_ID;
-            fs_create.shrink_percent = H5MF_FSPACE_SHRINK;
-            fs_create.expand_percent = H5MF_FSPACE_EXPAND;
-            fs_create.max_sect_addr = 1 + H5V_log2_gen((uint64_t)f->shared->maxaddr);
-            fs_create.max_sect_size = f->shared->maxaddr;
-
-            /* Create the free space structure for the heap */
-            HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
-#ifdef LATER
-            if(NULL == (f->shared->fs_man[type] = H5FS_create(f, dxpl_id, &f->shared->fs_addr[type],
-                    &fs_create, NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
-#else /* LATER */
-            if(NULL == (f->shared->fs_man[type] = H5FS_create(f, dxpl_id, NULL,
-                    &fs_create, NELMTS(classes), classes, f, f->shared->alignment, f->shared->threshold)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize free space info")
-#endif /* LATER */
-        } /* end if */
+        /* Create new free space manager */
+        if(H5MF_alloc_create(f, dxpl_id, type) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCREATE, FAIL, "can't initialize file free space")
     } /* end else */
-
-    /* Set the state for the free space manager to "open", if it is now */
-    if(f->shared->fs_man[type])
-        f->shared->fs_state[type] = H5F_FS_STATE_OPEN;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_alloc_start() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_alloc_close
+ *
+ * Purpose:     Close an existing free space manager of TYPE for file
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer: Vailin Choi; July 1st, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5MF_alloc_close)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->fs_man[type]);
+    HDassert(f->shared->fs_state[type] != H5F_FS_STATE_CLOSED);
+
+    /* Close an existing free space structure for the file */
+    if(H5FS_close(f, dxpl_id, f->shared->fs_man[type]) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release free space info")
+    f->shared->fs_man[type] = NULL;
+    f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_alloc_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -310,8 +418,8 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     fs_type = H5MF_ALLOC_TO_FS_TYPE(f, alloc_type);
 
     /* Check if the free space manager for the file has been initialized */
-    if(!f->shared->fs_man[fs_type])
-        if(H5MF_alloc_start(f, dxpl_id, fs_type, FALSE) < 0)
+    if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "can't initialize file free space")
 
     /* Search for large enough space in the free space manager */
@@ -537,7 +645,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
          *  space isn't at the end of the file, so start up (or create)
          *  the file space manager
          */
-        if(H5MF_alloc_start(f, dxpl_id, fs_type, TRUE) < 0)
+        if(H5MF_alloc_start(f, dxpl_id, fs_type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
     } /* end if */
     HDassert(f->shared->fs_man[fs_type]);
@@ -625,8 +733,8 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
             fs_type = H5MF_ALLOC_TO_FS_TYPE(f, alloc_type);
 
             /* Check if the free space for the file has been initialized */
-            if(!f->shared->fs_man[fs_type])
-                if(H5MF_alloc_start(f, dxpl_id, fs_type, FALSE) < 0)
+            if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
+                if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
 
             /* Check for test block able to block in free space manager */
@@ -689,16 +797,20 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
 
     /* Retrieve 'small data' aggregator info, if available */
     if(H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query small data aggregator stats")
 
     /* Iterate over all the free space types that have managers and get each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
         hsize_t type_fs_size = 0;    /* Amount of free space managed for each type */
+	hbool_t fs_started = FALSE;
 
-        /* Check if the free space for the file has been initialized */
-        if(!f->shared->fs_man[type])
-            if(H5MF_alloc_start(f, dxpl_id, type, FALSE) < 0)
+	/* Check if the free space for the file has been initialized */
+        if(!f->shared->fs_man[type] && H5F_addr_defined(f->shared->fs_addr[type])) {
+            if(H5MF_alloc_open(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+            HDassert(f->shared->fs_man[type]);
+            fs_started = TRUE;
+        } /* end if */
 
         /* Retrieve free space size from free space manager */
         if(f->shared->fs_man[type])
@@ -707,6 +819,11 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id)
 
         /* Increment total free space for types */
         tot_fs_size += type_fs_size;
+
+	/* Close the free space manager, if we opened it here */
+        if(fs_started)
+            if(H5MF_alloc_close(f, dxpl_id, type) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
     } /* end for */
 
     /* Start computing value to return */
@@ -905,7 +1022,7 @@ HDfprintf(stderr, "%s: Check 1.0 - f->shared->fs_man[%u] = %p, f->shared->fs_add
 HDfprintf(stderr, "%s: Before closing free space manager\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
             if(H5FS_close(f, dxpl_id, f->shared->fs_man[type]) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release free space info")
             f->shared->fs_man[type] = NULL;
             f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
         } /* end if */

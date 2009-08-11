@@ -147,6 +147,11 @@ typedef struct H5FS_stat_t {
     hsize_t tot_sect_count;     /* Total # of sections tracked                */
     hsize_t serial_sect_count;  /* # of serializable sections tracked         */
     hsize_t ghost_sect_count;   /* # of un-serializable sections tracked      */
+    haddr_t addr;		/* Address of free space header on disk       */
+    hsize_t hdr_size;		/* Size of the free-space header on disk      */
+    haddr_t sect_addr;          /* Address of the section info in the file    */
+    hsize_t alloc_sect_size;    /* Allocated size of the section info in the file */
+    hsize_t sect_size;    	/* Size of the section info in the file       */
 } H5FS_stat_t;
 
 /* Typedef for iteration operations */
@@ -192,8 +197,7 @@ H5_DLL herr_t H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     H5FS_section_info_t *sect, unsigned new_class);
 
 /* Statistics routine */
-H5_DLL herr_t H5FS_stat_info(const H5FS_t *fh, H5FS_stat_t *stats);
-
+H5_DLL herr_t H5FS_stat_info(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *stats);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
