@@ -149,7 +149,6 @@ typedef struct H5FS_stat_t {
     hsize_t ghost_sect_count;   /* # of un-serializable sections tracked      */
 } H5FS_stat_t;
 
-
 /* Typedef for iteration operations */
 typedef herr_t (*H5FS_operator_t)(const H5FS_section_info_t *sect,
         void *operator_data/*in,out*/);
