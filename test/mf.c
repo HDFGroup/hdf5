@@ -79,18 +79,43 @@ typedef struct frspace_state_t {
 } frspace_state_t;
 
 
-static int check_stats(const H5FS_t *, const frspace_state_t *);
+static int check_stats(const H5F_t *, const H5FS_t *, frspace_state_t *);
+static unsigned test_mf_eoa(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_tmp(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_fs_start(hid_t fapl);
+static unsigned test_mf_fs_alloc_free(hid_t fapl);
+static unsigned test_mf_fs_extend(hid_t fapl);
+static unsigned test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl);
+static unsigned test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
+static unsigned test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl);
 
 /*
  * Verify statistics for the free-space manager
  */
 static int
-check_stats(const H5FS_t *frsp, const frspace_state_t *state)
+check_stats(const H5F_t *f, const H5FS_t *frsp, frspace_state_t *state)
 {
     H5FS_stat_t frspace_stats;             /* Statistics about the heap */
 
     /* Get statistics for free-space and verify they are correct */
-    if(H5FS_stat_info(frsp, &frspace_stats) < 0)
+    if(H5FS_stat_info(f, frsp, &frspace_stats) < 0)
         FAIL_STACK_ERROR
 
     if(frspace_stats.tot_space != state->tot_space) {
@@ -895,7 +920,7 @@ error:
 } /* test_mf_tmp() */
 
 /*
- * To verify that the free-space manager is started up via H5MF_alloc_start()
+ * To verify that the free-space manager is created or opened
  *
  * Set up:
  * 	Turn off using meta/small data aggregator
@@ -912,7 +937,7 @@ test_mf_fs_start(hid_t fapl)
     frspace_state_t 	state;
 
 
-    TESTING("H5MF_alloc_start() of free-space manager");
+    TESTING("H5MF_alloc_create()/H5MF_alloc_open() of free-space manager");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -945,8 +970,10 @@ test_mf_fs_start(hid_t fapl)
 
     /* Start up free-space manager */
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -954,7 +981,7 @@ test_mf_fs_start(hid_t fapl)
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     if(H5Fclose(file) < 0)
@@ -1052,8 +1079,10 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1077,7 +1106,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 30 */
@@ -1091,7 +1120,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the block to free-space */
@@ -1100,7 +1129,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     state.tot_space += TEST_BLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove section A from free-space */
@@ -1135,8 +1164,10 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1160,7 +1191,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 20 */
@@ -1173,7 +1204,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     /* should still have 1 section of size 10 left in free-space manager */
     state.tot_space -= (TEST_BLOCK_SIZE20);
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the block to free-space manager */
@@ -1181,7 +1212,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Still 1 section in free-space because of merging */
     state.tot_space += TEST_BLOCK_SIZE20;
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove section A from free-space manager */
@@ -1217,8 +1248,10 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1242,7 +1275,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /*
@@ -1257,7 +1290,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 	TEST_ERROR
 
     /* free-space info should be the same  */
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove section A from free-space */
@@ -1270,7 +1303,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 	TEST_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the block of size 40 to free-space */
@@ -1281,7 +1314,7 @@ test_mf_fs_alloc_free(hid_t fapl)
      * The block is returned to free-space.
      * It is shrunk and freed because it is at end of file.
      */
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     if(H5Fclose(file) < 0)
@@ -1392,8 +1425,10 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1417,7 +1452,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 30 */
@@ -1431,7 +1466,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Create section B */
@@ -1445,7 +1480,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Try to extend the allocated block */
@@ -1460,7 +1495,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the extended block to free-space manager */
@@ -1471,7 +1506,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count = 1;
     state.serial_sect_count = 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove the extended block */
@@ -1507,8 +1542,10 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1532,7 +1569,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 30 */
@@ -1546,7 +1583,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Create section B */
@@ -1560,7 +1597,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Try to extend the allocated block */
@@ -1571,7 +1608,7 @@ test_mf_fs_extend(hid_t fapl)
 	TEST_ERROR
 
     /* free-space info should remain the same */
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the allocated block A to free-space */
@@ -1581,7 +1618,7 @@ test_mf_fs_extend(hid_t fapl)
     /* rest of the info remains the same */
     state.tot_space += TEST_BLOCK_SIZE30;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove the merged sections A & B from free-space */
@@ -1617,8 +1654,10 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1642,7 +1681,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 30 */
@@ -1656,7 +1695,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Create section B */
@@ -1670,7 +1709,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Try to extend the allocated block */
@@ -1682,7 +1721,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Should have 1 section of size=10 left in free-space manager */
     state.tot_space -= (TEST_BLOCK_SIZE40);
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the extended block  */
@@ -1691,7 +1730,7 @@ test_mf_fs_extend(hid_t fapl)
     /* rest info is same, the extended section returned is merged with the section in free-space */
     state.tot_space += (TEST_BLOCK_SIZE30+TEST_BLOCK_SIZE40);
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove the merged sections A & B from free-space */
@@ -1727,8 +1766,10 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1752,7 +1793,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of size=20 */
@@ -1766,7 +1807,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Create section B */
@@ -1780,7 +1821,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Try to extend the allocated block */
@@ -1791,7 +1832,7 @@ test_mf_fs_extend(hid_t fapl)
 	TEST_ERROR
 
     /* Free-space info should be the same */
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the allocated block */
@@ -1801,7 +1842,7 @@ test_mf_fs_extend(hid_t fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Remove section A from free-space manger */
@@ -1908,8 +1949,10 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
-        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
+
+        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
             TEST_ERROR
+
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
             TEST_ERROR
         if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -1975,8 +2018,10 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
-        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
+
+        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
             TEST_ERROR
+
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
             TEST_ERROR
         if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -2868,7 +2913,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
 
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         /* Free all the allocated blocks */
@@ -3048,7 +3093,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
 
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         /* Free all the allocated blocks */
@@ -3683,7 +3728,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
             state.serial_sect_count += 1;
-            if(check_stats(f->shared->fs_man[type], &state))
+            if(check_stats(f, f->shared->fs_man[type], &state))
                 TEST_ERROR
         }
 
@@ -3706,7 +3751,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
             state.serial_sect_count += 1;
-            if(check_stats(f->shared->fs_man[type], &state))
+            if(check_stats(f, f->shared->fs_man[type], &state))
                 TEST_ERROR
         }
 
@@ -3921,8 +3966,10 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -3945,7 +3992,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 50 */
@@ -3959,7 +4006,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the block to free-space */
@@ -3968,7 +4015,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_space += TEST_BLOCK_SIZE50;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     if(H5Fclose(file) < 0)
@@ -3988,8 +4035,10 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
+
+    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
+        TEST_ERROR
+
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
 	TEST_ERROR
     if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -4012,7 +4061,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Allocate a block of 600 */
@@ -4026,7 +4075,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* try to extend the block */
@@ -4037,7 +4086,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* space should be decreased by 200, # of sections remain the same */
     state.tot_space -= TEST_BLOCK_SIZE200;
 
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     /* Free the block to free-space manager */
@@ -4047,7 +4096,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     state.tot_space += (TEST_BLOCK_SIZE600+TEST_BLOCK_SIZE200);
     state.tot_sect_count = 1;
     state.serial_sect_count = 1;
-    if(check_stats(f->shared->fs_man[type], &state))
+    if(check_stats(f, f->shared->fs_man[type], &state))
         TEST_ERROR
 
     if(H5Fclose(file) < 0)
@@ -4075,8 +4124,10 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
-        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
+
+        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type) < 0)
             TEST_ERROR
+
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
             TEST_ERROR
         if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
@@ -4099,7 +4150,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
 
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
         /*
          * Allocate a block of 40
@@ -4126,7 +4177,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         }
 
         /* free-space info should be the same  */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -4389,7 +4440,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Verify total size of free space after all the allocations */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
@@ -4668,7 +4719,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Verify total size of free space after all the allocations */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
@@ -5040,7 +5091,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -5245,7 +5296,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr3 % alignment) TEST_ERROR
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -5453,7 +5504,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         }
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         /* nothing is changed in meta_aggr */
@@ -5773,7 +5824,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (sdata_addr != 0 || sdata_size != 0)
             TEST_ERROR
 
-        if(check_stats(f->shared->fs_man[type], &state))
+        if(check_stats(f, f->shared->fs_man[type], &state))
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -5812,17 +5863,17 @@ main(void)
 
     fapl = h5_fileaccess();
 
-    /* meta/small data is set to 2048 for the following tests */
-    if(H5Pset_meta_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
-	TEST_ERROR
-    if(H5Pset_small_data_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
-	TEST_ERROR
-
     /* Make a copy of the FAPL before adjusting the alignment */
     if((new_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
 
     /* alignment is not set for the following tests */
     if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0)
+	TEST_ERROR
+
+    /* meta/small data is set to 2048 for the following tests */
+    if(H5Pset_meta_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
+	TEST_ERROR
+    if(H5Pset_small_data_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
 	TEST_ERROR
 
     /* interaction with file allocation */
@@ -5880,11 +5931,13 @@ main(void)
 	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
     } /* end if */
 
+    if (H5Pclose(new_fapl) < 0) 
+        FAIL_STACK_ERROR
+    h5_cleanup(FILENAME, fapl);
+
     if(nerrors)
         goto error;
     puts("All free-space manager tests for file memory passed.");
-
-    h5_cleanup(FILENAME, fapl);
 
     return (0);
 
