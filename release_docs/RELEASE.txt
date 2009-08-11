@@ -71,6 +71,8 @@ New Features
 
 Support for New Platforms, Languages and Compilers
 ==================================================
+    - PathScale compilers are recognized and can build the HDF5 library
+      properly. AKC - 2009/7/28 -
 
 
 Bug Fixes since HDF5-1.6.9 Release
@@ -84,7 +86,8 @@ Bug Fixes since HDF5-1.6.9 Release
 
     Configuration
     -------------
-    - None
+    - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
+      recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
 
     Performance
     -----------
