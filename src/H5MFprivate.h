@@ -60,7 +60,8 @@
 
 /* File space manager routines */
 H5_DLL herr_t H5MF_init_merge_flags(H5F_t *f);
-H5_DLL hssize_t H5MF_get_freespace(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space,
+    hsize_t *meta_size);
 H5_DLL herr_t H5MF_close(H5F_t *f, hid_t dxpl_id);
 
 /* File space allocation routines */
