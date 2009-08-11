@@ -86,7 +86,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - None
+    - PathScale compilers are recognized and can build the HDF5 library
+      properly. AKC - 2009/7/28 -
 
 
 Bug Fixes since HDF5-1.8.3
@@ -94,7 +95,8 @@ Bug Fixes since HDF5-1.8.3
 
     Configuration
     -------------
-    - None
+    - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
+      recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
 
     Library
     -------
@@ -320,6 +322,11 @@ Cray XT3 2.0.41                      n       n         n         n
 
 Known Problems
 ==============
+* The PathScale MPI implementation, accessing a Panasas file system, would
+  cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
+  existing. This is due to the MPI_File_open() call failing if the amode has
+  the MPI_MODE_EXCL bit set. (See bug 1468 for details.) AKC - 2009/8/11
+ 
 * Parallel tests failed with 16 processes with data inconsistency at testphdf5
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
