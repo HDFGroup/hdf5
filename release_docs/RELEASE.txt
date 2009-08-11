@@ -151,6 +151,9 @@ New Features
             The size of the hyperslabs are defined as the size of each dimension or a 
             predefined constant, whatever is smaller. This assures that the chunk 
             read fits in the chunk cache. (PVN - 2008/11/21)
+     - h5diff: h5diff treats two INFINITY values different. Fixed by checking  (value==expect) 
+            before call ABS(...) at h5diff_array.c This will make that (INF==INF) is true 
+            (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
     
     High-Level APIs:
     ------
