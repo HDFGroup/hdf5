@@ -286,8 +286,9 @@ test_mpio_gb_file(char *filename)
 	VRFY((buf!=NULL), "malloc succeed");
 
 	/* open a new file. Remove it first in case it exists. */
-	if (MAINPROCESS)
-	    remove(filename);
+	/* Must delete because MPI_File_open does not have a Truncate mode. */
+	/* Don't care if it has error. */
+	MPI_File_delete(filename, MPI_INFO_NULL);
 	MPI_Barrier(MPI_COMM_WORLD);	/* prevent racing condition */
 
 	mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
@@ -490,6 +491,7 @@ test_mpio_1wMr(char *filename, int special_request)
     /* Must delete because MPI_File_open does not have a Truncate mode. */
     /* Don't care if it has error. */
     MPI_File_delete(filename, MPI_INFO_NULL);
+    MPI_Barrier(MPI_COMM_WORLD);	/* prevent racing condition */
 
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
 	    MPI_MODE_RDWR | MPI_MODE_CREATE ,
