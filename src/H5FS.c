@@ -386,9 +386,9 @@ HDfprintf(stderr, "%s: Real sections to store in file\n", FUNC);
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
                 } /* end if */
             } /* end if */
-            else
-                /* Sanity check that section info has address */
-                HDassert(H5F_addr_defined(fspace->sect_addr));
+	    else
+		/* Sanity check that section info has address */
+		HDassert(H5F_addr_defined(fspace->sect_addr));
 
             /* Cache the free space section info */
             if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)

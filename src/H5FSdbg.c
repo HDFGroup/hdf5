@@ -131,7 +131,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Free space client:",
 	      (fspace->client == H5FS_CLIENT_FHEAP_ID ? "Fractal heap" :
-	      (fspace->client == H5FS_CLIENT_FILE_ID ? "File Memory Management" : "Unknown")));
+	      (fspace->client == H5FS_CLIENT_FILE_ID ? "File" : "Unknown")));
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Total free space tracked:",
 	      fspace->tot_space);
