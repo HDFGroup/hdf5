@@ -124,8 +124,8 @@ typedef struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     uint8_t	status_flags;	/* File status flags			*/
-    unsigned	flags;		/* Access Permissions for file		*/
-    H5F_mtab_t	mtab;		/* File mount table		*/
+    unsigned	flags;		/* Access Permissions for file          */
+    H5F_mtab_t	mtab;		/* File mount table                     */
 
     /* Cached values from FCPL/superblock */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
@@ -205,6 +205,7 @@ struct H5F_t {
     struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
 };
+
 
 /*****************************/
 /* Package Private Variables */

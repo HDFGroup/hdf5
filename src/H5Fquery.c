@@ -113,8 +113,6 @@ H5F_get_intent(const H5F_t *f)
  *
  * Programmer:	Vailin Choi, April 2, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 char *
