@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "H5Pget_filter_by_id" -->
 <hr>
 <dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 12 August 2009
+      </i></font></div>
+
   <dt><strong>Name:</strong> <a name="Property-GetFilterById">H5Pget_filter_by_id</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_filter_by_id</code>(
@@ -35,10 +39,9 @@
 	allocated by the calling program; on exit it contains the
         number of values defined by the filter.
  	<p>
-	On input, the <code>name_len</code> parameter indicates the 
+	On input, the <code>namelen</code> parameter indicates the 
 	number of characters allocated for the filter name 
 	by the calling program in the array <code>name[]</code>.
-	On exit it contains the length in characters of name of the filter.
 	On exit <code>name[]</code> contains the name of the filter
         with one character of the name in each element of the array.
 	<p>
@@ -58,14 +61,14 @@
             <td valign="top">OUT:  Bit vector specifying certain general properties
                 of the filter.</td></tr>
         <tr>
-		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+		    <td valign="top"><em>size_t *</em><code>cd_nelmts</code></td>
             <td valign="top">IN/OUT: Number of elements in <code>cd_values</code>.</td></tr>
         <tr>
 		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">OUT: Auxiliary data for the filter.</td></tr>
         <tr>
 		    <td valign="top"><em>size_t</em> <code>namelen</code></td>
-            <td valign="top">IN/OUT: Length of filter name and 
+            <td valign="top">IN: Length of filter name and 
 	        number of elements in <code>name[]</code>.</td></tr>
         <tr>
 		    <td valign="top"><em>char</em> <code>name[]</code></td>
