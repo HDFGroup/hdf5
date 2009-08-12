@@ -39,6 +39,8 @@ New Features
 
     Configuration:
     -------------
+    - Configuration suite now uses Automake 1.11 and Autoconf 2.64.
+      MAM 2009/08/11.
     - Changed default Gnu fortran compiler from g95 to gfortran since
       gfortran is more likely installed with gcc now. -AKC 2009/07/19- 
     - Added libtool version numbers to generated c++, fortran, and 
