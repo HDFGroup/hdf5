@@ -561,8 +561,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, August 16, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t

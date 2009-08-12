@@ -678,13 +678,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, March 30, 1998
  *
- * Modifications:
- *
- *              John Mainzer, 6/8/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 void *

@@ -843,22 +843,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 18 1997
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed the file creation and access property list to the
- *		new generic property list.
- *
- *		J Mainzer, Mar 10, 2005
- *		Updated for the new metadata cache, and associated
- *		property list changes.
- *
- *		J Mainzer, Jun 30, 2005
- *		Added lf parameter so the shared->lf field can be
- *		initialized prior to the call to H5AC_create() if a
- *		new instance of H5F_file_t is created.  lf should be
- *		NULL if shared isn't, and vise versa.
- *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
@@ -1040,16 +1024,13 @@ done:
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Jul 18 1997
- * Modifications:
- *		Vailin Choi,  April 2, 2008
- *		Free f->extpath
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_dest(H5F_t *f, hid_t dxpl_id)
 {
-    herr_t	   ret_value = SUCCEED;
+    herr_t	   ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_dest)
 
@@ -1096,6 +1077,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp = NULL;
         } /* end if */
+
+        /* Destroy other components of the file */
         if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
@@ -1198,42 +1181,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  * Programmer:	Robb Matzke
  *		Tuesday, September 23, 1997
  *
- * Modifications:
- *		Albert Cheng, 1998-02-05
- *		Added the access_parms argument to pass down access template
- *		information.
- *
- * 		Robb Matzke, 1998-02-18
- *		The H5F_access_t changed to allow more generality.  The low
- *		level driver is part of the file access template so the TYPE
- *		argument has been removed.
- *
- * 		Robb Matzke, 1999-08-02
- *		Rewritten to use the virtual file layer.
- *
- * 		Robb Matzke, 1999-08-16
- *		Added decoding of file driver information block, which uses a
- *		formerly reserved address slot in the boot block in order to
- *		be compatible with previous versions of the file format.
- *
- * 		Robb Matzke, 1999-08-20
- *		Optimizations for opening a file. If the driver can't
- *		determine when two file handles refer to the same file then
- *		we open the file in one step.  Otherwise if the first attempt
- *		to open the file fails then we skip the second attempt if the
- *		arguments would be the same.
- *
- *		Raymond Lu, 2001-10-14
- *		Changed the file creation and access property lists to the
- *		new generic property list.
- *
- *		Bill Wendling, 2003-03-18
- *		Modified H5F_flush call to take one flag instead of
- *		multiple Boolean flags.
- *
- *		Vailin Choi, 2008-04-02
- *		To formulate path for later searching of target file for external link
- *		via H5_build_extpath().
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -1462,33 +1409,6 @@ done:
  *
  * Programmer:	Unknown
  *
- * Modifications:
- * 		Robb Matzke, 1997-07-18
- *		File struct creation and destruction is through H5F_new() and
- *		H5F_dest(). Writing the root symbol table entry is done with
- *		H5G_encode().
- *
- *  		Robb Matzke, 1997-08-29
- *		Moved creation of the boot block to H5F_flush().
- *
- *  		Robb Matzke, 1997-09-23
- *		Most of the work is now done by H5F_open() since H5Fcreate()
- *		and H5Fopen() originally contained almost identical code.
- *
- * 		Robb Matzke, 1998-02-18
- *		Better error checking for the creation and access property
- *		lists. It used to be possible to swap the two and core the
- *		library.  Also, zero is no longer valid as a default property
- *		list; one must use H5P_DEFAULT instead.
- *
- * 		Robb Matzke, 1999-08-02
- *		The file creation and file access property lists are passed
- *		to the H5F_open() as object IDs.
- *
- *		Raymond Lu, 2001-10-14
- *              Changed the file creation and access property list to the
- * 		new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1649,14 +1569,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Thursday, August  6, 1998
- *
- * Modifications:
- * 		Robb Matzke, 1998-10-16
- *		Added the `scope' argument.
- *
- *		Bill Wendling, 2003-03-18
- *		Modified H5F_flush call to take one flag instead of
- *		several Boolean flags.
  *
  *-------------------------------------------------------------------------
  */
@@ -2933,6 +2845,7 @@ done:
  *
  * Programmer:  Vailin Choi
  *              July 11, 2007
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2982,3 +2895,4 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info() */
+
