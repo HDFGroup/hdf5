@@ -142,8 +142,8 @@ H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1];
 /******************************/
 
 /* Allocator routines */
-H5_DLL herr_t H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
-    hbool_t may_create);
+H5_DLL herr_t H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+H5_DLL herr_t H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
 H5_DLL herr_t H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream);
 
 /* 'simple' section routines */

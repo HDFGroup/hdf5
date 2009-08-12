@@ -1471,6 +1471,7 @@ H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent
 
     /* Reset "fake" storage info */
     HDmemset(&storage, 0, sizeof(storage));
+    storage.idx_type = H5D_CHUNK_BTREE;
 
     /* Allocate the shared structure */
     if(H5D_btree_shared_create(f, &storage, ndims) < 0)

@@ -731,10 +731,11 @@ table_list_add(hid_t oid, unsigned long file_no)
 {
     size_t      idx;         /* Index of table to use */
     find_objs_t info;
-    void        *tmp_ptr;
 
     /* Allocate space if necessary */
     if(table_list.nused == table_list.nalloc) {
+        void        *tmp_ptr;
+
         table_list.nalloc = MAX(1, table_list.nalloc * 2);
         if(NULL == (tmp_ptr = HDrealloc(table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
             return -1;
@@ -1441,7 +1442,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
     int j;
 
     j = (int)HDstrlen(name) - 1;
-    obj_name = HDmalloc((size_t)j + 2);
+    obj_name = (char *)HDmalloc((size_t)j + 2);
 
     /* find the last / */
     while(name[j] != '/' && j >= 0)
@@ -1533,7 +1534,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
     herr_t      ret = SUCCEED;
 
     /* Build the object's path name */
-    obj_path = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    obj_path = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDassert(obj_path);
     HDstrcpy(obj_path, prefix);
     HDstrcat(obj_path, "/");
@@ -1692,7 +1693,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
         switch(linfo->type) {
             case H5L_TYPE_SOFT:
                 indentation(indent);
-                targbuf = HDmalloc(linfo->u.val_size);
+                targbuf = (char *)HDmalloc(linfo->u.val_size);
                 HDassert(targbuf);
 
                 if(!doxml) {
@@ -1722,7 +1723,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                         char *t_link_path;
                         int res;
 
-                        t_link_path = HDmalloc(HDstrlen(prefix) + linfo->u.val_size + 1);
+                        t_link_path = (char *)HDmalloc(HDstrlen(prefix) + linfo->u.val_size + 1);
                         if(targbuf[0] == '/')
                             HDstrcpy(t_link_path, targbuf);
                         else {
@@ -1785,7 +1786,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                 break;
 
             case H5L_TYPE_EXTERNAL:
-                targbuf = HDmalloc(linfo->u.val_size);
+                targbuf = (char *)HDmalloc(linfo->u.val_size);
                 HDassert(targbuf);
 
                 indentation(indent);
@@ -2057,7 +2058,7 @@ dump_group(hid_t gid, const char *name)
     }
 
 
-    tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDstrcpy(tmp, prefix);
     indentation(indent);
     begin_obj(dump_header_format->groupbegin, name, dump_header_format->groupblockbegin);
@@ -2714,9 +2715,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             hsize_t dims[H5S_MAX_RANK];
             int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);
             hsize_t nelmts = 1;
-            hsize_t size;
             double ratio = 0;
-            hssize_t a, b;
             int ok = 0;
 
             /* only print the compression ratio for these filters */
@@ -2739,19 +2738,18 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
 
             if (ndims && ok )
             {
+                hsize_t uncomp_size;
 
                 for (i = 0; i < ndims; i++)
                 {
                     nelmts *= dims[i];
                 }
-                size = nelmts * datum_size;
-
-                 a = size; b = storage_size;
+                uncomp_size = nelmts * datum_size;
 
                 /* compression ratio = uncompressed size /  compressed size */
 
-                if (b!=0)
-                    ratio = (double) a / (double) b;
+                if (storage_size != 0)
+                    ratio = (double) uncomp_size / (double) storage_size;
 
                 HDfprintf(stdout, "SIZE %Hu (%.3f:1 COMPRESSION)\n ", storage_size, ratio);
 

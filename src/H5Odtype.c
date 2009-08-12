@@ -579,8 +579,8 @@ done:
     if(ret_value < 0) {
         if(dt != NULL) {
             if(dt->shared != NULL)
-                H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t, dt);
+                dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
     } /* end if */
 

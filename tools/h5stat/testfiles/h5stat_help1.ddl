@@ -1,13 +1,6 @@
 #############################
 Expected output for 'h5stat -h'
 #############################
-
-This tool is under development. For detailed information
-please see the specification document at
-http://hdf.ncsa.uiuc.edu/RFC/h5stat/h5stat-spec.pdf
-
-Please send your comments and questions to help@hdfgroup.org
-
 Usage: h5stat [OPTIONS] file
 
       OPTIONS

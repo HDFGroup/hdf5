@@ -597,7 +597,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
+H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
     hsize_t size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */

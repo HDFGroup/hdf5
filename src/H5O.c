@@ -1450,11 +1450,12 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
                     *oh_flags = H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
                 } /* end else */
             } /* end if */
-        } else {
+        } /* end if */
+        else {
             /* A new object, or one that will be deleted */
-            if(oh->nlink == 0) {
-                /* Check if the object is current open, but marked for deletion */
-                if(H5FO_marked(f, addr) > 0) {
+            if(0 == oh->nlink) {
+                /* Check if the object is currently open, but marked for deletion */
+                if(H5FO_marked(f, addr)) {
                     /* Remove "delete me" flag on the object */
                     if(H5FO_mark(f, addr, FALSE) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
@@ -1497,7 +1498,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
     } /* end if */
 
     /* Set return value */
-    ret_value = oh->nlink;
+    ret_value = (int)oh->nlink;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2935,5 +2936,3 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_visit() */
-
-

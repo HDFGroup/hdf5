@@ -376,7 +376,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_construct(H5F_t *f, H5D_t *dset)
+H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 {
     const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */

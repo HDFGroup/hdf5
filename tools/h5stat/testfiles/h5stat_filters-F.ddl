@@ -5,6 +5,7 @@ Filename: h5stat_filters.h5
 Object header size: (total/unused)
 	Groups: 48/8
 	Datasets: 4936/1344
+	Datatypes: 80/0
 Storage information:
 	Groups:
 		B-tree/List: 1200

@@ -67,9 +67,9 @@
  *      layout is first in the union.  These values are overridden in the
  *      H5P_init_def_layout() routine. -QAK
  */
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, H5D_LOPS_COMPACT, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, H5D_LOPS_CONTIG, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG}}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
@@ -772,7 +772,6 @@ done:
 static herr_t
 H5P_init_def_layout(void)
 {
-    const H5O_layout_compact_t def_layout_compact = H5D_DEF_LAYOUT_COMPACT_INIT;
     const H5O_layout_chunk_t def_layout_chunk = H5D_DEF_LAYOUT_CHUNK_INIT;
     const H5O_storage_compact_t def_store_compact = H5D_DEF_STORAGE_COMPACT_INIT;
     const H5O_storage_chunk_t def_store_chunk = H5D_DEF_STORAGE_CHUNK_INIT;
@@ -780,9 +779,8 @@ H5P_init_def_layout(void)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_init_def_layout)
 
     /* Initialize the default layout info for non-contigous layouts */
-    H5D_def_layout_compact_g.u.compact = def_layout_compact;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
-    H5D_def_layout_chunk_g.u.chunk = def_chunk;
+    H5D_def_layout_chunk_g.u.chunk = def_layout_chunk;
     H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */

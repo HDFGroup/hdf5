@@ -758,15 +758,15 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 
     /* Check arguments */
     if(mesg_type_flags > H5O_SHMESG_ALL_FLAG)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Read the current number of indexes */
     if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &nindexes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
 
     /* Range check */
     if(index_num >= nindexes)
@@ -784,9 +784,9 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
 
     /* Write arrays back to plist */
     if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, type_flags) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index type flags");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set index type flags")
     if(H5P_set(plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set min mesg sizes")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -845,7 +845,7 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
+} /* end H5Pset_shared_mesg_index() */
 
 
 /*-------------------------------------------------------------------------
@@ -905,7 +905,7 @@ H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
+} /* end H5Pset_shared_mesg_phase_change() */
 
 
 /*-------------------------------------------------------------------------
@@ -946,5 +946,5 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
+} /* end H5Pget_shared_mesg_phase_change() */
 

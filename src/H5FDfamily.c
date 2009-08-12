@@ -656,8 +656,6 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
  * Programmer:	Raymond Lu
  *              Tuesday, May 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
