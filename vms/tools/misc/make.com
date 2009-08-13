@@ -49,6 +49,42 @@ $ type sys$input
 	Created  h5mkgrp
 $!
 $ type sys$input
+    	Creating h5repart
+$!
+$ cobj= " h5repart " 
+$!                               
+$ ccc 'cobj 
+$ type sys$input
+$ link/exe=h5repart.exe -
+           h5repart, -
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
+$ type sys$input
+	Created  h5repart
+$!
+$ cobj= " h5repart_gentest " 
+$!                               
+$ ccc 'cobj 
+$ type sys$input
+$ link/exe=h5repart_gentest.exe -
+           h5repart_gentest, -
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
+$ type sys$input
+	Created  h5repart_gentest
+$!
+$ type sys$input
+    	Creating repart_test
+$!
+$ cobj= " repart_test " 
+$!                               
+$ ccc 'cobj 
+$ type sys$input
+$ link/exe=repart_test.exe -
+           repart_test, -
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
+$ type sys$input
+	Created  repart_test
+$!
+$ type sys$input
        Done with misc tools compilation
 $!
 $ exit
