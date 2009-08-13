@@ -1124,7 +1124,6 @@ done:
 } /* H5FS_sect_link() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FS_sect_merge
  *
@@ -1508,9 +1507,14 @@ if(_section_)
              *  (or it would have been eliminated), etc)
              */
             if(sect->size >= extra_requested && (addr + size) == sect->addr) {
+                H5FS_section_class_t *cls;          /* Section's class */
+
                 /* Remove section from data structures */
                 if(H5FS_sect_remove_real(fspace, sect) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't remove section from internal data structures")
+
+                /* Get class for section */
+                cls = &fspace->sect_cls[sect->type];
 
                 /* Check for the section needing to be adjusted and re-added */
                 /* (Note: we should probably add a can_adjust/adjust callback
@@ -1519,11 +1523,6 @@ if(_section_)
                  *      it. - QAK - 2008/01/08)
                  */
                 if(sect->size > extra_requested) {
-                    H5FS_section_class_t *cls;          /* Section's class */
-
-                    /* Get class for section */
-                    cls = &fspace->sect_cls[sect->type];
-
                     /* Sanity check (for now) */
                     HDassert(cls->flags & H5FS_CLS_ADJUST_OK);
 
@@ -1535,6 +1534,14 @@ if(_section_)
                     if(H5FS_sect_link(fspace, sect, 0) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space section into skip list")
                 } /* end if */
+                else {
+                    /* Sanity check */
+                    HDassert(sect->size == extra_requested);
+
+                    /* Exact match, so just free section */
+                    if((*cls->free)(sect) < 0)
+                        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't free section")
+                } /* end else */
 
                 /* Note that we modified the section info */
                 sinfo_modified = TRUE;

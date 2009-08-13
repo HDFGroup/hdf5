@@ -5293,13 +5293,13 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     ret = H5Dclose(dset3);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid);
-    CHECK(ret, FAIL, "H5Sclose");
-
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_transition() */
 
 
