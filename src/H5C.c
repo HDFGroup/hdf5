@@ -6274,6 +6274,10 @@ H5C_protect(H5F_t *	        f,
 
     if ( entry_ptr != NULL ) {
 
+        /* Check for trying to load the wrong type of entry from an address */
+        if(entry_ptr->type != type)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "not a dataset creation property list")
+
         hit = TRUE;
         thing = (void *)entry_ptr;
 

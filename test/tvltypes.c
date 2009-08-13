@@ -2831,7 +2831,7 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
             ret = H5Dclose(dset_id);
@@ -3001,7 +3001,7 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
             ret = H5Dclose(dset_id);
@@ -3097,7 +3097,7 @@ test_vltypes_fill_value(void)
             } /* end for */
 
             /* Release the space */
-            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            ret = H5Dvlen_reclaim(dtype1_id, dset_select_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
             ret = H5Dclose(dset_id);

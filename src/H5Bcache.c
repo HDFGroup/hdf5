@@ -355,7 +355,7 @@ H5B_dest(H5F_t *f, H5B_t *bt)
     } /* end if */
 
     /* Release resources for B-tree node */
-    H5FL_SEQ_FREE(haddr_t, bt->child);
+    bt->child = H5FL_SEQ_FREE(haddr_t, bt->child);
     bt->native = H5FL_BLK_FREE(native_block, bt->native);
     H5RC_DEC(bt->rc_shared);
     bt = H5FL_FREE(H5B_t, bt);

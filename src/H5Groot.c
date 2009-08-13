@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- /*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  *
  * Created:		H5Gobj.c
  *			Apr  8 2009
@@ -107,7 +107,7 @@ H5G_root_ent_decode(H5F_t *f, const uint8_t **pp)
 
     /* Allocate space for the root group symbol table entry */
     HDassert(!f->shared->root_ent);
-    if(NULL == (f->shared->root_ent = (H5G_entry_t *) H5MM_calloc(sizeof(H5G_entry_t))))
+    if(NULL == (f->shared->root_ent = (H5G_entry_t *)H5MM_calloc(sizeof(H5G_entry_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for symbol table entry")
 
     /* decode the root group symbol table entry */
