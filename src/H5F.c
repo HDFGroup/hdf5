@@ -2883,9 +2883,8 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
     HDmemset(finfo, 0, sizeof(H5F_info_t));
 
     /* Check for superblock extension info */
-    if(H5F_addr_defined(f->shared->extension_addr))
-        if(H5F_super_ext_size(f, H5AC_ind_dxpl_id, &finfo->super_ext_size) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+    if(H5F_super_size(f, H5AC_ind_dxpl_id, NULL, &finfo->super_ext_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))

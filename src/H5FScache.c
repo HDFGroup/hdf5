@@ -281,13 +281,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

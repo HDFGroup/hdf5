@@ -417,68 +417,71 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     /* Get free space type from allocation type */
     fs_type = H5MF_ALLOC_TO_FS_TYPE(f, alloc_type);
 
-    /* Check if the free space manager for the file has been initialized */
-    if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
-        if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
+    /* Check if we are using the free space manager for this file */
+    if(H5F_HAVE_FREE_SPACE_MANAGER(f)) {
+        /* Check if the free space manager for the file has been initialized */
+        if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
+            if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
 
-    /* Search for large enough space in the free space manager */
-    if(f->shared->fs_man[fs_type]) {
-        H5MF_free_section_t *node;      /* Free space section pointer */
-        htri_t node_found = FALSE;      /* Whether an existing free list node was found */
+        /* Search for large enough space in the free space manager */
+        if(f->shared->fs_man[fs_type]) {
+            H5MF_free_section_t *node;      /* Free space section pointer */
+            htri_t node_found = FALSE;      /* Whether an existing free list node was found */
 
-        /* Try to get a section from the free space manager */
-        if((node_found = H5FS_sect_find(f, dxpl_id, f->shared->fs_man[fs_type], size, (H5FS_section_info_t **)&node)) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating free space in file")
+            /* Try to get a section from the free space manager */
+            if((node_found = H5FS_sect_find(f, dxpl_id, f->shared->fs_man[fs_type], size, (H5FS_section_info_t **)&node)) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "error locating free space in file")
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.5, node_found = %t\n", FUNC, node_found);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
-        /* Check for actually finding section */
-        if(node_found) {
-            /* Sanity check */
-            HDassert(node);
+            /* Check for actually finding section */
+            if(node_found) {
+                /* Sanity check */
+                HDassert(node);
 
-            /* Retrieve return value */
-            ret_value = node->sect_info.addr;
+                /* Retrieve return value */
+                ret_value = node->sect_info.addr;
 
-            /* Check for eliminating the section */
-            if(node->sect_info.size == size) {
+                /* Check for eliminating the section */
+                if(node->sect_info.size == size) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.6, freeing node\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-                /* Free section node */
-                if(H5MF_sect_simple_free((H5FS_section_info_t *)node) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free simple section node")
-            } /* end if */
-            else {
-                H5MF_sect_ud_t udata;               /* User data for callback */
+                    /* Free section node */
+                    if(H5MF_sect_simple_free((H5FS_section_info_t *)node) < 0)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, HADDR_UNDEF, "can't free simple section node")
+                } /* end if */
+                else {
+                    H5MF_sect_ud_t udata;               /* User data for callback */
 
-                /* Adjust information for section */
-                node->sect_info.addr += size;
-                node->sect_info.size -= size;
+                    /* Adjust information for section */
+                    node->sect_info.addr += size;
+                    node->sect_info.size -= size;
 
-                /* Construct user data for callbacks */
-                udata.f = f;
-                udata.dxpl_id = dxpl_id;
-                udata.alloc_type = alloc_type;
-                udata.allow_sect_absorb = TRUE;
+                    /* Construct user data for callbacks */
+                    udata.f = f;
+                    udata.dxpl_id = dxpl_id;
+                    udata.alloc_type = alloc_type;
+                    udata.allow_sect_absorb = TRUE;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.7, re-adding node, node->sect_info.size = %Hu\n", FUNC, node->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-                /* Re-insert section node into file's free space */
-                if(H5FS_sect_add(f, dxpl_id, f->shared->fs_man[fs_type], (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't re-add section to file free space")
-            } /* end else */
+                    /* Re-insert section node into file's free space */
+                    if(H5FS_sect_add(f, dxpl_id, f->shared->fs_man[fs_type], (H5FS_section_info_t *)node, H5FS_ADD_RETURNED_SPACE, &udata) < 0)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF, "can't re-add section to file free space")
+                } /* end else */
 
-            /* Leave now */
-            HGOTO_DONE(ret_value)
+                /* Leave now */
+                HGOTO_DONE(ret_value)
+            } /* end if */
         } /* end if */
-    } /* end if */
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
+    } /* end if */
 
     /* Allocate from the metadata aggregator (or the VFD) */
     if(HADDR_UNDEF == (ret_value = H5MF_aggr_vfd_alloc(f, alloc_type, dxpl_id, size)))
@@ -629,17 +632,20 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
 
         /* If we are deleting the free space manager, leave now, to avoid
          *  [re-]starting it.
+	 * or if file space strategy type is not using a free space manager
+	 *   (H5F_FILE_SPACE_AGGR_VFD or H5F_FILE_SPACE_VFD), drop free space
+         *   section on the floor.
          *
          * Note: this drops the space to free on the floor...
          *
          */
-        if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING)
-{
+        if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING || 
+	        !H5F_HAVE_FREE_SPACE_MANAGER(f)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
             HGOTO_DONE(SUCCEED)
-}
+        } /* end if */
 
         /* There's either already a free space manager, or the freed
          *  space isn't at the end of the file, so start up (or create)

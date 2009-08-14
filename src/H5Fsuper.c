@@ -1134,8 +1134,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_ext_size
- *              Get storage size of the superblock extension
+ * Function:    H5F_super_size
+ *
+ * Purpose:     Get storage size of the superblock and superblock extension
  *
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
@@ -1145,33 +1146,58 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_size)
+H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size)
 {
-    H5O_loc_t ext_loc;                  /* "Object location" for superblock extension */
-    H5O_info_t oinfo;                   /* Object info for superblock extension */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_ext_size, FAIL)
+    FUNC_ENTER_NOAPI(H5F_super_size, FAIL)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(super_ext_size);
 
-    /* Set up "fake" object location for superblock extension */
-    H5O_loc_reset(&ext_loc);
-    ext_loc.file = f;
-    ext_loc.addr = f->shared->extension_addr;
+    /* Set the superblock size */
+    if(super_size) {
+        H5P_genplist_t *plist;           	/* File creation property list */
+        unsigned        super_vers;       	/* Superblock version          */
 
-    /* Get object header info for superblock extension */
-    if(H5O_get_info(&ext_loc, dxpl_id, FALSE, &oinfo) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
+        /* Get the shared file creation property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Grab values from property list */
+        if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get superblock version")
+
+        /* Set the superblock size */
+	*super_size = H5F_SUPERBLOCK_SIZE(super_vers, f);
+    } /* end if */
 
     /* Set the superblock extension size */
-    *super_ext_size = oinfo.hdr.space.total;
+    if(super_ext_size) {
+        if(H5F_addr_defined(f->shared->extension_addr)) {
+            H5O_loc_t ext_loc;                  /* "Object location" for superblock extension */
+            H5O_info_t oinfo;                   /* Object info for superblock extension */
+
+            /* Set up "fake" object location for superblock extension */
+            H5O_loc_reset(&ext_loc);
+            ext_loc.file = f;
+            ext_loc.addr = f->shared->extension_addr;
+
+            /* Get object header info for superblock extension */
+            if(H5O_get_info(&ext_loc, dxpl_id, FALSE, &oinfo) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
+
+            /* Set the superblock extension size */
+            *super_ext_size = oinfo.hdr.space.total;
+        } /* end if */
+        else
+            /* Set the superblock extension size to zero */
+            *super_ext_size = (hsize_t)0;
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_super_ext_size() */
+} /* H5F_super_size() */
 
 
 /*-------------------------------------------------------------------------

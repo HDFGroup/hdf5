@@ -287,7 +287,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
 
         case H5FS_CLIENT_FILE_ID:
 #ifdef NOT_YET
-            if(H5MF_sects_debug(f, dxpl_id, client_addr, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
+            if(H5MF_sects_debug(f, dxpl_id, fs_addr, stream, indent + 3, MAX(0, fwidth - 3)) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_SYSTEM, FAIL, "unable to dump file free space sections")
 #endif /* NOT_YET */
             break;
