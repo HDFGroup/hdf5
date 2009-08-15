@@ -500,6 +500,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "fixed array headers",
     "fixed array data block",
     "fixed array data block pages",
+    "superblock",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

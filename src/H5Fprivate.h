@@ -248,12 +248,12 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
-#define H5F_SYM_LEAF_K(F)       ((F)->shared->sym_leaf_k)
-#define H5F_KVALUE(F,T)         ((F)->shared->btree_k[(T)->id])
+#define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
+#define H5F_KVALUE(F,T)         ((F)->shared->sblock->btree_k[(T)->id])
 #define H5F_RDCC_NSLOTS(F)      ((F)->shared->rdcc_nslots)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
-#define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
+#define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
@@ -534,6 +534,9 @@ H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
 /* Routines for creating & destroying "fake" file structures */
 H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
+
+/* Superblock related routines */
+H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL

@@ -861,23 +861,20 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared = shared;
     } /* end if */
     else {
-        unsigned super_vers = HDF5_SUPERBLOCK_VERSION_DEF;      /* Superblock version for file */
         H5P_genplist_t *plist;          /* Property list */
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
         if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
-	f->shared->base_addr = HADDR_UNDEF;
-	f->shared->extension_addr = HADDR_UNDEF;
+
+        f->shared->super_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
             f->shared->fs_addr[u] = HADDR_UNDEF;
-	f->shared->driver_addr = HADDR_UNDEF;
 	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
-        f->shared->root_addr = HADDR_UNDEF;
 
 	/*
 	 * Copy the file creation and file access property lists into the
@@ -893,10 +890,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for address")
         if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &f->shared->sizeof_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
-        if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &f->shared->sym_leaf_k) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
-        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &f->shared->btree_k[0]) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
         if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
         HDassert(f->shared->sohm_nindexes < 255);
@@ -950,29 +943,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          *      we make it work. - QAK)
          */
         f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
-
-        /* Bump superblock version if we are to use the latest version of the format */
-        if(f->shared->latest_format)
-            super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
-        /* Bump superblock version to create superblock extension for SOHM info */
-        else if(f->shared->sohm_nindexes > 0)
-            super_vers = HDF5_SUPERBLOCK_VERSION_2;
-        /* Check for non-default indexed storage B-tree internal 'K' value
-         * and set the version # of the superblock to 1 if it is a non-default
-         * value.
-         */
-        else if(f->shared->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF)
-            super_vers = HDF5_SUPERBLOCK_VERSION_1;
-
-        /* If a newer superblock version is required, set it here */
-        if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF) {
-            H5P_genplist_t *c_plist;              /* Property list */
-
-            if(NULL == (c_plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
-            if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
-        } /* end if */
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
@@ -1050,8 +1020,20 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
-            /* Flush and invalidate all caches */
-            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+            /* Flush all caches and indicate we are closing the file */
+            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_CLOSING) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+
+            /* Unpin the superblock, since we're about to destroy the cache */
+            if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+            f->shared->sblock = NULL;
+
+            /* Flush all caches and indicate all cached objects should be invalidated */
+            /* (The caches should already be clean and we should just be invalidating objects) */
+            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
         } /* end if */
@@ -1109,9 +1091,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
-
-        /* Free root group symbol table entry, if any */
-        f->shared->root_ent = (H5G_entry_t *)H5MM_xfree(f->shared->root_ent);
 
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
@@ -1300,22 +1279,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
 
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
-    /* This step is for h5repart tool only. If user wants to change file driver from
-     * family to sec2 while using h5repart, this private property should be set so that
-     * in the later step, the library can ignore the family driver information saved
-     * in the superblock.
-     */
-    if(H5P_exist_plist(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0) {
-        if(H5P_get(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &shared->fam_to_sec2) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
-    } /* end if */
-    else
-        shared->fam_to_sec2 = FALSE;
-
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1337,13 +1300,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          */
         if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-
-        /* Write the superblock to the file */
-        /* (This must be after the root group is created, since the root
-         *      group's symbol table entry is part of the superblock)
-         */
-        if(H5F_super_write(file, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
     } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
         if(H5F_super_read(file, dxpl_id) < 0)
@@ -1358,7 +1314,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
              * file by the application performing SWMR write operations.
              */
             /* (Account for the stored EOA being absolute offset -NAF) */
-            if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (file->shared->maxaddr - file->shared->base_addr)) < 0)
+            if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (file->shared->maxaddr - file->shared->sblock->base_addr)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't relax 'eoa' for SWMR read access")
         } /* end if */
 
@@ -1366,6 +1322,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
+
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1747,13 +1707,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
      */
     if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level truncate failed")
-
-    /* Write the superblock to disk */
-    /* (needs to happen before metadata flush (H5AC_flush), since the information
-     *  in the superblock extension may be updated - 2008/10/14, QAK)
-     */
-    if(H5F_super_write(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 
     /* Flush (and invalidate, if requested) the entire metadata cache */
     H5AC_flags = 0;

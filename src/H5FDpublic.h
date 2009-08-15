@@ -190,6 +190,20 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * and then sub-allocate "small" raw data requests from that larger block.
      */
 #define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000010
+    /*
+     * Defining the H5FD_FEAT_IGNORE_DRVRINFO for a VFL driver means that
+     * the library will ignore the driver info that is encoded in the file
+     * for the VFL driver.  (This will cause the driver info to be eliminated
+     * from the file when it is flushed/closed, if the file is opened R/W).
+     */
+#define H5FD_FEAT_IGNORE_DRVRINFO       0x00000020
+    /*
+     * Defining the H5FD_FEAT_DIRTY_SBLK_LOAD for a VFL driver means that
+     * the library will mark the superblock dirty when the file is opened
+     * R/W.  This will cause the driver info to be re-encoded when the file
+     * is flushed/closed.
+     */
+#define H5FD_FEAT_DIRTY_SBLK_LOAD       0x00000040
 
 
 /* Forward declaration */

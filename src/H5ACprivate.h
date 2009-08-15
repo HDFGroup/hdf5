@@ -71,6 +71,7 @@ typedef enum {
     H5AC_FARRAY_HDR_ID,	/*fixed array header		     	     */
     H5AC_FARRAY_DBLOCK_ID, /*fixed array data block	     	     */
     H5AC_FARRAY_DBLK_PAGE_ID, /*fixed array data block page          */
+    H5AC_SUPERBLOCK_ID, /* file superblock                           */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;

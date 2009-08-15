@@ -4068,7 +4068,9 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     H5O_layout_t layout;                /* Dataset layout  message */
+    hbool_t layout_read = FALSE;        /* Whether the layout message was read from the file */
     H5O_pline_t pline;                  /* I/O pipeline message */
+    hbool_t pline_read = FALSE;         /* Whether the I/O pipeline message was read from the file */
     htri_t	exists;                 /* Flag if header message of interest exists */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -4091,6 +4093,7 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     else if(exists) {
         if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_PLINE_ID, &pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O pipeline message")
+        pline_read = TRUE;
     } /* end else if */
     else
         HDmemset(&pline, 0, sizeof(pline));
@@ -4101,6 +4104,7 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     else if(exists) {
         if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout message")
+        layout_read = TRUE;
     } /* end else if */
     else
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "can't find layout message")
@@ -4117,6 +4121,14 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk index")
 
 done:
+    /* Clean up any messages read in */
+    if(pline_read)
+        if(H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
+    if(layout_read)
+        if(H5O_msg_reset(H5O_LAYOUT_ID, &layout) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout message")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_delete() */
 

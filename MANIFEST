@@ -527,6 +527,7 @@
 ./src/H5Fquery.c
 ./src/H5Fsfile.c
 ./src/H5Fsuper.c
+./src/H5Fsuper_cache.c
 ./src/H5Fpkg.h
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
