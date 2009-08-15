@@ -837,8 +837,6 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
  * Programmer:	Robb Matzke
  *              Monday, August 16, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

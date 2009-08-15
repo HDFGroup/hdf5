@@ -719,11 +719,15 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
 HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n", FUNC, (unsigned)alloc_type, addr, size, extra_requested);
 #endif /* H5MF_ALLOC_DEBUG */
 
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+
     /* Compute end of block to extend */
     end = addr + size;
 
     /* Check if the block is exactly at the end of the file */
-    if((ret_value = H5FD_try_extend(f->shared->lf, alloc_type, end, extra_requested)) < 0)
+    if((ret_value = H5FD_try_extend(f->shared->lf, alloc_type, f, end, extra_requested)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
     else if(ret_value == FALSE) {
         H5F_blk_aggr_t *aggr;   /* Aggregator to use */
@@ -757,6 +761,7 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_try_extend() */
 
