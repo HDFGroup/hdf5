@@ -458,7 +458,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
+    VRFY((file_size == 2147485792ULL), "File is correct size(~2GB)");
 
     /*
      * Create >4GB HDF5 file
@@ -487,7 +487,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
+    VRFY((file_size == 4294969440ULL), "File is correct size(~4GB)");
 
     /*
      * Create >8GB HDF5 file
@@ -516,7 +516,7 @@ void big_dataset(void)
 
     /* Check that file of the correct size was created */
     file_size = h5_get_file_size(filename, fapl);
-    VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
+    VRFY((file_size == 8589936736ULL), "File is correct size(~8GB)");
 
     /* Close fapl */
     ret = H5Pclose(fapl);

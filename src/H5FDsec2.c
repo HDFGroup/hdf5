@@ -397,7 +397,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         /* Get the FAPL */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "not a file access property list")
 
         /* This step is for h5repart tool only. If user wants to change file driver from
          * family to sec2 while using h5repart, this private property should be set so that
@@ -406,7 +406,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          */
         if(H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
             if(H5P_get(plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &file->fam_to_sec2) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
     } /* end if */
 
     /* Set return value */
@@ -535,7 +535,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {

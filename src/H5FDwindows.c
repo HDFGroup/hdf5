@@ -91,7 +91,11 @@ typedef struct H5FD_windows_t {
      */
     DWORD fileindexlo;
     DWORD fileindexhi;
-	DWORD volumeserialnumber;
+    DWORD volumeserialnumber;
+
+    /* Information from properties set by 'h5repart' tool */
+    hbool_t     fam_to_sec2;    /* Whether to eliminate the family driver info
+                                 * and convert this file to a single file */
 } H5FD_windows_t;
 
 
@@ -401,13 +405,31 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     file->write_access=write_access;    /* Note the write_access for later */
 #endif /* WINDOWS_USE_STDIO */
 
-	if( (filehandle = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file handle for file")
+    if( (filehandle = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file handle for file")
     if(!GetFileInformationByHandle(filehandle, &fileinfo))
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file information")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file information")
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
-	file->volumeserialnumber = fileinfo.dwVolumeSerialNumber;
+    file->volumeserialnumber = fileinfo.dwVolumeSerialNumber;
+
+    /* Check for non-default FAPL */
+    if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
+        H5P_genplist_t      *plist;      /* Property list pointer */
+
+        /* Get the FAPL */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "not a file access property list")
+
+        /* This step is for h5repart tool only. If user wants to change file driver from
+         * family to sec2 while using h5repart, this private property should be set so that
+         * in the later step, the library can ignore the family driver information saved
+         * in the superblock.
+         */
+        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0)
+            if(H5P_get(plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &file->fam_to_sec2) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
+    } /* end if */
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -520,17 +542,14 @@ done:
 				Based on code by Quincey Koziol
  *              Thursday, May 24 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5FD_windows_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
+H5FD_windows_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
+    const H5FD_windows_t *file = (const H5FD_windows_t*)_file;    /* windows VFD info */
 
-    FUNC_ENTER_NOAPI(H5FD_windows_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_windows_query)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -539,11 +558,15 @@ H5FD_windows_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA;	/* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_DATA_SIEVE;			/* OK to perform data sieving for faster raw data reads & writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA;	/* OK to aggregate "small" raw data allocations */
-    }
+
+        /* Check for flags that are set by h5repart */
+        if(file->fam_to_sec2)
+            *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which eliminates it) */
+    } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_windows_query() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_windows_get_eoa
