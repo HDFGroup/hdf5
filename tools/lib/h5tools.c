@@ -1203,29 +1203,29 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         h5tools_str_t *buffer/*string into which to render */,
         hsize_t curr_pos/*total data element position*/, unsigned flags,
         size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/) {
+    hssize_t nblocks;
     hsize_t alloc_size;
     hsize_t *ptdata;
     hsize_t *dims1;
     hsize_t *start;
     hsize_t *count;
-    hssize_t nblocks;
     size_t numelem;
-    int ndims;
-    h5tools_context_t region_ctx; /* print context  */
     hsize_t region_total_size[H5S_MAX_RANK];
+    h5tools_context_t region_ctx; /* print context  */
     hsize_t region_elmtno; /* elemnt index  */
     unsigned int region_flags; /* buffer extent flags */
     hsize_t region_curr_pos;
+    int ndims;
     int jndx;
-    int i;
     int type_size;
-    int blkndx;
-    hid_t sid1;
     hid_t mem_space;
     hid_t dtype;
     hid_t type_id;
     void *region_buf;
     herr_t status;
+    int i;
+    int blkndx;
+    hid_t sid1;
 
     /*
      * This function fails if the region does not have blocks. 
@@ -1289,8 +1289,6 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     /* Render the datatype element */
     h5tools_str_reset(buffer);
-
-    ctx->need_prefix = TRUE;
     h5tools_str_append(buffer, "%s %s ",
             h5tools_dump_header_format->datatypebegin,
             h5tools_dump_header_format->datatypeblockbegin);
@@ -1499,6 +1497,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
         {
             npoints = H5Sget_select_elem_npoints(region_space);
         }H5E_END_TRY;
+        
     if (npoints > 0) {
         int i;
 
@@ -1568,7 +1567,6 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
                 flags, ncols, elmt_counter, i_count);
 
         ctx->need_prefix = TRUE;
-
 
     /* Render the dataspace element */
     h5tools_str_reset(buffer);
@@ -1675,12 +1673,11 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
             region_ctx.indent_level--;
         }
 
-        free(ptdata);
-
         free(region_buf);
+        free(ptdata);
         free(dims1);
-        status = H5Sclose(mem_space);
         status = H5Tclose(dtype);
+        status = H5Sclose(mem_space);
 
         ctx->need_prefix = TRUE;
 
