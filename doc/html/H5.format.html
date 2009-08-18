@@ -5434,14 +5434,38 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Filter Identification</td>
-	  <td><P>This is a unique (except in the case of testing)
-	    identifier for the filter.  Values from zero through 255
-	    are reserved for filters defined by the NCSA HDF5
-	    library. Values 256 through 511 have been set aside for
-	    use when developing/testing new filters.  The remaining
-	    values are allocated to specific filters by contacting the 
-	    HDF5 Development Team at
-            <img src="Graphics/help.png" align=top height=16>.
+	  <td>
+            <p>
+            This value, often referred to as a filter identifier,
+            is designed to be a unique identifier for the filter. 
+            Values from zero through 32,767 are reserved for filters 
+            supported by The HDF Group in the HDF5 library and for 
+            filters requested and supported by third parties. 
+            Filters supported by The HDF Group are documented immediately
+            below.  Information on 3rd-party filters can be found at 
+            <a href="http://wiki.hdfgroup.org/Community-Support-for-HDF5">
+            <code>http://wiki.hdfgroup.org/Community-Support-for-HDF5</code></a>;
+            follow the &ldquo;HDF5 Filters&rdquo; link. 
+            <a href="#Footnote1Change"><sup><small>1</small></sup></a>
+            <p>
+            To request a filter identifier, please contact 
+            The HDF Group&rsquo;s Help Desk at
+            <img src="Graphics/help.png" valign="center" height=14>.
+            You will be asked to provide the following information:
+            <ol>
+              <li>Contact information for the developer requesting the
+                  new identifier 
+              <li>A short description of the new filter 
+              <li>Links to any relevant information, including licensing 
+                  information 
+            </ol>
+            <p>
+            Values from 32768 to 65535 are reserved for non-distributed uses 
+            (for example, internal company usage) or for application usage 
+            when testing a feature. The HDF Group does not track or document 
+            the use of the filters with identifiers from this range.
+
+            <p>
             The filters currently in library version 1.6.5 are 
 	    listed below:
 	    <table class=list>
@@ -6443,9 +6467,8 @@ The HDF Group Help Desk: <img src="Graphics/help.png" align=top height=16>
 Describes HDF5 Release 1.6.9, May 2009 
 </address>
 
-
-<!-- #EndLibraryItem --><P><!-- hhmts start -->
-Last modified: 10 August 2007 
+<!-- #EndLibraryItem --><!-- hhmts start -->
+Last modified: 17 August 2009 
 <!-- hhmts end -->
 
 </body>
