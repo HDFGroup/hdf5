@@ -146,7 +146,7 @@ H5F_check_cached_stab_test(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Verify the cached stab info */
-    if(H5G_verify_cached_stab_test(H5G_oloc(file->shared->root_grp), file->shared->root_ent) < 0)
+    if(H5G_verify_cached_stab_test(H5G_oloc(file->shared->root_grp), file->shared->sblock->root_ent) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to verify cached symbol table info")
 
 done:

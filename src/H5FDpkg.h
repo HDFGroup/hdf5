@@ -53,6 +53,10 @@
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5FD_init(void);
+H5_DLL haddr_t H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+    hsize_t size, haddr_t *align_addr, hsize_t *align_size);
+H5_DLL herr_t H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, hsize_t size);
 
 
 /* Testing routines */

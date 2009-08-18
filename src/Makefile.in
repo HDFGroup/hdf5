@@ -88,12 +88,12 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Dmpio.lo H5Doh.lo H5Dscatgath.lo H5Dselect.lo H5Dtest.lo \
 	H5E.lo H5Edeprec.lo H5Eint.lo H5F.lo H5Faccum.lo H5Fdbg.lo \
 	H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo H5Fquery.lo \
-	H5Fsfile.lo H5Fsuper.lo H5Ftest.lo H5FD.lo H5FDcore.lo \
-	H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo \
-	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo \
-	H5FDspace.lo H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo \
-	H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo H5G.lo \
-	H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
+	H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo H5Ftest.lo H5FD.lo \
+	H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo \
+	H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo \
+	H5FDsec2.lo H5FDspace.lo H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo \
+	H5FScache.lo H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo \
+	H5G.lo H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
 	H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo H5Gloc.lo \
 	H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Groot.lo H5Gstab.lo \
 	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
@@ -434,7 +434,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5F.c H5Faccum.c H5Fdbg.c H5Ffake.c H5Fio.c H5Fmount.c H5Fmpi.c H5Fquery.c \
-        H5Fsfile.c H5Fsuper.c H5Ftest.c \
+        H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
@@ -682,6 +682,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fquery.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsfile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsuper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Fsuper_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ftest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5G.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gbtree2.Plo@am__quote@
