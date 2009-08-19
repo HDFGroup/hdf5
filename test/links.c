@@ -4452,7 +4452,7 @@ external_link_win1(hid_t fapl, hbool_t new_format)
 	H5Fclose (fid);
     } H5E_END_TRY;
     return -1;
-} /* end external_link_win2() */
+} /* end external_link_win1() */
 
 
 /*-------------------------------------------------------------------------
@@ -4918,6 +4918,272 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     return -1;
 } /* end external_link_win6() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_link_win7
+ *
+ * Purpose:
+ *      1. UNC target link: "\\127.0.01\c$/tmp/extlinks10"
+ *      2. main file: "extlinks0"
+ *      3. target file: "extlinks15"
+ *      Should be able to find the target file via main file's local host/main drive/rel path
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_win7(hid_t fapl, hbool_t new_format)
+{
+    hid_t   fid = (-1);             /* File ID */
+    hid_t   gid = (-1);                 /* Group IDs */
+    char    filename1[NAME_BUF_SIZE],
+            filename2[NAME_BUF_SIZE],
+            filename3[NAME_BUF_SIZE],
+            tmpname[NAME_BUF_SIZE],
+            cwdpath[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("external links via main file's UNC local host/main drive/rel path(windows)(w/new group format)")
+    else
+        TESTING("external links via main file's UNC local host/main drive/rel path(windows)")
+
+    /* set up name for main file: "extlinks0" */
+    h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
+
+    if (HDgetcwd(cwdpath, NAME_BUF_SIZE)==NULL)
+        TEST_ERROR
+
+    /* set up name for target link: "\\127.0.0.1\c$/tmp/extlinks10" */
+    HDstrcpy(tmpname, "\\\\127.0.0.1\\c$"); /* absolute path */
+    HDstrcat(tmpname, "/");
+    HDstrcat(tmpname, FILENAME[30]);
+    h5_fixname(tmpname, fapl, filename2, sizeof filename2);
+
+    /* set up name for target file: "extlinks15" */
+    h5_fixname(FILENAME[29], fapl, filename3, sizeof filename3);
+
+    /* Create the target file */
+    if((fid=H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing for target file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+
+    /* Create the main file */
+    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to target file */
+    if(H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open object through external link */
+    H5E_BEGIN_TRY {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* should be able to find the target file via main file's local host/main drive*/
+    if (gid < 0) {
+    H5_FAILED();
+    puts("    Should have found the file in local host/main drive.");
+    goto error;
+    }
+
+    /* closing for main file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    H5Gclose (gid);
+    H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_link_win7() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_link_win8
+ *
+ * Purpose:
+ *      1. Long UNC target link: "\\?\<cur drive>:\CWD\extlinks10"
+ *      2. main file: "extlinks0"
+ *      3. target file: "extlinks10"
+ *      Should be able to access the target file directly (abs drive/abs path)
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_win8(hid_t fapl, hbool_t new_format)
+{
+    hid_t   fid = (-1);             /* File ID */
+    hid_t   gid = (-1);                 /* Group IDs */
+    int     drive=0;
+    char    filename1[NAME_BUF_SIZE],
+            filename2[NAME_BUF_SIZE],
+            filename3[NAME_BUF_SIZE],
+            tmpname[NAME_BUF_SIZE],
+            cwdpath[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("external links via target's Long UNC abs drive/abs path directly (windows)(w/new group format)")
+    else
+        TESTING("external links via target's Long UNC abs drive/abs path directly (windows)")
+
+    /* set up name for main file: "extlinks0" */
+    h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
+
+    if (HDgetcwd(cwdpath, NAME_BUF_SIZE)==NULL)
+        TEST_ERROR
+
+    /* create tmp directory */
+    if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+
+    /* set up name for target link: "<drive-letter>:\CWD\extlinks10" */
+    drive = HDgetdrive();
+    sprintf(tmpname, "\\\\?\\%c:%s\\%s", (drive+'A'-1), &cwdpath[2], FILENAME[30]);
+    h5_fixname(tmpname, fapl, filename2, sizeof filename2);
+
+    /* set up name for target file: "extlinks10" */
+    h5_fixname(FILENAME[30], fapl, filename3, sizeof filename3);
+
+    /* Create the target file */
+    if((fid=H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing for target file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+
+    /* Create the main file */
+    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to target file */
+    if(H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open object through external link */
+    H5E_BEGIN_TRY {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* should be able to find the target file directly */
+    if (gid < 0) {
+    H5_FAILED();
+    puts("    Should have found the file in tmp.");
+    goto error;
+    }
+
+    /* closing for main file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    H5Gclose (gid);
+    H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_link_win8() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_link_win9
+ *
+ * Purpose:
+ *      1. Long UNC target link: "\\?\UNC\127.0.01\c$/tmp/extlinks10"
+ *      2. main file: "extlinks0"
+ *      3. target file: "extlinks15"
+ *      Should be able to find the target file via main file's local host/main drive/rel path
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_win9(hid_t fapl, hbool_t new_format)
+{
+    hid_t   fid = (-1);             /* File ID */
+    hid_t   gid = (-1);                 /* Group IDs */
+    char    filename1[NAME_BUF_SIZE],
+            filename2[NAME_BUF_SIZE],
+            filename3[NAME_BUF_SIZE],
+        tmpname[NAME_BUF_SIZE],
+                cwdpath[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("external links via main file's Long UNC local host/main drive/rel path(windows)(w/new group format)")
+    else
+        TESTING("external links via main file's Long UNC local host/main drive/rel path(windows)")
+
+    /* set up name for main file: "extlinks0" */
+    h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
+
+    if (HDgetcwd(cwdpath, NAME_BUF_SIZE)==NULL)
+        TEST_ERROR
+
+    /* set up name for target link: "\\?\UNC\127.0.0.1\c$/tmp/extlinks10" */
+    HDstrcpy(tmpname, "\\\\?\\UNC\127.0.0.1\\c$"); /* absolute path */
+    HDstrcat(tmpname, "/");
+    HDstrcat(tmpname, FILENAME[30]);
+    h5_fixname(tmpname, fapl, filename2, sizeof filename2);
+
+    /* set up name for target file: "extlinks15" */
+    h5_fixname(FILENAME[29], fapl, filename3, sizeof filename3);
+
+    /* Create the target file */
+    if((fid=H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing for target file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+
+    /* Create the main file */
+    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to target file */
+    if(H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open object through external link */
+    H5E_BEGIN_TRY {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    } H5E_END_TRY;
+
+    /* should be able to find the target file via main file's local host/main drive*/
+    if (gid < 0) {
+    H5_FAILED();
+    puts("    Should have found the file in local host/main drive.");
+    goto error;
+    }
+
+    /* closing for main file */
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    H5Gclose (gid);
+    H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_link_win9() */
 
 #endif /* H5_HAVE_WINDOW_PATH */
 
@@ -12767,6 +13033,9 @@ main(void)
         nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
         /* These tests assume that external links are a form of UD links,
          * so assume that everything that passed for external links
