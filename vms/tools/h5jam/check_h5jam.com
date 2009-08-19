@@ -16,6 +16,12 @@ $ !
 $ ! This command file tests h5jam and h5unjam utilities. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
+$ type sys$input
+
+===================================
+       Testing h5jam utiltity
+===================================
+
 $ !
 $ ! Define h5jam, h5unjam and h5dump symbols
 $ !
