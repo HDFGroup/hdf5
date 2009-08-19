@@ -133,10 +133,18 @@
 #define H5T_CONV_INTERNAL_INTEGER_LDOUBLE         1
 #endif
 
-/* Define an internal macro for converting unsigned (long) long to floating numbers.
+/* Define an internal macro for converting unsigned long to float.
+ * Pathscale compiler on Sandia's Linux machine has some problem.
+ * 64-bit Solaris does different rounding. */
+#if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FLOAT_ACCURATE && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
+    (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_ULONG_FLT         1
+#endif
+
+/* Define an internal macro for converting unsigned (long) long to double.
  * 64-bit Solaris does different rounding. */
 #if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_ULONG_FP         1
+#define H5T_CONV_INTERNAL_ULONG_DBL         1
 #endif
 
 /* Define an internal macro for converting unsigned long to long double.  SGI compilers give some
