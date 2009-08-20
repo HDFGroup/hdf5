@@ -243,7 +243,7 @@ typedef struct H5F_file_t {
                                 /* (if aggregating "small data" allocations) */
 
     /* Metadata accumulator information */
-    H5F_meta_accum_t accum;     /* Metadata accumulator info           */
+    H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
 } H5F_file_t;
 
 /*

@@ -146,7 +146,6 @@ error:
     return(1);
 } /* check_stats() */
 
-
 /*
  * To verify that blocks are allocated from file allocation
  *

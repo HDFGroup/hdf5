@@ -80,14 +80,14 @@ typedef struct iter_t {
     ohdr_info_t dset_ohdr_info;         /* Object header information for datasets */
     hsize_t dset_storage_size;          /* Size of raw data for datasets */
     ohdr_info_t dtype_ohdr_info;        /* Object header information for datatypes */
-    hsize_t groups_btree_storage_size;     /* btree size for group */
-    hsize_t groups_heap_storage_size;      /* heap size for group */
-    hsize_t attrs_btree_storage_size;      /* btree size for attributes (1.8) */
-    hsize_t attrs_heap_storage_size;       /* fractal heap size for attributes (1.8) */
-    hsize_t SM_hdr_storage_size;           /* header size for SOHM table (1.8) */
-    hsize_t SM_index_storage_size;         /* index (btree & list) size for SOHM table (1.8) */
-    hsize_t SM_heap_storage_size;          /* fractal heap size for SOHM table (1.8) */
-    hsize_t super_ext_size;	   	   /* superblock extension size */
+    hsize_t groups_btree_storage_size;  /* btree size for group */
+    hsize_t groups_heap_storage_size;   /* heap size for group */
+    hsize_t attrs_btree_storage_size;   /* btree size for attributes (1.8) */
+    hsize_t attrs_heap_storage_size;    /* fractal heap size for attributes (1.8) */
+    hsize_t SM_hdr_storage_size;        /* header size for SOHM table (1.8) */
+    hsize_t SM_index_storage_size;      /* index (btree & list) size for SOHM table (1.8) */
+    hsize_t SM_heap_storage_size;	/* fractal heap size for SOHM table (1.8) */
+    hsize_t super_ext_size;	   	/* superblock extension size */
     hsize_t datasets_btree_storage_size;   /* btree size for chunked dataset */
     unsigned long nexternal;            /* Number of external files for a dataset */
     int           local;                /* Flag to indicate iteration over the object*/

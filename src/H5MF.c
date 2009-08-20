@@ -1033,6 +1033,11 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f->shared);
     HDassert(f->shared->lf);
 
+    /* Free the space in aggregators */
+    /* (for space not at EOF, it may be put into free space managers) */
+    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
+
     /* Iterate over all the free space types that have managers and get each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -1083,6 +1088,8 @@ HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
         } /* end if */
     } /* end for */
 
+    /* Free the space in aggregators (again) */
+    /* (in case any free space information re-started them) */
     if(H5MF_free_aggrs(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
 

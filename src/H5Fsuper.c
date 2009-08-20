@@ -704,7 +704,7 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_
     htri_t 	status;       	/* Indicate whether the message exists or not */
     herr_t 	ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_super_ext_write_msg)
+    FUNC_ENTER_NOAPI(H5F_super_ext_write_msg, FAIL)
 
     /* Sanity checks */
     HDassert(f);
