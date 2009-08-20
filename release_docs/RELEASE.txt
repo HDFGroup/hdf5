@@ -100,7 +100,10 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
-    - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
+    - Corrected problem where library would re-write the superblock in a file
+      opened for R/W access, even when no changes were made to the file.
+      (QAK - 2009/08/20, Bz#1473)
+    - Fixed a bug where H5Pget_filter_by_id would succeed when called for a
       ilter that wasn't present. NAF - 2009/06/25 - 1250
     - Fixed an issue with committed compound datatypes containing a vlen. Also
       fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
