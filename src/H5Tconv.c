@@ -8417,7 +8417,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_ULONG_FP
+#if H5T_CONV_INTERNAL_ULONG_FLT
 herr_t
 H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8433,7 +8433,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-#endif /* H5T_CONV_INTERNAL_ULONG_FP */
+#endif /* H5T_CONV_INTERNAL_ULONG_FLT */
 
 
 /*-------------------------------------------------------------------------
@@ -8451,7 +8451,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_ULONG_FP
+#if H5T_CONV_INTERNAL_ULONG_DBL
 herr_t
 H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8467,7 +8467,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-#endif /* H5T_CONV_INTERNAL_ULONG_FP */
+#endif /* H5T_CONV_INTERNAL_ULONG_DBL */
 
 
 /*-------------------------------------------------------------------------

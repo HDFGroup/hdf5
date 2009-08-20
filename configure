@@ -27058,6 +27058,74 @@ else
 $as_echo "no" >&6; }
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if accurately converting unsigned long to float values" >&5
+$as_echo_n "checking if accurately converting unsigned long to float values... " >&6; }
+
+if test "${hdf5_ulong_to_float_accurate+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "cannot run test program while cross compiling
+See \`config.log' for more details." "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+    int main(void)
+    {
+        int           ret = 0;
+        unsigned long l1;
+        unsigned long l2;
+        unsigned long l3;
+        float f1;
+        float f2;
+        float f3;
+
+
+        if(sizeof(unsigned long)==8) {
+            l1 = 0xffffffffffffffffUL;
+            l2 = 0xffffffffffff0000UL;
+            l3 = 0xf000000000000000UL;
+
+            f1 = (float)l1;
+            f2 = (float)l2;
+            f3 = (float)l3;
+
+            if((f1 < 0) || (f2 < 0) || (f3 < 0))
+                ret = 1;
+        }
+
+done:
+        exit(ret);
+    }
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  hdf5_ulong_to_float_accurate=yes
+else
+  hdf5_ulong_to_float_accurate=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+if test ${hdf5_ulong_to_float_accurate} = "yes"; then
+
+$as_echo "#define ULONG_TO_FLOAT_ACCURATE 1" >>confdefs.h
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if accurately converting unsigned long long to floating-point values" >&5
 $as_echo_n "checking if accurately converting unsigned long long to floating-point values... " >&6; }
 
