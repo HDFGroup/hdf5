@@ -1083,10 +1083,18 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
-        /* Close low-level file */
+        /* Only truncate the file on an orderly close, with write-access */
+        if(f->closing && (H5F_ACC_RDWR & f->shared->flags)) {
+            /* Truncate the file to the current allocated size */
+            if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+        } /* end if */
+
+        /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
@@ -1674,13 +1682,16 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         if(H5MF_close(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
     } /* end if */
-
-    /* Truncate the file to the current allocated size */
-    /* (needs to happen before superblock write, since the 'eoa' value is
-     *  written in superblock -QAK)
-     */
-    if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level truncate failed")
+    else {
+        /* Release any space allocated to space aggregators, so that the eoa value
+         *  corresponds to the end of the space written to in the file.
+         */
+        /* (needs to happen before superblock write, since the 'eoa' value is
+         *  written in superblock -QAK)
+         */
+        if(H5MF_free_aggrs(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+    } /* end else */
 
     /* Flush (and invalidate, if requested) the entire metadata cache */
     H5AC_flags = 0;
