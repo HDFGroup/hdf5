@@ -638,7 +638,7 @@ test_fs_sect_add(hid_t fapl)
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node,
-            H5FS_ADD_RETURNED_SPACE, NULL))
+            H5FS_ADD_RETURNED_SPACE, NULL) < 0)
         FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -701,7 +701,7 @@ test_fs_sect_add(hid_t fapl)
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node,
-            0, NULL))
+            0, NULL) < 0)
         FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -775,7 +775,7 @@ test_fs_sect_add(hid_t fapl)
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     /* nothing in free-space */
@@ -844,7 +844,7 @@ test_fs_sect_add(hid_t fapl)
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node,
-	    H5FS_ADD_DESERIALIZING, &can_shrink))
+	    H5FS_ADD_DESERIALIZING, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -952,7 +952,7 @@ test_fs_sect_find(hid_t fapl)
         TEST_ERROR
 
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE30, (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)TEST_SECT_SIZE30, (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -988,7 +988,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1009,7 +1009,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node3, (haddr_t)(TEST_SECT_ADDR200), (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node3,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node3->sect_info.size;
@@ -1028,7 +1028,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -1047,7 +1047,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR300, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node4,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node4->sect_info.size;
@@ -1058,7 +1058,7 @@ test_fs_sect_find(hid_t fapl)
         TEST_ERROR
 
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1105,7 +1105,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1125,7 +1125,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR200, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -1136,7 +1136,7 @@ test_fs_sect_find(hid_t fapl)
         TEST_ERROR
 
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1178,7 +1178,7 @@ test_fs_sect_find(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1190,7 +1190,7 @@ test_fs_sect_find(hid_t fapl)
         TEST_ERROR
 
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -1311,7 +1311,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1331,7 +1331,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* section B & C are merged */
@@ -1349,7 +1349,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE10, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node3,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* section A is merged with the merged section of B & C */
@@ -1367,7 +1367,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR150, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node4,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* section D is merged with the merged section of A & B & C */
@@ -1379,7 +1379,7 @@ test_fs_sect_merge(hid_t fapl)
 
     /* should be able to find the merged section of A, B, C & D */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE10+TEST_SECT_SIZE30+TEST_SECT_SIZE50+TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE10+TEST_SECT_SIZE30+TEST_SECT_SIZE50+TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1439,7 +1439,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1459,7 +1459,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* section A & B are not merged because H5FS_CLS_SEPAR_OBJ is set */
@@ -1472,7 +1472,7 @@ test_fs_sect_merge(hid_t fapl)
 
     /* should not be able to find the merged section of A & B */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE30+TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE30+TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -1533,7 +1533,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE10, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1553,7 +1553,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE_NEW, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* sections A & B are not merged because H5FS_CLS_MERGE_SYM is set & section class type is different */
@@ -1573,7 +1573,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE_NEW, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node3,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* sections B & C are merged because H5FS_CLS_MERGE_SYM is set & section class type is the same */
@@ -1591,7 +1591,7 @@ test_fs_sect_merge(hid_t fapl)
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR150, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node4,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /*
@@ -1607,14 +1607,14 @@ test_fs_sect_merge(hid_t fapl)
 
     /* should not be able to find a merged section of A, B, C & D */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE10+TEST_SECT_SIZE30+TEST_SECT_SIZE50+TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE10+TEST_SECT_SIZE30+TEST_SECT_SIZE50+TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
 
     /* should be able to find the merged section of B & C */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE30+TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE30+TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1628,7 +1628,7 @@ test_fs_sect_merge(hid_t fapl)
 
     /* should be able to find section A */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE10), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE10), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1641,7 +1641,7 @@ test_fs_sect_merge(hid_t fapl)
 
     /* should be able to find section D */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE80), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1766,7 +1766,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     can_shrink = FALSE;
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1779,7 +1779,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     /* section A should still be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1800,7 +1800,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     can_shrink = FALSE;
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     /* should have nothing in free-space */
@@ -1811,7 +1811,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     /* section A should not be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -1866,7 +1866,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1886,7 +1886,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     /* free-space should be the same since section B is shrunk */
@@ -1895,7 +1895,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     /* section B should not be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -1906,7 +1906,7 @@ test_fs_sect_shrink(hid_t fapl)
 
     /* section A should still be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE20), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE20), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (!node_found) TEST_ERROR
@@ -1965,7 +1965,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -1985,7 +1985,7 @@ test_fs_sect_shrink(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, &can_shrink))
+	    H5FS_ADD_RETURNED_SPACE, &can_shrink) < 0)
 	FAIL_STACK_ERROR
 
     /* section A & B are merged and then strunk, so there is nothing in free-space */
@@ -1995,14 +1995,14 @@ test_fs_sect_shrink(hid_t fapl)
 
     /* section B should not be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
 
     /* section A should not be there in free-space */
     if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)(TEST_SECT_SIZE30), (H5FS_section_info_t **)&node)) < 0)
+            (hsize_t)(TEST_SECT_SIZE30), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
     if (node_found) TEST_ERROR
@@ -2100,7 +2100,7 @@ test_fs_sect_change_class(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -2120,7 +2120,7 @@ test_fs_sect_change_class(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE_NONE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += TEST_SECT_SIZE50;
@@ -2140,7 +2140,7 @@ test_fs_sect_change_class(hid_t fapl)
         TEST_ERROR
 
     if(H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE30, (H5FS_section_info_t **)&node) < 0)
+            (hsize_t)TEST_SECT_SIZE30, (H5FS_section_info_t **)&node) < 0)
 	FAIL_STACK_ERROR
 
     if (node->sect_info.type != TEST_FSPACE_SECT_TYPE_NONE)
@@ -2201,7 +2201,7 @@ test_fs_sect_change_class(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /*
@@ -2213,7 +2213,7 @@ test_fs_sect_change_class(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE_NONE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /*
@@ -2225,7 +2225,7 @@ test_fs_sect_change_class(hid_t fapl)
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR200, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE_NONE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node3,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     /* change the class of B to A's class */
@@ -2245,7 +2245,7 @@ test_fs_sect_change_class(hid_t fapl)
 
     /* verify that section B has changed class */
     if(H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node) < 0)
+            (hsize_t)TEST_SECT_SIZE50, (H5FS_section_info_t **)&node) < 0)
 	FAIL_STACK_ERROR
 
     if (node->sect_info.type != TEST_FSPACE_SECT_TYPE)
@@ -2256,7 +2256,7 @@ test_fs_sect_change_class(hid_t fapl)
 
     /* verify that section C has changed class */
     if(H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, frsp,
-		    (hsize_t)TEST_SECT_SIZE80, (H5FS_section_info_t **)&node) < 0)
+            (hsize_t)TEST_SECT_SIZE80, (H5FS_section_info_t **)&node) < 0)
 	FAIL_STACK_ERROR
 
     if (node->sect_info.type != TEST_FSPACE_SECT_TYPE)
@@ -2338,9 +2338,9 @@ test_fs_sect_extend(hid_t fapl)
     size_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
-
-    TEST_free_section_t 	*sect_node1=NULL, *sect_node2=NULL;
-    unsigned			init_flags=0;
+    TEST_free_section_t *sect_node1=NULL, *sect_node2=NULL;
+    unsigned		init_flags=0;
+    htri_t              status;                 /* Status of 'try' calls */
 
     TESTING("a block's extension by requested-size which is = adjoining free section's size: Test 1");
 
@@ -2376,7 +2376,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -2396,7 +2396,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -2407,11 +2407,13 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend a block by requested-size */
-    if(H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_SIZE80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE40) < 0)
-	TEST_ERROR
+    if((status = H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_SIZE80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE40)) < 0)
+	FAIL_STACK_ERROR
+    if(FALSE == status)
+        TEST_ERROR
 
     /* Succeed in extending the block: free space info is decremented accordingly */
-    state.tot_space -= sect_node2->sect_info.size;
+    state.tot_space -= (hsize_t)TEST_SECT_SIZE40;
     state.tot_sect_count -= 1;
     state.serial_sect_count -= 1;
     if(check_stats(f, frsp, &state))
@@ -2450,7 +2452,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -2470,7 +2472,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -2481,8 +2483,10 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if(H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE50) < 0)
-	TEST_ERROR
+    if((status = H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE50)) < 0)
+	FAIL_STACK_ERROR
+    if(TRUE == status)
+        TEST_ERROR
 
     /* Not able to extend the block: free space info remains the same */
     if(check_stats(f, frsp, &state))
@@ -2521,7 +2525,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -2541,7 +2545,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -2552,8 +2556,10 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if(H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE30) < 0)
+    if((status = H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, (hsize_t)TEST_SECT_SIZE30)) < 0)
 	TEST_ERROR
+    if(FALSE == status)
+        TEST_ERROR
 
     /* Succeed in extending the block: total free space is decreased but other info remains the same */
     state.tot_space -= 30;
@@ -2593,7 +2599,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node1,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -2613,7 +2619,7 @@ test_fs_sect_extend(hid_t fapl)
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
     if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node2,
-	    H5FS_ADD_RETURNED_SPACE, NULL))
+	    H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	FAIL_STACK_ERROR
 
     state.tot_space += sect_node2->sect_info.size;
@@ -2624,8 +2630,10 @@ test_fs_sect_extend(hid_t fapl)
         TEST_ERROR
 
     /* Extend the block by requested-size */
-    if(H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE15, (hsize_t)TEST_SECT_SIZE40) < 0)
+    if((status = H5FS_sect_try_extend(f, H5P_DATASET_XFER_DEFAULT, frsp, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE15, (hsize_t)TEST_SECT_SIZE40)) < 0)
 	TEST_ERROR
+    if(TRUE == status)
+        TEST_ERROR
 
     /* Not able to extend the block: free space manager info remains the same */
     if(check_stats(f, frsp, &state))
@@ -2718,7 +2726,7 @@ test_fs_sect_iterate(hid_t fapl)
 	init_sect_node(sect_node, (haddr_t)i*10, (hsize_t)sect_size, TEST_FSPACE_SECT_TYPE, H5FS_SECT_LIVE);
 
 	if(H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, frsp, (H5FS_section_info_t *)sect_node,
-		H5FS_ADD_RETURNED_SPACE, NULL))
+		H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	    FAIL_STACK_ERROR
     }
 
