@@ -46,8 +46,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
  *  flush we want to do. They can be ORed together.
  */
 #define H5F_FLUSH_NONE       (0U)       /* No flags specified                       */
-#define H5F_FLUSH_INVALIDATE (1U << 0)  /* Invalidate cached data                   */
-#define H5F_FLUSH_CLOSING    (1U << 1)  /* Closing the file                         */
+#define H5F_FLUSH_CLOSING    (1U << 0)  /* Closing the file                         */
 
 /*
  * Encode and decode macros for file meta-data.

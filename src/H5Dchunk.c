@@ -1969,7 +1969,7 @@ H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags)
     /* Loop over all entries in the chunk cache */
     for(ent = rdcc->head; ent; ent = next) {
 	next = ent->next;
-	if((flags & H5F_FLUSH_INVALIDATE)) {
+	if((flags & H5F_FLUSH_CLOSING)) {
 	    if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
 		nerrors++;
 	} else {
