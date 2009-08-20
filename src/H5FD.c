@@ -1126,13 +1126,10 @@ done:
  *		the `open' callback.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, July 27, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1148,11 +1145,11 @@ H5FDclose(H5FD_t *file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
 
     if(H5FD_close(file) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to close file")
+	HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5FDclose() */
 
 
 /*-------------------------------------------------------------------------
@@ -1161,22 +1158,11 @@ done:
  * Purpose:	Private version of H5FDclose()
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *              Robb Matzke, 2000-11-10
- *              Removed a call to set *file to all zero because the struct
- *              has already been freed by the close method. This fixes a write
- *              to freed memory.
- *
- *              Bill Wendling, 2003-02-17
- *              Split out the freeing of the freelist from this function
- *              so that the Flexible PHDF5 stuff can call it without
- *              having to call H5FD_close().
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1201,7 +1187,7 @@ H5FD_close(H5FD_t *file)
      */
     HDassert(driver->close);
     if((driver->close)(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "close failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
