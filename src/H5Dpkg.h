@@ -118,8 +118,7 @@ typedef ssize_t (*H5D_layout_readvv_func_t)(const struct H5D_io_info_t *io_info,
 typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset, hid_t dxpl_id,
-    unsigned flags);
+typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset, hid_t dxpl_id);
 typedef herr_t (*H5D_layout_io_term_func_t)(const struct H5D_chunk_map_t *cm);
 
 /* Typedef for grouping layout I/O routines */
