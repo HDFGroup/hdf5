@@ -346,16 +346,18 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_region_prefix
  *
- * Purpose: Renders the line prefix value into string STR.
+ * Purpose: Renders the line prefix value into string STR. Region reference specific.
  *
  * Return:  Success:    Pointer to the prefix.
- *
- *      Failure:    NULL
- *
+ *          Failure:    NULL
+ *      
+ * In/Out: 
+ *      h5tools_context_t *ctx
+ *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
+h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
         hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t min_idx[], hsize_t max_idx[],
         h5tools_context_t *ctx) 
 {
@@ -387,7 +389,7 @@ h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *i
             h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) ctx->pos[i]);
 
         }
-    }
+    } /* if (ndims > 0) */
     else {
         /* Scalar */
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) 0);
@@ -401,15 +403,16 @@ h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *i
  * Function:    h5tools_str_dump_region_blocks
  *
  * Purpose: Prints information about a dataspace region by appending
- *      the information to the specified string.
+ *          the information to the specified string.
  *
- * Return:  Success:    0
- *
- *      Failure:    NULL
- *
+ * Return:  none
+ *      
+ * In/Out: 
+ *      h5tools_context_t *ctx
+ *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
-int 
+void 
 h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         const h5tool_format_t *info, h5tools_context_t *ctx) 
 {
@@ -419,9 +422,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
     int        ndims = H5Sget_simple_extent_ndims(region);
 
     /*
-     * These two functions fail if the region does not have blocks or points,
-     * respectively. They do not currently know how to translate from one to
-     * the other.
+     * This function fails if the region does not have blocks. 
      */
     H5E_BEGIN_TRY {
         nblocks = H5Sget_select_hyper_nblocks(region);
@@ -442,18 +443,17 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         for (i = 0; i < nblocks; i++) {
             int j;
 
-            h5tools_str_append(str, info->dset_blockformat_pre,
-                               i ? "," OPTIONAL_LINE_BREAK " " : "",
+            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)i);
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
                 h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                        (unsigned long) ptdata[i * 2 * ndims + j]);
+                                    (unsigned long) ptdata[i * 2 * ndims + j]);
 
             for (j = 0; j < ndims; j++)
                 h5tools_str_append(str, "%s%lu", j ? "," : ")-(",
-                        (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
+                                    (unsigned long) ptdata[i * 2 * ndims + j + ndims]);
 
             h5tools_str_append(str, ")");
         }
@@ -461,23 +461,23 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         free(ptdata);
 
         h5tools_str_append(str, "}");
-    }
-    return 0;
+    } /* end if (nblocks > 0) */
 }
 
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_dump_region_points
  *
  * Purpose: Prints information about a dataspace region by appending
- *      the information to the specified string.
+ *          the information to the specified string.
  *
- * Return:  Success:    0
- *
- *      Failure:    NULL
- *
+ * Return:  none
+ *      
+ * In/Out: 
+ *      h5tools_context_t *ctx
+ *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
-int 
+void 
 h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         const h5tool_format_t *info, h5tools_context_t *ctx) 
 {
@@ -487,9 +487,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
     int        ndims = H5Sget_simple_extent_ndims(region);
 
     /*
-     * These two functions fail if the region does not have blocks or points,
-     * respectively. They do not currently know how to translate from one to
-     * the other.
+     * This function fails if the region does not have points.
      */
     H5E_BEGIN_TRY {
         npoints = H5Sget_select_elem_npoints(region);
@@ -510,13 +508,12 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         for (i = 0; i < npoints; i++) {
             int j;
 
-            h5tools_str_append(str, info->dset_ptformat_pre,
-                               i ? "," OPTIONAL_LINE_BREAK " " : "",
+            h5tools_str_append(str, info->dset_ptformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)i);
 
             for (j = 0; j < ndims; j++)
                 h5tools_str_append(str, "%s%lu", j ? "," : "(",
-                        (unsigned long) (ptdata[i * ndims + j]));
+                                  (unsigned long) (ptdata[i * ndims + j]));
 
             h5tools_str_append(str, ")");
         }
@@ -524,8 +521,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         free(ptdata);
 
         h5tools_str_append(str, "}");
-    }
-    return 0;
+    } /* end if (npoints > 0) */
 }
 
 /*-------------------------------------------------------------------------
@@ -534,11 +530,6 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
  * Purpose: Shove a character into the STR.
  *
  * Return:  Nothing
- *
- * Programmer:  Bill Wendling
- *              Tuesday, 20. February 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -648,7 +639,6 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
-
 char *
 h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
@@ -1143,13 +1133,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_sprint_region
  *
- * Purpose: Dataset region reference -- show the type and data of the referenced
- * object.
+ * Purpose: Dataset region reference -- show the type and data of the referenced object.
  *
  * Return:  Nothing
  *-------------------------------------------------------------------------
  */
-void h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
+void 
+h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
         hid_t container, void *vp, h5tools_context_t *ctx) 
 {
     hid_t   obj, region;
@@ -1166,9 +1156,9 @@ void h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
             h5tools_str_dump_region_points(str, region, info, ctx);
 
             H5Sclose(region);
-        }
+        } /* end if (region >= 0) */
         H5Dclose(obj);
-    }
+    } /* end if (obj >= 0) */
 }
 
 /*-------------------------------------------------------------------------

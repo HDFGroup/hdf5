@@ -514,7 +514,10 @@ struct subset_t {
     hsize_t *block;
 };
 
-/* include after above stucts are defined */
+/* The following include, h5tools_str.h, must be after the 
+ * above stucts are defined. There is a dependency in the following
+ * include that hasn't been identified yet. */
+
 #include "h5tools_str.h"
 
 extern FILE   *rawdatastream;       /* output stream for raw data */
@@ -557,7 +560,7 @@ void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
  * new functions needed to display region reference data
  */
 void            h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
-                         h5tools_context_t *ctx/*in,out*/, unsigned flags, hid_t type); 
+                         h5tools_context_t *ctx/*in,out*/, hid_t type); 
 void            h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
                          const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
                          hid_t space);
