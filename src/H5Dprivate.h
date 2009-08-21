@@ -162,7 +162,7 @@ H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
-H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, hbool_t closing);
 
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,

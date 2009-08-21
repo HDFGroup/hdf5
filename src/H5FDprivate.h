@@ -72,7 +72,7 @@ H5_DLL herr_t H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf/*out*/);
 H5_DLL herr_t H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
+H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);

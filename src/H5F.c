@@ -72,7 +72,7 @@ static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope);
-static herr_t H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags);
+static herr_t H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -1023,7 +1023,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 
             /* Flush all caches and indicate we are closing the file */
             /* (The caches should already be clean and we should just be invalidating objects) */
-            if(H5F_flush_real(f, dxpl_id, H5F_FLUSH_CLOSING) < 0)
+            if(H5F_flush_real(f, dxpl_id, TRUE) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
         } /* end if */
@@ -1661,7 +1661,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope)
     } /* end if */
 
     /* Call the "real" flush routine, for this file */
-    if(H5F_flush_real(f, dxpl_id, H5F_FLUSH_NONE) < 0)
+    if(H5F_flush_real(f, dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Check flush errors for children - errors are already on the stack */
@@ -1676,9 +1676,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush_real
  *
- * Purpose:	Flushes (and optionally invalidates) cached data plus the
- *		file superblock.  If the logical file size field is zero
- *		then it is updated to be the length of the superblock.
+ * Purpose:	Flushes (and optionally invalidates) cached data.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1689,7 +1687,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
     unsigned H5AC_flags = H5AC__NO_FLAGS_SET;   /* Flags for H5AC_flush() */
     herr_t   ret_value = SUCCEED;       /* Return value */
@@ -1700,7 +1698,7 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
     HDassert(f);
 
     /* Flush any cached dataset storage raw data */
-    if(H5D_flush(f, dxpl_id, flags) < 0)
+    if(H5D_flush(f, dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /* If we will be closing the file, we should release the free space
@@ -1709,7 +1707,7 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
      *  holding some data structures in memory and also because releasing free
      *  space can shrink the file's 'eoa' value)
      */
-    if(flags & H5F_FLUSH_CLOSING) {
+    if(closing) {
         /* Shutdown file free space manager(s) */
         if(H5MF_close(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
@@ -1726,7 +1724,7 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
     } /* end else */
 
     /* Flush (and invalidate, if requested) the entire metadata cache */
-    if(flags & H5F_FLUSH_CLOSING) {
+    if(closing) {
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
 
         /* Unpin the superblock, since we're about to destroy the cache */
@@ -1743,7 +1741,7 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
         HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+    if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
 done:
@@ -1954,7 +1952,7 @@ H5F_try_close(H5F_t *f)
      */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush all caches */
-        if(H5F_flush_real(f, H5AC_dxpl_id, H5F_FLUSH_NONE) < 0)
+        if(H5F_flush_real(f, H5AC_dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
