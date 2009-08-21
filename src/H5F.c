@@ -71,7 +71,8 @@ static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_hand
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
+static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope);
+static herr_t H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -1021,19 +1022,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
             /* Flush all caches and indicate we are closing the file */
-            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_CLOSING) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-
-            /* Unpin the superblock, since we're about to destroy the cache */
-            if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
-            f->shared->sblock = NULL;
-
-            /* Flush all caches and indicate all cached objects should be invalidated */
             /* (The caches should already be clean and we should just be invalidating objects) */
-            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE) < 0)
+            if(H5F_flush_real(f, dxpl_id, H5F_FLUSH_CLOSING) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
         } /* end if */
@@ -1609,8 +1599,17 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
     /* Flush the file */
-    if(H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
+    /*
+     * Nothing to do if the file is read only.	This determination is
+     * made at the shared open(2) flags level, implying that opening a
+     * file twice, once for read-only and once for read-write, and then
+     * calling H5F_flush() with the read-only handle, still causes data
+     * to be flushed.
+     */
+    if(H5F_ACC_RDWR & f->shared->flags) {
+        if(H5F_flush(f, H5AC_dxpl_id, scope) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1633,39 +1632,72 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
+H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */
-    unsigned		i;              /* Index variable */
-    unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
-    herr_t              ret_value;      /* Return value */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
 
     /* Sanity check arguments */
     HDassert(f);
 
-    /*
-     * Nothing to do if the file is read only.	This determination is
-     * made at the shared open(2) flags level, implying that opening a
-     * file twice, once for read-only and once for read-write, and then
-     * calling H5F_flush() with the read-only handle, still causes data
-     * to be flushed.
-     */
-    if(0 == (H5F_ACC_RDWR & f->shared->flags))
-	HGOTO_DONE(SUCCEED)
-
     /* Flush other files, depending on scope */
     if(H5F_SCOPE_GLOBAL == scope) {
+        /* Find the top file in the mount hierarchy */
 	while(f->parent)
             f = f->parent;
 
+        /* Switch to 'down' scope for further flushing */
 	scope = H5F_SCOPE_DOWN;
     } /* end while */
-    if(H5F_SCOPE_DOWN == scope)
-        for(i = 0; i < f->shared->mtab.nmounts; i++)
-            if(H5F_flush(f->shared->mtab.child[i].file, dxpl_id, scope, flags) < 0)
+    if(H5F_SCOPE_DOWN == scope) {
+        unsigned u;              /* Index variable */
+
+        /* Flush all child files, not stopping for errors */
+        for(u = 0; u < f->shared->mtab.nmounts; u++)
+            if(H5F_flush(f->shared->mtab.child[u].file, dxpl_id, scope) < 0)
                 nerrors++;
+    } /* end if */
+
+    /* Call the "real" flush routine, for this file */
+    if(H5F_flush_real(f, dxpl_id, H5F_FLUSH_NONE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+    /* Check flush errors for children - errors are already on the stack */
+    if(nerrors)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's child mounts")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_flush_real
+ *
+ * Purpose:	Flushes (and optionally invalidates) cached data plus the
+ *		file superblock.  If the logical file size field is zero
+ *		then it is updated to be the length of the superblock.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Aug 29 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_flush_real(H5F_t *f, hid_t dxpl_id, unsigned flags)
+{
+    unsigned H5AC_flags = H5AC__NO_FLAGS_SET;   /* Flags for H5AC_flush() */
+    herr_t   ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_flush_real)
+
+    /* Sanity check arguments */
+    HDassert(f);
 
     /* Flush any cached dataset storage raw data */
     if(H5D_flush(f, dxpl_id, flags) < 0)
@@ -1694,9 +1726,15 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end else */
 
     /* Flush (and invalidate, if requested) the entire metadata cache */
-    H5AC_flags = 0;
-    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
+    if(flags & H5F_FLUSH_CLOSING) {
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
+
+        /* Unpin the superblock, since we're about to destroy the cache */
+        if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+        f->shared->sblock = NULL;
+    } /* end if */
     if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
@@ -1708,12 +1746,9 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if(H5FD_flush(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
-    /* Check flush errors for children - errors are already on the stack */
-    ret_value = (nerrors ? FAIL : SUCCEED);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_flush() */
+} /* end H5F_flush_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -1918,8 +1953,8 @@ H5F_try_close(H5F_t *f)
      * Only try to flush the file if it was opened with write access.
      */
     if(f->intent&H5F_ACC_RDWR) {
-        /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5AC__NO_FLAGS_SET) < 0)
+        /* Flush all caches */
+        if(H5F_flush_real(f, H5AC_dxpl_id, H5F_FLUSH_NONE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
