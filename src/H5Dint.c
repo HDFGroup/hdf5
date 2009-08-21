@@ -48,7 +48,6 @@
 typedef struct {
     const H5F_t *f;             /* Pointer to file being flushed */
     hid_t dxpl_id;              /* DXPL for I/O operations */
-    hbool_t closing;            /* Whether the file is closing */
 } H5D_flush_ud_t;
 
 
@@ -66,7 +65,7 @@ static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
-static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, hbool_t closing);
+static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id);
 
 
 /*********************/
@@ -1361,7 +1360,7 @@ H5D_close(H5D_t *dataset)
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
         /* Flush the dataset's information */
-        if(H5D_flush_real(dataset, H5AC_dxpl_id, FALSE) < 0)
+        if(H5D_flush_real(dataset, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
         /* Free the data sieve buffer, if it's been allocated */
@@ -2234,7 +2233,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, hbool_t closing)
+H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2278,7 +2277,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, hbool_t closing)
 
     /* Flush cached raw data for each kind of dataset layout */
     if(dataset->shared->layout.ops->flush && 
-            (dataset->shared->layout.ops->flush)(dataset, dxpl_id, closing) < 0)
+            (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
 
 done:
@@ -2319,7 +2318,7 @@ H5D_flush_cb(void *_dataset, hid_t UNUSED id, void *_udata)
     /* Check for dataset in same file */
     if(udata->f == dataset->oloc.file) {
         /* Flush the dataset's information */
-        if(H5D_flush_real(dataset, udata->dxpl_id, udata->closing) < 0)
+        if(H5D_flush_real(dataset, udata->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to flush cached dataset info")
     } /* end if */
 
@@ -2342,7 +2341,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush(const H5F_t *f, hid_t dxpl_id, hbool_t closing)
+H5D_flush(const H5F_t *f, hid_t dxpl_id)
 {
     H5D_flush_ud_t udata;               /* User data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2355,7 +2354,6 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, hbool_t closing)
     /* Set user data for callback */
     udata.f = f;
     udata.dxpl_id = dxpl_id;
-    udata.closing = closing;
 
     /* Iterate over all the open datasets */
     H5I_search(H5I_DATASET, H5D_flush_cb, &udata, FALSE);

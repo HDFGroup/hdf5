@@ -1619,9 +1619,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush
  *
- * Purpose:	Flushes (and optionally invalidates) cached data plus the
- *		file superblock.  If the logical file size field is zero
- *		then it is updated to be the length of the superblock.
+ * Purpose:	Flushes (and optionally invalidates) cached data, possibly
+ *		in all mounted files, depending on the SCOPE.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1697,9 +1696,12 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     /* Sanity check arguments */
     HDassert(f);
 
-    /* Flush any cached dataset storage raw data */
-    if(H5D_flush(f, dxpl_id, closing) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+    /* If we will be closing the file, we don't need to flush the dataset info */
+    if(!closing) {
+        /* Flush any cached dataset storage raw data */
+        if(H5D_flush(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+    } /* end if */
 
     /* If we will be closing the file, we should release the free space
      *  information now (needs to happen before truncating the file and
@@ -1736,13 +1738,19 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
-    /* Flush out the metadata accumulator */
-    if(H5F_accum_flush(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+    /* If we will be closing the file, we don't need to flush the accumulator info */
+    if(!closing) {
+        /* Flush out the metadata accumulator */
+        if(H5F_accum_flush(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+    } /* end if */
 
-    /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+    /* If we will be closing the file, we don't need to flush file buffers */
+    if(!closing) {
+        /* Flush file buffers to disk. */
+        if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

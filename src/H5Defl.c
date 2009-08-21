@@ -50,7 +50,7 @@
 
 /* Layout operation callbacks */
 static herr_t H5D_efl_construct(H5F_t *f, H5D_t *dset);
-static hbool_t H5D_efl_is_space_alloc(const H5O_layout_t *layout);
+static hbool_t H5D_efl_is_space_alloc(const H5O_storage_t *storage);
 static herr_t H5D_efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
@@ -182,14 +182,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5D_efl_is_space_alloc(const H5O_layout_t UNUSED *layout)
+H5D_efl_is_space_alloc(const H5O_storage_t UNUSED *storage)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_efl_is_space_alloc)
 
     /* Sanity checks */
-    HDassert(layout);
+    HDassert(storage);
 
-    /* EFL storage is currently treated as allocated */
+    /* EFL storage is currently always treated as allocated */
     FUNC_LEAVE_NOAPI(TRUE)
 } /* end H5D_efl_is_space_alloc() */
 

@@ -65,7 +65,7 @@ static herr_t H5D_contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
-static herr_t H5D_contig_flush(H5D_t *dset, hid_t dxpl_id, hbool_t closing);
+static herr_t H5D_contig_flush(H5D_t *dset, hid_t dxpl_id);
 
 /* Helper routines */
 static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
@@ -1186,7 +1186,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_contig_flush(H5D_t *dset, hid_t dxpl_id, hbool_t UNUSED closing)
+H5D_contig_flush(H5D_t *dset, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
