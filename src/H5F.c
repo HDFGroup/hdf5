@@ -72,7 +72,6 @@ static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope);
-static herr_t H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -1633,7 +1632,6 @@ done:
 static herr_t
 H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope)
 {
-    unsigned		nerrors = 0;    /* Errors from nested flushes */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
@@ -1643,29 +1641,15 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope)
 
     /* Flush other files, depending on scope */
     if(H5F_SCOPE_GLOBAL == scope) {
-        /* Find the top file in the mount hierarchy */
-	while(f->parent)
-            f = f->parent;
-
-        /* Switch to 'down' scope for further flushing */
-	scope = H5F_SCOPE_DOWN;
-    } /* end while */
-    if(H5F_SCOPE_DOWN == scope) {
-        unsigned u;              /* Index variable */
-
-        /* Flush all child files, not stopping for errors */
-        for(u = 0; u < f->shared->mtab.nmounts; u++)
-            if(H5F_flush(f->shared->mtab.child[u].file, dxpl_id, scope) < 0)
-                nerrors++;
+        /* Call the flush routine for mounted file hierarchies */
+        if(H5F_flush_mounts(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
     } /* end if */
-
-    /* Call the "real" flush routine, for this file */
-    if(H5F_flush_real(f, dxpl_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
-
-    /* Check flush errors for children - errors are already on the stack */
-    if(nerrors)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's child mounts")
+    else {
+        /* Call the "real" flush routine, for this file */
+        if(H5F_flush_real(f, dxpl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1685,13 +1669,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
     unsigned H5AC_flags = H5AC__NO_FLAGS_SET;   /* Flags for H5AC_flush() */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_flush_real)
+    FUNC_ENTER_NOAPI(H5F_flush_real, FAIL)
 
     /* Sanity check arguments */
     HDassert(f);
