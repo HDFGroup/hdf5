@@ -1020,11 +1020,22 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
-            /* Flush all caches and indicate we are closing the file */
-            /* (The caches should already be clean and we should just be invalidating objects) */
-            if(H5F_flush_real(f, dxpl_id, TRUE) < 0)
+            /* Shutdown file free space manager(s) */
+            /* (We should release the free space information now (before truncating
+             *      the file and before the metadata cache is shut down) since the
+             *      free space manager is holding some data structures in memory
+             *      and also because releasing free space can shrink the file's
+             *      'eoa' value)
+             */
+            if(H5MF_close(f, dxpl_id) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+
+            /* Unpin the superblock, since we're about to destroy the cache */
+            if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+            f->shared->sblock = NULL;
         } /* end if */
 
         /* Remove shared file struct from list of open files */
@@ -1620,8 +1631,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush
  *
- * Purpose:	Flushes (and optionally invalidates) cached data, possibly
- *		in all mounted files, depending on the SCOPE.
+ * Purpose:	Flushes cached data, possibly in all mounted files,
+ *		depending on the SCOPE.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1649,7 +1660,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope)
     } /* end if */
     else {
         /* Call the "real" flush routine, for this file */
-        if(H5F_flush_real(f, dxpl_id, FALSE) < 0)
+        if(H5F_flush_real(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
     } /* end else */
 
@@ -1661,7 +1672,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush_real
  *
- * Purpose:	Flushes (and optionally invalidates) cached data.
+ * Purpose:	Flushes cached data.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1672,7 +1683,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
+H5F_flush_real(H5F_t *f, hid_t dxpl_id)
 {
     herr_t   ret_value = SUCCEED;       /* Return value */
 
@@ -1681,60 +1692,30 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     /* Sanity check arguments */
     HDassert(f);
 
-    /* If we will be closing the file, we don't need to flush the dataset info */
-    if(!closing) {
-        /* Flush any cached dataset storage raw data */
-        if(H5D_flush(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
-    } /* end if */
+    /* Flush any cached dataset storage raw data */
+    if(H5D_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
-    /* If we will be closing the file, we should release the free space
-     *  information now (needs to happen before truncating the file and
-     *  before the metadata cache is shut down, since the free space manager is
-     *  holding some data structures in memory and also because releasing free
-     *  space can shrink the file's 'eoa' value)
+    /* Release any space allocated to space aggregators, so that the eoa value
+     *  corresponds to the end of the space written to in the file.
      */
-    if(closing) {
-        /* Shutdown file free space manager(s) */
-        if(H5MF_close(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
-    } /* end if */
-    else {
-        /* Release any space allocated to space aggregators, so that the eoa value
-         *  corresponds to the end of the space written to in the file.
-         */
-        /* (needs to happen before superblock write, since the 'eoa' value is
-         *  written in superblock -QAK)
-         */
-        if(H5MF_free_aggrs(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
-    } /* end else */
+    /* (needs to happen before cache flush, with superblock write, since the
+     *  'eoa' value is written in superblock -QAK)
+     */
+    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
-    if(closing) {
-        /* Unpin the superblock, since we're about to destroy the cache */
-        if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
-        f->shared->sblock = NULL;
-    } /* end if */
-    else {
-        /* Flush the entire metadata cache */
-        if(H5AC_flush(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
-    } /* end else */
+    /* Flush the entire metadata cache */
+    if(H5AC_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
-    /* If we will be closing the file, we don't need to flush the accumulator info */
-    if(!closing) {
-        /* Flush out the metadata accumulator */
-        if(H5F_accum_flush(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
-    } /* end if */
+    /* Flush out the metadata accumulator */
+    if(H5F_accum_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
-    /* If we will be closing the file, we don't need to flush file buffers */
-    if(!closing) {
-        /* Flush file buffers to disk. */
-        if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
-    } /* end if */
+    /* Flush file buffers to disk. */
+    if(H5FD_flush(f->shared->lf, dxpl_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1944,7 +1925,7 @@ H5F_try_close(H5F_t *f)
      */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush all caches */
-        if(H5F_flush_real(f, H5AC_dxpl_id, FALSE) < 0)
+        if(H5F_flush_real(f, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
