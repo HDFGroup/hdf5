@@ -288,7 +288,7 @@ H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
 /* General routines */
 H5_DLL herr_t H5F_init(void);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
-H5_DLL herr_t H5F_flush_real(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id);
 
 /* File mount related routines */
 H5_DLL herr_t H5F_close_mounts(H5F_t *f);
