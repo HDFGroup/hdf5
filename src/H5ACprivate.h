@@ -343,7 +343,7 @@ H5_DLL herr_t H5AC_destroy_flush_dependency(H5F_t *f, void *parent_thing,
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
-H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                           void *  thing,
 					   hbool_t size_changed,

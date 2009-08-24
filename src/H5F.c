@@ -1032,6 +1032,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
+        /* Shutdown the metadata cache */
+        if(H5AC_dest(f, dxpl_id))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
         /*
          * Do not close the root group since we didn't count it, but free
          * the memory associated with it.
@@ -1050,9 +1055,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         } /* end if */
 
         /* Destroy other components of the file */
-        if(H5AC_dest(f, dxpl_id))
-            /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5F_accum_reset(f) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
@@ -1672,7 +1674,6 @@ done:
 herr_t
 H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
-    unsigned H5AC_flags = H5AC__NO_FLAGS_SET;   /* Flags for H5AC_flush() */
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_flush_real, FAIL)
@@ -1709,18 +1710,17 @@ H5F_flush_real(H5F_t *f, hid_t dxpl_id, hbool_t closing)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
     } /* end else */
 
-    /* Flush (and invalidate, if requested) the entire metadata cache */
     if(closing) {
-        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-
         /* Unpin the superblock, since we're about to destroy the cache */
         if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
-            /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
         f->shared->sblock = NULL;
     } /* end if */
-    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+    else {
+        /* Flush the entire metadata cache */
+        if(H5AC_flush(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+    } /* end else */
 
     /* If we will be closing the file, we don't need to flush the accumulator info */
     if(!closing) {
