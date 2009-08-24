@@ -288,11 +288,13 @@ H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
 /* General routines */
 H5_DLL herr_t H5F_init(void);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
+H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id);
 
 /* File mount related routines */
 H5_DLL herr_t H5F_close_mounts(H5F_t *f);
 H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
+H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t dxpl_id);
 
 /* Superblock related routines */
 H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
@@ -313,7 +315,7 @@ H5_DLL htri_t H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
 H5_DLL herr_t H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
     haddr_t addr, hsize_t size);
 H5_DLL herr_t H5F_accum_flush(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_accum_reset(H5F_t *f);
+H5_DLL herr_t H5F_accum_reset(H5F_t *f, hid_t dxpl_id);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

@@ -79,8 +79,7 @@
 /* The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {
     H5F_SCOPE_LOCAL	= 0,	/*specified file handle only		*/
-    H5F_SCOPE_GLOBAL	= 1,	/*entire virtual file			*/
-    H5F_SCOPE_DOWN      = 2	/*for internal use only			*/
+    H5F_SCOPE_GLOBAL	= 1 	/*entire virtual file			*/
 } H5F_scope_t;
 
 /* Unlimited file size for H5Pset_external() */

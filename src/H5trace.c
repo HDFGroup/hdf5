@@ -674,10 +674,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5F_SCOPE_GLOBAL:
                                 fprintf(out, "H5F_SCOPE_GLOBAL");
                                 break;
-                            case H5F_SCOPE_DOWN:
-                                fprintf(out, "H5F_SCOPE_DOWN "
-                                        "/*FOR INTERNAL USE ONLY!*/");
-                                break;
                             default:
                                 fprintf(out, "%ld", (long)scope);
                                 break;

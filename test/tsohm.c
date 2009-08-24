@@ -544,8 +544,12 @@ error:
 static hid_t
 close_reopen_file(hid_t file, const char* filename, hid_t fapl_id)
 {
-    if(H5Fclose(file) < 0) goto error;
-    return H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    hid_t fid;
+
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) FAIL_STACK_ERROR
+
+    return(fid);
 
 error:
     return -1;
@@ -598,19 +602,19 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     dim1[0] = 1;
     if((space_id=H5Screate_simple(1,dim1,NULL)) < 0) TEST_ERROR
 
-    if((dset_id = H5Dcreate2(file,DSETNAME[0],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[0],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Test writing and reading */
-    if(H5Dwrite(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) TEST_ERROR
+    if(H5Dwrite(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) FAIL_STACK_ERROR
 
-    if(H5Dread(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) TEST_ERROR
+    if(H5Dread(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) FAIL_STACK_ERROR
 
     if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED(); AT();
         printf("incorrect read data\n");
         goto error;
     } /* end if */
-    if(H5Dclose(dset_id) < 0) TEST_ERROR
+    if(H5Dclose(dset_id) < 0) FAIL_STACK_ERROR
 
     /* Close and re-open the file if requested*/
     if(test_file_closing) {
@@ -618,8 +622,8 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     }
 
     /* Create more datasets with the same datatype */
-    if((dset_id = H5Dcreate2(file,DSETNAME[1],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Dclose(dset_id) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[1],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dset_id) < 0) FAIL_STACK_ERROR
 
     /* Close and re-open the file if requested*/
     if(test_file_closing) {
