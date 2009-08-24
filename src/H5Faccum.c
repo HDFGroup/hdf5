@@ -722,12 +722,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_accum_reset(H5F_t *f)
+H5F_accum_reset(H5F_t *f, hid_t dxpl_id)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5F_accum_reset)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_accum_reset, FAIL)
 
     HDassert(f);
     HDassert(f->shared);
+
+    /* Flush any dirty data in accumulator */
+    if(H5F_accum_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush metadata accumulator")
 
     /* Check if we need to reset the metadata accumulator information */
     if(f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) {
@@ -744,7 +750,7 @@ H5F_accum_reset(H5F_t *f)
         f->shared->accum.dirty = FALSE;
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_accum_reset() */
-
 
