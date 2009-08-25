@@ -60,8 +60,8 @@ test_cont(char *filename, hid_t fapl)
     H5O_info_t  oinfo;               
     H5O_loc_t	oh_locA, oh_locB;
     time_t	time_new;
-    char	*short_name = "T";
-    char	*long_name = "This is the message";
+    const char	*short_name = "T";
+    const char	*long_name = "This is the message";
     size_t	nchunks;
 
     TESTING("object header continuation block");
@@ -100,7 +100,9 @@ test_cont(char *filename, hid_t fapl)
     if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name, H5P_DATASET_XFER_DEFAULT) < 0)
 	FAIL_STACK_ERROR
 
-    if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+    if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+    if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_locA.addr, H5AC__NO_FLAGS_SET) < 0)
 	FAIL_STACK_ERROR
 
     if(H5O_get_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
@@ -210,7 +212,9 @@ main(void)
         time_new = 11111111;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR
@@ -226,7 +230,9 @@ main(void)
         time_new = 33333333;
         if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR
@@ -255,7 +261,9 @@ main(void)
             if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
@@ -294,7 +302,9 @@ main(void)
             time_new = (i + 1) * 1000 + 10;
             if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+            if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+                FAIL_STACK_ERROR
+            if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
         PASSED();
@@ -322,7 +332,9 @@ main(void)
         time_new = 22222222;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR

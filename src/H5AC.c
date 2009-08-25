@@ -193,6 +193,8 @@ static herr_t H5AC_receive_and_apply_clean_list(H5F_t  * f,
 static herr_t H5AC_log_renamed_entry(H5AC_t * cache_ptr,
                                      haddr_t old_addr,
                                      haddr_t new_addr);
+
+static herr_t H5AC_flush_entries(H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -766,64 +768,52 @@ done:
 herr_t
 H5AC_dest(H5F_t *f, hid_t dxpl_id)
 {
-    H5AC_t *cache = NULL;
-    herr_t ret_value=SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_dest, FAIL)
 
-    assert(f);
-    assert(f->shared->cache);
-    cache = f->shared->cache;
-#ifdef H5_HAVE_PARALLEL
-    aux_ptr = cache->aux_ptr;
-
-    if ( aux_ptr != NULL ) {
-
-        HDassert ( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    }
-#endif /* H5_HAVE_PARALLEL */
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared->cache);
 
 #if H5AC__TRACE_FILE_ENABLED
-    if ( H5AC_close_trace_file(cache) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_close_trace_file() failed.")
-    }
+    if(H5AC_close_trace_file(f->shared->cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if ( H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id, cache) < 0 ) {
+#ifdef H5_HAVE_PARALLEL
+    aux_ptr = f->shared->cache->aux_ptr;
+    if(aux_ptr)
+        /* Sanity check */
+        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
+    /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
+    if(H5AC_flush_entries(f) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Destroy the cache */
+    if(H5C_dest(f, dxpl_id, H5AC_noblock_dxpl_id, f->shared->cache) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
-    }
-
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
-    if ( aux_ptr != NULL ) {
-
-        if ( aux_ptr->d_slist_ptr != NULL ) {
-
+    if(aux_ptr != NULL) {
+        if(aux_ptr->d_slist_ptr != NULL)
             H5SL_close(aux_ptr->d_slist_ptr);
-        }
-
-        if ( aux_ptr->c_slist_ptr != NULL ) {
-
+        if(aux_ptr->c_slist_ptr != NULL)
             H5SL_close(aux_ptr->c_slist_ptr);
-        }
-
         aux_ptr->magic = 0;
         H5FL_FREE(H5AC_aux_t, aux_ptr);
         aux_ptr = NULL;
-    }
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_dest() */
 
 
@@ -923,42 +913,10 @@ done:
  * Purpose:	Flush (and possibly destroy) the metadata cache associated
  *		with the specified file.
  *
- *		This is a re-write of an earlier version of the function
- *		which was reputedly capable of flushing (and destroying
- *		if requested) individual entries, individual entries if
- *		they match the supplied type, all entries of a given type,
- *		as well as all entries in the cache.
- *
- *		As only this last capability is actually used at present,
- *		I have not implemented the other capabilities in this
- *		version of the function.
- *
- *		The type and addr parameters are retained to avoid source
- *		code changed, but values other than NULL and HADDR_UNDEF
- *		respectively are errors.  If all goes well, they should
- *		be removed, and the function renamed to something more
- *		descriptive -- perhaps H5AC_flush_cache.
- *
  *		If the cache contains protected entries, the function will
  *		fail, as protected entries cannot be flushed.  However
  *		all unprotected entries should be flushed before the
  *		function returns failure.
- *
- *		For historical purposes, the original version of the
- *		purpose section is reproduced below:
- *
- *              ============ Original Version of "Purpose:" ============
- *
- *              Flushes (and destroys if DESTROY is non-zero) the specified
- *              entry from the cache.  If the entry TYPE is CACHE_FREE and
- *              ADDR is HADDR_UNDEF then all types of entries are
- *              flushed. If TYPE is CACHE_FREE and ADDR is defined then
- *              whatever is cached at ADDR is flushed.  Otherwise the thing
- *              at ADDR is flushed if it is the correct type.
- *
- *              If there are protected objects they will not be flushed.
- *              However, an attempt will be made to flush all non-protected
- *              items before this function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
@@ -967,45 +925,16 @@ done:
  *              matzke@llnl.gov
  *              Jul  9 1997
  *
- * Modifications:
- * 		Robb Matzke, 1999-07-27
- *		The ADDR argument is passed by value.
- *
- *		Complete re-write. See above for details.  -- JRM 5/11/04
- *
- *		Abstracted the guts of the function to H5C_flush_cache()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_flush_cache().
- *
- *                                                 JRM - 6/7/04
- *
- *		JRM - 7/5/05
- *		Modified function as part of a fix for a cache coherency
- *		bug in PHDF5.  See the header comments on the H5AC_aux_t
- *		structure for details.
- *
- *		JRM -- 5/11/06
- *		Added call to the write_done callback.
- *
- *		JRM -- 6/6/06
- * 		Added trace file support.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5AC_flush(H5F_t *f, hid_t dxpl_id)
 {
-    herr_t	  status;
-    herr_t	  ret_value = SUCCEED;      /* Return value */
-#ifdef H5_HAVE_PARALLEL
-    H5AC_aux_t	* aux_ptr = NULL;
-    int		  mpi_code;
-#endif /* H5_HAVE_PARALLEL */
 #if H5AC__TRACE_FILE_ENABLED
     char 	  trace[128] = "";
     FILE *	  trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-
+    herr_t	  ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_flush, FAIL)
 
@@ -1016,108 +945,31 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     /* For the flush, only the flags are really necessary in the trace file.
      * Write the result to catch occult errors.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-	 ( f->shared->cache != NULL ) &&
-	 ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
-	 ( trace_file_ptr != NULL ) ) {
-
-	sprintf(trace, "H5AC_flush 0x%x", flags);
-    }
+    if((f != NULL) &&
+            (f->shared != NULL) &&
+            (f->shared->cache != NULL) &&
+            (H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
+            (trace_file_ptr != NULL))
+	sprintf(trace, "H5AC_flush");
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    aux_ptr = f->shared->cache->aux_ptr;
-
-    if ( aux_ptr != NULL ) {
-
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
-        HDfprintf(stdout,
-                  "%d::H5AC_flush: (u/uu/i/iu/r/ru) = %d/%d/%d/%d/%d/%d\n",
-                  (int)(aux_ptr->mpi_rank),
-                  (int)(aux_ptr->unprotect_dirty_bytes),
-                  (int)(aux_ptr->unprotect_dirty_bytes_updates),
-                  (int)(aux_ptr->insert_dirty_bytes),
-                  (int)(aux_ptr->insert_dirty_bytes_updates),
-                  (int)(aux_ptr->rename_dirty_bytes),
-                  (int)(aux_ptr->rename_dirty_bytes_updates));
-#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-
-        /* to prevent "messages from the future" we must synchronize all
-         * processes before we start the flush.  Hence the following
-         * barrier.
-         */
-        if ( MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)) ) {
-
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
-        }
-
-        /* if the clear only flag is set, this flush will not involve any
-         * disk I/O.  In such cases, it is not necessary to let process 0
-         * flush first.
-         */
-        if ( ( aux_ptr->mpi_rank == 0 ) &&
-             ( (flags & H5AC__FLUSH_CLEAR_ONLY_FLAG) == 0 ) ) {
-
-            unsigned init_flush_flags = H5AC__NO_FLAGS_SET;
-
-            if ( ( (flags & H5AC__FLUSH_MARKED_ENTRIES_FLAG) != 0 ) &&
-                 ( (flags & H5AC__FLUSH_INVALIDATE_FLAG) == 0 ) ) {
-
-                init_flush_flags |= H5AC__FLUSH_MARKED_ENTRIES_FLAG;
-            }
-
-	    aux_ptr->write_permitted = TRUE;
-
-            status = H5C_flush_cache(f,
-                                     H5AC_noblock_dxpl_id,
-                                     H5AC_noblock_dxpl_id,
-                                     f->shared->cache,
-                                     init_flush_flags);
-
-	    aux_ptr->write_permitted = FALSE;
-
-            if ( status < 0 ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
-            }
-
-            if ( aux_ptr->write_done != NULL ) {
-
-                (aux_ptr->write_done)();
-	    }
-
-        } /* end if ( aux_ptr->mpi_rank == 0 ) */
-
-        status = H5AC_propagate_flushed_and_still_clean_entries_list(f,
-                                                          H5AC_noblock_dxpl_id,
-                                                          f->shared->cache,
-                                                          FALSE);
-    } /* end if ( aux_ptr != NULL ) */
+    /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
+    if(H5AC_flush_entries(f) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 #endif /* H5_HAVE_PARALLEL */
 
-    status = H5C_flush_cache(f,
-                             dxpl_id,
-                             H5AC_noblock_dxpl_id,
-                             f->shared->cache,
-                             flags);
-
-    if ( status < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
-    }
+    /* Flush the cache */
+    if(H5C_flush_cache(f, dxpl_id, H5AC_noblock_dxpl_id, f->shared->cache, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache.")
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
+    if(trace_file_ptr != NULL)
         HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_flush() */
 
 
@@ -4886,5 +4738,89 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_receive_and_apply_clean_list() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_flush_entries
+ *
+ * Purpose:	Flush the metadata cache associated with the specified file,
+ *		only writing from rank 0, but propagating the cleaned entries
+ *		to all ranks.
+ *
+ * Return:      Non-negative on success/Negative on failure if there was a
+ *              request to flush all items and something was protected.
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Aug 22 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_flush_entries(H5F_t *f)
+{
+    herr_t	  ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_flush_entries)
+
+    HDassert(f);
+    HDassert(f->shared->cache);
+
+    /* Check if we have >1 ranks */
+    if(f->shared->cache->aux_ptr) {
+        H5AC_aux_t	* aux_ptr = f->shared->cache->aux_ptr;
+        int		  mpi_code;
+
+#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+        HDfprintf(stdout,
+                  "%d::H5AC_flush: (u/uu/i/iu/r/ru) = %d/%d/%d/%d/%d/%d\n",
+                  (int)(aux_ptr->mpi_rank),
+                  (int)(aux_ptr->unprotect_dirty_bytes),
+                  (int)(aux_ptr->unprotect_dirty_bytes_updates),
+                  (int)(aux_ptr->insert_dirty_bytes),
+                  (int)(aux_ptr->insert_dirty_bytes_updates),
+                  (int)(aux_ptr->rename_dirty_bytes),
+                  (int)(aux_ptr->rename_dirty_bytes_updates));
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+
+        /* to prevent "messages from the future" we must synchronize all
+         * processes before we start the flush.  Hence the following
+         * barrier.
+         */
+        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+        /* Flush data to disk, from rank 0 process */
+        if(aux_ptr->mpi_rank == 0 ) {
+            herr_t	  status;
+
+	    aux_ptr->write_permitted = TRUE;
+
+            status = H5C_flush_cache(f,
+                                     H5AC_noblock_dxpl_id,
+                                     H5AC_noblock_dxpl_id,
+                                     f->shared->cache,
+                                     H5AC__NO_FLAGS_SET);
+
+	    aux_ptr->write_permitted = FALSE;
+
+            if(status < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
+
+            if(aux_ptr->write_done != NULL)
+                (aux_ptr->write_done)();
+        } /* end if ( aux_ptr->mpi_rank == 0 ) */
+
+        /* Propagate cleaned entries to other ranks */
+        if(H5AC_propagate_flushed_and_still_clean_entries_list(f,
+                                                          H5AC_noblock_dxpl_id,
+                                                          f->shared->cache,
+                                                          FALSE) < 0 )
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
+    } /* end if ( aux_ptr != NULL ) */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_flush_entries() */
 #endif /* H5_HAVE_PARALLEL */
 

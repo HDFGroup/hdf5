@@ -60,6 +60,9 @@ New Features
 
     Library:
     --------
+    - Corrected problem where library would re-write the superblock in a file
+      opened for R/W access, even when no changes were made to the file.
+      (QAK - 2009/08/20, Bz#1473)
     - Separated "factory" free list class from block free lists. These free
       lists are dynamically created and manage blocks of a fixed size.
       H5set_free_list_limits() will use the same settings specified for block
@@ -123,9 +126,10 @@ New Features
 
     Tools:
     ------
+     - h5dump/h5ls display buffer resize fixed in tools library.  (ADB - 2009/7/21 - 1520)
      - h5diff new flag, -c, --compare, list objects that are not comparable.
-        PVN - 2009/4/10 - 1368
-     - h5diff new flag, -N, --nan, avoids NaNs detection. PVN - 2009/4/10
+        (PVN - 2009/4/10 - 1368)
+     - h5diff new flag, -N, --nan, avoids NaNs detection. (PVN - 2009/4/10)
      - h5dump correctly specifies XML dtd / schema urls (ADB - 2009/4/3 - 1519)
      - h5repack now handles group creation order. (PVN - 2009/4/2 - 1402)
      - h5dump: added a printing of the compression ratio of uncompressed and compressed 

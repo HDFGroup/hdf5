@@ -620,6 +620,10 @@
    correct precision. */
 #undef ULLONG_TO_LDOUBLE_PRECISION
 
+/* Define if your system accurately converting unsigned long to float values.
+   */
+#undef ULONG_TO_FLOAT_ACCURATE
+
 /* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
 #undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE

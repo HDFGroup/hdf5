@@ -484,33 +484,33 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- * 		Robb Matzke, 1999-10-19
- *		The contents of memory are written to the backing store if
- *		one is open.
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_core_close(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_core_close, FAIL)
 
+    /* Flush any changed buffers */
+    if(H5FD_core_flush(_file, (hid_t)-1, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+
     /* Release resources */
-    if (file->fd>=0)
+    if(file->fd >= 0)
         HDclose(file->fd);
-    if (file->name)
+    if(file->name)
         H5MM_xfree(file->name);
-    if (file->mem)
+    if(file->mem)
         H5MM_xfree(file->mem);
     HDmemset(file, 0, sizeof(H5FD_core_t));
     H5MM_xfree(file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_core_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -973,7 +973,7 @@ H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
         new_eof += file->increment;
 
     /* Extend the file to make sure it's large enough */
-    if(!H5F_addr_eq((haddr_t)new_eof, file->eof)) {
+    if(!H5F_addr_eq(file->eof, (haddr_t)new_eof)) {
         unsigned char *x;       /* Pointer to new buffer for file data */
 
         /* (Re)allocate memory for the file buffer */

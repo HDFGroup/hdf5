@@ -2524,6 +2524,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         if (++fails_all_tests>=max_fails) {
             HDputs("    maximum failures reached, aborting test...");
+            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
             goto done;
         }
     }
@@ -3359,6 +3360,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 HDputs("    maximum failures reached, aborting test...");
             else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
                 HDputs("    maximum warnings reached, aborting test...");
+            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
 
             goto done;
         }
@@ -4488,6 +4490,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDputs("    maximum failures reached, aborting test...");
             else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
                 HDputs("    maximum warnings reached, aborting test...");
+            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
 
             goto done;
         }
@@ -4887,7 +4890,9 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_DOUBLE);
 
+#if H5_ULONG_TO_FLOAT_ACCURATE
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT);
+#endif
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE);
 #endif
 

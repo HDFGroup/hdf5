@@ -28,6 +28,7 @@
 
 /* Private headers needed by this file */
 
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -38,16 +39,6 @@ typedef struct H5F_t H5F_t;
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
-/*===----------------------------------------------------------------------===
- *                              Flush Flags
- *===----------------------------------------------------------------------===
- *
- *  Flags passed into the flush routines which indicate what type of
- *  flush we want to do. They can be ORed together.
- */
-#define H5F_FLUSH_NONE       (0U)       /* No flags specified                       */
-#define H5F_FLUSH_INVALIDATE (1U << 0)  /* Invalidate cached data                   */
-#define H5F_FLUSH_CLOSING    (1U << 1)  /* Closing the file                         */
 
 /*
  * Encode and decode macros for file meta-data.

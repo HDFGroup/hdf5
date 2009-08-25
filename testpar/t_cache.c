@@ -5449,7 +5449,7 @@ trace_file_check(void)
       "H5AC_unpin_entry 4 0\n",
       "H5AC_rename 0 8a65 15 0\n",
       "H5AC_rename 8a65 0 15 0\n",
-      "H5AC_flush 0x0 0\n",
+      "H5AC_flush 0\n",
       NULL
     };
     char buffer[256];

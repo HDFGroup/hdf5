@@ -1026,8 +1026,6 @@ H5_DLL herr_t H5C_dest(H5F_t * f,
                        hid_t   secondary_dxpl_id,
                        H5C_t * cache_ptr);
 
-H5_DLL herr_t H5C_dest_empty(H5C_t * cache_ptr);
-
 H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
 		                hid_t               primary_dxpl_id,
                                 hid_t               secondary_dxpl_id,

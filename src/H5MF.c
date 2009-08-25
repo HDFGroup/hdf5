@@ -938,74 +938,6 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_free_aggrs
- *
- * Purpose:     Reset a block aggregator, returning any space back to file
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *	        July 1st, 2009
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5MF_free_aggrs(H5F_t *f, hid_t dxpl_id)
-{
-    H5F_blk_aggr_t *first_aggr;         /* First aggregator to reset */
-    H5F_blk_aggr_t *second_aggr;        /* Second aggregator to reset */
-    haddr_t ma_addr = HADDR_UNDEF;      /* Base "metadata aggregator" address */
-    hsize_t ma_size = 0;                /* Size of "metadata aggregator" */
-    haddr_t sda_addr = HADDR_UNDEF;     /* Base "small data aggregator" address */
-    hsize_t sda_size = 0;               /* Size of "small data aggregator" */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5MF_free_aggrs, FAIL)
-
-    /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-
-    /* Retrieve metadata aggregator info, if available */
-    if(H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats")
-
-    /* Retrieve 'small data' aggregator info, if available */
-    if(H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query small data aggregator stats")
-
-    /* Make certain we release the aggregator that's later in the file first */
-    /* (so the file shrinks properly) */
-    if(H5F_addr_defined(ma_addr) && H5F_addr_defined(sda_addr)) {
-        if(H5F_addr_lt(ma_addr, sda_addr)) {
-            first_aggr = &(f->shared->sdata_aggr);
-            second_aggr = &(f->shared->meta_aggr);
-        } /* end if */
-        else {
-            first_aggr = &(f->shared->meta_aggr);
-            second_aggr = &(f->shared->sdata_aggr);
-        } /* end else */
-    } /* end if */
-    else {
-        first_aggr = &(f->shared->meta_aggr);
-        second_aggr = &(f->shared->sdata_aggr);
-    } /* end else */
-
-     /* Release the unused portion of the metadata and "small data" blocks back
-      * to the free lists in the file.
-      */
-    if(H5MF_aggr_reset(f, dxpl_id, first_aggr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't reset metadata block")
-    if(H5MF_aggr_reset(f, dxpl_id, second_aggr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't reset 'small data' block")
-done:
-    FUNC_LEAVE_NOAPI(ret_value) 
-} /* end H5MF_free_aggrs() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5MF_close
  *
  * Purpose:     Close the free space tracker(s) for a file
@@ -1032,6 +964,11 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->lf);
+
+    /* Free the space in aggregators */
+    /* (for space not at EOF, it may be put into free space managers) */
+    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
 
     /* Iterate over all the free space types that have managers and get each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
@@ -1083,6 +1020,8 @@ HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
         } /* end if */
     } /* end for */
 
+    /* Free the space in aggregators (again) */
+    /* (in case any free space information re-started them) */
     if(H5MF_free_aggrs(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
 

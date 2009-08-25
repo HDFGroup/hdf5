@@ -327,116 +327,11 @@
 			<File
 				RelativePath="..\..\..\test\h5test.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						ObjectFile="..\..\..\test\libtest\Debug/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Debug/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						ObjectFile="..\..\..\test\libtest\Debug/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Debug/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\test\libtest\Release/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Release/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\test\libtest\Release/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Release/"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\test\testframe.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						ObjectFile="..\..\..\test\libtest\Debug/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Debug/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						ObjectFile="..\..\..\test\libtest\Debug/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Debug/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\test\libtest\Release/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Release/"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\test\libtest\Release/"
-						ProgramDataBaseFileName="..\..\..\test\libtest\Release/"
-					/>
-				</FileConfiguration>
 			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;fi;fd"
-			>
 		</Filter>
 	</Files>
 	<Globals>

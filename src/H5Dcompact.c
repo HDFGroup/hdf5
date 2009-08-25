@@ -69,7 +69,7 @@ static ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
 static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
-static herr_t H5D_compact_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
+static herr_t H5D_compact_flush(H5D_t *dset, hid_t dxpl_id);
 
 
 /*********************/
@@ -350,7 +350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_compact_flush(H5D_t *dset, hid_t dxpl_id, unsigned UNUSED flags)
+H5D_compact_flush(H5D_t *dset, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 

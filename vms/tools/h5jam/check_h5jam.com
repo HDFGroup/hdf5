@@ -16,16 +16,23 @@ $ !
 $ ! This command file tests h5jam and h5unjam utilities. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
+$ type sys$input
+
+===================================
+       Testing h5jam utiltity
+===================================
+
 $ !
 $ ! Define h5jam, h5unjam and h5dump symbols
 $ !
 $! set message/notext/nofacility/noidentification/noseverity
 $ current_dir = F$DIRECTRY()
 $ len = F$LENGTH(current_dir)
-$ temp = F$EXTRACT(0, len-10, current_dir)
+$ temp = F$EXTRACT(0, len-16, current_dir)
 $ h5dump_dir = temp + "H5DUMP]"
 $ h5dump :== $sys$disk:'h5dump_dir'h5dump.exe
-$ h5jam_dir = temp + "H5JAM]"
+$ temp2 = F$EXTRACT(0, len-11, current_dir)
+$ h5jam_dir = temp2 + "]"
 $ h5jam :== $sys$disk:'h5jam_dir'h5jam.exe
 $ !
 $ ! Define output for diff command that compares expected and actual
