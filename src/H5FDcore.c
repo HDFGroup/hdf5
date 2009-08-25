@@ -53,6 +53,9 @@ typedef struct H5FD_core_t {
     hbool_t	backing_store;		/*write to file name on flush	*/
     int		fd;			/*backing store file descriptor	*/
     hbool_t	dirty;			/*changes not saved?		*/
+
+    /* Information from file open flags, for SWMR access */
+    hbool_t     swmr_read;      /* Whether the file is open for SWMR read access */
 } H5FD_core_t;
 
 /* Driver-specific file access properties */
@@ -464,6 +467,10 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         }
     }
 
+    /* Check for SWMR reader access */
+    if(flags & H5F_ACC_SWMR_READ)
+        file->swmr_read = TRUE;
+
     /* Set return value */
     ret_value=(H5FD_t *)file;
 
@@ -782,7 +789,13 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
-    if (addr + size > file->eoa)
+    /* If the file is open for SWMR read access, allow access to data past
+     * the end of the allocated space (the 'eoa').  This is done because the
+     * eoa stored in the file's superblock might be out of sync with the
+     * objects being written within the file by the application performing
+     * SWMR write operations.
+     */
+    if((addr + size) > file->eoa)
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /* Read the part which is before the EOF marker */

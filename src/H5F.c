@@ -1314,19 +1314,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(H5F_super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
-        /* Check if the file is open for SWMR read access */
-        if(flags & H5F_ACC_SWMR_READ) {
-            /* If the file is open for SWMR read access, adjust the end of the
-             * allocated space (the 'eoa') to allow access to any address in the
-             * file.  This is done because the eoa stored in the file's superblock
-             * might be out of sync with the objects being written within the
-             * file by the application performing SWMR write operations.
-             */
-            /* (Account for the stored EOA being absolute offset -NAF) */
-            if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, (file->shared->maxaddr - file->shared->sblock->base_addr)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't relax 'eoa' for SWMR read access")
-        } /* end if */
-
 	/* Open the root group */
 	if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")

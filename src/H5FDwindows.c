@@ -93,6 +93,9 @@ typedef struct H5FD_windows_t {
     DWORD fileindexhi;
     DWORD volumeserialnumber;
 
+    /* Information from file open flags, for SWMR access */
+    hbool_t     swmr_read;      /* Whether the file is open for SWMR read access */
+
     /* Information from properties set by 'h5repart' tool */
     hbool_t     fam_to_sec2;    /* Whether to eliminate the family driver info
                                  * and convert this file to a single file */
@@ -412,6 +415,10 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
     file->volumeserialnumber = fileinfo.dwVolumeSerialNumber;
+
+    /* Check for SWMR reader access */
+    if(flags & H5F_ACC_SWMR_READ)
+        file->swmr_read = TRUE;
 
     /* Check for non-default FAPL */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
@@ -799,7 +806,13 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined")
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
-    if (addr+size>file->eoa)
+    /* If the file is open for SWMR read access, allow access to data past
+     * the end of the allocated space (the 'eoa').  This is done because the
+     * eoa stored in the file's superblock might be out of sync with the
+     * objects being written within the file by the application performing
+     * SWMR write operations.
+     */
+    if(!file->swmr_read && (addr + size) > file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
     /* Seek to the correct location */
