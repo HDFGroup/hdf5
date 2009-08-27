@@ -61,7 +61,6 @@
 
 /* v2 B-tree driver callbacks */
 static herr_t H5HF_huge_btree2_indir_store(void *native, const void *udata);
-static herr_t H5HF_huge_btree2_indir_retrieve(void *udata, const void *native);
 static herr_t H5HF_huge_btree2_indir_compare(const void *rec1, const void *rec2);
 static herr_t H5HF_huge_btree2_indir_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -71,7 +70,6 @@ static herr_t H5HF_huge_btree2_indir_debug(FILE *stream, const H5F_t *f, hid_t d
     int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_btree2_filt_indir_store(void *native, const void *udata);
-static herr_t H5HF_huge_btree2_filt_indir_retrieve(void *udata, const void *native);
 static herr_t H5HF_huge_btree2_filt_indir_compare(const void *rec1, const void *rec2);
 static herr_t H5HF_huge_btree2_filt_indir_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -81,7 +79,6 @@ static herr_t H5HF_huge_btree2_filt_indir_debug(FILE *stream, const H5F_t *f, hi
     int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_btree2_dir_store(void *native, const void *udata);
-static herr_t H5HF_huge_btree2_dir_retrieve(void *udata, const void *native);
 static herr_t H5HF_huge_btree2_dir_compare(const void *rec1, const void *rec2);
 static herr_t H5HF_huge_btree2_dir_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -91,7 +88,6 @@ static herr_t H5HF_huge_btree2_dir_debug(FILE *stream, const H5F_t *f, hid_t dxp
     int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_btree2_filt_dir_store(void *native, const void *udata);
-static herr_t H5HF_huge_btree2_filt_dir_retrieve(void *udata, const void *native);
 static herr_t H5HF_huge_btree2_filt_dir_compare(const void *rec1, const void *rec2);
 static herr_t H5HF_huge_btree2_filt_dir_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -108,7 +104,6 @@ const H5B2_class_t H5HF_BT2_INDIR[1]={{     /* B-tree class information */
     H5B2_FHEAP_HUGE_INDIR_ID,           /* Type of B-tree */
     sizeof(H5HF_huge_bt2_indir_rec_t),  /* Size of native record */
     H5HF_huge_btree2_indir_store,       /* Record storage callback */
-    H5HF_huge_btree2_indir_retrieve,    /* Record retrieval callback */
     H5HF_huge_btree2_indir_compare,     /* Record comparison callback */
     H5HF_huge_btree2_indir_encode,      /* Record encoding callback */
     H5HF_huge_btree2_indir_decode,      /* Record decoding callback */
@@ -120,7 +115,6 @@ const H5B2_class_t H5HF_BT2_FILT_INDIR[1]={{     /* B-tree class information */
     H5B2_FHEAP_HUGE_FILT_INDIR_ID,              /* Type of B-tree */
     sizeof(H5HF_huge_bt2_filt_indir_rec_t),     /* Size of native record */
     H5HF_huge_btree2_filt_indir_store,          /* Record storage callback */
-    H5HF_huge_btree2_filt_indir_retrieve,       /* Record retrieval callback */
     H5HF_huge_btree2_filt_indir_compare,        /* Record comparison callback */
     H5HF_huge_btree2_filt_indir_encode,         /* Record encoding callback */
     H5HF_huge_btree2_filt_indir_decode,         /* Record decoding callback */
@@ -132,7 +126,6 @@ const H5B2_class_t H5HF_BT2_DIR[1]={{     /* B-tree class information */
     H5B2_FHEAP_HUGE_DIR_ID,             /* Type of B-tree */
     sizeof(H5HF_huge_bt2_dir_rec_t),    /* Size of native record */
     H5HF_huge_btree2_dir_store,         /* Record storage callback */
-    H5HF_huge_btree2_dir_retrieve,      /* Record retrieval callback */
     H5HF_huge_btree2_dir_compare,       /* Record comparison callback */
     H5HF_huge_btree2_dir_encode,        /* Record encoding callback */
     H5HF_huge_btree2_dir_decode,        /* Record decoding callback */
@@ -144,7 +137,6 @@ const H5B2_class_t H5HF_BT2_FILT_DIR[1]={{     /* B-tree class information */
     H5B2_FHEAP_HUGE_FILT_DIR_ID,        /* Type of B-tree */
     sizeof(H5HF_huge_bt2_filt_dir_rec_t),/* Size of native record */
     H5HF_huge_btree2_filt_dir_store,    /* Record storage callback */
-    H5HF_huge_btree2_filt_dir_retrieve, /* Record retrieval callback */
     H5HF_huge_btree2_filt_dir_compare,  /* Record comparison callback */
     H5HF_huge_btree2_filt_dir_encode,   /* Record encoding callback */
     H5HF_huge_btree2_filt_dir_decode,   /* Record decoding callback */
@@ -248,30 +240,6 @@ H5HF_huge_btree2_indir_store(void *nrecord, const void *udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_btree2_indir_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_huge_btree2_indir_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_huge_btree2_indir_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_btree2_indir_retrieve)
-
-    *(H5HF_huge_bt2_indir_rec_t *)udata = *(const H5HF_huge_bt2_indir_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HF_huge_btree2_indir_retrieve() */
 
 
 /*-------------------------------------------------------------------------
@@ -485,30 +453,6 @@ H5HF_huge_btree2_filt_indir_store(void *nrecord, const void *udata)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_huge_btree2_filt_indir_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_huge_btree2_filt_indir_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_btree2_filt_indir_retrieve)
-
-    *(H5HF_huge_bt2_filt_indir_rec_t *)udata = *(const H5HF_huge_bt2_filt_indir_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HF_huge_btree2_filt_indir_retrieve() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5HF_huge_btree2_filt_indir_compare
  *
  * Purpose:	Compare two native information records, according to some key
@@ -687,30 +631,6 @@ H5HF_huge_btree2_dir_store(void *nrecord, const void *udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_btree2_dir_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_huge_btree2_dir_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_huge_btree2_dir_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_btree2_dir_retrieve)
-
-    *(H5HF_huge_bt2_dir_rec_t *)udata = *(const H5HF_huge_bt2_dir_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HF_huge_btree2_dir_retrieve() */
 
 
 /*-------------------------------------------------------------------------
@@ -928,30 +848,6 @@ H5HF_huge_btree2_filt_dir_store(void *nrecord, const void *udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_btree2_filt_dir_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF_huge_btree2_filt_dir_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HF_huge_btree2_filt_dir_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_huge_btree2_filt_dir_retrieve)
-
-    *(H5HF_huge_bt2_filt_dir_rec_t *)udata = *(const H5HF_huge_bt2_filt_dir_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HF_huge_btree2_filt_dir_retrieve() */
 
 
 /*-------------------------------------------------------------------------
