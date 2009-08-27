@@ -53,7 +53,6 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5B2_test_store(void *nrecord, const void *udata);
-static herr_t H5B2_test_retrieve(void *udata, const void *nrecord);
 static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
     const void *nrecord);
@@ -69,7 +68,6 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
     sizeof(hsize_t),            /* Size of native record */
     H5B2_test_store,            /* Record storage callback */
-    H5B2_test_retrieve,         /* Record retrieval callback */
     H5B2_test_compare,          /* Record comparison callback */
     H5B2_test_encode,           /* Record encoding callback */
     H5B2_test_decode,           /* Record decoding callback */
@@ -109,31 +107,6 @@ H5B2_test_store(void *nrecord, const void *udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_test_retrieve
- *
- * Purpose:	Retrieve native information from record for B-tree
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, February 25, 2005
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5B2_test_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_retrieve)
-
-    *(hsize_t *)udata = *(const hsize_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_retrieve() */
 
 
 /*-------------------------------------------------------------------------
