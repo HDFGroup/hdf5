@@ -78,6 +78,9 @@ am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
 h5repack_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+h5repack_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5repack_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h5repacktst_OBJECTS = $(am__objects_1) h5repacktst.$(OBJEXT)
 h5repacktst_OBJECTS = $(am_h5repacktst_OBJECTS)
 h5repacktst_LDADD = $(LDADD)
@@ -374,6 +377,9 @@ TEST_PROG = h5repacktst
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repack$(EXEEXT)
 
+# Add h5repack specific linker flags here
+h5repack_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Depend on the hdf5 library, the tools library, the test library
 LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
@@ -501,7 +507,7 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 h5repack$(EXEEXT): $(h5repack_OBJECTS) $(h5repack_DEPENDENCIES) 
 	@rm -f h5repack$(EXEEXT)
-	$(LINK) $(h5repack_OBJECTS) $(h5repack_LDADD) $(LIBS)
+	$(h5repack_LINK) $(h5repack_OBJECTS) $(h5repack_LDADD) $(LIBS)
 h5repacktst$(EXEEXT): $(h5repacktst_OBJECTS) $(h5repacktst_DEPENDENCIES) 
 	@rm -f h5repacktst$(EXEEXT)
 	$(LINK) $(h5repacktst_OBJECTS) $(h5repacktst_LDADD) $(LIBS)

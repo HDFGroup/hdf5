@@ -74,6 +74,9 @@ am_h5diff_OBJECTS = h5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 h5diff_OBJECTS = $(am_h5diff_OBJECTS)
 h5diff_LDADD = $(LDADD)
 h5diff_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5diff_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5diff_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h5diffgentest_OBJECTS = h5diffgentest.$(OBJEXT)
 h5diffgentest_OBJECTS = $(am_h5diffgentest_OBJECTS)
 h5diffgentest_LDADD = $(LDADD)
@@ -367,6 +370,9 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 @BUILD_PARALLEL_CONDITIONAL_TRUE@H5PDIFF = ph5diff
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SCRIPT_PARA = $(srcdir)/testph5diff.sh
 
+# Add h5diff specific linker flags here
+h5diff_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Test programs and scripts
 TEST_PROG = h5diffgentest
 TEST_SCRIPT = $(srcdir)/testh5diff.sh
@@ -485,7 +491,7 @@ clean-checkPROGRAMS:
 	rm -f $$list
 h5diff$(EXEEXT): $(h5diff_OBJECTS) $(h5diff_DEPENDENCIES) 
 	@rm -f h5diff$(EXEEXT)
-	$(LINK) $(h5diff_OBJECTS) $(h5diff_LDADD) $(LIBS)
+	$(h5diff_LINK) $(h5diff_OBJECTS) $(h5diff_LDADD) $(LIBS)
 h5diffgentest$(EXEEXT): $(h5diffgentest_OBJECTS) $(h5diffgentest_DEPENDENCIES) 
 	@rm -f h5diffgentest$(EXEEXT)
 	$(LINK) $(h5diffgentest_OBJECTS) $(h5diffgentest_LDADD) $(LIBS)

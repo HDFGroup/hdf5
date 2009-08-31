@@ -565,25 +565,6 @@ dnl Change back to the C language
 AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
-dnl If we should build only static executables
-dnl
-AC_MSG_CHECKING([if should build only statically linked executables])
-AC_ARG_ENABLE([static_exec],
-              [AC_HELP_STRING([--enable-static-exec],
-                              [Build only statically linked executables
-                               [default=no]])],
-              [STATIC_EXEC=$enableval])
-
-if test "X$STATIC_EXEC" = "Xyes"; then
-  echo "yes"
-  LT_STATIC_EXEC="-all-static"
-else
-  echo "no"
-  LT_STATIC_EXEC=""
-fi
-AC_SUBST([LT_STATIC_EXEC])
-
-dnl ----------------------------------------------------------------------
 dnl Check if they have Perl installed on their system. We only need Perl
 dnl if they're using a GNU compiler.
 dnl
@@ -992,6 +973,32 @@ EOF
     fi
     ;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Check if we should install only statically linked executables.
+dnl   This check needs to occur after libtool is initialized because
+dnl   we check a libtool cache value and may issue a warning based 
+dnl   on its result.
+AC_MSG_CHECKING([if we should install only statically linked executables])
+AC_ARG_ENABLE([static_exec],
+              [AC_HELP_STRING([--enable-static-exec],
+                              [Install only statically linked executables
+                               [default=no]])],
+              [STATIC_EXEC=$enableval])
+
+if test "X$STATIC_EXEC" = "Xyes"; then
+  echo "yes"
+  dnl Issue a warning if -static flag is not supported.
+  if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
+      echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+  fi
+  LT_STATIC_EXEC="-all-static"
+else
+  echo "no"
+  LT_STATIC_EXEC=""
+fi
+
+AC_SUBST([LT_STATIC_EXEC])
 
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.

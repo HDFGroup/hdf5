@@ -74,6 +74,9 @@ h5stat_SOURCES = h5stat.c
 h5stat_OBJECTS = h5stat.$(OBJEXT)
 h5stat_LDADD = $(LDADD)
 h5stat_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5stat_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5stat_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5stat_gentest_SOURCES = h5stat_gentest.c
 h5stat_gentest_OBJECTS = h5stat_gentest.$(OBJEXT)
 h5stat_gentest_LDADD = $(LDADD)
@@ -386,6 +389,9 @@ check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5stat$(EXEEXT)
 bin_SCRIPTS = 
 
+# Add h5stat specific linker flags here
+h5stat_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Tell automake to clean h5redeploy script
 CLEANFILES = 
 
@@ -500,7 +506,7 @@ clean-checkPROGRAMS:
 	rm -f $$list
 h5stat$(EXEEXT): $(h5stat_OBJECTS) $(h5stat_DEPENDENCIES) 
 	@rm -f h5stat$(EXEEXT)
-	$(LINK) $(h5stat_OBJECTS) $(h5stat_LDADD) $(LIBS)
+	$(h5stat_LINK) $(h5stat_OBJECTS) $(h5stat_LDADD) $(LIBS)
 h5stat_gentest$(EXEEXT): $(h5stat_gentest_OBJECTS) $(h5stat_gentest_DEPENDENCIES) 
 	@rm -f h5stat_gentest$(EXEEXT)
 	$(LINK) $(h5stat_gentest_OBJECTS) $(h5stat_gentest_LDADD) $(LIBS)

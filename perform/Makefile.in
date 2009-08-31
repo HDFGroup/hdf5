@@ -90,10 +90,16 @@ am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
 h5perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+h5perf_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5perf_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT) \
 	sio_timer.$(OBJEXT)
 h5perf_serial_OBJECTS = $(am_h5perf_serial_OBJECTS)
 h5perf_serial_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+h5perf_serial_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(h5perf_serial_LDFLAGS) $(LDFLAGS) -o $@
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
 iopipe_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -391,6 +397,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
 
+# Add h5perf and h5perf_serial specific linker flags here
+h5perf_LDFLAGS = $(LT_STATIC_EXEC)
+h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
@@ -526,10 +536,10 @@ chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES)
 	$(LINK) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
 h5perf$(EXEEXT): $(h5perf_OBJECTS) $(h5perf_DEPENDENCIES) 
 	@rm -f h5perf$(EXEEXT)
-	$(LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
+	$(h5perf_LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
 h5perf_serial$(EXEEXT): $(h5perf_serial_OBJECTS) $(h5perf_serial_DEPENDENCIES) 
 	@rm -f h5perf_serial$(EXEEXT)
-	$(LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
+	$(h5perf_serial_LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
 	$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)

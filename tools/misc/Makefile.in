@@ -75,14 +75,23 @@ h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
 h5debug_LDADD = $(LDADD)
 h5debug_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5debug_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5debug_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5mkgrp_SOURCES = h5mkgrp.c
 h5mkgrp_OBJECTS = h5mkgrp.$(OBJEXT)
 h5mkgrp_LDADD = $(LDADD)
 h5mkgrp_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5mkgrp_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5mkgrp_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5repart_SOURCES = h5repart.c
 h5repart_OBJECTS = h5repart.$(OBJEXT)
 h5repart_LDADD = $(LDADD)
 h5repart_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5repart_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5repart_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5repart_gentest_SOURCES = h5repart_gentest.c
 h5repart_gentest_OBJECTS = h5repart_gentest.$(OBJEXT)
 h5repart_gentest_LDADD = $(LDADD)
@@ -401,6 +410,11 @@ check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
 bin_SCRIPTS = h5redeploy
 
+# Add h5debug, h5repart, and h5mkgrp specific linker flags here
+h5debug_LDFLAGS = $(LT_STATIC_EXEC)
+h5repart_LDFLAGS = $(LT_STATIC_EXEC)
+h5mkgrp_LDFLAGS = $(LT_STATIC_EXEC)
+
 # Tell automake to clean h5redeploy script
 CLEANFILES = h5redeploy
 
@@ -522,13 +536,13 @@ clean-checkPROGRAMS:
 	rm -f $$list
 h5debug$(EXEEXT): $(h5debug_OBJECTS) $(h5debug_DEPENDENCIES) 
 	@rm -f h5debug$(EXEEXT)
-	$(LINK) $(h5debug_OBJECTS) $(h5debug_LDADD) $(LIBS)
+	$(h5debug_LINK) $(h5debug_OBJECTS) $(h5debug_LDADD) $(LIBS)
 h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) 
 	@rm -f h5mkgrp$(EXEEXT)
-	$(LINK) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
+	$(h5mkgrp_LINK) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
 h5repart$(EXEEXT): $(h5repart_OBJECTS) $(h5repart_DEPENDENCIES) 
 	@rm -f h5repart$(EXEEXT)
-	$(LINK) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
+	$(h5repart_LINK) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
 h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPENDENCIES) 
 	@rm -f h5repart_gentest$(EXEEXT)
 	$(LINK) $(h5repart_gentest_OBJECTS) $(h5repart_gentest_LDADD) $(LIBS)

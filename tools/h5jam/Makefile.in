@@ -76,6 +76,9 @@ h5jam_SOURCES = h5jam.c
 h5jam_OBJECTS = h5jam.$(OBJEXT)
 h5jam_LDADD = $(LDADD)
 h5jam_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5jam_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5jam_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5jamgentest_SOURCES = h5jamgentest.c
 h5jamgentest_OBJECTS = h5jamgentest.$(OBJEXT)
 h5jamgentest_LDADD = $(LDADD)
@@ -84,6 +87,9 @@ h5unjam_SOURCES = h5unjam.c
 h5unjam_OBJECTS = h5unjam.$(OBJEXT)
 h5unjam_LDADD = $(LDADD)
 h5unjam_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5unjam_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5unjam_LDFLAGS) \
+	$(LDFLAGS) -o $@
 tellub_SOURCES = tellub.c
 tellub_OBJECTS = tellub.$(OBJEXT)
 tellub_LDADD = $(LDADD)
@@ -365,6 +371,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.txt
 # Include src and tools/lib directories
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_SCRIPT = testh5jam.sh
+
+# Add h5jam and h5unjam specific linker flags here
+h5jam_LDFLAGS = $(LT_STATIC_EXEC)
+h5unjam_LDFLAGS = $(LT_STATIC_EXEC)
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5jam$(EXEEXT) h5unjam$(EXEEXT)
 
@@ -480,13 +490,13 @@ getub$(EXEEXT): $(getub_OBJECTS) $(getub_DEPENDENCIES)
 	$(LINK) $(getub_OBJECTS) $(getub_LDADD) $(LIBS)
 h5jam$(EXEEXT): $(h5jam_OBJECTS) $(h5jam_DEPENDENCIES) 
 	@rm -f h5jam$(EXEEXT)
-	$(LINK) $(h5jam_OBJECTS) $(h5jam_LDADD) $(LIBS)
+	$(h5jam_LINK) $(h5jam_OBJECTS) $(h5jam_LDADD) $(LIBS)
 h5jamgentest$(EXEEXT): $(h5jamgentest_OBJECTS) $(h5jamgentest_DEPENDENCIES) 
 	@rm -f h5jamgentest$(EXEEXT)
 	$(LINK) $(h5jamgentest_OBJECTS) $(h5jamgentest_LDADD) $(LIBS)
 h5unjam$(EXEEXT): $(h5unjam_OBJECTS) $(h5unjam_DEPENDENCIES) 
 	@rm -f h5unjam$(EXEEXT)
-	$(LINK) $(h5unjam_OBJECTS) $(h5unjam_LDADD) $(LIBS)
+	$(h5unjam_LINK) $(h5unjam_OBJECTS) $(h5unjam_LDADD) $(LIBS)
 tellub$(EXEEXT): $(tellub_OBJECTS) $(tellub_DEPENDENCIES) 
 	@rm -f tellub$(EXEEXT)
 	$(LINK) $(tellub_OBJECTS) $(tellub_LDADD) $(LIBS)

@@ -97,6 +97,10 @@ Bug Fixes since HDF5-1.8.3
 
     Configuration
     -------------
+    - The --enable-static-exec flag has been fixed and will now install
+      statically-linked executables within the install directory when used
+      on systems that support the -static linker flag.
+      MAM - 2009/08/31 - BZ #1583
     - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
       recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
 

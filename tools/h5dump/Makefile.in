@@ -78,6 +78,9 @@ h5dump_SOURCES = h5dump.c
 h5dump_OBJECTS = h5dump.$(OBJEXT)
 h5dump_LDADD = $(LDADD)
 h5dump_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+h5dump_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(h5dump_LDFLAGS) \
+	$(LDFLAGS) -o $@
 h5dumpgentest_SOURCES = h5dumpgentest.c
 h5dumpgentest_OBJECTS = h5dumpgentest.$(OBJEXT)
 h5dumpgentest_LDADD = $(LDADD)
@@ -365,6 +368,9 @@ TEST_SCRIPT = testh5dump.sh testh5dumpxml.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5dump$(EXEEXT)
 
+# Add h5dump specific linker flags here
+h5dump_LDFLAGS = $(LT_STATIC_EXEC)
+
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 DISTCLEANFILES = testh5dump.sh
@@ -479,7 +485,7 @@ binread$(EXEEXT): $(binread_OBJECTS) $(binread_DEPENDENCIES)
 	$(LINK) $(binread_OBJECTS) $(binread_LDADD) $(LIBS)
 h5dump$(EXEEXT): $(h5dump_OBJECTS) $(h5dump_DEPENDENCIES) 
 	@rm -f h5dump$(EXEEXT)
-	$(LINK) $(h5dump_OBJECTS) $(h5dump_LDADD) $(LIBS)
+	$(h5dump_LINK) $(h5dump_OBJECTS) $(h5dump_LDADD) $(LIBS)
 h5dumpgentest$(EXEEXT): $(h5dumpgentest_OBJECTS) $(h5dumpgentest_DEPENDENCIES) 
 	@rm -f h5dumpgentest$(EXEEXT)
 	$(LINK) $(h5dumpgentest_OBJECTS) $(h5dumpgentest_LDADD) $(LIBS)
