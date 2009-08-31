@@ -2696,7 +2696,7 @@ dnl bug also occurs at SGI IRIX 6.5 C with compiler version lower than or equal 
 dnl In case people still use the old compiler, we keep this flag.
 AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
 
-AC_CACHE_VAL([hdf5_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
 
 if test ${hdf5_mpi_complex_derived_datatype_works} = "yes"; then
   AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
@@ -2715,7 +2715,7 @@ dnl and SGI altix. For those systems, we have to turn off this feature and use i
 dnl
 AC_MSG_CHECKING([if MPI-IO can do collective IO when one or more processes don't do IOs])
 
-AC_CACHE_VAL([hdf5_mpi_special_collective_io_works],[hdf5_mpi_special_collective_io_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_mpi_special_collective_io_works=yes])
 
 if test ${hdf5_mpi_special_collective_io_works} = "yes"; then
   AC_DEFINE([MPI_SPECIAL_COLLECTIVE_IO_WORKS], [1],
@@ -2844,7 +2844,7 @@ AC_ARG_ENABLE([direct-vfd],
               [DIRECT_VFD=$enableval], [DIRECT_VFD=yes])
 
 if test "$DIRECT_VFD" = "yes"; then
-   AC_CACHE_VAL([hdf5_direct_io],
+   AC_CACHE_VAL([hdf5_cv_direct_io],
        [AC_TRY_RUN([
 	  #include <sys/types.h>
 	  #include <sys/stat.h>
@@ -3004,7 +3004,7 @@ AC_MSG_CHECKING([if converting from long double to integers works])
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_integer_works=${hdf5_ldouble_to_integer_works=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_integer_works],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_works],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3071,7 +3071,7 @@ dnl the conversion to float.)
 dnl
 AC_MSG_CHECKING([if accurately converting unsigned long to float values])
 
-AC_CACHE_VAL([hdf5_ulong_to_float_accurate],
+AC_CACHE_VAL([hdf5_cv_ulong_to_float_accurate],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -3204,7 +3204,7 @@ dnl than 0.5.
 dnl
 AC_MSG_CHECKING([if accurately roundup converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_fp_to_ullong_accurate],
+AC_CACHE_VAL([hdf5_cv_fp_to_ullong_accurate],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -3241,7 +3241,7 @@ dnl during conversion.
 dnl
 AC_MSG_CHECKING([if right maximum converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_fp_to_ullong_right_maximum],
+AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -3286,7 +3286,7 @@ AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_uint_accurate=${hdf5_ldouble_to_uint_accurate=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_uint_accurate],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_accurate],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3488,7 +3488,7 @@ AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long val
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_llong_accurate=${hdf5_ldouble_to_llong_accurate=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_llong_accurate],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3549,7 +3549,7 @@ AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double val
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_llong_to_ldouble_correct=${hdf5_llong_to_ldouble_correct=no}
 else
-   AC_CACHE_VAL([hdf5_llong_to_ldouble_correct],
+   AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
         [AC_TRY_RUN([
         int main(void)
         {

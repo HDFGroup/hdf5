@@ -1,5 +1,8 @@
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if building universal (internal helper macro) */
+#undef AC_APPLE_UNIVERSAL_BUILD
+
 /* Define if your system generates wrong code for log2 routine. */
 #undef BAD_LOG2_CODE_GENERATED
 
@@ -298,7 +301,7 @@
 /* Define if `struct timezone' is defined */
 #undef HAVE_STRUCT_TIMEZONE
 
-/* Define to 1 if `tm_zone' is member of `struct tm'. */
+/* Define to 1 if `struct tm' is a member of `tm_zone'. */
 #undef HAVE_STRUCT_TM_TM_ZONE
 
 /* Define if `struct videoconfig' is defined */
@@ -469,6 +472,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
@@ -643,9 +649,17 @@
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
 
-/* Define to 1 if your processor stores words with the most significant byte
-   first (like Motorola and SPARC, unlike Intel and VAX). */
-#undef WORDS_BIGENDIAN
+/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
+   significant byte first (like Motorola and SPARC, unlike Intel). */
+#if defined AC_APPLE_UNIVERSAL_BUILD
+# if defined __BIG_ENDIAN__
+#  define WORDS_BIGENDIAN 1
+# endif
+#else
+# ifndef WORDS_BIGENDIAN
+#  undef WORDS_BIGENDIAN
+# endif
+#endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
