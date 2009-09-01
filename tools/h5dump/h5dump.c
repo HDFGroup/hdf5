@@ -677,14 +677,16 @@ usage(const char *prog)
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
     fprintf(stdout, " Thus, the options mirror those for performing a hyperslab selection.\n");
-    fprintf(stdout, " The START and COUNT parameters are mandatory if you do subsetting.\n");
-    fprintf(stdout, " The STRIDE and BLOCK parameters are optional and will default to 1 in\n");
-    fprintf(stdout, " each dimension.\n");
+    fprintf(stdout, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
+    fprintf(stdout, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    fprintf(stdout, " each dimension. START is optional and will default to 0 in each dimension.\n");
     fprintf(stdout, "\n");
-    fprintf(stdout, "      -s L, --start=L     Offset of start of subsetting selection\n");
-    fprintf(stdout, "      -S L, --stride=L    Hyperslab stride\n");
-    fprintf(stdout, "      -c L, --count=L     Number of blocks to include in selection\n");
-    fprintf(stdout, "      -k L, --block=L     Size of block in hyperslab\n");
+    fprintf(stdout, "      -s START,  --start=START    Offset of start of subsetting selection\n");
+    fprintf(stdout, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
+    fprintf(stdout, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
+    fprintf(stdout, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
+    fprintf(stdout, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
+    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
     fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
@@ -695,8 +697,6 @@ usage(const char *prog)
     fprintf(stdout, "  P - is the full path from the root group to the object.\n");
     fprintf(stdout, "  N - is an integer greater than 1.\n");
     fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
-    fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
-    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     fprintf(stdout, "        updated by [IETF RFC 2732])\n");
     fprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
@@ -3671,21 +3671,22 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             }
 
             if (!sset->count) {
-                hsize_t dims[H5S_MAX_RANK];
-                herr_t status = H5Sget_simple_extent_dims(sid, dims, NULL);
+//                hsize_t dims[H5S_MAX_RANK];
+//                herr_t status = H5Sget_simple_extent_dims(sid, dims, NULL);
                 unsigned int i;
 
-                if (status == FAIL) {
-                    error_msg(progname, "unable to get dataset dimensions\n");
-                    d_status = EXIT_FAILURE;
-                    H5Sclose(sid);
-                    return;
-                }
+//                if (status == FAIL) {
+//                    error_msg(progname, "unable to get dataset dimensions\n");
+//                    d_status = EXIT_FAILURE;
+//                    H5Sclose(sid);
+//                    return;
+//                }
 
                 sset->count = calloc(ndims, sizeof(hsize_t));
 
                 for (i = 0; i < ndims; i++)
-                    sset->count[i] = dims[i] - sset->start[i];
+                    sset->count[i] = 1;
+//                    sset->count[i] = dims[i] - sset->start[i];
             }
 
             if (!sset->block) {

@@ -41,14 +41,16 @@ usage: h5dump [OPTIONS] file
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.
  Thus, the options mirror those for performing a hyperslab selection.
- The START and COUNT parameters are mandatory if you do subsetting.
- The STRIDE and BLOCK parameters are optional and will default to 1 in
- each dimension.
+ One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.
+ The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in
+ each dimension. START is optional and will default to 0 in each dimension.
 
-      -s L, --start=L     Offset of start of subsetting selection
-      -S L, --stride=L    Hyperslab stride
-      -c L, --count=L     Number of blocks to include in selection
-      -k L, --block=L     Size of block in hyperslab
+      -s START,  --start=START    Offset of start of subsetting selection
+      -S STRIDE, --stride=STRIDE  Hyperslab stride
+      -c COUNT,  --count=COUNT    Number of blocks to include in selection
+      -k BLOCK,  --block=BLOCK    Size of block in hyperslab
+  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the
+        number of dimensions in the dataspace being queried
 
   D - is the file driver to use in opening the file. Acceptable values
         are "sec2", "family", "split", "multi", "direct", and "stream". Without
@@ -59,8 +61,6 @@ usage: h5dump [OPTIONS] file
   P - is the full path from the root group to the object.
   N - is an integer greater than 1.
   T - is a string containing the floating point format, e.g '%.3f'
-  L - is a list of integers the number of which are equal to the
-        number of dimensions in the dataspace being queried
   U - is a URI reference (as defined in [IETF RFC 2396],
         updated by [IETF RFC 2732])
   B - is the form of binary output: NATIVE for a memory type, FILE for the
