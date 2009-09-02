@@ -411,13 +411,12 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
         case 'b':
 
-            options->ublock_size = atol( opt_arg );
+            options->ublock_size = (hsize_t)atol( opt_arg );
             break;
 
         case 't':
 
-            options->threshold = atol( opt_arg );
-          
+            options->threshold = (hsize_t)atol( opt_arg );
             break;
 
         case 'a':

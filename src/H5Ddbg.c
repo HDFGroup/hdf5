@@ -115,7 +115,7 @@ H5Ddebug(hid_t dset_id)
     if(H5D_CHUNKED == dset->shared->layout.type)
 	(void)H5D_chunk_dump_index(dset, H5AC_dxpl_id, stdout);
     else if(H5D_CONTIGUOUS == dset->shared->layout.type)
-	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->shared->layout.u.contig.addr);
+	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->shared->layout.storage.u.contig.addr);
 
 done:
     FUNC_LEAVE_API(ret_value)

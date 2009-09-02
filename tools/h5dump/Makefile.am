@@ -34,6 +34,9 @@ SCRIPT_DEPEND=h5dump$(EXEEXT)
 # Our main target, the h5dump tool.
 bin_PROGRAMS=h5dump
 
+# Add h5dump specific linker flags here
+h5dump_LDFLAGS = $(LT_STATIC_EXEC)
+
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 

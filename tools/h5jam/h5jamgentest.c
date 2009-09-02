@@ -132,7 +132,7 @@ static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group,
 #define MY_LINKCLASS 187
 const H5L_class_t UD_link_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    MY_LINKCLASS,             /* Link type id number            */
+    (H5L_type_t)MY_LINKCLASS, /* Link type id number            */
     "UD link class",          /* name for debugging             */
     NULL,                     /* Creation callback              */
     NULL,                     /* Move/rename callback           */
@@ -301,7 +301,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   /* user-defined link */
   H5Lregister(UD_link_class);
-  H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
+  H5Lcreate_ud(fid, "/g2/udlink", (H5L_type_t)MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
 
   H5Fclose(fid);
 

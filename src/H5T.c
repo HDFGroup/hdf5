@@ -720,10 +720,8 @@ H5T_init_interface(void)
     H5T_t       *std_u16be=NULL;        /* Datatype structure for unsigned 16-bit big-endian integer */
     H5T_t       *std_u32le=NULL;        /* Datatype structure for unsigned 32-bit little-endian integer */
     H5T_t       *std_u32be=NULL;        /* Datatype structure for unsigned 32-bit big-endian integer */
-    H5T_t       *std_i32le=NULL;        /* Datatype structure for signed 32-bit little-endian integer */
     H5T_t       *std_u64le=NULL;        /* Datatype structure for unsigned 64-bit little-endian integer */
     H5T_t       *std_u64be=NULL;        /* Datatype structure for unsigned 64-bit big-endian integer */
-    H5T_t       *ieee_f64le=NULL;       /* Datatype structure for IEEE 64-bit little-endian floating-point */
     H5T_t	*dt = NULL;
     H5T_t	*fixedpt=NULL;          /* Datatype structure for native int */
     H5T_t	*floatpt=NULL;          /* Datatype structure for native float */
@@ -836,7 +834,6 @@ H5T_init_interface(void)
 
     /* IEEE 8-byte little-endian float */
     H5T_INIT_TYPE(DOUBLELE,H5T_IEEE_F64LE_g,COPY,native_double,SET,8)
-    ieee_f64le=dt;    /* Keep type for later */
 
     /* IEEE 8-byte big-endian float */
     H5T_INIT_TYPE(DOUBLEBE,H5T_IEEE_F64BE_g,COPY,native_double,SET,8)
@@ -871,7 +868,6 @@ H5T_init_interface(void)
 
     /* 4-byte little-endian signed integer */
     H5T_INIT_TYPE(SINTLE,H5T_STD_I32LE_g,COPY,native_int,SET,4)
-    std_i32le=dt;    /* Keep type for later */
 
     /* 4-byte big-endian signed integer */
     H5T_INIT_TYPE(SINTBE,H5T_STD_I32BE_g,COPY,native_int,SET,4)
@@ -1202,10 +1198,12 @@ H5T_init_interface(void)
 #endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From unsigned long to floats */
-#if H5T_CONV_INTERNAL_ULONG_FP
+#if H5T_CONV_INTERNAL_ULONG_FLT
     status |= H5T_register(H5T_PERS_HARD, "ulong_flt", native_ulong, native_float, H5T_conv_ulong_float, H5AC_dxpl_id, FALSE);
+#endif /* H5T_CONV_INTERNAL_ULONG_FLT */
+#if H5T_CONV_INTERNAL_ULONG_DBL
     status |= H5T_register(H5T_PERS_HARD, "ulong_dbl", native_ulong, native_double, H5T_conv_ulong_double, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_ULONG_FP */
+#endif /* H5T_CONV_INTERNAL_ULONG_DBL */
 #if H5T_CONV_INTERNAL_ULONG_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "ulong_ldbl", native_ulong, native_ldouble, H5T_conv_ulong_ldouble, H5AC_dxpl_id, FALSE);
 #endif /* H5T_CONV_INTERNAL_ULONG_LDOUBLE */

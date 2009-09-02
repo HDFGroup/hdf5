@@ -376,7 +376,7 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
 
     /* Check for chunked dataset storage */
-    if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout)) {
+    if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout.storage)) {
         H5O_pline_t pline;              /* I/O pipeline message */
         htri_t	exists;                 /* Flag if header message of interest exists */
 

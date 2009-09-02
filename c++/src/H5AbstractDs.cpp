@@ -25,6 +25,11 @@
 #include "H5CommonFG.h"
 #include "H5Alltypes.h"
 
+#include <iostream> // remove when done
+
+    using std::cerr;
+    using std::endl;
+
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif

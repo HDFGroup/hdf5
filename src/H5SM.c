@@ -139,10 +139,6 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     /* File should not already have a SOHM table */
     HDassert(f->shared->sohm_addr == HADDR_UNDEF);
 
-    /* Initialize master table */
-    if(NULL == (table = H5FL_MALLOC(H5SM_master_table_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for SOHM table")
-
     /* Get information from fcpl */
     if(H5P_get(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &num_indexes)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of indexes")
@@ -166,6 +162,10 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "the same shared message type flag is assigned to more than one index")
         type_flags_used |= index_type_flags[x];
     } /* end for */
+
+    /* Initialize master table */
+    if(NULL == (table = H5FL_MALLOC(H5SM_master_table_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for SOHM table")
 
     /* Set version and number of indexes in table and in superblock.
      * Right now we just use one byte to hold the number of indexes.
@@ -235,7 +235,7 @@ done:
         if(table_addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
         if(table != NULL)
-            (void)H5FL_FREE(H5SM_master_table_t, table);
+            table = H5FL_FREE(H5SM_master_table_t, table);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1911,7 +1911,7 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
 
-    message->location = *raw++;
+    message->location = (H5SM_storage_loc_t)*raw++;
     UINT32DECODE(raw, message->hash);
 
     if(message->location == H5SM_IN_HEAP) {

@@ -129,10 +129,8 @@ typedef struct {
 } H5G_name_t;
 
 /* Forward declarations (for prototypes & struct definitions) */
-struct H5P_genplist_t;
 struct H5O_loc_t;
 struct H5O_link_t;
-struct H5O_t;
 
 /*
  * The "location" of an object in a group hierarchy.  This points to an object
@@ -181,8 +179,9 @@ H5_DLL herr_t H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream
 /*
  * These functions operate on group object locations.
  */
-H5_DLL herr_t H5G_root_ent_decode(H5F_t *f, const uint8_t **pp);
-H5_DLL herr_t H5G_root_ent_encode(H5F_t *f, uint8_t **pp);
+H5_DLL herr_t H5G_ent_encode(const H5F_t *f, uint8_t **pp,
+    const H5G_entry_t *ent);
+H5_DLL herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent/*out*/);
 
 /*
  * These functions operate on group hierarchy names.

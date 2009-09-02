@@ -78,7 +78,6 @@ typedef struct H5G_fh_ud_cmp_t {
 
 /* v2 B-tree driver callbacks for 'creation order' index */
 static herr_t H5G_dense_btree2_corder_store(void *native, const void *udata);
-static herr_t H5G_dense_btree2_corder_retrieve(void *udata, const void *native);
 static herr_t H5G_dense_btree2_corder_compare(const void *rec1, const void *rec2);
 static herr_t H5G_dense_btree2_corder_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -89,7 +88,6 @@ static herr_t H5G_dense_btree2_corder_debug(FILE *stream, const H5F_t *f, hid_t 
 
 /* v2 B-tree driver callbacks for 'name' index */
 static herr_t H5G_dense_btree2_name_store(void *native, const void *udata);
-static herr_t H5G_dense_btree2_name_retrieve(void *udata, const void *native);
 static herr_t H5G_dense_btree2_name_compare(const void *rec1, const void *rec2);
 static herr_t H5G_dense_btree2_name_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -110,7 +108,6 @@ const H5B2_class_t H5G_BT2_NAME[1]={{     /* B-tree class information */
     H5B2_GRP_DENSE_NAME_ID,             /* Type of B-tree */
     sizeof(H5G_dense_bt2_name_rec_t),   /* Size of native record */
     H5G_dense_btree2_name_store,        /* Record storage callback */
-    H5G_dense_btree2_name_retrieve,     /* Record retrieval callback */
     H5G_dense_btree2_name_compare,      /* Record comparison callback */
     H5G_dense_btree2_name_encode,       /* Record encoding callback */
     H5G_dense_btree2_name_decode,       /* Record decoding callback */
@@ -122,7 +119,6 @@ const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
     H5B2_GRP_DENSE_CORDER_ID,           /* Type of B-tree */
     sizeof(H5G_dense_bt2_corder_rec_t), /* Size of native record */
     H5G_dense_btree2_corder_store,      /* Record storage callback */
-    H5G_dense_btree2_corder_retrieve,   /* Record retrieval callback */
     H5G_dense_btree2_corder_compare,    /* Record comparison callback */
     H5G_dense_btree2_corder_encode,     /* Record encoding callback */
     H5G_dense_btree2_corder_decode,     /* Record decoding callback */
@@ -211,30 +207,6 @@ H5G_dense_btree2_name_store(void *_nrecord, const void *_udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_name_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_dense_btree2_name_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_dense_btree2_name_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_dense_btree2_name_retrieve)
-
-    *(H5G_dense_bt2_name_rec_t *)udata = *(const H5G_dense_bt2_name_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5G_dense_btree2_name_retrieve() */
 
 
 /*-------------------------------------------------------------------------
@@ -425,30 +397,6 @@ H5G_dense_btree2_corder_store(void *_nrecord, const void *_udata)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G_dense_btree2_corder_store() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_dense_btree2_corder_retrieve
- *
- * Purpose:	Retrieve native information from record for v2 B-tree
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, October 30, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_dense_btree2_corder_retrieve(void *udata, const void *nrecord)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_dense_btree2_corder_retrieve)
-
-    *(H5G_dense_bt2_corder_rec_t *)udata = *(const H5G_dense_bt2_corder_rec_t *)nrecord;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5G_dense_btree2_corder_retrieve() */
 
 
 /*-------------------------------------------------------------------------

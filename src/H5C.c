@@ -3434,10 +3434,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
  * Programmer:  John Mainzer
  *		6/2/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3450,21 +3446,20 @@ H5C_dest(H5F_t * f,
 
     FUNC_ENTER_NOAPI(H5C_dest, FAIL)
 
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
+    /* Sanity check */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->skip_file_checks || f);
 
-    if ( H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id,
-                         cache_ptr, H5C__FLUSH_INVALIDATE_FLAG) < 0 ) {
-
+    /* Flush and invalidate all cache entries */
+    if(H5C_flush_invalidate_cache(f, primary_dxpl_id, secondary_dxpl_id,
+                cache_ptr, H5C__NO_FLAGS_SET) < 0 )
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    }
 
-    if ( cache_ptr->slist_ptr != NULL ) {
-
+    if(cache_ptr->slist_ptr != NULL) {
         H5SL_close(cache_ptr->slist_ptr);
         cache_ptr->slist_ptr = NULL;
-    }
+    } /* end if */
 
     cache_ptr->magic = 0;
 
@@ -3472,63 +3467,7 @@ H5C_dest(H5F_t * f,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_dest_empty
- *
- * Purpose:     Destroy an empty cache.
- *
- *              This function fails if the cache is not empty on entry.
- *
- *		Note that *cache_ptr has been freed upon successful return.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *		6/2/04
- *
- * Modifications:
- *
- *		None.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_dest_empty(H5C_t * cache_ptr)
-{
-    herr_t ret_value=SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_dest_empty, FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ( ( ! cache_ptr ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( cache_ptr->index_len != 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Bad cache_ptr or non-empty cache on entry.")
-    }
-
-
-    if ( cache_ptr->slist_ptr != NULL ) {
-
-        H5SL_close(cache_ptr->slist_ptr);
-        cache_ptr->slist_ptr = NULL;
-    }
-
-    cache_ptr->magic = 0;
-
-    (void)H5FL_FREE(H5C_t, cache_ptr);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_dest_empty() */
 
 
 /*-------------------------------------------------------------------------
@@ -3928,8 +3867,7 @@ H5C_flush_cache(H5F_t *  f,
 #ifndef NDEBUG
                     if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
 
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                    "entry_ptr->magic invalid ?!?!");
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry_ptr->magic is invalid ?!?!")
 
                     } else
 #endif /* NDEBUG */
@@ -3937,9 +3875,8 @@ H5C_flush_cache(H5F_t *  f,
                          ( ! entry_ptr->in_slist ) ) {
 
                         /* the s-list has been modified out from under us.
-                         * set node_ptr to NULL and break out of the inner loop.
+                         * break out of the loop.
                          */
-                        node_ptr = NULL;
                         goto end_of_inner_loop;;
                     }
 
@@ -3950,11 +3887,8 @@ H5C_flush_cache(H5F_t *  f,
 
                     if ( node_ptr != NULL ) {
                         next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-                        if ( next_entry_ptr == NULL ) {
-                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                        "next_entry_ptr == NULL 2 ?!?!");
-                        }
+                        if ( NULL == next_entry_ptr )
+                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
                         HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                         HDassert( next_entry_ptr->is_dirty );
                         HDassert( next_entry_ptr->in_slist );
@@ -3999,18 +3933,19 @@ H5C_flush_cache(H5F_t *  f,
                                                                 FALSE);
                                 if ( status < 0 ) {
 
-                                    /* This shouldn't happen -- if it does, we are
-                                     * toast so just scream and die.
+                                    /* This shouldn't happen -- if it does, we are toast
+                                     * so just scream and die.
                                      */
                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                                                 "dirty pinned entry flush failed.")
-                                }
+                                } /* end if */
                                 flushed_during_dep_loop = TRUE;
                             } /* end if */
                             else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
                                 /* This shouldn't happen -- if it does, just scream and die.  */
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
-                        } else {
+                        } /* end if */
+                        else {
                             /* Test to see if we are can flush the entry now.
                              * If we can, go ahead and flush.  Note that we
                              * aren't trying to do a destroy here, so that
@@ -6273,6 +6208,10 @@ H5C_protect(H5F_t *	        f,
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
 
     if ( entry_ptr != NULL ) {
+
+        /* Check for trying to load the wrong type of entry from an address */
+        if(entry_ptr->type != type)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "not a dataset creation property list")
 
         hit = TRUE;
         thing = (void *)entry_ptr;
@@ -10331,7 +10270,6 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 {
     herr_t              status;
     herr_t		ret_value = SUCCEED;
-    hbool_t		done = FALSE;
     hbool_t		first_flush = TRUE;
     int32_t		protected_entries = 0;
     int32_t		i;
@@ -10407,7 +10345,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
     cur_pel_len = cache_ptr->pel_len;
     old_pel_len = cache_ptr->pel_len;
 
-    while ( ! done )
+    while ( cache_ptr->index_len > 0 )
     {
         unsigned curr_flush_dep_height = 0;
         unsigned flush_dep_passes = 0;
@@ -10432,24 +10370,19 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
             } else {
 
+                /* Start at beginning of skip list each time */
                 node_ptr = H5SL_first(cache_ptr->slist_ptr);
+                HDassert( node_ptr != NULL );
 
-                if ( node_ptr == NULL ) {
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "slist_len != 0 && node_ptr == NULL");
-                }
-
+                /* Get cache entry for this node */
                 next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-                if ( next_entry_ptr == NULL ) {
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "next_entry_ptr == NULL 1 ?!?!");
-                }
+                if ( NULL == next_entry_ptr )
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
                 HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                 HDassert( next_entry_ptr->is_dirty );
                 HDassert( next_entry_ptr->in_slist );
-
             }
+
 #if H5C_DO_SANITY_CHECKS
             /* Depending on circumstances, H5C_flush_single_entry() will
              * remove dirty entries from the slist as it flushes them.
@@ -10514,8 +10447,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 #ifndef NDEBUG
                 if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
 
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "entry_ptr->magic is invalid ?!?!");
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry_ptr->magic is invalid ?!?!")
 
                 } else
 #endif /* NDEBUG */
@@ -10534,19 +10466,13 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
                 node_ptr = H5SL_next(node_ptr);
                 if ( node_ptr != NULL ) {
-
                     next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-                    if ( next_entry_ptr == NULL ) {
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                    "next_entry_ptr == NULL 2 ?!?!");
-                    }
+                    if ( NULL == next_entry_ptr )
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
                     HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                     HDassert( next_entry_ptr->is_dirty );
                     HDassert( next_entry_ptr->in_slist );
-
                 } else {
-
                     next_entry_ptr = NULL;
                 }
 
@@ -10807,23 +10733,20 @@ end_of_inner_loop:
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
 	                "Maximum passes on flush exceeded.")
 	}
-
-	if ( cache_ptr->index_len <= 0 ) {
-
-	    done = TRUE;
-            HDassert( cache_ptr->index_size == 0 );
-            HDassert( cache_ptr->clean_index_size == 0 );
-            HDassert( cache_ptr->dirty_index_size == 0 );
-	    HDassert( cache_ptr->slist_len == 0 );
-	    HDassert( cache_ptr->slist_size == 0 );
-	    HDassert( cache_ptr->pel_len == 0 );
-	    HDassert( cache_ptr->pel_size == 0 );
-	    HDassert( cache_ptr->pl_len == 0 );
-	    HDassert( cache_ptr->pl_size == 0 );
-	    HDassert( cache_ptr->LRU_list_len == 0 );
-	    HDassert( cache_ptr->LRU_list_size == 0 );
-        }
     } /* main while loop */
+
+    /* Invariants, after destroying all entries in the hash table */
+    HDassert( cache_ptr->index_size == 0 );
+    HDassert( cache_ptr->clean_index_size == 0 );
+    HDassert( cache_ptr->dirty_index_size == 0 );
+    HDassert( cache_ptr->slist_len == 0 );
+    HDassert( cache_ptr->slist_size == 0 );
+    HDassert( cache_ptr->pel_len == 0 );
+    HDassert( cache_ptr->pel_size == 0 );
+    HDassert( cache_ptr->pl_len == 0 );
+    HDassert( cache_ptr->pl_size == 0 );
+    HDassert( cache_ptr->LRU_list_len == 0 );
+    HDassert( cache_ptr->LRU_list_size == 0 );
 
 
     HDassert( protected_entries <= cache_ptr->pl_len );

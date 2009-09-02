@@ -38,10 +38,10 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	virtual DataSpace getSpace() const;
 
 	// Returns the amount of storage size required for this attribute.
-	hsize_t getStorageSize() const;
+	virtual hsize_t getStorageSize() const;
 
 	// Returns the in memory size of this attribute's data.
-	size_t getInMemDataSize() const;
+	virtual size_t getInMemDataSize() const;
 
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
@@ -81,6 +81,10 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// defined in AbstractDs for generic datatype and specific
 	// sub-types
 	virtual hid_t p_get_type() const;
+
+	// Reads variable or fixed len strings from this attribute.
+	void p_read_variable_len(const DataType& mem_type, H5std_string& strg) const;
+	void p_read_fixed_len(const DataType& mem_type, H5std_string& strg) const;
 
 	// do not inherit H5Object::iterateAttrs
 	int iterateAttrs() { return 0; }

@@ -1539,7 +1539,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         if(hdr->filter_len > 0) {
             H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
             size_t nbytes;                      /* Number of bytes used */
-            unsigned filter_mask;               /* Filter mask for block */
+            unsigned filter_mask = 0;           /* Filter mask for block */
 
             /* Allocate buffer to perform I/O filtering on */
             write_size = dblock->size;

@@ -61,14 +61,19 @@ typedef struct H5FD_family_t {
     hid_t	memb_fapl_id;	/*file access property list for members	*/
     hsize_t	memb_size;	/*actual size of each member file	*/
     hsize_t	pmem_size;	/*member size passed in from property	*/
-    hsize_t	mem_newsize;	/*new member size passed in as private
-                                 *property. It's used only by h5repart  */
     unsigned	nmembs;		/*number of family members		*/
     unsigned	amembs;		/*number of member slots allocated	*/
     H5FD_t	**memb;		/*dynamic array of member pointers	*/
     haddr_t	eoa;		/*end of allocated addresses		*/
     char	*name;		/*name generator printf format		*/
     unsigned	flags;		/*flags for opening additional members	*/
+
+    /* Information from properties set by 'h5repart' tool */
+    hsize_t	mem_newsize;	/*new member size passed in as private
+                                 * property. It's used only by h5repart */
+    hbool_t     repart_members; /* Whether to mark the superblock dirty
+                                 * when it is loaded, so that the family
+                                 * member sizes can be re-encoded       */
 } H5FD_family_t;
 
 /* Driver-specific file access properties */
@@ -656,8 +661,6 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
  * Programmer:	Raymond Lu
  *              Tuesday, May 10, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -743,9 +746,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_t     		*ret_value=NULL;
     char		memb_name[4096], temp[4096];
     hsize_t		eof=HADDR_UNDEF;
-    hsize_t             fam_newsize = 0;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
-    H5P_genplist_t      *plist;      /* Property list pointer */
 
     FUNC_ENTER_NOAPI(H5FD_family_open, NULL)
 
@@ -767,6 +768,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         file->mem_newsize = 0;            /*New member size used by h5repart only       */
     } /* end if */
     else {
+        H5P_genplist_t      *plist;      /* Property list pointer */
         H5FD_family_fapl_t *fa;
 
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -774,10 +776,18 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         fa = (H5FD_family_fapl_t *)H5P_get_driver_info(plist);
         HDassert(fa);
 
-        /* New family file size. It's used by h5repart only. */
-        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_NEWSIZE_NAME) > 0)
+        /* Check for new family file size. It's used by h5repart only. */
+        if(H5P_exist_plist(plist, H5F_ACS_FAMILY_NEWSIZE_NAME) > 0) {
+            hsize_t fam_newsize = 0;        /* New member size, when repartitioning */
+
+            /* Get the new family file size */
             if(H5P_get(plist, H5F_ACS_FAMILY_NEWSIZE_NAME, &fam_newsize) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get new family member size")
+
+            /* Store information for later */
+            file->mem_newsize = fam_newsize; /* New member size passed in through property */
+            file->repart_members = TRUE;
+        } /* end if */
 
         if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
             if(H5I_inc_ref(fa->memb_fapl_id, FALSE)<0)
@@ -791,7 +801,6 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         } /* end else */
         file->memb_size = fa->memb_size; /* Actual member size to be updated later */
         file->pmem_size = fa->memb_size; /* Member size passed in through property */
-        file->mem_newsize = fam_newsize; /* New member size passed in through property */
     } /* end else */
     file->name = H5MM_strdup(name);
     file->flags = flags;
@@ -799,8 +808,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Check that names are unique */
     sprintf(memb_name, name, 0);
     sprintf(temp, name, 1);
-
-    if (!strcmp(memb_name, temp))
+    if(!HDstrcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
     /* Open all the family members */
@@ -970,23 +978,20 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
  *              Friday, August 25, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
-H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
+H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
-    herr_t ret_value = SUCCEED;
+    const H5FD_family_t	*file = (const H5FD_family_t*)_file;    /* Family VFD info */
 
-    FUNC_ENTER_NOAPI(H5FD_family_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_query)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -995,10 +1000,13 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
         *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+
+        /* Check for flags that are set by h5repart */
+        if(file->repart_members)
+            *flags |= H5FD_FEAT_DIRTY_SBLK_LOAD; /* Mark the superblock dirty when it is loaded (so the family member sizes are rewritten) */
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_family_query() */
 
 

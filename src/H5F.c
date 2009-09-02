@@ -71,7 +71,6 @@ static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_hand
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -843,22 +842,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 18 1997
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed the file creation and access property list to the
- *		new generic property list.
- *
- *		J Mainzer, Mar 10, 2005
- *		Updated for the new metadata cache, and associated
- *		property list changes.
- *
- *		J Mainzer, Jun 30, 2005
- *		Added lf parameter so the shared->lf field can be
- *		initialized prior to the call to H5AC_create() if a
- *		new instance of H5F_file_t is created.  lf should be
- *		NULL if shared isn't, and vise versa.
- *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
@@ -877,23 +860,20 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared = shared;
     } /* end if */
     else {
-        unsigned super_vers = HDF5_SUPERBLOCK_VERSION_DEF;      /* Superblock version for file */
         H5P_genplist_t *plist;          /* Property list */
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
         if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
-	f->shared->base_addr = HADDR_UNDEF;
-	f->shared->extension_addr = HADDR_UNDEF;
+
+        f->shared->super_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
             f->shared->fs_addr[u] = HADDR_UNDEF;
-	f->shared->driver_addr = HADDR_UNDEF;
 	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
-        f->shared->root_addr = HADDR_UNDEF;
 
 	/*
 	 * Copy the file creation and file access property lists into the
@@ -909,11 +889,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for address")
         if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &f->shared->sizeof_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
-        if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, &f->shared->sym_leaf_k) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
-        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &f->shared->btree_k[0]) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
-        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes)<0)
+        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
         HDassert(f->shared->sohm_nindexes < 255);
 
@@ -967,29 +943,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          */
         f->shared->use_tmp_space = !(IS_H5FD_MPI(f));
 
-        /* Bump superblock version if we are to use the latest version of the format */
-        if(f->shared->latest_format)
-            super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
-        /* Bump superblock version to create superblock extension for SOHM info */
-        else if(f->shared->sohm_nindexes > 0)
-            super_vers = HDF5_SUPERBLOCK_VERSION_2;
-        /* Check for non-default indexed storage B-tree internal 'K' value
-         * and set the version # of the superblock to 1 if it is a non-default
-         * value.
-         */
-        else if(f->shared->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF)
-            super_vers = HDF5_SUPERBLOCK_VERSION_1;
-
-        /* If a newer superblock version is required, set it here */
-        if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF) {
-            H5P_genplist_t *c_plist;              /* Property list */
-
-            if(NULL == (c_plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
-            if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
-        } /* end if */
-
 	/*
 	 * Create a metadata cache with the specified number of elements.
 	 * The cache might be created with a different number of elements and
@@ -1040,16 +993,13 @@ done:
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Jul 18 1997
- * Modifications:
- *		Vailin Choi,  April 2, 2008
- *		Free f->extpath
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_dest(H5F_t *f, hid_t dxpl_id)
 {
-    herr_t	   ret_value = SUCCEED;
+    herr_t	   ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_dest)
 
@@ -1069,14 +1019,31 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
-            /* Flush and invalidate all caches */
-            if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+            /* Shutdown file free space manager(s) */
+            /* (We should release the free space information now (before truncating
+             *      the file and before the metadata cache is shut down) since the
+             *      free space manager is holding some data structures in memory
+             *      and also because releasing free space can shrink the file's
+             *      'eoa' value)
+             */
+            if(H5MF_close(f, dxpl_id) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+
+            /* Unpin the superblock, since we're about to destroy the cache */
+            if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+            f->shared->sblock = NULL;
         } /* end if */
 
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
+        /* Shutdown the metadata cache */
+        if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
@@ -1096,10 +1063,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
             f->shared->root_grp = NULL;
         } /* end if */
-        if(H5AC_dest(f, dxpl_id))
-            /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-        if(H5F_accum_reset(f) < 0)
+
+        /* Destroy other components of the file */
+        if(H5F_accum_reset(f, dxpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1118,17 +1084,22 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
-        /* Close low-level file */
+        /* Only truncate the file on an orderly close, with write-access */
+        if(f->closing && (H5F_ACC_RDWR & f->shared->flags)) {
+            /* Truncate the file to the current allocated size */
+            if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+        } /* end if */
+
+        /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
-
-        /* Free root group symbol table entry, if any */
-        f->shared->root_ent = (H5G_entry_t *)H5MM_xfree(f->shared->root_ent);
 
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
@@ -1198,42 +1169,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  * Programmer:	Robb Matzke
  *		Tuesday, September 23, 1997
  *
- * Modifications:
- *		Albert Cheng, 1998-02-05
- *		Added the access_parms argument to pass down access template
- *		information.
- *
- * 		Robb Matzke, 1998-02-18
- *		The H5F_access_t changed to allow more generality.  The low
- *		level driver is part of the file access template so the TYPE
- *		argument has been removed.
- *
- * 		Robb Matzke, 1999-08-02
- *		Rewritten to use the virtual file layer.
- *
- * 		Robb Matzke, 1999-08-16
- *		Added decoding of file driver information block, which uses a
- *		formerly reserved address slot in the boot block in order to
- *		be compatible with previous versions of the file format.
- *
- * 		Robb Matzke, 1999-08-20
- *		Optimizations for opening a file. If the driver can't
- *		determine when two file handles refer to the same file then
- *		we open the file in one step.  Otherwise if the first attempt
- *		to open the file fails then we skip the second attempt if the
- *		arguments would be the same.
- *
- *		Raymond Lu, 2001-10-14
- *		Changed the file creation and access property lists to the
- *		new generic property list.
- *
- *		Bill Wendling, 2003-03-18
- *		Modified H5F_flush call to take one flag instead of
- *		multiple Boolean flags.
- *
- *		Vailin Choi, 2008-04-02
- *		To formulate path for later searching of target file for external link
- *		via H5_build_extpath().
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -1346,22 +1281,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     file->intent = flags;
     file->name = H5MM_xstrdup(name);
 
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
-    /* This step is for h5repart tool only. If user wants to change file driver from
-     * family to sec2 while using h5repart, this private property should be set so that
-     * in the later step, the library can ignore the family driver information saved
-     * in the superblock.
-     */
-    if(H5P_exist_plist(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME) > 0) {
-        if(H5P_get(a_plist, H5F_ACS_FAMILY_TO_SEC2_NAME, &shared->fam_to_sec2) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property of changing family to sec2")
-    } /* end if */
-    else
-        shared->fam_to_sec2 = FALSE;
-
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1383,13 +1302,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          */
         if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-
-        /* Write the superblock to the file */
-        /* (This must be after the root group is created, since the root
-         *      group's symbol table entry is part of the superblock)
-         */
-        if(H5F_super_write(file, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
     } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
         if(H5F_super_read(file, dxpl_id) < 0)
@@ -1399,6 +1311,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
+
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1461,33 +1377,6 @@ done:
  *		Failure:	FAIL
  *
  * Programmer:	Unknown
- *
- * Modifications:
- * 		Robb Matzke, 1997-07-18
- *		File struct creation and destruction is through H5F_new() and
- *		H5F_dest(). Writing the root symbol table entry is done with
- *		H5G_encode().
- *
- *  		Robb Matzke, 1997-08-29
- *		Moved creation of the boot block to H5F_flush().
- *
- *  		Robb Matzke, 1997-09-23
- *		Most of the work is now done by H5F_open() since H5Fcreate()
- *		and H5Fopen() originally contained almost identical code.
- *
- * 		Robb Matzke, 1998-02-18
- *		Better error checking for the creation and access property
- *		lists. It used to be possible to swap the two and core the
- *		library.  Also, zero is no longer valid as a default property
- *		list; one must use H5P_DEFAULT instead.
- *
- * 		Robb Matzke, 1999-08-02
- *		The file creation and file access property lists are passed
- *		to the H5F_open() as object IDs.
- *
- *		Raymond Lu, 2001-10-14
- *              Changed the file creation and access property list to the
- * 		new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1650,14 +1539,6 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, August  6, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1998-10-16
- *		Added the `scope' argument.
- *
- *		Bill Wendling, 2003-03-18
- *		Modified H5F_flush call to take one flag instead of
- *		several Boolean flags.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1729,8 +1610,26 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
     /* Flush the file */
-    if(H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
+    /*
+     * Nothing to do if the file is read only.	This determination is
+     * made at the shared open(2) flags level, implying that opening a
+     * file twice, once for read-only and once for read-write, and then
+     * calling H5Fflush() with the read-only handle, still causes data
+     * to be flushed.
+     */
+    if(H5F_ACC_RDWR & f->shared->flags) {
+        /* Flush other files, depending on scope */
+        if(H5F_SCOPE_GLOBAL == scope) {
+            /* Call the flush routine for mounted file hierarchies */
+            if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
+        } /* end if */
+        else {
+            /* Call the flush routine, for this file */
+            if(H5F_flush(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+        } /* end else */
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1740,9 +1639,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush
  *
- * Purpose:	Flushes (and optionally invalidates) cached data plus the
- *		file superblock.  If the logical file size field is zero
- *		then it is updated to be the length of the superblock.
+ * Purpose:	Flushes cached data.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1752,88 +1649,45 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
+herr_t
+H5F_flush(H5F_t *f, hid_t dxpl_id)
 {
-    unsigned		nerrors = 0;    /* Errors from nested flushes */
-    unsigned		i;              /* Index variable */
-    unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
-    herr_t              ret_value;      /* Return value */
+    herr_t   ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
+    FUNC_ENTER_NOAPI(H5F_flush, FAIL)
 
     /* Sanity check arguments */
     HDassert(f);
 
-    /*
-     * Nothing to do if the file is read only.	This determination is
-     * made at the shared open(2) flags level, implying that opening a
-     * file twice, once for read-only and once for read-write, and then
-     * calling H5F_flush() with the read-only handle, still causes data
-     * to be flushed.
-     */
-    if(0 == (H5F_ACC_RDWR & f->shared->flags))
-	HGOTO_DONE(SUCCEED)
-
-    /* Flush other files, depending on scope */
-    if(H5F_SCOPE_GLOBAL == scope) {
-	while(f->parent)
-            f = f->parent;
-
-	scope = H5F_SCOPE_DOWN;
-    } /* end while */
-    if(H5F_SCOPE_DOWN == scope)
-        for(i = 0; i < f->shared->mtab.nmounts; i++)
-            if(H5F_flush(f->shared->mtab.child[i].file, dxpl_id, scope, flags) < 0)
-                nerrors++;
-
     /* Flush any cached dataset storage raw data */
-    if(H5D_flush(f, dxpl_id, flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+    if(H5D_flush(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
-    /* If we will be closing the file, we should release the free space
-     *  information now (needs to happen before truncating the file and
-     *  before the metadata cache is shut down, since the free space manager is
-     *  holding some data structures in memory and also because releasing free
-     *  space can shrink the file's 'eoa' value)
+    /* Release any space allocated to space aggregators, so that the eoa value
+     *  corresponds to the end of the space written to in the file.
      */
-    if(flags & H5F_FLUSH_CLOSING) {
-        /* Shutdown file free space manager(s) */
-        if(H5MF_close(f, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
-    } /* end if */
-
-    /* Truncate the file to the current allocated size */
-    /* (needs to happen before superblock write, since the 'eoa' value is
-     *  written in superblock -QAK)
+    /* (needs to happen before cache flush, with superblock write, since the
+     *  'eoa' value is written in superblock -QAK)
      */
-    if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level truncate failed")
+    if(H5MF_free_aggrs(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
-    /* Write the superblock to disk */
-    /* (needs to happen before metadata flush (H5AC_flush), since the information
-     *  in the superblock extension may be updated - 2008/10/14, QAK)
-     */
-    if(H5F_super_write(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
-
-    /* Flush (and invalidate, if requested) the entire metadata cache */
-    H5AC_flags = 0;
-    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
-        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+    /* Flush the entire metadata cache */
+    if(H5AC_flush(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
     /* Flush out the metadata accumulator */
     if(H5F_accum_flush(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
-
-    /* Check flush errors for children - errors are already on the stack */
-    ret_value = (nerrors ? FAIL : SUCCEED);
+    if(H5FD_flush(f->shared->lf, dxpl_id, FALSE) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2042,8 +1896,8 @@ H5F_try_close(H5F_t *f)
      * Only try to flush the file if it was opened with write access.
      */
     if(f->intent&H5F_ACC_RDWR) {
-        /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5AC__NO_FLAGS_SET) < 0)
+        /* Flush all caches */
+        if(H5F_flush(f, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2520,6 +2374,7 @@ hssize_t
 H5Fget_freespace(hid_t file_id)
 {
     H5F_t      *file;           /* File object for file ID */
+    hsize_t	tot_space;	/* Amount of free space in the file */
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Fget_freespace, FAIL)
@@ -2530,8 +2385,10 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if((ret_value = H5MF_get_freespace(file, H5AC_ind_dxpl_id)) < 0)
+    if(H5MF_get_freespace(file, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
+    ret_value = (hssize_t)tot_space;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2930,6 +2787,7 @@ done:
  *
  * Programmer:  Vailin Choi
  *              July 11, 2007
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2967,9 +2825,8 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
     HDmemset(finfo, 0, sizeof(H5F_info_t));
 
     /* Check for superblock extension info */
-    if(H5F_addr_defined(f->shared->extension_addr))
-        if(H5F_super_ext_size(f, H5AC_ind_dxpl_id, &finfo->super_ext_size) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+    if(H5F_super_size(f, H5AC_ind_dxpl_id, NULL, &finfo->super_ext_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
@@ -2979,3 +2836,4 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info() */
+

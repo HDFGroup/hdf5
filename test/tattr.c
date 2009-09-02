@@ -2077,7 +2077,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
         VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
         if(HDstrcmp(check_name, attrname))
-            TestErrPrintf("attribute name different: attr_name = '%s', should be '%s'\n", check_name, attrname);
+            TestErrPrintf("attribute name different: attrname = '%s', should be '%s'\n", check_name, attrname);
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
@@ -5293,13 +5293,13 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     ret = H5Dclose(dset3);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* Close dataspace */
-    ret = H5Sclose(sid);
-    CHECK(ret, FAIL, "H5Sclose");
-
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_corder_transition() */
 
 

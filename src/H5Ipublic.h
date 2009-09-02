@@ -77,7 +77,7 @@ extern "C" {
 
 /* Public API functions */
 
-H5_DLL hid_t H5Iregister(H5I_type_t type, void *object);
+H5_DLL hid_t H5Iregister(H5I_type_t type, const void *object);
 H5_DLL void *H5Iobject_verify(hid_t id, H5I_type_t id_type);
 H5_DLL void *H5Iremove_verify(hid_t id, H5I_type_t id_type);
 H5_DLL H5I_type_t H5Iget_type(hid_t id);

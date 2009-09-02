@@ -293,234 +293,257 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    break;
 
 	case 'D':
-	    switch (type[1]) {
-            case 'a':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5D_alloc_time_t alloc_time = va_arg (ap, H5D_alloc_time_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (alloc_time) {
-		    case H5D_ALLOC_TIME_ERROR:
-			fprintf (out, "H5D_ALLOC_TIME_ERROR");
-			break;
-		    case H5D_ALLOC_TIME_DEFAULT:
-			fprintf (out, "H5D_ALLOC_TIME_DEFAULT");
-			break;
-		    case H5D_ALLOC_TIME_EARLY:
-			fprintf (out, "H5D_ALLOC_TIME_EARLY");
-			break;
-		    case H5D_ALLOC_TIME_LATE:
-			fprintf (out, "H5D_ALLOC_TIME_LATE");
-			break;
-		    case H5D_ALLOC_TIME_INCR:
-			fprintf (out, "H5D_ALLOC_TIME_INCR");
-			break;
-                    default:
-                        fprintf (out, "%ld", (long)alloc_time);
-			break;
-		    }
-		}
-		break;
+	    switch(type[1]) {
+                case 'a':
+                    if(ptr) {
+                        if(vp)
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5D_alloc_time_t alloc_time = (H5D_alloc_time_t)va_arg(ap, int);
 
- 	    case 'c':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5FD_mpio_collective_opt_t opt= va_arg(ap, H5FD_mpio_collective_opt_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (opt) {
-			case H5FD_MPIO_COLLECTIVE_IO:
-			    fprintf (out, "H5FD_MPIO_COLLECTIVE_IO");
-			    break;
-			case H5FD_MPIO_INDIVIDUAL_IO:
-			    fprintf (out, "H5FD_MPIO_INDIVIDUAL_IO");
-			    break;
-			default:
-			    fprintf (out, "%ld", (long)opt);
-			    break;
-		    }
-		}
-		break;
+                        switch(alloc_time) {
+                            case H5D_ALLOC_TIME_ERROR:
+                                fprintf(out, "H5D_ALLOC_TIME_ERROR");
+                                break;
 
-            case 'f':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5D_fill_time_t fill_time = va_arg (ap, H5D_fill_time_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (fill_time) {
-		    case H5D_FILL_TIME_ERROR:
-			fprintf (out, "H5D_FILL_TIME_ERROR");
-			break;
-		    case H5D_FILL_TIME_ALLOC:
-			fprintf (out, "H5D_FILL_TIME_ALLOC");
-			break;
-		    case H5D_FILL_TIME_NEVER:
-			fprintf (out, "H5D_FILL_TIME_NEVER");
-			break;
-		    case H5D_FILL_TIME_IFSET:
-			fprintf (out, "H5D_FILL_TIME_IFSET");
-			break;
-                    default:
-                        fprintf (out, "%ld", (long)fill_time);
-			break;
-		    }
-		}
-		break;
+                            case H5D_ALLOC_TIME_DEFAULT:
+                                fprintf(out, "H5D_ALLOC_TIME_DEFAULT");
+                                break;
 
-            case 'F':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5D_fill_value_t fill_value = va_arg (ap, H5D_fill_value_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (fill_value) {
-		    case H5D_FILL_VALUE_ERROR:
-			fprintf (out, "H5D_FILL_VALUE_ERROR");
-			break;
-		    case H5D_FILL_VALUE_UNDEFINED:
-			fprintf (out, "H5D_FILL_VALUE_UNDEFINED");
-			break;
-		    case H5D_FILL_VALUE_DEFAULT:
-			fprintf (out, "H5D_FILL_VALUE_DEFAULT");
-			break;
-		    case H5D_FILL_VALUE_USER_DEFINED:
-			fprintf (out, "H5D_FILL_VALUE_USER_DEFINED");
-			break;
-                    default:
-                        fprintf (out, "%ld", (long)fill_value);
-			break;
-		    }
-		}
-		break;
+                            case H5D_ALLOC_TIME_EARLY:
+                                fprintf(out, "H5D_ALLOC_TIME_EARLY");
+                                break;
 
-	    case 'h':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5FD_mpio_chunk_opt_t opt = va_arg(ap, H5FD_mpio_chunk_opt_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (opt) {
-		    case H5FD_MPIO_CHUNK_DEFAULT:
-			fprintf (out, "H5FD_MPIO_CHUNK_DEFAULT");
-			break;
-		    case H5FD_MPIO_CHUNK_ONE_IO:
-			fprintf (out, "H5FD_MPIO_CHUNK_ONE_IO");
-			break;
-		    case H5FD_MPIO_CHUNK_MULTI_IO:
-			fprintf (out, "H5FD_MPIO_CHUNK_MULTI_IO");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)opt);
-			break;
-		    }
-		}
-		break;
+                            case H5D_ALLOC_TIME_LATE:
+                                fprintf(out, "H5D_ALLOC_TIME_LATE");
+                                break;
 
-	    case 'l':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5D_layout_t layout = va_arg (ap, H5D_layout_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (layout) {
-		    case H5D_LAYOUT_ERROR:
-			fprintf (out, "H5D_LAYOUT_ERROR");
-			break;
-		    case H5D_COMPACT:
-			fprintf (out, "H5D_COMPACT");
-			break;
-		    case H5D_CONTIGUOUS:
-			fprintf (out, "H5D_CONTIGUOUS");
-			break;
-		    case H5D_CHUNKED:
-			fprintf (out, "H5D_CHUNKED");
-			break;
-		    case H5D_NLAYOUTS:
-			fprintf (out, "H5D_NLAYOUTS");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)layout);
-			break;
-		    }
-		}
-		break;
+                            case H5D_ALLOC_TIME_INCR:
+                                fprintf(out, "H5D_ALLOC_TIME_INCR");
+                                break;
 
-	    case 's':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5D_space_status_t space_status = va_arg(ap, H5D_space_status_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (space_status) {
-		    case H5D_SPACE_STATUS_NOT_ALLOCATED:
-			fprintf (out, "H5D_SPACE_STATUS_NOT_ALLOCATED");
-			break;
-		    case H5D_SPACE_STATUS_PART_ALLOCATED:
-			fprintf (out, "H5D_SPACE_STATUS_PART_ALLOCATED");
-			break;
-		    case H5D_SPACE_STATUS_ALLOCATED:
-			fprintf (out, "H5D_SPACE_STATUS_ALLOCATED");
-			break;
-		    case H5D_SPACE_STATUS_ERROR:
-			fprintf (out, "H5D_SPACE_STATUS_ERROR");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)space_status);
-			break;
-		    }
-		}
-		break;
+                            default:
+                                fprintf(out, "%ld", (long)alloc_time);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
 
-	    case 't':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5FD_mpio_xfer_t transfer = va_arg(ap, H5FD_mpio_xfer_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (transfer) {
-		    case H5FD_MPIO_INDEPENDENT:
-			fprintf (out, "H5FD_MPIO_INDEPENDENT");
-			break;
-		    case H5FD_MPIO_COLLECTIVE:
-			fprintf (out, "H5FD_MPIO_COLLECTIVE");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)transfer);
-			break;
-		    }
-		}
-		break;
+                case 'c':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5FD_mpio_collective_opt_t opt = (H5FD_mpio_collective_opt_t)va_arg(ap, int);
 
-	    default:
-		fprintf (out, "BADTYPE(D%c)", type[1]);
-		goto error;
-	    }
+                        switch(opt) {
+                            case H5FD_MPIO_COLLECTIVE_IO:
+                                fprintf(out, "H5FD_MPIO_COLLECTIVE_IO");
+                                break;
+
+                            case H5FD_MPIO_INDIVIDUAL_IO:
+                                fprintf(out, "H5FD_MPIO_INDIVIDUAL_IO");
+                                break;
+
+                            default:
+                                fprintf(out, "%ld", (long)opt);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'f':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5D_fill_time_t fill_time = (H5D_fill_time_t)va_arg(ap, int);
+
+                        switch(fill_time) {
+                            case H5D_FILL_TIME_ERROR:
+                                fprintf(out, "H5D_FILL_TIME_ERROR");
+                                break;
+
+                            case H5D_FILL_TIME_ALLOC:
+                                fprintf(out, "H5D_FILL_TIME_ALLOC");
+                                break;
+
+                            case H5D_FILL_TIME_NEVER:
+                                fprintf(out, "H5D_FILL_TIME_NEVER");
+                                break;
+
+                            case H5D_FILL_TIME_IFSET:
+                                fprintf(out, "H5D_FILL_TIME_IFSET");
+                                break;
+
+                            default:
+                                fprintf(out, "%ld", (long)fill_time);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'F':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5D_fill_value_t fill_value = (H5D_fill_value_t)va_arg(ap, int);
+
+                        switch(fill_value) {
+                            case H5D_FILL_VALUE_ERROR:
+                                fprintf(out, "H5D_FILL_VALUE_ERROR");
+                                break;
+
+                            case H5D_FILL_VALUE_UNDEFINED:
+                                fprintf(out, "H5D_FILL_VALUE_UNDEFINED");
+                                break;
+
+                            case H5D_FILL_VALUE_DEFAULT:
+                                fprintf(out, "H5D_FILL_VALUE_DEFAULT");
+                                break;
+
+                            case H5D_FILL_VALUE_USER_DEFINED:
+                                fprintf(out, "H5D_FILL_VALUE_USER_DEFINED");
+                                break;
+
+                            default:
+                                fprintf(out, "%ld", (long)fill_value);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'h':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5FD_mpio_chunk_opt_t opt = (H5FD_mpio_chunk_opt_t)va_arg(ap, int);
+
+                        switch(opt) {
+                            case H5FD_MPIO_CHUNK_DEFAULT:
+                                fprintf(out, "H5FD_MPIO_CHUNK_DEFAULT");
+                                break;
+
+                            case H5FD_MPIO_CHUNK_ONE_IO:
+                                fprintf(out, "H5FD_MPIO_CHUNK_ONE_IO");
+                                break;
+
+                            case H5FD_MPIO_CHUNK_MULTI_IO:
+                                fprintf(out, "H5FD_MPIO_CHUNK_MULTI_IO");
+                                break;
+
+                            default:
+                                fprintf(out, "%ld", (long)opt);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'l':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5D_layout_t layout = va_arg (ap, H5D_layout_t); /*lint !e64 Type mismatch not really occuring */
+                        switch (layout) {
+                        case H5D_LAYOUT_ERROR:
+                            fprintf (out, "H5D_LAYOUT_ERROR");
+                            break;
+                        case H5D_COMPACT:
+                            fprintf (out, "H5D_COMPACT");
+                            break;
+                        case H5D_CONTIGUOUS:
+                            fprintf (out, "H5D_CONTIGUOUS");
+                            break;
+                        case H5D_CHUNKED:
+                            fprintf (out, "H5D_CHUNKED");
+                            break;
+                        case H5D_NLAYOUTS:
+                            fprintf (out, "H5D_NLAYOUTS");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)layout);
+                            break;
+                        }
+                    }
+                    break;
+
+                case 's':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5D_space_status_t space_status = va_arg(ap, H5D_space_status_t); /*lint !e64 Type mismatch not really occuring */
+                        switch (space_status) {
+                        case H5D_SPACE_STATUS_NOT_ALLOCATED:
+                            fprintf (out, "H5D_SPACE_STATUS_NOT_ALLOCATED");
+                            break;
+                        case H5D_SPACE_STATUS_PART_ALLOCATED:
+                            fprintf (out, "H5D_SPACE_STATUS_PART_ALLOCATED");
+                            break;
+                        case H5D_SPACE_STATUS_ALLOCATED:
+                            fprintf (out, "H5D_SPACE_STATUS_ALLOCATED");
+                            break;
+                        case H5D_SPACE_STATUS_ERROR:
+                            fprintf (out, "H5D_SPACE_STATUS_ERROR");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)space_status);
+                            break;
+                        }
+                    }
+                    break;
+
+                case 't':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5FD_mpio_xfer_t transfer = va_arg(ap, H5FD_mpio_xfer_t); /*lint !e64 Type mismatch not really occuring */
+                        switch (transfer) {
+                        case H5FD_MPIO_INDEPENDENT:
+                            fprintf (out, "H5FD_MPIO_INDEPENDENT");
+                            break;
+                        case H5FD_MPIO_COLLECTIVE:
+                            fprintf (out, "H5FD_MPIO_COLLECTIVE");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)transfer);
+                            break;
+                        }
+                    }
+                    break;
+
+                default:
+                    fprintf (out, "BADTYPE(D%c)", type[1]);
+                    goto error;
+	    } /* end switch */
 	    break;
 
 	case 'e':
@@ -650,10 +673,6 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 break;
                             case H5F_SCOPE_GLOBAL:
                                 fprintf(out, "H5F_SCOPE_GLOBAL");
-                                break;
-                            case H5F_SCOPE_DOWN:
-                                fprintf(out, "H5F_SCOPE_DOWN "
-                                        "/*FOR INTERNAL USE ONLY!*/");
                                 break;
                             default:
                                 fprintf(out, "%ld", (long)scope);

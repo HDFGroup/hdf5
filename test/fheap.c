@@ -15377,6 +15377,18 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+/* Custom filter used to verify that the filters are actually called and do not
+ * just silently fail */
+static hbool_t test_write_filter_called;
+static size_t test_write_filter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+    const unsigned int UNUSED cd_values[], size_t nbytes, size_t UNUSED *buf_size,
+    void UNUSED **buf)
+{
+    test_write_filter_called = TRUE;
+
+    return nbytes;
+} /* end link_filter_filter */
+
 static unsigned
 test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
@@ -15413,12 +15425,27 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
     /* Check if we are compressing the blocks */
     if(tparam->comp == FHEAP_TEST_COMPRESS) {
+        H5Z_class2_t filter_class;          /* Custom filter */
         unsigned    deflate_level;          /* Deflation level */
 
         /* Set an I/O filter for heap data */
         deflate_level = 6;
         if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, (size_t)1, &deflate_level) < 0)
             FAIL_STACK_ERROR
+
+        /* Register and append custom filter */
+        filter_class.version = H5Z_CLASS_T_VERS;
+        filter_class.id = H5Z_FILTER_RESERVED + 43;
+        filter_class.encoder_present = TRUE;
+        filter_class.decoder_present = TRUE;
+        filter_class.name = "custom_fheap_filter";
+        filter_class.can_apply = NULL;
+        filter_class.set_local = NULL;
+        filter_class.filter = test_write_filter;
+        if(H5Zregister(&filter_class) < 0) TEST_ERROR
+        if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, 0, NULL) < 0)
+            FAIL_STACK_ERROR
+        test_write_filter_called = FALSE;
     } /* end if */
 
     /* Perform common file & heap open operations */
@@ -15466,6 +15493,35 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if(ret >= 0)
         TEST_ERROR
 
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify that the custom filter has been applied for the huge object (if
+     * applicable) */
+    if(tparam->comp == FHEAP_TEST_COMPRESS) {
+        if(!test_write_filter_called) TEST_ERROR
+        test_write_filter_called = FALSE;
+    } /* end if */
+
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Re-open the heap */
+    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
     /* Initialize data to overwrite with */
     rewrite_obj = (unsigned char *)H5MM_malloc(shared_obj_size_g);
     for(u = 0; u < shared_obj_size_g; u++)
@@ -15510,6 +15566,11 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     /* Close the file */
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+
+    /* Verify that the custom filter has been applied to the managed objects (if
+     * applicable) */
+    if(tparam->comp == FHEAP_TEST_COMPRESS)
+        if(!test_write_filter_called) TEST_ERROR
 
 
     /* Re-open the file */
@@ -15816,7 +15877,7 @@ curr_test = FHEAP_TEST_NORMAL;
             /* "Re-open heap" testing parameters */
             case FHEAP_TEST_REOPEN:
                 puts("Testing with reopen heap flag set");
-                tparam.reopen_heap = TRUE;
+                tparam.reopen_heap = FHEAP_TEST_REOPEN;
                 break;
 
             /* An unknown test? */

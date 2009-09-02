@@ -51,7 +51,7 @@ PROGRAM fortranlibtest
   WRITE(*,*)
 
   ret_total_error = 0
-  CALL file_space(cleanup, ret_total_error)
+  CALL file_space("file_space_1_8",cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, &
        ' Testing file free space', &
        total_error)

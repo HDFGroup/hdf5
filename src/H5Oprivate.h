@@ -321,6 +321,7 @@ typedef struct H5O_efl_t {
     H5O_efl_entry_t *slot;		/*array of external file entries     */
 } H5O_efl_t;
 
+
 /*
  * Data Layout Message.
  * (Data structure in file)
@@ -352,45 +353,56 @@ typedef struct H5O_efl_t {
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
 struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
 
-typedef struct H5O_layout_contig_t {
+typedef struct H5O_storage_contig_t {
     haddr_t	addr;			/* File address of data              */
     hsize_t     size;                   /* Size of data in bytes             */
-} H5O_layout_contig_t;
+} H5O_storage_contig_t;
 
-typedef struct H5O_layout_chunk_btree_t {
-    haddr_t	addr;			/* File address of B-tree            */
+typedef struct H5O_storage_chunk_btree_t {
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
-} H5O_layout_chunk_btree_t;
+} H5O_storage_chunk_btree_t;
+
+typedef struct H5O_storage_chunk_t {
+    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
+    haddr_t	idx_addr;		/* File address of chunk index       */
+    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
+    union {
+        H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
+    } u;
+} H5O_storage_chunk_t;
+
+typedef struct H5O_storage_compact_t {
+    hbool_t     dirty;                  /* Dirty flag for compact dataset    */
+    size_t      size;                   /* Size of buffer in bytes           */
+    void        *buf;                   /* Buffer for compact dataset        */
+} H5O_storage_compact_t;
+
+typedef struct H5O_storage_t {
+    H5D_layout_t type;			/* Type of layout                    */
+    union {
+        H5O_storage_contig_t contig;    /* Information for contiguous storage */
+        H5O_storage_chunk_t chunk;      /* Information for chunked storage    */
+        H5O_storage_compact_t compact;  /* Information for compact storage    */
+    } u;
+} H5O_storage_t;
 
 typedef struct H5O_layout_chunk_t {
-    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
     hsize_t     nchunks;                /* Number of chunks in dataset	     */
     hsize_t     chunks[H5O_LAYOUT_NDIMS]; /* # of chunks in dataset dimensions */
     hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];	/* "down" size of number of chunks in each dimension */
-    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
-    union {
-        H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */
-    } u;
 } H5O_layout_chunk_t;
-
-typedef struct H5O_layout_compact_t {
-    hbool_t     dirty;                  /* Dirty flag for compact dataset    */
-    size_t      size;                   /* Size of buffer in bytes           */
-    void        *buf;                   /* Buffer for compact dataset        */
-} H5O_layout_compact_t;
 
 typedef struct H5O_layout_t {
     H5D_layout_t type;			/* Type of layout                    */
     unsigned version;                   /* Version of message                */
     const struct H5D_layout_ops_t *ops; /* Pointer to data layout I/O operations */
     union {
-        H5O_layout_contig_t contig;     /* Information for contiguous layout */
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
-        H5O_layout_compact_t compact;   /* Information for compact layout    */
     } u;
+    H5O_storage_t storage;              /* Information for storing dataset elements */
 } H5O_layout_t;
 
 /* Enable reading/writing "bogus" messages */
@@ -663,9 +675,6 @@ H5_DLL herr_t H5O_loc_reset(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_copy(H5O_loc_t *dst, const H5O_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
-
-/* Layout operators */
-H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);

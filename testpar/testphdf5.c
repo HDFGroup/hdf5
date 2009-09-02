@@ -402,7 +402,7 @@ int main(int argc, char **argv)
 	    "collective group and dataset write", &collngroups_params);
     AddTest("ingrpr", independent_group_read, NULL,
 	    "independent group and dataset read", &collngroups_params);
-				 AddTest("bigdset", big_dataset, NULL,
+    AddTest("bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
     AddTest("fill", dataset_fillvalue, NULL,
 	    "dataset fill value", PARATESTFILE);
@@ -461,35 +461,6 @@ int main(int argc, char **argv)
     AddTest("ccchunkr",
 	coll_irregular_complex_chunk_read,NULL,
 	"collective irregular complex chunk read",PARATESTFILE);
-
-
-#if 0
-    if((mpi_size > 3) && MAINPROCESS) {
-	printf("Collective irregular chunk IO tests haven't been tested \n");
-	printf("  for the number of process greater than 3.\n");
-	printf("Please try with the number of process \n");
-	printf("  no greater than 3 for collective irregular chunk IO test.\n");
-	printf("Collective irregular chunk tests will be skipped \n");
-    }
-    AddTest((mpi_size > 3) ? "-ccontw" : "ccontw",
-	coll_irregular_cont_write,NULL,
-	"collective irregular contiguous write",PARATESTFILE);
-    AddTest((mpi_size > 3) ? "-ccontr" : "ccontr",
-	coll_irregular_cont_read,NULL,
-	"collective irregular contiguous read",PARATESTFILE);
-    AddTest((mpi_size > 3) ? "-cschunkw" : "cschunkw",
-	coll_irregular_simple_chunk_write,NULL,
-	"collective irregular simple chunk write",PARATESTFILE);
-    AddTest((mpi_size > 3) ? "-cschunkr" : "cschunkr",
-	coll_irregular_simple_chunk_read,NULL,
-	"collective irregular simple chunk read",PARATESTFILE);
-    AddTest((mpi_size > 3) ? "-ccchunkw" : "ccchunkw",
-	coll_irregular_complex_chunk_write,NULL,
-	"collective irregular complex chunk write",PARATESTFILE);
-    AddTest((mpi_size > 3) ? "-ccchunkr" : "ccchunkr",
-	coll_irregular_complex_chunk_read,NULL,
-	"collective irregular complex chunk read",PARATESTFILE);
-#endif
 
 
     AddTest("null", null_dataset, NULL,

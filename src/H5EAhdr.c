@@ -50,8 +50,10 @@
 /* Local Macros */
 /****************/
 
+#ifndef NDEBUG
 /* Max. # of bits for max. nelmts index */
 #define H5EA_MAX_NELMTS_IDX_MAX 64
+#endif /* NDEBUG */
 
 /* # of elements in a data block for a particular super block */
 #define H5EA_SBLK_DBLK_NELMTS(s, m)                                           \

@@ -39,8 +39,8 @@ fi
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
         gcc*)
-            FC=g95
-            FC_BASENAME=g95
+            FC=gfortran
+            FC_BASENAME=gfortran
             ;;
 	pgcc*)
             FC=pgf90

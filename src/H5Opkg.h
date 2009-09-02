@@ -310,13 +310,6 @@ struct H5O_t {
     H5O_chunk_t *chunk;			/*array of chunks		     */
 };
 
-/* Callback information for copying dataset */
-typedef struct H5D_copy_file_ud_t {
-    struct H5S_extent_t *src_space_extent;     /* Copy of dataspace extent for dataset */
-    H5T_t *src_dtype;                   /* Copy of datatype for dataset */
-    H5O_pline_t *src_pline;             /* Copy of filter pipeline for dataet */
-} H5D_copy_file_ud_t;
-
 /* Class for types of objects in file */
 typedef struct H5O_obj_class_t {
     H5O_type_t	type;				/*object type on disk	     */

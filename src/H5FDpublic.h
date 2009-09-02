@@ -26,23 +26,8 @@
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
 
-/*
- * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
- * should not change other than adding new types to the end. These numbers
- * might appear in files.
- */
-typedef enum H5FD_mem_t {
-    H5FD_MEM_NOLIST	= -1,			/*must be negative*/
-    H5FD_MEM_DEFAULT	= 0,			/*must be zero*/
-    H5FD_MEM_SUPER      = 1,
-    H5FD_MEM_BTREE      = 2,
-    H5FD_MEM_DRAW       = 3,
-    H5FD_MEM_GHEAP      = 4,
-    H5FD_MEM_LHEAP      = 5,
-    H5FD_MEM_OHDR       = 6,
-
-    H5FD_MEM_NTYPES				/*must be last*/
-} H5FD_mem_t;
+/* Types of allocation requests: see H5Fpublic.h  */
+typedef enum H5F_mem_t	H5FD_mem_t;
 
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
@@ -205,6 +190,20 @@ typedef enum H5FD_mem_t {
      * and then sub-allocate "small" raw data requests from that larger block.
      */
 #define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000010
+    /*
+     * Defining the H5FD_FEAT_IGNORE_DRVRINFO for a VFL driver means that
+     * the library will ignore the driver info that is encoded in the file
+     * for the VFL driver.  (This will cause the driver info to be eliminated
+     * from the file when it is flushed/closed, if the file is opened R/W).
+     */
+#define H5FD_FEAT_IGNORE_DRVRINFO       0x00000020
+    /*
+     * Defining the H5FD_FEAT_DIRTY_SBLK_LOAD for a VFL driver means that
+     * the library will mark the superblock dirty when the file is opened
+     * R/W.  This will cause the driver info to be re-encoded when the file
+     * is flushed/closed.
+     */
+#define H5FD_FEAT_DIRTY_SBLK_LOAD       0x00000040
 
 
 /* Forward declaration */

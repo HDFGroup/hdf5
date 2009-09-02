@@ -627,3 +627,80 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mount_count_ids() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_flush_mounts_recurse
+ *
+ * Purpose:	Flush a mount hierarchy, recursively
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Fri, August 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_flush_mounts_recurse(H5F_t *f, hid_t dxpl_id)
+{
+    unsigned	nerrors = 0;            /* Errors from recursive flushes */
+    unsigned    u;                      /* Index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_flush_mounts_recurse)
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Flush all child files, not stopping for errors */
+    for(u = 0; u < f->shared->mtab.nmounts; u++)
+        if(H5F_flush_mounts_recurse(f->shared->mtab.child[u].file, dxpl_id) < 0)
+            nerrors++;
+
+    /* Call the "real" flush routine, for this file */
+    if(H5F_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+    /* Check flush errors for children - errors are already on the stack */
+    if(nerrors)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's child mounts")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_flush_mounts_recurse() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_flush_mounts
+ *
+ * Purpose:	Flush a mount hierarchy
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Fri, August 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_flush_mounts(H5F_t *f, hid_t dxpl_id)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_flush_mounts, FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Find the top file in the mount hierarchy */
+    while(f->parent)
+        f = f->parent;
+
+    /* Flush the mounted file hierarchy */
+    if(H5F_flush_mounts_recurse(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_flush_mounts() */
+

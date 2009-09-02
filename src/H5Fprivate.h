@@ -28,6 +28,7 @@
 
 /* Private headers needed by this file */
 
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -38,16 +39,6 @@ typedef struct H5F_t H5F_t;
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
-/*===----------------------------------------------------------------------===
- *                              Flush Flags
- *===----------------------------------------------------------------------===
- *
- *  Flags passed into the flush routines which indicate what type of
- *  flush we want to do. They can be ORed together.
- */
-#define H5F_FLUSH_NONE       (0U)       /* No flags specified                       */
-#define H5F_FLUSH_INVALIDATE (1U << 0)  /* Invalidate cached data                   */
-#define H5F_FLUSH_CLOSING    (1U << 1)  /* Closing the file                         */
 
 /*
  * Encode and decode macros for file meta-data.
@@ -248,12 +239,12 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
-#define H5F_SYM_LEAF_K(F)       ((F)->shared->sym_leaf_k)
-#define H5F_KVALUE(F,T)         ((F)->shared->btree_k[(T)->id])
+#define H5F_SYM_LEAF_K(F)       ((F)->shared->sblock->sym_leaf_k)
+#define H5F_KVALUE(F,T)         ((F)->shared->sblock->btree_k[(T)->id])
 #define H5F_RDCC_NSLOTS(F)      ((F)->shared->rdcc_nslots)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
-#define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
+#define H5F_BASE_ADDR(F)        ((F)->shared->sblock->base_addr)
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
@@ -498,6 +489,7 @@ H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
+H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
@@ -532,6 +524,9 @@ H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
 /* Routines for creating & destroying "fake" file structures */
 H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
+
+/* Superblock related routines */
+H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL

@@ -704,6 +704,10 @@ addr_to_datum_index(haddr_t base_addr)
  *		JRM -- 2/4/09
  *		Added initialization for the cleared and flushed fields.
  *
+ *              Mike McGreevy, July 2, 2009
+ *              Changed base address from 0 to 512 since the superblock will
+ *              always be at address 0.
+ *
  *****************************************************************************/
 
 static void
@@ -724,7 +728,7 @@ init_data(void)
                                       1974, 3194, 5168, 8362, 13539};
     int i;
     int j = 0;
-    haddr_t addr = 0;
+    haddr_t addr = 512;
 
     /* this must hold so renames don't change entry size. */
     HDassert( (NUM_DATA_ENTRIES / 2) % 20 == 0 );
@@ -5445,7 +5449,7 @@ trace_file_check(void)
       "H5AC_unpin_entry 4 0\n",
       "H5AC_rename 0 8a65 15 0\n",
       "H5AC_rename 8a65 0 15 0\n",
-      "H5AC_flush 0x0 0\n",
+      "H5AC_flush 0\n",
       NULL
     };
     char buffer[256];

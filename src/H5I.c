@@ -91,7 +91,7 @@ typedef struct H5I_id_info_t {
     hid_t	id;		/* ID for this info			    */
     unsigned	count;		/* ref. count for this atom		    */
     unsigned    app_count;      /* ref. count of application visible atoms  */
-    void	*obj_ptr;	/* pointer associated with the atom	    */
+    const void	*obj_ptr;	/* pointer associated with the atom	    */
     struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
 } H5I_id_info_t;
 
@@ -609,7 +609,8 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
             } /* end if */
 
             /* Check for a 'free' function and call it, if it exists */
-            if(type_ptr->free_func && (type_ptr->free_func)(cur->obj_ptr) < 0) {
+            /* (Casting away const OK -QAK) */
+            if(type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0) {
                 if(force) {
 #ifdef H5I_DEBUG
                     if(H5DEBUG(I)) {
@@ -782,7 +783,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Iregister(H5I_type_t type, void *object)
+H5Iregister(H5I_type_t type, const void *object)
 {
     hid_t ret_value;                      /* Return value */
 
@@ -826,7 +827,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_register(H5I_type_t type, void *object, hbool_t app_ref)
+H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
     H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
@@ -949,7 +950,8 @@ H5I_object(hid_t id)
     /* General lookup of the ID */
     if(NULL != (id_ptr = H5I_find_id(id))) {
         /* Get the object pointer to return */
-        ret_value = id_ptr->obj_ptr;
+        /* (Casting away const OK -QAK) */
+        ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
 
 done:
@@ -1028,7 +1030,8 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     /* Verify that the type of the ID is correct & lookup the ID */
     if(id_type == H5I_TYPE(id) && NULL != (id_ptr = H5I_find_id(id))) {
         /* Get the object pointer to return */
-        ret_value = id_ptr->obj_ptr;
+        /* (Casting away const OK -QAK) */
+        ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
 
 done:
@@ -1244,7 +1247,8 @@ H5I_remove(hid_t id)
         } else {
             last_id->next = curr_id->next;
         }
-        ret_value = curr_id->obj_ptr;
+        /* (Casting away const OK -QAK) */
+        ret_value = (void *)curr_id->obj_ptr;
         (void)H5FL_FREE(H5I_id_info_t, curr_id);
     } else {
         /* couldn't find the ID in the proper place */
@@ -1376,7 +1380,8 @@ H5I_dec_ref(hid_t id, hbool_t app_ref)
      * Beware: the free method may call other H5I functions.
      */
     if(1 == id_ptr->count) {
-        if(!type_ptr->free_func || (type_ptr->free_func)(id_ptr->obj_ptr) >= 0) {
+        /* (Casting away const OK -QAK) */
+        if(!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) {
             H5I_remove(id);
             ret_value = 0;
         } else {
@@ -1982,8 +1987,10 @@ H5I_search(H5I_type_t type, H5I_search_func_t func, void *key, hbool_t app_ref)
             id_ptr = type_ptr->id_list[i];
             while(id_ptr) {
                 next_id = id_ptr->next;      /* Protect against ID being deleted in callback */
-                if((!app_ref || id_ptr->app_count) && (*func)(id_ptr->obj_ptr, id_ptr->id, key))
-                    HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
+                /* (Casting away const OK -QAK) */
+                if((!app_ref || id_ptr->app_count) && (*func)((void *)id_ptr->obj_ptr, id_ptr->id, key))
+                    /* (Casting away const OK -QAK) */
+                    HGOTO_DONE((void *)id_ptr->obj_ptr);	/*found the item*/
                 id_ptr = next_id;
             } /* end while */
         } /* end for */

@@ -70,6 +70,7 @@ typedef enum {
     H5AC_FARRAY_HDR_ID,	/*fixed array header		     	     */
     H5AC_FARRAY_DBLOCK_ID, /*fixed array data block	     	     */
     H5AC_FARRAY_DBLK_PAGE_ID, /*fixed array data block page          */
+    H5AC_SUPERBLOCK_ID, /* file superblock                           */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;
@@ -342,7 +343,7 @@ H5_DLL herr_t H5AC_destroy_flush_dependency(H5F_t *f, void *parent_thing,
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
-H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_pinned_entry_dirty(H5F_t * f,
 		                           void *  thing,
 					   hbool_t size_changed,

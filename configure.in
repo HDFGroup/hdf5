@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.44], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.45], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -565,25 +565,6 @@ dnl Change back to the C language
 AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
-dnl If we should build only static executables
-dnl
-AC_MSG_CHECKING([if should build only statically linked executables])
-AC_ARG_ENABLE([static_exec],
-              [AC_HELP_STRING([--enable-static-exec],
-                              [Build only statically linked executables
-                               [default=no]])],
-              [STATIC_EXEC=$enableval])
-
-if test "X$STATIC_EXEC" = "Xyes"; then
-  echo "yes"
-  LT_STATIC_EXEC="-all-static"
-else
-  echo "no"
-  LT_STATIC_EXEC=""
-fi
-AC_SUBST([LT_STATIC_EXEC])
-
-dnl ----------------------------------------------------------------------
 dnl Check if they have Perl installed on their system. We only need Perl
 dnl if they're using a GNU compiler.
 dnl
@@ -992,6 +973,32 @@ EOF
     fi
     ;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Check if we should install only statically linked executables.
+dnl   This check needs to occur after libtool is initialized because
+dnl   we check a libtool cache value and may issue a warning based 
+dnl   on its result.
+AC_MSG_CHECKING([if we should install only statically linked executables])
+AC_ARG_ENABLE([static_exec],
+              [AC_HELP_STRING([--enable-static-exec],
+                              [Install only statically linked executables
+                               [default=no]])],
+              [STATIC_EXEC=$enableval])
+
+if test "X$STATIC_EXEC" = "Xyes"; then
+  echo "yes"
+  dnl Issue a warning if -static flag is not supported.
+  if test "X$lt_cv_prog_compiler_static_works" = "Xno"; then
+      echo "    warning: -static flag not supported on this system; executable won't statically link shared system libraries."
+  fi
+  LT_STATIC_EXEC="-all-static"
+else
+  echo "no"
+  LT_STATIC_EXEC=""
+fi
+
+AC_SUBST([LT_STATIC_EXEC])
 
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
@@ -2686,7 +2693,7 @@ dnl bug also occurs at SGI IRIX 6.5 C with compiler version lower than or equal 
 dnl In case people still use the old compiler, we keep this flag.
 AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
 
-AC_CACHE_VAL([hdf5_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
 
 if test ${hdf5_mpi_complex_derived_datatype_works} = "yes"; then
   AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
@@ -2705,7 +2712,7 @@ dnl and SGI altix. For those systems, we have to turn off this feature and use i
 dnl
 AC_MSG_CHECKING([if MPI-IO can do collective IO when one or more processes don't do IOs])
 
-AC_CACHE_VAL([hdf5_mpi_special_collective_io_works],[hdf5_mpi_special_collective_io_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_mpi_special_collective_io_works=yes])
 
 if test ${hdf5_mpi_special_collective_io_works} = "yes"; then
   AC_DEFINE([MPI_SPECIAL_COLLECTIVE_IO_WORKS], [1],
@@ -2834,7 +2841,7 @@ AC_ARG_ENABLE([direct-vfd],
               [DIRECT_VFD=$enableval], [DIRECT_VFD=yes])
 
 if test "$DIRECT_VFD" = "yes"; then
-   AC_CACHE_VAL([hdf5_direct_io],
+   AC_CACHE_VAL([hdf5_cv_direct_io],
        [AC_TRY_RUN([
 	  #include <sys/types.h>
 	  #include <sys/stat.h>
@@ -2994,7 +3001,7 @@ AC_MSG_CHECKING([if converting from long double to integers works])
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_integer_works=${hdf5_ldouble_to_integer_works=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_integer_works],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_works],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3050,6 +3057,56 @@ if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
 else
   AC_MSG_RESULT([no])
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can accurately convert
+dnl 'unsigned long' to 'float' values.
+dnl (This flag should be set for all machines, except for Pathscale compiler
+dnl on Sandia's Linux machine where the compiler interprets 'unsigned long'
+dnl values as negative when the first bit of 'unsigned long' is on during 
+dnl the conversion to float.) 
+dnl
+AC_MSG_CHECKING([if accurately converting unsigned long to float values])
+
+AC_CACHE_VAL([hdf5_cv_ulong_to_float_accurate],
+    [AC_TRY_RUN([
+    int main(void)
+    {
+        int           ret = 0;
+        unsigned long l1;
+        unsigned long l2;
+        unsigned long l3;
+        float f1;
+        float f2;
+        float f3;
+
+
+        if(sizeof(unsigned long)==8) {
+            l1 = 0xffffffffffffffffUL;
+            l2 = 0xffffffffffff0000UL;
+            l3 = 0xf000000000000000UL;
+
+            f1 = (float)l1;
+            f2 = (float)l2;
+            f3 = (float)l3;
+
+            if((f1 < 0) || (f2 < 0) || (f3 < 0))
+                ret = 1;
+        }
+
+done:
+        exit(ret);
+    }
+    ], [hdf5_ulong_to_float_accurate=yes], [hdf5_ulong_to_float_accurate=no],)])
+
+if test ${hdf5_ulong_to_float_accurate} = "yes"; then
+  AC_DEFINE([ULONG_TO_FLOAT_ACCURATE], [1],
+            [Define if your system accurately converting unsigned long to float values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
@@ -3144,7 +3201,7 @@ dnl than 0.5.
 dnl
 AC_MSG_CHECKING([if accurately roundup converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_fp_to_ullong_accurate],
+AC_CACHE_VAL([hdf5_cv_fp_to_ullong_accurate],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -3181,7 +3238,7 @@ dnl during conversion.
 dnl
 AC_MSG_CHECKING([if right maximum converting floating-point to unsigned long long values])
 
-AC_CACHE_VAL([hdf5_fp_to_ullong_right_maximum],
+AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
     [AC_TRY_RUN([
     int main(void)
     {
@@ -3226,7 +3283,7 @@ AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_uint_accurate=${hdf5_ldouble_to_uint_accurate=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_uint_accurate],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_accurate],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3428,7 +3485,7 @@ AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long val
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_ldouble_to_llong_accurate=${hdf5_ldouble_to_llong_accurate=no}
 else
-   AC_CACHE_VAL([hdf5_ldouble_to_llong_accurate],
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
         [AC_TRY_RUN([
         int main(void)
         {
@@ -3489,7 +3546,7 @@ AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double val
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_llong_to_ldouble_correct=${hdf5_llong_to_ldouble_correct=no}
 else
-   AC_CACHE_VAL([hdf5_llong_to_ldouble_correct],
+   AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
         [AC_TRY_RUN([
         int main(void)
         {

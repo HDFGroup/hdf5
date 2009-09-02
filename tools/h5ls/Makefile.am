@@ -31,6 +31,9 @@ SCRIPT_DEPEND=h5ls$(EXEEXT)
 # This is our main target, the h5ls tool
 bin_PROGRAMS=h5ls
 
+# Add h5ls specific linker flags here
+h5ls_LDFLAGS = $(LT_STATIC_EXEC)
+
 # All programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 

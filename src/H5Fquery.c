@@ -113,8 +113,6 @@ H5F_get_intent(const H5F_t *f)
  *
  * Programmer:	Vailin Choi, April 2, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -263,8 +261,9 @@ H5F_sym_leaf_k(const H5F_t *f)
 
     HDassert(f);
     HDassert(f->shared);
+    HDassert(f->shared->sblock);
 
-    FUNC_LEAVE_NOAPI(f->shared->sym_leaf_k)
+    FUNC_LEAVE_NOAPI(f->shared->sblock->sym_leaf_k)
 } /* end H5F_sym_leaf_k() */
 
 
@@ -294,9 +293,10 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 
     HDassert(f);
     HDassert(f->shared);
+    HDassert(f->shared->sblock);
     HDassert(type);
 
-    FUNC_LEAVE_NOAPI(f->shared->btree_k[type->id])
+    FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
 } /* end H5F_Kvalue() */
 
 
@@ -415,8 +415,9 @@ H5F_get_base_addr(const H5F_t *f)
 
     HDassert(f);
     HDassert(f->shared);
+    HDassert(f->shared->sblock);
 
-    FUNC_LEAVE_NOAPI(f->shared->base_addr)
+    FUNC_LEAVE_NOAPI(f->shared->sblock->base_addr)
 } /* end H5F_get_base_addr() */
 
 

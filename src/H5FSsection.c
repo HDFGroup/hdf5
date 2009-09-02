@@ -27,6 +27,7 @@
 
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -36,14 +37,10 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
+
 /****************/
 /* Local Macros */
 /****************/
-
-/* #define QAK */
-
-/* Default starting size of section buffer */
-#define H5FS_SINFO_SIZE_DEFAULT  64
 
 
 /******************/
@@ -86,6 +83,7 @@ static herr_t H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect,
     void *op_data);
 static htri_t H5FS_sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node);
 static herr_t H5FS_sect_serialize_size(H5FS_t *fspace);
+
 
 /*********************/
 /* Package Variables */
@@ -178,8 +176,9 @@ done:
         /* Release bins for skip lists */
         if(sinfo->bins)
             sinfo->bins = H5FL_SEQ_FREE(H5FS_bin_t, sinfo->bins);
+
         /* Release free space section info */
-        H5FL_FREE(H5FS_sinfo_t, sinfo);
+        sinfo = H5FL_FREE(H5FS_sinfo_t, sinfo);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1125,7 +1124,6 @@ done:
 } /* H5FS_sect_link() */
 
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FS_sect_merge
  *
@@ -1509,9 +1507,14 @@ if(_section_)
              *  (or it would have been eliminated), etc)
              */
             if(sect->size >= extra_requested && (addr + size) == sect->addr) {
+                H5FS_section_class_t *cls;          /* Section's class */
+
                 /* Remove section from data structures */
                 if(H5FS_sect_remove_real(fspace, sect) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't remove section from internal data structures")
+
+                /* Get class for section */
+                cls = &fspace->sect_cls[sect->type];
 
                 /* Check for the section needing to be adjusted and re-added */
                 /* (Note: we should probably add a can_adjust/adjust callback
@@ -1520,11 +1523,6 @@ if(_section_)
                  *      it. - QAK - 2008/01/08)
                  */
                 if(sect->size > extra_requested) {
-                    H5FS_section_class_t *cls;          /* Section's class */
-
-                    /* Get class for section */
-                    cls = &fspace->sect_cls[sect->type];
-
                     /* Sanity check (for now) */
                     HDassert(cls->flags & H5FS_CLS_ADJUST_OK);
 
@@ -1536,6 +1534,14 @@ if(_section_)
                     if(H5FS_sect_link(fspace, sect, 0) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space section into skip list")
                 } /* end if */
+                else {
+                    /* Sanity check */
+                    HDassert(sect->size == extra_requested);
+
+                    /* Exact match, so just free section */
+                    if((*cls->free)(sect) < 0)
+                        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't free section")
+                } /* end else */
 
                 /* Note that we modified the section info */
                 sinfo_modified = TRUE;

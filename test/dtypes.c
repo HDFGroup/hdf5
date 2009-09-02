@@ -2718,8 +2718,12 @@ test_compound_14(void)
     rdata1.c1 = rdata1.c2 = 0;
     if(rdata1.str) HDfree(rdata1.str);
 
-    rdata2.c1 = rdata2.c2 = rdata2.l1 = rdata2.l2 = rdata2.l3 = rdata2.l4 = 0;
-    if(rdata2.str) HDfree(rdata2.str);
+    rdata2.c1 = rdata2.c2 = 0;
+    rdata2.l1 = rdata2.l2 = rdata2.l3 = rdata2.l4 = 0;
+    if(rdata2.str) {
+        HDfree(rdata2.str);
+        rdata2.str = NULL;
+    } /* end if */
 
     if(H5Dread(dset1_id, cmpd_m1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();

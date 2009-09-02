@@ -146,7 +146,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     /* Check for non-default link type */
     if(link_flags & H5O_LINK_STORE_LINK_TYPE) {
         /* Get the type of the link */
-        lnk->type = *p++;
+        lnk->type = (H5L_type_t)*p++;
         if(lnk->type < H5L_TYPE_HARD || lnk->type > H5L_TYPE_MAX)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
     } /* end if */

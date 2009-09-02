@@ -523,7 +523,7 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
     /* Determine if we found the link we were looking for */
-    ret_value = udata.found;
+    ret_value = (htri_t)udata.found;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
