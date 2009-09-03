@@ -1957,9 +1957,6 @@ static void gent_attrreg(void)
     /* Close attribute */
     H5Aclose (attr1);
 
-    /* Close disk dataspace */
-    H5Sclose(sid1);
-
     /* Close Dataset */
     H5Dclose(dset1);
 
