@@ -126,7 +126,10 @@ New Features
 
     Tools:
     ------
-     - h5dump/h5ls display buffer resize fixed in tools library.  (ADB - 2009/7/21 - 1520)
+     - h5dump subsetting now allows default for count. Also trailing ; in short form
+       can be omitted after last specified value. (ADB - 2009/09/04)
+     - h5dump/h5ls now can display data in region references 
+       using new -R, --region flag.  (ADB - 2009/09/04)
      - h5diff new flag, -c, --compare, list objects that are not comparable.
         (PVN - 2009/4/10 - 1368)
      - h5diff new flag, -N, --nan, avoids NaNs detection. (PVN - 2009/4/10)
@@ -327,6 +330,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5dump/h5ls display buffer resize fixed in tools library.  
+            (ADB - 2009/07/21 - 1520)
         - Fixed many problems that could occur when using h5repack with named
             datatypes. (NAF - 2009/4/20 - 1516/1466)
         - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
