@@ -1151,6 +1151,9 @@
 ./tools/testfiles/tattr-2.ddl
 ./tools/testfiles/tattr-3.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tattrreg.h5
+./tools/testfiles/tattrreg.ddl 
+./tools/testfiles/tattrregR.ddl 
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl

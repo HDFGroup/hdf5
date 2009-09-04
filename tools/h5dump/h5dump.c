@@ -81,7 +81,6 @@ static const char   *fp_format = NULL;
 const char          *outfname=NULL;
 
 
-
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
 static int          display_oid       = FALSE;
@@ -94,6 +93,7 @@ static int          display_dcpl      = FALSE; /*dcpl */
 static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
+static int          display_region    = FALSE; /*print region reference data */
 
 /* sort parameters */
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
@@ -388,7 +388,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -500,6 +500,7 @@ static struct long_options l_opts[] = {
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
+    { "region", no_arg, 'R' },
     { NULL, 0, '\0' }
 };
 
@@ -655,6 +656,7 @@ usage(const char *prog)
     fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
@@ -665,14 +667,16 @@ usage(const char *prog)
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
     fprintf(stdout, " Thus, the options mirror those for performing a hyperslab selection.\n");
-    fprintf(stdout, " The START and COUNT parameters are mandatory if you do subsetting.\n");
-    fprintf(stdout, " The STRIDE and BLOCK parameters are optional and will default to 1 in\n");
-    fprintf(stdout, " each dimension.\n");
+    fprintf(stdout, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
+    fprintf(stdout, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    fprintf(stdout, " each dimension. START is optional and will default to 0 in each dimension.\n");
     fprintf(stdout, "\n");
-    fprintf(stdout, "      -s L, --start=L     Offset of start of subsetting selection\n");
-    fprintf(stdout, "      -S L, --stride=L    Hyperslab stride\n");
-    fprintf(stdout, "      -c L, --count=L     Number of blocks to include in selection\n");
-    fprintf(stdout, "      -k L, --block=L     Size of block in hyperslab\n");
+    fprintf(stdout, "      -s START,  --start=START    Offset of start of subsetting selection\n");
+    fprintf(stdout, "      -S STRIDE, --stride=STRIDE  Hyperslab stride\n");
+    fprintf(stdout, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
+    fprintf(stdout, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
+    fprintf(stdout, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
+    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
     fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
@@ -683,8 +687,6 @@ usage(const char *prog)
     fprintf(stdout, "  P - is the full path from the root group to the object.\n");
     fprintf(stdout, "  N - is an integer greater than 1.\n");
     fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
-    fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
-    fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     fprintf(stdout, "        updated by [IETF RFC 2732])\n");
     fprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
@@ -1189,6 +1191,18 @@ print_datatype(hid_t type,unsigned in_group)
 
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
+                /* The BNF document states that the type of reference should be 
+                 * displayed after "H5T_REFERENCE". Therefore add the missing 
+                 * reference type if the region command line option is used. This 
+                 * reference type will not be displayed if the region option is not used. */
+                if(display_region) {
+                    if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+                        printf(" { H5T_STD_REF_DSETREG }");
+                    } 
+                    else {
+                        printf(" { H5T_STD_REF_OBJECT }");
+                    }        
+                }
                 break;
 
             case H5T_ENUM:
@@ -2391,13 +2405,29 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     outputformat->pindex=display_index;
 
     /* do not print indices for regions */
-    if(obj_data == DATASET_DATA)
-    {
+    if(obj_data == DATASET_DATA) {
         hid_t f_type = H5Dget_type(obj_id);
 
-        if (H5Tequal(f_type, H5T_STD_REF_DSETREG))
-        {
-            outputformat->pindex = 0;
+        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+            /* For the region option, correct the display of indices */
+            if (display_region) {
+                if (display_index) {
+                    outputformat->pindex = 1;
+                    outputformat->idx_fmt   = "(%s): ";
+                    outputformat->idx_n_fmt = HSIZE_T_FORMAT;
+                    outputformat->idx_sep   = ",";
+                    outputformat->line_pre  = "%s";
+                }
+                else {
+                    outputformat->pindex = 0;
+                    outputformat->idx_fmt   = "";
+                    outputformat->idx_n_fmt = "";
+                    outputformat->idx_sep   = "";
+                    outputformat->line_pre  = "";
+                }
+            }
+            else
+                outputformat->pindex = 0;
         }
         H5Tclose(f_type);
     }
@@ -2470,13 +2500,15 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
 
         H5Tclose(f_type);
-    } else {
+    } 
+    else {
         /* need to call h5tools_dump_mem for the attribute data */
         space = H5Aget_space(obj_id);
         space_type = H5Sget_simple_extent_type(space);
         if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
             status = SUCCEED;
-        } else {
+        } 
+        else {
             char        string_prefix[64];
             h5tool_format_t    string_dataformat;
 
@@ -3516,21 +3548,13 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             }
 
             if (!sset->count) {
-                hsize_t dims[H5S_MAX_RANK];
-                herr_t status = H5Sget_simple_extent_dims(sid, dims, NULL);
                 unsigned int i;
 
-                if (status == FAIL) {
-                    error_msg(progname, "unable to get dataset dimensions\n");
-                    d_status = EXIT_FAILURE;
-                    H5Sclose(sid);
-                    return;
-                }
 
                 sset->count = calloc(ndims, sizeof(hsize_t));
 
                 for (i = 0; i < ndims; i++)
-                    sset->count[i] = dims[i] - sset->start[i];
+                    sset->count[i] = 1;
             }
 
             if (!sset->block) {
@@ -3872,6 +3896,10 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
+        case 'R':
+            display_region = TRUE;
+            region_output = TRUE;
+            break;
         case 'B':
             display_bb = TRUE;
             last_was_dset = FALSE;
@@ -3981,74 +4009,61 @@ parse_start:
             break;
 
         case 'o':
+            if ( bin_output ) {
+                if (set_output_file(opt_arg, 1) < 0) {
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
+            else {
+                if (set_output_file(opt_arg, 0) < 0) {
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
 
-         if ( bin_output )
-         {
-          if (set_output_file(opt_arg, 1) < 0){
-           usage(progname);
-           leave(EXIT_FAILURE);
-          }
-         }
-         else
-         {
-          if (set_output_file(opt_arg, 0) < 0){
-           usage(progname);
-           leave(EXIT_FAILURE);
-          }
-         }
+            usingdasho = TRUE;
+            last_was_dset = FALSE;
+            outfname = opt_arg;
+            break;
 
-         usingdasho = TRUE;
-         last_was_dset = FALSE;
-         outfname = opt_arg;
-         break;
+        case 'b':
+            if ( opt_arg != NULL) {
+                if ( ( bin_form = set_binary_form(opt_arg)) < 0) {
+                    /* failed to set binary form */
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
+            bin_output = TRUE;
+            if (outfname!=NULL) {
+                if (set_output_file(outfname, 1) < 0)  {
+                    /* failed to set output file */
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
 
-       case 'b':
+                last_was_dset = FALSE;
+            }
+            break;
 
-        if ( opt_arg != NULL)
-           {
-               if ( ( bin_form = set_binary_form(opt_arg)) < 0)
-               {
-                   /* failed to set binary form */
-                   usage(progname);
-                   leave(EXIT_FAILURE);
-               }
-           }
-           bin_output = TRUE;
-           if (outfname!=NULL) 
-           {
-               if (set_output_file(outfname, 1) < 0)
-               {
-                   /* failed to set output file */
-                   usage(progname);
-                   leave(EXIT_FAILURE);
-               }
-               
-               last_was_dset = FALSE;
-           }
-           
-           break;
+        case 'q':
+            if ( ( sort_by = set_sort_by(opt_arg)) < 0) {
+                /* failed to set "sort by" form */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+            break;
 
-       case 'q':
+        case 'z':
+            if ( ( sort_order = set_sort_order(opt_arg)) < 0) {
+                /* failed to set "sort order" form */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+            break;
 
-           if ( ( sort_by = set_sort_by(opt_arg)) < 0)
-           {
-               /* failed to set "sort by" form */
-               usage(progname);
-               leave(EXIT_FAILURE);
-           }
-
-           break;
-
-       case 'z':
-
-           if ( ( sort_order = set_sort_order(opt_arg)) < 0)
-           {
-               /* failed to set "sort order" form */
-               usage(progname);
-               leave(EXIT_FAILURE);
-           }
-
-           break;
+            break;
 
         /** begin XML parameters **/
         case 'x':

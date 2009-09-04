@@ -50,6 +50,147 @@
 /* format for hsize_t */
 #define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
 
+#define H5TOOLS_DUMP_MAX_RANK     H5S_MAX_RANK
+
+/* 
+ * Strings for output - these were duplicated from the h5dump.h 
+ * file in order to support region reference data display 
+ */
+#define ATTRIBUTE       "ATTRIBUTE"
+#define BLOCK           "BLOCK"
+#define SUPER_BLOCK     "SUPER_BLOCK"
+#define COMPRESSION     "COMPRESSION"
+#define CONCATENATOR    "//"
+#define COMPLEX         "COMPLEX"
+#define COUNT           "COUNT"
+#define CSET            "CSET"
+#define CTYPE           "CTYPE"
+#define DATA            "DATA"
+#define DATASPACE       "DATASPACE"
+#define EXTERNAL        "EXTERNAL"
+#define FILENO          "FILENO"
+#define HARDLINK        "HARDLINK"
+#define NLINK           "NLINK"
+#define OBJID           "OBJECTID"
+#define OBJNO           "OBJNO"
+#define S_SCALAR        "SCALAR"
+#define S_SIMPLE        "SIMPLE"
+#define S_NULL          "NULL"
+#define SOFTLINK        "SOFTLINK"
+#define EXTLINK         "EXTERNAL_LINK"
+#define UDLINK          "USERDEFINED_LINK"
+#define START           "START"
+#define STRIDE          "STRIDE"
+#define STRSIZE         "STRSIZE"
+#define STRPAD          "STRPAD"
+#define SUBSET          "SUBSET"
+#define FILTERS         "FILTERS"
+#define DEFLATE         "COMPRESSION DEFLATE"
+#define DEFLATE_LEVEL   "LEVEL"
+#define SHUFFLE         "PREPROCESSING SHUFFLE"
+#define FLETCHER32      "CHECKSUM FLETCHER32"
+#define SZIP            "COMPRESSION SZIP"
+#define NBIT            "COMPRESSION NBIT"
+#define SCALEOFFSET            "COMPRESSION SCALEOFFSET"
+#define SCALEOFFSET_MINBIT            "MIN BITS"
+#define STORAGE_LAYOUT  "STORAGE_LAYOUT"
+#define CONTIGUOUS      "CONTIGUOUS"
+#define COMPACT         "COMPACT"
+#define CHUNKED         "CHUNKED"
+#define EXTERNAL_FILE   "EXTERNAL_FILE"
+#define FILLVALUE       "FILLVALUE"
+#define FILE_CONTENTS   "FILE_CONTENTS"
+
+#define BEGIN           "{"
+#define END             "}"
+
+/* 
+ * dump structure for output - this was duplicated from the h5dump.h 
+ * file in order to support region reference data display 
+ */
+typedef struct h5tools_dump_header_t {
+    const char *name;
+    const char *filebegin;
+    const char *fileend;
+    const char *bootblockbegin;
+    const char *bootblockend;
+    const char *groupbegin;
+    const char *groupend;
+    const char *datasetbegin;
+    const char *datasetend;
+    const char *attributebegin;
+    const char *attributeend;
+    const char *datatypebegin;
+    const char *datatypeend;
+    const char *dataspacebegin;
+    const char *dataspaceend;
+    const char *databegin;
+    const char *dataend;
+    const char *softlinkbegin;
+    const char *softlinkend;
+    const char *extlinkbegin;
+    const char *extlinkend;
+    const char *udlinkbegin;
+    const char *udlinkend;
+    const char *subsettingbegin;
+    const char *subsettingend;
+    const char *startbegin;
+    const char *startend;
+    const char *stridebegin;
+    const char *strideend;
+    const char *countbegin;
+    const char *countend;
+    const char *blockbegin;
+    const char *blockend;
+
+    const char *fileblockbegin;
+    const char *fileblockend;
+    const char *bootblockblockbegin;
+    const char *bootblockblockend;
+    const char *groupblockbegin;
+    const char *groupblockend;
+    const char *datasetblockbegin;
+    const char *datasetblockend;
+    const char *attributeblockbegin;
+    const char *attributeblockend;
+    const char *datatypeblockbegin;
+    const char *datatypeblockend;
+    const char *dataspaceblockbegin;
+    const char *dataspaceblockend;
+    const char *datablockbegin;
+    const char *datablockend;
+    const char *softlinkblockbegin;
+    const char *softlinkblockend;
+    const char *extlinkblockbegin;
+    const char *extlinkblockend;
+    const char *udlinkblockbegin;
+    const char *udlinkblockend;
+    const char *strblockbegin;
+    const char *strblockend;
+    const char *enumblockbegin;
+    const char *enumblockend;
+    const char *structblockbegin;
+    const char *structblockend;
+    const char *vlenblockbegin;
+    const char *vlenblockend;
+    const char *subsettingblockbegin;
+    const char *subsettingblockend;
+    const char *startblockbegin;
+    const char *startblockend;
+    const char *strideblockbegin;
+    const char *strideblockend;
+    const char *countblockbegin;
+    const char *countblockend;
+    const char *blockblockbegin;
+    const char *blockblockend;
+
+    const char *dataspacedescriptionbegin;
+    const char *dataspacedescriptionend;
+    const char *dataspacedimbegin;
+    const char *dataspacedimend;
+
+} h5tools_dump_header_t;
+
 /*
  * Information about how to format output.
  */
@@ -373,11 +514,16 @@ struct subset_t {
     hsize_t *block;
 };
 
+/* The following include, h5tools_str.h, must be after the 
+ * above stucts are defined. There is a dependency in the following
+ * include that hasn't been identified yet. */
+
+#include "h5tools_str.h"
+
 extern FILE   *rawdatastream;       /* output stream for raw data */
 extern int     bin_output;          /* binary output */
 extern int     bin_form;            /* binary form */
-
-
+extern int     region_output;       /* region output */
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
@@ -407,6 +553,19 @@ extern int      h5tools_canreadf(const char* name,
 extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
-
+/* 
+ * new functions needed to display region reference data
+ */
+void            h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
+                         h5tools_context_t *ctx/*in,out*/, hid_t type); 
+void            h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
+                         const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                         hid_t space);
+void            h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
+                         const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                         hid_t type);
+void            h5tools_print_enum(h5tools_str_t *buffer/*in,out*/,
+                        const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                        hid_t type);
 #endif /* H5TOOLS_H__ */
 

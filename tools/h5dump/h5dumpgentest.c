@@ -92,6 +92,7 @@
 #define FILE62  "textlinktar.h5"
 #define FILE63  "textlinkfar.h5"
 #define FILE64  "tarray8.h5"
+#define FILE65  "tattrreg.h5"
 
 
 
@@ -1835,6 +1836,126 @@ static void gent_datareg(void)
 
     /* Close disk dataspace */
     H5Sclose(sid1);
+
+    /* Close Dataset */
+    H5Dclose(dset1);
+
+    /* Close uint8 dataset dataspace */
+    H5Sclose(sid2);
+
+    /* Close file */
+    H5Fclose(fid1);
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+    free(dwbuf);
+    free(drbuf);
+}
+
+static void gent_attrreg(void)
+{
+    /*some code is taken from enum.c in the test dir */
+
+    hid_t  fid1;        /* HDF5 File IDs  */
+    hid_t  dset1;       /* Dataset ID   */
+    hid_t  dset2;       /* Dereferenced dataset ID */
+    hid_t  sid1;        /* Dataspace ID #1  */
+    hid_t  sid2;        /* Dataspace ID #2  */
+    hid_t  sid3;        /* Dataspace ID #3  */
+    hid_t  attr1;       /* Attribute ID  */
+    hsize_t  dims1[] = {SPACE1_DIM1};
+    hsize_t  dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t  start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t  stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t  count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t  block[SPACE2_RANK];     /* Block size of hyperslab */
+    hsize_t  coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
+    hdset_reg_ref_t      *rbuf;      /* buffer read from disk */
+    uint8_t    *dwbuf;      /* Buffer for writing numeric data to disk */
+    uint8_t    *drbuf;      /* Buffer for reading numeric data from disk */
+    uint8_t    *tu8;        /* Temporary pointer to uint8 data */
+    int        i;           /* counting variables */
+
+    /* Allocate write & read buffers */
+    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE65, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Create dataspace for datasets */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+
+    /* Create a dataset */
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8BE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    for(tu8 = dwbuf, i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
+        *tu8++=i*3;
+
+    /* Write selection to disk */
+    H5Dwrite(dset2, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf);
+
+    /* Close Dataset */
+    H5Dclose(dset2);
+
+    /*
+     * Create dataset with a null dataspace to serve as the parent for
+     * the attribute.
+     */
+    sid1 = H5Screate (H5S_NULL);
+    dset1 = H5Dcreate (fid1, "Dataset1", H5T_STD_I32LE, sid1, H5P_DEFAULT,
+                H5P_DEFAULT, H5P_DEFAULT);
+    H5Sclose (sid1);
+
+    /* Create references */
+
+    /* Select 6x6 hyperslab for first reference */
+    start[0] = 2; start[1] = 2;
+    stride[0] = 1; stride[1] = 1;
+    count[0] = 6; count[1] = 6;
+    block[0] = 1; block[1] = 1;
+    H5Sselect_hyperslab(sid2, H5S_SELECT_SET, start, stride, count, block);
+
+    H5Sget_select_npoints(sid2);
+
+    /* Store first dataset region */
+    H5Rcreate(&wbuf[0], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+
+    /* Select sequence of ten points for second reference */
+    coord1[0][0]=6; coord1[0][1]=9;
+    coord1[1][0]=2; coord1[1][1]=2;
+    coord1[2][0]=8; coord1[2][1]=4;
+    coord1[3][0]=1; coord1[3][1]=6;
+    coord1[4][0]=2; coord1[4][1]=8;
+    coord1[5][0]=3; coord1[5][1]=2;
+    coord1[6][0]=0; coord1[6][1]=4;
+    coord1[7][0]=9; coord1[7][1]=0;
+    coord1[8][0]=7; coord1[8][1]=1;
+    coord1[9][0]=3; coord1[9][1]=3;
+    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(hsize_t *)coord1);
+
+    H5Sget_select_npoints(sid2);
+
+    /* Store second dataset region */
+    H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
+
+    /* Create dataspace for the attribute */
+    sid3 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+
+    /* Create the attribute and write the region references to it. */
+    attr1 = H5Acreate (dset1, "Attribute1", H5T_STD_REF_DSETREG, sid3, H5P_DEFAULT,
+                    H5P_DEFAULT);
+    H5Awrite (attr1, H5T_STD_REF_DSETREG, wbuf);
+
+    /* Close attribute dataspace */
+    H5Sclose(sid3);
+
+    /* Close attribute */
+    H5Aclose (attr1);
 
     /* Close Dataset */
     H5Dclose(dset1);
@@ -6351,6 +6472,7 @@ int main(void)
     gent_enum();
     gent_objref();
     gent_datareg();
+    gent_attrreg();
     gent_nestcomp();
     gent_opaque();
     gent_bitfields();
