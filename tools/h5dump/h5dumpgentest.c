@@ -1907,7 +1907,7 @@ static void gent_attrreg(void)
      * the attribute.
      */
     sid1 = H5Screate (H5S_NULL);
-    dset1 = H5Dcreate (fid1, "Dataset1", H5T_STD_I32LE, sid1, H5P_DEFAULT,
+    dset1 = H5Dcreate2 (fid1, "Dataset1", H5T_STD_I32LE, sid1, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose (sid1);
 
@@ -1947,7 +1947,7 @@ static void gent_attrreg(void)
     sid3 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create the attribute and write the region references to it. */
-    attr1 = H5Acreate (dset1, "Attribute1", H5T_STD_REF_DSETREG, sid3, H5P_DEFAULT,
+    attr1 = H5Acreate2 (dset1, "Attribute1", H5T_STD_REF_DSETREG, sid3, H5P_DEFAULT,
                     H5P_DEFAULT);
     H5Awrite (attr1, H5T_STD_REF_DSETREG, wbuf);
 
