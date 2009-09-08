@@ -419,6 +419,14 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get userblock size")
 
+    /* Sanity check the userblock size vs. the file's allocation alignment */
+    if(userblock_size > 0) {
+        if(userblock_size < f->shared->alignment)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be > file object alignment")
+        if(0 != (userblock_size % f->shared->alignment))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be an integral multiple of file object alignment")
+    } /* end if */
+
     sblock->base_addr = userblock_size;
     sblock->status_flags = 0;
 
