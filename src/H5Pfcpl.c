@@ -261,44 +261,39 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- * 		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_userblock(hid_t plist_id, hsize_t size)
 {
-    unsigned		    i;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pset_userblock, FAIL);
+    FUNC_ENTER_API(H5Pset_userblock, FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
-    /* Check that the userblock size is a power of two */
-    for (i=8; i<8*sizeof(hsize_t); i++) {
-        hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
+    /* Sanity check non-zero userblock sizes */
+    if(size > 0) {
+        /* Check that the userblock size is >=512 */
+        if(size < 512)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and less than 512")
 
-        if (size == p2)
-            break;
-    }
-    if (i>=8*sizeof(hsize_t))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is not valid");
+        /* Check that the userblock size is a power of two */
+        if(!POWER_OF_TWO(size))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is non-zero and not a power of two")
+    } /* end if */
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
     if(H5P_set(plist, H5F_CRT_USER_BLOCK_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_userblock() */
 
 
 /*-------------------------------------------------------------------------
