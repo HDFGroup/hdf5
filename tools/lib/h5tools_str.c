@@ -1124,6 +1124,7 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
 {
     hid_t   obj, region;
     char    ref_name[1024];
+    H5S_sel_type region_type;
 
     obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
     if (obj >= 0) {
@@ -1132,8 +1133,11 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
             H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*) ref_name, 1024);
 
             h5tools_str_append(str, info->dset_format, ref_name);
-            h5tools_str_dump_region_blocks(str, region, info, ctx);
-            h5tools_str_dump_region_points(str, region, info, ctx);
+            region_type = H5Sget_select_type(region);
+            if(region_type==H5S_SEL_POINTS)
+                h5tools_str_dump_region_points(str, region, info, ctx);
+            else
+                h5tools_str_dump_region_blocks(str, region, info, ctx);
 
             H5Sclose(region);
         } /* end if (region >= 0) */
