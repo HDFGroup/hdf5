@@ -3172,8 +3172,8 @@ h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datatypeend);
     h5tools_str_append(&buffer, "\n");
 
-    curr_pos = h5tools_render_element(stream, info, ctx, &buffer, curr_pos,
-                                       ncols, &elmt_counter, 0);
+    curr_pos = h5tools_render_element(stream, info, ctx, &buffer, &curr_pos,
+                                       ncols, elmt_counter, 0);
 
     ctx->need_prefix = TRUE;
     ctx->indent_level--;
