@@ -1987,7 +1987,7 @@ test_userblock_file_size(void)
     CHECK(ret, FAIL, "H5Fget_filesize");
 
     /* Verify that the file sizes differ exactly by the userblock size */
-    VERIFY(filesize2, filesize1 + USERBLOCK_SIZE, "H5Fget_filesize");
+    VERIFY_TYPE((unsigned long long)filesize2, (unsigned long long)(filesize1 + USERBLOCK_SIZE), unsigned long long, "%llu", "H5Fget_filesize");
 
     /* Close files */
     ret = H5Fclose(file1_id);
@@ -2117,6 +2117,113 @@ test_rw_noupdate(void)
 
 /****************************************************************
 **
+**  test_userblock_alignment_helper(): helper routine for
+**      test_userblock_alignment() test, to handle common testing
+**
+**  Programmer: Quincey Koziol
+**              koziol@hdfgroup.org
+**              Septmber 10, 2009
+**
+*****************************************************************/
+static int
+test_userblock_alignment_helper(hid_t fcpl, hid_t fapl)
+{
+    hid_t fid;          /* File ID */
+    int curr_num_errs = GetTestNumErrs();       /* Retrieve the current # of errors */
+    herr_t ret;         /* Generic return value */
+
+    /* Create a file with FAPL & FCPL */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Only proceed further if file ID is OK */
+    if(fid > 0) {
+        hid_t gid;      /* Group ID */
+        hid_t sid;      /* Dataspace ID */
+        hid_t did;      /* Dataset ID */
+        int val = 2;    /* Dataset value */
+
+        /* Create a group */
+        gid = H5Gcreate2(fid, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gcreate2");
+
+        /* Create a dataset */
+        sid = H5Screate(H5S_SCALAR);
+        CHECK(sid, FAIL, "H5Screate");
+        did = H5Dcreate2(gid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(did, FAIL, "H5Dcreate2");
+
+        /* Close dataspace */
+        ret = H5Sclose(sid);
+        CHECK(ret, FAIL, "H5Sclose");
+
+        /* Write value to dataset */
+        ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val);
+        CHECK(ret, FAIL, "H5Dwrite");
+
+        /* Close dataset */
+        ret = H5Dclose(did);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        /* Close group */
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* end if */
+
+
+    /* Re-open file */
+    fid = H5Fopen(FILE1, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Only proceed further if file ID is OK */
+    if(fid > 0) {
+        hid_t gid, gid2;        /* Group IDs */
+        hid_t did;              /* Dataset ID */
+        int val = 2;            /* Dataset value */
+
+        /* Open group */
+        gid = H5Gopen2(fid, "group1", H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gopen2");
+
+        /* Open dataset */
+        did = H5Dopen2(gid, "dataset", H5P_DEFAULT);
+        CHECK(did, FAIL, "H5Dopen2");
+
+        /* Read value from dataset */
+        ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &val);
+        CHECK(ret, FAIL, "H5Dread");
+        VERIFY(val, 2, "H5Dread");
+
+        /* Close dataset */
+        ret = H5Dclose(did);
+        CHECK(ret, FAIL, "H5Dclose");
+
+        /* Create a new group */
+        gid2 = H5Gcreate2(gid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(gid, FAIL, "H5Gcreate2");
+
+        /* Close new group */
+        ret = H5Gclose(gid2);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        /* Close group */
+        ret = H5Gclose(gid);
+        CHECK(ret, FAIL, "H5Gclose");
+
+        /* Close file */
+        ret = H5Fclose(fid);
+        CHECK(ret, FAIL, "H5Fclose");
+    } /* end if */
+
+    return((GetTestNumErrs() == curr_num_errs) ? 0 : -1);
+} /* end test_userblock_alignment_helper() */
+
+/****************************************************************
+**
 **  test_userblock_alignment(): low-level file test routine.
 **      This test checks to ensure that files with both a userblock and a
 **      object [allocation] alignment size set interact properly.
@@ -2154,9 +2261,9 @@ test_userblock_alignment(void)
     ret = H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)3);
     CHECK(ret, FAIL, "H5Pset_alignment");
 
-    /* Create a file with FAPL & FCPL */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    /* Call helper routine to perform file manipulations */
+    ret = test_userblock_alignment_helper(fcpl, fapl);
+    CHECK(ret, FAIL, "test_userblock_alignment_helper");
 
     /* Release property lists */
     ret = H5Pclose(fcpl);
@@ -2164,9 +2271,6 @@ test_userblock_alignment(void)
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
 
     /* Case 2:
      *  Userblock size = 512, alignment = 16
@@ -2186,9 +2290,9 @@ test_userblock_alignment(void)
     ret = H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)16);
     CHECK(ret, FAIL, "H5Pset_alignment");
 
-    /* Create a file with FAPL & FCPL */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    /* Call helper routine to perform file manipulations */
+    ret = test_userblock_alignment_helper(fcpl, fapl);
+    CHECK(ret, FAIL, "test_userblock_alignment_helper");
 
     /* Release property lists */
     ret = H5Pclose(fcpl);
@@ -2196,9 +2300,6 @@ test_userblock_alignment(void)
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
 
     /* Case 3:
      *  Userblock size = 512, alignment = 512
@@ -2218,9 +2319,9 @@ test_userblock_alignment(void)
     ret = H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)512);
     CHECK(ret, FAIL, "H5Pset_alignment");
 
-    /* Create a file with FAPL & FCPL */
-    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
+    /* Call helper routine to perform file manipulations */
+    ret = test_userblock_alignment_helper(fcpl, fapl);
+    CHECK(ret, FAIL, "test_userblock_alignment_helper");
 
     /* Release property lists */
     ret = H5Pclose(fcpl);
@@ -2228,9 +2329,6 @@ test_userblock_alignment(void)
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
 
     /* Case 4:
      *  Userblock size = 512, alignment = 3
@@ -2262,6 +2360,7 @@ test_userblock_alignment(void)
     CHECK(ret, FAIL, "H5Pclose");
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
+
 
     /* Case 5:
      *  Userblock size = 512, alignment = 1024

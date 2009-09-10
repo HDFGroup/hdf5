@@ -60,7 +60,6 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
-    HDassert(f->shared->super_addr != HADDR_UNDEF);
 
     /* Get property list */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))

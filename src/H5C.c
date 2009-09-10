@@ -6143,7 +6143,7 @@ H5C_protect(H5F_t *	        f,
 
         /* Check for trying to load the wrong type of entry from an address */
         if(entry_ptr->type != type)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "not a dataset creation property list")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "incorrect cache entry type")
 
         hit = TRUE;
         thing = (void *)entry_ptr;
@@ -10252,7 +10252,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 	    */
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-	                "Can't unpin all pinned entries 1.")
+	                "Pinned entry count not decreasing.")
 
         } else if ( ( cur_pel_len == 0 ) && ( old_pel_len == 0 ) ) {
 
@@ -10295,7 +10295,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
     } else if ( cur_pel_len > 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-	            "Can't unpin all pinned entries 2.")
+	            "Can't unpin all pinned entries.")
 
     }
 
@@ -10530,7 +10530,7 @@ H5C_flush_single_entry(H5F_t *		   f,
             if ( NULL == (dxpl = H5I_object(primary_dxpl_id)) ) {
 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                            "not a dataset creation property list")
+                            "not a dataset transfer property list")
             }
 
             /* Get the transfer mode property */

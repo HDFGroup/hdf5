@@ -77,6 +77,7 @@ H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
+H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 
 #endif /* !_H5FDprivate_H */
 
