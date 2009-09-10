@@ -81,6 +81,20 @@
     }									      \
 } while(0)
 
+/* Used to make certain a (non-'long' type's) return value _is_ a value */
+#define VERIFY_TYPE(_x, _val, _type, _format, where) do {					      \
+    _type __x = (_type)_x, __val = (_type)_val;				      \
+    if(GetTestVerbosity() >= VERBO_HI) {				      \
+	print_func("   Call to routine: %15s at line %4d in %s had value "    \
+		   _format " \n", (where), (int)__LINE__, __FILE__, __x);	      \
+    }									      \
+    if((__x) != (__val)) {						      \
+	TestErrPrintf("*** UNEXPECTED VALUE from %s should be " _format ", but is " _format " at line %4d " \
+		   "in %s\n", (where), __val, __x, (int)__LINE__, __FILE__);  \
+	H5Eprint2(H5E_DEFAULT, stdout);					      \
+    }									      \
+} while(0)
+
 /* Used to make certain a string return value _is_ a value */
 #define VERIFY_STR(x, val, where) do {					      \
     if (GetTestVerbosity()>=VERBO_HI) {				              \

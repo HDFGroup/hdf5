@@ -2088,3 +2088,33 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_set_base_addr() */
 
+
+/*--------------------------------------------------------------------------
+ * Function:    H5FD_get_base_addr
+ *
+ * Purpose:     Get the base address for the file
+ *
+ * Return:	Success:	The absolute base address of the file
+ *		Failure:	The undefined address (HADDR_UNDEF)
+ *
+ * Programmer:  Quincey Koziol
+ *              Sept. 10, 2009
+ *
+ *--------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_get_base_addr(const H5FD_t *file)
+{
+    haddr_t ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_get_base_addr, HADDR_UNDEF)
+
+    HDassert(file);
+
+    /* Return the file's base address */
+    ret_value = file->base_addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_base_addr() */
+
