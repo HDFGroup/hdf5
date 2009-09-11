@@ -381,8 +381,8 @@ rem ############################################################################
     call :tooltest h5diff_607.txt -d "1" %file1% %file2%  g1/dset3 g1/dset4
 
     rem 6.8: repeated option
-    call :testing %h5diff% -d 1 -d 2 %srcfile1% %srcfile2%   g1/dset3 g1/dset4
-    call :tooltest h5diff_608.txt -d 1 -d 2 %file1% %file2% g1/dset3 g1/dset4
+    call :testing %h5diff% --use-system-epsilon %srcfile1% %srcfile2%   g1/dset3 g1/dset4
+    call :tooltest h5diff_608.txt --use-system-epsilon %file1% %file2% g1/dset3 g1/dset4
 
     rem 6.9: number larger than biggest difference
     call :testing %h5diff% -d 200 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
@@ -432,12 +432,9 @@ rem ############################################################################
     call :tooltest h5diff_619.txt -p 0.005 %file1% %file2% g1/dset3 g1/dset4
 
 
-
     rem ##############################################################################
     rem # -n
     rem ##############################################################################
-
-
 
     rem 6.21: negative value
     call :testing %h5diff% -n -4 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
@@ -471,6 +468,7 @@ rem ############################################################################
     call :testing %h5diff% -n 1 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
     call :tooltest h5diff_628.txt -n 1 %file1% %file2% g1/dset3 g1/dset4
 
+	rem This is disabled on *nix platforms
     rem 6.29  non valid files
     call :testing %h5diff% file1.h6 file2.h6
     call :tooltest h5diff_629.txt file1.h6 file2.h6
@@ -493,7 +491,7 @@ rem ############################################################################
 
     rem 10. read by hyperslab, print indexes
     rem ##############################################################################
-    rem   Not tested on windows as this has not been a problem - ADB 1/22/2009
+    rem   Not skipped on windows as this has not been a problem - ADB 1/22/2009
     rem    if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
     rem    # skip this test which sometimes hangs in some THG machines
     rem    SKIP -v $SRCFILE9 $SRCFILE10
