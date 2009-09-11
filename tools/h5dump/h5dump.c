@@ -3669,22 +3669,12 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             }
 
             if (!sset->count) {
-//                hsize_t dims[H5S_MAX_RANK];
-//                herr_t status = H5Sget_simple_extent_dims(sid, dims, NULL);
                 unsigned int i;
-
-//                if (status == FAIL) {
-//                    error_msg(progname, "unable to get dataset dimensions\n");
-//                    d_status = EXIT_FAILURE;
-//                    H5Sclose(sid);
-//                    return;
-//                }
 
                 sset->count = calloc(ndims, sizeof(hsize_t));
 
                 for (i = 0; i < ndims; i++)
                     sset->count[i] = 1;
-//                    sset->count[i] = dims[i] - sset->start[i];
             }
 
             if (!sset->block) {
@@ -4010,8 +4000,11 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
 static struct handler_t *
 parse_command_line(int argc, const char *argv[])
 {
-    struct handler_t   *hand, *last_dset = NULL;
-    int                 i, opt, last_was_dset = FALSE;
+    struct handler_t   *hand;
+    struct handler_t   *last_dset = NULL;
+    int                 i;
+    int                 opt;
+    int                 last_was_dset = FALSE;
 
      /* no arguments */
     if (argc == 1) {
