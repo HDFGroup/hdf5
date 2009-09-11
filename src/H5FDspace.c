@@ -126,6 +126,7 @@ H5FD_space_init_interface(void)
 static haddr_t
 H5FD_extend(H5FD_t *file, H5FD_mem_t type, hbool_t new_block, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size)
 {
+    hsize_t orig_size = size;   /* Original allocation size */
     haddr_t eoa;                /* Address of end-of-allocated space */
     hsize_t extra;        	/* Extra space to allocate, to align request */
     haddr_t ret_value;          /* Return value */
@@ -143,7 +144,7 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, hbool_t new_block, hsize_t size, hadd
 
     /* Compute extra space to allocate, if this is a new block and should be aligned */
     extra = 0;
-    if(new_block && file->alignment > 1 && size >= file->threshold) {
+    if(new_block && file->alignment > 1 && orig_size >= file->threshold) {
         hsize_t mis_align;              /* Amount EOA is misaligned */
 
         /* Check for EOA already aligned */
@@ -170,6 +171,10 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, hbool_t new_block, hsize_t size, hadd
     eoa += size;
     if(file->cls->set_eoa(file, type, eoa) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
+
+    /* Post-condition sanity check */
+    if(new_block && file->alignment && orig_size >= file->threshold)
+	HDassert(!(ret_value % file->alignment));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
