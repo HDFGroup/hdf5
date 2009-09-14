@@ -23,6 +23,7 @@
 #define H5TOOLS_H__
 
 #include "hdf5.h"
+#include "h5tools_error.h"
 
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
@@ -558,14 +559,10 @@ void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
  */
 void            h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
                          h5tools_context_t *ctx/*in,out*/, hid_t type); 
-void            h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
-                         const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
-                         hid_t space);
-void            h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
+int             h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/, hid_t space);
+int             h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
                          const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
                          hid_t type);
-void            h5tools_print_enum(h5tools_str_t *buffer/*in,out*/,
-                        const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
-                        hid_t type);
+int             h5tools_print_enum(h5tools_str_t *buffer/*in,out*/, hid_t type);
 #endif /* H5TOOLS_H__ */
 

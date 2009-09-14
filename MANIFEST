@@ -1072,7 +1072,7 @@
 ./tools/lib/h5tools_ref.h
 ./tools/lib/h5tools_type.c
 ./tools/lib/ph5diff.h
-./tools/lib/talign.c
+./tools/lib/h5tools_error.h
 
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
@@ -1085,6 +1085,7 @@
 ./tools/misc/repart_test.c
 ./tools/misc/testh5mkgrp.sh
 ./tools/misc/testh5repart.sh.in
+./tools/misc/talign.c
 
 ./tools/h5stat/Makefile.am
 ./tools/h5stat/Makefile.in
@@ -1166,6 +1167,7 @@
 ./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
+./tools/testfiles/tdataregR.ddl 
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3s.ddl
