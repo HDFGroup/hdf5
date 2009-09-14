@@ -584,6 +584,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
 done:
     if(my_fapl != H5P_DEFAULT)
         H5Pclose(my_fapl);
+
     return fid;
 }
 
@@ -1406,6 +1407,8 @@ h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
         ctx.indent_level--;
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
+    HGOTO_DONE(SUCCEED)
+
  done:
     free(start);
     free(count);
@@ -1416,8 +1419,7 @@ h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
     if(H5Sclose(sid1) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
-
-    H5_LEAVE(SUCCEED)
+    
 CATCH
     return ret_value;
 }
@@ -1606,7 +1608,8 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     /* Render the region } element end */
 
     H5_LEAVE(dimension_break)
-CATCH
+
+ CATCH
     return ret_value;
 }
 
@@ -1718,14 +1721,14 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
             elmtno = 0;
     } /* end for (jndx = 0; jndx < npoints; jndx++, region_elmtno++) */
 
+    HGOTO_DONE(SUCCEED)
+
  done:
     free(region_buf);
     free(dims1);
     
     if(H5Sclose(mem_space) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
-
-    H5_LEAVE(SUCCEED)
 CATCH
     return ret_value;
 }
@@ -2308,7 +2311,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         fputs(OPT(info->line_sep, ""), stream);
     }
     
-    H5_LEAVE(SUCCEED)
+    HGOTO_DONE(SUCCEED)
 
 done:
     if(H5Sclose(f_space) < 0)
