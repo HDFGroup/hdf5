@@ -396,7 +396,7 @@ done:
 int_f
 nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type,
-		int_f *address, hsize_t_f *val_size,
+		haddr_t_f *address, size_t_f *val_size,
 		hid_t_f *lapl_id)
 {
     char *c_link_name = NULL;          /* Buffer to hold C string */
@@ -421,8 +421,8 @@ nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
     *corder_valid = 0;
     if(link_buff.corder_valid > 0) *corder_valid = 1;
     *link_type = (int_f)link_buff.type;
-    *address = (int_f)link_buff.u.address;
-    *val_size = (hsize_t)link_buff.u.val_size;
+    *address = (haddr_t_f)link_buff.u.address;
+    *val_size = (size_t_f)link_buff.u.val_size;
 
 done:
     return ret_value;
@@ -453,7 +453,7 @@ done:
 int_f
 nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_field, int_f *order, hsize_t_f *n,
-		      int_f *corder_valid, int_f *corder, int_f *cset, hsize_t_f *data_size, hid_t_f *lapl_id)
+		      int_f *link_type, int_f *corder_valid, int_f *corder, int_f *cset,  haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id)
 {
     char *c_group_name = NULL;          /* Buffer to hold C string */
     H5_index_t c_index_field;
@@ -483,7 +483,9 @@ nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 
     *corder = (int_f)link_buff.corder;
     *cset = (int_f)link_buff.cset;
-    *data_size = (hsize_t)link_buff.u.val_size;
+    *link_type = (int_f)link_buff.type;
+    *address = (haddr_t_f)link_buff.u.address;
+    *val_size = (size_t_f)link_buff.u.val_size;
 
 done:
     return ret_value;
