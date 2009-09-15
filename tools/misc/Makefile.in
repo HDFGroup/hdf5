@@ -411,7 +411,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
-TEST_PROG = h5repart_gentest talign.c
+TEST_PROG = h5repart_gentest talign
 TEST_SCRIPT = testh5repart.sh $(srcdir)/testh5mkgrp.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
