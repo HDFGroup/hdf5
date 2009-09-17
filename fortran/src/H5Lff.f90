@@ -574,7 +574,7 @@ CONTAINS
 !
 !              cset - indicates the character set used for link’s name. 
 !      corder - specifies the link’s creation order position.
-!corder_valid - indicates whether the value in corder is valid.
+!f_corder_valid - indicates whether the value in corder is valid.
 !         link_type -  specifies the link class:
 !     	                H5L_LINK_HARD_F      - Hard link
 !     	                H5L_LINK_SOFT_F      - Soft link
@@ -612,8 +612,8 @@ CONTAINS
      	                              !  H5L_LINK_SOFT_F      - Soft link
      	                              !  H5L_LINK_EXTERNAL_F  - External link
      	                              !  H5L_LINK_ERROR _F    - Error
-    INTEGER, INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
-    INTEGER(HSIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
+    INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
@@ -638,8 +638,8 @@ CONTAINS
          INTEGER, INTENT(OUT) :: cset 
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: link_type
-         INTEGER, INTENT(OUT) :: address
-         INTEGER(HSIZE_T), INTENT(OUT) :: val_size
+         INTEGER(HADDR_T), INTENT(OUT) :: address
+         INTEGER(SIZE_T), INTENT(OUT) :: val_size
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: link_namelen
          INTEGER :: corder_valid
@@ -691,7 +691,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
-       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
+       link_type, f_corder_valid, corder, cset, address, val_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier specifying location of subject group  
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
@@ -706,10 +706,16 @@ CONTAINS
                                         !    H5_ITER_DEC_F      - Decreasing order
                                         !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
     INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
+    INTEGER, INTENT(OUT) :: link_type ! Specifies the link class:
+     	                              !  H5L_LINK_HARD_F      - Hard link
+     	                              !  H5L_LINK_SOFT_F      - Soft link
+     	                              !  H5L_LINK_EXTERNAL_F  - External link
+     	                              !  H5L_LINK_ERROR _F    - Error
     LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
     INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
     INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the attribute’s name
-    INTEGER(HSIZE_T), INTENT(OUT) :: data_size   ! Indicates the size, in the number of characters, of the attribute
+    INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size   ! Indicates the size, in the number of characters, of the attribute for symbolic link
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
@@ -721,22 +727,24 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-            corder_valid, corder, cset, data_size, lapl_id_default)
+            link_type, corder_valid, corder, cset, address, val_size, lapl_id_default)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_BY_IDX_C'::h5lget_info_by_idx_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: group_name
-         INTEGER(HID_T), INTENT(IN) :: loc_id 
+         INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
          INTEGER, INTENT(IN) :: index_field
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
-         INTEGER :: corder_valid
+         INTEGER, INTENT(OUT) :: link_type
+         INTEGER :: corder_valid 
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: cset
-         INTEGER(HSIZE_T), INTENT(OUT) :: data_size
+         INTEGER(HADDR_T), INTENT(OUT) :: address
+         INTEGER(SIZE_T), INTENT(OUT) :: val_size
          INTEGER(HID_T) :: lapl_id_default
        END FUNCTION h5lget_info_by_idx_c
     END INTERFACE
@@ -747,7 +755,7 @@ CONTAINS
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     hdferr = h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-         corder_valid, corder, cset, data_size, lapl_id_default)
+         link_type, corder_valid, corder, cset, address, val_size, lapl_id_default)
 
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.

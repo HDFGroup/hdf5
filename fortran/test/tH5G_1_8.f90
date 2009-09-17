@@ -642,6 +642,18 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER ::   arank = 1                      ! Attribure rank
      INTEGER :: error
 
+     INTEGER :: cset ! Indicates the character set used for the link’s name. 
+     INTEGER :: corder ! Specifies the link’s creation order position.
+     LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
+     INTEGER :: link_type ! Specifies the link class:
+     	                              !  H5L_LINK_HARD_F      - Hard link
+     	                              !  H5L_LINK_SOFT_F      - Soft link
+     	                              !  H5L_LINK_EXTERNAL_F  - External link
+     	                              !  H5L_LINK_ERROR _F    - Error
+     INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+     INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
+
+
 !     WRITE(*,*) "link creation (w/new group format)"
 
      ! /* Create a file */
@@ -669,6 +681,18 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      !/* Create a symbolic link */
      CALL H5Lcreate_soft_f("/d1", file, "grp1/soft",error)
      CALL check("H5Lcreate_soft_f", error, total_error)
+
+     CALL H5Lget_info_f(file, "grp1/soft", &
+          cset, corder, f_corder_valid, link_type, address, val_size, &
+          error, H5P_DEFAULT_F)
+     CALL check("H5Lget_info_f",error,total_error)
+
+!     CALL VerifyLogical("H5Lget_info_by_idx_f11", f_corder_valid, .TRUE., total_error)
+
+     CALL VERIFY("H5Lget_info_by_idx_f", H5L_LINK_SOFT_F, link_type, total_error)
+     CALL VERIFY("H5Lget_info_by_idx_f", cset, H5T_CSET_ASCII_F, total_error)
+     ! should be '/d1' + NULL character = 4
+     CALL VERIFY("H5Lget_info_by_idx_f", INT(val_size), 4, total_error)
 
     !/* Create a symbolic link to something that doesn't exist */
 
@@ -733,8 +757,8 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      	                              !  H5L_LINK_SOFT_F      - Soft link
      	                              !  H5L_LINK_EXTERNAL_F  - External link
      	                              !  H5L_LINK_ERROR _F    - Error
-    INTEGER :: address  ! If the link is a hard link, address specifies the file address that the link points to
-    INTEGER(HSIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
+    INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+    INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
     INTEGER :: error
 
@@ -1147,15 +1171,18 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
-  INTEGER(HSIZE_T) :: data_size   ! Indicates the size, in the number of characters, of the attribute
+  INTEGER(SIZE_T) :: val_size 
+  INTEGER :: link_type
+  INTEGER(HADDR_T) :: address
 
   INTEGER :: u ! /* Local index variable */
   INTEGER :: Input1, i
   INTEGER(HID_T) :: group_id2
-
+  INTEGER(HID_T) :: grp
   INTEGER :: iorder ! /* Order within in the index */
   CHARACTER(LEN=2) :: chr2
   INTEGER :: error
+  INTEGER :: id_type
   !
   !
   !
@@ -1263,7 +1290,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            htmp =9 
 !EP           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
            CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, htmp, error)
-           CALL VERIFY("delete_by_idx.H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
+           CALL VERIFY("H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
 
 
            ! /* Delete links from compact group */
@@ -1271,18 +1298,36 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            DO u = 0, (max_compact - 1) -1
               ! /* Delete first link in appropriate order */
               CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), error)
-              CALL check("delete_by_idx.H5Ldelete_by_idx_f", error, total_error)
+              CALL check("H5Ldelete_by_idx_f", error, total_error)
               ! /* Verify the link information for first link in appropriate order */
               ! HDmemset(&linfo, 0, sizeof(linfo));
 
               CALL H5Lget_info_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), &
-                   f_corder_valid, corder, cset, data_size, error)
+                   link_type, f_corder_valid, corder, cset, address, val_size, error)
 
+              CALL H5Oopen_by_addr_f(group_id, address, grp, error)
+              CALL check("H5Oopen_by_addr_f", error, total_error)
+
+              CALL H5Iget_type_f(grp, id_type, error)
+              CALL check("H5Iget_type_f", error, total_error)
+
+              CALL VERIFY("H5Iget_type_f", id_type, H5I_GROUP_F, total_error)
+              
+              CALL H5Gclose_f(grp, error)
+              CALL check("H5Gclose_f", error, total_error)
+
+              CALL VerifyLogical("H5Lget_info_by_idx_f", f_corder_valid, .TRUE., total_error)
+
+              CALL VERIFY("H5Lget_info_by_idx_f", H5L_LINK_HARD_F, link_type, total_error)
               IF(iorder.EQ.H5_ITER_INC_F)THEN
-                 CALL VERIFY("delete_by_idx.H5Lget_info_by_idx_f", corder, u+1, total_error)
+                 CALL VERIFY("H5Lget_info_by_idx_f", corder, u+1, total_error)
               ELSE
-                 CALL VERIFY("delete_by_idx.H5Lget_info_by_idx_f", corder, (max_compact - (u + 2)), total_error)
+                 CALL VERIFY("H5Lget_info_by_idx_f", corder, (max_compact - (u + 2)), total_error)
               ENDIF
+
+              CALL VERIFY("H5Lget_info_by_idx_f",cset, H5T_CSET_ASCII_F, total_error)
+
+
 
               ! /* Verify the name for first link in appropriate order */
               ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
@@ -1357,7 +1402,9 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
-  INTEGER(HSIZE_T) :: data_size   ! Indicates the size, in the number of characters, of the attribute
+  INTEGER :: link_type
+  INTEGER(HADDR_T) :: address
+  INTEGER(SIZE_T) :: val_size   ! Indicates the size, in the number of characters, of the attribute
 
   CHARACTER(LEN=7) :: tmpname     !/* Temporary link name */
   CHARACTER(LEN=3) :: tmpname_small !/* to small temporary link name */
@@ -1376,14 +1423,14 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   ! /* Verify the link information for first link, in increasing creation order */
   !  HDmemset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), &
-       f_corder_valid, corder, cset, data_size, error)
+       link_type, f_corder_valid, corder, cset, address, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL VERIFY("H5Lget_info_by_idx_f", corder, 0, total_error)
 
   ! /* Verify the link information for new link, in increasing creation order */
   ! HDmemset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), &
-       f_corder_valid, corder, cset, data_size, error)
+       link_type, f_corder_valid, corder, cset, address, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL VERIFY("H5Lget_info_by_idx_f", corder, n, total_error)
 
@@ -1468,8 +1515,8 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
      	                              !  H5L_LINK_SOFT_F      - Soft link
      	                              !  H5L_LINK_EXTERNAL_F  - External link
      	                              !  H5L_LINK_ERROR _F    - Error
-  INTEGER :: address  ! If the link is a hard link, address specifies the file address that the link points to
-  INTEGER(HSIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
+  INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
+  INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
   CHARACTER(LEN=1024) :: filename = 'tempfile.h5'
   INTEGER, PARAMETER :: TEST6_DIM1 = 8, TEST6_DIM2 = 7
