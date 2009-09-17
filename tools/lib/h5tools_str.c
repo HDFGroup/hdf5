@@ -432,8 +432,6 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
     if (nblocks > 0) {
         int i;
 
-        h5tools_str_append(str, "{");
-
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = malloc((size_t) alloc_size);
@@ -459,8 +457,6 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         }
 
         free(ptdata);
-
-        h5tools_str_append(str, "}");
     } /* end if (nblocks > 0) */
 }
 
@@ -497,8 +493,6 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
     if (npoints > 0) {
         int i;
 
-        h5tools_str_append(str, "{");
-
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = malloc((size_t) alloc_size);
@@ -519,8 +513,6 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         }
 
         free(ptdata);
-
-        h5tools_str_append(str, "}");
     } /* end if (npoints > 0) */
 }
 
@@ -1133,11 +1125,16 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
             H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*) ref_name, 1024);
 
             h5tools_str_append(str, info->dset_format, ref_name);
+
+            h5tools_str_append(str, "{");
+
             region_type = H5Sget_select_type(region);
             if(region_type==H5S_SEL_POINTS)
                 h5tools_str_dump_region_points(str, region, info, ctx);
             else
                 h5tools_str_dump_region_blocks(str, region, info, ctx);
+
+            h5tools_str_append(str, "}");
 
             H5Sclose(region);
         } /* end if (region >= 0) */

@@ -1295,7 +1295,7 @@ h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t ctx, 
         h5tools_str_t *buffer/*string into which to render */, size_t ncols, 
         int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata) {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     hbool_t      dimension_break = TRUE;
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
@@ -1406,8 +1406,6 @@ h5tools_print_region_data_blocks(hid_t region_space, hid_t region_id,
 
         ctx.indent_level--;
     } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
-
-    HGOTO_DONE(SUCCEED)
 
  done:
     free(start);
@@ -1636,7 +1634,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, const h5tool_format_t *info, h5tools_context_t ctx, 
         h5tools_str_t *buffer, size_t ncols, 
         int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata) {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     hbool_t  dimension_break = TRUE;
     hsize_t  alloc_size;
     hsize_t *dims1 = NULL;
@@ -1720,8 +1718,6 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
         if(FALSE == dimension_break)
             elmtno = 0;
     } /* end for (jndx = 0; jndx < npoints; jndx++, region_elmtno++) */
-
-    HGOTO_DONE(SUCCEED)
 
  done:
     free(region_buf);
@@ -1957,7 +1953,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
                            hsize_t *total_size,/* total size of dataset */
                            unsigned int row_dim/* index of row_counter dimension */)
 {
-    HERR_INIT(herr_t, FAIL)
+    HERR_INIT(herr_t, SUCCEED)
     size_t            i;                       /* counters  */
     size_t            j;                       /* counters  */
     hsize_t           zero = 0;                /* vector of zeros */
@@ -2078,8 +2074,6 @@ done:
         ctx->continuation++;
 
     } /* hyperslab_count loop */
-    
-    H5_LEAVE(SUCCEED)
 
 CATCH
     return ret_value;
@@ -2122,7 +2116,7 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
                            hid_t dset, hid_t p_type, struct subset_t *sset,
                            hid_t f_space, hsize_t *total_size)
 {
-    HERR_INIT(herr_t, FAIL)
+    HERR_INIT(herr_t, SUCCEED)
     size_t            i;                       /* counters  */
     hsize_t           n;                       /* counters  */
     hsize_t           count;                   /* hyperslab count */
@@ -2222,8 +2216,6 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
         } /* ctx.ndims > 1 */
 
     } /* outer_count */
-    
-    H5_LEAVE(SUCCEED)
 
 CATCH
     return ret_value;
@@ -2274,7 +2266,7 @@ static herr_t
 h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                            hid_t p_type, struct subset_t *sset, int indentlevel)
 {
-    HERR_INIT(herr_t, FAIL)
+    HERR_INIT(herr_t, SUCCEED)
     hid_t             f_space;                 /* file data space */
     size_t            i;                       /* counters  */
     hsize_t           total_size[H5S_MAX_RANK];/* total size of dataset*/
@@ -2310,8 +2302,6 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         putc('\n', stream);
         fputs(OPT(info->line_sep, ""), stream);
     }
-    
-    HGOTO_DONE(SUCCEED)
 
 done:
     if(H5Sclose(f_space) < 0)
@@ -2693,7 +2683,7 @@ int
 h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t type,
                  hid_t space, void *mem, int indentlevel)
 {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     h5tool_format_t    info_dflt;
 
     /* Use default values */
@@ -3031,7 +3021,7 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         /* Type doesn't match any of above. */
         h5tools_str_append(buffer, "unknown_one_character_type;\n ");
 
-  done:
+      done:
         if(H5Tclose(str_type) < 0)
             HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
         if(H5Tclose(tmp_type) < 0)
@@ -3189,8 +3179,6 @@ h5tools_print_datatype(h5tools_str_t *buffer, const h5tool_format_t *info,
         break;
     }
 
-    H5_LEAVE(SUCCEED)
-
 CATCH
     return ret_value;
 }
@@ -3210,7 +3198,7 @@ CATCH
 int 
 h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space) 
 {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     hsize_t     size[H5TOOLS_DUMP_MAX_RANK];
     hsize_t     maxsize[H5TOOLS_DUMP_MAX_RANK];
     int         ndims = -1;
@@ -3267,8 +3255,6 @@ h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
         break;
     } /* end switch */
 
-    H5_LEAVE(SUCCEED)
-
 CATCH
     return ret_value;
 }
@@ -3288,7 +3274,7 @@ CATCH
 int 
 h5tools_print_enum(h5tools_str_t *buffer, hid_t type) 
 {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     char         **name = NULL;  /*member names                   */
     unsigned char *value = NULL; /*value array                    */
     unsigned char *copy = NULL;  /*a pointer to value array       */
@@ -3384,8 +3370,6 @@ h5tools_print_enum(h5tools_str_t *buffer, hid_t type)
 
         h5tools_str_append(buffer, ";\n");
     }
-    
-    H5_LEAVE(SUCCEED)
 
 CATCH
 
@@ -3499,7 +3483,7 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 static
 int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     unsigned char *mem  = (unsigned char*)_mem;
     size_t         size; /* datum size */
     hsize_t        i;    /* element counter  */
@@ -3513,7 +3497,6 @@ int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
             return FAIL;
        }
     }
-    H5_LEAVE(SUCCEED)
 
 CATCH
     return ret_value;
@@ -3531,7 +3514,7 @@ CATCH
 static int 
 render_bin_output(FILE *stream, hid_t tid, void *_mem)
 {
-    HERR_INIT(int, FAIL)
+    HERR_INIT(int, SUCCEED)
     unsigned char     *mem  = (unsigned char*)_mem;
     size_t             size;   /* datum size */
     float              tempfloat;
@@ -3870,8 +3853,6 @@ render_bin_output(FILE *stream, hid_t tid, void *_mem)
             } /*i*/
         }/*else 1 */
     }
-
-    H5_LEAVE(SUCCEED)
 
 CATCH
     return ret_value;
