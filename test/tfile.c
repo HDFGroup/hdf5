@@ -2073,7 +2073,18 @@ test_cached_stab_info(void)
 **              mamcgree@hdfgroup.org
 **              June 29, 2009
 **
+**  Modification: Raymond Lu
+**                Skip this function for OpenVMS.
+**                17 September 2009
 *****************************************************************/
+#ifdef H5_VMS
+static void
+test_rw_noupdate(void)
+{
+    /* Output message about test being performed */
+    MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed.  This test is skipped on OpenVMS because the modification time from stat is the same as the last access time.\n"));
+} /* end test_rw_noupdate() */
+#else
 static void
 test_rw_noupdate(void)
 {
@@ -2114,6 +2125,7 @@ test_rw_noupdate(void)
     ret = (diff > 0.0);
     VERIFY(ret, 0, "Timestamp");
 } /* end test_rw_noupdate() */
+#endif
 
 /****************************************************************
 **
