@@ -71,13 +71,6 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
-talign_SOURCES = talign.c
-talign_OBJECTS = talign.$(OBJEXT)
-talign_LDADD = $(LDADD)
-talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-talign_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(talign_LDFLAGS) \
-	$(LDFLAGS) -o $@
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
 h5debug_LDADD = $(LDADD)
@@ -107,6 +100,10 @@ repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
 repart_test_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+talign_SOURCES = talign.c
+talign_OBJECTS = talign.$(OBJEXT)
+talign_LDADD = $(LDADD)
+talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \

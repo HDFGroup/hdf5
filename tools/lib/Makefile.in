@@ -72,6 +72,7 @@ am_libh5tools_la_OBJECTS = h5tools.lo h5tools_str.lo h5tools_utils.lo \
 	h5diff_util.lo h5trav.lo h5tools_filters.lo h5tools_ref.lo \
 	h5tools_type.lo
 libh5tools_la_OBJECTS = $(am_libh5tools_la_OBJECTS)
+am__EXEEXT_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -354,7 +355,7 @@ libh5tools_la_SOURCES = h5tools.c h5tools_str.c h5tools_utils.c h5diff.c \
 
 
 # Test program.  Link using libhdf5 and libh5tools
-TEST_PROG =
+TEST_PROG = 
 
 # Name libh5tools.la so that dependencies work out. Automake knows how
 # to build 'libh5tools.la', but not '../../tools/lib/libh5tools.la'.

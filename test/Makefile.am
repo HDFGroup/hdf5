@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
