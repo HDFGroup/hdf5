@@ -46,7 +46,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -139,7 +139,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -232,7 +232,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -325,7 +325,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -391,7 +391,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\tools\lib\talign.c"
+			RelativePath="..\..\..\tools\misc\talign.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"

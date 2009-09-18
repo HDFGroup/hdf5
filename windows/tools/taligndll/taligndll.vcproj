@@ -47,7 +47,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -139,7 +139,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -229,7 +229,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -321,7 +321,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\tools\lib,..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\tools\misc,..\..\..\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -387,7 +387,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\tools\lib\talign.c"
+			RelativePath="..\..\..\tools\misc\talign.c"
 			>
 			<FileConfiguration
 				Name="Release|Win32"
