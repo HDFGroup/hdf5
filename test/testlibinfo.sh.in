@@ -28,20 +28,47 @@
 #	      Sep 18, 2009
 
 # Determine the configure options of the hdf5 library and executables.
+
 Shared_Lib=@enable_shared@
 Static_Lib=@enable_static@
 Static_exec=@STATIC_EXEC@
 
-# Function definitions
-CHECK_LIBINFO(){
-    echo Checking file $1
-    strings $1 | grep "SUMMARY OF THE HDF5 CONFIGURATION"
+
+# Print a line-line message left justified in a field of 70 characters.
+#
+LINEMSG() {
+   SPACES="                                                               "
+   echo "Check file $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 
+# Print a "SKIP" message
+SKIP() {
+    LINEMSG $*
+    echo  " -SKIP-"
+}
+  
+# Function definitions
+CHECK_LIBINFO(){
+    LINEMSG $1
+    if strings $1 | grep "SUMMARY OF THE HDF5 CONFIGURATION" > /dev/null; then
+	echo " PASSED"
+    else
+	echo " FAILED"
+	nerrors=`expr $nerrors + 1`
+    fi
+}
 
 
 # MAIN Body
+nerrors=0
+H5_HAVE_EMBEDDED_LIBINFO=`grep '#define H5_HAVE_EMBEDDED_LIBINFO ' ../src/H5pubconf.h`
+
+# Skip the rest if embedded-libinfo is not enabled.
+if [ -z "$H5_HAVE_EMBEDDED_LIBINFO" ]; then
+    echo "embedded-libinfo is not enabled. Test skipped."
+    exit 0
+fi
 
 # The location of HDF library file(s) depends on whether shared lib is
 # built too.
@@ -59,19 +86,31 @@ h5libsettings=../src/libhdf5.settings
 # Check dynamic library file if built.
 if [ x-$Shared_Lib = x-yes ]; then
     CHECK_LIBINFO ${h5libdir}/libhdf5.so
+else
+    SKIP ${h5libdir}/libhdf5.so
 fi
 
 # Though rare, libhdf5.a may not have been built.
 if [ x-$Static_Lib = x-yes ]; then
     CHECK_LIBINFO ${h5libdir}/libhdf5.a
+else
+    SKIP ${h5libdir}/libhdf5.a
 fi
 
 # Check if executables has the lib information only if shared lib is not
-# built or static-exec is used.
-if [ x-$Shared_Lib != x-yes -o x-$Static_exec = x-yes ]; then
+# built or static-exec is used.  (Don't care static-exec since it affects
+# tools binary only.)
+if [ x-$Shared_Lib != x-yes ]; then
     CHECK_LIBINFO testhdf5
+else
+    SKIP testhdf5
 fi
 
 
-exit $?
-
+if [ $nerrors -gt 0 ]; then
+    echo "***$nerrors errors encountered***"
+    exit 1
+else
+    echo "No error encountered"
+    exit 0
+fi

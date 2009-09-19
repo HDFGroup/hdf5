@@ -508,6 +508,8 @@ sigbus_handler(int UNUSED signo)
  *
  * Purpose:	insert the contents of libhdf5.settings into a file
  *		represented by flibinfo.
+ *		Make it an empty string if H5_HAVE_EMBEDDED_LIBINFO is not
+ *		defined, i.e., not enabled.
  *
  * Return:	void
  *
@@ -522,6 +524,7 @@ sigbus_handler(int UNUSED signo)
 static void
 insert_libhdf5_settings(FILE *flibinfo)
 {
+#ifdef H5_HAVE_EMBEDDED_LIBINFO
     FILE *fsettings;	/* for files libhdf5.settings */
     int inchar;
     int	bol=0;	/* indicates the beginning of a new line */
@@ -562,6 +565,10 @@ insert_libhdf5_settings(FILE *flibinfo)
 	perror(LIBSETTINGSFNAME);
 	exit(1);
     }
+#else
+    /* print variable definition and an empty string */
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+#endif
 }
 
 
@@ -670,10 +677,8 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /*******************/\n\
 \n");
 
-#ifdef H5_HAVE_EMBEDDED_LIBINFO
-    /* Generate embedded library information files */
+    /* Generate embedded library information variable definition */
     make_libinfo();
-#endif
 
     /* The interface initialization function */
     printf("\n\
