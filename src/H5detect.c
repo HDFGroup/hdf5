@@ -108,7 +108,8 @@ static void detect_C99_integers16(void);
 static void detect_C99_integers32(void);
 static void detect_C99_integers64(void);
 static void detect_alignments(void);
-static void insert_libhdf5_settings(void);
+static void insert_libhdf5_settings(FILE *flibinfo);
+static void make_libinfo(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
 static jmp_buf jbuf_g;
 
@@ -505,8 +506,10 @@ sigbus_handler(int UNUSED signo)
 /*-------------------------------------------------------------------------
  * Function:	insert_libhdf5_settings
  *
- * Purpose:	Insert contents of libhdf5.settings so that it is included
- *		in all hdf5 executables.
+ * Purpose:	insert the contents of libhdf5.settings into a file
+ *		represented by flibinfo.
+ *		Make it an empty string if H5_HAVE_EMBEDDED_LIBINFO is not
+ *		defined, i.e., not enabled.
  *
  * Return:	void
  *
@@ -519,9 +522,10 @@ sigbus_handler(int UNUSED signo)
  */
 #define LIBSETTINGSFNAME "libhdf5.settings"
 static void
-insert_libhdf5_settings(void)
+insert_libhdf5_settings(FILE *flibinfo)
 {
-    FILE *fsettings;
+#ifdef H5_HAVE_EMBEDDED_LIBINFO
+    FILE *fsettings;	/* for files libhdf5.settings */
     int inchar;
     int	bol=0;	/* indicates the beginning of a new line */
 
@@ -529,34 +533,66 @@ insert_libhdf5_settings(void)
         perror(LIBSETTINGSFNAME);
         exit(1);
     }
-    /* print variable definition */
-    printf("extern char H5libhdf5_settings[]=\n");
+    /* print variable definition and the string */
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
     bol++;
     while (EOF != (inchar = getc(fsettings))){
 	if (bol){
 	    /* Start a new line */
-	    printf("\t\"");
+	    fprintf(flibinfo, "\t\"");
 	    bol = 0;
 	}
 	if (inchar == '\n'){
 	    /* end of a line */
-	    printf("\\n\"\n");
+	    fprintf(flibinfo, "\\n\"\n");
 	    bol++;
 	}else{
-	    putchar(inchar);
+	    putc(inchar, flibinfo);
 	}
     }
     if (feof(fsettings)){
 	/* wrap up */
 	if (!bol){
 	    /* EOF found without a new line */
-	    printf("\\n\"\n");
+	    fprintf(flibinfo, "\\n\"\n");
 	};
-	printf(";\n\n");
+	fprintf(flibinfo, ";\n\n");
     }else{
 	fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
 	exit(1);
     }
+    if (0 != fclose(fsettings)){
+	perror(LIBSETTINGSFNAME);
+	exit(1);
+    }
+#else
+    /* print variable definition and an empty string */
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+#endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	make_libinfo
+ *
+ * Purpose:	Create the embedded library information definition.
+ * 		This sets up for a potential extension that the declaration
+ *		is printed to a file different from stdout.
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		Sep 15, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+make_libinfo(void)
+{
+    /* print variable definition and then the string as a macro. */
+    insert_libhdf5_settings(stdout);
 }
 
 
@@ -623,11 +659,13 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /********************/\n\
 /* Public Variables */\n\
 /********************/\n\
-\n\n\
+\n\
+\n\
 /*****************************/\n\
 /* Library Private Variables */\n\
 /*****************************/\n\
-\n\n\
+\n\
+\n\
 /*********************/\n\
 /* Package Variables */\n\
 /*********************/\n\
@@ -639,10 +677,8 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /*******************/\n\
 \n");
 
-#ifdef H5_HAVE_EMBEDDED_LIBINFO
-    /* Insert content of libhdf5.settings */
-    insert_libhdf5_settings();
-#endif
+    /* Generate embedded library information variable definition */
+    make_libinfo();
 
     /* The interface initialization function */
     printf("\n\
@@ -1119,8 +1155,8 @@ find_bias(int epos, int esize, int *perm, void *_a)
 
 /*-------------------------------------------------------------------------
  * Function:	print_header
- *
- * Purpose:	Prints the C file header for the generated file.
+     *
+     * Purpose:	Prints the C file header for the generated file.
  *
  * Return:	void
  *
