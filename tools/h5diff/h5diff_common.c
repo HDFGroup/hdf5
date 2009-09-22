@@ -43,6 +43,7 @@ static struct long_options l_opts[] = {
     { "relative", require_arg, 'p' },
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
+    { "use-system-epsilon", no_arg, 'e' },
     { NULL, 0, '\0' }
 };
 
@@ -109,6 +110,11 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->delta = atof( opt_arg );
+            
+            /* -d 0 is the same as default */
+            if (options->delta == 0)
+            options->d=0;
+
             break;
 
         case 'p':
@@ -121,6 +127,11 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->percent = atof( opt_arg );
+
+            /* -p 0 is the same as default */
+            if (options->percent == 0)
+            options->p = 0;
+
             break;
 
         case 'n':
@@ -142,8 +153,15 @@ void parse_command_line(int argc,
         case 'c':
             options->m_list_not_cmp = 1;
             break;
+        case 'e':
+            options->use_system_epsilon = 1;
+            break;
         }
     }
+
+    /* if use system epsilon, unset -p and -d option */
+    if (options->use_system_epsilon)
+        options->d = options->p = 0;
 
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
@@ -277,7 +295,7 @@ check_p_input( const char *str )
         return -1;
 
     x=atof(str);
-    if (x<=0)
+    if (x<0)
         return -1;
 
     return 1;
@@ -311,7 +329,7 @@ check_d_input( const char *str )
         return -1;
 
     x=atof(str);
-    if (x <=0)
+    if (x <0)
         return -1;
 
     return 1;
@@ -344,18 +362,18 @@ void usage(void)
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
  printf("   -c, --compare           List objects that are not comparable\n");
  printf("   -N, --nan               Avoid NaNs detection\n");
+ printf("   -n C, --count=C         Print differences up to C number, C is a positive integer.\n");
 
- printf("   -n C, --count=C         Print differences up to C number\n");
- printf("   -d D, --delta=D         Print difference when greater than limit D\n");
- printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
+ printf("   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive number.\n");
+ printf("   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive number.\n");
+ printf("   --use-system-epsilon    Print difference if (|a-b| > EPSILON),\n");
+ printf("                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the system epsilon value. \n");
+ printf("                           If the system epsilon is not defined, use the value below:\n");
+ printf("                               FLT_EPSILON = 1.19209E-07 for float\n");
+ printf("                               DBL_EPSILON = 2.22045E-16 for double\n");
 
-
- printf("\n");
-
- printf("  C - is a positive integer\n");
- printf("  D - is a positive number. Compare criteria is |a - b| > D\n");
- printf("  R - is a positive number. Compare criteria is |(b-a)/a| > R\n");
-
+ printf("                           -d, -p, and --use-system-epsilon options are used for comparing floating point values.\n");
+ printf("                           By default, strict equality is used. Use -p or -d to set specific tolerance.\n");  
  printf("\n");
 
  printf(" Modes of output:\n");

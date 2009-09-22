@@ -97,3 +97,28 @@ nh5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid
   return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5oopen_by_addr_c
+ * Purpose:     Calls H5open_by_addr
+ * Inputs:      loc_id  - File or group identifier
+ *              addr     - Object’s address in the file
+ * Outputs:     obj_id  - Dataset identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M. Scot Breitenfeld
+ *              September 14, 2009
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
+{
+  int_f ret_value = 0;          /* Return value */
+
+  /*
+   * Call H5Oopen_by_address function.
+   */
+  if((*obj_id = (hid_t_f)H5Oopen_by_addr((hid_t)*loc_id, (haddr_t)*addr)) < 0)
+    HGOTO_DONE(FAIL);
+
+ done:
+  return ret_value;
+}

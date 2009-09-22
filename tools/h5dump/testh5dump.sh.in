@@ -489,6 +489,9 @@ fi
 
 # test for dataset region references 
 TOOLTEST tdatareg.ddl tdatareg.h5
+TOOLTEST tdataregR.ddl -R tdatareg.h5
+TOOLTEST tattrreg.ddl tattrreg.h5
+TOOLTEST tattrregR.ddl -R tattrreg.h5
 
 # tests for group creation order
 # "1" tracked, "2" name, root tracked

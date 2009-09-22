@@ -25,21 +25,22 @@
  */
 
 typedef struct {
-    int    m_quiet;   /* quiet mide: no output at all */
-    int    m_report;  /* report mode: print the data */
-    int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
-    int    d;         /* delta, absolute value to compare */
-    double delta;     /* delta value */
-    int    p;         /* relative error to compare*/
-    double percent;   /* relative error value */
-    int    n;         /* count, compare up to count */
-    hsize_t count;    /* count value */
-    int    err_stat;  /* an error ocurred (1, error, 0, no error) */
-    int    cmn_objs;  /* do we have common objects */
-    int    not_cmp;   /* are the objects comparable */
-    int    contents;  /* equal contents */
-    int    do_nans;   /* consider Nans while diffing floats */
-    int    m_list_not_cmp;   /* list not comparable messages */
+    int      m_quiet;               /* quiet mide: no output at all */
+    int      m_report;              /* report mode: print the data */
+    int      m_verbose;             /* verbose mode: print the data, list of objcets, warnings */
+    int      d;                     /* delta, absolute value to compare */
+    double   delta;                 /* delta value */
+    int      p;                     /* relative error to compare*/
+    int      use_system_epsilon;    /* flag to use system epsilon (1 or 0) */
+    double   percent;               /* relative error value */
+    int      n;                     /* count, compare up to count */
+    hsize_t  count;                 /* count value */
+    int      err_stat;              /* an error ocurred (1, error, 0, no error) */
+    int      cmn_objs;              /* do we have common objects */
+    int      not_cmp;               /* are the objects comparable */
+    int      contents;              /* equal contents */
+    int      do_nans;               /* consider Nans while diffing floats */
+    int      m_list_not_cmp;        /* list not comparable messages */
 } diff_opt_t;
 
 

@@ -32,14 +32,14 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Abtree2, H5A, H5AC, H5Adense, H5Adeprec, H5Aint, H5Atest, H5B2, H5B2cache,"+-
         "H5B2dbg, H5B2int, H5B2stat, H5B2test, H5B, H5Bcache, H5Bdbg, H5C, H5CS,"+-  
         "H5Dbtree, H5D, H5Dchunk, H5Dcompact, H5Dcontig, H5Ddbg, H5Ddeprec,"+-
-        "H5Defl, H5Dfill, H5Dint, H5Dio, H5Dmpio, H5Doh, H5Dscatgath, H5Dselect, H5Dtest,"+-
+        "H5Defl, H5Dfill, H5Dint, H5Dio, H5Dlayout, H5Dmpio, H5Doh, H5Dscatgath, H5Dselect, H5Dtest,"+-
         "H5EA, H5EAcache, H5EAdbg, H5EAdblkpage, H5EAdblock, H5EAhdr, H5EAiblock, H5EAint,"+-
         "H5EAsblock, H5EAstat, H5EAtest, H5E, H5Edeprec, H5Eint,"+-
         "H5FA, H5FAcache, H5FAdbg, H5FAdblkpage, H5FAdblock, H5FAhdr, H5FAstat, H5FAtest,"+-
         "H5Faccum, H5F, H5Fdbg, H5FD, H5FDcore, H5FDdirect, H5FDfamily, H5FDint, H5FDlog, H5FDmpi,"+-
         "H5FDmpio, H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDspace, H5FDstdio, H5FDwindows,"+-
         "H5Ffake, H5Fio, H5FL, H5Fmount, H5Fmpi, H5FO, H5Fquery, H5FS, H5FScache, H5FSdbg, H5Fsfile,"+-
-        "H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Ftest,"+-
+        "H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Fsuper_cache, H5Ftest,"+-
         "H5Gbtree2, H5G, H5Gcache, H5Gcompact, H5Gdense, H5Gdeprec, H5Gent, H5Gint, H5Glink, H5Gloc,"+-
         "H5Gname, H5Gnode, H5Gobj, H5Goh, H5Groot, H5Gstab, H5Gtest, H5Gtraverse,"+-
         "H5HFbtree2, H5HF, H5HFcache, H5HFdbg, H5HFdblock, H5HFdtable, H5HFhdr, H5HFhuge, H5HFiblock,"+-

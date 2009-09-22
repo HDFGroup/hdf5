@@ -377,6 +377,7 @@ rem ############################################################################
     call :tooltest tarray5.ddl tarray5.h5
     call :tooltest tarray6.ddl tarray6.h5
     call :tooltest tarray7.ddl tarray7.h5
+    call :tooltest tarray8.ddl tarray8.h5
 
     rem test for files with empty data
     call :tooltest tempty.ddl tempty.h5
@@ -580,6 +581,9 @@ rem ############################################################################
 
     rem test for dataset region references 
     call :tooltest tdatareg.ddl tdatareg.h5
+    call :tooltest tdataregR.ddl -R tdatareg.h5
+    call :tooltest tattrreg.ddl tattrreg.h5
+    call :tooltest tattrregR.ddl -R tattrreg.h5
 
     rem tests for group creation order
     rem "1" tracked, "2" name, root tracked
@@ -599,10 +603,6 @@ rem ############################################################################
     rem Note: Make sure to use PERCENT rather than "%", because Windows needs
     rem to handle it specially.  --SJW 5/12/08
     call :tooltest tfpformat.ddl -m PERCENT.7f tfpformat.h5
-
-    rem tests for traversal of external links
-    call :tooltest textlinksrc.ddl textlinksrc.h5
-    call :tooltest textlinkfar.ddl textlinkfar.h5
 
     rem tests for traversal of external links
     call :tooltest textlinksrc.ddl textlinksrc.h5

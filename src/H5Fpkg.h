@@ -192,7 +192,6 @@ typedef struct H5F_super_t {
 typedef struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     H5F_super_t *sblock;        /* Pointer to (pinned) superblock for file */
-    haddr_t     super_addr;     /* Address of superblock signature      */
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     unsigned	flags;		/* Access Permissions for file          */
     H5F_mtab_t	mtab;		/* File mount table                     */

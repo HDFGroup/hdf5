@@ -293,6 +293,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 {
     H5F_super_t *       sblock = NULL;      /* superblock structure                         */
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
+    haddr_t             super_addr;         /* Absolute address of superblock */
     H5AC_protect_t      rw;                 /* read/write permissions for file              */
     hbool_t             dirtied = FALSE;    /* Bool for sblock protect call                 */
     herr_t              ret_value = SUCCEED; /* return value                                */
@@ -300,8 +301,15 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(H5F_super_read, FAIL)
 
     /* Find the superblock */
-    if(HADDR_UNDEF == (f->shared->super_addr = H5F_locate_signature(f->shared->lf, dxpl_id)))
+    if(HADDR_UNDEF == (super_addr = H5F_locate_signature(f->shared->lf, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to find file signature")
+
+    /* Check for userblock present */
+    if(H5F_addr_gt(super_addr, 0)) {
+        /* Set the base address for the file in the VFD now */
+        if(H5FD_set_base_addr(f->shared->lf, super_addr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "failed to set base address for file driver")
+    } /* end if */
 
     /* Determine file intent for superblock protect */
     if(H5F_INTENT(f) & H5F_ACC_RDWR)
@@ -310,7 +318,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
         rw = H5AC_READ;
 
     /* Look up the superblock */
-    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, f->shared->super_addr, NULL, &dirtied, rw)))
+    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, NULL, &dirtied, rw)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
     
     /* Mark the superblock dirty if it was modified during loading or VFD indicated to do so */
@@ -326,7 +334,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 
 done:
     /* Release the superblock */
-    if(sblock && H5AC_unprotect(f, dxpl_id, H5AC_SUPERBLOCK, f->shared->super_addr, sblock, sblock_flags) < 0)
+    if(sblock && H5AC_unprotect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -359,7 +367,6 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     hsize_t         superblock_size;    /* Size of superblock, in bytes               */
     size_t          driver_size;        /* Size of driver info block (bytes)          */
     unsigned super_vers = HDF5_SUPERBLOCK_VERSION_DEF; /* Superblock version for file */
-    haddr_t         super_addr;         /* Address of superblock                      */
     hbool_t         need_ext;           /* Whether the superblock extension is needed */
     herr_t          ret_value = SUCCEED; /* Return Value                              */
 
@@ -419,6 +426,14 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get userblock size")
 
+    /* Sanity check the userblock size vs. the file's allocation alignment */
+    if(userblock_size > 0) {
+        if(userblock_size < f->shared->alignment)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be > file object alignment")
+        if(0 != (userblock_size % f->shared->alignment))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "userblock size must be an integral multiple of file object alignment")
+    } /* end if */
+
     sblock->base_addr = userblock_size;
     sblock->status_flags = 0;
 
@@ -463,17 +478,13 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, superblock_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set EOA value for superblock")
 
-    /* Set the superblock's address, it must be immediately after any userblock */
-    super_addr = (haddr_t)0;
-
     /* Insert superblock into cache, pinned */
-    if(H5AC_set(f, dxpl_id, H5AC_SUPERBLOCK, super_addr, sblock, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "can't add superblock to cache")
     sblock_in_cache = TRUE;
 
     /* Keep a copy of the superblock info */
     f->shared->sblock = sblock;
-    f->shared->super_addr = super_addr;
 
     /*
      * Determine if we will need a superblock extension
@@ -577,7 +588,7 @@ done:
                     HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
 
                 /* Evict the superblock from the cache */
-                if(H5AC_expunge_entry(f, dxpl_id, H5AC_SUPERBLOCK, super_addr, H5AC__NO_FLAGS_SET) < 0)
+                if(H5AC_expunge_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
             } /* end if */
             else
@@ -586,7 +597,6 @@ done:
 
             /* Reset variables in file structure */
             f->shared->sblock = NULL;
-            f->shared->super_addr = HADDR_UNDEF;
         } /* end if */
     } /* end if */
 

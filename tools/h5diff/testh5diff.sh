@@ -461,9 +461,9 @@ TOOLTEST h5diff_606.txt -d 0x1 $FILE1 $FILE2 g1/dset3 g1/dset4
 TESTING $H5DIFF -d "1" $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_607.txt -d "1" $FILE1 $FILE2 g1/dset3 g1/dset4
 
-# 6.8: repeated option
-TESTING $H5DIFF -d 1 -d 2 $SRCFILE1 $SRCFILE2   g1/dset3 g1/dset4
-TOOLTEST h5diff_608.txt -d 1 -d 2 $FILE1 $FILE2  g1/dset3 g1/dset4
+# 6.8: use system epsilon 
+TESTING $H5DIFF --use-system-epsilon $SRCFILE1 $SRCFILE2   g1/dset3 g1/dset4
+TOOLTEST h5diff_608.txt --use-system-epsilon $FILE1 $FILE2  g1/dset3 g1/dset4
 
 # 6.9: number larger than biggest difference
 TESTING $H5DIFF -d 200 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4

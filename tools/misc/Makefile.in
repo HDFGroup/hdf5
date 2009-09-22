@@ -69,7 +69,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5cc testh5repart.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT)
+am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
@@ -100,6 +100,10 @@ repart_test_SOURCES = repart_test.c
 repart_test_OBJECTS = repart_test.$(OBJEXT)
 repart_test_LDADD = $(LDADD)
 repart_test_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+talign_SOURCES = talign.c
+talign_OBJECTS = talign.$(OBJEXT)
+talign_LDADD = $(LDADD)
+talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -136,9 +140,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c
+	repart_test.c talign.c
 DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c
+	repart_test.c talign.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -404,7 +408,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
-TEST_PROG = h5repart_gentest
+TEST_PROG = h5repart_gentest talign
 TEST_SCRIPT = testh5repart.sh $(srcdir)/testh5mkgrp.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
@@ -549,6 +553,9 @@ h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPEND
 repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) 
 	@rm -f repart_test$(EXEEXT)
 	$(LINK) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
+talign$(EXEEXT): $(talign_OBJECTS) $(talign_DEPENDENCIES) 
+	@rm -f talign$(EXEEXT)
+	$(LINK) $(talign_OBJECTS) $(talign_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -595,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/talign.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
