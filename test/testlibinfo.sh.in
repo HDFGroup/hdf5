@@ -78,6 +78,18 @@ else
    h5libdir=../src
 fi 
 
+# Different OS uses different naming for shared libs.
+case `uname -s` in
+    Darwin)	# MacOS
+        shlibsuffix=.dylib
+        break
+        ;;
+    *)		# default
+        shlibsuffix=.so
+        break
+        ;;
+esac
+
 h5libsettings=../src/libhdf5.settings 
 
 # Part 1:
@@ -85,9 +97,9 @@ h5libsettings=../src/libhdf5.settings
 # libhdf5.settings file.
 # Check dynamic library file if built.
 if [ x-$Shared_Lib = x-yes ]; then
-    CHECK_LIBINFO ${h5libdir}/libhdf5.so
+    CHECK_LIBINFO ${h5libdir}/libhdf5${shlibsuffix}
 else
-    SKIP ${h5libdir}/libhdf5.so
+    SKIP ${h5libdir}/libhdf5${shlibsuffix}
 fi
 
 # Though rare, libhdf5.a may not have been built.
