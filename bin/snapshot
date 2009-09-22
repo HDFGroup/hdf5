@@ -412,7 +412,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	    TIMESTAMP "check-install" && \
 	    ${MAKE} check-install && DISKUSAGE \
 	    TIMESTAMP "uninstall" && \
-	    ${MAKE} uninstall-all) && DISKUSAGE ; then
+	    ${MAKE} uninstall-all && DISKUSAGE); then
 	    :
 	else
 	    errcode=$?
