@@ -190,6 +190,8 @@ else
  TOOLTEST tdataregbe.ls 0 -v tdatareg.h5
 fi 
 
+# test for file with datasets that use Fixed Array chunk indices
+TOOLTEST tdset_idx.ls 0 -w80 -d tdset_idx.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."

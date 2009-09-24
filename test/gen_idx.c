@@ -14,80 +14,23 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Generate the binary hdf5 files for the h5stat tests.
- * Usage: just execute the program without any arguments will
- * generate all the binary hdf5 files in the ./testfiles directory.
+ * Purpose:     This program is run to generate an HDF5 data file with datasets
+ *              that use Fixed Array indexing method.
  *
- * If you regenerate the test files (e.g., changing some code,
- * trying it on a new platform, ...), you need to verify the correctness
- * of the expected output and update the corresponding *.ddl files.
+ *              To test compatibility, compile and run this program
+ *              which will generate a file called "fixed_idx.h5".
+ *              Move it to the test directory in the HDF5 v1.6/1.8 source tree.
+ *              The test: test_idx_compatible() in dsets.c will read it.
  */
-
 #include <assert.h>
 #include "hdf5.h"
 
-#define FILE 		"h5stat_newgrat.h5"
-#define DATASET_NAME	"DATASET_NAME"
-#define GROUP_NAME	"GROUP"
-#define ATTR_NAME	"ATTR"
-#define NUM_GRPS 	35000
-#define NUM_ATTRS	100
+const char *FILENAME[1] = {
+    "fixed_idx.h5"	/* file with datasets that use Fixed Array indexing method */
+}; 
 
-/* Declarations for gen_idx_file() */
-#define FILE_IDX 	"h5stat_idx.h5"
 #define DSET		"dset"
 #define DSET_FILTER	"dset_filter"
-
-/*
- * Generate 1.8 HDF5 file
- * with NUM_GRPS groups
- * with NUM_ATTRS attributes on the dataset
- */
-static void gen_file(void)
-{
-    int     	ret, i;
-    hid_t	fapl, gid;
-    hid_t   	file, type_id, space_id, attr_id, dset_id;
-    char	name[30];
-    char	attrname[30];
-
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-    assert(ret >= 0);
-
-     /* Create dataset */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    for(i = 1; i <= NUM_GRPS; i++) {
-        sprintf(name, "%s%d", GROUP_NAME,i);
-        gid = H5Gcreate2(file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        H5Gclose(gid);
-    } /* end for */
-
-    /* Create a datatype to commit and use */
-    type_id = H5Tcopy(H5T_NATIVE_INT);
-
-    /* Create dataspace for dataset */
-    space_id = H5Screate(H5S_SCALAR);
-
-     /* Create dataset */
-    dset_id = H5Dcreate2(file, DATASET_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    for(i = 1; i <= NUM_ATTRS; i++) {
-        sprintf(attrname, "%s%d", ATTR_NAME,i);
-        attr_id = H5Acreate2(dset_id, attrname, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
-        ret = H5Aclose(attr_id);
-        assert(ret >= 0);
-    } /* end for */
-
-    ret = H5Dclose(dset_id);
-    assert(ret >= 0);
-    ret = H5Sclose(space_id);
-    assert(ret >= 0);
-    ret = H5Tclose(type_id);
-    assert(ret >= 0);
-    ret = H5Fclose(file);
-    assert(ret >= 0);
-
-} /* gen_file() */
 
 /*
  * Function: gen_idx_file
@@ -103,7 +46,7 @@ static void gen_idx_file(void)
     hid_t	fid;	            /* file id */
     hid_t   	sid;	            /* space id */
     hid_t	dcpl;	    	    /* dataset creation property id */
-    hid_t	did, did2;	    /* dataset id */
+    hid_t	did, did2;    	    /* dataset id */
     hsize_t 	dims[1] = {10};     /* dataset dimension */
     hsize_t 	c_dims[1] = {2};    /* chunk dimension */
     herr_t  	status;             /* return status */
@@ -113,13 +56,15 @@ static void gen_idx_file(void)
 
     /* Get a copy of the file aaccess property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
+    assert(fapl >= 0);
 
     /* Set the "use the latest format" bounds for creating objects in the file */
     status  = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     assert(status >= 0);
 
      /* Create dataset */
-    fid = H5Fcreate(FILE_IDX, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(FILENAME[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    assert(fid >= 0);
 
     /* Create data */
     for(i = 0; i < 10; i++)
@@ -127,12 +72,16 @@ static void gen_idx_file(void)
 
     /* Set chunk */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    assert(dcpl >= 0);
     status = H5Pset_chunk(dcpl, 1, c_dims);
     assert(status >= 0);
 
-    /* Create a 1D dataset */
     sid = H5Screate_simple(1, dims, NULL);
+    assert(sid >= 0);
+
+    /* Create a 1D dataset */
     did  = H5Dcreate2(fid, DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    assert(did >= 0);
     
     /* Write to the dataset */
     status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -145,30 +94,31 @@ static void gen_idx_file(void)
 
     /* Create and write the dataset */
     did2  = H5Dcreate2(fid, DSET_FILTER, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    assert(did2 >= 0);
+
     status = H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     assert(status >= 0);
 
     /* Close the dataset */
     status = H5Dclose(did2);
     assert(status >= 0);
-
 #endif
 
-    /* closing: dataspace, dataset, file */
+    /* closing */
+    status = H5Dclose(did);
+    assert(status >= 0);
     status = H5Sclose(sid);
     assert(status >= 0);
-    status = H5Dclose(did);
+    status = H5Pclose(dcpl);
+    assert(status >= 0);
+    status = H5Pclose(fapl);
     assert(status >= 0);
     status = H5Fclose(fid);
     assert(status >= 0);
-
 } /* gen_idx_file() */
 
 int main(void)
 {
-    gen_file();
-
-    /* Generate an HDF file to test for datasets with Fixed Array indexing */
     gen_idx_file();
 
     return 0;

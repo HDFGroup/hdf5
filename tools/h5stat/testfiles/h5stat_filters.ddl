@@ -22,7 +22,7 @@ Storage information:
 		B-tree/List: 0
 		Heap: 0
 	Chunked datasets:
-		B-tree: 31392
+		Index: 31392
 	Shared Messages:
 		Header: 0
 		B-tree/List: 0

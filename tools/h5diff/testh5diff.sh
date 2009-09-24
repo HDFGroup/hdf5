@@ -42,6 +42,8 @@ SRCFILE8=h5diff_dset2.h5
 SRCFILE9=h5diff_hyper1.h5
 SRCFILE10=h5diff_hyper2.h5
 SRCFILE11=h5diff_empty.h5
+SRCFILE12=h5diff_dset_idx1.h5
+SRCFILE13=h5diff_dset_idx2.h5
 
 FILE1="$INDIR/$SRCFILE1"
 FILE2="$INDIR/$SRCFILE2"
@@ -54,6 +56,8 @@ FILE8="$INDIR/$SRCFILE8"
 FILE9="$INDIR/$SRCFILE9"
 FILE10="$INDIR/$SRCFILE10"
 FILE11="$INDIR/$SRCFILE11"
+FILE12="$INDIR/$SRCFILE12"
+FILE13="$INDIR/$SRCFILE13"
 
 
 H5DIFF=h5diff               # The tool name
@@ -615,6 +619,13 @@ TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset8  g2/dset9
 TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
 
 
+# ##############################################################################
+# 12.  The comparision for the two datasets between the 2 files should be the same
+#		SRCFILE12: B-tree indexing is used for the datasets
+#		SRCFILE13: Fixed Array indexing is used for the datasets
+# ##############################################################################
+TESTING $H5DIFF -v  $SRCFILE12 $SRCFILE13 
+TOOLTEST h5diff_idx.txt -v $FILE12 $FILE13 
 
 
 # ##############################################################################

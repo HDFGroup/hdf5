@@ -39,7 +39,13 @@
 #define H5P_TESTING
 #include "H5Ppkg.h"		/* Property Lists 			*/
 
-#include "H5Dprivate.h"         /* Datasets (for EFL property name)     */
+/*
+ * This file needs to access private information from the H5D package.
+ * This file also needs to access the dataset testing code.
+ */
+#define H5D_PACKAGE
+#define H5D_TESTING
+#include "H5Dpkg.h"		/* Datasets     			*/
 
 
 const char *FILENAME[] = {
@@ -136,6 +142,8 @@ static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
 static int
 compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags);
+static int 
+compare_idx_type(hid_t fapl, hid_t did, H5D_chunk_index_t new_type, H5D_chunk_index_t old_type);
 
 
 /*-------------------------------------------------------------------------
@@ -1380,6 +1388,47 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    compare_idx_type
+ *
+ * Purpose:     If using new format, the index array type should be NEW_TYPE
+ *		If not, the index array type should be OLD_TYPE
+ *
+ * Return:	TRUE if the index type retrieved for the dataset DID is 
+ *			as expected
+ *	        FALSE if not
+ *
+ * Programmer:  Vailin Choi; August 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int 
+compare_idx_type(hid_t fapl, hid_t did, H5D_chunk_index_t new_type, H5D_chunk_index_t old_type)
+{
+    H5D_chunk_index_t idx_type; /* Dataset chunk index type */
+    H5F_libver_t low;           /* File format low bound */
+
+    /* Get the chunk index type */
+    if(H5D_layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+
+    /* Check if we are using the latest version of the format */
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) 
+	FAIL_STACK_ERROR
+
+    /* Verify index type */
+    if(low == H5F_LIBVER_LATEST) {
+	if(idx_type != new_type)
+	    TEST_ERROR
+    } else if(idx_type != old_type) 
+	TEST_ERROR
+
+    return TRUE;
+error:
+    return FALSE;
+} /* compare_idx_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_named_datatype
  *
  * Purpose:     Create name datatype in SRC file and copy it to DST file
@@ -2261,6 +2310,10 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     /* open the 1-D destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
+    /* Check if the array index type is correct */
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_EARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+	TEST_ERROR
+
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf1d) != TRUE) TEST_ERROR
 
@@ -2275,6 +2328,10 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the array index type is correct */
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+	TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf2d) != TRUE) TEST_ERROR
@@ -2423,6 +2480,10 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
+    /* Check if the array index type is correct */
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_EARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+	TEST_ERROR
+
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
 
@@ -2437,6 +2498,10 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the array index type is correct */
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+	TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -2766,6 +2831,9 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    if(compare_idx_type(fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+	TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR

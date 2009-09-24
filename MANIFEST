@@ -804,6 +804,8 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/btree_idx_1_6.h5
+./test/btree_idx_1_8.h5
 ./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
@@ -839,6 +841,7 @@
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_idx.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
@@ -1113,6 +1116,8 @@
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
+./tools/h5stat/testfiles/h5stat_idx.h5
+./tools/h5stat/testfiles/h5stat_idx.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
@@ -1185,6 +1190,9 @@
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
+./tools/testfiles/tdset_idx.ls
+./tools/testfiles/tdset_idx.ddl
+./tools/testfiles/tdset_idx.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tempty.ls
@@ -1521,6 +1529,7 @@
 ./tools/h5diff/testfiles/h5diff_205.txt
 ./tools/h5diff/testfiles/h5diff_206.txt
 ./tools/h5diff/testfiles/h5diff_207.txt
+./tools/h5diff/testfiles/h5diff_idx.txt
 
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
@@ -1529,6 +1538,8 @@
 ./tools/h5diff/testfiles/h5diff_basic2.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
 ./tools/h5diff/testfiles/h5diff_dset2.h5
+./tools/h5diff/testfiles/h5diff_dset_idx1.h5
+./tools/h5diff/testfiles/h5diff_dset_idx2.h5
 ./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_empty.h5
 ./tools/h5diff/testfiles/h5diff_hyper1.h5
@@ -1583,6 +1594,8 @@
 # test files for h5copy
 ./tools/h5copy/testfiles/h5copytst.h5
 ./tools/h5copy/testfiles/h5copytst.out.ls
+./tools/h5copy/testfiles/h5copytst_new.h5
+./tools/h5copy/testfiles/h5copytst_new.out.ls
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls

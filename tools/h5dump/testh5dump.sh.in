@@ -515,8 +515,8 @@ TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
 
-
-
+# tests for Fixed Array chunk indices
+TOOLTEST tdset_idx.ddl -p -H tdset_idx.h5
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

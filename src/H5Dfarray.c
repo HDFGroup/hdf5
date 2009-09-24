@@ -57,7 +57,7 @@
 /* Fixed array create/open user data */
 typedef struct H5D_farray_ctx_ud_t {
     const H5F_t *f;             /* Pointer to file info */
-    const H5O_layout_chunk_t *layout; /* Pointer to layout info */
+    uint32_t chunk_size;        /* Size of chunk (bytes) */
 } H5D_farray_ctx_ud_t;
 
 /* Fixed array callback context */
@@ -109,6 +109,9 @@ static herr_t H5D_farray_decode(const void *raw, void *elmt, size_t nelmts,
     void *ctx);
 static herr_t H5D_farray_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
+static void *H5D_farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id,
+    haddr_t obj_addr);
+static herr_t H5D_farray_dst_dbg_context(void *dbg_ctx);
 
 /* Fixed array class callbacks for chunks w/filters */
 /* (some shared with callbacks for chunks w/o filters) */
@@ -189,7 +192,9 @@ const H5FA_class_t H5FA_CLS_CHUNK[1]={{
     H5D_farray_fill,            /* Fill block of missing elements callback */
     H5D_farray_encode,          /* Element encoding callback */
     H5D_farray_decode,          /* Element decoding callback */
-    H5D_farray_debug            /* Element debugging callback */
+    H5D_farray_debug,           /* Element debugging callback */
+    H5D_farray_crt_dbg_context, /* Create debugging context */
+    H5D_farray_dst_dbg_context 	/* Destroy debugging context */
 }};
 
 /* Fixed array class callbacks for dataset chunks w/filters */
@@ -202,12 +207,16 @@ const H5FA_class_t H5FA_CLS_FILT_CHUNK[1]={{
     H5D_farray_filt_fill,       /* Fill block of missing elements callback */
     H5D_farray_filt_encode,     /* Element encoding callback */
     H5D_farray_filt_decode,     /* Element decoding callback */
-    H5D_farray_filt_debug       /* Element debugging callback */
+    H5D_farray_filt_debug,      /* Element debugging callback */
+    H5D_farray_crt_dbg_context, /* Create debugging context */
+    H5D_farray_dst_dbg_context 	/* Destroy debugging context */
 }};
 
 /* Declare a free list to manage the H5D_farray_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_farray_ctx_t);
 
+/* Declare a free list to manage the H5D_farray_ctx_ud_t struct */
+H5FL_DEFINE_STATIC(H5D_farray_ctx_ud_t);
 
 
 /*-------------------------------------------------------------------------
@@ -235,7 +244,7 @@ H5D_farray_crt_context(void *_udata)
     /* Sanity checks */
     HDassert(udata);
     HDassert(udata->f);
-    HDassert(udata->layout);
+    HDassert(udata->chunk_size > 0);
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5D_farray_ctx_t)))
@@ -247,7 +256,7 @@ H5D_farray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->layout->size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -439,6 +448,111 @@ H5D_farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_farray_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_farray_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *		(get the layout message in the specified object header)
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Vailin Choi
+ *		5th August, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5D_farray_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr)
+{
+    H5D_farray_ctx_ud_t	*dbg_ctx = NULL;   /* Context for fixed array callback */
+    H5O_loc_t obj_loc;          /* Pointer to an object's location */
+    hbool_t obj_opened = FALSE; /* Flag to indicate that the object header was opened */
+    H5O_layout_t layout;        /* Layout message */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_farray_crt_dbg_context)
+
+    HDassert(f);
+    HDassert(H5F_addr_defined(obj_addr));
+
+    /* Allocate context for debugging callback */
+    if(NULL == (dbg_ctx = H5FL_MALLOC(H5D_farray_ctx_ud_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context")
+
+    /* Set up the object header location info */
+    H5O_loc_reset(&obj_loc);
+    obj_loc.file = f;
+    obj_loc.addr = obj_addr;
+
+    /* Open the object header where the layout message resides */
+    if(H5O_open(&obj_loc) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header")
+    obj_opened = TRUE;
+
+    /* Read the layout message */
+    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
+
+    /* close the object header */
+    if(H5O_close(&obj_loc) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+
+    /* Create user data */
+    dbg_ctx->f = f;
+    dbg_ctx->chunk_size = layout.u.chunk.size;
+
+    /* Set return value */
+    ret_value = dbg_ctx;
+
+done:
+    /* Cleanup on error */
+    if(ret_value == NULL) {
+        /* Release context structure */
+        if(dbg_ctx)
+            dbg_ctx = H5FL_FREE(H5D_farray_ctx_ud_t, dbg_ctx);
+
+        /* Close object header */
+        if(obj_opened) {
+            if(H5O_close(&obj_loc) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_farray_crt_dbg_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_farray_dst_dbg_context
+ *
+ * Purpose:	Destroy context for debugging callback
+ *		(free the layout message from the specified object header)
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		24th September, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_farray_dst_dbg_context(void *_dbg_ctx)
+{
+    H5D_farray_ctx_ud_t	*dbg_ctx = (H5D_farray_ctx_ud_t	*)_dbg_ctx; /* Context for fixed array callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_farray_dst_dbg_context)
+
+    HDassert(dbg_ctx);
+
+    /* Release context structure */
+    dbg_ctx = H5FL_FREE(H5D_farray_ctx_ud_t, dbg_ctx);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_farray_dst_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -636,7 +750,7 @@ H5D_farray_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f = idx_info->f;
-    udata.layout = idx_info->layout;
+    udata.chunk_size = idx_info->layout->size;
 
     /* Open the fixed array for the chunk index */
     cls = (idx_info->pline->nused > 0) ?  H5FA_CLS_FILT_CHUNK : H5FA_CLS_CHUNK;
@@ -709,7 +823,7 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f = idx_info->f;
-    udata.layout = idx_info->layout;
+    udata.chunk_size = idx_info->layout->size;
     
     /* Create the fixed array for the chunk index */
     if(NULL == (idx_info->storage->u.farray.fa = H5FA_create(idx_info->f, idx_info->dxpl_id, &cparam, &udata)))

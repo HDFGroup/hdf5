@@ -20,6 +20,7 @@
 #include "hdf5.h"
 
 #define FILENAME                "h5copytst.h5"
+#define FILENAME_NEW            "h5copytst_new.h5"
 #define DATASET_SIMPLE          "simple"
 #define DATASET_CHUNK           "chunk"
 #define DATASET_COMPACT         "compact"
@@ -30,6 +31,8 @@
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
+#define TRUE			1
+#define FALSE			0
 
 
 /*-------------------------------------------------------------------------
@@ -394,15 +397,29 @@ static void gent_nested_group(hid_t loc_id)
 
 int main(void)
 {
-    hid_t fid;
+    hid_t fid;		/* File id */
+    hid_t fapl_new;	/* File access property id */
+    hbool_t new_format;	/* New format or old format */
 
-    /* Create source file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    gent_datasets(fid);
-    gent_empty_group(fid);
-    gent_nested_datasets(fid);
-    gent_nested_group(fid);
-    H5Fclose(fid);
+    fapl_new = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_libver_bounds(fapl_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+
+    /* Test with old & new format groups */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    
+        /* Set the FAPL for the type of format */
+        if(new_format)
+	    fid = H5Fcreate(FILENAME_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
+	else
+	    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+	gent_datasets(fid);
+	gent_empty_group(fid);
+	gent_nested_datasets(fid);
+	gent_nested_group(fid);
+	H5Fclose(fid);
+    }
+    H5Pclose(fapl_new);
 
     return 0;
 }

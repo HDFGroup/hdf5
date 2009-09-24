@@ -93,6 +93,7 @@
 #define FILE63  "textlinkfar.h5"
 #define FILE64  "tarray8.h5"
 #define FILE65  "tattrreg.h5"
+#define FILE66  "tdset_idx.h5"
 
 
 
@@ -103,6 +104,8 @@
  */
 
 /* utility functions */
+static int
+make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void *buf);
 static int
 write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
                 hid_t tid, void *buf);
@@ -244,6 +247,16 @@ typedef struct s1_t {
 #define F64_ARRAY_BUF_LEN   (4*1024)
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
 
+/* Declarations for gent_dataset_idx() for "FILE66" */
+#define DSET_FIXED		"dset_fixed"
+#define DSET_FIXED_FILTER	"dset_filter"
+#define DSET_BTREE		"dset_btree"
+#define DIM200		200
+#define DIM100		100
+#define DIM20		20
+#define DIM10		10
+#define CHUNK		5
+
 static void
 gent_group(void)
 {
@@ -377,6 +390,84 @@ gent_dataset2(void)
     H5Fclose(fid);
 }
 
+/*
+ * Create a file with new format.
+ * Create one dataset with (set_chunk, fixed dimension) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dimension, filter) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, non-fixed dimension) 
+ *	so that B-tree indexing will be used.
+ */
+static void
+gent_dataset_idx(void)
+{
+    hid_t fid, space, dcpl, fapl;
+    hsize_t dims[2];
+    hsize_t maxdims[2];
+    int buf[20][10];
+    int i, j, ret;
+
+    /* Get a copy of the file aaccess property */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
+    fid = H5Fcreate(FILE66, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+    dims[0] = CHUNK;
+    dims[1] = CHUNK;
+
+    /* set chunk */
+    ret = H5Pset_chunk(dcpl, RANK, dims);
+    assert(ret >= 0);
+
+    /* dataset with fixed dimensions */
+    dims[0] = DIM20; 
+    dims[1] = DIM10;
+    space = H5Screate_simple(RANK, dims, NULL);
+
+    for(i = 0; i < DIM20; i++)
+         for(j = 0; j < DIM10; j++)
+              buf[i][j] = j;
+
+    ret = make_dset(fid, DSET_FIXED, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+    /* dataset with non-fixed dimensions */
+    maxdims[0] = DIM200; 
+    maxdims[1] = DIM100;
+    space = H5Screate_simple(RANK, dims, maxdims);
+
+    ret = make_dset(fid, DSET_BTREE, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+
+    /* dataset with fixed dimensions and filters */
+    /* remove the filters from the dcpl */
+    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    assert(ret >= 0);
+
+    /* set deflate data */
+    ret = H5Pset_deflate(dcpl, 9);
+    assert(ret >= 0);
+
+    space = H5Screate_simple(RANK, dims, NULL);
+    ret = make_dset(fid, DSET_FIXED_FILTER, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+
+    H5Sclose(space);
+#endif
+
+    H5Pclose(dcpl);
+    H5Fclose(fid);
+}
 
 static void
 gent_attribute(void)
@@ -6517,6 +6608,7 @@ int main(void)
     gent_fpformat();
     gent_extlinks();
 
+    gent_dataset_idx();
 
     return 0;
 }

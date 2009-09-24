@@ -43,6 +43,8 @@
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
 #define FILE11   "h5diff_empty.h5"
+#define FILE12   "h5diff_dset_idx1.h5"
+#define FILE13   "h5diff_dset_idx2.h5"
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
 #define GBLL    ((unsigned long long) 1024 * 1024 *1024 )
@@ -87,6 +89,7 @@ static void gen_datareg(hid_t fid,int make_diffs);
 /* utilities */
 static int write_attr(hid_t loc_id,int rank,hsize_t *dims,const char *name,hid_t tid,void *buf);
 static int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *name,hid_t tid,void *buf);
+static int gen_dataset_idx(const char *file, int format);
 
 
 /*-------------------------------------------------------------------------
@@ -118,8 +121,17 @@ int main(void)
     /* generate 2 files, the second call creates a similar file with differences */
     test_hyperslab(FILE9,0);
     test_hyperslab(FILE10,1);
-    return 0;
 
+    /* 
+     * Generate 2 files: FILE12 with old format; FILE13 with new format
+     * 	Create 2 datasets in each file:
+     *  	One dataset: chunked layout, w/o filters, fixed dimension
+     *  	One dataset: chunked layout,  w/ filters, fixed dimension
+     */
+    gen_dataset_idx(FILE12, 0);
+    gen_dataset_idx(FILE13, 1);
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -889,6 +901,95 @@ int test_datasets(const char *file,
     /* close file */
     status = H5Fclose(fid);
     assert(status >= 0);
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+* Function: gen_dataset_idx
+*
+* Purpose: Create a file with either the new or old format
+*	   Create two datasets in the file: 
+*		one dataset: fixed dimension, chunked layout, w/o filters
+*		one dataset: fixed dimension, chunked layout, w/ filters
+*
+*-------------------------------------------------------------------------
+*/
+static
+int gen_dataset_idx(const char *file, int format)
+{
+    hid_t   fid;		/* file id */
+    hid_t   did, did2;		/* dataset id */
+    hid_t   sid;		/* space id */
+    hid_t   fapl;		/* file access property id */
+    hid_t   dcpl;		/* dataset creation property id */
+    hsize_t dims[1] = {10};	/* dataset dimension */
+    hsize_t c_dims[1] = {2};	/* chunk dimension */
+    herr_t  status;		/* return status */
+    int     buf[10];		/* data buffer */
+    int	    i;			/* local index variable */
+
+    /* Get a copy of the file aaccess property */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set the "use the latest format" bounds for creating objects in the file */
+    if(format) {
+	status = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+	assert(status >= 0);
+    }
+
+    /* Create a file  */
+    if((fid = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        return -1;
+
+    /* Create data */
+    for(i = 0; i < 10; i++)
+	buf[i] = i;
+
+    /* Set chunk */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    status = H5Pset_chunk(dcpl, 1, c_dims);
+    assert(status >= 0);
+
+    /* Create a 1D dataset */
+    sid = H5Screate_simple(1, dims, NULL);
+    did  = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    
+    /* Write to the dataset */
+    status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    assert(status >= 0);
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+    /* set deflate data */
+    status = H5Pset_deflate(dcpl, 9);
+    assert(status >= 0);
+
+    /* Create and write the dataset */
+    did2  = H5Dcreate2(fid, "dset_filter", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    status = H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    assert(status >= 0);
+
+    /* Close the dataset */
+    status = H5Dclose(did2);
+    assert(status >= 0);
+
+#endif
+
+    /* closing: dataspace, dataset, file */
+    status = H5Sclose(sid);
+    assert(status >= 0);
+
+    status = H5Dclose(did);
+    assert(status >= 0);
+
+    status = H5Fclose(fid);
+    assert(status >= 0);
+
+    status = H5Pclose(dcpl);
+    assert(status >= 0);
+
+    status = H5Pclose(fapl);
+    assert(status >= 0);
+
     return status;
 }
 

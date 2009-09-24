@@ -88,7 +88,7 @@ typedef struct iter_t {
     hsize_t SM_index_storage_size;      /* index (btree & list) size for SOHM table (1.8) */
     hsize_t SM_heap_storage_size;	/* fractal heap size for SOHM table (1.8) */
     hsize_t super_ext_size;	   	/* superblock extension size */
-    hsize_t datasets_btree_storage_size;   /* btree size for chunked dataset */
+    hsize_t datasets_index_storage_size;   /* meta size for chunked dataset's indexing type */
     unsigned long nexternal;            /* Number of external files for a dataset */
     int           local;                /* Flag to indicate iteration over the object*/
 } iter_t;
@@ -426,7 +426,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     assert(did > 0);
 
     /* Update dataset metadata info */
-    iter->datasets_btree_storage_size += oi->meta_size.obj.index_size;
+    iter->datasets_index_storage_size += oi->meta_size.obj.index_size;
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
@@ -860,7 +860,7 @@ print_file_metadata(const iter_t *iter)
     HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
 
     HDfprintf(stdout, "\tChunked datasets:\n");
-    HDfprintf(stdout, "\t\tB-tree: %Hu\n", iter->datasets_btree_storage_size);
+    HDfprintf(stdout, "\t\tIndex: %Hu\n", iter->datasets_index_storage_size);
 
     HDfprintf(stdout, "\tShared Messages:\n");
     HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);

@@ -96,7 +96,9 @@ const H5FA_class_t H5FA_CLS_TEST[1]={{
     H5FA__test_fill,            /* Fill block of missing elements callback */
     H5FA__test_encode,          /* Element encoding callback */
     H5FA__test_decode,          /* Element decoding callback */
-    H5FA__test_debug            /* Element debugging callback */
+    H5FA__test_debug,           /* Element debugging callback */
+    NULL,			/* Create debugging context */
+    NULL 			/* Destroy debugging context */
 }};
 
 

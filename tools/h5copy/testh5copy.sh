@@ -30,7 +30,6 @@ H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 nerrors=0
 verbose=yes
 
-SRCFILE=h5copytst.h5
 INDIR=$srcdir/testfiles
 OUTDIR=../testfiles
 CMP='cmp -s'
@@ -56,7 +55,7 @@ TESTING()
 VERIFY() 
 {
     SPACES="                                                               "
-    echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
+    echo "Verifying h5diff output `basename $1` `basename $2` `basename $3` `basename $4` $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -92,7 +91,7 @@ TOOLTEST()
       runh5diff=no
      fi
   
-    TESTING $H5COPY $@
+    TESTING $H5COPY $5 $6 $7 $8 $9
     (
     echo "#############################"
     echo " output for '$H5COPY $@'"
@@ -134,7 +133,7 @@ TOOLTEST_FAIL()
       runh5diff=no
      fi
   
-    TESTING $H5COPY $@
+    TESTING $H5COPY $5 $6 $7 $8 $9
     (
     echo "#############################"
     echo " output for '$H5COPY $@'"
@@ -248,12 +247,13 @@ H5LSTEST()
 # <none>
 COPYOBJECTS() 
 {
-    TESTFILE="$INDIR/$SRCFILE"
-    FILEOUT="$OUTDIR/`basename $SRCFILE .h5`.out.h5"
+    TESTFILE="$INDIR/$1"
+    FILEOUT="$OUTDIR/`basename $1 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
+    echo "Testing from `basename $TESTFILE` to `basename $FILEOUT` for the following tests:"
     echo "Test copying various forms of datasets"
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple     -d simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk      -d chunk
@@ -304,8 +304,12 @@ COPYOBJECTS()
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-COPYOBJECTS 
+COPYOBJECTS h5copytst.h5
 
+# Add newline for nicer formatting
+echo " "
+
+COPYOBJECTS h5copytst_new.h5
 
 if test $nerrors -eq 0 ; then
     echo "All h5copy tests passed."

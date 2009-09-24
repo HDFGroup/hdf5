@@ -58,7 +58,7 @@
 /* Extensible array create/open user data */
 typedef struct H5D_earray_ctx_ud_t {
     const H5F_t *f;             /* Pointer to file info */
-    const H5O_layout_chunk_t *layout; /* Pointer to layout info */
+    uint32_t chunk_size;        /* Size of chunk (bytes) */
 } H5D_earray_ctx_ud_t;
 
 /* Extensible array callback context */
@@ -227,7 +227,7 @@ H5D_earray_crt_context(void *_udata)
     /* Sanity checks */
     HDassert(udata);
     HDassert(udata->f);
-    HDassert(udata->layout);
+    HDassert(udata->chunk_size > 0);
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5D_earray_ctx_t)))
@@ -239,7 +239,7 @@ H5D_earray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->layout->size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -746,7 +746,7 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f = idx_info->f;
-    udata.layout = idx_info->layout;
+    udata.chunk_size = idx_info->layout->size;
 
     /* Open the extensible array for the chunk index */
     cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
@@ -899,7 +899,7 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f = idx_info->f;
-    udata.layout = idx_info->layout;
+    udata.chunk_size = idx_info->layout->size;
 
     /* Create the extensible array for the chunk index */
     if(NULL == (idx_info->storage->u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, &udata)))

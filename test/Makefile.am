@@ -61,7 +61,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
+BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_idx gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow
 
@@ -125,7 +125,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
             unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
-            objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 \
+            objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
             earray.h5 swmr_data.h5
 
 # Sources for testhdf5 executable

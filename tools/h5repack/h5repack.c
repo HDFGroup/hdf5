@@ -90,13 +90,13 @@ int h5repack(const char* infile,
 *-------------------------------------------------------------------------
 */
 
-int h5repack_init (pack_opt_t *options,
-                   int verbose)
+int h5repack_init (pack_opt_t *options, int verbose, int latest)
 {
     int k, n;
     memset(options,0,sizeof(pack_opt_t));
     options->min_comp = 1024;
-    options->verbose   = verbose;
+    options->verbose  = verbose;
+    options->latest = latest ;
 
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
     {

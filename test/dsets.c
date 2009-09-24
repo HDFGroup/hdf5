@@ -208,6 +208,15 @@ const char *FILENAME[] = {
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
+/* Declarations for test_idx_compatible() */
+#define DSET            "dset"
+#define DSET_FILTER     "dset_filter"
+const char *OLD_FILENAME[] = {  /* Files created under 1.6 branch and 1.8 branch */
+    "btree_idx_1_6.h5", /* 1.6 HDF5 file */
+    "btree_idx_1_8.h5"  /* 1.8 HDF5 file */
+};
+
+
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
@@ -7058,7 +7067,7 @@ test_chunk_fast(hid_t fapl)
                         /* Get the chunk index type */
                         if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
-                        /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
+                        /* Chunk index type expected depends on whether we are using the latest version of the format */
                         if(low == H5F_LIBVER_LATEST) {
                             /* Verify index type */
                             if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
@@ -7777,7 +7786,7 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  
+ * Programmer:  Vailin Choi; 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -7812,10 +7821,8 @@ test_fixed_array(hid_t fapl)
     int         rbuf_big[POINTS_BIG];  	/* read buffer for big dataset */
 
     hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
-
     int         chunks[12][6];          /* # of chunks for dataset dimensions */
     int         chunks_big[125][20];    /* # of chunks for big dataset dimensions */
-
     int         chunk_row;              /* chunk row index */
     int         chunk_col;              /* chunk column index */
 
@@ -7830,6 +7837,9 @@ test_fixed_array(hid_t fapl)
     hbool_t     compress;       	/* Whether chunks should be compressed */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    h5_stat_size_t       empty_size;  	/* Size of an empty file */
+    h5_stat_size_t       file_size;  	/* Size of each file created */
+
     size_t      i, j;           	/* local index variables */
     herr_t      ret;            	/* Generic return value */
 
@@ -7839,6 +7849,16 @@ test_fixed_array(hid_t fapl)
 
     /* Check if we are using the latest version of the format */
     if(H5Pget_libver_bounds(fapl, &low, &high) < 0) FAIL_STACK_ERROR
+
+    /* Create and close the file to get the file size */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        STACK_ERROR
+
+    /* Get the size of the empty file */
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Loop over compressing chunks */
@@ -7993,10 +8013,6 @@ test_fixed_array(hid_t fapl)
 	    if(H5Sclose(sid_big) < 0) FAIL_STACK_ERROR
     	    if(H5Sclose(big_mem_id) < 0) FAIL_STACK_ERROR
     	    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
-	    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-            /* Re-open file */
-            if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
 	    /* Open the first dataset */
 	    if((dsid = H5Dopen2(fid, DSET_FIXED_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -8060,6 +8076,15 @@ test_fixed_array(hid_t fapl)
 
             /* Close everything */
             if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+	     /* Get the size of the file */
+	    if((file_size = h5_get_file_size(filename, fapl)) < 0)
+		TEST_ERROR
+
+	    /* Verify the file is correct size */
+	    if(file_size != empty_size)
+		TEST_ERROR
+
         } /* end for */
 #ifdef H5_HAVE_FILTER_DEFLATE
     } /* end for */
@@ -8078,6 +8103,85 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end test_fixed_array() */
+
+/*-------------------------------------------------------------------------
+ *
+ *  test_idx_compatible(): 
+ *	Verify that the library can read datasets created with
+ *	1.6/1.8 library that use the B-tree indexing method.
+ *
+ *  Programmer: Vailin Choi; 26th August, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+test_idx_compatible(void)
+{
+    hid_t	fid;		/* File id */
+    hid_t       did;		/* Dataset id */
+    ssize_t     nread;          /* Number of bytes read in */
+    char  	*srcdir = HDgetenv("srcdir"); 	   /* where the src code is located */
+    char        filename[FILENAME_BUF_SIZE] = "";  /* old test file name */
+    unsigned    j;              /* Local index variable */
+    H5D_chunk_index_t idx_type; /* Chunked dataset index type */
+    herr_t      ret;        	/* Return value */
+
+    /* Output message about test being performed */
+    TESTING("compatibility for 1.6/1.8 datasets that use B-tree indexing");
+
+    for(j = 0; j < NELMTS(OLD_FILENAME); j++) {
+
+	/* Generate correct name for test file by prepending the source path */
+	if(srcdir && ((HDstrlen(srcdir) + HDstrlen(OLD_FILENAME[j]) + 1) < sizeof(filename))) {
+	    HDstrcpy(filename, srcdir);
+	    HDstrcat(filename, "/");
+	}
+	HDstrcat(filename, OLD_FILENAME[j]);
+
+	/* Open the file */
+	if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+	    FAIL_STACK_ERROR
+
+	/* Should be able to read the dataset w/o filter created under 1.8/1.6 */
+	if((did = H5Dopen2(fid, DSET, H5P_DEFAULT)) < 0)
+	    TEST_ERROR
+
+	/* Get the chunk index type */
+	if(H5D_layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+
+	/* Verify index type */
+	if(idx_type != H5D_CHUNK_IDX_BTREE) 
+	    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+
+	if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+	/* Should be able to read the dataset w/ filter created under 1.8/1.6 */
+	if((did = H5Dopen2(fid, DSET_FILTER, H5P_DEFAULT)) < 0)
+	    TEST_ERROR
+
+	/* Get the chunk index type */
+	if(H5D_layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+
+	/* Verify index type */
+	if(idx_type != H5D_CHUNK_IDX_BTREE) 
+	    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+
+	if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+	/* Close the file */
+	if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    }
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_idx_compatible */
 
 
 /*-------------------------------------------------------------------------
@@ -8206,6 +8310,7 @@ main(void)
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
         nerrors += (test_fixed_array(my_fapl) < 0		? 1 : 0);
+	nerrors += (test_idx_compatible() < 0			? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
