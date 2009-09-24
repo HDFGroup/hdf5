@@ -135,6 +135,12 @@ const char *FILENAME[] = {
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
+/* Declarations for test_idx_compatible() */
+#define	FIXED_IDX_FILE	"fixed_idx.h5"
+#define DSET            "dset"		/* dataset name w/o filter */
+#define DSET_FILTER     "dset_filter"	/* dataset name w/ filter */
+#define FILENAME_LEN  	1024           	/* length of file name */
+
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
@@ -4194,6 +4200,47 @@ test_compat(hid_t file)
     return -1;
 } /* end test_compat() */
 
+/*-------------------------------------------------------------------------
+ *
+ *  test_idx_compatible(): 
+ *	Verify that the 1.6 branch cannot open the file with datasets that
+ *	use Fixed Array indexing method.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t 
+test_idx_compatible(void)
+{
+    hid_t	fid;		/* File id */
+    char  	*srcdir = HDgetenv("srcdir"); /* where the src code is located */
+    char        filename[FILENAME_LEN] = "";  /* old test file name */
+
+    /* Output message about test being performed */
+    TESTING("Compatibility for file with datasets that use Fixed Array indexing\n");
+
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FIXED_IDX_FILE) + 1) < sizeof(filename))) {
+	HDstrcpy(filename, srcdir);
+	HDstrcat(filename, "/");
+    }
+    HDstrcat(filename, FIXED_IDX_FILE);
+
+    /* Should not be able to read the file with datasets that use Fixed Array indexing */
+    H5E_BEGIN_TRY {
+	if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_idx_compatible */
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -4269,6 +4316,7 @@ main(void)
     nerrors += test_missing_chunk(file)<0	?1:0;
     nerrors += test_random_chunks()<0   ?1:0;
     nerrors += test_compat(file)<0      ?1:0;
+    nerrors += test_idx_compatible()< 0 ?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

@@ -1514,9 +1514,11 @@
 ./test/file_handle.c
 ./test/fill_old.h5
 ./test/fillval.c
+./test/fixed_idx.h5 
 ./test/flush1.c
 ./test/flush2.c
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_idx.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_

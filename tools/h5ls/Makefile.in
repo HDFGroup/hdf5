@@ -43,6 +43,9 @@ LIB_SRC=
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
+## Temporary files.
+DISTCLEAN=testh5ls.sh
+
 ## Source and object files for programs...
 PROG_SRC=h5ls.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
