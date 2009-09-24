@@ -804,12 +804,14 @@
 ./test/freespace.c
 ./test/fill_old.h5
 ./test/fillval.c
+./test/fixed_idx.h5
 ./test/flush1.c
 ./test/flush2.c
 ./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_idx.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_

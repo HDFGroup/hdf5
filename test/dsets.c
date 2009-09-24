@@ -178,6 +178,11 @@ const char *FILENAME[] = {
 #define BYPASS_CHUNK_DIM         500
 #define BYPASS_FILL_VALUE        7
  
+/* Declarations for test_idx_compatible() */
+#define	FIXED_IDX_FILE	"fixed_idx.h5"
+#define DSET            "dset"
+#define DSET_FILTER     "dset_filter"
+
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -7242,6 +7247,62 @@ error:
     return -1;
 } /* end test_chunk_expand() */
 
+/*-------------------------------------------------------------------------
+ *
+ *  test_idx_compatible(): 
+ *	Verify that the 1.8 branch cannot read datasets that use
+ *	Fixed Array indexing method.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+test_idx_compatible(void)
+{
+    hid_t	fid;		/* File id */
+    hid_t       did;		/* Dataset id */
+    char  	*srcdir = HDgetenv("srcdir"); /* where the src code is located */
+    char        filename[FILENAME_BUF_SIZE] = "";  /* old test file name */
+
+    /* Output message about test being performed */
+    TESTING("Compatibility for datasets that use Fixed Array indexing\n");
+
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FIXED_IDX_FILE) + 1) < sizeof(filename))) {
+	HDstrcpy(filename, srcdir);
+	HDstrcat(filename, "/");
+    }
+    HDstrcat(filename, FIXED_IDX_FILE);
+
+    /* Open the file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Should not able to read the dataset w/o filter that use Fixed Array indexing */
+    H5E_BEGIN_TRY {
+	if((did = H5Dopen2(fid, DSET, H5P_DEFAULT)) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Should not able to read the dataset w/ filter that use Fixed Array indexing */
+    H5E_BEGIN_TRY {
+	if((did = H5Dopen2(fid, DSET_FILTER, H5P_DEFAULT)) != FAIL)
+	    TEST_ERROR
+    } H5E_END_TRY;
+
+    if(H5Fclose(fid) < 0) 
+	FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_idx_compatible */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -7366,6 +7427,7 @@ main(void)
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
+	nerrors += (test_idx_compatible() < 0  			? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
