@@ -49,6 +49,7 @@
 #define F1_SYM_LEAF_K	   4
 #define F1_SYM_INTERN_K	   16
 #define FILE1	"tfile1.h5"
+#define SFILE1	"sys_file1"
 
 #define F2_USERBLOCK_SIZE  (hsize_t)512
 #define F2_OFFSET_SIZE	   8
@@ -2074,20 +2075,15 @@ test_cached_stab_info(void)
 **              June 29, 2009
 **
 **  Modification: Raymond Lu
-**                Skip this function for OpenVMS.
+**                I added a test with the system functions to make
+**                sure the stat function behaves as we expected.
 **                17 September 2009
 *****************************************************************/
-#ifdef H5_VMS
 static void
 test_rw_noupdate(void)
 {
-    /* Output message about test being performed */
-    MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed.  This test is skipped on OpenVMS because the modification time from stat is the same as the last access time.\n"));
-} /* end test_rw_noupdate() */
-#else
-static void
-test_rw_noupdate(void)
-{
+    int   fid;          /* File ID from system-created file */
+    struct stat sys_sb1, sys_sb2;  /* Info from the system stat */
     hid_t file_id;      /* HDF5 File ID */
     h5_stat_t sb1, sb2; /* Info from 'stat' call */
     double diff;        /* Difference in modification times */
@@ -2096,7 +2092,42 @@ test_rw_noupdate(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing to verify that nothing is written if nothing is changed.\n"));
 
-    /* Create and Close File */
+    /* First make sure the stat function behaves as we expect - the modification time
+     * is the time that the file was modified last time. */
+    fid = open(SFILE1, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    CHECK(fid, FAIL, "open");
+    ret = close(fid);
+    CHECK(ret, FAIL, "close");
+
+    /* Determine File's Initial Timestamp */
+    ret = stat(SFILE1, &sys_sb1);
+    VERIFY(ret, 0, "stat");
+
+    /* Wait for 2 seconds */
+    /* This ensures a system time difference between the two file accesses */
+    sleep(2);
+
+    fid = open(SFILE1, O_RDWR);
+    CHECK(fid, FAIL, "open");
+    ret = close(fid);
+    CHECK(ret, FAIL, "close");
+
+    /* Determine File's New Timestamp */
+    ret = stat(SFILE1, &sys_sb2);
+    VERIFY(ret, 0, "stat");
+
+    /* Ensure That Timestamps Are Equal */
+    diff = difftime(sys_sb2.st_mtime, sys_sb1.st_mtime);
+
+    if(!DBL_ABS_EQUAL(diff, 0.0)) {
+        /* Output message about test being performed */
+        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time (We know OpenVMS behaves in this way).\n"));
+
+        goto done;
+    }
+
+    /* Then we can test with a HDF5 file */
+    /* Create and Close a HDF5 File */
     file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fcreate");
     ret = H5Fclose(file_id);
@@ -2124,8 +2155,10 @@ test_rw_noupdate(void)
     diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
     ret = (diff > 0.0);
     VERIFY(ret, 0, "Timestamp");
+
+done:
+    ; /* do nothing */
 } /* end test_rw_noupdate() */
-#endif
 
 /****************************************************************
 **
@@ -2532,6 +2565,7 @@ test_file(void)
 void
 cleanup_file(void)
 {
+    HDremove(SFILE1);
     HDremove(FILE1);
     HDremove(FILE2);
     HDremove(FILE3);
