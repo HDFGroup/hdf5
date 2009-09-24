@@ -53,13 +53,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Fixed array create/open user data */
-typedef struct ctx_ud_t {
-    const H5F_t *f;             /* Pointer to file info */
-    const H5O_layout_t *layout; /* Pointer to layout info */
-} ctx_ud_t;
-
-
 /********************/
 /* Package Typedefs */
 /********************/
@@ -105,9 +98,7 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 
     /* Local variables */
     H5FA_hdr_t *hdr = NULL; 	/* Shared fixed array header */
-    H5O_loc_t obj_loc;		/* Pointer to an object's location */
-    H5O_layout_t layout;	/* Layout message */
-    ctx_ud_t udata;		/* User data */
+    void *dbg_ctx = NULL;	/* Fixed array debugging context */
 
     /* Check arguments */
     HDassert(f);
@@ -118,28 +109,15 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     HDassert(fwidth >= 0);
     HDassert(cls);
 
-    H5O_loc_reset(&obj_loc);
-    obj_loc.file = f;
-    obj_loc.addr = obj_addr;
-
-    /* Open the object header where the layout message resides */
-    if(H5O_open(&obj_loc) < 0)
-	H5E_THROW(H5E_CANTPROTECT, "unable to open object header")
-
-    /* Read the layout message */
-    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
-	H5E_THROW(H5E_CANTPROTECT, "unable to read layout message")
-
-    /* close the object header */
-    if(H5O_close(&obj_loc) < 0)
-	H5E_THROW(H5E_CANTPROTECT, "unable to close object header")
-
-    /* Create user data */
-    udata.f = f;
-    udata.layout = &layout;
+    /* Check for debugging context callback available */
+    if(cls->crt_dbg_ctx) {
+        /* Create debugging context */
+        if(NULL == (dbg_ctx = cls->crt_dbg_ctx(f, dxpl_id, obj_addr)))
+	    H5E_THROW(H5E_CANTGET, "unable to create fixed array debugging context")
+    } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, addr, cls, &udata, H5AC_READ)))
+    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, addr, cls, dbg_ctx, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Print opening message */
@@ -170,6 +148,8 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	      "Fixed Array Data Block Address:", hdr->dblk_addr);
 
 CATCH
+    if(dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
+	H5E_THROW(H5E_CANTRELEASE, "unable to release fixed array debugging context")
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FARRAY_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
 
@@ -197,10 +177,8 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     /* Local variables */
     H5FA_hdr_t *hdr = NULL;             /* Shared fixed array header */
     H5FA_dblock_t *dblock = NULL;       /* Fixed array data block */
+    void *dbg_ctx = NULL;	        /* Fixed array context */
     size_t u;                           /* Local index variable */
-    H5O_loc_t obj_loc;		/* Pointer to an object's location */
-    H5O_layout_t layout;	/* Layout message */
-    ctx_ud_t udata;		/* User data */
 
     /* Check arguments */
     HDassert(f);
@@ -212,28 +190,15 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     HDassert(H5F_addr_defined(hdr_addr));
     HDassert(H5F_addr_defined(obj_addr));
 
-    H5O_loc_reset(&obj_loc);
-    obj_loc.file = f;
-    obj_loc.addr = obj_addr;
-
-    /* Open the object header where the layout message resides */
-    if(H5O_open(&obj_loc) < 0)
-	H5E_THROW(H5E_CANTPROTECT, "unable to open object header")
-
-    /* Read the layout message */
-    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
-        H5E_THROW(H5E_CANTPROTECT, "unable to read layout message")
-
-    /* close the object header */
-    if(H5O_close(&obj_loc) < 0)
-	H5E_THROW(H5E_CANTPROTECT, "unable to close object header")
-
-    /* Create user data */
-    udata.f = f;
-    udata.layout = &layout;
+    /* Check for debugging context callback available */
+    if(cls->crt_dbg_ctx) {
+        /* Create debugging context */
+        if(NULL == (dbg_ctx = cls->crt_dbg_ctx(f, dxpl_id, obj_addr)))
+	    H5E_THROW(H5E_CANTGET, "unable to create fixed array debugging context")
+    } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, hdr_addr, cls, &udata, H5AC_READ)))
+    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, hdr_addr, cls, dbg_ctx, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Protect data block */
@@ -242,7 +207,6 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 
     /* Print opening message */
     HDfprintf(stream, "%*sFixed Array data Block...\n", indent, "");
-
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
@@ -312,6 +276,8 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     } /* end else */
 
 CATCH
+    if(dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
+	H5E_THROW(H5E_CANTRELEASE, "unable to release fixed array debugging context")
     if(dblock && H5FA__dblock_unprotect(dblock, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block")
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FARRAY_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)

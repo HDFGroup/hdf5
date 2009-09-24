@@ -134,9 +134,6 @@ H5FA__test_crt_context(void UNUSED *udata))
     /* Local variables */
     H5FA__test_ctx_t *ctx;              /* Context for callbacks */
 
-    /* Sanity checks */
-    HDassert(udata);
-
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
 	H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")

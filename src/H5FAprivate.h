@@ -70,6 +70,8 @@ typedef struct H5FA_class_t {
     herr_t (*encode)(void *raw, const void *elmt, size_t nelmts, void *ctx);   /* Encode elements from native form to disk storage form */
     herr_t (*decode)(const void *raw, void *elmt, size_t nelmts, void *ctx);   /* Decode elements from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt); /* Print an element for debugging */
+    void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); /* Create debugging context */
+    herr_t (*dst_dbg_ctx)(void *dbg_ctx);       /* Destroy debugging context */
 } H5FA_class_t;
 
 /* Fixed array creation parameters */
