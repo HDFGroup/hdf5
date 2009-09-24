@@ -581,7 +581,8 @@ CONTAINS
 !     	                H5L_LINK_EXTERNAL_F  - External link
 !     	                H5L_LINK_ERROR_ F    - Error
 !           address - If the link is a hard link, address specifies the file address that the link points to
-!          val_size - If the link is a symbolic link, val_size will be the length of the link value
+!          val_size - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+!                     the length of the name of the pointed-to object with a null terminator. 
 !            hdferr - error code		
 !				 Success:  0
 !				 Failure: -1   
@@ -613,7 +614,8 @@ CONTAINS
      	                              !  H5L_LINK_EXTERNAL_F  - External link
      	                              !  H5L_LINK_ERROR _F    - Error
     INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+                                             ! the length of the name of the pointed-to object with a null terminator. 
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
@@ -676,8 +678,10 @@ CONTAINS
 ! Outputs:  NOTE: In C these are defined as a structure: H5L_info_t
 !    corder_valid   - indicates whether the creation order data is valid for this attribute
 !    corder         - is a positive integer containing the creation order of the attribute        
-!    cset           - indicates the character set used for the attribute’s name          
-!    data_size      - indicates the size, in the number of characters, of the attribute	
+!    cset           - indicates the character set used for the attribute’s name 
+!    address        - If the link is a hard link, address specifies the file address that the link points to
+!    val_size       - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+!                     the length of the name of the pointed-to object with a null terminator. 
 !    hdferr         - error code		
 !				 Success:  0
 !				 Failure: -1   
@@ -715,7 +719,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
     INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the attribute’s name
     INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size   ! Indicates the size, in the number of characters, of the attribute for symbolic link
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size  ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+                                              ! the length of the name of the pointed-to object with a null terminator. 
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list

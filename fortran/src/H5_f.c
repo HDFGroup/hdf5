@@ -557,26 +557,28 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5t_flags[10] = (int_f)H5T_ORDER_LE;
       h5t_flags[11] = (int_f)H5T_ORDER_BE;
       h5t_flags[12] = (int_f)H5T_ORDER_VAX;
-      h5t_flags[13] = (int_f)H5T_PAD_ZERO;
-      h5t_flags[14] = (int_f)H5T_PAD_ONE;
-      h5t_flags[15] = (int_f)H5T_PAD_BACKGROUND;
-      h5t_flags[16] = (int_f)H5T_PAD_ERROR;
-      h5t_flags[17] = (int_f)H5T_SGN_NONE;
-      h5t_flags[18] = (int_f)H5T_SGN_2;
-      h5t_flags[19] = (int_f)H5T_SGN_ERROR;
-      h5t_flags[20] = (int_f)H5T_NORM_IMPLIED;
-      h5t_flags[21] = (int_f)H5T_NORM_MSBSET;
-      h5t_flags[22] = (int_f)H5T_NORM_NONE;
-      h5t_flags[23] = (int_f)H5T_CSET_ASCII;
-      h5t_flags[24] = (int_f)H5T_CSET_UTF8;
-      h5t_flags[25] = (int_f)H5T_STR_NULLTERM;
-      h5t_flags[26] = (int_f)H5T_STR_NULLPAD;
-      h5t_flags[27] = (int_f)H5T_STR_SPACEPAD;
-      h5t_flags[28] = (int_f)H5T_STR_ERROR;
-      h5t_flags[29] = (int_f)H5T_VLEN;
-      h5t_flags[30] = (int_f)H5T_ARRAY;
-      h5t_flags[31] = (int_f)H5T_DIR_ASCEND;
-      h5t_flags[32] = (int_f)H5T_DIR_DESCEND;
+      h5t_flags[13] = (int_f)H5T_ORDER_NONE;
+      h5t_flags[14] = (int_f)H5T_PAD_ZERO;
+      h5t_flags[15] = (int_f)H5T_PAD_ONE;
+      h5t_flags[16] = (int_f)H5T_PAD_BACKGROUND;
+      h5t_flags[17] = (int_f)H5T_PAD_ERROR;
+      h5t_flags[18] = (int_f)H5T_SGN_NONE;
+      h5t_flags[19] = (int_f)H5T_SGN_2;
+      h5t_flags[20] = (int_f)H5T_SGN_ERROR;
+      h5t_flags[21] = (int_f)H5T_NORM_IMPLIED;
+      h5t_flags[22] = (int_f)H5T_NORM_MSBSET;
+      h5t_flags[23] = (int_f)H5T_NORM_NONE;
+      h5t_flags[24] = (int_f)H5T_CSET_ASCII;
+      h5t_flags[25] = (int_f)H5T_CSET_UTF8;
+      h5t_flags[26] = (int_f)H5T_STR_NULLTERM;
+      h5t_flags[27] = (int_f)H5T_STR_NULLPAD;
+      h5t_flags[28] = (int_f)H5T_STR_SPACEPAD;
+      h5t_flags[29] = (int_f)H5T_STR_ERROR;
+      h5t_flags[30] = (int_f)H5T_VLEN;
+      h5t_flags[31] = (int_f)H5T_ARRAY;
+      h5t_flags[32] = (int_f)H5T_DIR_ASCEND;
+      h5t_flags[33] = (int_f)H5T_DIR_DESCEND;
+
 /*
  *  H5Z flags
  */
