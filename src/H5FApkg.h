@@ -203,7 +203,6 @@ typedef struct H5FA_dblk_page_load_ud_t {
 } H5FA_dblk_page_load_ud_t;
 
 
-
 /*****************************/
 /* Package Private Variables */
 /*****************************/

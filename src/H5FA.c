@@ -361,16 +361,16 @@ HDfprintf(stderr, "%s: fixed array data block address not defined!\n", FUNC, idx
     else { /* paging */
         size_t  page_idx;      		/* Index of page within data block */
         size_t  dblk_page_nelmts;      	/* # of elements in a data block page */
-        hsize_t elmt_idx;		/* Element index within the page */
+        size_t  elmt_idx;		/* Element index within the page */
         haddr_t dblk_page_addr;		/* Address of data block page */
 
         /* Compute the page & element index */
-        page_idx = (size_t)idx / dblock->dblk_page_nelmts;
-        elmt_idx = (size_t)idx % dblock->dblk_page_nelmts;
+        page_idx = (size_t)(idx / dblock->dblk_page_nelmts);
+        elmt_idx = (size_t)(idx % dblock->dblk_page_nelmts);
 
         /* Get the address of the data block page */
 	dblk_page_addr = dblock->addr + H5FA_DBLOCK_PREFIX_SIZE(dblock) +
-                        (page_idx * dblock->dblk_page_size);
+                        ((hsize_t)page_idx * dblock->dblk_page_size);
 
         /* Check for using last page, to set the number of elements on the page */
 	if((page_idx + 1) == dblock->npages)
@@ -378,7 +378,7 @@ HDfprintf(stderr, "%s: fixed array data block address not defined!\n", FUNC, idx
 	else
 	    dblk_page_nelmts = dblock->dblk_page_nelmts;
 
-        /* Check if the page has been create yet */
+        /* Check if the page has been created yet */
         if(!H5V_bit_get(dblock->dblk_page_init, page_idx)) {
 	    /* Create the data block page */
 	    if(H5FA__dblk_page_create(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts) < 0)
@@ -468,7 +468,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
             size_t  page_idx;           /* Index of page within data block */
 
             /* Compute the page index */
-            page_idx = (size_t)idx / dblock->dblk_page_nelmts;
+            page_idx = (size_t)(idx / dblock->dblk_page_nelmts);
 
             /* Check if the page is defined yet */
             if(!H5V_bit_get(dblock->dblk_page_init, page_idx)) {
@@ -480,15 +480,15 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
                 H5_LEAVE(SUCCEED)
             } /* end if */
             else { /* get the page */
-                hsize_t elmt_idx;		/* Element index within the page */
-                haddr_t dblk_page_addr;     /* Address of data block page */
-                size_t  dblk_page_nelmts;   /* # of elements in a data block page */
+                size_t  dblk_page_nelmts;	/* # of elements in a data block page */
+                size_t  elmt_idx;		/* Element index within the page */
+                haddr_t dblk_page_addr;		/* Address of data block page */
 
                 /* Compute the element index */
-                elmt_idx = (size_t)idx % dblock->dblk_page_nelmts;
+                elmt_idx = (size_t)(idx % dblock->dblk_page_nelmts);
 
                 /* Compute the address of the data block */
-                dblk_page_addr = dblock->addr + H5FA_DBLOCK_PREFIX_SIZE(dblock) + (page_idx * dblock->dblk_page_size);
+                dblk_page_addr = dblock->addr + H5FA_DBLOCK_PREFIX_SIZE(dblock) + ((hsize_t)page_idx * dblock->dblk_page_size);
 
                 /* Check for using last page, to set the number of elements on the page */
                 if((page_idx + 1) == dblock->npages)

@@ -230,6 +230,25 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     hdr->stats.nelmts = hdr->cparam.nelmts;
     hdr->stats.hdr_size = hdr->size = size;  	/* Size of header in file */
 
+    /* Check for data block */
+    if(H5F_addr_defined(hdr->dblk_addr)) {
+	H5FA_dblock_t  dblock;  	/* Fake data block for computing size */
+	size_t	dblk_page_nelmts;	/* # of elements per data block page */
+
+	/* Set up fake data block for computing size on disk */
+	dblock.hdr = hdr;
+	dblock.dblk_page_init_size = 0;
+	dblock.npages = 0;
+	dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
+	if(hdr->cparam.nelmts > dblk_page_nelmts) {
+	    dblock.npages = (size_t)(((hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
+	    dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
+	} /* end if */
+
+        /* Compute Fixed Array data block size for hdr statistics */
+	hdr->stats.dblk_size = (size_t)H5FA_DBLOCK_SIZE(&dblock);
+    } /* end if */
+
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
     HDassert((size_t)(p - buf) == (size - H5FA_SIZEOF_CHKSUM));

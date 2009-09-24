@@ -828,6 +828,7 @@
 ./test/family_v16_00001.h5
 ./test/family_v16_00002.h5
 ./test/family_v16_00003.h5
+./test/farray.c
 ./test/fheap.c
 ./test/freespace.c
 ./test/fill_old.h5
@@ -1522,16 +1523,16 @@
 ./tools/h5diff/testfiles/h5diff_207.txt
 
 
+./tools/h5diff/testfiles/h5diff_attr1.h5
+./tools/h5diff/testfiles/h5diff_attr2.h5
 ./tools/h5diff/testfiles/h5diff_basic1.h5
 ./tools/h5diff/testfiles/h5diff_basic2.h5
-./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_dset1.h5
 ./tools/h5diff/testfiles/h5diff_dset2.h5
+./tools/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/h5diff/testfiles/h5diff_empty.h5
 ./tools/h5diff/testfiles/h5diff_hyper1.h5
-./tools/h5diff/testfiles/h5diff_attr1.h5
 ./tools/h5diff/testfiles/h5diff_hyper2.h5
-./tools/h5diff/testfiles/h5diff_attr2.h5
 ./tools/h5diff/testfiles/h5diff_types.h5
 
 
