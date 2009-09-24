@@ -53,7 +53,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testerror.sh.in $(top_srcdir)/config/commence.am \
+	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
 	swmr_writer$(EXEEXT)
@@ -68,7 +69,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testerror.sh
+CONFIG_CLEAN_FILES = testerror.sh testlibinfo.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
@@ -679,7 +680,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh $(srcdir)/testswmr.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh $(srcdir)/testswmr.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -785,6 +786,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:

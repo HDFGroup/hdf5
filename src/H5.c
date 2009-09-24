@@ -28,7 +28,7 @@
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
-#include "H5SLprivate.h"    /* Skip lists                           */
+#include "H5SLprivate.h"        /* Skip lists                           */
 
 
 /****************/
@@ -623,6 +623,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static int	checked = 0;            /* If we've already checked the version info */
     static int	disable_version_check = 0;      /* Set if the version check should be disabled */
     herr_t      ret_value=SUCCEED;       /* Return value */
+    static char *version_mismatch_warning=VERSION_MISMATCH_WARNING;
 
     FUNC_ENTER_API_NOINIT_NOFS(H5check_version)
     H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
@@ -644,15 +645,16 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             H5_VERS_RELEASE!=relnum) {
         switch (disable_version_check) {
 	case 0:
-            HDfputs (VERSION_MISMATCH_WARNING
+	    HDfprintf(stderr, "%s%s", version_mismatch_warning,
 		     "You can, at your own risk, disable this warning by setting the environment\n"
 		     "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-		     "Setting it to 2 will suppress the warning messages totally.\n",
-		     stderr);
+		     "Setting it to 2 will suppress the warning messages totally.\n");
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum,
 		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+	    /* Show library settings if available */
+	    HDfprintf (stderr, "%s", H5libhdf5_settings);
 
 	    /* Bail out now. */
 	    HDfputs ("Bye...\n", stderr);
@@ -662,14 +664,18 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    break;
 	default:
 	    /* continue with a warning */
-            HDfprintf (stderr, VERSION_MISMATCH_WARNING
-                     "'HDF5_DISABLE_VERSION_CHECK' "
+	    /* Note that the warning message is embedded in the format string. */
+            HDfprintf (stderr,
+                     "%s'HDF5_DISABLE_VERSION_CHECK' "
                      "environment variable is set to %d, application will\n"
-                     "continue at your own risk.\n", disable_version_check);
+                     "continue at your own risk.\n",
+		     version_mismatch_warning, disable_version_check);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum,
 		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+	    /* Show library settings if available */
+	    HDfprintf (stderr, "%s", H5libhdf5_settings);
 	    break;
         } /* end switch */
 

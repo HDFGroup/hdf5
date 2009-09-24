@@ -28203,7 +28203,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testerror.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/tools/Makefile hl/tools/gif2h5/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testerror.sh test/testlibinfo.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/examples/Makefile c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/tools/Makefile hl/tools/gif2h5/Makefile hl/examples/Makefile hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -29414,6 +29414,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "test/testerror.sh") CONFIG_FILES="$CONFIG_FILES test/testerror.sh" ;;
+    "test/testlibinfo.sh") CONFIG_FILES="$CONFIG_FILES test/testlibinfo.sh" ;;
     "testpar/Makefile") CONFIG_FILES="$CONFIG_FILES testpar/Makefile" ;;
     "testpar/testph5.sh") CONFIG_FILES="$CONFIG_FILES testpar/testph5.sh" ;;
     "perform/Makefile") CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;
