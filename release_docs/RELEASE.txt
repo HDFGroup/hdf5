@@ -106,6 +106,8 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
+    - Fixed incorrect return value for H5Pget_filter_by_id1/2 in H5Ppublic.h.
+      NAF - 2009/09/25 - 1620
     - Fixed a bug where properties weren't being compared with the registered
       compare callback. NAF - 2009/09/25 - 1555
     - Corrected problem where library would re-write the superblock in a file
