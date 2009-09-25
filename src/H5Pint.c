@@ -277,7 +277,7 @@ H5P_do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Property callback failed");
 
     /* Check if the property value changed */
-    if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+    if((prop->cmp)(tmp_value,prop->value,prop->size)) {
         /* Make a copy of the class's property */
         if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
@@ -2264,7 +2264,7 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
                         } /* end if */
 
-                        if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+                        if((prop->cmp)(tmp_value,prop->value,prop->size)) {
                             /* Make a copy of the class's property */
                             if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
                                 HGOTO_ERROR(H5E_PLIST,H5E_CANTCOPY,FAIL,"Can't copy property");
@@ -2282,7 +2282,7 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
                     } /* end if */
                     /* No 'set' callback, just copy value */
                     else {
-                        if(HDmemcmp(value,prop->value,prop->size)) {
+                        if((prop->cmp)(value,prop->value,prop->size)) {
                             /* Make a copy of the class's property */
                             if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
                                 HGOTO_ERROR(H5E_PLIST,H5E_CANTCOPY,FAIL,"Can't copy property");
@@ -3614,7 +3614,7 @@ H5P_get(const H5P_genplist_t *plist, const char *name, void *value)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
                         } /* end if */
 
-                        if(HDmemcmp(tmp_value,prop->value,prop->size)) {
+                        if((prop->cmp)(tmp_value,prop->value,prop->size)) {
                             H5P_genprop_t *pcopy;  /* Copy of property to insert into skip list */
 
                             /* Make a copy of the class's property */
