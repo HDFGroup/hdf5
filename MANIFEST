@@ -2058,6 +2058,8 @@
 ./windows/test/extenddll/extenddll.vcproj
 ./windows/test/external/external.vcproj
 ./windows/test/externaldll/externaldll.vcproj
+./windows/test/farray/farray.vcproj
+./windows/test/farraydll/farraydll.vcproj
 ./windows/test/fheap/fheap.vcproj
 ./windows/test/fheapdll/fheapdll.vcproj
 ./windows/test/fillval/fillval.vcproj
