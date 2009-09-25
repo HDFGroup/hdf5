@@ -234,7 +234,7 @@ H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, unsigned filter,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[]);
-H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
+H5_DLL herr_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
        unsigned int *flags/*out*/,
        size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/,

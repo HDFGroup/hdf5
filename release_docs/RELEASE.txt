@@ -79,6 +79,8 @@ Bug Fixes since HDF5-1.6.9 Release
 ==================================
     Library
     -------
+    - Fixed incorrect return value for H5Pget_filter_by_id in H5Ppublic.h.
+      NAF - 2009/09/25 - 1620
     - Fixed a bug where properties weren't being compared with the registered
       compare callback. NAF - 2009/09/25 - 1555
     - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
