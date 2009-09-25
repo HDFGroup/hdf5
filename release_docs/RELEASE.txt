@@ -79,6 +79,8 @@ Bug Fixes since HDF5-1.6.9 Release
 ==================================
     Library
     -------
+    - Fixed a bug where properties weren't being compared with the registered
+      compare callback. NAF - 2009/09/25 - 1555
     - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
       filter that wasn't present. NAF - 2009/06/25 - 1250
     - Fixed an issue with committed compound datatypes containing a vlen. Also
@@ -99,7 +101,7 @@ Bug Fixes since HDF5-1.6.9 Release
     F90 API
     -------
     - None
-                                
+
     C++ API
     -------
     - None
