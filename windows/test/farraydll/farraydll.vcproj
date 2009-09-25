@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="farraydll"
-	ProjectGUID="{3C224452-C71A-4B3E-937A-891144D1941D}"
+	ProjectGUID="{79FF58EE-7427-4732-AC25-370341859292}"
 	RootNamespace="farraydll"
 	Keyword="Win32Proj"
 	>
