@@ -88,11 +88,11 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
-	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
+	gen_idx$(EXEEXT) gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
 	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
-	space_overflow$(EXEEXT) gen_idx$(EXEEXT)
+	space_overflow$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
@@ -689,9 +689,9 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
-    gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-    gen_nullspace gen_udlinks space_overflow gen_idx
+BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_idx \
+    gen_new_array gen_new_fill gen_new_group gen_new_mtime gen_new_super \
+    gen_noencoder gen_nullspace gen_udlinks space_overflow
 
 
 # The libh5test library provides common support code for the tests.
