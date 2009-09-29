@@ -25,8 +25,18 @@ Shared_Lib=@enable_shared@
 Static_Lib=@enable_static@
 Static_exec=@STATIC_EXEC@
 
+CMP='cmp -s'
+DIFF='diff -c'
 
 # Function definitions
+#
+# Show the purpose of this test script and a note about the abort messages.
+PURPOSE() {
+    echo "Tests for the H5check_version function."
+    echo "Note that abort messages may appear due to the expected termination"
+    echo "of the program when it is tested with mis-matched version numnbers."
+}
+
 # Print a line-line message left justified in a field of 70 characters.
 #
 LINEMSG() {
@@ -39,6 +49,42 @@ LINEMSG() {
 SKIP() {
     LINEMSG $*
     echo  " -SKIP-"
+}
+
+
+# Print warning message of version mismatch.
+WarnMesg(){
+    echo "Warning! ***HDF5 library version mismatched error***"
+    echo "The HDF5 header files used to compile this application do not match"
+    echo "the version used by the HDF5 library to which this application is linked."
+    echo "Data corruption or segmentation faults may occur if the application continues."
+    echo "This can happen when an application was compiled by one version of HDF5 but"
+    echo "linked with a different version of static or shared HDF5 library."
+    echo "You should recompile the application or check your shared library related"
+    echo "settings such as 'LD_LIBRARY_PATH'."
+    echo "You can, at your own risk, disable this warning by setting the environment"
+    echo "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'."
+    echo "Setting it to 2 or higher will suppress the warning messages totally."
+    echo "Headers are $xxh5versmajor.$xxh5versminor.$xxh5versrelease, library is $h5versmajor.$h5versminor.$h5versrelease"
+    test -n "$H5_HAVE_EMBEDDED_LIBINFO" && cat $h5libsettings
+    echo "Bye..."
+}
+  
+
+# Print warning message2 of version mismatch.
+WarnMesg2(){
+    echo "Warning! ***HDF5 library version mismatched error***"
+    echo "The HDF5 header files used to compile this application do not match"
+    echo "the version used by the HDF5 library to which this application is linked."
+    echo "Data corruption or segmentation faults may occur if the application continues."
+    echo "This can happen when an application was compiled by one version of HDF5 but"
+    echo "linked with a different version of static or shared HDF5 library."
+    echo "You should recompile the application or check your shared library related"
+    echo "settings such as 'LD_LIBRARY_PATH'."
+    echo "'HDF5_DISABLE_VERSION_CHECK' environment variable is set to 1, application will"
+    echo "continue at your own risk."
+    echo "Headers are $xxh5versmajor.$xxh5versminor.$xxh5versrelease, library is $h5versmajor.$h5versminor.$h5versrelease"
+    test -n "$H5_HAVE_EMBEDDED_LIBINFO" && cat $h5libsettings
 }
   
 
@@ -77,6 +123,9 @@ TESTING() {
 
     h5DisableVersion="$1"
     wrongversionnumbers="$2"
+    xxh5versmajor=$h5versmajor
+    xxh5versminor=$h5versminor
+    xxh5versrelease=$h5versrelease
 
     if [ "$h5DisableVersion" = unset ]; then
 	envcmd=""		# noop
@@ -90,40 +139,52 @@ TESTING() {
 	expected_code=0
     else
 	arguments=-t"$wrongversionnumbers"
+	# calculate mismatched version numbers by listing.
+	case $wrongversionnumbers in
+	    "M")    xxh5versmajor=`expr $h5versmajor + 1`
+		    ;;
+	    "m")    xxh5versminor=`expr $h5versminor + 1`
+		    ;;
+	    "r")    xxh5versrelease=`expr $h5versrelease + 1`
+		    ;;
+	esac
 	case "$h5DisableVersion" in
-	    2)	# OK: No warning, exit 0
+	    1)
+		# W2/OK: Different Warning, exit 0.
+		WarnMesg2 > $expect
+		expected_code=0
+		;;
+	    [2-9]|[1-9][0-9]*)
+		# OK: No warning, exit 0
 		cp /dev/null $expect
 		expected_code=0
 		;;
-	    [13-9]|[1-9][0-9]*)
-		# W2/OK: Different Warning, exit 0.
-		cp /dev/null $expect   #NEED FIX
-		expected_code=0
-		;;
 	    *)	# W/A:   Warning, abort and exit non-0.
-		cp /dev/null $expect    #NEED FIX
-		expected_code=1		# non-zero since abort exit code maybe
-		;;			# machine dependent.
+		WarnMesg > $expect
+		expected_code=134	# Signal Abort exit code (128+6)
+		;;
 	esac
     fi
 
     # Run test.
     LINEMSG $envcmd $TEST_NAME $arguments
     (
-      echo "#############################"
-      echo "Expected output for $TEST_ERR" 
-      echo "#############################"
       $envcmd $RUNSERIAL $TEST_BIN  $arguments
     ) >$actual 2>$actual_err
     ret_code=$?
+    cat $actual_err >> $actual
     
-    if [ \( $expected_code -eq 0 -a $expected_code -eq $ret_code \) -o \
-	   \( $expected_code -ne 0 -a $ret_code -ne 0 \) ]; then
-	echo " PASSED"
-    else
+    if [ \( $expected_code -ne $ret_code \) ]; then
 	echo "*FAILED*"
 	echo "    Expected exit code ($expected_code) differs from actual code ($ret_code)"
 	nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+	echo " PASSED"
+    else
+	echo "*FAILED*"
+	echo "    Expected result differs from actual result"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
@@ -135,7 +196,7 @@ TESTING() {
 
 # Echo parameters for debugging if verbose mode is on.
 DEBUGPRINT() {
-    if [ -n "$verbose" ]; then
+    if [ -n "$debugmode" ]; then
 	echo $*
     fi
 }
@@ -143,19 +204,17 @@ DEBUGPRINT() {
 
 # MAIN Body
 nerrors=0
+verbose=yes	# default on
+debugmode=	# default off
 H5_HAVE_EMBEDDED_LIBINFO=`grep '#define H5_HAVE_EMBEDDED_LIBINFO ' ../src/H5pubconf.h`
+h5libsettings=../src/libhdf5.settings 
+
+PURPOSE
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.
 fi
-
-# Skip the rest if embedded-libinfo is not enabled.
-if [ -z "$H5_HAVE_EMBEDDED_LIBINFO" ]; then
-    echo "embedded-libinfo is not enabled. Test skipped."
-    exit 0
-fi
-h5libsettings=../src/libhdf5.settings 
 
 # Figure out library version numbers from the header file.
 h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | cut -f2` 
@@ -172,7 +231,7 @@ DEBUGPRINT $h5versmajor.$h5versminor.$h5versrelease
 # HDF5_DISABLE_VERSION_CHECK, as unset, "", -1, 0, 1, 2, 3
 
 for val_disable_version_check in unset "" -1 0 1 2 3; do
-    for wrong_version in none M m r Mm Mr mr; do
+    for wrong_version in none M m r; do
 	TESTING "$val_disable_version_check" "$wrong_version"
     done
 done
