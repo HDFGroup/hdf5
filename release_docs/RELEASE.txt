@@ -64,7 +64,7 @@ New Features
       version mismatch is detected.  Also changed H5check_version() to
       suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
       or higher. (Old behavior treated 3 or higher the same as 1, that is
-      print a warning and allows the program to continue.
+      print a warning and allows the program to continue. (AKC - 2009/9/28)
     - Added a new feature that have the library information in the file
       libhdf5.settings embedded in the hdf5 library and statically linked
       executables.  If a user does not care for the extra library information
