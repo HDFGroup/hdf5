@@ -65,10 +65,8 @@ New Features
       suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
       or higher. (Old behavior treated 3 or higher the same as 1, that is
       print a warning and allows the program to continue. (AKC - 2009/9/28)
-    - Added a new feature that have the library information in the file
-      libhdf5.settings embedded in the hdf5 library and statically linked
-      executables.  If a user does not care for the extra library information
-      in the executable, he may turn it off by --disable-embedded-libinfo
+    - If a user does not care for the extra library information insert
+      in the executables, he may turn it off by --disable-embedded-libinfo
       during configure. (AKC - 2009/9/15)
     - Corrected problem where library would re-write the superblock in a file
       opened for R/W access, even when no changes were made to the file.
