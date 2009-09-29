@@ -53,13 +53,13 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
+	$(srcdir)/testlibinfo.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
 	swmr_writer$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) testmeta$(EXEEXT)
+	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = test
@@ -69,7 +69,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testerror.sh testlibinfo.sh
+CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh testlibinfo.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
@@ -89,14 +89,14 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	ttsafe$(EXEEXT) getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) \
 	dangle$(EXEEXT) dtransform$(EXEEXT) reserved$(EXEEXT) \
 	cross_read$(EXEEXT) freespace$(EXEEXT) mf$(EXEEXT) \
-        farray$(EXEEXT) earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT)
+	farray$(EXEEXT) earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
-	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
+	gen_idx$(EXEEXT) gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
 	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
-	space_overflow$(EXEEXT) gen_idx$(EXEEXT)
+	space_overflow$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
@@ -334,6 +334,10 @@ swmr_writer_SOURCES = swmr_writer.c
 swmr_writer_OBJECTS = swmr_writer.$(OBJEXT)
 swmr_writer_LDADD = $(LDADD)
 swmr_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
+tcheck_version_SOURCES = tcheck_version.c
+tcheck_version_OBJECTS = tcheck_version.$(OBJEXT)
+tcheck_version_LDADD = $(LDADD)
+tcheck_version_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tattr.$(OBJEXT) tchecksum.$(OBJEXT) tconfig.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
@@ -388,8 +392,9 @@ SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mf.c \
 	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
 	set_extent.c space_overflow.c stab.c swmr_generator.c \
-	swmr_reader.c swmr_writer.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	swmr_reader.c swmr_writer.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
 	dsets.c dt_arith.c dtransform.c dtypes.c earray.c enum.c \
@@ -401,8 +406,9 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mf.c \
 	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
 	set_extent.c space_overflow.c stab.c swmr_generator.c \
-	swmr_reader.c swmr_writer.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	swmr_reader.c swmr_writer.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -689,7 +695,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh $(srcdir)/testswmr.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh $(srcdir)/testswmr.sh testcheck_version.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -716,9 +722,9 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
+BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_idx gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-    gen_nullspace gen_udlinks space_overflow gen_idx
+    gen_nullspace gen_udlinks space_overflow
 
 
 # The libh5test library provides common support code for the tests.
@@ -794,6 +800,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+testcheck_version.sh: $(top_builddir)/config.status $(srcdir)/testcheck_version.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
@@ -1047,6 +1055,9 @@ swmr_reader$(EXEEXT): $(swmr_reader_OBJECTS) $(swmr_reader_DEPENDENCIES)
 swmr_writer$(EXEEXT): $(swmr_writer_OBJECTS) $(swmr_writer_DEPENDENCIES) 
 	@rm -f swmr_writer$(EXEEXT)
 	$(LINK) $(swmr_writer_OBJECTS) $(swmr_writer_LDADD) $(LIBS)
+tcheck_version$(EXEEXT): $(tcheck_version_OBJECTS) $(tcheck_version_DEPENDENCIES) 
+	@rm -f tcheck_version$(EXEEXT)
+	$(LINK) $(tcheck_version_OBJECTS) $(tcheck_version_LDADD) $(LIBS)
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
 	$(LINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
@@ -1133,6 +1144,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcheck_version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tchecksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcoords.Po@am__quote@

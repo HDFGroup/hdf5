@@ -292,7 +292,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned filter,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[],
        unsigned *filter_config /*out*/);
-H5_DLL H5Z_filter_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
+H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
        unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
        unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
        unsigned *filter_config/*out*/);
@@ -419,7 +419,7 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size,
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);
-H5_DLL H5Z_filter_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id,
+H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/);
 

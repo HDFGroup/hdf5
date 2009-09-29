@@ -1,4 +1,4 @@
-HDF5 version 1.9.46-FA_a4 currently under development
+HDF5 version 1.9.47-FA_a4 currently under development
 ================================================================================
 
 
@@ -60,6 +60,16 @@ New Features
 
     Library:
     --------
+    - The embedded library information is displayed by H5check_version() if a
+      version mismatch is detected.  Also changed H5check_version() to
+      suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
+      or higher. (Old behavior treated 3 or higher the same as 1, that is
+      print a warning and allows the program to continue. (AKC - 2009/9/28)
+    - Added a new feature that have the library information in the file
+      libhdf5.settings embedded in the hdf5 library and statically linked
+      executables.  If a user does not care for the extra library information
+      in the executable, he may turn it off by --disable-embedded-libinfo
+      during configure. (AKC - 2009/9/15)
     - Corrected problem where library would re-write the superblock in a file
       opened for R/W access, even when no changes were made to the file.
       (QAK - 2009/08/20, Bz#1473)
@@ -183,6 +193,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed incorrect return value for H5Pget_filter_by_id1/2 in H5Ppublic.h.
+            (NAF - 2009/09/25 - 1620)
+      - Fixed a bug where properties weren't being compared with the registered
+            compare callback. (NAF - 2009/09/25 - 1555)
       - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
             filter that wasn't present. (NAF - 2009/06/25 - 1250)
       - Fixed an issue with committed compound datatypes containing a vlen.

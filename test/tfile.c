@@ -2074,17 +2074,11 @@ test_cached_stab_info(void)
 **              mamcgree@hdfgroup.org
 **              June 29, 2009
 **
-**  Modification: Raymond Lu
-**                I added a test with the system functions to make
-**                sure the stat function behaves as we expected.
-**                17 September 2009
 *****************************************************************/
 static void
 test_rw_noupdate(void)
 {
-    int   fid;          /* File ID from system-created file */
-    struct stat sys_sb1, sys_sb2;  /* Info from the system stat */
-    hid_t file_id;      /* HDF5 File ID */
+    int fd;             /* File Descriptor */
     h5_stat_t sb1, sb2; /* Info from 'stat' call */
     double diff;        /* Difference in modification times */
     herr_t ret;         /* Generic return value */
@@ -2094,70 +2088,68 @@ test_rw_noupdate(void)
 
     /* First make sure the stat function behaves as we expect - the modification time
      * is the time that the file was modified last time. */
-    fid = open(SFILE1, O_RDWR | O_CREAT | O_TRUNC, 0666);
-    CHECK(fid, FAIL, "open");
-    ret = close(fid);
-    CHECK(ret, FAIL, "close");
+    fd = HDopen(SFILE1, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    CHECK(fd, FAIL, "HDopen");
+    ret = HDclose(fd);
+    CHECK(ret, FAIL, "HDclose");
 
     /* Determine File's Initial Timestamp */
-    ret = stat(SFILE1, &sys_sb1);
-    VERIFY(ret, 0, "stat");
-
-    /* Wait for 2 seconds */
-    /* This ensures a system time difference between the two file accesses */
-    sleep(2);
-
-    fid = open(SFILE1, O_RDWR);
-    CHECK(fid, FAIL, "open");
-    ret = close(fid);
-    CHECK(ret, FAIL, "close");
-
-    /* Determine File's New Timestamp */
-    ret = stat(SFILE1, &sys_sb2);
-    VERIFY(ret, 0, "stat");
-
-    /* Ensure That Timestamps Are Equal */
-    diff = difftime(sys_sb2.st_mtime, sys_sb1.st_mtime);
-
-    if(!DBL_ABS_EQUAL(diff, 0.0)) {
-        /* Output message about test being performed */
-        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time (We know OpenVMS behaves in this way).\n"));
-
-        goto done;
-    }
-
-    /* Then we can test with a HDF5 file */
-    /* Create and Close a HDF5 File */
-    file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(file_id, FAIL, "H5Fcreate");
-    ret = H5Fclose(file_id);
-    CHECK(ret, FAIL, "H5Fclose");
-
-    /* Determine File's Initial Timestamp */
-    ret = HDstat(FILE1, &sb1);
-    VERIFY(ret, 0, "HDfstat");
-
-    /* Wait for 2 seconds */
-    /* This ensures a system time difference between the two file accesses */
-    HDsleep(2);
-
-    /* Open and Close File With Read/Write Permission */
-    file_id = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-    CHECK(file_id, FAIL, "H5Fopen");
-    ret = H5Fclose(file_id);
-    CHECK(ret, FAIL, "H5Fclose");
-
-    /* Determine File's New Timestamp */
-    ret = HDstat(FILE1, &sb2);
+    ret = HDstat(SFILE1, &sb1);
     VERIFY(ret, 0, "HDstat");
 
-    /* Ensure That Timestamps Are Equal */
-    diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
-    ret = (diff > 0.0);
-    VERIFY(ret, 0, "Timestamp");
+    /* Wait for 2 seconds */
+    /* (This ensures a system time difference between the two file accesses) */
+    HDsleep(2);
 
-done:
-    ; /* do nothing */
+    fd = HDopen(SFILE1, O_RDWR, 0666);
+    CHECK(fd, FAIL, "HDopen");
+    ret = HDclose(fd);
+    CHECK(ret, FAIL, "HDclose");
+
+    /* Determine File's New Timestamp */
+    ret = HDstat(SFILE1, &sb2);
+    VERIFY(ret, 0, "HDstat");
+
+    /* Get difference between timestamps */
+    diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
+
+    /* Check That Timestamps Are Equal */
+    if(diff > 0.0) {
+        /* Output message about test being performed */
+        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time (We know OpenVMS behaves in this way).\n"));
+    } /* end if */
+    else {
+        hid_t file_id;      /* HDF5 File ID */
+
+        /* Create and Close a HDF5 File */
+        file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(file_id, FAIL, "H5Fcreate");
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Determine File's Initial Timestamp */
+        ret = HDstat(FILE1, &sb1);
+        VERIFY(ret, 0, "HDfstat");
+
+        /* Wait for 2 seconds */
+        /* (This ensures a system time difference between the two file accesses) */
+        HDsleep(2);
+
+        /* Open and Close File With Read/Write Permission */
+        file_id = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(file_id, FAIL, "H5Fopen");
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
+
+        /* Determine File's New Timestamp */
+        ret = HDstat(FILE1, &sb2);
+        VERIFY(ret, 0, "HDstat");
+
+        /* Ensure That Timestamps Are Equal */
+        diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
+        ret = (diff > 0.0);
+        VERIFY(ret, 0, "Timestamp");
+    } /* end else */
 } /* end test_rw_noupdate() */
 
 /****************************************************************

@@ -621,7 +621,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     char	lib_str[256];
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;            /* If we've already checked the version info */
-    static int	disable_version_check = 0;      /* Set if the version check should be disabled */
+    static unsigned int	disable_version_check = 0;      /* Set if the version check should be disabled */
     herr_t      ret_value=SUCCEED;       /* Return value */
     static char *version_mismatch_warning=VERSION_MISMATCH_WARNING;
 
@@ -638,7 +638,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         s = HDgetenv ("HDF5_DISABLE_VERSION_CHECK");
 
         if (s && HDisdigit(*s))
-            disable_version_check = (int)HDstrtol (s, NULL, 0);
+            disable_version_check = (unsigned int)HDstrtol (s, NULL, 0);
     }
 
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
@@ -648,7 +648,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    HDfprintf(stderr, "%s%s", version_mismatch_warning,
 		     "You can, at your own risk, disable this warning by setting the environment\n"
 		     "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-		     "Setting it to 2 will suppress the warning messages totally.\n");
+		     "Setting it to 2 or higher will suppress the warning messages totally.\n");
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		     majnum, minnum, relnum,
@@ -659,12 +659,9 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    /* Bail out now. */
 	    HDfputs ("Bye...\n", stderr);
 	    HDabort ();
-	case 2:
-	    /* continue silently */
-	    break;
-	default:
+	case 1:
 	    /* continue with a warning */
-	    /* Note that the warning message is embedded in the format string. */
+	    /* Note that the warning message is embedded in the format string.*/
             HDfprintf (stderr,
                      "%s'HDF5_DISABLE_VERSION_CHECK' "
                      "environment variable is set to %d, application will\n"
@@ -676,6 +673,9 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 	    /* Show library settings if available */
 	    HDfprintf (stderr, "%s", H5libhdf5_settings);
+	    break;
+	default:
+	    /* 2 or higer: continue silently */
 	    break;
         } /* end switch */
 

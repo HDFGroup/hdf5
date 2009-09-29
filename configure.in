@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.46-FA_a4], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.47-FA_a4], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -3992,6 +3992,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
                  test/Makefile
+                 test/testcheck_version.sh
                  test/testerror.sh
                  test/testlibinfo.sh
                  testpar/Makefile
