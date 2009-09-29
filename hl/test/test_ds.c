@@ -125,8 +125,8 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define DIM0_LABEL     "Latitude"
 #define DIM1_LABEL     "Longitude"
 
-#define FOREIGN_FILE1       "test_dsLE.h5"
-#define FOREIGN_FILE2       "test_dsBE.h5"
+#define FOREIGN_FILE1       "test_ds_le.h5"
+#define FOREIGN_FILE2       "test_ds_be.h5"
 #define FILENAME       "test_ds"
 #define FILEEXT        ".h5"
 
@@ -245,14 +245,8 @@ herr_t create_char_dataset(hid_t fid, const char *dsidx)
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
     char    s1_wbuf[DIM1_SIZE] = {1,2,3};
-    char    s11_wbuf[DIM1_SIZE] = {10,20,30};
     char    s2_wbuf[DIM2_SIZE] = {10,20,30,40};
-    char    s21_wbuf[DIM2_SIZE] = {1,2,3,4};
-    char    s22_wbuf[DIM2_SIZE] = {5,10,50,100};
     char    s3_wbuf[DIM3_SIZE] = {10,10,10,20,20,20,30,30,30,40,40,40};
-    char    s31_wbuf[DIM3_SIZE] = {1,1,1,2,2,2,3,3,3,4,4,4};
-    char    s32_wbuf[DIM3_SIZE] = {5,5,5,10,10,10,50,50,50,100,100,100};
-    char    s33_wbuf[DIM3_SIZE] = {6,6,6,12,12,12,53,53,53,120,120,120};
     char name[32];
 
     strcpy(name, DATASET_NAME);
@@ -276,7 +270,7 @@ herr_t create_char_dataset(hid_t fid, const char *dsidx)
     return SUCCEED;
 }
 
-herr_t create_short_dataset(hid_t fid, const char *dsidx) 
+static herr_t create_short_dataset(hid_t fid, const char *dsidx) 
 {
     int     rank = 3;
     int     rankds = 1;
@@ -366,19 +360,9 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx)
     hsize_t s3_dim[1]  = {DIM3_SIZE};
     hsize_t s4_dim[1]  = {DIM4_SIZE};
     long    s1_wbuf[DIM1_SIZE] = {10,20,30};
-    long    s11_wbuf[DIM1_SIZE] = {10,100,300};
     long    s2_wbuf[DIM2_SIZE] = {100,200,300,400};
-    long    s21_wbuf[DIM2_SIZE] = {10,20,30,40};
-    long    s22_wbuf[DIM2_SIZE] = {5,10,50,300};
     long    s3_wbuf[DIM3_SIZE] = {10,10,10,20,20,20,30,30,30,40,40,40};
-    long    s31_wbuf[DIM3_SIZE] = {1,1,1,2,2,2,3,3,3,4,4,4};
-    long    s32_wbuf[DIM3_SIZE] = {5,5,5,10,10,10,50,50,50,100,100,100};
-    long    s33_wbuf[DIM3_SIZE] = {6,6,6,12,12,12,53,53,53,140,140,140};
     long    s4_wbuf[DIM4_SIZE] = {18,18};
-    long    s41_wbuf[DIM4_SIZE] = {8,8};
-    long    s42_wbuf[DIM4_SIZE] = {80,80};
-    long    s43_wbuf[DIM4_SIZE] = {180,180};
-    long    s44_wbuf[DIM4_SIZE] = {280,280};
     char name[32];
 
     strcpy(name, dsname);
@@ -2127,7 +2111,7 @@ out:
     return FAIL;
 }
 
-static int test_simple()
+static int test_simple(void)
 {
     hid_t   fid = -1;
     hid_t   did = -1;
