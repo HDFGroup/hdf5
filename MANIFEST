@@ -856,8 +856,10 @@
 ./test/tbad_msg_count.h5
 ./test/tbogus.h5
 ./test/tchecksum.c
+./test/tcheck_version.c
 ./test/tconfig.c
 ./test/tcoords.c
+./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testframe.c
 ./test/testhdf5.c

@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -46,10 +46,11 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
+# tcheck_version is used by testcheck_version.sh.
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -103,26 +104,27 @@ flush2.chkexe_: flush1.chkexe_
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
-            max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
-            huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
-            extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-            sys_file1 tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
-            stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
-            dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
-	    big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
-            stdio.h5 sec2.h5 dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5        \
-            tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
-            fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
-            trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
-            enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
-            tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
-            getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
-            family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
-            multi_file-[rs].h5 core_file \
-            new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
-            dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
-            objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5
+    max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
+    huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
+    extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
+    sys_file1 tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 \
+    stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
+    dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
+    big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
+    stdio.h5 sec2.h5 dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5        \
+    tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
+    fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
+    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
+    enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
+    tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
+    getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
+    family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
+    multi_file-[rs].h5 core_file \
+    new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
+    dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
+    unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
+    objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 tcheck_version_*.out \
+    tcheck_version_*.err
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
