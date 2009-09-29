@@ -210,7 +210,7 @@ error:
             trav_table_free(travt);
     } H5E_END_TRY;
     return -1;
-}
+} /* h5repack_verify() */
 
 
 

@@ -1084,7 +1084,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
         /* Only truncate the file on an orderly close, with write-access */
-        if(f->closing && (H5F_ACC_RDWR & f->shared->flags)) {
+        if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
             /* Truncate the file to the current allocated size */
             if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
                 /* Push error, but keep going*/
@@ -1616,7 +1616,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
      * calling H5Fflush() with the read-only handle, still causes data
      * to be flushed.
      */
-    if(H5F_ACC_RDWR & f->shared->flags) {
+    if(H5F_ACC_RDWR & H5F_INTENT(f)) {
         /* Flush other files, depending on scope */
         if(H5F_SCOPE_GLOBAL == scope) {
             /* Call the flush routine for mounted file hierarchies */
@@ -1894,7 +1894,7 @@ H5F_try_close(H5F_t *f)
      * copy of the cache needs to be clean.
      * Only try to flush the file if it was opened with write access.
      */
-    if(f->intent&H5F_ACC_RDWR) {
+    if(f->intent & H5F_ACC_RDWR) {
         /* Flush all caches */
         if(H5F_flush(f, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")

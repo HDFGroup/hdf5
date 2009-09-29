@@ -670,8 +670,8 @@ H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_
     /* Set the superblock extension size */
     if(super_ext_size) {
         if(H5F_addr_defined(f->shared->sblock->ext_addr)) {
-            H5O_loc_t ext_loc;                  /* "Object location" for superblock extension */
-            H5O_info_t oinfo;                   /* Object info for superblock extension */
+            H5O_loc_t ext_loc;          /* "Object location" for superblock extension */
+            H5O_hdr_info_t hdr_info;    /* Object info for superblock extension */
 
             /* Set up "fake" object location for superblock extension */
             H5O_loc_reset(&ext_loc);
@@ -679,11 +679,11 @@ H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_
             ext_loc.addr = f->shared->sblock->ext_addr;
 
             /* Get object header info for superblock extension */
-            if(H5O_get_info(&ext_loc, dxpl_id, FALSE, &oinfo) < 0)
+            if(H5O_get_hdr_info(&ext_loc, dxpl_id, &hdr_info) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
 
             /* Set the superblock extension size */
-            *super_ext_size = oinfo.hdr.space.total;
+            *super_ext_size = hdr_info.space.total;
         } /* end if */
         else
             /* Set the superblock extension size to zero */

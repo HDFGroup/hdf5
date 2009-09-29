@@ -5,7 +5,7 @@ Filename: h5stat_newgrat.h5
 File information
 	# of unique groups: 35001
 	# of unique datasets: 1
-	# of unique named dataypes: 0
+	# of unique named datatypes: 0
 	# of unique links: 0
 	# of unique other: 0
 	Max. # of links to object: 1
