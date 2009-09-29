@@ -79,7 +79,6 @@
 #define FNAME_UB   "ublock.bin"
 
 
-
 const char *H5REPACK_FILENAMES[] = {
     "h5repack_big_out",
     NULL
@@ -177,6 +176,7 @@ int main (void)
     * 2) use the h5diff function to compare the input and output file
     *-------------------------------------------------------------------------
     */
+
 
     /*-------------------------------------------------------------------------
     * file with fill values
@@ -1471,7 +1471,6 @@ int main (void)
         GOERROR;
     if(h5repack_verify(FNAME8OUT, &pack_options) <= 0)
         GOERROR;
-
 
     /* verify aligment */
     {

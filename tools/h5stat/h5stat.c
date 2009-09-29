@@ -88,7 +88,7 @@ typedef struct iter_t {
     hsize_t SM_index_storage_size;      /* index (btree & list) size for SOHM table (1.8) */
     hsize_t SM_heap_storage_size;	/* fractal heap size for SOHM table (1.8) */
     hsize_t super_ext_size;	   	/* superblock extension size */
-    hsize_t datasets_btree_storage_size;   /* btree size for chunked dataset */
+    hsize_t datasets_index_storage_size;/* meta size for chunked dataset's indexing type */
     unsigned long nexternal;            /* Number of external files for a dataset */
     int           local;                /* Flag to indicate iteration over the object*/
 } iter_t;
@@ -381,18 +381,6 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
  * Programmer:    Quincey Koziol
  *                Tuesday, August 16, 2005
  *
- * Modifications: Refactored code from the walk_function
- *                EIP, Wednesday, August 16, 2006
- *
- *                Vailin Choi 12 July 2007
- *                1. Gathered storage info for btree and heap
- *                   (chunked datasets and attributes)
- *                2. Gathered info for attributes
- *
- *		  Vailin Choi 14 July 2007
- *		  Cast "dims" and "num_attrs" to size_t
- *		  Due to the -Mbounds problem for the pgi-32bit compiler on indexing
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -426,7 +414,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     assert(did > 0);
 
     /* Update dataset metadata info */
-    iter->datasets_btree_storage_size += oi->meta_size.obj.index_size;
+    iter->datasets_index_storage_size += oi->meta_size.obj.index_size;
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
@@ -587,8 +575,7 @@ datatype_stats(iter_t *iter, const H5O_info_t *oi)
  * Purpose: Gather statistics about an object
  *
  * Return: Success: 0
- *
- *  Failure: -1
+ *  	   Failure: -1
  *
  * Programmer: Quincey Koziol
  *             Tuesday, November 6, 2007
@@ -815,7 +802,7 @@ print_file_info(const iter_t *iter)
     printf("File information\n");
     printf("\t# of unique groups: %lu\n", iter->uniq_groups);
     printf("\t# of unique datasets: %lu\n", iter->uniq_dsets);
-    printf("\t# of unique named dataypes: %lu\n", iter->uniq_dtypes);
+    printf("\t# of unique named datatypes: %lu\n", iter->uniq_dtypes);
     printf("\t# of unique links: %lu\n", iter->uniq_links);
     printf("\t# of unique other: %lu\n", iter->uniq_others);
     printf("\tMax. # of links to object: %lu\n", iter->max_links);
@@ -860,7 +847,7 @@ print_file_metadata(const iter_t *iter)
     HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
 
     HDfprintf(stdout, "\tChunked datasets:\n");
-    HDfprintf(stdout, "\t\tB-tree: %Hu\n", iter->datasets_btree_storage_size);
+    HDfprintf(stdout, "\t\tB-tree: %Hu\n", iter->datasets_index_storage_size);
 
     HDfprintf(stdout, "\tShared Messages:\n");
     HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);

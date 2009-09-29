@@ -51,6 +51,8 @@ static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
 static void *H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
+static herr_t H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_ih_info_t *bh_info);
 
 
 /*********************/
@@ -76,7 +78,8 @@ const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
     H5O_group_isa, 		/* "isa" message		*/
     H5O_group_open, 		/* open an object of this class */
     H5O_group_create, 		/* create an object of this class */
-    H5O_group_get_oloc 		/* get an object header location for an object */
+    H5O_group_get_oloc,		/* get an object header location for an object */
+    H5O_group_bh_info 		/* get the index & heap info for an object */
 }};
 
 
@@ -257,14 +260,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     htri_t	exists;                 /* Flag if header message of interest exists */
     H5HF_t      *fheap = NULL;          /* Fractal heap handle */
     herr_t      ret_value = SUCCEED;  	/* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_group_bh_info, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_group_bh_info)
 
     /* Sanity check */
     HDassert(f);

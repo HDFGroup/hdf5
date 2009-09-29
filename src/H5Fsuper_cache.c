@@ -573,7 +573,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     ret_value = sblock;
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_sblock_load() */
 

@@ -57,7 +57,7 @@ test_cont(char *filename, hid_t fapl)
 {
     hid_t	file=-1;
     H5F_t	*f = NULL;
-    H5O_info_t  oinfo;               
+    H5O_hdr_info_t hdr_info;               
     H5O_loc_t	oh_locA, oh_locB;
     time_t	time_new;
     const char	*short_name = "T";
@@ -105,18 +105,18 @@ test_cont(char *filename, hid_t fapl)
     if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_locA.addr, H5AC__NO_FLAGS_SET) < 0)
 	FAIL_STACK_ERROR
 
-    if(H5O_get_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+    if(H5O_get_hdr_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, &hdr_info) < 0)
 	FAIL_STACK_ERROR
-    nchunks = oinfo.hdr.nchunks;
+    nchunks = hdr_info.nchunks;
 
     /* remove the 1st H5O_NAME_ID message */
     if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE, H5P_DATASET_XFER_DEFAULT) < 0)
 	FAIL_STACK_ERROR
 
-    if(H5O_get_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+    if(H5O_get_hdr_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, &hdr_info) < 0)
 	FAIL_STACK_ERROR
 
-    if (oinfo.hdr.nchunks >= nchunks)
+    if(hdr_info.nchunks >= nchunks)
 	TEST_ERROR
 
     if(H5O_close(&oh_locA) < 0)
@@ -164,7 +164,7 @@ main(void)
     hid_t	dset=-1;
     H5F_t	*f=NULL;
     char	filename[1024];
-    H5O_info_t  oinfo;                  /* Object info */
+    H5O_hdr_info_t hdr_info;                  /* Object info */
     H5O_loc_t	oh_loc;
     time_t	time_new, ro;
     int		i;
@@ -240,9 +240,9 @@ main(void)
             TEST_ERROR
 
         /* Make certain that chunk #0 in the object header can be encoded with a 1-byte size */
-        if(H5O_get_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+        if(H5O_get_hdr_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, &hdr_info) < 0)
             FAIL_STACK_ERROR
-        if(oinfo.hdr.space.total >=256)
+        if(hdr_info.space.total >=256)
             TEST_ERROR
 
         PASSED();
@@ -267,9 +267,9 @@ main(void)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
-        if(H5O_get_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+        if(H5O_get_hdr_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, &hdr_info) < 0)
             FAIL_STACK_ERROR
-        if(oinfo.hdr.space.total < 256)
+        if(hdr_info.space.total < 256)
             TEST_ERROR
 
         PASSED();
