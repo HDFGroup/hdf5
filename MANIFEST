@@ -1636,6 +1636,8 @@
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_table.c
+./hl/test/test_dsLE.h5
+./hl/test/test_dsBE.h5
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5

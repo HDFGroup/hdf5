@@ -147,7 +147,8 @@ Bug Fixes since HDF5-1.8.3
 
     High-Level APIs:
     ------
-    - None
+    - H5DSis_attached failed to account for different platform types. Added a
+      get native type call. ADB - 2009/9/29 - 1562
 
     Fortran High-Level APIs:
     ------

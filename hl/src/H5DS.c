@@ -1024,6 +1024,7 @@ htri_t H5DSis_attached(hid_t did,
     hssize_t   nelmts;
     hid_t      sid;          /* space ID */
     hid_t      tid = -1;     /* attribute type ID */
+    hid_t      ntid = -1;    /* attribute native type ID */
     hid_t      aid = -1;     /* attribute ID */
     int        rank;         /* rank of dataset */
     ds_list_t  *dsbuf;       /* array of attribute data in the DS pointing to the dataset */
@@ -1187,7 +1188,10 @@ htri_t H5DSis_attached(hid_t did,
 
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
-
+        
+        if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+            goto out;
+        
         /* get and save the old reference(s) */
         if((sid = H5Aget_space(aid)) < 0)
             goto out;
@@ -1200,7 +1204,7 @@ htri_t H5DSis_attached(hid_t did,
         if (dsbuf == NULL)
             goto out;
 
-        if (H5Aread(aid,tid,dsbuf) < 0)
+        if (H5Aread(aid,ntid,dsbuf) < 0)
             goto out;
 
         /*-------------------------------------------------------------------------
@@ -1241,6 +1245,8 @@ htri_t H5DSis_attached(hid_t did,
 
         /* close */
         if (H5Sclose(sid) < 0)
+            goto out;
+        if (H5Tclose(ntid) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
             goto out;
