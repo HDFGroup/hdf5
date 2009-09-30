@@ -1554,11 +1554,14 @@
 ./test/tattr.c
 ./test/tbad_msg_count.h5
 ./test/tbogus.h5
+./test/tcheck_version.c
 ./test/tconfig.c
 ./test/tcoords.c
+./test/testcheck_version.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/testlibinfo.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
@@ -1572,9 +1575,9 @@
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
 ./test/tnullspace.h5
-./test/ttime.c
 ./test/trefer.c
 ./test/trefstr.c
+./test/ttime.c
 ./test/tselect.c
 ./test/tskiplist.c
 ./test/ttst.c
