@@ -30,10 +30,11 @@ static herr_t op_stop(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 /* prototypes */
 static int create_test_file(const char *fileext);
 static int open_test_file(const char *fileext);
-herr_t create_char_dataset(hid_t fid, const char *dsidx);
-herr_t create_int_dataset(hid_t fid, const char *dsidx); 
-herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx); 
-herr_t create_float_dataset(hid_t fid, const char *dsidx); 
+herr_t create_char_dataset(hid_t fid, const char *dsidx, int fulldims);
+herr_t create_short_dataset(hid_t fid, const char *dsidx, int fulldims);
+herr_t create_int_dataset(hid_t fid, const char *dsidx, int fulldims); 
+herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldims); 
+herr_t create_float_dataset(hid_t fid, const char *dsidx, int fulldims); 
 herr_t create_DS1_char_datasets(hid_t fid, const char *dsidx, int rankds, hsize_t *s_dim, char *s_wbuf, char *s1_wbuf);
 herr_t create_DS2_char_datasets(hid_t fid, const char *dsidx, int rankds, hsize_t *s_dim, char *s_wbuf, char *s1_wbuf, char *s2_wbuf);
 herr_t create_DS3_char_datasets(hid_t fid, const char *dsidx, int rankds, hsize_t *s_dim, char *s_wbuf, char *s1_wbuf, char *s2_wbuf, char *s3_wbuf);
@@ -68,7 +69,7 @@ static int test_int_scalenames(const char *fileext);
 static int test_long_scalenames(const char *fileext);
 static int test_samelong_scalenames(const char *fileext);
 static int test_float_scalenames(const char *fileext);
-static int test_foreign_scaleattached(const char *fileext);
+static int test_foreign_scaleattached(const char *fileforeign);
 
 static int test_simple(void);
 static int test_errors(void);
@@ -117,10 +118,6 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define SCALE_32_NAME  "scalename_32_"
 #define SCALE_33_NAME  "scalename_33_"
 #define SCALE_4_NAME   "scalename_4_"
-#define SCALE_41_NAME  "scalename_41_"
-#define SCALE_42_NAME  "scalename_42_"
-#define SCALE_43_NAME  "scalename_43_"
-#define SCALE_44_NAME  "scalename_44_"
 
 #define DIM0_LABEL     "Latitude"
 #define DIM1_LABEL     "Longitude"
@@ -227,6 +224,7 @@ static hid_t open_test_file(const char *fileext)
     strcpy(filename, FILENAME);
     strcat(filename, fileext);
     strcat(filename, FILEEXT);
+    
     return H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 }
 
@@ -234,7 +232,7 @@ static hid_t open_test_file(const char *fileext)
  * create "data" dataset
  *-------------------------------------------------------------------------
  */
-herr_t create_char_dataset(hid_t fid, const char *dsidx) 
+herr_t create_char_dataset(hid_t fid, const char *dsidx, int fulldims) 
 {
     int     rank = 3;
     int     rankds = 1;
@@ -245,32 +243,50 @@ herr_t create_char_dataset(hid_t fid, const char *dsidx)
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
     char    s1_wbuf[DIM1_SIZE] = {1,2,3};
+    char    s11_wbuf[DIM1_SIZE] = {10,20,30};
     char    s2_wbuf[DIM2_SIZE] = {10,20,30,40};
+    char    s21_wbuf[DIM2_SIZE] = {1,2,3,4};
+    char    s22_wbuf[DIM2_SIZE] = {5,10,50,100};
     char    s3_wbuf[DIM3_SIZE] = {10,10,10,20,20,20,30,30,30,40,40,40};
+    char    s31_wbuf[DIM3_SIZE] = {1,1,1,2,2,2,3,3,3,4,4,4};
+    char    s32_wbuf[DIM3_SIZE] = {5,5,5,10,10,10,50,50,50,100,100,100};
+    char    s33_wbuf[DIM3_SIZE] = {6,6,6,12,12,12,53,53,53,120,120,120};
     char name[32];
 
     strcpy(name, DATASET_NAME);
     strcat(name, dsidx);
     /* make a dataset */
     if(H5LTmake_dataset_char(fid, name, rank, dims, buf) >= 0) {
-         /* make a DS dataset for the first dimension */
-         if(create_DS1_char_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
+        if(fulldims==0) {
+            /* make a DS dataset for the first dimension */
+            if(create_DS1_char_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
              return FAIL;
-         
-         /* make a DS dataset for the second dimension */
-         if(create_DS2_char_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
+            
+            /* make a DS dataset for the second dimension */
+            if(create_DS2_char_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
              return FAIL;
-         
-         /* make a DS dataset for the third dimension */
-         if(create_DS3_char_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
+            
+            /* make a DS dataset for the third dimension */
+            if(create_DS3_char_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
              return FAIL;
+        }
+        else {
+            if(create_DS1_char_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS2_char_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS3_char_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, s31_wbuf, s32_wbuf, s33_wbuf) < 0)
+             return FAIL;
+        }
      }
      else
          return FAIL;
     return SUCCEED;
 }
 
-static herr_t create_short_dataset(hid_t fid, const char *dsidx) 
+herr_t create_short_dataset(hid_t fid, const char *dsidx, int fulldims) 
 {
     int     rank = 3;
     int     rankds = 1;
@@ -296,24 +312,36 @@ static herr_t create_short_dataset(hid_t fid, const char *dsidx)
 
     /* make a dataset */
     if(H5LTmake_dataset_short(fid, name, rank, dims, buf) >= 0) {
-         /* make a DS dataset for the first dimension */
-         if(create_DS1_short_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+        if(fulldims==0) {
+            /* make a DS dataset for the first dimension */
+            if(create_DS1_short_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
              return FAIL;
-    
-         /* make a DS dataset for the second dimension */
-         if(create_DS2_short_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+            
+            /* make a DS dataset for the second dimension */
+            if(create_DS2_short_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
              return FAIL;
-         
-         /* make a DS dataset for the third dimension */
-         if(create_DS3_short_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, s31_wbuf, s32_wbuf, s33_wbuf) < 0)
+            
+            /* make a DS dataset for the third dimension */
+            if(create_DS3_short_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
              return FAIL;
+        }
+        else {
+            if(create_DS1_short_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS2_short_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS3_short_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, s31_wbuf, s32_wbuf, s33_wbuf) < 0)
+             return FAIL;
+        }
      }
      else
          return FAIL;
     return SUCCEED;
 }
 
-herr_t create_int_dataset(hid_t fid, const char *dsidx) 
+herr_t create_int_dataset(hid_t fid, const char *dsidx, int fulldims) 
 {
     int     rank = RANK;
     int     rankds = 1;
@@ -333,20 +361,29 @@ herr_t create_int_dataset(hid_t fid, const char *dsidx)
 
     /* make a dataset */
     if(H5LTmake_dataset_int(fid, name, rank, dims, buf) >= 0) {
-         /* make a DS dataset for the first dimension */
-         if(create_DS1_int_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+        if(fulldims==0) {
+            /* make a DS dataset for the first dimension */
+            if(create_DS1_int_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
              return FAIL;
-    
-         /* make a DS dataset for the second dimension */
-         if(create_DS2_int_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+            
+            /* make a DS dataset for the second dimension */
+            if(create_DS2_int_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
              return FAIL;
+        }
+        else {
+            if(create_DS1_int_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS2_int_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+             return FAIL;
+        }
      }
      else
          return FAIL;
     return SUCCEED;
 }
 
-herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx) 
+herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldims) 
 {
     int     rank = 4;
     int     rankds = 1;
@@ -360,37 +397,62 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx)
     hsize_t s3_dim[1]  = {DIM3_SIZE};
     hsize_t s4_dim[1]  = {DIM4_SIZE};
     long    s1_wbuf[DIM1_SIZE] = {10,20,30};
+    long    s11_wbuf[DIM1_SIZE] = {10,100,300};
     long    s2_wbuf[DIM2_SIZE] = {100,200,300,400};
+    long    s21_wbuf[DIM2_SIZE] = {10,20,30,40};
+    long    s22_wbuf[DIM2_SIZE] = {5,10,50,300};
     long    s3_wbuf[DIM3_SIZE] = {10,10,10,20,20,20,30,30,30,40,40,40};
+    long    s31_wbuf[DIM3_SIZE] = {1,1,1,2,2,2,3,3,3,4,4,4};
+    long    s32_wbuf[DIM3_SIZE] = {5,5,5,10,10,10,50,50,50,100,100,100};
+    long    s33_wbuf[DIM3_SIZE] = {6,6,6,12,12,12,53,53,53,140,140,140};
     long    s4_wbuf[DIM4_SIZE] = {18,18};
+    long    s41_wbuf[DIM4_SIZE] = {8,8};
+    long    s42_wbuf[DIM4_SIZE] = {80,80};
+    long    s43_wbuf[DIM4_SIZE] = {180,180};
+    long    s44_wbuf[DIM4_SIZE] = {280,280};
     char name[32];
 
     strcpy(name, dsname);
 
     /* make a dataset */
     if(H5LTmake_dataset_long(fid, name, rank, dims, buf) >= 0) {
-         /* make a DS dataset for the first dimension */
-         if(create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
+        if(fulldims==0) {
+            /* make a DS dataset for the first dimension */
+            if(create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
              return FAIL;
-    
-         /* make a DS dataset for the second dimension */
-         if(create_DS2_long_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
+            
+            /* make a DS dataset for the second dimension */
+            if(create_DS2_long_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
              return FAIL;
-         
-         /* make a DS dataset for the third dimension */
-         if(create_DS3_long_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
+            
+            /* make a DS dataset for the third dimension */
+            if(create_DS3_long_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
              return FAIL;
-         
-         /* make a DS dataset for the fourth dimension */
-         if(create_DS4_long_datasets(fid, dsidx, rankds, s4_dim, s4_wbuf, NULL, NULL, NULL, NULL) < 0)
+            
+            /* make a DS dataset for the fourth dimension */
+            if(create_DS4_long_datasets(fid, dsidx, rankds, s4_dim, s4_wbuf, NULL, NULL, NULL, NULL) < 0)
              return FAIL;
+        }
+        else {
+            if(create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS2_long_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS3_long_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, s31_wbuf, s32_wbuf, s33_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS4_long_datasets(fid, dsidx, rankds, s4_dim, s4_wbuf, s41_wbuf, s42_wbuf, s43_wbuf, s44_wbuf) < 0)
+             return FAIL;
+        }
      }
      else
          return FAIL;
     return SUCCEED;
 }
 
-herr_t create_float_dataset(hid_t fid, const char *dsidx) 
+herr_t create_float_dataset(hid_t fid, const char *dsidx, int fulldims) 
 {
     int     rank = RANK;
     int     rankds = 1;
@@ -410,13 +472,22 @@ herr_t create_float_dataset(hid_t fid, const char *dsidx)
 
     /* make a dataset */
     if(H5LTmake_dataset_float(fid, name, rank, dims, buf) >= 0) {
-         /* make a DS dataset for the first dimension */
-         if(create_DS1_float_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+        if(fulldims==0) {
+            /* make a DS dataset for the first dimension */
+            if(create_DS1_float_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
              return FAIL;
-    
-         /* make a DS dataset for the second dimension */
-         if(create_DS2_float_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+            
+            /* make a DS dataset for the second dimension */
+            if(create_DS2_float_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
              return FAIL;
+        }
+        else {
+            if(create_DS1_float_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
+             return FAIL;
+            
+            if(create_DS2_float_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
+             return FAIL;
+        }
      }
      else
          return FAIL;
@@ -1087,7 +1158,7 @@ static int test_char_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset */
-    if(create_char_dataset(fid, "ac") < 0)
+    if(create_char_dataset(fid, "ac", 0) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1143,7 +1214,7 @@ static int test_short_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset */
-    if(create_short_dataset(fid, "as") < 0)
+    if(create_short_dataset(fid, "as", 1) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1229,7 +1300,7 @@ static int test_int_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset */
-    if(create_int_dataset(fid, "a") < 0)
+    if(create_int_dataset(fid, "a", 1) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1295,7 +1366,7 @@ static int test_long_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset */
-    if(create_long_dataset(fid, dsname, "al") < 0)
+    if(create_long_dataset(fid, dsname, "al", 0) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1356,7 +1427,7 @@ static int test_duplicatelong_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset 2 */
-    if(create_long_dataset(fid, dsname, "al2") < 0)
+    if(create_long_dataset(fid, dsname, "al2", 0) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1417,7 +1488,7 @@ static int test_float_attachscales(const char *fileext)
         goto out;
     
     /* make a dataset */
-    if(create_float_dataset(fid, "af") < 0)
+    if(create_float_dataset(fid, "af", 1) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -1506,7 +1577,7 @@ static int test_numberofscales(const char *fileext)
     strcat(dsname, "b");
 
     /* make a dataset */
-    if(create_int_dataset(fid, "b") < 0)
+    if(create_int_dataset(fid, "b", 1) < 0)
         goto out;
 
     /* make a DS dataset for the first dimension */
@@ -2072,10 +2143,19 @@ static int test_foreign_scaleattached(const char *fileforeign)
     hid_t   fid = -1;
     hid_t   did = -1;
     hid_t   dsid = -1;
+    char  *srcdir = getenv("srcdir"); /* the source directory */
+    char  filename[512]="";          /* buffer to hold name of existing file */
+
+    /* compose the name of the file to open, using the srcdir, if appropriate */
+    if (srcdir) {
+        strcpy(filename,srcdir);
+        strcat(filename,"/");
+    }
+    strcat(filename, fileforeign);
     
     TESTING2("test_foreign_scaleattached");
 
-    if((fid = H5Fopen(fileforeign, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         goto out;
 
     if((did = H5Dopen2(fid, "/dset_al", H5P_DEFAULT)) >= 0) {
