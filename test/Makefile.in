@@ -70,6 +70,7 @@ MOSTLYCLEAN=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5   \
             err_vers.h5
 
 CLEAN=$(TIMINGS)
+DISTCLEAN=testerror.sh testlibinfo.sh testcheck_version.sh
 
 ## Source and object files for programs...  The TEST_SRC list contains all the
 ## source files and is used for things like dependencies, archiving, etc.  The
