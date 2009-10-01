@@ -313,6 +313,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Added $(EXEEXT) extension to H5detect when it's executed in the 
+      src/Makfile to generate H5Tinit.c so it works correctly on platforms 
+      that require the full extension when running executables.
+      MAM - 2009/10/01 - BZ #1613
     - Configure will now set FC and CXX to "no" when fortran and c++
       are not being compiled, respectively, so configure will not run
       some of the compiler tests for these languages when they are not
