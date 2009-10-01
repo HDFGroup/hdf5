@@ -32,8 +32,10 @@
 #include "H5LTpublic.h"
 
 /* prototypes */
+static hid_t open_test_file(const char *fileext);
 herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx); 
 herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx);
+herr_t test_detach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx);
 herr_t test_set_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx);
 herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx);
 
@@ -44,7 +46,6 @@ static int test_samelong_scalenames(const char *filename);
 static int test_foreign_scaleattached(const char *filename);
 
 
-#define RANK          2
 #define DIM_DATA      12
 #define DIM1_SIZE     3
 #define DIM2_SIZE     4
@@ -112,12 +113,23 @@ error:
     return 1;
 }
 
+static hid_t open_test_file(const char *fileext)
+{
+    char filename[65];
+
+    strcpy(filename, FILENAME);
+    strcat(filename, fileext);
+    strcat(filename, FILEEXT);
+    
+    return H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+}
+
 /*-------------------------------------------------------------------------
  * create "data" dataset
  *-------------------------------------------------------------------------
  */
 
-herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx) 
+herr_t create_long_dataset(hid_t fid, const char *name, const char *dsidx) 
 {
     int     rank = 4;
     int     rankds = 1;
@@ -134,9 +146,6 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx)
     long    s2_wbuf[DIM2_SIZE] = {100,200,300,400};
     long    s3_wbuf[DIM3_SIZE] = {10,10,10,20,20,20,30,30,30,40,40,40};
     long    s4_wbuf[DIM4_SIZE] = {18,18};
-    char name[32];
-
-    strcpy(name, dsname);
 
     /* make a dataset */
     if(H5LTmake_dataset_long(fid, name, rank, dims, buf) >= 0) {
@@ -246,7 +255,7 @@ herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *sc
     if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if(H5DSis_attached(did, dsid, idx) == 1) {
             if((name_len=H5DSget_scale_name(dsid,NULL,(size_t)0)) > 0) {
-                name_out = (char*)malloc(name_len * sizeof (char));
+                name_out = (char*)malloc((size_t)name_len * sizeof (char));
                 if(name_out != NULL) {
                     if(H5DSget_scale_name(dsid, name_out, (size_t)name_len) >= 0) {
                         if(strcmp(scalename,name_out)==0) {
@@ -280,7 +289,7 @@ static int test_long_attachscales(const char *filename)
         goto out;
     
     /* make a dataset */
-    if(create_long_dataset(fid, dsname, "al", 0) < 0)
+    if(create_long_dataset(fid, dsname, "al") < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -341,7 +350,7 @@ static int test_duplicatelong_attachscales(const char *filename)
         goto out;
     
     /* make a dataset 2 */
-    if(create_long_dataset(fid, dsname, "al2", 0) < 0)
+    if(create_long_dataset(fid, dsname, "al2") < 0)
         goto out;
 
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
@@ -469,14 +478,15 @@ static int test_samelong_scalenames(const char *filename) {
     char    dsname[32];
     char    scalename[32];
     char    name[32];
+
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al2");
     
-    if((fid = open_test_file(fileext)) < 0)
+    if((fid = open_test_file(filename)) < 0)
         goto out;
     
     TESTING2("set same long scale/cmp scale name");
-    if((did = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) >= 0) {
+    if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         strcpy(scalename, DS_1_NAME);
         strcat(scalename, "al");
         strcpy(name, DS_1_NAME);
