@@ -4063,8 +4063,6 @@ parse_start:
             }
             break;
 
-            break;
-
         /** begin XML parameters **/
         case 'x':
             /* select XML output */
