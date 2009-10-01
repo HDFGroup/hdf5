@@ -726,7 +726,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh
+DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
