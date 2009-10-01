@@ -40,8 +40,8 @@ PROGS=$(TEST_PROGS_PARA)
 ## MPItest.h5 is from t_mpi
 ## Para*.h5 are from testphdf
 ## *.clog are from MPE option
-MOSTLYCLEAN=MPItest.h5 Para*.h5 *.clog
-DISTCLEAN=go Makefile testph5.sh
+MOSTLYCLEAN=MPItest.h5 Para*.h5 *.clog go
+DISTCLEAN=testph5.sh
 
 ## Test source files
 TEST_PHDF5_SRC=testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c
