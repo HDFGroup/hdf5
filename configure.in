@@ -433,6 +433,7 @@ dnl compile the DOUBLE PRECISION interfaces.
   AC_LANG_POP(Fortran)
 else
   echo "no"
+  FC="no"
 fi
 
 AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
@@ -559,6 +560,7 @@ int main(void) {
   ])
 else
   echo "no"
+  CXX="no"
 fi
 
 dnl Change back to the C language

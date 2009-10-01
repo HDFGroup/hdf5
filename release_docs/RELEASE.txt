@@ -104,6 +104,10 @@ Bug Fixes since HDF5-1.8.3
 
     Configuration
     -------------
+    - Configure will now set FC and CXX to "no" when fortran and c++
+      are not being compiled, respectively, so configure will not run
+      some of the compiler tests for these languages when they are not 
+      being used. MAM - 2009/10/01
     - The --enable-static-exec flag has been fixed and will now install
       statically-linked executables within the install directory when used
       on systems that support the -static linker flag.
