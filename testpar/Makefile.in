@@ -370,8 +370,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
+# go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5 \
-	CacheTestDummy.h5
+	CacheTestDummy.h5 go
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
@@ -385,7 +386,7 @@ testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)
-DISTCLEANFILES = go Makefile testph5.sh
+DISTCLEANFILES = testph5.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
