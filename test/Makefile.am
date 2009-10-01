@@ -133,6 +133,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh
 
 include $(top_srcdir)/config/conclude.am
