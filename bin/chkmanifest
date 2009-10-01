@@ -171,8 +171,8 @@ EOF
     exit 1
 fi
 
-if [ $errcode > 0 ]; then
-    exit $errcode
+if [ $errcode -ne 0 ]; then
+    exit 1
 fi 
 
 test "$verbose" && echo "   The MANIFEST is up to date." 1>&2
