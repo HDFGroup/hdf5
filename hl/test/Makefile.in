@@ -33,6 +33,7 @@
 #
 # HDF5 High-Level Test Makefile(.in)
 #
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -71,6 +72,10 @@ am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
 	test_table$(EXEEXT) test_ds$(EXEEXT) test_packet$(EXEEXT)
 am__EXEEXT_2 = gen_test_ds$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
+gen_test_ds_SOURCES = gen_test_ds.c
+gen_test_ds_OBJECTS = gen_test_ds.$(OBJEXT)
+gen_test_ds_LDADD = $(LDADD)
+gen_test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
@@ -91,10 +96,6 @@ test_table_SOURCES = test_table.c
 test_table_OBJECTS = test_table.$(OBJEXT)
 test_table_LDADD = $(LDADD)
 test_table_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
-gen_test_ds_SOURCES = gen_test_ds.c
-gen_test_ds_OBJECTS = gen_test_ds.$(OBJEXT)
-gen_test_ds_LDADD = $(LDADD)
-gen_test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -108,10 +109,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = test_ds.c test_image.c test_lite.c test_packet.c \
-	test_table.c gen_test_ds.c
-DIST_SOURCES = test_ds.c test_image.c test_lite.c test_packet.c \
-	test_table.c gen_test_ds.c
+SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
+	test_packet.c test_table.c
+DIST_SOURCES = gen_test_ds.c test_ds.c test_image.c test_lite.c \
+	test_packet.c test_table.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -456,6 +457,9 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES) 
+	@rm -f gen_test_ds$(EXEEXT)
+	$(LINK) $(gen_test_ds_OBJECTS) $(gen_test_ds_LDADD) $(LIBS)
 test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) 
 	@rm -f test_ds$(EXEEXT)
 	$(LINK) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
@@ -471,9 +475,6 @@ test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES)
 test_table$(EXEEXT): $(test_table_OBJECTS) $(test_table_DEPENDENCIES) 
 	@rm -f test_table$(EXEEXT)
 	$(LINK) $(test_table_OBJECTS) $(test_table_LDADD) $(LIBS)
-gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES) 
-	@rm -f gen_test_ds$(EXEEXT)
-	$(LINK) $(gen_test_ds_OBJECTS) $(gen_test_ds_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -481,12 +482,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -702,15 +703,15 @@ uninstall-am:
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-checkPROGRAMS clean-generic clean-libtool clean-noinstPROGRAMS \
-	ctags distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean clean-checkPROGRAMS clean-generic clean-libtool \
+	clean-noinstPROGRAMS ctags distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
 	pdf-am ps ps-am tags uninstall uninstall-am
