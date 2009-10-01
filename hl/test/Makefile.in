@@ -56,6 +56,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1)
+@BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS)
 subdir = hl/test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -68,6 +69,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_lite$(EXEEXT) test_image$(EXEEXT) \
 	test_table$(EXEEXT) test_ds$(EXEEXT) test_packet$(EXEEXT)
+am__EXEEXT_2 = gen_test_ds$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
 test_ds_SOURCES = test_ds.c
 test_ds_OBJECTS = test_ds.$(OBJEXT)
 test_ds_LDADD = $(LDADD)
@@ -88,6 +91,10 @@ test_table_SOURCES = test_table.c
 test_table_OBJECTS = test_table.$(OBJEXT)
 test_table_LDADD = $(LDADD)
 test_table_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
+gen_test_ds_SOURCES = gen_test_ds.c
+gen_test_ds_OBJECTS = gen_test_ds.$(OBJEXT)
+gen_test_ds_LDADD = $(LDADD)
+gen_test_ds_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -102,9 +109,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = test_ds.c test_image.c test_lite.c test_packet.c \
-	test_table.c
+	test_table.c gen_test_ds.c
 DIST_SOURCES = test_ds.c test_image.c test_lite.c test_packet.c \
-	test_table.c
+	test_table.c gen_test_ds.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -375,6 +382,13 @@ LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 # order to be executed, generally most specific tests to least specific tests.
 TEST_PROG = test_lite test_image test_table test_ds test_packet
 
+# These programs generate test files for the tests.  They don't need to be
+# compiled every time we want to test the library.  However, putting
+# them in a conditional causes automake to generate rules so that they
+# can be built by hand.  They can also be built by specifying
+# --enable-build-all at configure time.
+BUILD_ALL_PROGS = gen_test_ds
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -433,6 +447,15 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
 test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) 
 	@rm -f test_ds$(EXEEXT)
 	$(LINK) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
@@ -448,6 +471,9 @@ test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES)
 test_table$(EXEEXT): $(test_table_OBJECTS) $(test_table_DEPENDENCIES) 
 	@rm -f test_table$(EXEEXT)
 	$(LINK) $(test_table_OBJECTS) $(test_table_LDADD) $(LIBS)
+gen_test_ds$(EXEEXT): $(gen_test_ds_OBJECTS) $(gen_test_ds_DEPENDENCIES) 
+	@rm -f gen_test_ds$(EXEEXT)
+	$(LINK) $(gen_test_ds_OBJECTS) $(gen_test_ds_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -460,6 +486,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_test_ds.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -574,7 +601,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(PROGRAMS) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -604,7 +631,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
-	mostlyclean-am
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -675,8 +702,8 @@ uninstall-am:
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-checkPROGRAMS clean-generic clean-libtool ctags \
-	distclean distclean-compile distclean-generic \
+	clean clean-checkPROGRAMS clean-generic clean-libtool clean-noinstPROGRAMS \
+	ctags distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \

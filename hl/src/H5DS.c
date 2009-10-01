@@ -129,6 +129,7 @@ herr_t H5DSattach_scale(hid_t did,
     hssize_t   nelmts;
     hid_t      sid;          /* space ID */
     hid_t      tid = -1;     /* attribute type ID */
+    hid_t      ntid = -1;    /* attribute native type ID */
     hid_t      aid = -1;     /* attribute ID */
     int        rank;         /* rank of dataset */
     hsize_t    *dims=NULL;   /* dimension of the "REFERENCE_LIST" array */
@@ -472,6 +473,9 @@ herr_t H5DSattach_scale(hid_t did,
 
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
+        
+        if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+            goto out;
 
         /* get and save the old reference(s) */
         if((sid = H5Aget_space(aid)) < 0)
@@ -487,13 +491,15 @@ herr_t H5DSattach_scale(hid_t did,
         if (dsbuf == NULL)
             goto out;
 
-        if (H5Aread(aid,tid,dsbuf) < 0)
+        if (H5Aread(aid,ntid,dsbuf) < 0)
             goto out;
 
         /* close */
         if (H5Sclose(sid) < 0)
             goto out;
         if (H5Aclose(aid) < 0)
+            goto out;
+        if (H5Tclose(ntid) < 0)
             goto out;
 
         /*-------------------------------------------------------------------------
@@ -586,6 +592,7 @@ out:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
         H5Aclose(aid);
+        H5Tclose(ntid);
         H5Tclose(tid);
     } H5E_END_TRY;
     return FAIL;
@@ -631,6 +638,7 @@ herr_t H5DSdetach_scale(hid_t did,
     hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
     hid_t      sid;          /* space ID */
     hid_t      tid = -1;     /* attribute type ID */
+    hid_t      ntid = -1;    /* attribute native type ID */
     hid_t      aid = -1;     /* attribute ID */
     int        rank;         /* rank of dataset */
     ds_list_t  *dsbuf = NULL;  /* array of attribute data in the DS pointing to the dataset */
@@ -823,6 +831,9 @@ herr_t H5DSdetach_scale(hid_t did,
 
     if((tid = H5Aget_type(aid)) < 0)
         goto out;
+    
+    if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+        goto out;
 
     /* get and save the old reference(s) */
     if((sid = H5Aget_space(aid)) < 0)
@@ -835,7 +846,7 @@ herr_t H5DSdetach_scale(hid_t did,
     if(dsbuf == NULL)
         goto out;
 
-    if (H5Aread(aid,tid,dsbuf) < 0)
+    if (H5Aread(aid,ntid,dsbuf) < 0)
         goto out;
 
     for(i=0; i<nelmts; i++)
@@ -878,6 +889,8 @@ herr_t H5DSdetach_scale(hid_t did,
     if (H5Sclose(sid) < 0)
         goto out;
     if (H5Aclose(aid) < 0)
+        goto out;
+    if (H5Tclose(ntid) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -961,6 +974,7 @@ out:
     H5E_BEGIN_TRY {
         H5Sclose(sid);
         H5Aclose(aid);
+        H5Tclose(ntid);
         H5Tclose(tid);
         
         if (dsbuf) 

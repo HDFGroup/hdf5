@@ -1631,6 +1631,7 @@
 ./hl/test/image24plane.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
+./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
