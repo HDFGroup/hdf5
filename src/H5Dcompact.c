@@ -484,15 +484,19 @@ H5D_compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst,
 
         HDmemcpy(buf, storage_src->buf, storage_src->size);
 
+        /* allocate temporary bkg buff for data conversion */
+        if(NULL == (bkg = H5FL_BLK_MALLOC(type_conv, buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
         /* Convert from source file to memory */
-        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
+        /* Copy into another buffer, to reclaim memory later */
         HDmemcpy(reclaim_buf, buf, buf_size);
 
-        /* allocate temporary bkg buff for data conversion */
-        if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        /* Set background buffer to all zeros */
+        HDmemset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
         if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)

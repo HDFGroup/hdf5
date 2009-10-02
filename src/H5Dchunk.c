@@ -4210,7 +4210,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Convert from source file to memory */
         H5_CHECK_OVERFLOW(udata->nelmts, uint32_t, size_t);
-        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, (size_t)udata->nelmts, (size_t)0, (size_t)0, buf, NULL, udata->idx_info_dst->dxpl_id) < 0)
+        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, (size_t)udata->nelmts, (size_t)0, (size_t)0, buf, bkg, udata->idx_info_dst->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Copy into another buffer, to reclaim memory later */
