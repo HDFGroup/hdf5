@@ -517,6 +517,7 @@
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fdbg.c
+./src/H5Fdeprec.c
 ./src/H5Ffake.c
 ./src/H5Fio.c
 ./src/H5Fmount.c
@@ -671,6 +672,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
@@ -826,6 +828,8 @@
 ./test/family_v16_00003.h5
 ./test/farray.c
 ./test/fheap.c
+./test/filespace_1_8.h5
+./test/filespace_1_6.h5
 ./test/freespace.c
 ./test/fill_old.h5
 ./test/fillval.c
@@ -835,6 +839,7 @@
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_filespace.c                  _DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_fill.c			_DO_NOT_DISTRIBUTE_
@@ -1129,6 +1134,8 @@
 ./tools/testfiles/family_file00015.h5
 ./tools/testfiles/family_file00016.h5
 ./tools/testfiles/family_file00017.h5
+./tools/testfiles/file_space.h5
+./tools/testfiles/file_space.ddl
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl

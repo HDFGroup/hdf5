@@ -167,6 +167,7 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_UNKNOWN_ID  0x0017          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
+#define H5O_FSINFO_ID   0x0018          /* Free-space manager info message.  */
 
 
 /* Shared object message types.
@@ -551,6 +552,17 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  */
 typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
+/*
+ * Free space manager info Message.
+ * Contains file space management info and 
+ * addresses of free space managers for file memory
+ * (Data structure in memory)
+ */
+typedef struct H5O_fsinfo_t {
+    H5F_file_space_type_t strategy;	/* File space strategy */
+    hsize_t		  threshold;	/* Free space section threshold */
+    haddr_t     	  fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
+} H5O_fsinfo_t;
 
 /* Typedef for "application" iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,

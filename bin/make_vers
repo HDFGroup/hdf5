@@ -4,7 +4,7 @@ require 5.003;
 # Global settings
 
 # Max. library "index" (0 = v1.0, 1 = 1.2, etc)
-$max_idx = 4;
+$max_idx = 5;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -86,9 +86,9 @@ sub print_checkoptions ($) {
 
     # Print the option checking
     print $fh "\n/* Issue error if contradicting macros have been defined. */\n";
-    print $fh "#if defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS)\n";
+    print $fh "#if (defined(H5_USE_16_API) || defined(H5_USE_18_API)) && defined(H5_NO_DEPRECATED_SYMBOLS)\n";
     print $fh "#error \"Can't choose old API versions when deprecated APIs are disabled\"\n";
-    print $fh "#endif /* defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS) */\n";
+    print $fh "#endif /* (defined(H5_USE_16_API) || defined(H5_USE_18_API)) && defined(H5_NO_DEPRECATED_SYMBOLS) */\n";
 }
 
 ##############################################################################
@@ -118,7 +118,7 @@ sub print_globalapivers ($) {
     # Loop over supported older library APIs and define the appropriate macros
     for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
         # Print API version ifdef
-        print $fh "#ifdef H5_USE_1", ($curr_idx * 2), "_API\n";
+        print $fh "\n#ifdef H5_USE_1", ($curr_idx * 2), "_API\n";
 
         # Print the version macro info for each function that is defined for
         # this API version
@@ -271,6 +271,7 @@ sub parse_line ($) {
         my $params;         # Typedefs for function parameters
         my $vers;           # The version info for the function
         my @vers_list;      # Version info, as a list
+        my @vers_nums;      # Version info, as a numeric list
         my $num_versions;   # Number of versions for function
         my %sym_versions;   # Versions for a symbol
         my $last_idx;       # The previous version index seen for a function
@@ -308,15 +309,12 @@ sub parse_line ($) {
         @vers_list = split(/\s*,\s*/, $vers);
 #print "parse_line: vers_list=(@vers_list)\n";
 
-        # Check for invalid version info given
-        $last_idx = -1;
-        $last_vers = 1;
-        foreach(sort(@vers_list)) {
+        # Parse the version list into numbers, checking for invalid input
+        foreach(@vers_list) {
             my $vers_idx;       # Index of version in array
 
-#print "parse_line: _=$_ last_idx='$last_idx'\n";
             # Do some validation on the input
-            if(!($_ =~ /v1[02468]/)) {
+            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ )) {
                 die "bad version information: $name";
             }
             if(exists($sym_versions{$_})) {
@@ -326,18 +324,29 @@ sub parse_line ($) {
             # Store the versions for the function in a local hash table, indexed by the version
             $sym_versions{$_}=$_;
 
+#print "parse_line: _=$_\n";
             # Get the index of the version
-            ($vers_idx) = ($_ =~ /v1(\d)/);
+            ($vers_idx) = ($_ =~ /v1(\d+)/);
             $vers_idx /= 2;
 #print "parse_line: vers_idx='$vers_idx'\n";
+            push(@vers_nums, $vers_idx);
+        }
+#print "parse_line: vers_nums=(@vers_nums)\n";
 
+        # Check for invalid version info given
+        $last_idx = -1;
+        $last_vers = 1;
+        foreach(sort(@vers_nums)) {
+#print "parse_line: _=$_ last_idx='$last_idx'\n";
             # Update intermediate versions of the library that included the API routine
             if($last_idx >= 0) {
+#print "parse_line: name='$name'\n";
+#print "parse_line: last_vers='$last_vers'\n";
 #print "parse_line: last_idx='$last_idx'\n";
 
                 # Add the function to the list of API routines available in
                 # different versions of the library
-                while($last_idx < $vers_idx) {
+                while($last_idx <= $_) {
                     if($line_type == 1) {
                         $func_vers[$last_idx]{$name} = $last_vers;
                     } elsif($line_type == 2) {
@@ -353,7 +362,7 @@ sub parse_line ($) {
             }
 
             # Keep track of last version index seen
-            $last_idx = $vers_idx;
+            $last_idx = $_;
         }
 
         # Finish updating versions of the library that included the API routine

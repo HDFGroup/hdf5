@@ -891,6 +891,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
         HDassert(f->shared->sohm_nindexes < 255);
+        if(H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &f->shared->fs_strategy) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
+        if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1025,9 +1029,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
              *      and also because releasing free space can shrink the file's
              *      'eoa' value)
              */
-            if(H5MF_close(f, dxpl_id) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+            if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+                if(H5MF_close(f, dxpl_id) < 0)
+                    /* Push error, but keep going*/
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+            } /* end if */
 
             /* Unpin the superblock, since we're about to destroy the cache */
             if(H5AC_unpin_entry(f, f->shared->sblock) < 0)
@@ -2775,11 +2781,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fget_info
- *		1. Get storage size for superblock extension if there is one
+ * Function:    H5Fget_info2
+ *
+ * Purpose:     Gets general information about the file, including:
+ *		1. Get storage size for superblock extension if there is one.
  *              2. Get the amount of btree and heap storage for entries
  *                 in the SOHM table if there is one.
- *		Consider success when there is no superblock extension and/or SOHM table
+ *		3. The amount of free space tracked in the file.
  *
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
@@ -2790,12 +2798,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
+H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 {
     H5F_t *f;                           /* Top file in mount hierarchy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Fget_info, FAIL)
+    FUNC_ENTER_API(H5Fget_info2, FAIL)
     H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */
@@ -2821,18 +2829,67 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
     HDassert(f->shared);
 
     /* Reset file info struct */
-    HDmemset(finfo, 0, sizeof(H5F_info_t));
+    HDmemset(finfo, 0, sizeof(*finfo));
 
-    /* Check for superblock extension info */
-    if(H5F_super_size(f, H5AC_ind_dxpl_id, NULL, &finfo->super_ext_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+    /* Get the size of the superblock and any superblock extensions */
+    if(H5F_super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
+
+    /* Get the size of any persistent free space */
+    if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, finfo) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM btree & heap storage info")
+        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
+
+    /* Set version # fields */
+    finfo->super.version = f->shared->sblock->super_vers;
+    finfo->sohm.version = f->shared->sohm_vers;
+    finfo->free.version = HDF5_FREESPACE_VERSION; 
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fget_info() */
+} /* end H5Fget_info2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_free_sections
+ *
+ * Purpose:     To get free-space section information for free-space manager with
+ *		TYPE that is associated with file FILE_ID.
+ *		If SECT_INFO is null, this routine returns the total # of free-space
+ *		sections.
+ *
+ * Return:      Success:        non-negative, the total # of free space sections
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi; July 1st, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
+    H5F_sect_info_t *sect_info/*out*/)
+{
+    H5F_t         *file;        /* Top file in mount hierarchy */
+    ssize_t       ret_value;    /* Return value */
+
+    FUNC_ENTER_API(H5Fget_free_sections, FAIL)
+    H5TRACE4("Zs", "iFmzx", file_id, type, nsects, sect_info);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    if(sect_info && nsects == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
+
+    /* Go get the free-space section information in the file */
+    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_dxpl_id, type, nsects, sect_info)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_free_sections() */
 

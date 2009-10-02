@@ -40,18 +40,30 @@
  */
 static void gen_file(void)
 {
-    int     	ret, i;
-    hid_t	fapl, gid;
-    hid_t   	file, type_id, space_id, attr_id, dset_id;
-    char	name[30];
-    char	attrname[30];
+    hid_t	fcpl; 	/* File creation property */
+    hid_t	fapl; 	/* File access property */
+    hid_t   	file;	/* File id */
+    hid_t	gid;	/* Group id */
+    hid_t	type_id;	/* Datatype id */
+    hid_t	space_id; 	/* Dataspace id */
+    hid_t	attr_id; 	/* Attribute id */
+    hid_t	dset_id;	/* Dataset id */
+    char	name[30];	/* Group name */
+    char	attrname[30];	/* Attribute name */
+    int     	ret;	/* Return value */
+    int 	i;	/* Local index variable */
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     assert(ret >= 0);
 
+    /* Set file space handling strategy */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, 0);
+    assert(ret >= 0);
+
      /* Create dataset */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, fcpl, fapl);
     for(i = 1; i <= NUM_GRPS; i++) {
         sprintf(name, "%s%d", GROUP_NAME,i);
         gid = H5Gcreate2(file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

@@ -180,10 +180,15 @@ H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
 H5_DLL herr_t H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size);
 H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
+H5_DLL herr_t H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id);
+H5_DLL herr_t H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
+H5_DLL herr_t H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
 
 /* Free space section routines */
 H5_DLL herr_t H5FS_sect_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     H5FS_section_info_t *node, unsigned flags, void *op_data);
+H5_DLL htri_t H5FS_sect_try_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, 
+    H5FS_section_info_t *sect, unsigned flags, void *op_data);
 H5_DLL htri_t H5FS_sect_try_extend(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     haddr_t addr, hsize_t size, hsize_t extra_requested);
 H5_DLL herr_t H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,

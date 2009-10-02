@@ -440,5 +440,59 @@ H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Pinsert1() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_version
+ *
+ * Purpose:	Retrieves version information for various parts of a file.
+ *
+ *		SUPER:		The file super block.
+ *		FREELIST:	The global free list.
+ *		STAB:		The root symbol table entry.
+ *		SHHDR:		Shared object headers.
+ *
+ *		Any (or even all) of the output arguments can be null
+ *		pointers.
+ *
+ * Return:	Success:	Non-negative, version information is returned
+ *				through the arguments.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/,
+    unsigned *stab/*out*/, unsigned *shhdr/*out*/)
+{
+    H5P_genplist_t *plist;     	/* Property list pointer */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(H5Pget_version, FAIL)
+    H5TRACE5("e", "ixxxx", plist_id, super, freelist, stab, shhdr);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get values */
+    if(super)
+        if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, super) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get superblock version")
+    if(freelist)
+        *freelist = HDF5_FREESPACE_VERSION;     /* (hard-wired) */
+    if(stab)
+        *stab = HDF5_OBJECTDIR_VERSION;         /* (hard-wired) */
+    if(shhdr)
+        *shhdr = HDF5_SHAREDHEADER_VERSION;     /* (hard-wired) */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_version() */
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

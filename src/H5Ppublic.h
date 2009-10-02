@@ -208,9 +208,6 @@ H5_DLL herr_t H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times);
 H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 
 /* File creation property list (FCPL) routines */
-H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,
-         unsigned *freelist/*out*/, unsigned *stab/*out*/,
-         unsigned *shhdr/*out*/);
 H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
 H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
 H5_DLL herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
@@ -227,6 +224,8 @@ H5_DLL herr_t H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsig
 H5_DLL herr_t H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type_flags, unsigned *min_mesg_size);
 H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list, unsigned min_btree);
 H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
+H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
+H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
 
 
 /* File access property list (FAPL) routines */
@@ -422,7 +421,9 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
 H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/);
-
+H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,
+         unsigned *freelist/*out*/, unsigned *stab/*out*/,
+         unsigned *shhdr/*out*/);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus

@@ -38,7 +38,7 @@ const char  *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:i:o:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:i:o:S:T:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -58,6 +58,8 @@ static struct long_options l_opts[] = {
     { "alignment", require_arg, 'a' },
     { "infile", require_arg, 'i' },   /* -i for backward compability */
     { "outfile", require_arg, 'o' },  /* -o for backward compability */
+    { "fs_strategy", require_arg, 'S' },
+    { "fs_threshold", require_arg, 'T' },
     { NULL, 0, '\0' }
 };
 
@@ -104,7 +106,7 @@ int main(int argc, const char **argv)
     int           ret=-1;
     
     /* initialize options  */
-    h5repack_init (&options,0);        
+    h5repack_init (&options, 0, 0, (hsize_t)0);        
     
     parse_command_line(argc, argv, &options);
     
@@ -180,6 +182,8 @@ static void usage(const char *prog)
  printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
+ printf("   -S STRGY, --fs_strategy=STRGY  File-space-handling strategy\n");
+ printf("   -T THRD, --fs_threshold=THRD   Free-space section threshold\n");
 
  printf("\n");
 
@@ -193,7 +197,18 @@ static void usage(const char *prog)
  printf("        a power of 2 (1024 default)\n");
  printf("    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
-
+ printf("\n");
+ printf("    STRGY is an integer value listed below:\n");
+ printf("        1: Use persistent free-space managers, aggregators and virtual file driver for allocation\n");
+ printf("        2: Use non-persistent free-space managers, aggregators and virtual file driver for allocation\n");
+ printf("        3: Use aggregators and virtual file driver for allocation\n");
+ printf("        4: Use virtual file driver for allocation\n");
+ printf("        A value of 0 retains the existing file-space-handling strategy used in the library.\n");
+ printf("        The library default is 2.\n");
+ printf("\n");
+ printf("    THRD is the minimum size of free-space sections to track by the free-space managers.\n");
+ printf("        A value of 0 retains the existing free-space section threshold used in the library.\n");
+ printf("        The library default is 1.\n");
  printf("\n");
 
  printf("    FILT - is a string with the format:\n");
@@ -429,6 +444,15 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
             }
             break;
 
+        case 'S':
+
+            options->fs_strategy = atol( opt_arg );
+            break;
+
+        case 'T':
+
+            options->fs_threshold = (hsize_t)atol( opt_arg );
+            break;
         } /* switch */
 
 

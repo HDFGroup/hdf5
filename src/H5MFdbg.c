@@ -41,7 +41,6 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5MFpkg.h"		/* File memory management		*/
 
-#ifdef H5MF_ALLOC_DEBUG_DUMP
 
 /****************/
 /* Local Macros */
@@ -139,6 +138,67 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_sects_debug_cb() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_sects_debug
+ *
+ * Purpose:	Iterate over free space sections for a file
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		January 31 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int indent, int fwidth)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5FD_mem_t 	type;                    /* Memory type for iteration */
+
+    FUNC_ENTER_NOAPI(H5MF_sects_debug, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+	if(H5F_addr_eq(f->shared->fs_addr[type], fs_addr)) {
+	    if(!f->shared->fs_man[type])
+		if(H5MF_alloc_open(f, dxpl_id, type) < 0)
+		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
+
+	    if(f->shared->fs_man[type]) {
+		H5MF_debug_iter_ud_t udata;        /* User data for callbacks */
+
+		/* Prepare user data for section iteration callback */
+		udata.fspace = f->shared->fs_man[type];
+		udata.stream = stream;
+		udata.indent = indent;
+		udata.fwidth = fwidth;
+
+		/* Iterate over all the free space sections */
+		if(H5FS_sect_iterate(f, dxpl_id, f->shared->fs_man[type], H5MF_sects_debug_cb, &udata) < 0)
+		    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+
+		/* Close the free space information */
+		if(H5FS_close(f, dxpl_id, f->shared->fs_man[type]) < 0)
+		    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+	    } /* end if */
+	    break;
+	}
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5MF_sects_debug() */
+
+#ifdef H5MF_ALLOC_DEBUG_DUMP
 
 /*-------------------------------------------------------------------------
  * Function:	H5MF_sects_dump

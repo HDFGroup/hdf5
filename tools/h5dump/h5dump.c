@@ -3067,22 +3067,22 @@ dump_fcpl(hid_t fid)
     hsize_t  userblock; /* userblock size retrieved from FCPL */
     size_t   off_size;  /* size of offsets in the file */
     size_t   len_size;  /* size of lengths in the file */
-    unsigned super;     /* superblock version # */
-    unsigned freelist;  /* free list version # */
-    unsigned stab;      /* symbol table entry version # */
-    unsigned shhdr;     /* shared object header version # */
     hid_t    fdriver;   /* file driver */
     char     dname[32]; /* buffer to store driver name */
     unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
     unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
+    H5F_file_space_type_t  fs_strategy;	/* file space strategy */
+    hsize_t  fs_threshold;		/* free-space section threshold */
+    H5F_info2_t finfo;	/* file information */
 
     fcpl=H5Fget_create_plist(fid);
-    H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
+    H5Fget_info2(fid, &finfo);
     H5Pget_userblock(fcpl,&userblock);
     H5Pget_sizes(fcpl,&off_size,&len_size);
     H5Pget_sym_k(fcpl,&sym_ik,&sym_lk);
     H5Pget_istore_k(fcpl,&istore_ik);
+    H5Pget_file_space(fcpl, &fs_strategy, &fs_threshold);
     H5Pclose(fcpl);
     fapl=h5_fileaccess();
     fdriver=H5Pget_driver(fapl);
@@ -3094,13 +3094,13 @@ dump_fcpl(hid_t fid)
     */
     printf("%s %s\n",SUPER_BLOCK, BEGIN);
     indentation(indent + COL);
-    printf("%s %u\n","SUPERBLOCK_VERSION", super);
+    printf("%s %u\n","SUPERBLOCK_VERSION", finfo.super.version);
     indentation(indent + COL);
-    printf("%s %u\n","FREELIST_VERSION", freelist);
+    printf("%s %u\n","FREELIST_VERSION", finfo.free.version);
     indentation(indent + COL);
-    printf("%s %u\n","SYMBOLTABLE_VERSION", stab);
+    printf("%s %u\n","SYMBOLTABLE_VERSION", 0);  /* Retain this for backward compatibility, for now (QAK) */
     indentation(indent + COL);
-    printf("%s %u\n","OBJECTHEADER_VERSION", shhdr);
+    printf("%s %u\n","OBJECTHEADER_VERSION", finfo.sohm.version);
     indentation(indent + COL);
     HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
     indentation(indent + COL);
@@ -3141,6 +3141,21 @@ dump_fcpl(hid_t fid)
     printf("%s %s\n","FILE_DRIVER", dname);*/
     indentation(indent + COL);
     printf("%s %u\n","ISTORE_K", istore_ik);
+
+    indentation(indent + COL);
+    if(fs_strategy == H5F_FILE_SPACE_ALL_PERSIST)
+        printf("%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL_PERSIST");
+    else if(fs_strategy == H5F_FILE_SPACE_ALL)
+        printf("%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL");
+    else if(fs_strategy == H5F_FILE_SPACE_AGGR_VFD)
+        printf("%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_AGGR_VFD");
+    else if(fs_strategy == H5F_FILE_SPACE_VFD)
+        printf("%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_VFD");
+    else
+        printf("%s %s\n", "FILE_SPACE_STRATEGY", "Unknown strategy");
+    indentation(indent + COL);
+    HDfprintf(stdout, "%s %Hu\n","FREE_SPACE_THRESHOLD", fs_threshold);
+
     printf("%s\n",END);
 
     /*-------------------------------------------------------------------------

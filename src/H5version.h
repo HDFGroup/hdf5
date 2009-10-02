@@ -21,9 +21,9 @@
 #define _H5version_H
 
 /* Issue error if contradicting macros have been defined. */
-#if defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS)
+#if (defined(H5_USE_16_API) || defined(H5_USE_18_API)) && defined(H5_NO_DEPRECATED_SYMBOLS)
 #error "Can't choose old API versions when deprecated APIs are disabled"
-#endif /* defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS) */
+#endif /* (defined(H5_USE_16_API) || defined(H5_USE_18_API)) && defined(H5_NO_DEPRECATED_SYMBOLS) */
 
 
 /* If a particular "global" version of the library's interfaces is chosen,
@@ -35,6 +35,11 @@
 #if defined(H5_USE_16_API_DEFAULT) && !defined(H5_USE_16_API)
 #define H5_USE_16_API 1
 #endif /* H5_USE_16_API_DEFAULT && !H5_USE_16_API */
+
+#if defined(H5_USE_18_API_DEFAULT) && !defined(H5_USE_18_API)
+#define H5_USE_18_API 1
+#endif /* H5_USE_18_API_DEFAULT && !H5_USE_18_API */
+
 
 #ifdef H5_USE_16_API
 
@@ -139,6 +144,114 @@
 #endif /* !defined(H5Z_class_t_vers) */
 
 #endif /* H5_USE_16_API */
+
+#ifdef H5_USE_18_API
+
+/*************/
+/* Functions */
+/*************/
+
+#if !defined(H5Acreate_vers)
+#define H5Acreate_vers 2
+#endif /* !defined(H5Acreate_vers) */
+
+#if !defined(H5Aiterate_vers)
+#define H5Aiterate_vers 2
+#endif /* !defined(H5Aiterate_vers) */
+
+#if !defined(H5Dcreate_vers)
+#define H5Dcreate_vers 2
+#endif /* !defined(H5Dcreate_vers) */
+
+#if !defined(H5Dopen_vers)
+#define H5Dopen_vers 2
+#endif /* !defined(H5Dopen_vers) */
+
+#if !defined(H5Eclear_vers)
+#define H5Eclear_vers 2
+#endif /* !defined(H5Eclear_vers) */
+
+#if !defined(H5Eget_auto_vers)
+#define H5Eget_auto_vers 2
+#endif /* !defined(H5Eget_auto_vers) */
+
+#if !defined(H5Eprint_vers)
+#define H5Eprint_vers 2
+#endif /* !defined(H5Eprint_vers) */
+
+#if !defined(H5Epush_vers)
+#define H5Epush_vers 2
+#endif /* !defined(H5Epush_vers) */
+
+#if !defined(H5Eset_auto_vers)
+#define H5Eset_auto_vers 2
+#endif /* !defined(H5Eset_auto_vers) */
+
+#if !defined(H5Ewalk_vers)
+#define H5Ewalk_vers 2
+#endif /* !defined(H5Ewalk_vers) */
+
+#if !defined(H5Fget_info_vers)
+#define H5Fget_info_vers 1
+#endif /* !defined(H5Fget_info_vers) */
+
+#if !defined(H5Gcreate_vers)
+#define H5Gcreate_vers 2
+#endif /* !defined(H5Gcreate_vers) */
+
+#if !defined(H5Gopen_vers)
+#define H5Gopen_vers 2
+#endif /* !defined(H5Gopen_vers) */
+
+#if !defined(H5Pget_filter_vers)
+#define H5Pget_filter_vers 2
+#endif /* !defined(H5Pget_filter_vers) */
+
+#if !defined(H5Pget_filter_by_id_vers)
+#define H5Pget_filter_by_id_vers 2
+#endif /* !defined(H5Pget_filter_by_id_vers) */
+
+#if !defined(H5Pinsert_vers)
+#define H5Pinsert_vers 2
+#endif /* !defined(H5Pinsert_vers) */
+
+#if !defined(H5Pregister_vers)
+#define H5Pregister_vers 2
+#endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Rget_obj_type_vers)
+#define H5Rget_obj_type_vers 2
+#endif /* !defined(H5Rget_obj_type_vers) */
+
+#if !defined(H5Tarray_create_vers)
+#define H5Tarray_create_vers 2
+#endif /* !defined(H5Tarray_create_vers) */
+
+#if !defined(H5Tcommit_vers)
+#define H5Tcommit_vers 2
+#endif /* !defined(H5Tcommit_vers) */
+
+#if !defined(H5Tget_array_dims_vers)
+#define H5Tget_array_dims_vers 2
+#endif /* !defined(H5Tget_array_dims_vers) */
+
+#if !defined(H5Topen_vers)
+#define H5Topen_vers 2
+#endif /* !defined(H5Topen_vers) */
+
+/************/
+/* Typedefs */
+/************/
+
+#if !defined(H5E_auto_t_vers)
+#define H5E_auto_t_vers 2
+#endif /* !defined(H5E_auto_t_vers) */
+
+#if !defined(H5Z_class_t_vers)
+#define H5Z_class_t_vers 2
+#endif /* !defined(H5Z_class_t_vers) */
+
+#endif /* H5_USE_18_API */
 
 
 /* Choose the correct version of each API symbol, defaulting to the latest
@@ -266,6 +379,19 @@
 #else /* H5Ewalk_vers */
 #error "H5Ewalk_vers set to invalid value"
 #endif /* H5Ewalk_vers */
+
+#if !defined(H5Fget_info_vers) || H5Fget_info_vers == 2
+#ifndef H5Fget_info_vers
+#define H5Fget_info_vers 2
+#endif /* H5Fget_info_vers */
+#define H5Fget_info H5Fget_info2
+#define H5F_info_t H5F_info2_t
+#elif H5Fget_info_vers == 1
+#define H5Fget_info H5Fget_info1
+#define H5F_info_t H5F_info1_t
+#else /* H5Fget_info_vers */
+#error "H5Fget_info_vers set to invalid value"
+#endif /* H5Fget_info_vers */
 
 #if !defined(H5Gcreate_vers) || H5Gcreate_vers == 2
 #ifndef H5Gcreate_vers

@@ -93,6 +93,7 @@
 #define FILE63  "textlinkfar.h5"
 #define FILE64  "tarray8.h5"
 #define FILE65  "tattrreg.h5"
+#define FILE66  "file_space.h5"
 
 
 
@@ -243,6 +244,10 @@ typedef struct s1_t {
 #define F64_DIM0            1
 #define F64_ARRAY_BUF_LEN   (4*1024)
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
+
+/* File 65 macros */
+#define STRATEGY	H5F_FILE_SPACE_AGGR_VFD	/* File space handling strategy */
+#define THRESHOLD10 	10    			/* Free space section threshold */ 
 
 static void
 gent_group(void)
@@ -6443,7 +6448,32 @@ gent_extlinks(void)
  H5Fclose(far_fid);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_fs_strategy_threshold
+ *
+ * Purpose:     Generate a file with non-default file space strategy and
+ *		non-default free-space section threshold.
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_fs_strategy_threshold(void)
+{
+ hid_t    fid;	/* File id */
+ hid_t	  fcpl;	/* File creation property */
 
+ /* Create file-creation template */
+ fcpl = H5Pcreate(H5P_FILE_CREATE);
+
+ /* Set file space information */
+ H5Pset_file_space(fcpl, STRATEGY, THRESHOLD10);
+
+ /* Create the file with the specified strategy and threshold */
+ fid = H5Fcreate(FILE66, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+
+ /* close */
+ H5Fclose(fid);
+ H5Pclose(fcpl);
+}
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -6516,7 +6546,7 @@ int main(void)
     gent_attr_creation_order();
     gent_fpformat();
     gent_extlinks();
-
+    gent_fs_strategy_threshold();
 
     return 0;
 }

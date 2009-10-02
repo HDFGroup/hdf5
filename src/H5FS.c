@@ -477,9 +477,6 @@ HDfprintf(stderr, "%s: Section info is NOT for file free space\n", FUNC);
         if(fspace->serial_sect_count > 0)
             /* Sanity check that section info has address */
             HDassert(H5F_addr_defined(fspace->sect_addr));
-        else
-            /* Sanity check that section info doesn't have address */
-            HDassert(!H5F_addr_defined(fspace->sect_addr));
     } /* end else */
 
     /* Decrement the reference count on the free space manager header */
@@ -722,6 +719,183 @@ HDfprintf(stderr, "%s: Marking free space header as dirty\n", FUNC);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_alloc_hdr()
+ *
+ * Purpose:	Allocate space for the free-space manager header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id)
+{
+    herr_t	ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FS_alloc_hdr, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(fspace);
+
+    if(!H5F_addr_defined(fspace->addr)) {
+	/* Allocate space for the free space header */
+	if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, dxpl_id, (hsize_t)H5FS_HEADER_SIZE(f))))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for free space header")
+
+	/* Cache the new free space header (pinned) */
+	if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space header to cache")
+    } /* end if */
+
+    if(fs_addr)
+	*fs_addr = fspace->addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FS_alloc_hdr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_alloc_sect()
+ *
+ * Purpose:	Allocate space for the free-space manager section info header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
+{
+    herr_t	ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FS_alloc_sect, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(fspace);
+
+    if(!H5F_addr_defined(fspace->sect_addr) && fspace->sinfo && fspace->serial_sect_count > 0) {
+	/* Allocate space for section info from aggregator/vfd */
+	/* (The original version called H5MF_alloc(), but that may cause sect_size to change again) */
+	if(HADDR_UNDEF == (fspace->sect_addr = H5MF_aggr_vfd_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_size)))
+	    HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info")
+
+	fspace->alloc_sect_size = fspace->sect_size;
+
+	/* Mark free-space header as dirty */
+	if(H5FS_dirty(f, fspace) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+
+	/* Cache the free-space section info */
+	if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
+	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
+
+	fspace->sinfo = NULL;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FS_alloc_sect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_free()
+ *
+ * Purpose:	Free space for free-space manager header and section info header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
+{
+    herr_t	ret_value = SUCCEED;              /* Return value */
+    haddr_t	saved_addr;
+    hsize_t	saved_size;
+    unsigned    cache_flags;
+    unsigned 	sinfo_status = 0; 
+    unsigned 	hdr_status = 0; 
+
+    FUNC_ENTER_NOAPI(H5FS_free, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(fspace);
+
+    cache_flags = H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;;
+
+    if(H5F_addr_defined(fspace->sect_addr)) {
+
+	/* Check whether free-space manager section info is in cache or not */
+	if(H5AC_get_entry_status(f, fspace->sect_addr, &sinfo_status) < 0)
+	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to check metadata cache status for free-space section info")
+
+	/* Load free-space manager section info */
+        if(sinfo_status & H5AC_ES__IN_CACHE || !fspace->sinfo) {
+	    if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_READ)))
+		HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to load free space section info")
+
+	    /* Unload and release ownership of the free-space manager section info */
+	    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, cache_flags) < 0)
+		HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
+	}
+
+	saved_addr = fspace->sect_addr;
+	saved_size = fspace->alloc_sect_size;
+
+	fspace->sect_addr = HADDR_UNDEF;
+	fspace->alloc_sect_size = 0;
+
+	/* Free space for the free-space manager section info */
+	if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, saved_addr, saved_size) < 0)
+	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections")
+
+	/* Mark free-space manager header as dirty */
+	if(H5FS_dirty(f, fspace) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+    }
+
+    if(H5F_addr_defined(fspace->addr)) {
+	/* Check whether free-space manager header is in cache or not */
+	if(H5AC_get_entry_status(f, fspace->addr, &hdr_status) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to check metadata cache status for free-space section info")
+    
+        if(hdr_status & H5AC_ES__IN_CACHE) {
+	    /* Unpin the free-space manager header */
+	    if(H5AC_unpin_entry(f, fspace) < 0)
+		HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
+
+	    /* Load the free-space manager header */
+	    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, NULL, fspace, H5AC_READ)))
+		HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to load free space section info")
+
+	    /* Unload and release ownership of the free-space header */
+	    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, cache_flags) < 0)
+		HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
+	}
+	saved_addr = fspace->addr;
+	fspace->addr = HADDR_UNDEF;
+
+	/* Free space for the free-space manager header */
+	if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, saved_addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
+	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header")
+    }
+	
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FS_free() */
 
 #ifdef H5FS_DEBUG_ASSERT
 
