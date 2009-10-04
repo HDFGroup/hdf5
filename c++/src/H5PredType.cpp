@@ -289,7 +289,6 @@ void PredType::commit( H5Object& loc, const H5std_string& name )
 bool PredType::committed()
 {
    throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
-   return (0);
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
