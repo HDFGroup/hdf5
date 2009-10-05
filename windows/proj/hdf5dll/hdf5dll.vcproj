@@ -1032,6 +1032,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Ofsinfo.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Oginfo.c"
 				>
 			</File>
