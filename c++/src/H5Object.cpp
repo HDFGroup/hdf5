@@ -205,26 +205,30 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 /// <A HREF="../RM_H5A.html#Annot-Iterate">../RM_H5A.html#Annot-Iterate</A>
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
+int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
 {
    // store the user's function and data
    UserData4Aiterate* userData = new UserData4Aiterate;
    userData->opData = op_data;
-   userData->idx = idx;
    userData->op = user_op;
    userData->object = this;
 
    // call the C library routine H5Aiterate to iterate the attributes
-   int ret_value = H5Aiterate(getId(), idx, userAttrOpWrpr, (void *) userData );
+   unsigned idx = _idx ? *_idx : 0; // _idx can be null
+   int ret_value = H5Aiterate(getId(), &idx, userAttrOpWrpr, (void *) userData );
+
    // release memory
    delete userData;
 
+   // Pass back updated index value to calling code
    if( ret_value >= 0 )
-      return( ret_value );
+      if (_idx) *_idx = idx;
+
    else  // raise exception when H5Aiterate returns a negative value
    {
       throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate failed");
    }
+   return( ret_value );
 }
 
 //--------------------------------------------------------------------------
