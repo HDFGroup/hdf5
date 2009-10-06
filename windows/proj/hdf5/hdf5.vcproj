@@ -565,6 +565,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Fdeprec.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5FDfamily.c"
 				>
 			</File>
