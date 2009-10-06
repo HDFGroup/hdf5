@@ -196,7 +196,8 @@ grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
 
 # Prepare the source tree for a release.
 ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
-mv Makefile $tmpdir/Makefile.x 2>/dev/null #might fail
+# Save a backup copy of Makefile if exists.
+test -f Makefile && mv Makefile $tmpdir/Makefile.x
 cp -p Makefile.dist Makefile
 
 # Update README.txt and release_docs/RELEASE.txt with release information in
@@ -259,7 +260,8 @@ done
 # Copy the RELEASE.txt to the release area.
 cp release_docs/RELEASE.txt $DEST/$HDF5_VERS-RELEASE.txt
 
-# Restore previous Makefile if existed.
+# Remove distributed Makefile and restore previous Makefile if existed.
+rm -f Makefile
 test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
 
 # Restore OLD version information, then no need for trap.
