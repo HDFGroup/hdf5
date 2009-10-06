@@ -200,11 +200,11 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     /* Check for format of group to create */
     if(use_latest_format) {
         /* Insert link info message */
-        if(H5O_msg_create(oloc, H5O_LINFO_ID, 0, 0, linfo, dxpl_id) < 0)
+        if(H5O_msg_create(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, linfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert group info message */
-        if(H5O_msg_create(oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, H5O_UPDATE_TIME, ginfo, dxpl_id) < 0)
+        if(H5O_msg_create(oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, ginfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
     } /* end if */
     else {

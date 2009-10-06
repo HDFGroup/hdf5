@@ -12971,7 +12971,6 @@ main(void)
             my_fapl = fapl;
 
         /* General tests... (on both old & new format groups */
-
         nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
@@ -13025,7 +13024,6 @@ main(void)
         nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
         nerrors += external_set_elink_acc_flags(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
-
 #ifdef H5_HAVE_WINDOW_PATH
         nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
@@ -13037,6 +13035,7 @@ main(void)
         nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
+
         /* These tests assume that external links are a form of UD links,
          * so assume that everything that passed for external links
          * above has already been tested for UD links.
@@ -13045,7 +13044,6 @@ main(void)
             nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
             nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
         } /* end if */
-
         nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;

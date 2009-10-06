@@ -124,7 +124,7 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
 int
 H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
 {
-    int ret_value;         /* Return value */
+    int ret_value = 0;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cmp_cparam_test)
 

@@ -69,7 +69,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_get_cparam_test
+ * Function:    H5FS_get_cparam_test
  *
  * Purpose:     Retrieve the parameters used to create the free-space manager
  *
@@ -101,7 +101,7 @@ H5FS_get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
 } /* H5FS_get_cparam_test() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5HF_cmp_cparam_test
+ * Function:    H5FS_cmp_cparam_test
  *
  * Purpose:     Compare the parameters used to create the fractal heap
  *
