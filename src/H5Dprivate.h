@@ -139,7 +139,7 @@ typedef struct H5D_dcpl_cache_t {
     H5O_efl_t efl;              /* External file list info (H5D_CRT_EXT_FILE_LIST_NAME) */
 } H5D_dcpl_cache_t;
 
-/* Callback information for copying dataset */
+/* Callback information for copying datasets */
 typedef struct H5D_copy_file_ud_t {
     struct H5S_extent_t *src_space_extent;     /* Copy of dataspace extent for dataset */
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
