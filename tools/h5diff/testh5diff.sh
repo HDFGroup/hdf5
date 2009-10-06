@@ -79,8 +79,9 @@ test -d ./testfiles || mkdir ./testfiles
 #   -h   print help page
 while [ $# -gt 0 ]; do
     case "$1" in
-    -p)	# run ph5diff tests
-	H5DIFF_BIN=`pwd`/ph5diff
+    -p)	# reset the tool name and bin to run ph5diff tests
+	H5DIFF=ph5diff               # The tool name
+	H5DIFF_BIN=`pwd`/$H5DIFF
 	pmode=yes
 	shift
 	;;
