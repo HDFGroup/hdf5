@@ -201,19 +201,12 @@ TOOLTEST() {
     fi
 
     # Run test.
-    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
-    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
-    #TESTING $H5DIFF $@
     (
 	#echo "#############################"
 	#echo "Expected output for '$H5DIFF $@'" 
 	#echo "#############################"
 	#cd $srcdir/testfiles
-	if [ "`uname -s`" = "TFLOPS O/S" ]; then
-	    eval $RUNCMD $H5DIFF_BIN $@
-	else
-	    eval $RUNCMD $H5DIFF_BIN "$@"
-	fi
+	eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
     # save actual and actual_err in case they are needed later.
     cp $actual $actual_sav

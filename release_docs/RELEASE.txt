@@ -315,6 +315,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
+      machine has long retired. AKC - 2009/10/06.
     - Added $(EXEEXT) extension to H5detect when it's executed in the 
       src/Makfile to generate H5Tinit.c so it works correctly on platforms 
       that require the full extension when running executables.
@@ -711,17 +713,6 @@ Known Problems
         warning: ANSI C does not support `long long'
   
   This warning is innocuous and can be safely ignored.
-
-
-* The Stream VFD was not tested yet under Windows. It is not supported
-  in the TFLOPS machine.
-
-
-* The ./dsets tests failed in the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The hdf5 library still works
-  correctly with the -O option.  The test program works fine if it is
-  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
-  program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
     - Cray J90 and Cray T90IEEE give errors during testing when displaying

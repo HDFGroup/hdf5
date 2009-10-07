@@ -161,12 +161,8 @@ DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
-     cd $srcdir/../testfiles
-     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-      $RUNSERIAL $H5DIFF_BIN $@ -q
-     else
-      $RUNSERIAL $H5DIFF_BIN "$@" -q
-     fi
+	cd $srcdir/../testfiles
+	$RUNSERIAL $H5DIFF_BIN "$@" -q
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -198,12 +194,8 @@ IMPORTTEST()
 
     PRINT_H5IMPORT  $@
     (
-     cd $srcdir/../testfiles
-     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-      $RUNSERIAL $H5IMPORT_BIN $@
-     else
-      $RUNSERIAL $H5IMPORT_BIN "$@" 
-     fi
+	cd $srcdir/../testfiles
+	$RUNSERIAL $H5IMPORT_BIN "$@" 
     )
     RET=$?
     if [ $RET != 0 ] ; then

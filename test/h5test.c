@@ -64,12 +64,7 @@
  * is about the best guess.
  */
 #ifndef HDF5_PARAPREFIX
-#ifdef __PUMAGON__
-/* For the PFS of TFLOPS */
-#define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1"
-#else
 #define HDF5_PARAPREFIX ""
-#endif
 #endif
 char	*paraprefix = NULL;	/* for command line option para-prefix */
 #ifdef H5_HAVE_PARALLEL
