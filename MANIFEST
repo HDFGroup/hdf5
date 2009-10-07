@@ -93,7 +93,6 @@
 ./config/ia64-linux-gnu
 ./config/intel-fflags
 ./config/intel-flags
-./config/intel-osf1
 ./config/irix5.x
 ./config/irix6.x
 ./config/linux-gnu

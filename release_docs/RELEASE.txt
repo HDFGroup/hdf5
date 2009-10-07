@@ -104,6 +104,8 @@ Bug Fixes since HDF5-1.8.3
 
     Configuration
     -------------
+    - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
+      machine has long retired. AKC - 2009/10/06.
     - Added $(EXEEXT) extension to H5detect when it's executed in the
       src/Makefile to generate H5Tinit.c so it works correctly on platforms 
       that require the full extension when running executables.

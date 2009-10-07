@@ -107,12 +107,7 @@ static int  clean_file_g = -1;  /*whether to cleanup temporary test     */
  * is about the best guess.
  */
 #ifndef HDF5_PARAPREFIX
-#  ifdef __PUMAGON__
-/* For the PFS of TFLOPS */
-#    define HDF5_PARAPREFIX     "pfs:/pfs_grande/multi/tmp_1"
-#  else
 #    define HDF5_PARAPREFIX     ""
-#  endif    /* __PUMAGON__ */
 #endif  /* !HDF5_PARAPREFIX */
 
 #ifndef MIN
