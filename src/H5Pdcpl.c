@@ -1723,7 +1723,7 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags
 
     /* Get filter information */
     if(H5P_get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1791,7 +1791,7 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
 
     /* Get filter info */
     if(H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, filter_config) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1873,13 +1873,13 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 
     /* Get pipeline info */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Check if there are any filters */
     if (pline.filter) {
         /* Delete filter */
         if(H5Z_delete(&pline, filter) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't delete filter")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter")
 
         /* Put the I/O pipeline information back into the property list */
         if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
@@ -2959,7 +2959,7 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
 
     /* Get filter info */
     if(H5P_get_filter_by_id(plist, id, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get filter info")
 
 done:
     FUNC_LEAVE_API(ret_value)
