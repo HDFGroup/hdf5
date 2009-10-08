@@ -78,7 +78,12 @@ New Features
  
     Tools
     -----
-    - None
+     - h5diff: h5diff treats two INFINITY values different. Fixed by checking
+       (value==expect) before call ABS(...) at h5diff_array.c This will make that
+       (INF==INF) is true (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
+     - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
+            Change default to use strict equality (PC -- 2009/09/12)
+
 
     High-Level APIs
     ---------------
