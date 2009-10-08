@@ -191,6 +191,7 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
       - Fixed an assertion failure that occurred when H5Ocopy was called on a
             dataset using a vlen inside a compound. (NAF - 2009/10/02 - 1597)
       - Fixed incorrect return value for H5Pget_filter_by_id1/2 in H5Ppublic.h.
