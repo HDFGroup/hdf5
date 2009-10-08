@@ -199,6 +199,7 @@ test_compound (char *filename, hid_t fapl)
     hsize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     hsize_t		memb_size[1] = {4};
+    int			ret_code;
 
     /* Create the file */
     if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
@@ -209,8 +210,19 @@ test_compound (char *filename, hid_t fapl)
     if ((space = H5Screate_simple (2, dim, NULL)) < 0) goto error;
 
     /* Create xfer properties to preserve initialized data */
-    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0) goto error;
-    if (H5Pset_preserve (PRESERVE, 1) < 0) goto error;
+    /* Also verify H5Pset_preserve is initially 0 and then is set to 1. */
+    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
+    if ((ret_code=H5Pget_preserve (PRESERVE)) != 0){
+	printf("Preserve status of dataset transfer property list should be"
+	   " 0 (FALSE), got %d\n", ret_code);
+	goto error;
+    }
+    if (H5Pset_preserve (PRESERVE, 1)<0) goto error;
+    if ((ret_code=H5Pget_preserve (PRESERVE)) != 1){
+	printf("Preserve status of dataset transfer property list should be"
+	   " 1 (TRUE), got %d\n", ret_code);
+	goto error;
+    }
 
     /*
      *######################################################################
