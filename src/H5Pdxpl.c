@@ -839,7 +839,7 @@ H5Pget_preserve(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if (H5P_get(plist,H5D_XFER_BKGR_BUF_NAME,&need_bkg)<0)
+    if (H5P_get(plist,H5D_XFER_BKGR_BUF_TYPE_NAME,&need_bkg)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
     /* Set return value */
