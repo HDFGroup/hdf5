@@ -85,8 +85,8 @@ fi
 # PROFILE_CPPFLAGS	library suitable for performance testing (like 
 # 			`-pg').  This may or may not include debugging 
 # 			or production flags.
-#			
-# CFLAGS		Flags can be added to this variable which
+#
+# H5_CFLAGS		Flags can be added to this variable which
 #			might already be partially initialized.  These 
 #			flags will always be passed to the compiler
 #			and should include switches to turn on full
@@ -95,16 +95,14 @@ fi
 #			practices resulting in few if any
 #			warnings.
 #
-#			Warning flags do not have to be added to CFLAGS
+#			Warning flags do not have to be added to H5_CFLAGS
 #			variable if the compiler is the GNU gcc
 #			compiler or a descendent of gcc such as EGCS or PGCC.
 #
-#			The CFLAGS should contains *something* or else 
-#			configure will probably add `-g'.  For most
-#			systems this isn't a problem but some systems
-#			will disable optimizations in favor of the
-#			`-g'.
-#			
+# AM_CFLAGS             Flags added directly into this variable will
+#                       be propogated to the compiler wrapper scripts (h5cc,
+#                       h5c++, et cetera) in addition to being used to compile 
+#                       the library.
 #
 # These flags should be set according to the compiler being used.
 # There are two ways to check the compiler.  You can try using `-v' or 
@@ -115,7 +113,7 @@ fi
 
 case $CC_BASENAME in
     cc)
-        CFLAGS="$CFLAGS"
+        H5_CFLAGS="$H5_CFLAGS"
 	DEBUG_CFLAGS="-Cdebug -g -wall"
 	DEBUG_CPPFLAGS=
 	PROD_CFLAGS="-Cnoopt"
@@ -125,7 +123,7 @@ case $CC_BASENAME in
 	;;
 
     *)
-	CFLAGS="$CFLAGS"
+	H5_CFLAGS="$H5_CFLAGS"
 	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	PROD_CFLAGS=""
@@ -137,21 +135,21 @@ esac
 
 case $CXX_BASENAME in
     c++)
-         CXXFLAGS="$CXXFLAGS -Tlocal"
+         H5_CXXFLAGS="$H5_CXXFLAGS -Tlocal"
          ;;
 
     *)
-         CXXFLAGS="$CXXFLAGS"
+         H5_CXXFLAGS="$H5_CXXFLAGS"
          ;;
 esac
  
 case $FC_BASENAME in
     f90)
-         FCFLAGS="$F9XFLAGS"
+         H5_FCFLAGS="$F9XFLAGS"
          ;;
 
     *)
-         FCFLAGS="$F9XFLAGS"
+         H5_FCFLAGS="$F9XFLAGS"
          ;;
 esac
 

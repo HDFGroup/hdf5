@@ -33,7 +33,7 @@ if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpicc; then
     enable_shared="${enable_shared:-no}"
 fi
 
-CFLAGS="$CFLAGS -DRED_STORM"
+H5_CFLAGS="$H5_CFLAGS -DRED_STORM"
 
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=-g

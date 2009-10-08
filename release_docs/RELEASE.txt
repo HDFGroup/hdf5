@@ -316,6 +316,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed the following config files, as we no longer support them:
+        config/dec-osf*, config/hpux11.00, config/irix5.x, 
+        config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
+      MAM - 2009/10/08
+    - Modified configure and make process to properly preserve user's CFLAGS
+      (and company) environment variables. Build will now properly use
+      automake's AM_CFLAGS for any compiler flags set by the configure
+      process. Configure will no longer modify CFLAGS directly, nor will 
+      setting CFLAGS during make completely replace what configure has set up.
+      MAM - 2009/10/08
     - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
       machine has long retired. AKC - 2009/10/06.
     - Added $(EXEEXT) extension to H5detect when it's executed in the 

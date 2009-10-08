@@ -68,25 +68,23 @@ RANLIB=:
 #                      `-pg').  This may or may not include debugging 
 #                      or production flags.
 #                      
-# CFLAGS               Flags can be added to this variable which
-#                      might already be partially initialized.  These 
-#                      flags will always be passed to the compiler
-#                      and should include switches to turn on full
-#                      warnings.  HDF5 attempts to be ANSI and Posix
-#                      compliant and employ good programming
-#                      practices resulting in few if any
-#                      warnings.
+# H5_CFLAGS		Flags can be added to this variable which
+#			might already be partially initialized.  These 
+#			flags will always be passed to the compiler
+#			and should include switches to turn on full
+#			warnings.  HDF5 attempts to be ANSI and Posix
+#			compliant and employ good programming
+#			practices resulting in few if any
+#			warnings.
 #
-#                      Warning flags do not have to be added to CFLAGS
-#                      variable if the compiler is the GNU gcc
-#                      compiler or a descendent of gcc such as EGCS or PGCC.
+#			Warning flags do not have to be added to H5_CFLAGS
+#			variable if the compiler is the GNU gcc
+#			compiler or a descendent of gcc such as EGCS or PGCC.
 #
-#                      The CFLAGS should contains *something* or else 
-#                      configure will probably add `-g'.  For most
-#                      systems this isn't a problem but some systems
-#                      will disable optimizations in favor of the
-#                      `-g'.
-#                      
+# AM_CFLAGS             Flags added directly into this variable will
+#                       be propogated to the compiler wrapper scripts (h5cc,
+#                       h5c++, et cetera) in addition to being used to compile 
+#                       the library.
 #
 # These flags should be set according to the compiler being used.
 # There are two ways to check the compiler.  You can try using `-v' or 
@@ -162,7 +160,7 @@ if test "X-" = "X-$f9x_flags_set"; then
     # The -em flag enables .mod files, which is what HDF5 builds.
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FCFLAGS="$FCFLAGS -em"
+    H5_FCFLAGS="$H5_FCFLAGS -em"
     DEBUG_FCFLAGS="-g"
     PROD_FCFLAGS=""
     PROFILE_FCFLAGS=""

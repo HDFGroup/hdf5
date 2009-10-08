@@ -50,7 +50,7 @@ case $CC_BASENAME in
 	;;
 
     *)
-	CFLAGS="$CFLAGS -ansi"
+	H5_CFLAGS="$H5_CFLAGS -ansi"
 	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	PROD_CFLAGS="-O"
@@ -76,7 +76,7 @@ case $FC in
     # this is for efc v7.  Older efc do not work with these.
     # -Vaxlib is for non-standard fortran calls like exit().
     MORE_FCFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
-    FCFLAGS="$FCFLAGS $MORE_FCFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $MORE_FCFLAGS"
     f9x_flags_set=yes
     ;;
 
@@ -89,7 +89,7 @@ esac
 if test "X$f9x_flags_set" = "X"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FCFLAGS="$FCFLAGS"
+  H5_FCFLAGS="$H5_FCFLAGS"
   DEBUG_FCFLAGS=""
   PROD_FCFLAGS=""
   PROFILE_FCFLAGS=""
@@ -113,7 +113,7 @@ fi
 case $CXX_BASENAME in
     ecc|icc)	# Intel compilers
 	# Default to C99 standard.
-	CXXFLAGS="${CXXFLAGS:--std=c99}"
+	H5_CXXFLAGS="${H5_CXXFLAGS:--std=c99}"
 	DEBUG_CXXFLAGS="-g -w2 -Wall"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS=""     #Default optimization O2 is used
@@ -122,7 +122,7 @@ case $CXX_BASENAME in
 	PROFILE_CPPFLAGS=
 	;;
     g++)
-	CXXFLAGS="$CXXFLAGS -Wsign-compare" #Only works for some versions
+	H5_CXXFLAGS="$H5_CXXFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CXXFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS="-O3 -fomit-frame-pointer"
@@ -133,7 +133,7 @@ case $CXX_BASENAME in
 
     *)
 	# Default to C99 standard.
-	CXXFLAGS="${CXXFLAGS:--std=c99}"
+	H5_CXXFLAGS="${H5_CXXFLAGS:--std=c99}"
 	DEBUG_CXXFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS="-O"

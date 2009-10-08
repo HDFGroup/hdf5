@@ -48,7 +48,7 @@ case $CC_BASENAME in
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
     # Make sure this is applied to other API compile options such as C++.
-    CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $CFLAGS"
+    H5_CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $H5_CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
@@ -63,7 +63,7 @@ case $CC_BASENAME in
     ;;
 
   *)
-    CFLAGS="$CFLAGS -ansi"
+    H5_CFLAGS="$H5_CFLAGS -ansi"
     DEBUG_CFLAGS="-g"
     DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O"
@@ -136,7 +136,7 @@ fi
 
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+  H5_FCFLAGS="$H5_FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
   PROD_FCFLAGS="-O"
@@ -157,6 +157,6 @@ CXX=${CXX=xlC}
 # Added -qweaksymbol to suppress linker messages warning of duplicate
 # symbols; these warnings are harmless. - BMR
 # Use -D_LARGE_FILES by default to support large file size.
-CXXFLAGS="$CXXFLAGS -qweaksymbol -D_LARGE_FILES"
+H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol -D_LARGE_FILES"
 
 

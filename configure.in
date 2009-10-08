@@ -94,11 +94,31 @@ AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
 
+dnl AM_CFLAGS (and company) are for CFLAGS that should be used on HDF5,
+dnl and WILL be exported to h5cc (or h5fc, etc) if set by configure.
+AC_SUBST([AM_CFLAGS])
+AC_SUBST([AM_FCFLAGS])
+AC_SUBST([AM_CXXFLAGS])
+AC_SUBST([AM_CPPFLAGS])
+AC_SUBST([AM_LDFLAGS])
+
 dnl Make sure flags are set to something (otherwise macros may set them later).
+AM_CFLAGS="${AM_CFLAGS}"
+AM_CXXFLAGS="${AM_CXXFLAGS}"
+AM_FCFLAGS="${AM_FCFLAGS}"
+AM_CPPFLAGS="${AM_CPPFLAGS}"
+AM_LDFLAGS="${AM_LDFLAGS}"
 CFLAGS="${CFLAGS}"
-CPPFLAGS="${CPPFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
+CPPFLAGS="${CPPFLAGS}"
+LDFLAGS="${LDFLAGS}"
+
+dnl Configure will need to alter LDFLAGS and CPPFLAGS in order for
+dnl various checks to work correctly. Save the user's value here so it
+dnl can be restored once all configure checks are complete.
+saved_user_LDFLAGS="$LDFLAGS"
+saved_user_CPPFLAGS="$CPPFLAGS"
 
 dnl Different compilers may need default libraries. They are specified in
 dnl the config/* files, so we put this statement here so that it'll be
@@ -342,7 +362,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl General Fortran flags
   dnl
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  AM_FCFLAGS="${AM_FCFLAGS} ${AM_FFLAGS}"
 
   dnl --------------------------------------------------------------------
   dnl Fortran source extention
@@ -374,8 +394,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl See if the compiler will support the "-I." option
   dnl
-dnl  FCFLAGS_saved=$FCFLAGS
-dnl  FCFLAGS="${FCFLAGS} -I."
+dnl  AM_FCFLAGS_saved=$AM_FCFLAGS
+dnl  AM_FCFLAGS="${AM_FCFLAGS} -I."
 
 dnl  AC_MSG_CHECKING(if compiler supports -I. option)
 dnl  AC_TRY_FCOMPILE([
@@ -383,7 +403,7 @@ dnl      program conftest
 dnl      end
 dnl  ], AC_MSG_RESULT(yes),
 dnl     AC_MSG_RESULT(no)
-dnl     FCFLAGS="$FCFLAGS_saved")
+dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
 
 dnl --------------------------------------------------------------------
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
@@ -471,7 +491,7 @@ int main(void) { return 0; }
     echo no
   ], [
     echo yes
-    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
   ])
 
   AC_MSG_CHECKING([if $CXX can handle namespaces])
@@ -489,7 +509,7 @@ int main(void) {
      echo yes
   ], [
      echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
   ])
 
   AC_MSG_CHECKING([if $CXX supports std])
@@ -506,7 +526,7 @@ int main(void) {
      echo yes
   ], [
      echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
   ])
 
   AC_MSG_CHECKING([if $CXX supports bool types])
@@ -519,7 +539,7 @@ int main(void) {
      echo yes
   ], [
      echo no
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
   ])
 
   AC_MSG_CHECKING([if $CXX has offsetof extension])
@@ -556,7 +576,7 @@ int main(void) {
     echo yes
   ], [
     echo no
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
   ])
 else
   echo "no"
@@ -874,7 +894,7 @@ if test "X${HDF_FORTRAN}" = "Xyes"; then
       H5_FORTRAN_SHARED="no"
     else
 dnl echo 'adding fortran compiler flag needed for building shared libraries'
-      FCFLAGS="${FCFLAGS} -fPIC"
+      AM_FCFLAGS="${AM_FCFLAGS} -fPIC"
     fi
   fi
   if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
@@ -1276,7 +1296,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     AC_MSG_CHECKING([for large file support mode on Linux])
     if test "X$LINUX_LFS" = "Xyes"; then
       AC_MSG_RESULT([enabled])
-      CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
+      AM_CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
     else
       AC_MSG_RESULT([disabled])
     fi
@@ -1284,15 +1304,19 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl Add POSIX support on Linux systems, so <features.h> defines
     dnl __USE_POSIX, which is required to get the prototype for fdopen
     dnl defined correctly in <stdio.h>
-    CPPFLAGS="-D_POSIX_SOURCE $CPPFLAGS"
+    AM_CPPFLAGS="-D_POSIX_SOURCE $AM_CPPFLAGS"
 
     dnl Also add BSD support on Linux systems, so <features.h> defines
     dnl __USE_BSD, which is required to get the prototype for strdup
     dnl defined correctly in <string.h> and snprintf & vsnprintf defined
     dnl correctly in <stdio.h>
-    CPPFLAGS="-D_BSD_SOURCE $CPPFLAGS"
+    AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
     ;;
 esac
+
+dnl Need to add AM_CPPFLAGS into CPPFLAGS to make them visible for configure checks.
+dnl Note: CPPFLAGS will be restored by the end of configure.
+CPPFLAGS="$AM_CPPFLAGS $CPPFLAGS"
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
@@ -1467,13 +1491,17 @@ case $withval in
       CPPFLAGS="$CPPFLAGS -I$dmalloc_inc"
     fi
 
-    AC_CHECK_HEADERS(dmalloc.h,, CPPFLAGS="$saved_CPPFLAGS")
+    AC_CHECK_HEADERS(dmalloc.h, AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc",CPPFLAGS="$saved_CPPFLAGS")
 
     if test -n "$dmalloc_lib"; then
       LDFLAGS="$LDFLAGS -L$dmalloc_lib"
     fi
 
     AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_DMALLOC)
+
+    if test -n "$HAVE_DMALLOC"; then
+        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+    fi
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR(couldn't find dmalloc library)
@@ -1542,7 +1570,7 @@ case $withval in
     fi
 
     AC_CHECK_HEADERS([zlib.h],
-                     [HAVE_ZLIB_H="yes"],
+                     [HAVE_ZLIB_H="yes"; AM_CPPFLAGS="$AM_CPPFLAGS -I$zlib_inc"],
                      [CPPFLAGS="$saved_CPPFLAGS"])
 
     if test -n "$zlib_lib"; then
@@ -1552,6 +1580,10 @@ case $withval in
     AC_CHECK_LIB([z], [compress2],,
                  [LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB])
     AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+
+    if test -n "$HAVE_ZLIB"; then
+        AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
+    fi
 
     if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find zlib library])
@@ -1631,16 +1663,20 @@ case $withval in
     fi
     
     AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"],
+                     [HAVE_SZLIB_H="yes"; AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"],
                      [CPPFLAGS="$saved_CPPFLAGS"])
-    
+
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
     fi
     
     AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
                  [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
-    
+
+    if test -n "$HAVE_SZLIB"; then
+        AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
+    fi
+ 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
     fi
@@ -1757,7 +1793,8 @@ case "$withval" in
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; unset PTHREAD])
+      AC_CHECK_HEADERS([pthread.h],AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc", [unset PTHREAD])
+      CPPFLAGS="$saved_CPPFLAGS"
     else
       AC_CHECK_HEADERS([pthread.h],, [unset PTHREAD])
     fi
@@ -1767,6 +1804,11 @@ case "$withval" in
       LDFLAGS="$LDFLAGS -L$pthread_lib"
       AC_CHECK_LIB([pthread], [pthread_create],,
                    [LDFLAGS="$saved_LDFLAGS"; unset PTHREAD])
+
+      if test -n "$PTHREAD"; then
+          AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+      fi
+
     else
       AC_CHECK_LIB([pthread], [pthread_create],, [unset PTHREAD])
     fi
@@ -2072,7 +2114,7 @@ dnl LD_LIBRARY_PATH along with LDFLAGS or do it with the AC_TRY_RUN macro.
 dnl
 AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll],
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $AM_LDFLAGS $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
 for hdf5_cv_printf_ll in l ll L q unknown; do
@@ -2613,7 +2655,8 @@ if test -n "$PARALLEL"; then
       if test -n "$mpe_inc"; then
         saved_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; unset MPE])
+        AC_CHECK_HEADERS([mpe.h],AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc", [unset MPE])
+        CPPFLAGS="$saved_CPPFLAGS"
       else
         AC_CHECK_HEADERS([mpe.h],, [unset MPE])
       fi
@@ -2625,6 +2668,11 @@ if test -n "$PARALLEL"; then
                      [LDFLAGS="$saved_LDFLAGS"; unset MPE])
         AC_CHECK_LIB([lmpe], [CLOG_Init],,
                      [LDFLAGS="$saved_LDFLAGS"; unset MPE])
+
+        if test -n "$MPE"; then
+            AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
+        fi
+
       else
         AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
         AC_CHECK_LIB([lmpe], [CLOG_Init],, [unset MPE])
@@ -3704,8 +3752,8 @@ dnl libraries.
 dnl 
 AC_SUBST([DYNAMIC_DIRS]) DYNAMIC_DIRS=""
 
-if test -n "$LDFLAGS"; then
-  for d in $LDFLAGS ; do
+if test -n "$AM_LDFLAGS $LDFLAGS"; then
+  for d in $AM_LDFLAGS $LDFLAGS ; do
     case "$d" in
       -L*)
         d="`echo $d | sed -e 's/-L//g'`"
@@ -3722,9 +3770,9 @@ if test -n "$LDFLAGS"; then
   done
 fi
 
-if test -n "$CPPFLAGS"; then
+if test -n "$AM_CPPFLAGS"; then
   TEMP_CPPFLAGS=""
-  for d in $CPPFLAGS ; do
+  for d in $AM_CPPFLAGS ; do
     case "$d" in
       -I.*)
         dnl If the path isn't absolute, make it so by prepending
@@ -3735,7 +3783,7 @@ if test -n "$CPPFLAGS"; then
     esac
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
   done
-  CPPFLAGS=$TEMP_CPPFLAGS
+  AM_CPPFLAGS=$TEMP_CPPFLAGS
 fi
 
 dnl ----------------------------------------------------------------------
@@ -3937,6 +3985,13 @@ AC_RUN_IFELSE([
     ], [
     AC_MSG_RESULT([unknown, assuming yes])
     ])
+
+
+dnl ------------------------------------
+dnl Restore user's CPPFLAGS and LDFLAGS.
+CPPFLAGS="$saved_user_CPPFLAGS"
+LDFLAGS="$saved_user_LDFLAGS"
+
 
 dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories

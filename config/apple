@@ -51,8 +51,7 @@ fi
 case $FC_BASENAME in
     xlf) 
         F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-        FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG}"
-        H5_FCFLAGS="$H5_FCFLAGS -qmoddir=./ "
+        H5_FCFLAGS="$H5_FCFLAGS ${F9XSUFFIXFLAG} -qmoddir=./ "
         FSEARCH_DIRS="-I./ -I../src"
         DEBUG_FCFLAGS="-g"
         PROD_FCFLAGS="-O"

@@ -36,7 +36,7 @@ bin_PROGRAMS=h5stat
 bin_SCRIPTS=
 
 # Add h5stat specific linker flags here
-h5stat_LDFLAGS = $(LT_STATIC_EXEC)
+h5stat_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Tell automake to clean h5redeploy script
 CLEANFILES=

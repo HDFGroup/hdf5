@@ -34,7 +34,7 @@ endif
 bin_PROGRAMS=h5diff $(H5PDIFF)
 
 # Add h5diff specific linker flags here
-h5diff_LDFLAGS = $(LT_STATIC_EXEC)
+h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Test programs and scripts
 TEST_PROG=h5diffgentest

@@ -32,8 +32,8 @@ bin_PROGRAMS=gif2h5 h52gif
 noinst_PROGRAMS=h52gifgentst
 
 # Add h52gif and gif2h5 specific linker flags here
-h52gif_LDFLAGS = $(LT_STATIC_EXEC)
-gif2h5_LDFLAGS = $(LT_STATIC_EXEC)
+h52gif_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+gif2h5_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
 

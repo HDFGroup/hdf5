@@ -73,14 +73,14 @@ case "X-$CC_BASENAME" in
       #    1429:  the `long long' type is not standard
       #    1685:  turn off warnings about turning off invalid warnings
       #    3201:  remark - parameter not referenced
-      #CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
+      #H5_CFLAGS="$H5_CFLAGS -woff 1174,1429,1209,1196,1685,3201"
       H5_CFLAGS="$H5_CFLAGS -woff 1209,3201"
 
       # Always turn off these compiler warnings for the old compiler:
       #    799:   the `long long' type is not standard
       #    803:   turn off warnings about turning off invalid warnings
       #    835:   __vfork() (this is an SGI config problem)
-      #CFLAGS="$CFLAGS -woff 799,803,835"
+      #H5_CFLAGS="$H5_CFLAGS -woff 799,803,835"
 
       # Always turn off these loader warnings:
       # (notice the peculiar syntax)
@@ -133,7 +133,7 @@ fi
 if test -z "$cxx_flags_set"; then
   # -LANG:std required for std use; -ptused causes templates used to be
   # instantiated
-  CPPFLAGS="$CPPFLAGS -LANG:std"
+  AM_CPPFLAGS="$AM_CPPFLAGS -LANG:std"
   H5_CPPFLAGS="$H5_CPPFLAGS -ptused"
 
   # libCio is a default library, since libtool before 1.5 doesn't fully 
