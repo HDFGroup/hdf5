@@ -1499,7 +1499,7 @@ case $withval in
 
     AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_DMALLOC)
 
-    if test -n "$HAVE_DMALLOC"; then
+    if test -n "$HAVE_DMALLOC" -a -n "$dmalloc_lib"; then
         AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
     fi
 
@@ -1581,7 +1581,7 @@ case $withval in
                  [LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB])
     AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
 
-    if test -n "$HAVE_ZLIB"; then
+    if test -n "$HAVE_ZLIB" -a -n "$zlib_lib"; then
         AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
     fi
 
@@ -1673,7 +1673,7 @@ case $withval in
     AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
                  [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
 
-    if test -n "$HAVE_SZLIB"; then
+    if test -n "$HAVE_SZLIB" -a -n "$szlib_lib"; then
         AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
  
