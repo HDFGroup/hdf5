@@ -92,7 +92,8 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
-	space_overflow$(EXEEXT) gen_filespace$(EXEEXT)
+	space_overflow$(EXEEXT) gen_filespace$(EXEEXT) \
+	gen_specmetaread$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
@@ -246,6 +247,10 @@ gen_nullspace_SOURCES = gen_nullspace.c
 gen_nullspace_OBJECTS = gen_nullspace.$(OBJEXT)
 gen_nullspace_LDADD = $(LDADD)
 gen_nullspace_DEPENDENCIES = libh5test.la $(LIBHDF5)
+gen_specmetaread = gen_specmetaread.c
+gen_specmetaread_OBJECTS = gen_specmetaread.$(OBJEXT)
+gen_specmetaread_LDADD = $(LDADD)
+gen_specmetaread_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_udlinks_SOURCES = gen_udlinks.c
 gen_udlinks_OBJECTS = gen_udlinks.$(OBJEXT)
 gen_udlinks_LDADD = $(LDADD)
@@ -377,7 +382,7 @@ SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
 	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
 	set_extent.c space_overflow.c stab.c tcheck_version.c \
 	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	vfd.c gen_specmetaread.c
 DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
 	dsets.c dt_arith.c dtransform.c dtypes.c earray.c enum.c \
@@ -390,7 +395,7 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
 	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
 	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c gen_specmetaread.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -712,7 +717,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
 # so do not appear in this list.
 BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-    gen_nullspace gen_udlinks space_overflow gen_filespace
+    gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread
 
 
 # The libh5test library provides common support code for the tests.
@@ -937,6 +942,9 @@ gen_noencoder$(EXEEXT): $(gen_noencoder_OBJECTS) $(gen_noencoder_DEPENDENCIES)
 gen_nullspace$(EXEEXT): $(gen_nullspace_OBJECTS) $(gen_nullspace_DEPENDENCIES) 
 	@rm -f gen_nullspace$(EXEEXT)
 	$(LINK) $(gen_nullspace_OBJECTS) $(gen_nullspace_LDADD) $(LIBS)
+gen_specmetaread$(EXEEXT): $(gen_specmetaread_OBJECTS) $(gen_specmetaread_DEPENDENCIES) 
+	@rm -f gen_specmetaread$(EXEEXT)
+	$(LINK) $(gen_specmetaread_OBJECTS) $(gen_specmetaread_LDADD) $(LIBS)
 gen_udlinks$(EXEEXT): $(gen_udlinks_OBJECTS) $(gen_udlinks_DEPENDENCIES) 
 	@rm -f gen_udlinks$(EXEEXT)
 	$(LINK) $(gen_udlinks_OBJECTS) $(gen_udlinks_LDADD) $(LIBS)
@@ -1055,6 +1063,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_super.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_noencoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_nullspace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_specmetaread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_udlinks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gheap.Po@am__quote@

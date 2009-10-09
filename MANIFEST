@@ -851,6 +851,7 @@
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_specmetaread.c		_DO_NOT_DISTRIBUTE_
 ./test/gen_udlinks.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
@@ -876,6 +877,7 @@
 ./test/pool.c
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/specmetaread.h5
 ./test/stab.c
 ./test/tarray.c
 ./test/tarrold.h5

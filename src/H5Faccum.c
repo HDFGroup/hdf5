@@ -99,6 +99,10 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  * Purpose:	Attempts to read some data from the metadata accumulator for
  *              a file into a buffer.
  *
+ * Note:	We can't change (or add to) the metadata accumulator, because
+ *		this might be a speculative read and could possibly read raw
+ *		data into the metadata accumulator.
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -185,69 +189,11 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
             /* Make certain we've read it all */
             HDassert(size == 0);
         } /* end if */
-        /* Current read doesn't overlap with metadata accumulator, read it into accumulator */
+        /* Current read doesn't overlap with metadata accumulator, read it from file */
         else {
-            /* Only update the metadata accumulator if it is not dirty or if
-             * we are allowed to write the accumulator out during reads (when
-             * it is dirty)
-             */
-            if(f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA_READ || !f->shared->accum.dirty) {
-                /* Flush current contents, if dirty */
-                if(f->shared->accum.dirty) {
-                    if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, f->shared->accum.loc, f->shared->accum.size, f->shared->accum.buf) < 0)
-                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "driver write request failed")
-
-                    /* Reset accumulator dirty flag */
-                    f->shared->accum.dirty = FALSE;
-                } /* end if */
-
-                /* Cache the new piece of metadata */
-                /* Check if we need to resize the buffer */
-                if(size > f->shared->accum.alloc_size) {
-                    size_t new_size;        /* New size of accumulator */
-
-                    /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
-                    new_size = (size_t)1 << (1 + H5V_log2_gen((uint64_t)(size - 1)));
-
-                    /* Grow the metadata accumulator buffer */
-                    if(NULL == (f->shared->accum.buf = H5FL_BLK_REALLOC(meta_accum, f->shared->accum.buf, new_size)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                    /* Note the new buffer size */
-                    f->shared->accum.alloc_size = new_size;
-                } /* end if */
-                else {
-                    /* Check if we should shrink the accumulator buffer */
-                    if(size < (f->shared->accum.alloc_size / H5F_ACCUM_THROTTLE) &&
-                            f->shared->accum.alloc_size > H5F_ACCUM_THRESHOLD) {
-                        size_t new_size = (f->shared->accum.alloc_size / H5F_ACCUM_THROTTLE); /* New size of accumulator buffer */
-
-                        /* Shrink the accumulator buffer */
-                        if(NULL == (f->shared->accum.buf = H5FL_BLK_REALLOC(meta_accum, f->shared->accum.buf, new_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                        /* Note the new buffer size */
-                        f->shared->accum.alloc_size = new_size;
-                    } /* end if */
-                } /* end else */
-
-                /* Update accumulator information */
-                f->shared->accum.loc = addr;
-                f->shared->accum.size = size;
-                f->shared->accum.dirty = FALSE;
-
-                /* Read into accumulator */
-                if(H5FD_read(f->shared->lf, dxpl_id, H5FD_MEM_DEFAULT, f->shared->accum.loc, f->shared->accum.size, f->shared->accum.buf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
-
-                /* Copy into buffer */
-                HDmemcpy(buf, f->shared->accum.buf, size);
-            } /* end if */
-            else {
-                /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
-            } /* end else */
+            /* Dispatch to driver */
+            if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
         } /* end else */
 
         /* Indicate success */
