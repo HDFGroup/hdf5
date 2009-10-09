@@ -267,7 +267,8 @@ typedef struct {
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo)
+H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
+    const H5O_pline_t *pline)
 {
     H5HF_create_t fheap_cparam;         /* Fractal heap creation parameters */
     H5HF_t *fheap;                      /* Fractal heap handle */
@@ -293,6 +294,8 @@ H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo)
     fheap_cparam.managed.start_root_rows = H5G_FHEAP_MAN_START_ROOT_ROWS;
     fheap_cparam.checksum_dblocks = H5G_FHEAP_CHECKSUM_DBLOCKS;
     fheap_cparam.max_man_size = H5G_FHEAP_MAX_MAN_SIZE;
+    if(pline)
+        fheap_cparam.pline = *pline;
 
     /* Create fractal heap for storing links */
     if(NULL == (fheap = H5HF_create(f, dxpl_id, &fheap_cparam)))

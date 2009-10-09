@@ -87,11 +87,12 @@ H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline,
 H5_DLL H5Z_class2_t *H5Z_find(H5Z_filter_t id);
 H5_DLL herr_t H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id);
+H5_DLL herr_t H5Z_can_apply_direct(const struct H5O_pline_t *pline);
+H5_DLL herr_t H5Z_set_local_direct(const struct H5O_pline_t *pline);
 H5_DLL H5Z_filter_info_t *H5Z_filter_info(const struct H5O_pline_t *pline,
         H5Z_filter_t filter);
 H5_DLL htri_t H5Z_all_filters_avail(const struct H5O_pline_t *pline);
 H5_DLL herr_t H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
-H5_DLL herr_t H5Z_set_latest_version(struct H5O_pline_t *pline);
 
 /* Data Transform Functions */
 typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */

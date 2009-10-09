@@ -1478,7 +1478,7 @@ test_genprop_class_addprop(void)
     CHECK_I(cid, "H5Pcreate_class");
 
     /* Check existence of an original property */
-    ret = H5Pexist(cid,H5D_CRT_DATA_PIPELINE_NAME);
+    ret = H5Pexist(cid,H5O_CRT_PIPELINE_NAME);
     VERIFY(ret, 0, "H5Pexist");
 
     /* Insert first property into class (with no callbacks) */
@@ -1490,7 +1490,7 @@ test_genprop_class_addprop(void)
     CHECK(pid, FAIL, "H5Pcreate");
 
     /* Check existence of an original property */
-    ret = H5Pexist(pid, H5D_CRT_DATA_PIPELINE_NAME);
+    ret = H5Pexist(pid, H5O_CRT_PIPELINE_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
     /* Check existence of added property */

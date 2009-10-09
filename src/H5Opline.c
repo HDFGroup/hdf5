@@ -572,7 +572,7 @@ H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
     hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
 {
     const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source datatype */
-    H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
+    H5O_copy_file_ud_common_t *udata = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_pline_pre_copy_file)
@@ -580,7 +580,7 @@ H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
     /* check args */
     HDassert(pline_src);
 
-    /* If the user data is non-NULL, assume we are copying a dataset
+    /* If the user data is non-NULL, assume we are copying a dataset or group
      * and make a copy of the filter pipeline for later in
      * the object copying process.
      */
@@ -664,4 +664,31 @@ H5O_pline_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *s
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_pline_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_pline_set_latest_version
+ *
+ * Purpose:     Set the encoding for a I/O filter pipeline to the latest version.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, July 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_pline_set_latest_version(H5O_pline_t *pline)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5O_pline_set_latest_version)
+
+    /* Sanity check */
+    HDassert(pline);
+
+    /* Set encoding of I/O pipeline to latest version */
+    pline->version = H5O_PLINE_VERSION_LATEST;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_pline_set_latest_version() */
 

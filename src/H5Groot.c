@@ -137,25 +137,9 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
      * with a hard link count of one since it's pointed to by the superblock.
      */
     if(create_root) {
-        H5P_genplist_t *fc_plist;       /* File creation property list */
-        H5O_ginfo_t     ginfo;          /* Group info parameters */
-        H5O_linfo_t     linfo;          /* Link info parameters */
-
-        /* Get the file creation property list */
-        /* (Which is a sub-class of the group creation property class) */
-        if(NULL == (fc_plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-        /* Get the group info property */
-        if(H5P_get(fc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
-
-        /* Get the link info property */
-        if(H5P_get(fc_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
-
         /* Create root group */
-	if(H5G_obj_create(f, dxpl_id, &ginfo, &linfo, f->shared->fcpl_id, root_loc.oloc/*out*/) < 0)
+        /* (Pass the FCPL which is a sub-class of the group creation property class) */
+	if(H5G_obj_create(f, dxpl_id, f->shared->fcpl_id, root_loc.oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(root_loc.oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")

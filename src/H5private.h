@@ -460,6 +460,11 @@ typedef enum {
     H5_COPY_DEEP        /* Deep copy from source to destination, including duplicating fields pointed to */
 } H5_copy_depth_t;
 
+/* Common object copying udata (right now only used for groups and datasets) */
+typedef struct H5O_copy_file_ud_common_t {
+    struct H5O_pline_t *src_pline;      /* Copy of filter pipeline for object */
+} H5O_copy_file_ud_common_t;
+
 /* Unique object "position" */
 typedef struct {
     unsigned long fileno;       /* The unique identifier for the file of the object */

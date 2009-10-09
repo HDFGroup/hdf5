@@ -155,8 +155,8 @@ H5O_dset_free_copy_file_udata(void *_udata)
         H5T_close(udata->src_dtype);
 
     /* Release copy of dataset's filter pipeline, if it was set */
-    if(udata->src_pline)
-        H5O_msg_free(H5O_PLINE_ID, udata->src_pline);
+    if(udata->common.src_pline)
+        H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
 
     /* Release space for 'copy file' user data */
     (void)H5FL_FREE(H5D_copy_file_ud_t, udata);
