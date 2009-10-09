@@ -2958,7 +2958,6 @@ test_filespace_compatible(void)
     uint8_t     buf[READ_OLD_BUFSIZE];	/* temporary buffer for reading */
     ssize_t 	nread;  	/* Number of bytes read in */
     char  	*srcdir = HDgetenv("srcdir"); /* where the src code is located */
-    char  	filename[FILENAME_LEN] = "";  /* old test file name */
     unsigned    i, j;		    /* Local index variable */
     hssize_t	free_space;	    /* Amount of free space in the file */
     hsize_t	threshold;	    /* Free space section threshold */
@@ -2969,6 +2968,7 @@ test_filespace_compatible(void)
     MESSAGE(5, ("Testing File space compatibility for 1.6 and 1.8 files\n"));
 
     for(j = 0; j < NELMTS(OLD_FILENAME); j++) {
+        char  	filename[FILENAME_LEN] = "";  /* old test file name */
 
 	/* Generate correct name for test file by prepending the source path */
 	if(srcdir && ((HDstrlen(srcdir) + HDstrlen(OLD_FILENAME[j]) + 1) < sizeof(filename))) {
@@ -3123,7 +3123,7 @@ test_deprec(void)
     CHECK(fcpl, FAIL, "H5Pcreate");
 
     /* Set a property in the FCPL that will push the superblock version up */
-    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_VFD, 0);
+    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_VFD, (hsize_t)0);
     CHECK(ret, FAIL, "H5Pset_file_space");
 
     /* Creating a file with the non-default file creation property list should
