@@ -37,7 +37,7 @@ user block to a file or stdout and the HDF5 file to an HDF5 file with a header a
       <p>
 If <code>user_block</code> is set,the user block will be written to <code>user_block</code>.&nbsp; If <code>user_block</code> is not set, the user block (if any)<code></code> will be written to stdout. If <code>-delete</code> is selected, the user block will not be not written.</dd>
 
-<dt><strong>Example Usage</strong></dt>
+<dt><strong>Example Usage:</strong></dt>
 <dd>Create new file, <code>newfile.h5</code>,&nbsp; with the text in file <code>mytext.txt</code> as the user block for the HDF5 file <code>file.h5</code>.
   <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5jam -u mytext.txt -i file.h5 -o newfile.h5</pre>
   
@@ -51,13 +51,18 @@ Overwrite the user block (if any) in <code>file.h5</code> with the contents of <
 For an HDF5 file, <code>with_ub.h5</code>,&nbsp; with a user block, extract the user block to <code>user_block.txt</code> and the HDF5 file to <code>wo_ub.h5</code>.
   <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5unjam -i with_ub.h5 -u user_block.txt -o wo_ub.h5</pre>
 
-
-<dt><strong></strong></dt><dt><strong>Return Value</strong></dt>
-<dd><code>h5jam</code> returns the size of the output file, or -1 if an error occurs.
-  <p>
-  <code>h5unjam</code> returns the size of the output file, or -1 if an error occurs.
-
-<dt><strong>Caveats</strong></dt><dt><strong></strong> </dt>
+<dt><strong>Exit Status:</strong></dt>
+    <dd><table border=0>
+        <tr valign=top align=left>
+            <td>0</td>
+            <td>Succeeded.</td>
+	</tr>
+        <tr valign=top align=left>
+            <td>&gt;0&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>An error occurred.</td>
+        </tr>
+    </table>
+<dt><strong>Caveats:</strong></dt><dt><strong></strong> </dt>
 <dd>This tool copies all the data (sequentially) in the file(s) to new offsets. 
 For a large file, this copy will take a long time.
   <p>The most efficient way to create a user block is to create the file
