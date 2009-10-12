@@ -13,7 +13,7 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for the h5dump tool
+# Tests for the h5jam/h5unjam tools
 
 # Determine which filters are available
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
