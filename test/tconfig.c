@@ -47,6 +47,7 @@
 
 /* local routine prototypes */
 void test_config_ctypes(void);
+void test_exit_definitions(void);
 
 
 /*-------------------------------------------------------------------------
@@ -69,6 +70,7 @@ test_configure(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing configure definitions\n"));
     test_config_ctypes();
+    test_exit_definitions();
 }
 
 
@@ -201,4 +203,32 @@ test_config_ctypes(void)
     vrfy_ctype(ssize_t, H5_SIZEOF_SSIZE_T);
 #endif
 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_exit_definitions
+ *
+ * Purpose:	test the exit macros values
+ *
+ * Return:	none (error is fed back via global variable num_errs)
+ *
+ * Programmer:	Albert Cheng
+ *              October 12, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+test_exit_definitions(void)
+{
+    /* Verify the EXIT_SUCCESS and EXIT_FAILURE are 0 and 1 respectively. */
+    /* This should be true for POSIX compliant systems. */
+    if (EXIT_SUCCESS != 0) \
+	TestErrPrintf("Error: EXIT_SUCCESS is %d, should be %d\n", \
+	    EXIT_SUCCESS, 0);
+    if (EXIT_FAILURE != 1) \
+	TestErrPrintf("Error: EXIT_FAILURE is %d, should be %d\n", \
+	    EXIT_FAILURE, 1);
 }
