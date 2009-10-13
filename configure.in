@@ -114,9 +114,12 @@ FCFLAGS="${FCFLAGS}"
 CPPFLAGS="${CPPFLAGS}"
 LDFLAGS="${LDFLAGS}"
 
-dnl Configure will need to alter LDFLAGS and CPPFLAGS in order for
+dnl Configure may need to alter any of the *FLAGS variables in order for
 dnl various checks to work correctly. Save the user's value here so it
 dnl can be restored once all configure checks are complete.
+saved_user_CFLAGS="$CFLAGS"
+saved_user_CXXFLAGS="$CXXFLAGS"
+saved_user_FCFLAGS="$FCFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
 
@@ -3991,6 +3994,9 @@ dnl ------------------------------------
 dnl Restore user's CPPFLAGS and LDFLAGS.
 CPPFLAGS="$saved_user_CPPFLAGS"
 LDFLAGS="$saved_user_LDFLAGS"
+FCFLAGS="$saved_user_FCFLAGS"
+CFLAGS="$saved_user_CFLAGS"
+CXXFLAGS="$saved_user_CXXFLAGS"
 
 
 dnl ----------------------------------------------------------------------

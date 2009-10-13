@@ -134,8 +134,14 @@ if test "X-" = "X-$FC"; then
   fi
 fi
 
+# While we try to avoid setting FCFLAGS directly for use in compilation, in 
+# this case we need the -k flag present for some configure checks. As such, 
+# the configure script saves the user's set FCFLAGS before running, and 
+# restores them when complete. We must then set up both FCFLAGS and H5_FCFLAGS 
+# to ensure the flag is present for both configure as well as for the build.
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
+  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
   H5_FCFLAGS="$H5_FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
