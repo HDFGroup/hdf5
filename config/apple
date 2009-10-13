@@ -28,45 +28,30 @@ fi
 
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
-
-# The default Fortran 90 compiler
+ 
+. $srcdir/config/intel-flags
 if test "X-" = "X-$FC"; then
-    # Assume G95 compiler
-    FC=g95
-    FC_BASENAME=g95
+    case $CC_BASENAME in
+        gcc*)
+            FC=gfortran
+            FC_BASENAME=gfortran
+            ;;
+        icc*)
+            FC=ifort
+            FC_BASENAME=ifort
+            ;;
+    esac
 fi
+# Figure out compiler flags
+. $srcdir/config/gnu-fflags
+ 
+. $srcdir/config/intel-fflags
 
-case $FC_BASENAME in
-    xlf) 
-        F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-        FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG}"
-        H5_FCFLAGS="$H5_FCFLAGS -qmoddir=./ "
-        FSEARCH_DIRS="-I./ -I../src"
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g"
-        f9x_flags_set=yes
-        ;;
-
-    f95)
-
-        F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names 
-# (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS"
-        FSEARCH_DIRS=""
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g -pg"
-        f9x_flags_set=yes
-
-        ;;
-esac  
-# Fortran doesn't support shared libraries
-# Works with static executable only.
+# Fortran doesn't work with shared libraries
+# 
 if test "X-" != "X-$enable_fortran"; then
-        echo '    warning: shared libraries are not supported with Fortran'
-        echo '    disabling shared libraries'
+        echo '    Warning: shared libraries are not supported with Fortran'
+        echo '    Disabling shared libraries'
         enable_shared="no"
 fi
 
