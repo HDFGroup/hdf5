@@ -128,6 +128,9 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
+    - Fixed error in library's internal caching mechanisms which could cause
+      an assertion failure (and attendent core dump) when encountering an
+      unusually formatted file.  (QAK - 2009/10/13)
     - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
     - Fixed an assertion failure that occurred when H5Ocopy was called on a
       dataset using a vlen inside a compound. NAF - 2009/10/02 - 1597

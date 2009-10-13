@@ -848,6 +848,7 @@
 ./test/pool.c
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/specmetaread.h5
 ./test/stab.c
 ./test/tarray.c
 ./test/tarrold.h5
