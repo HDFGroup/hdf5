@@ -28,53 +28,30 @@ fi
 
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
-
-# The default Fortran 90 compiler
+ 
+. $srcdir/config/intel-flags
 if test "X-" = "X-$FC"; then
-    # Assume Absoft compiler
-    FC=xlf
-    FC_BASENAME=xlf
-  else
+    case $CC_BASENAME in
+        gcc*)
+            FC=gfortran
+            FC_BASENAME=gfortran
+            ;;
+        icc*)
+            FC=ifort
+            FC_BASENAME=ifort
+            ;;
+    esac
+fi
+# Figure out compiler flags
+. $srcdir/config/gnu-fflags
+ 
+. $srcdir/config/intel-fflags
 
-    # Neither xlf nor f95 have a working "version" command.
-    # If FC is set, try to guess which one is being used by examining
-    # the last element in the path to the compiler.
-
-    TEMP_BASENAME=`basename $FC`
-    if test "xlf" = "${TEMP_BASENAME}"; then
-      FC_BASENAME=xlf
-    else
-      FC_BASENAME=f95
-    fi
+# Fortran doesn't work with shared libraries
+# 
+if test "X-" != "X-$enable_fortran"; then
+        echo '    Warning: shared libraries are not supported with Fortran'
+        echo '    Disabling shared libraries'
+        enable_shared="no"
 fi
 
-case $FC_BASENAME in
-    xlf) 
-        F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-        H5_FCFLAGS="$H5_FCFLAGS ${F9XSUFFIXFLAG} -qmoddir=./ "
-        FSEARCH_DIRS="-I./ -I../src"
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g"
-        f9x_flags_set=yes
-        ;;
-
-    f95)
-
-        F9XSUFFIXFLAG=""
-# We force compiler to use upper case for external names 
-# (just in case since this should be a default EIP)
-        H5_FCFLAGS="$H5_FCFLAGS"
-        FSEARCH_DIRS=""
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g -pg"
-        f9x_flags_set=yes
-
-# f95 doesn't support shared libraries
-        echo '    warning: shared libraries are not supported for f95!'
-        echo '    disabling shared libraries'
-        enable_shared="no"
-        ;;
-
-esac  
