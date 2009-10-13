@@ -69,7 +69,7 @@
 
 
 <dt><strong>Options and Parameters:</strong>
-    <dl>
+    <dd><dl>
         <dt><em>file1</em>
         <dt><em>file2</em>
             <dd>The HDF5 files to be compared.
@@ -112,8 +112,24 @@
         <dt><em>object1</em>
         <dt><em>object2</em>
             <dd>Specific object(s) within the files to be compared.
-    </dl>
+    </dl></dd>
 <!-- NEW PAGE -->
+<dt><strong>Exit Status:</strong></dt>
+    <dd><table border=0>
+        <tr valign=top align=left>
+            <td>0</td>
+            <td>No differences were found.</td>
+        </tr>
+        <tr valign=top align=left>
+            <td>1</td>
+            <td>Some differences were found.</td>
+        </tr>
+        <tr valign=top align=left>
+            <td>&gt;1&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>An error occurred.</td>
+        </tr>
+    </table>
+
 <dt><strong>Examples:</strong>
     <dd>The following <code>h5diff</code> call compares
         the object <code>/a/b</code> in <code>file1</code> 
