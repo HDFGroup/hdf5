@@ -19,6 +19,7 @@ Compiling Options:
                      C Compiler: @CC_VERSION@
                          CFLAGS: @CFLAGS@
                       H5_CFLAGS: @H5_CFLAGS@
+                      AM_CFLAGS: @AM_CFLAGS@
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@

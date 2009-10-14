@@ -1488,23 +1488,23 @@ case $withval in
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
 
     if test -n "$dmalloc_inc"; then
       CPPFLAGS="$CPPFLAGS -I$dmalloc_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc"
     fi
 
-    AC_CHECK_HEADERS(dmalloc.h, AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc",CPPFLAGS="$saved_CPPFLAGS")
+    AC_CHECK_HEADERS(dmalloc.h,,CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS")
 
     if test -n "$dmalloc_lib"; then
       LDFLAGS="$LDFLAGS -L$dmalloc_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
     fi
 
-    AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_DMALLOC)
-
-    if test -n "$HAVE_DMALLOC" -a -n "$dmalloc_lib"; then
-        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
-    fi
+    AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC)
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR(couldn't find dmalloc library)
@@ -1566,27 +1566,27 @@ case $withval in
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
 
     if test -n "$zlib_inc"; then
       CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$zlib_inc"
     fi
 
     AC_CHECK_HEADERS([zlib.h],
-                     [HAVE_ZLIB_H="yes"; AM_CPPFLAGS="$AM_CPPFLAGS -I$zlib_inc"],
-                     [CPPFLAGS="$saved_CPPFLAGS"])
+                     [HAVE_ZLIB_H="yes"],
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
     if test -n "$zlib_lib"; then
       LDFLAGS="$LDFLAGS -L$zlib_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
     fi
 
     AC_CHECK_LIB([z], [compress2],,
-                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB])
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB])
     AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
-
-    if test -n "$HAVE_ZLIB" -a -n "$zlib_lib"; then
-        AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
-    fi
 
     if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find zlib library])
@@ -1659,27 +1659,27 @@ case $withval in
     fi
     
     saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
     
     if test -n "$szlib_inc"; then
       CPPFLAGS="$CPPFLAGS -I$szlib_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
     
     AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"; AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"],
-                     [CPPFLAGS="$saved_CPPFLAGS"])
+                     [HAVE_SZLIB_H="yes"],
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
     
     AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
 
-    if test -n "$HAVE_SZLIB" -a -n "$szlib_lib"; then
-        AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
-    fi
- 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
     fi
@@ -1795,22 +1795,21 @@ case "$withval" in
 
     if test -n "$pthread_inc"; then
       saved_CPPFLAGS="$CPPFLAGS"
+      saved_AM_CPPFLAGS="$AM_CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc", [unset PTHREAD])
-      CPPFLAGS="$saved_CPPFLAGS"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
+      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset PTHREAD])
     else
       AC_CHECK_HEADERS([pthread.h],, [unset PTHREAD])
     fi
 
     if test -n "$pthread_lib"; then
       saved_LDFLAGS="$LDFLAGS"
+      saved_AM_LDFLAGS="$AM_LDFLAGS"
       LDFLAGS="$LDFLAGS -L$pthread_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
       AC_CHECK_LIB([pthread], [pthread_create],,
-                   [LDFLAGS="$saved_LDFLAGS"; unset PTHREAD])
-
-      if test -n "$PTHREAD"; then
-          AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-      fi
+                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset PTHREAD])
 
     else
       AC_CHECK_LIB([pthread], [pthread_create],, [unset PTHREAD])
@@ -2657,24 +2656,23 @@ if test -n "$PARALLEL"; then
   
       if test -n "$mpe_inc"; then
         saved_CPPFLAGS="$CPPFLAGS"
+        saved_AM_CPPFLAGS="$AM_CPPFLAGS"
         CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc", [unset MPE])
-        CPPFLAGS="$saved_CPPFLAGS"
+        AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc"
+        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset MPE])
       else
         AC_CHECK_HEADERS([mpe.h],, [unset MPE])
       fi
   
       if test -n "$mpe_lib"; then
         saved_LDFLAGS="$LDFLAGS"
+        saved_AM_LDFLAGS="$AM_LDFLAGS"
         LDFLAGS="$LDFLAGS -L$mpe_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
         AC_CHECK_LIB([mpe], [MPE_Init_log],,
-                     [LDFLAGS="$saved_LDFLAGS"; unset MPE])
+                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
         AC_CHECK_LIB([lmpe], [CLOG_Init],,
-                     [LDFLAGS="$saved_LDFLAGS"; unset MPE])
-
-        if test -n "$MPE"; then
-            AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
-        fi
+                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
 
       else
         AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])

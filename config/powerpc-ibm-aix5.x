@@ -48,7 +48,7 @@ case $CC_BASENAME in
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
     # Make sure this is applied to other API compile options such as C++.
-    H5_CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $H5_CFLAGS"
+    AM_CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $AM_CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
@@ -163,6 +163,7 @@ CXX=${CXX=xlC}
 # Added -qweaksymbol to suppress linker messages warning of duplicate
 # symbols; these warnings are harmless. - BMR
 # Use -D_LARGE_FILES by default to support large file size.
-H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol -D_LARGE_FILES"
+H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol"
+AM_CXXFLAGS="$AM_CXXFLAGS -D_LARGE_FILES"
 
 
