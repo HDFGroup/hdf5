@@ -2754,9 +2754,9 @@ dnl bug also occurs at SGI IRIX 6.5 C with compiler version lower than or equal 
 dnl In case people still use the old compiler, we keep this flag.
 AC_MSG_CHECKING([if irregular hyperslab optimization code works inside MPI-IO])
 
-AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_mpi_complex_derived_datatype_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_complex_derived_datatype_works],[hdf5_cv_mpi_complex_derived_datatype_works=yes])
 
-if test ${hdf5_mpi_complex_derived_datatype_works} = "yes"; then
+if test ${hdf5_cv_mpi_complex_derived_datatype_works} = "yes"; then
   AC_DEFINE([MPI_COMPLEX_DERIVED_DATATYPE_WORKS], [1],
             [Define if your system can handle complicated MPI derived datatype correctly.])
   AC_MSG_RESULT([yes])
@@ -2773,9 +2773,9 @@ dnl and SGI altix. For those systems, we have to turn off this feature and use i
 dnl
 AC_MSG_CHECKING([if MPI-IO can do collective IO when one or more processes don't do IOs])
 
-AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_mpi_special_collective_io_works=yes])
+AC_CACHE_VAL([hdf5_cv_mpi_special_collective_io_works],[hdf5_cv_mpi_special_collective_io_works=yes])
 
-if test ${hdf5_mpi_special_collective_io_works} = "yes"; then
+if test ${hdf5_cv_mpi_special_collective_io_works} = "yes"; then
   AC_DEFINE([MPI_SPECIAL_COLLECTIVE_IO_WORKS], [1],
             [Define if your system can handle special collective IO properly.])
   AC_MSG_RESULT([yes])
@@ -2915,9 +2915,9 @@ if test "$DIRECT_VFD" = "yes"; then
              close(fid);  
              remove("tst_file"); 
              exit (0);
-          }], AC_TRY_LINK(, [posix_memalign()], [hdf5_direct_io=yes], [hdf5_direct_io=no]), [hdf5_direct_io=no],)])
+          }], AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no]), [hdf5_cv_direct_io=no],)])
 
-   if test ${hdf5_direct_io} = "yes"; then
+   if test ${hdf5_cv_direct_io} = "yes"; then
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_DIRECT], [1],
                 [Define if the direct I/O virtual file driver should be compiled])
@@ -3036,7 +3036,7 @@ dnl
 AC_MSG_CHECKING([if converting from long double to integers is accurate])
 
 if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_ldouble_to_integer_accurate=${hdf5_ldouble_to_integer_accurate=no}
+   hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_accurate], [hdf5_cv_ldouble_to_integer_accurate=yes])
 fi
@@ -3060,7 +3060,7 @@ dnl yet. (1/8/05 - SLU)
 AC_MSG_CHECKING([if converting from long double to integers works])
 
 if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_ldouble_to_integer_works=${hdf5_ldouble_to_integer_works=no}
+   hdf5_cv_ldouble_to_integer_works=${hdf5_cv_ldouble_to_integer_works=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_works],
         [AC_TRY_RUN([
@@ -3085,10 +3085,10 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_ldouble_to_integer_works=yes], [hdf5_ldouble_to_integer_works=no],)])
+        ], [hdf5_cv_ldouble_to_integer_works=yes], [hdf5_cv_ldouble_to_integer_works=no],)])
 fi
 
-if test ${hdf5_ldouble_to_integer_works} = "yes"; then
+if test ${hdf5_cv_ldouble_to_integer_works} = "yes"; then
   AC_DEFINE([LDOUBLE_TO_INTEGER_WORKS], [1],
             [Define if your system can convert from long double to integer values.])
   AC_MSG_RESULT([yes])
@@ -3158,9 +3158,9 @@ AC_CACHE_VAL([hdf5_cv_ulong_to_float_accurate],
 done:
         exit(ret);
     }
-    ], [hdf5_ulong_to_float_accurate=yes], [hdf5_ulong_to_float_accurate=no],)])
+    ], [hdf5_cv_ulong_to_float_accurate=yes], [hdf5_cv_ulong_to_float_accurate=no],)])
 
-if test ${hdf5_ulong_to_float_accurate} = "yes"; then
+if test ${hdf5_cv_ulong_to_float_accurate} = "yes"; then
   AC_DEFINE([ULONG_TO_FLOAT_ACCURATE], [1],
             [Define if your system accurately converting unsigned long to float values.])
   AC_MSG_RESULT([yes])
@@ -3280,9 +3280,9 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_accurate],
 done:
         exit(ret);
     }
-    ], [hdf5_fp_to_ullong_accurate=yes], [hdf5_fp_to_ullong_accurate=no],)])
+    ], [hdf5_cv_fp_to_ullong_accurate=yes], [hdf5_cv_fp_to_ullong_accurate=no],)])
 
-if test ${hdf5_fp_to_ullong_accurate} = "yes"; then
+if test ${hdf5_cv_fp_to_ullong_accurate} = "yes"; then
   AC_DEFINE([FP_TO_ULLONG_ACCURATE], [1],
             [Define if your system roundup accurately converting floating-point to unsigned long long values.])
   AC_MSG_RESULT([yes])
@@ -3324,9 +3324,9 @@ AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
 done:
         exit(ret);
     }
-    ], [hdf5_fp_to_ullong_right_maximum=yes], [hdf5_fp_to_ullong_right_maximum=no],)])
+    ], [hdf5_cv_fp_to_ullong_right_maximum=yes], [hdf5_cv_fp_to_ullong_right_maximum=no],)])
 
-if test ${hdf5_fp_to_ullong_right_maximum} = "yes"; then
+if test ${hdf5_cv_fp_to_ullong_right_maximum} = "yes"; then
   AC_DEFINE([FP_TO_ULLONG_RIGHT_MAXIMUM], [1],
             [Define if your system has right maximum convert floating-point to unsigned long long values.])
   AC_MSG_RESULT([yes])
@@ -3342,7 +3342,7 @@ dnl
 AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
 
 if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_ldouble_to_uint_accurate=${hdf5_ldouble_to_uint_accurate=no}
+   hdf5_cv_ldouble_to_uint_accurate=${hdf5_cv_ldouble_to_uint_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_accurate],
         [AC_TRY_RUN([
@@ -3359,10 +3359,10 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_ldouble_to_uint_accurate=yes], [hdf5_ldouble_to_uint_accurate=no],)])
+        ], [hdf5_cv_ldouble_to_uint_accurate=yes], [hdf5_cv_ldouble_to_uint_accurate=no],)])
 fi
 
-if test ${hdf5_ldouble_to_uint_accurate} = "yes"; then
+if test ${hdf5_cv_ldouble_to_uint_accurate} = "yes"; then
   AC_DEFINE([LDOUBLE_TO_UINT_ACCURATE], [1],
             [Define if your system can convert long double to unsigned int values correctly.])
   AC_MSG_RESULT([yes])
@@ -3544,7 +3544,7 @@ dnl
 AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
 
 if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_ldouble_to_llong_accurate=${hdf5_ldouble_to_llong_accurate=no}
+   hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
         [AC_TRY_RUN([
@@ -3584,10 +3584,10 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_ldouble_to_llong_accurate=yes], [hdf5_ldouble_to_llong_accurate=no],)])
+        ], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],)])
 fi
 
-if test ${hdf5_ldouble_to_llong_accurate} = "yes"; then
+if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
   AC_DEFINE([LDOUBLE_TO_LLONG_ACCURATE], [1],
             [Define if your system can convert long double to (unsigned) long long values correctly.])
   AC_MSG_RESULT([yes])
@@ -3605,7 +3605,7 @@ dnl
 AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
 
 if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_llong_to_ldouble_correct=${hdf5_llong_to_ldouble_correct=no}
+   hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
 else
    AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
         [AC_TRY_RUN([
@@ -3649,10 +3649,10 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_llong_to_ldouble_correct=yes], [hdf5_llong_to_ldouble_correct=no],)])
+        ], [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],)])
 fi
 
-if test ${hdf5_llong_to_ldouble_correct} = "yes"; then
+if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
   AC_DEFINE([LLONG_TO_LDOUBLE_CORRECT], [1],
             [Define if your system can convert (unsigned) long long to long double values correctly.])
   AC_MSG_RESULT([yes])
