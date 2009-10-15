@@ -56,8 +56,7 @@ if test "X-" = "X-$cc_flags_set"; then
        && PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O//'`"
 fi
 
-# Add socket lib for the Stream Virtual File Driver
-LIBS="$LIBS -lsocket"
+LIBS="$LIBS"
 
 # The default Fortran 90 compiler
 
@@ -69,8 +68,8 @@ if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
   H5_FCFLAGS="$H5_FCFLAGS"
-  DEBUG_FCFLAGS=""
-  PROD_FCFLAGS=""
+  DEBUG_FCFLAGS="-g"
+  PROD_FCFLAGS="-02"
   PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi
