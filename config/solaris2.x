@@ -45,7 +45,7 @@ if test "X-" = "X-$cc_flags_set"; then
 	5.9*)
 	    # Need the xopenmp flag to build the Fortran library
 	    if test X-$enable_fortran = X-yes; then
-		LDFLAGS="$LDFLAGS -xopenmp=stubs"
+		AM_LDFLAGS="$AM_LDFLAGS -xopenmp=stubs"
 	    fi
 	    ;;
     esac
@@ -68,7 +68,7 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FCFLAGS="$FCFLAGS"
+  H5_FCFLAGS="$H5_FCFLAGS"
   DEBUG_FCFLAGS=""
   PROD_FCFLAGS=""
   PROFILE_FCFLAGS=""

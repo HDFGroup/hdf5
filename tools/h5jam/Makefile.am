@@ -28,8 +28,8 @@ check_PROGRAMS=tellub h5jamgentest getub
 TEST_SCRIPT=testh5jam.sh
 
 # Add h5jam and h5unjam specific linker flags here
-h5jam_LDFLAGS = $(LT_STATIC_EXEC)
-h5unjam_LDFLAGS = $(LT_STATIC_EXEC)
+h5jam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+h5unjam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5jam$(EXEEXT) h5unjam$(EXEEXT)

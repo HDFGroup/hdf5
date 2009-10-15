@@ -27,13 +27,13 @@ include $(top_srcdir)/config/lt_vers.am
 # a long time to compile it with any optimization on.  H5detect is used
 # to generate H5Tinit.c once. So, optimization is not critical.
 noinst_PROGRAMS = H5detect
-H5detect_CFLAGS = -g
+H5detect_CFLAGS = -g $(AM_CFLAGS)
 
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la
 
 # Add libtool numbers to the HDF5 library (from config/lt_vers.am)
-libhdf5_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
+libhdf5_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
 
 # H5Tinit.c is a generated file, and should be cleaned.
 MOSTLYCLEANFILES=H5Tinit.c

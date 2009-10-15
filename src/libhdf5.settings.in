@@ -17,15 +17,21 @@ Compiling Options:
 ------------------
                Compilation Mode: @CONFIG_MODE@
                      C Compiler: @CC_VERSION@
-	       CFLAGS/H5_CFLAGS: @CFLAGS@/@H5_CFLAGS@
-           CPPFLAGS/H5_CPPFLAGS: @CPPFLAGS@/@H5_CPPFLAGS@
+                         CFLAGS: @CFLAGS@
+                      H5_CFLAGS: @H5_CFLAGS@
+                      AM_CFLAGS: @AM_CFLAGS@
+                       CPPFLAGS: @CPPFLAGS@
+                    H5_CPPFLAGS: @H5_CPPFLAGS@
+                    AM_CPPFLAGS: @AM_CPPFLAGS@
                Shared Libraries: @enable_shared@
                Static Libraries: @enable_static@
   Statically Linked Executables: @STATIC_EXEC@
-		Extra libraries: @LDFLAGS@ @LIBS@
-		       Archiver: @AR@
-			 Ranlib: @RANLIB@
-	      Debugged Packages: @DEBUG_PKG@
+                        LDFLAGS: @LDFLAGS@
+                     AM_LDFLAGS: @AM_LDFLAGS@
+ 	 	Extra libraries: @LIBS@
+ 		       Archiver: @AR@
+ 		 	 Ranlib: @RANLIB@
+ 	      Debugged Packages: @DEBUG_PKG@
 		    API Tracing: @TRACE_API@
 
 Languages:
@@ -33,9 +39,13 @@ Languages:
                         Fortran: @HDF_FORTRAN@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @FC@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
 
 Features:
 ---------

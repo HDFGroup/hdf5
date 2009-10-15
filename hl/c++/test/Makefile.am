@@ -26,7 +26,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/c++/src -I$(top_srcdir)/hl/src -I$(
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL
 else
-  AM_LDFLAGS=-static
+  AM_LDFLAGS+=-static
 endif
 
 # These are our main targets.  They should be listed in the order to be
