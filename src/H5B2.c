@@ -43,6 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
@@ -61,6 +62,9 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, H5AC_protect_t rw);
+static herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 
 
 /*********************/
@@ -69,6 +73,7 @@
 
 /* Declare a free list to manage the H5B2_t struct */
 H5FL_DEFINE(H5B2_t);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -130,12 +135,15 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, size_t node_size,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (bt2->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree header")
 
     /* Cache the new B-tree node */
-    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, *addr_p, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, bt2->addr, bt2, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree header to cache")
+
+    /* Set the B-tree's address to return */
+    *addr_p = bt2->addr;
 
 done:
     if(ret_value < 0) {
@@ -145,6 +153,54 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_open
+ *
+ * Purpose:	Opens an existing v2 B-tree in the file.
+ *
+ * Return:	Pointer to v2 B-tree wrapper on success
+ *              NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 15 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5B2_t *
+H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+    H5AC_protect_t rw)
+{
+    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
+    H5B2_t	*ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_open)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the B-tree header */
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, rw)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
+
+    /* Set file pointer for this B-tree operation */
+    bt2->f = f;
+
+    /* Set the return value */
+    ret_value = bt2;
+
+done:
+    if(!ret_value) {
+        if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close B-tree")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -165,8 +221,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
            void *udata)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
-    unsigned	bt2_flags = H5AC__NO_FLAGS_SET; /* Metadata cache flags for B-tree header */
-    herr_t	ret_value = SUCCEED;
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_insert, FAIL)
 
@@ -175,12 +230,9 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
-    /* Look up the b-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Check if the root node is allocated yet */
     if(!H5F_addr_defined(bt2->root.addr)) {
@@ -191,13 +243,13 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Check if we need to split the root node (equiv. to a 1->2 node split) */
     else if(bt2->root.node_nrec == bt2->node_info[bt2->depth].split_nrec) {
         /* Split root node */
-        if(H5B2_split_root(f, dxpl_id, bt2, &bt2_flags) < 0)
+        if(H5B2_split_root(f, dxpl_id, bt2) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
     } /* end if */
 
     /* Attempt to insert record into B-tree */
     if(bt2->depth > 0) {
-        if(H5B2_insert_internal(f, dxpl_id, bt2, bt2->depth, &bt2_flags, &bt2->root, udata) < 0)
+        if(H5B2_insert_internal(f, dxpl_id, bt2, bt2->depth, NULL, &bt2->root, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
     } /* end if */
     else {
@@ -206,15 +258,13 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end else */
 
     /* Mark B-tree header as dirty */
-    bt2_flags |= H5AC__DIRTIED_FLAG;
+    if(H5B2_hdr_dirty(bt2) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark B-tree header dirty")
 
 done:
-    /* Release the B-tree header info */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_flags) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_insert() */
@@ -252,12 +302,9 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
     HDassert(op);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Iterate through records */
     if(bt2->root.node_nrec > 0) {
@@ -267,12 +314,9 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end if */
 
 done:
-    /* Release header */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate() */
@@ -319,12 +363,9 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
@@ -419,12 +460,9 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end block */
 
 done:
-    /* Release header */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_find() */
@@ -465,12 +503,9 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
     HDassert(op);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
@@ -590,12 +625,9 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end block */
 
 done:
-    /* Release header */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_index() */
@@ -619,7 +651,6 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     void *udata, H5B2_remove_t op, void *op_data)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
-    unsigned    bt2_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_remove, FAIL)
@@ -629,12 +660,9 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
-    /* Look up the b-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Check for empty B-tree */
     if(0 == bt2->root.all_nrec)
@@ -645,7 +673,7 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         hbool_t depth_decreased = FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
         if(H5B2_remove_internal(f, dxpl_id, bt2, &depth_decreased, NULL, bt2->depth,
-                &(bt2->cache_info), &bt2_flags, &bt2->root, udata, op, op_data) < 0)
+                &(bt2->cache_info), NULL, &bt2->root, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         /* Check for decreasing the depth of the B-tree */
@@ -669,16 +697,14 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     /* Decrement # of records in B-tree */
     bt2->root.all_nrec--;
 
-    /* Mark parent node as dirty */
-    bt2_flags |= H5AC__DIRTIED_FLAG;
+    /* Mark B-tree header as dirty */
+    if(H5B2_hdr_dirty(bt2) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark B-tree header dirty")
 
 done:
-    /* Release the B-tree header info */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_flags) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_remove() */
@@ -703,7 +729,6 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     void *op_data)
 {
     H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
-    unsigned    bt2_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_remove_by_idx, FAIL)
@@ -713,12 +738,9 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
-    /* Look up the b-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Check for empty B-tree */
     if(0 == bt2->root.all_nrec)
@@ -737,7 +759,7 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
         hbool_t depth_decreased = FALSE;  /* Flag to indicate whether the depth of the B-tree decreased */
 
         if(H5B2_remove_internal_by_idx(f, dxpl_id, bt2, &depth_decreased, NULL, bt2->depth,
-                &(bt2->cache_info), &bt2_flags, &bt2->root, idx, op, op_data) < 0)
+                &(bt2->cache_info), NULL, &bt2->root, idx, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         /* Check for decreasing the depth of the B-tree */
@@ -761,16 +783,14 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     /* Decrement # of records in B-tree */
     bt2->root.all_nrec--;
 
-    /* Mark parent node as dirty */
-    bt2_flags |= H5AC__DIRTIED_FLAG;
+    /* Mark B-tree header as dirty */
+    if(H5B2_hdr_dirty(bt2) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark B-tree header dirty")
 
 done:
-    /* Release the B-tree header info */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, bt2_flags) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_remove_by_idx() */
@@ -804,23 +824,17 @@ H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
     HDassert(nrec);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Get B-tree number of records */
     *nrec = bt2->root.all_nrec;
 
 done:
-    /* Release B-tree header node */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_get_nrec() */
@@ -866,12 +880,9 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
     HDassert(op);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Check for empty tree */
     if(!H5F_addr_defined(bt2->root.addr))
@@ -888,12 +899,9 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     } /* end else */
 
 done:
-    /* Release the B-tree header info */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_neighbor() */
@@ -935,25 +943,23 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Delete all nodes in B-tree */
     if(H5F_addr_defined(bt2->root.addr))
         if(H5B2_delete_node(f, dxpl_id, bt2, bt2->depth, &bt2->root, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
+    /* Mark B-tree header for deletion */
+    if(H5B2_hdr_delete(bt2) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to mark B-tree header for deletion")
+
 done:
-    /* Release the B-tree header info */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to delete B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete() */
@@ -998,12 +1004,9 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
     HDassert(op);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = bt2->root;
@@ -1121,12 +1124,9 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     }
 
 done:
-    /* Release header */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_modify() */
@@ -1159,12 +1159,9 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     HDassert(H5F_addr_defined(addr));
     HDassert(btree_size);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
-
-    /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    /* Open the B-tree header */
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, type, addr, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Add size of header to B-tree metadata total */
     *btree_size += H5B2_HEADER_SIZE(f);
@@ -1181,13 +1178,49 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     } /* end if */
 
 done:
-    /* Release header */
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    /* Close the B-tree */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_close
+ *
+ * Purpose:	Close a v2 B-tree
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 15 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
+{
+    unsigned    bt2_flags = H5AC__NO_FLAGS_SET;   /* Metadata cache flags for unprotecting header */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_close)
+
+    /* Check arguments. */
+    HDassert(bt2);
+    HDassert(bt2->f);
+    HDassert(H5F_addr_defined(bt2->addr));
+
+    /* Check if we are supposed to delete the header */
+    if(bt2->pending_delete)
+        bt2_flags = H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+
+    /* Release the B-tree header info */
+    if(H5AC_unprotect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2->addr, bt2, bt2_flags) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_close() */
 

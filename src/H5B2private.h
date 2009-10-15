@@ -110,13 +110,13 @@ typedef struct H5B2_stat_t {
 /* Library-private Variables */
 /*****************************/
 
+
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    size_t node_size, size_t rrec_size,
-    unsigned split_percent, unsigned merge_percent,
-    haddr_t *addr_p);
+    size_t node_size, size_t rrec_size, unsigned split_percent,
+    unsigned merge_percent, haddr_t *addr_p);
 H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,

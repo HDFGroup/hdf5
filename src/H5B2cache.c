@@ -241,6 +241,9 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     if(H5B2_hdr_init(f, bt2, type, depth, node_size, rrec_size, split_percent, merge_percent) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
+    /* Set the B-tree header's address */
+    bt2->addr = addr;
+
     /* Set return value */
     ret_value = bt2;
 

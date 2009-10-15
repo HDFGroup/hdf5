@@ -118,6 +118,7 @@ H5B2_hdr_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     /* Initialize basic information */
     bt2->f = f;
     bt2->rc = 0;
+    bt2->pending_delete = FALSE;
 
     /* Assign dynamic information */
     bt2->depth = depth;
@@ -360,4 +361,32 @@ H5B2_hdr_dirty(H5B2_t *bt2)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_hdr_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_hdr_delete
+ *
+ * Purpose:	Mark B-tree header for deletion
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 15 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_hdr_delete(H5B2_t *bt2)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_delete)
+
+    /* Sanity check */
+    HDassert(bt2);
+
+    /* Mark B-tree header as pending deletion */
+    bt2->pending_delete = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B2_hdr_delete() */
 

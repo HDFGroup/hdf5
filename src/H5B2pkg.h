@@ -156,7 +156,9 @@ typedef struct H5B2_t {
 
     /* Shared internal data structures (not stored) */
     H5F_t       *f;             /* Pointer to the file that the B-tree is in */
+    haddr_t     addr;           /* Address of B-tree header in the file */
     size_t      rc;             /* Reference count of nodes using this header */
+    hbool_t     pending_delete; /* B-tree is pending deletion */
     const H5B2_class_t *type;	/* Type of tree			     */
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
@@ -239,6 +241,7 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 H5_DLL herr_t H5B2_hdr_incr(H5B2_t *bt2);
 H5_DLL herr_t H5B2_hdr_decr(H5B2_t *bt2);
 H5_DLL herr_t H5B2_hdr_dirty(H5B2_t *bt2);
+H5_DLL herr_t H5B2_hdr_delete(H5B2_t *bt2);
 H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     unsigned depth, size_t node_size, size_t rrec_size,
     unsigned split_percent, unsigned merge_percent);
@@ -249,8 +252,7 @@ H5_DLL H5B2_internal_t *H5B2_protect_internal(H5F_t *f, hid_t dxpl_id,
     H5B2_t *bt2, haddr_t addr, unsigned nrec, unsigned depth, H5AC_protect_t rw);
 
 /* Routines for allocating nodes */
-H5_DLL herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
-    unsigned *bt2_flags_ptr);
+H5_DLL herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2);
 H5_DLL herr_t H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
     H5B2_node_ptr_t *node_ptr);
 

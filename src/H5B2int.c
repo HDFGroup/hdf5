@@ -190,7 +190,6 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split1)
 
     HDassert(f);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(internal);
     HDassert(internal_flags_ptr);
 
@@ -317,8 +316,9 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     /* Update grandparent info */
     curr_node_ptr->node_nrec++;
 
-    /* Mark grandparent as dirty */
-    *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
+    /* Mark grandparent as dirty, if given */
+    if(parent_cache_info_flags_ptr)
+        *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0, bt2, internal);
@@ -349,7 +349,6 @@ done:
  * Purpose:	Split the root node
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -359,7 +358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
+H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2)
 {
     H5B2_internal_t *new_root;          /* Pointer to new root node */
     unsigned new_root_flags = H5AC__NO_FLAGS_SET;   /* Cache flags for new root node */
@@ -372,7 +371,6 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
 
     HDassert(f);
     HDassert(bt2);
-    HDassert(bt2_flags_ptr);
 
     /* Update depth of B-tree */
     bt2->depth++;
@@ -411,7 +409,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
     new_root->node_ptrs[0] = old_root_ptr;
 
     /* Split original root node */
-    if(H5B2_split1(f, dxpl_id, bt2->depth, &(bt2->root), bt2_flags_ptr, new_root, &new_root_flags, 0) < 0)
+    if(H5B2_split1(f, dxpl_id, bt2->depth, &(bt2->root), NULL, new_root, &new_root_flags, 0) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split old root node")
 
     /* Release new root node (marked as dirty) */
@@ -1050,7 +1048,6 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
     HDassert(f);
     HDassert(curr_node_ptr);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(internal);
     HDassert(internal_flags_ptr);
 
@@ -1145,8 +1142,9 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     /* Update grandparent info */
     curr_node_ptr->node_nrec--;
 
-    /* Mark grandparent as dirty */
-    *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
+    /* Mark grandparent as dirty, if given */
+    if(parent_cache_info_flags_ptr)
+        *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0, bt2, internal);
@@ -1208,7 +1206,6 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
 
     HDassert(f);
     HDassert(curr_node_ptr);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(internal);
     HDassert(internal_flags_ptr);
 
@@ -1361,8 +1358,9 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     /* Update grandparent info */
     curr_node_ptr->node_nrec--;
 
-    /* Mark grandparent as dirty */
-    *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
+    /* Mark grandparent as dirty, if given */
+    if(parent_cache_info_flags_ptr)
+        *parent_cache_info_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 #ifdef H5B2_DEBUG
     H5B2_assert_internal((hsize_t)0, bt2, internal);
@@ -1591,7 +1589,6 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned depth,
     HDassert(f);
     HDassert(bt2);
     HDassert(depth > 0);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
@@ -2119,7 +2116,6 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
     HDassert(bt2);
     HDassert(depth > 0);
     HDassert(parent_cache_info);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
@@ -2402,7 +2398,6 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
     HDassert(bt2);
     HDassert(depth > 0);
     HDassert(parent_cache_info);
-    HDassert(parent_cache_info_flags_ptr);
     HDassert(curr_node_ptr);
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
