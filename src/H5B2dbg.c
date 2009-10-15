@@ -90,7 +90,7 @@ herr_t
 H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type)
 {
-    H5B2_t	*bt2 = NULL;            /* B-tree header info */
+    H5B2_hdr_t	*hdr = NULL;            /* B-tree header info */
     unsigned    u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -110,11 +110,11 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    hdr->f = f;
 
     /* Print opening message */
     HDfprintf(stream, "%*sv2 B-tree Header...\n", indent, "");
@@ -124,58 +124,58 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      (bt2->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (bt2->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
+                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
               "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
-	      bt2->node_size);
+	      hdr->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      bt2->rrec_size);
+	      hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
-	      bt2->cache_info.is_dirty ? "True" : "False");
+	      hdr->cache_info.is_dirty ? "True" : "False");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Depth:",
-	      bt2->depth);
+	      hdr->depth);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of records in tree:",
-	      bt2->root.all_nrec);
+	      hdr->root.all_nrec);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of records in root node:",
-	      bt2->root.node_nrec);
+	      hdr->root.node_nrec);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of root node:",
-	      bt2->root.addr);
+	      hdr->root.addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Split percent:",
-	      bt2->split_percent);
+	      hdr->split_percent);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Merge percent:",
-	      bt2->merge_percent);
+	      hdr->merge_percent);
 
     /* Print relevant node info */
     HDfprintf(stream, "%*sNode Info: (max_nrec/split_nrec/merge_nrec)\n", indent, "");
-    for(u = 0; u < (bt2->depth + 1); u++) {
+    for(u = 0; u < (hdr->depth + 1); u++) {
         sprintf(temp_str, "Depth %u:", u);
         HDfprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3),
             temp_str,
-            bt2->node_info[u].max_nrec, bt2->node_info[u].split_nrec, bt2->node_info[u].merge_nrec);
+            hdr->node_info[u].max_nrec, hdr->node_info[u].split_nrec, hdr->node_info[u].merge_nrec);
     } /* end for */
 
 done:
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr) {
+        hdr->f = NULL;
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     } /* end if */
 
@@ -200,7 +200,7 @@ herr_t
 H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth)
 {
-    H5B2_t	*bt2 = NULL;            /* B-tree header */
+    H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_internal_t	*internal = NULL;   /* B-tree internal node */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
@@ -223,16 +223,16 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    hdr->f = f;
 
     /*
      * Load the B-tree internal node
      */
-    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2, addr, nrec, depth, H5AC_READ)))
+    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, hdr, addr, nrec, depth, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */
@@ -246,23 +246,23 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      (bt2->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (bt2->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
+                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
               "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
-	      bt2->node_size);
+	      hdr->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      bt2->rrec_size);
+	      hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      internal->cache_info.is_dirty ? "True" : "False");
@@ -284,9 +284,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
         sprintf(temp_str, "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
-        HDassert(H5B2_INT_NREC(internal, bt2, u));
+        HDassert(H5B2_INT_NREC(internal, hdr, u));
         (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
-            H5B2_INT_NREC(internal, bt2, u), NULL);
+            H5B2_INT_NREC(internal, hdr, u), NULL);
     } /* end for */
 
     /* Print final node pointer */
@@ -298,9 +298,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
               internal->node_ptrs[u].addr);
 
 done:
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr) {
+        hdr->f = NULL;
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     } /* end if */
     if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, addr, internal, H5AC__NO_FLAGS_SET) < 0)
@@ -327,7 +327,7 @@ herr_t
 H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec)
 {
-    H5B2_t	*bt2 = NULL;            /* B-tree header */
+    H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_leaf_t	*leaf = NULL;           /* B-tree leaf node */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
@@ -350,16 +350,16 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
-    bt2->f = f;
+    hdr->f = f;
 
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2, H5AC_READ)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, hdr, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
 
     /* Print opening message */
@@ -370,23 +370,23 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      (bt2->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (bt2->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (bt2->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (bt2->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
+	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
+                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
+                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
+                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
               "Unknown!")))))))))));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
-	      bt2->node_size);
+	      hdr->node_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      bt2->rrec_size);
+	      hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      leaf->cache_info.is_dirty ? "True" : "False");
@@ -400,15 +400,15 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
         sprintf(temp_str, "Record #%u:", u);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
-        HDassert(H5B2_LEAF_NREC(leaf, bt2, u));
+        HDassert(H5B2_LEAF_NREC(leaf, hdr, u));
         (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
-            H5B2_LEAF_NREC(leaf, bt2, u), NULL);
+            H5B2_LEAF_NREC(leaf, hdr, u), NULL);
     } /* end for */
 
 done:
-    if(bt2) {
-        bt2->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr) {
+        hdr->f = NULL;
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header")
     } /* end if */
     if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, addr, leaf, H5AC__NO_FLAGS_SET) < 0)
