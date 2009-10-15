@@ -446,6 +446,7 @@
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
+./src/H5B2hdr.c
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h

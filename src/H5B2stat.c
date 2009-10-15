@@ -83,11 +83,10 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr, H5B2_stat_t *info)
+H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+    H5B2_stat_t *info)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
-    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
@@ -102,11 +101,8 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
-    /* Get pointer to reference counted shared B-tree info */
-    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
-
     /* Get information about the B-tree */
-    info->depth = shared->depth;
+    info->depth = bt2->depth;
     info->nrecords = bt2->root.all_nrec;
 
 done:
