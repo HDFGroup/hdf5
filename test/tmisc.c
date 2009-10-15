@@ -32,9 +32,6 @@
 #include "testhdf5.h"
 #include "H5Dpkg.h"		/* Datasets 				*/
 
-#define NAME_BUF_SIZE   1024
-#define READ_OLD_BUFSIZE        1024
-
 /* Definitions for misc. test #1 */
 #define MISC1_FILE	"tmisc1.h5"
 #define MISC1_VAL       (13417386)      /* 0xccbbaa */
@@ -5136,39 +5133,15 @@ test_misc28(void)
 static void
 test_misc29(void)
 {
-    int	fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
-    char  buf[READ_OLD_BUFSIZE];        /* Buffer for copying data */
-    ssize_t nread;                      /* Number of bytes read in */
-    char  *srcdir = HDgetenv("srcdir"); /* where the src code is located */
-    char  filename[NAME_BUF_SIZE] = ""; /* old test file name */
     hid_t fid;              /* File ID */
     herr_t  ret;            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Speculative metadata reads\n"));
 
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC29_ORIG_FILE) + 1) < sizeof(filename))) {
-        HDstrcpy(filename, srcdir);
-        HDstrcat(filename, "/");
-    } /* end if */
-    HDstrcat(filename, MISC29_ORIG_FILE);
-
-    /* Copy old file into temporary file */
-    fd_old = HDopen(filename, O_RDONLY, 0666);
-    CHECK(fd_old, -1, "HDopen");
-    fd_new = HDopen(MISC29_COPY_FILE, O_RDWR|O_CREAT|O_TRUNC, 0666);
-    CHECK(fd_new, -1, "HDopen");
-
-    /* Copy data */
-    while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0)
-        HDwrite(fd_new, buf, (size_t)nread);
-
-    /* Close files */
-    ret = HDclose(fd_old);
-    CHECK(ret, -1, "HDclose");
-    ret = HDclose(fd_new);
-    CHECK(ret, -1, "HDclose");
+    /* Make a copy of the data file from svn. */
+    ret = h5_make_local_copy(MISC29_ORIG_FILE, MISC29_COPY_FILE);
+    CHECK(ret, -1, "h5_make_local_copy");
 
     /* Open the copied file */
     fid = H5Fopen(MISC29_COPY_FILE, H5F_ACC_RDWR, H5P_DEFAULT); 

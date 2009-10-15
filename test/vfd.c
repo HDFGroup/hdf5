@@ -28,7 +28,6 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
-#define FILE_COPY_BUF_SIZE  4096
 
 /*Macros for Direct VFD*/
 #define MBOUNDARY	512
@@ -809,11 +808,7 @@ test_family_compat(void)
     char        filename[1024];
     char        pathname[1024], pathname_individual[1024];
     char        newname[1024], newname_individual[1024];
-    char       *srcdir = getenv("srcdir"); /*where the src code is located*/
     FILE        *tmp_fp, *old_fp;       /* Pointers to temp & old files */
-    void        *copy_buf;              /* Pointer to buffer for copying data */
-    size_t      written;                /* Amount of data written to new file */
-    size_t      read_in;                /* Amount of data read in from old file */
     int         counter = 0;
 
     TESTING("FAMILY file driver backward compatibility");
@@ -828,45 +823,23 @@ test_family_compat(void)
     h5_fixname(FILENAME[3], fapl, newname, sizeof newname);
 
     pathname[0] = '\0';
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(pathname))) {
-        HDstrcpy(pathname, srcdir);
-        HDstrcat(pathname, "/");
-    }
     HDstrcat(pathname, filename);
 
     /* The following code makes the copies of the family files in the source directory.
      * Since we're going to open the files with write mode, this protects the original
      * files.
      */
-    if(NULL == (copy_buf = HDmalloc((size_t)FILE_COPY_BUF_SIZE))) TEST_ERROR
-
     sprintf(newname_individual, newname, counter);
     sprintf(pathname_individual, pathname, counter);
 
-    /* Open the original files until no more left.  Copy the content into the new files. */
-    while((old_fp = HDfopen(pathname_individual,"rb"))) {
-        /* Open the new file */
-        if(NULL == (tmp_fp = fopen(newname_individual,"wb"))) TEST_ERROR
-
-        /* Copy data from the old file to the new file */
-        while((read_in = HDfread(copy_buf, (size_t)1, (size_t)FILE_COPY_BUF_SIZE, old_fp)) > 0)
-            /* Write the data to the new file */
-            if(read_in != (written = HDfwrite(copy_buf, (size_t)1, read_in, tmp_fp))) TEST_ERROR
-
-        /* Close the old file */
-        if(HDfclose(old_fp)) TEST_ERROR
-
-        /* Close the new file */
-        if(HDfclose(tmp_fp)) TEST_ERROR
-
+    while (h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
         counter++;
         sprintf(newname_individual, newname, counter);
         sprintf(pathname_individual, pathname, counter);
     }
 
-    /* Free the copy buffer */
-    free(copy_buf);
+    if (old_fp = HDfopen(pathname_individual,"rb") 
+        && (tmp_fp = fopen(newname_individual,"wb"))) TEST_ERROR
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */
