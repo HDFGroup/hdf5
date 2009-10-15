@@ -69,7 +69,7 @@ if test "X-" = "X-$f9x_flags_set"; then
   FSEARCH_DIRS=""
   H5_FCFLAGS="$H5_FCFLAGS"
   DEBUG_FCFLAGS="-g"
-  PROD_FCFLAGS="-02"
+  PROD_FCFLAGS="-O2"
   PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi
