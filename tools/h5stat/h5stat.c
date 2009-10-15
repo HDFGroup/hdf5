@@ -32,7 +32,15 @@
                                           accommodate for user-define filters + one
                                           to accomodate datasets whithout any filters */
 
-
+/* File space management strategies: see H5Fpublic.h for declarations */
+const char *FS_STRATEGY_NAME[] = {
+    "unknown",			
+    "H5F_FILE_SPACE_ALL_PERSIST",
+    "H5F_FILE_SPACE_ALL",
+    "H5F_FILE_SPACE_AGGR_VFD",
+    "H5F_FILE_SPACE_VFD",
+    NULL
+};
 
 /* Datatype statistics for datasets */
 typedef struct dtype_info_t {
@@ -92,8 +100,10 @@ typedef struct iter_t {
     hsize_t super_size;	   	   	/* superblock size */
     hsize_t super_ext_size;	   	/* superblock extension size */
     hsize_t ublk_size;	   		/* user block size (if exists) */
+    H5F_file_space_type_t  fs_strategy;	/* File space management strategy */
+    hsize_t fs_threshold;		/* Free-space section threshold */
     hsize_t free_space;                	/* amount of freespace in the file */
-    hsize_t free_hdr;                	/* free space manager header in the file */
+    hsize_t free_hdr;                	/* size of free space manager metadata in the file */
     unsigned long num_small_sects[SIZE_SMALL_SECTS];   /* Size of small free-space sections */
     unsigned sect_nbins;               /* Number of bins for free-space section sizes */
     unsigned long *sect_bins;          /* Pointer to array of bins for free-space section sizes */
@@ -106,16 +116,24 @@ typedef struct iter_t {
 
 const char *progname = "h5stat";
 int               d_status = EXIT_SUCCESS;
+
+/* Enable the printing of everything */
 static int        display_all = TRUE;
-static int        display_file_metadata = FALSE;
-static int        display_file = FALSE;
-static int        display_group = FALSE;
-static int        display_dset = FALSE;
-static int        display_dtype_metadata = FALSE;
-static int        display_object = FALSE;
-static int        display_attr = FALSE;
-static int        display_free_sections = FALSE;
-static int        display_summary = FALSE;
+
+/* Enable the printing of selected statistics */
+static int        display_file = FALSE;		/* display file information */
+static int        display_group = FALSE;	/* display groups information */
+static int        display_dset = FALSE;		/* display datasets information */
+static int        display_dset_dtype_info = FALSE;  /* display datasets' datatype information */
+static int        display_attr = FALSE;		/* display attributes information */
+static int        display_free_sections = FALSE;    /* display free space information */
+static int        display_summary = FALSE;	/* display summary of file space information */
+
+static int        display_file_metadata = FALSE;    /* display file space info for file's metadata */
+static int        display_group_metadata = FALSE;   /* display file space info for groups' metadata */
+static int        display_dset_metadata = FALSE;    /* display file space info for datasets' metadata */
+
+static int        display_object = FALSE;	/* not implemented yet */
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
@@ -123,10 +141,11 @@ struct handler_t {
 };
 
 
-static const char *s_opts ="ADdFfhGgsSTO:V";
+static const char *s_opts ="aDdFfhGgsSTO:v";
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
     {"hel", no_arg, 'h'},
+    {"he", no_arg, 'h'},
     {"file", no_arg, 'f'},
     {"fil", no_arg, 'f'},
     {"fi", no_arg, 'f'},
@@ -142,55 +161,52 @@ static struct long_options l_opts[] = {
     {"grou", no_arg, 'g'},
     {"gro", no_arg, 'g'},
     {"gr", no_arg, 'g'},
-    {"groupmetadata", no_arg, 'G'},
-    {"groupmetadat", no_arg, 'G'},
-    {"groupmetada", no_arg, 'G'},
-    {"groupmetad", no_arg, 'G'},
-    {"groupmeta", no_arg, 'G'},
-    {"groupmet", no_arg, 'G'},
-    {"groupme", no_arg, 'G'},
-    {"groupm", no_arg, 'G'},
+    {"GROUPmetadata", no_arg, 'G'},
+    {"GROUPmetadat", no_arg, 'G'},
+    {"GROUPmetada", no_arg, 'G'},
+    {"GROUPmetad", no_arg, 'G'},
+    {"GROUPmeta", no_arg, 'G'},
+    {"GROUPmet", no_arg, 'G'},
+    {"GROUPme", no_arg, 'G'},
+    {"GROUPm", no_arg, 'G'},
     {"dset", no_arg, 'd'},
     {"dse", no_arg, 'd'},
     {"ds", no_arg, 'd'},
-    {"d", no_arg, 'd'},
-    {"dsetmetadata", no_arg, 'D'},
-    {"dsetmetadat", no_arg, 'D'},
-    {"dsetmetada", no_arg, 'D'},
-    {"dsetmetad", no_arg, 'D'},
-    {"dsetmeta", no_arg, 'D'},
-    {"dsetmet", no_arg, 'D'},
-    {"dsetme", no_arg, 'D'},
-    {"dsetm", no_arg, 'D'},
-    {"dtypemetadata", no_arg, 'T'},
-    {"dtypemetadat", no_arg, 'T'},
-    {"dtypemetada", no_arg, 'T'},
-    {"dtypemetad", no_arg, 'T'},
-    {"dtypemeta", no_arg, 'T'},
-    {"dtypemet", no_arg, 'T'},
-    {"dtypeme", no_arg, 'T'},
-    {"dtypem", no_arg, 'T'},
-    {"dtype", no_arg, 'T'},
+    {"DSETmetadata", no_arg, 'D'},
+    {"DSETmetadat", no_arg, 'D'},
+    {"DSETmetada", no_arg, 'D'},
+    {"DSETmetad", no_arg, 'D'},
+    {"DSETmeta", no_arg, 'D'},
+    {"DSETmet", no_arg, 'D'},
+    {"DSETme", no_arg, 'D'},
+    {"DSETm", no_arg, 'D'},
+    {"DSETtypeinfo", no_arg, 'T'},
+    {"DSETtypeinf", no_arg, 'T'},
+    {"DSETtypein", no_arg, 'T'},
+    {"DSETtypei", no_arg, 'T'},
+    {"DSETtype", no_arg, 'T'},
+    {"DSETtyp", no_arg, 'T'},
+    {"DSETty", no_arg, 'T'},
+    {"DSETt", no_arg, 'T'},
     { "object", require_arg, 'O' },
     { "objec", require_arg, 'O' },
     { "obje", require_arg, 'O' },
     { "obj", require_arg, 'O' },
     { "ob", require_arg, 'O' },
-    { "version", no_arg, 'V' },
-    { "versio", no_arg, 'V' },
-    { "versi", no_arg, 'V' },
-    { "vers", no_arg, 'V' },
-    { "ver", no_arg, 'V' },
-    { "ve", no_arg, 'V' },
-    { "attribute", no_arg, 'A' },
-    { "attribut", no_arg, 'A' },
-    { "attribu", no_arg, 'A' },
-    { "attrib", no_arg, 'A' },
-    { "attri", no_arg, 'A' },
-    { "attr", no_arg, 'A' },
-    { "att", no_arg, 'A' },
-    { "at", no_arg, 'A' },
-    { "a", no_arg, 'A' },
+    { "version", no_arg, 'v' },
+    { "versio", no_arg, 'v' },
+    { "versi", no_arg, 'v' },
+    { "vers", no_arg, 'v' },
+    { "ver", no_arg, 'v' },
+    { "ve", no_arg, 'v' },
+    { "attribute", no_arg, 'a' },
+    { "attribut", no_arg, 'a' },
+    { "attribu", no_arg, 'a' },
+    { "attrib", no_arg, 'a' },
+    { "attri", no_arg, 'a' },
+    { "attr", no_arg, 'a' },
+    { "att", no_arg, 'a' },
+    { "at", no_arg, 'a' },
     { "freespace", no_arg, 's' },
     { "freespac", no_arg, 's' },
     { "freespa", no_arg, 's' },
@@ -223,17 +239,17 @@ static void usage(const char *prog)
      fprintf(stdout, "\n");
      fprintf(stdout, "      OPTIONS\n");
      fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-     fprintf(stdout, "     -V, --version         Print version number and exit\n");
+     fprintf(stdout, "     -v, --version         Print version number and exit\n");
      fprintf(stdout, "     -f, --file            Print file information\n");
-     fprintf(stdout, "     -F, --filemetadata    Print file metadata\n");
+     fprintf(stdout, "     -F, --FILEmetadata    Print file space information for file's metadata\n");
      fprintf(stdout, "     -g, --group           Print group information\n");
-     fprintf(stdout, "     -G, --groupmetadata   Print group metadata\n");
+     fprintf(stdout, "     -G, --GROUPmetadata   Print file space information for groups' metadata\n");
      fprintf(stdout, "     -d, --dset            Print dataset information\n");
-     fprintf(stdout, "     -D, --dsetmetadata    Print dataset metadata\n");
-     fprintf(stdout, "     -T, --dtypemetadata   Print datatype metadata\n");
-     fprintf(stdout, "     -A, --attribute       Print attribute information\n");
-     fprintf(stdout, "     -s, --freespace       Print free-space information\n");
-     fprintf(stdout, "     -S, --Summary         Print summary of storage information\n");
+     fprintf(stdout, "     -D, --DSETmetadata    Print file space information for datasets' metadata\n");
+     fprintf(stdout, "     -T, --DSETtypeinfo    Print datasets' datatype information\n");
+     fprintf(stdout, "     -a, --attribute       Print attribute information\n");
+     fprintf(stdout, "     -s, --freespace       Print free space information\n");
+     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
 }
 
 
@@ -763,6 +779,11 @@ freespace_stats(hid_t fid, iter_t *iter)
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
  *
+ * Modifications: 
+ *	Vailin Choi; October 2009
+ *	Turn on display_group_metadata, display_dset_metadata
+ *	Add 'S' & 's' for printing free space info (previous checkin)
+ *
  *-------------------------------------------------------------------------
  */
 static struct handler_t *
@@ -777,10 +798,15 @@ parse_command_line(int argc, const char *argv[])
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
-            case 'A':
-                display_all = FALSE;
-                display_attr = TRUE;
+            case 'h':
+                usage(progname);
+                leave(EXIT_SUCCESS);
+
+            case 'v':
+                print_version(progname);
+                leave(EXIT_SUCCESS);
                 break;
+
 
             case 'F':
                 display_all = FALSE;
@@ -794,6 +820,7 @@ parse_command_line(int argc, const char *argv[])
 
             case 'G':
                 display_all = FALSE;
+		display_group_metadata = TRUE;
                 break;
 
             case 'g':
@@ -801,18 +828,24 @@ parse_command_line(int argc, const char *argv[])
                 display_group = TRUE;
                 break;
 
-            case 'T':
-                display_all = FALSE;
-                display_dtype_metadata = TRUE;
-                break;
-
             case 'D':
                 display_all = FALSE;
+		display_dset_metadata = TRUE;
                 break;
 
             case 'd':
                 display_all = FALSE;
                 display_dset = TRUE;
+                break;
+
+            case 'T':
+                display_all = FALSE;
+                display_dset_dtype_info = TRUE;
+                break;
+
+            case 'a':
+                display_all = FALSE;
+                display_attr = TRUE;
                 break;
 
 	    case 's':
@@ -825,16 +858,8 @@ parse_command_line(int argc, const char *argv[])
                 display_summary = TRUE;
                 break;
 
-            case 'h':
-                usage(progname);
-                leave(EXIT_SUCCESS);
-
-            case 'V':
-                print_version(progname);
-                leave(EXIT_SUCCESS);
-                break;
-
             case 'O':
+                display_all = FALSE;
                 display_object = TRUE;
                 for(i = 0; i < argc; i++)
                     if(!hand[i].obj) {
@@ -916,65 +941,8 @@ print_file_info(const iter_t *iter)
     HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter->max_fanout);
 
     return 0;
-}
+} /* print_file_info() */
 
-
-/*-------------------------------------------------------------------------
- * Function: print_file_metadata
- *
- * Purpose: Prints metadata information about file
- *
- * Return: Success: 0
- *
- * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-print_file_metadata(const iter_t *iter)
-{
-    printf("Storage information (in bytes):\n");
-    HDfprintf(stdout, "\tSuperblock: %Hu\n", iter->super_size);
-    HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
-    HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
-
-    HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
-		iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", 
-		iter->dset_ohdr_info.total_size,
-		iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
-		iter->dtype_ohdr_info.free_size);
-
-    HDfprintf(stdout, "\tGroups:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->groups_heap_storage_size);
-
-    HDfprintf(stdout, "\tAttributes:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->attrs_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
-
-    HDfprintf(stdout, "\tChunked datasets:\n");
-    HDfprintf(stdout, "\t\tIndex: %Hu\n", iter->datasets_index_storage_size);
-
-    HDfprintf(stdout, "\tDatasets:\n");
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->datasets_heap_storage_size);
-
-    HDfprintf(stdout, "\tShared Messages:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->SM_index_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->SM_heap_storage_size);
-
-    HDfprintf(stdout, "\tFree-space managers:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->free_hdr);
-    HDfprintf(stdout, "\t\tAmount of free space: %Hu\n", iter->free_space);
-
-    return 0;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -1031,7 +999,7 @@ print_group_info(const iter_t *iter)
     printf("\tTotal # of groups: %lu\n", total);
 
     return 0;
-}
+} /* print_group_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1082,7 +1050,7 @@ print_attr_info(const iter_t *iter)
     printf("\tMax. # of attributes to objects: %lu\n", (unsigned long)iter->max_attrs);
 
     return 0;
-}
+} /* print_attr_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1170,26 +1138,56 @@ print_dataset_info(const iter_t *iter)
         printf("\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
         printf("\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
         printf("\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL-1]);
-
-        if(display_dtype_metadata) {
-            printf("Dataset datatype information:\n");
-            printf("\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
-            total = 0;
-            for(u = 0; u < iter->dset_ntypes; u++) {
-                H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
-                printf("\tDataset datatype #%u:\n", u);
-                printf("\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count, iter->dset_type_info[u].named);
-                printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
-                        (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
-                H5Tclose(iter->dset_type_info[u].tid);
-                total += iter->dset_type_info[u].count;
-            } /* end for */
-            printf("\tTotal dataset datatype count: %lu\n", total);
-        }
     } /* end if */
 
     return 0;
-}
+} /* print_dataset_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_dset_dtype_info
+ *
+ * Purpose: Prints datasets' datatype information 
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer: 
+ *
+ * Modifications:
+ *	Vailin Choi; October 2009
+ *	Moved from print_dataset_info()
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+print_dset_dtype_info(const iter_t *iter)
+{
+    unsigned long power;        /* Temporary "power" for bins */
+    unsigned long total;        /* Total count for various statistics */
+    size_t   dtype_size;        /* Size of encoded datatype */
+    unsigned u;                 /* Local index variable */
+
+    if(iter->dset_ntypes) {
+	printf("Dataset datatype information:\n");
+	printf("\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
+	total = 0;
+	for(u = 0; u < iter->dset_ntypes; u++) {
+	    H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
+	    printf("\tDataset datatype #%u:\n", u);
+	    printf("\t\tCount (total/named) = (%lu/%lu)\n", 
+		iter->dset_type_info[u].count, iter->dset_type_info[u].named);
+	    printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
+		(unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
+	    H5Tclose(iter->dset_type_info[u].tid);
+	    total += iter->dset_type_info[u].count;
+	} /* end for */
+	printf("\tTotal dataset datatype count: %lu\n", total);
+    }
+
+    return 0;
+} /* print_dset_dtype_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1212,6 +1210,7 @@ print_freespace_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
+    HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
     printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for(u = 0; u < SIZE_SMALL_SECTS; u++) {
@@ -1239,10 +1238,11 @@ print_freespace_info(const iter_t *iter)
     return 0;
 } /* print_freespace_info() */
 
+
 /*-------------------------------------------------------------------------
  * Function: print_storage_summary
  *
- * Purpose: Prints summary of the storage information in the file
+ * Purpose: Prints file space information for the file
  *
  * Return: Success: 0
  *
@@ -1259,7 +1259,8 @@ print_storage_summary(const iter_t *iter)
     hsize_t unaccount = 0;
     float   percent = 0.0;
 
-    printf("Summary of storage information:\n");
+    HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
+    printf("Summary of file space information:\n");
     total_meta =
 	iter->super_size + iter->super_ext_size + iter->ublk_size +
 	iter->group_ohdr_info.total_size +
@@ -1285,7 +1286,7 @@ print_storage_summary(const iter_t *iter)
 
     if(iter->filesize < (total_meta+iter->dset_storage_size+iter->free_space)) {
 	unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
-	HDfprintf(stdout, "  ??? File has %Hu more bytes accounted for that its size! ???\n", unaccount);
+	HDfprintf(stdout, "  ??? File has %Hu more bytes accounted for than its size! ???\n", unaccount);
     }
     else {
 	unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
@@ -1298,8 +1299,124 @@ print_storage_summary(const iter_t *iter)
     if(iter->nexternal)
 	HDfprintf(stdout, "External raw data: %Hu bytes\n", iter->dset_external_storage_size);
 
+
     return 0;
 } /* print_storage_summary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_file_metadata
+ *
+ * Purpose: Prints file space information for file's metadata
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer: Elena Pourmal
+ *             Saturday, August 12, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+print_file_metadata(const iter_t *iter)
+{
+    printf("File space information for file metadata (in bytes):\n");
+    HDfprintf(stdout, "\tSuperblock: %Hu\n", iter->super_size);
+    HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
+    HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
+
+    HDfprintf(stdout, "\tObject headers: (total/unused)\n");
+    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+		iter->group_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", 
+		iter->dset_ohdr_info.total_size,
+		iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+		iter->dtype_ohdr_info.free_size);
+
+    HDfprintf(stdout, "\tGroups:\n");
+    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->groups_heap_storage_size);
+
+    HDfprintf(stdout, "\tAttributes:\n");
+    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->attrs_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
+
+    HDfprintf(stdout, "\tChunked datasets:\n");
+    HDfprintf(stdout, "\t\tIndex: %Hu\n", iter->datasets_index_storage_size);
+
+    HDfprintf(stdout, "\tDatasets:\n");
+    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+
+    HDfprintf(stdout, "\tShared Messages:\n");
+    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->SM_index_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->SM_heap_storage_size);
+
+    HDfprintf(stdout, "\tFree-space managers:\n");
+    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->free_hdr);
+    HDfprintf(stdout, "\t\tAmount of free space: %Hu\n", iter->free_space);
+
+    return 0;
+} /* print_file_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_group_metadata
+ *
+ * Purpose: Prints file space information for groups' metadata 
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer: Vailin Choi; October 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+print_group_metadata(const iter_t *iter)
+{
+    printf("File space information for groups' metadata (in bytes):\n");
+
+    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n",
+		iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
+
+    HDfprintf(stdout, "\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\tHeap: %Hu\n", iter->groups_heap_storage_size);
+
+    return 0;
+} /* print_group_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_dataset_metadata
+ *
+ * Purpose: Prints file space information for datasets' metadata 
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ * Programmer:  Vailin Choi; October 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+print_dset_metadata(const iter_t *iter)
+{
+    printf("File space information for datasets' metadata (in bytes):\n");
+
+    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n",
+		iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+
+    HDfprintf(stdout, "\tIndex for Chunked datasets: %Hu\n",
+		iter->datasets_index_storage_size);
+    HDfprintf(stdout, "\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+
+    return 0;
+} /* print_dset_metadata() */
 
 
 /*-------------------------------------------------------------------------
@@ -1314,6 +1431,11 @@ print_storage_summary(const iter_t *iter)
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
  *
+ * Modifications:
+ *	Vailin Choi; October 2009
+ *	Activate "display_group_metadata", "dislay_dset_metadata" and
+ *	"display_dset_dtype_info".
+ *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1321,21 +1443,31 @@ print_file_statistics(const iter_t *iter)
 {
     if(display_all) {
         display_file = TRUE;
-        display_file_metadata = TRUE;
         display_group = TRUE;
         display_dset = TRUE;
-        display_dtype_metadata = TRUE;
+	display_dset_dtype_info = TRUE;
         display_attr = TRUE;
 	display_free_sections = TRUE;
+	display_summary = TRUE;
+
+        display_file_metadata = TRUE;
+        display_group_metadata = TRUE;
+        display_dset_metadata = TRUE;
     }
 
-    if(display_file)          print_file_info(iter);
-    if(display_file_metadata) print_file_metadata(iter);
-    if(display_group)         print_group_info(iter);
-    if(display_dset)          print_dataset_info(iter);
-    if(display_attr)          print_attr_info(iter);
-    if(display_free_sections) print_freespace_info(iter);
-    if(display_summary)       print_storage_summary(iter);
+    if(display_file)          	print_file_info(iter);
+    if(display_file_metadata) 	print_file_metadata(iter);
+
+    if(display_group)         	print_group_info(iter);
+    if(!display_all && display_group_metadata) 	print_group_metadata(iter);
+
+    if(display_dset)          	print_dataset_info(iter);
+    if(display_dset_dtype_info) print_dset_dtype_info(iter);
+    if(!display_all && display_dset_metadata) 	print_dset_metadata(iter);
+
+    if(display_attr)          	print_attr_info(iter);
+    if(display_free_sections) 	print_freespace_info(iter);
+    if(display_summary)       	print_storage_summary(iter);
 }
 
 
@@ -1424,7 +1556,7 @@ main(int argc, const char *argv[])
 
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
 	warn_msg(progname, "Unable to retrieve file size\n");
-     assert(iter.filesize >= 0);
+    assert(iter.filesize != 0);
 	
     /* Get storge info for file-level structures */
     if(H5Fget_info2(fid, &finfo) < 0)
@@ -1444,6 +1576,10 @@ main(int argc, const char *argv[])
 
     if(H5Pget_userblock(fcpl, &iter.ublk_size) < 0)
         warn_msg(progname, "Unable to retrieve userblock size\n");
+
+    if(H5Pget_file_space(fcpl, &iter.fs_strategy, &iter.fs_threshold) < 0)
+        warn_msg(progname, "Unable to retrieve file space information\n");
+    assert(iter.fs_strategy != 0 && iter.fs_strategy < H5F_FILE_SPACE_NTYPES);
 
     /* get information for free-space sections */
     if(freespace_stats(fid, &iter) < 0)

@@ -2,7 +2,7 @@
 Expected output for 'h5stat -F h5stat_filters.h5'
 #############################
 Filename: h5stat_filters.h5
-Storage information (in bytes):
+File space information for file metadata (in bytes):
 	Superblock: 96
 	Superblock extension: 0
 	User block: 0
