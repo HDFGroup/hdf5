@@ -98,15 +98,15 @@ libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5timer.lo H5trace.lo H5A.lo H5Abtree2.lo H5Adense.lo \
 	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5B.lo H5Bcache.lo \
-	H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2hdr.lo H5B2int.lo \
-	H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dbtree.lo \
-	H5Dchunk.lo H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo \
-	H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo H5Dlayout.lo \
-	H5Dmpio.lo H5Doh.lo H5Dscatgath.lo H5Dselect.lo H5Dtest.lo \
-	H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo H5EAdbg.lo \
-	H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo H5EAiblock.lo \
-	H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo H5F.lo \
-	H5Faccum.lo H5Fdbg.lo H5Fdeprec.lo H5Ffake.lo H5Fio.lo \
+	H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2hdr.lo \
+	H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo H5D.lo \
+	H5Dbtree.lo H5Dchunk.lo H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo \
+	H5Ddeprec.lo H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo \
+	H5Dlayout.lo H5Dmpio.lo H5Doh.lo H5Dscatgath.lo H5Dselect.lo \
+	H5Dtest.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo \
+	H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo \
+	H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo \
+	H5F.lo H5Faccum.lo H5Fdbg.lo H5Fdeprec.lo H5Ffake.lo H5Fio.lo \
 	H5Fmount.lo H5Fmpi.lo H5Fquery.lo H5Fsfile.lo H5Fsuper.lo \
 	H5Fsuper_cache.lo H5Ftest.lo H5FA.lo H5FAcache.lo H5FAdbg.lo \
 	H5FAdblock.lo H5FAdblkpage.lo H5FAhdr.lo H5FAstat.lo \

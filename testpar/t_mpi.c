@@ -849,7 +849,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	    printf("Complicated derived datatype is NOT working at this platform\n");
 	    printf("Go back to hdf5/config and find the corresponding\n");
 	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
-	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+	    printf("hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype-works='no'}\n");
 	    printf(" at the end of the file.\n");
 	    printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
 	}
@@ -862,7 +862,7 @@ static int test_mpio_derived_dtype(char *filename) {
 	    printf("Complicated derived datatype is WORKING at this platform\n");
 	    printf(" Go back to hdf5/config and find the corresponding \n");
 	    printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
-	    printf("hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype-works='no'}\n");
+	    printf("hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype-works='no'}\n");
 	    printf(" at the end of the file.\n");
 	    printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
 	}
@@ -1018,7 +1018,7 @@ test_mpio_special_collective(char *filename)
 	    printf("special collective IO is NOT working at this platform\n");
 	    printf("Go back to hdf5/config and find the corresponding\n");
 	    printf("configure-specific file (for example, powerpc-ibm-aix5.x) and add\n");
-	    printf("hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}\n");
+	    printf("hdf5_cv_mpi_special_collective_io_works=${hdf5_cv_mpi_special_collective_io_works='no'}\n");
 	    printf(" at the end of the file.\n");
 	    printf(" Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
 	}
@@ -1031,7 +1031,7 @@ test_mpio_special_collective(char *filename)
 	    printf("special collective IO is WORKING at this platform\n");
 	    printf(" Go back to hdf5/config and find the corresponding \n");
 	    printf(" configure-specific file (for example, powerpc-ibm-aix5.x) and delete the line\n");
-	    printf("hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}\n");
+	    printf("hdf5_cv_mpi_special_collective_io_works=${hdf5_cv_mpi_special_collective_io_works='no'}\n");
 	    printf(" at the end of the file.\n");
 	    printf("Please report to hdfhelp@ncsa.uiuc.edu about this problem.\n");
 	}
