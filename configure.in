@@ -4026,7 +4026,7 @@ else
 fi
 
 dnl Some cleanup stuff
-rm -f conftest conftest.o conftest.c dummy.o
+rm -f conftest conftest.o conftest.c dummy.o *.mod
 
 dnl Build config.status, touch the stamp files, and build all the Makefiles.
 dnl The order is such that the first `make' does not need to update any
