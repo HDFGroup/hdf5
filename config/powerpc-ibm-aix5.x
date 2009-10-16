@@ -128,9 +128,9 @@ ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
 
 if test "X-" = "X-$FC"; then
   if test "X-$enable_parallel" = "X-yes"; then
-    FC=mpxlf_r
+    FC=mpxlf90_r
   else
-    FC=xlf
+    FC=xlf90
   fi
 fi
 
@@ -141,8 +141,8 @@ fi
 # to ensure the flag is present for both configure as well as for the build.
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
-  H5_FCFLAGS="$H5_FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./"
+  H5_FCFLAGS="$H5_FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
   PROD_FCFLAGS="-O"
