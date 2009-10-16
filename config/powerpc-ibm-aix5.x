@@ -48,7 +48,8 @@ case $CC_BASENAME in
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
     # Make sure this is applied to other API compile options such as C++.
-    AM_CFLAGS="-qlanglvl=stdc99 -D_LARGE_FILES $AM_CFLAGS"
+    AM_CFLAGS="-D_LARGE_FILES $AM_CFLAGS"
+    H5_CFLAGS="-qlanglvl=stdc99 $H5_CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
     # -O causes test/dtypes to fail badly. Turn it off for now.
