@@ -838,8 +838,9 @@ test_family_compat(void)
         sprintf(pathname_individual, pathname, counter);
     }
 
-    if (old_fp = HDfopen(pathname_individual,"rb") 
-        && (tmp_fp = fopen(newname_individual,"wb"))) TEST_ERROR
+    if ((NULL != (old_fp = HDfopen(pathname_individual,"rb"))) && 
+        (NULL != (tmp_fp = HDfopen(newname_individual,"wb"))))
+	TEST_ERROR;
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */
