@@ -1284,7 +1284,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     dnl Add POSIX support on Linux systems, so <features.h> defines
     dnl __USE_POSIX, which is required to get the prototype for fdopen
     dnl defined correctly in <stdio.h>
-    AM_CPPFLAGS="-D_POSIX_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_SOURCE $H5_CPPFLAGS"
 
     dnl Also add BSD support on Linux systems, so <features.h> defines
     dnl __USE_BSD, which is required to get the prototype for strdup
