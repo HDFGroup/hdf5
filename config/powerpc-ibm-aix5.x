@@ -142,8 +142,8 @@ fi
 # to ensure the flag is present for both configure as well as for the build.
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
-  FCFLAGS="$FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./"
-  H5_FCFLAGS="$H5_FCFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./"
+  FCFLAGS="$FCFLAGS -O ${F9XSUFFIXFLAG}"
+  H5_FCFLAGS="$H5_FCFLAGS -O ${F9XSUFFIXFLAG}"
   FSEARCH_DIRS="-I./ -I../src"
   DEBUG_FCFLAGS="-O"
   PROD_FCFLAGS="-O"
