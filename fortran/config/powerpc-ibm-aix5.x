@@ -94,15 +94,15 @@ OBJECT_NAMELEN_DEFAULT_F=-1
 
 if test "X-" = "X-$F9X"; then
   if test "X-$enable_parallel" = "X-yes"; then
-    F9X=mpxlf_r
+    F9X=mpxlf90_r
   else
-    F9X=xlf
+    F9X=xlf90
   fi
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
     F9XSUFFIXFLAG="-qsuffix=f=f90"
-    FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+    FFLAGS="$FFLAGS -O ${F9XSUFFIXFLAG}"
     FSEARCH_DIRS="-I./ -I../src"
     DEBUG_FFLAGS="-O"
     PROD_FFLAGS="-O"
