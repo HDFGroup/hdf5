@@ -25,13 +25,18 @@
  *
  * Programmer: Albert Cheng
  *             September 20, 2009
+ * Modifications:
+ *   Added abort signal intercept. AKC - 2009/10/16 -
  */
 
-
-#include <stdlib.h>
-#include "hdf5.h"
+#include "h5test.h"
 
 #define	progname	"tcheck_version"
+
+/* prototypes */
+void showhelp(void);
+void parse(int ac, char **av);
+void abort_intercept (int UNUSED sig);
 
 /* global variables */
 unsigned	major = H5_VERS_MAJOR;
@@ -90,10 +95,24 @@ parse(int ac, char **av)
     }
 }
 
+/* Handler for SIGABRT - catch the abort signal supposedly from check_version()
+ * and exit(134).  134 would have been the return code in Unix systems.
+ * This handles the abort signal instead letting it interrupt the OS because
+ * some systems may produce extra messages and/or produce core dump.
+ * This tries to eliminate those side effects.
+ */
+void
+abort_intercept (int UNUSED sig)
+{
+    HDexit(134);
+}
+
 int
 main(int ac, char **av)
 {
     parse(ac, av);
+    HDsignal(SIGABRT, &abort_intercept);
     H5check_version(major, minor, release);
+    HDsignal(SIGABRT, SIG_DFL);
     return 0;
 }
