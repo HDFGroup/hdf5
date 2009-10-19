@@ -317,6 +317,16 @@ while test -n "$hname"; do
 done
 
 dnl ----------------------------------------------------------------------
+dnl Some built-in configure checks can only see CFLAGS (not AM_CFLAGS), so
+dnl we need to add this in so configure works as intended. We will need to
+dnl reset this value at the end of configure, to preserve the user's settings.
+CFLAGS="${AM_CFLAGS} ${CFLAGS}"
+FCFLAGS="${AM_FCFLAGS} ${FCFLAGS}"
+CXXFLAGS="${AM_CXXFLAGS} ${CXXFLAGS}"
+CPPFLAGS="${AM_CPPFLAGS} ${CPPFLAGS}"
+LDFLAGS="${AM_LDFLAGS} ${LDFLAGS}"
+
+dnl ----------------------------------------------------------------------
 dnl Enable dependency tracking unless the configure options or a
 dnl site-specific file told us not to.  This prevents configure from
 dnl silently disabling dependencies for some compilers.
@@ -365,7 +375,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl --------------------------------------------------------------------
   dnl General Fortran flags
   dnl
-  AM_FCFLAGS="${AM_FCFLAGS} ${AM_FFLAGS}"
+  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
+  FCFLAGS="${FCFLAGS} ${FFLAGS}"
 
   dnl --------------------------------------------------------------------
   dnl Fortran source extention
@@ -494,6 +505,7 @@ int main(void) { return 0; }
     echo no
   ], [
     echo yes
+    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
     AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
   ])
 
@@ -512,6 +524,7 @@ int main(void) {
      echo yes
   ], [
      echo no
+     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
      AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
   ])
 
@@ -529,6 +542,7 @@ int main(void) {
      echo yes
   ], [
      echo no
+     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
      AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
   ])
 
@@ -542,6 +556,7 @@ int main(void) {
      echo yes
   ], [
      echo no
+     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
      AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
   ])
 
@@ -579,6 +594,7 @@ int main(void) {
     echo yes
   ], [
     echo no
+    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
     AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
   ])
 else
@@ -885,6 +901,7 @@ if test "X${HDF_FORTRAN}" = "Xyes"; then
       H5_FORTRAN_SHARED="no"
     else
 dnl echo 'adding fortran compiler flag needed for building shared libraries'
+      FCFLAGS="${FCFLAGS} -fPIC"
       AM_FCFLAGS="${AM_FCFLAGS} -fPIC"
     fi
   fi
@@ -3965,13 +3982,13 @@ AC_RUN_IFELSE([
     ])
 
 
-dnl ------------------------------------
-dnl Restore user's CPPFLAGS and LDFLAGS.
+dnl ----------------------------------------------------------------------
+dnl Restore user's CFLAGS.
+CFLAGS="$saved_user_CFLAGS"
+FCFLAGS="$saved_user_FCFLAGS"
+CXXFLAGS="$saved_user_CXXFLAGS"
 CPPFLAGS="$saved_user_CPPFLAGS"
 LDFLAGS="$saved_user_LDFLAGS"
-FCFLAGS="$saved_user_FCFLAGS"
-CFLAGS="$saved_user_CFLAGS"
-CXXFLAGS="$saved_user_CXXFLAGS"
 
 
 dnl ----------------------------------------------------------------------
