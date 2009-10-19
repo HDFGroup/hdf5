@@ -122,6 +122,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test mf%2 .\mf%2\%1
     call :add_test btree2%2 .\btree2%2\%1
     call :add_test fheap%2 .\fheap%2\%1
+    call :add_test tcheckversion%2 .\tcheckversion%2\%1
     
     
     rem Run the tests, passing in which version to run
