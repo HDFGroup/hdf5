@@ -31,6 +31,7 @@ typedef struct {
     int    d;         /* delta, absolute value to compare */
     double delta;     /* delta value */
     int    p;         /* relative error to compare*/
+    int      use_system_epsilon;    /* flag to use system epsilon (1 or 0) */
     double percent;   /* relative error value */
     int    n;         /* count, compare up to count */
     hsize_t count;    /* count value */

@@ -48,6 +48,7 @@ static struct long_options l_opts[] = {
     { "relative", require_arg, 'p' },
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
+    { "use-system-epsilon", no_arg, 'e' },
     { NULL, 0, '\0' }
 };
 
@@ -421,20 +422,21 @@ void usage(void)
     printf("   -q, --quiet             Quiet mode. Do not do output\n");
     printf("   -c, --compare           List objects that are not comparable\n");
     printf("   -N, --nan               Avoid NaNs detection\n");
-    
     printf("   -n C, --count=C         Print differences up to C number\n");
-    printf("   -d D, --delta=D         Print difference when greater than limit D\n");
-    printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
-    
-    
+
+    printf("   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive number.\n");
+    printf("   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive number.\n");
+    printf("   --use-system-epsilon    Print difference if (|a-b| > EPSILON),\n");
+    printf("                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the system epsilon value. \n");
+    printf("                           If the system epsilon is not defined, use the value below:\n");
+    printf("                               FLT_EPSILON = 1.19209E-07 for float\n");
+    printf("                               DBL_EPSILON = 2.22045E-16 for double\n");
+
+    printf("                           -d, -p, and --use-system-epsilon options are used for comparing floating point values.\n");
+    printf("                           By default, strict equality is used. Use -p or -d to set specific tolerance.\n");
     printf("\n");
-    
-    printf("  C - is a positive integer\n");
-    printf("  D - is a positive number. Compare criteria is |a - b| > D\n");
-    printf("  R - is a positive number. Compare criteria is |(b-a)/a| > R\n");
-    
-    printf("\n");
-    
+
+ 
     printf(" Modes of output:\n");
     printf("\n");
     printf("  Default mode: print the number of differences found and where they occured\n");
