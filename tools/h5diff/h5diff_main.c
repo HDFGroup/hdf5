@@ -189,6 +189,11 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->delta = atof( opt_arg );
+
+            /* -d 0 is the same as default */
+            if (options->delta == 0)
+            options->d=0;
+
             break;
 
         case 'p':
@@ -201,6 +206,11 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->percent = atof( opt_arg );
+
+            /* -p 0 is the same as default */
+            if (options->percent == 0)
+            options->p = 0;
+
             break;
 
         case 'n':
@@ -222,8 +232,17 @@ void parse_command_line(int argc,
         case 'c':
             options->m_list_not_cmp = 1;
             break;
+        case 'e':
+            options->use_system_epsilon = 1;
+            break;
+
         }
     }
+
+    /* if use system epsilon, unset -p and -d option */
+    if (options->use_system_epsilon)
+        options->d = options->p = 0;
+
 
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
