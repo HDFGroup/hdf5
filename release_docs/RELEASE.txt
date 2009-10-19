@@ -91,7 +91,7 @@ New Features
 
     F90 API
     -------
-    - None
+     - Added H5Oopen_by_addr_f MSB - 9/14/09
 
     C++ API
     -------
@@ -170,7 +170,20 @@ Bug Fixes since HDF5-1.8.3
 
     F90 API
     ------
-    - None
+    - Fixed bug in h5lget_info_by_idx_f by adding missing arguments, 
+      consequently changing the API. New API is:
+
+      SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
+        link_type, f_corder_valid, corder, cset, address, val_size, hdferr, lapl_id)
+
+        MSB - 2009/9/17 - 1652
+
+    - Corrected the values for the H5L_flags FORTRAN constants: 
+        H5L_LINK_ERROR_F, H5L_LINK_HARD_F, H5L_LINK_SOFT_F, H5L_LINK_EXTERNAL_F
+        MSB - 2009-09-17 - 1653
+
+    - Added FORTRAN equivalent of C constant H5T_ORDER_NONE: H5T_ORDER_NONE_F
+        MSB - 2009-9-24 - 1471
 
     C++ API
     ------
