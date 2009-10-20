@@ -189,10 +189,10 @@ int main(int argc, char *argv[])
   if (process(&opt) == -1)
     goto err;
 
-  return(0);
+  return(EXIT_SUCCESS);
   err:
     (void) fprintf(stderr, err4);
-    return(-1);
+    return(EXIT_FAILURE);
 }
 
 static int
