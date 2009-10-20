@@ -2069,6 +2069,8 @@
 ./windows/test/set_extentdll/set_extentdll.vcproj
 ./windows/test/stab/stab.vcproj
 ./windows/test/stabdll/stabdll.vcproj
+./windows/test/tcheckversion/tcheckversion.vcproj
+./windows/test/tcheckversiondll/tcheckversiondll.vcproj
 ./windows/test/tellub/tellub.vcproj
 ./windows/test/testhdf5/testhdf5.vcproj
 ./windows/test/testhdf5dll/testhdf5dll.vcproj
