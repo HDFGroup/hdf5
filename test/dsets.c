@@ -34,6 +34,7 @@
 #define H5Z_PACKAGE
 #include "H5Zpkg.h"
 
+
 const char *FILENAME[] = {
     "dataset",
     "compact_dataset",
@@ -140,6 +141,7 @@ const char *FILENAME[] = {
 /* Names for noencoder test */
 #ifdef H5_HAVE_FILTER_SZIP
 #define NOENCODER_FILENAME "noencoder.h5"
+#define NOENCODER_COPY_FILENAME "noencoder.h5.copy"
 #define NOENCODER_TEST_DATASET "noencoder_tdset.h5"
 #define NOENCODER_SZIP_DATASET "noencoder_szip_dset.h5"
 #define NOENCODER_SZIP_SHUFF_FLETCH_DATASET "noencoder_szip_shuffle_fletcher_dset.h5"
@@ -1691,6 +1693,8 @@ error:
  *              Monday, June 7, 2004
  *
  * Modifications:
+ *              Make copy of data file since the test writes to the file.
+ *              Larry Knox, October 14, 2009   
  *
  *-------------------------------------------------------------------------
  */
@@ -1708,20 +1712,14 @@ test_filter_noencoder(const char *dset_name)
     int test_ints[10] = { 12 };
     int read_buf[10];
     int i;
-    char * srcdir = HDgetenv("srcdir"); /* The source directory */
-    char testfile[512]="";	/* Buffer to hold name of test file */
-
-    /*
-     * Create the name of the file to open (in case we are using the --srcdir
-     * option and the file is in a different directory from this test).
-     */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(NOENCODER_FILENAME) + 1) < sizeof(testfile))) {
-        HDstrcpy(testfile, srcdir);
-        HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, NOENCODER_FILENAME);
-
-    file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+ 
+    /* Make a local copy of the file since this test writes to the data file
+       from svn. */  
+    if (h5_make_local_copy(NOENCODER_FILENAME, NOENCODER_COPY_FILENAME) < 0) 
+        goto error;
+    
+    /* Open file */
+    file_id = H5Fopen(NOENCODER_COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     if(file_id < 0) goto error;
 
     dset_id = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
@@ -1803,6 +1801,7 @@ error:
         H5Pclose(dcpl_id);
     if(file_id != -1)
         H5Fclose(file_id);
+
     return -1;
 }
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -7377,6 +7376,10 @@ main(void)
     if(nerrors)
         goto error;
     printf("All dataset tests passed.\n");
+#ifdef H5_HAVE_FILTER_SZIP
+    if (GetTestCleanup())
+        HDremove(NOENCODER_COPY_FILENAME); 
+#endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
     return 0;

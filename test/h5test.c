@@ -71,6 +71,9 @@ char	*paraprefix = NULL;	/* for command line option para-prefix */
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
+#define FILENAME_BUF_SIZE       1024
+#define READ_BUF_SIZE           4096 
+
 /*
  * These are the letters that are appended to the file name when generating
  * names for the split and multi drivers. They are:
@@ -1087,4 +1090,56 @@ getenv_all(MPI_Comm comm, int root, const char* name)
 }
 
 #endif
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_make_local_copy
+ *
+ * Purpose:     Make copy of file.  Some tests write to data files under that
+ *              are under version control.  Those tests should make a copy of
+ *              the versioned file and write to the copy.  This function 
+ *              prepends srcdir to the name of the file to be copied and uses
+ *              the name of the copy as is. 
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Larry Knox
+ *              Monday, October 13, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_make_local_copy(char *origfilename, char *local_copy_name)
+{
+    char  filename[FILENAME_BUF_SIZE] = "";
+    int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
+    ssize_t nread;                      /* Number of bytes read in */
+    char  buf[READ_BUF_SIZE];        /* Buffer for copying data */
+    char * srcdir = HDgetenv("srcdir"); /* The source directory */
+
+    if(srcdir && ((HDstrlen(srcdir) +
+                   HDstrlen(origfilename) + 6) < FILENAME_BUF_SIZE)) {
+        HDstrcpy(filename, srcdir);
+        HDstrcat(filename, "/");
+    }
+    HDstrcat(filename, origfilename);
+
+    /* Copy old file into temporary file */
+    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) return -1;
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) 
+        < 0) return -1;
+
+    /* Copy data */
+    while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
+        HDwrite(fd_new, buf, (size_t)nread);
+
+    /* Close files */
+    if(HDclose(fd_old) < 0) return -1;
+    if(HDclose(fd_new) < 0) return -1;
+   
+    return 0; 
+}
 

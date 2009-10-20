@@ -59,6 +59,7 @@ const char *FILENAME[] = {
  * for version 1.6.  To get this data file, simply compile gen_old_group.c with
  * the HDF5 library in that branch and run it. */
 #define FILE_OLD_GROUPS "group_old.h5"
+#define FILE_OLD_GROUPS_COPY "group_old.h5.copy"
 
 /* Definitions for 'no_compact' test */
 #define NO_COMPACT_TOP_GROUP     "top"
@@ -665,45 +666,22 @@ error:
 static int
 read_old(void)
 {
-    int	fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     hid_t fid = (-1);                   /* File ID */
     hid_t gid = (-1);                   /* Group ID */
     hid_t gid2 = (-1);                  /* Group ID */
-    char  buf[READ_OLD_BUFSIZE];        /* Buffer for copying data */
-    ssize_t nread;                      /* Number of bytes read in */
     char  objname[NAME_BUF_SIZE];       /* Object name */
     unsigned    u;                      /* Local index variable */
-    char  *srcdir = HDgetenv("srcdir"); /* where the src code is located */
-    char  filename[512] = "";           /* old test file name */
-    char  filename2[NAME_BUF_SIZE];     /* copy of old test file */
 
     TESTING("reading old groups");
 
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_OLD_GROUPS) + 1) < sizeof(filename))) {
-        HDstrcpy(filename, srcdir);
-        HDstrcat(filename, "/");
-    }
-    HDstrcat(filename, FILE_OLD_GROUPS);
-
-    /* Create filename */
-    h5_fixname(FILENAME[0], H5P_DEFAULT, filename2, sizeof(filename2));
-
-    /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) TEST_ERROR
-    if((fd_new = HDopen(filename2, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) TEST_ERROR
-
-    /* Copy data */
-    while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0)
-        HDwrite(fd_new, buf, (size_t)nread);
-
-    /* Close files */
-    if(HDclose(fd_old) < 0) TEST_ERROR
-    if(HDclose(fd_new) < 0) TEST_ERROR
-
+    /* Make a copy of the data file from svn. */
+    if(h5_make_local_copy(FILE_OLD_GROUPS, FILE_OLD_GROUPS_COPY) < 0) TEST_ERROR
 
     /* Open copied file */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(FILE_OLD_GROUPS_COPY, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Open copied file */
+    if((fid = H5Fopen(FILE_OLD_GROUPS_COPY, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Attempt to open "old" group */
     if((gid = H5Gopen2(fid, "old", H5P_DEFAULT)) < 0) TEST_ERROR
@@ -1106,46 +1084,13 @@ error:
 static int
 corrupt_stab_msg(void)
 {
-    char testfile[512]="";              /* Character buffer for corrected test file name */
-    char *srcdir = HDgetenv("srcdir");  /* Pointer to the directory the source code is located within */
-    FILE        *tmp_fp, *old_fp;       /* Pointers to temp & old files */
-    void        *copy_buf;              /* Pointer to buffer for copying data */
-    size_t      written;                /* Amount of data written to new file */
-    size_t      read_in;                /* Amount of data read in from old file */
     hid_t       fid = (-1);             /* File ID */
     hid_t       did = (-1);             /* Dataset ID */
 
     TESTING("corrupt symbol table message");
 
-    /* Generate the correct name for the test file, by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(CORRUPT_STAB_FILE) + 1) < sizeof(testfile))) {
-        HDstrcpy(testfile, srcdir);
-        HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, CORRUPT_STAB_FILE);
-
-    /* Open the temporary file */
-    if(NULL == (tmp_fp = HDfopen(CORRUPT_STAB_TMP_FILE,"wb"))) TEST_ERROR
-
-    /* Open the old file */
-    if(NULL == (old_fp = fopen(testfile,"rb"))) TEST_ERROR
-
-    /* Allocate space for the copy buffer */
-    if(NULL == (copy_buf = HDmalloc((size_t)CORRUPT_STAB_COPY_BUF_SIZE))) TEST_ERROR
-
-    /* Copy data from the old file to the new file */
-    while((read_in = HDfread(copy_buf, (size_t)1, (size_t)CORRUPT_STAB_COPY_BUF_SIZE, old_fp)) > 0)
-        /* Write the data to the new file */
-        if(read_in != (written = HDfwrite(copy_buf, (size_t)1, read_in, tmp_fp))) TEST_ERROR
-
-    /* Close the old file */
-    if(HDfclose(old_fp)) TEST_ERROR
-
-    /* Close the new file */
-    if(HDfclose(tmp_fp)) TEST_ERROR
-
-    /* Free the copy buffer */
-    free(copy_buf);
+    /* Make a copy of the data file from svn. */
+    if(h5_make_local_copy(CORRUPT_STAB_FILE, CORRUPT_STAB_TMP_FILE) < 0) TEST_ERROR
 
 #ifndef H5_STRICT_FORMAT_CHECKS
     /* Open temp file through HDF5 library */
@@ -1186,8 +1131,6 @@ corrupt_stab_msg(void)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
 #endif /* H5_STRICT_FORMAT_CHECKS */
-    /* Remove temporary file */
-    if(HDremove(CORRUPT_STAB_TMP_FILE)) TEST_ERROR
 
     PASSED();
 
@@ -1198,7 +1141,6 @@ error:
     	H5Dclose(did);
     	H5Fclose(fid);
     } H5E_END_TRY;
-    HDremove(CORRUPT_STAB_TMP_FILE);
 
     return 1;
 } /* end old_api() */
@@ -1266,6 +1208,10 @@ main(void)
     puts("All symbol table tests passed.");
 
     /* Cleanup */
+    if (GetTestCleanup()) {
+        HDremove(FILE_OLD_GROUPS_COPY);
+        HDremove(CORRUPT_STAB_TMP_FILE);
+    }
     h5_cleanup(FILENAME, fapl);
 
     return 0;
