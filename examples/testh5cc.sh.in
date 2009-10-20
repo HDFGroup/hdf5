@@ -117,8 +117,8 @@ EOF
 # Generate HDF5 Main Program:
 # An HDF5 sample program that calls hdf5 functions.
 cat > $hdf5main <<EOF
-#include "hdf5.h"
 #define H5_USE_16_API
+#include "hdf5.h"
 #define H5FILE_NAME        "tmp.h5"
 int
 main (void)
