@@ -763,6 +763,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\c++\test\tlinks.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\c++\test\trefer.cpp"
 				>
 				<FileConfiguration
