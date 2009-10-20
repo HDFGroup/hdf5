@@ -39,7 +39,7 @@ LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 
 dsets_SOURCES=dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
-	th5s.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+	th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.
 CXX_API=yes

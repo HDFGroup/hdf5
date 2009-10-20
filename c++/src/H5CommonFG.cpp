@@ -425,16 +425,37 @@ void CommonFG::getObjinfo( const H5std_string& name, H5G_stat_t& statbuf ) const
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 {
-   char* value_C = new char[size+1];  // temporary C-string for C API
+    H5L_info_t linkinfo;
+    char *value_C;	// value in C string
+    size_t val_size = size;
+    H5std_string value = "";
+    herr_t ret_value;
 
-   herr_t ret_value = H5Lget_val( getLocId(), name, value_C, size, H5P_DEFAULT );
-   if( ret_value < 0 )
-   {
-      throwException("getLinkval", "H5Lget_val failed");
-   }
-   H5std_string value = H5std_string( value_C );
-   delete []value_C;
-   return( value );
+    // if user doesn't provide buffer size, determine it
+    if (size == 0)
+    {
+	ret_value = H5Lget_info(getLocId(), name, &linkinfo, H5P_DEFAULT);
+	if( ret_value < 0 )
+	{
+	    throwException("getLinkval", "H5Lget_info to find buffer size failed");
+	}
+	val_size = linkinfo.u.val_size;
+    }
+
+    // if link has value, retrieve the value, otherwise, return null string
+    if (val_size > 0)
+    {
+	value_C = new char[val_size+1];  // temporary C-string for C API
+
+	ret_value = H5Lget_val(getLocId(), name, value_C, val_size, H5P_DEFAULT);
+	if( ret_value < 0 )
+	{
+	    throwException("getLinkval", "H5Lget_val failed");
+	}
+	value = H5std_string(value_C);
+	delete []value_C;
+    }
+    return(value);
 }
 
 //--------------------------------------------------------------------------
@@ -524,48 +545,6 @@ void CommonFG::removeComment(const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getComment
-///\brief	Retrieves comment for the specified object.
-///\param	name  - IN: Name of the object
-///\return	Comment string
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - May 2005
-//	2007: QAK modified to use H5O APIs; however the first parameter is
-//		no longer just file or group, this function should be moved
-//		to another class to accommodate attribute, dataset, and named
-//		datatype. - BMR
-//--------------------------------------------------------------------------
-H5std_string CommonFG::getComment (const H5std_string& name) const
-{
-   size_t bufsize = 256;        // anticipating the comment's length
-   hid_t loc_id = getLocId();   // temporary variable
-
-   // temporary C-string for the object's comment
-   char* comment_C = new char[bufsize+1];
-   ssize_t ret_value = H5Oget_comment_by_name(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
-
-   // if the actual length of the comment is longer than the anticipated
-   // value, then call H5Oget_comment_by_name again with the correct value
-   if ((size_t)ret_value > bufsize)
-   {
-	bufsize = ret_value;
-	delete []comment_C;
-	comment_C = new char[bufsize+1];
-	ret_value = H5Oget_comment_by_name(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
-   }
-
-   // if H5Oget_comment_by_name returns SUCCEED, return the string comment,
-   // otherwise, throw an exception
-   if( ret_value < 0 )
-   {
-      throwException("getComment", "H5Oget_comment_by_name failed");
-   }
-   H5std_string comment = H5std_string(comment_C);
-   delete []comment_C;
-   return (comment);
-}
-
-//--------------------------------------------------------------------------
-// Function:	CommonFG::getComment
 ///\brief	Retrieves comment for the specified object and its comment's
 ///		length.
 ///\param	name  - IN: Name of the object
@@ -580,19 +559,35 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 {
-   // temporary C-string for the object's comment
-   char* comment_C = new char[bufsize+1];
+   // bufsize is default to 256
+   // temporary variable
+   hid_t loc_id = getLocId();   // temporary variable
 
-   herr_t ret_value = H5Oget_comment_by_name( getLocId(), name, comment_C, bufsize, H5P_DEFAULT );
+   // temporary C-string for the object's comment; bufsize already including
+   // null character
+   char* comment_C = new char[bufsize];
+   ssize_t ret_value = H5Oget_comment_by_name(loc_id, name, comment_C, bufsize, H5P_DEFAULT);
 
-   // if H5Oget_comment_by_name returns SUCCEED, return the string comment
+   // if the actual length of the comment is longer than bufsize and bufsize
+   // was the default value, i.e., not given by the user, then call
+   // H5Oget_comment_by_name again with the correct value
+   if ((size_t)ret_value > bufsize && bufsize == 256)
+   {
+	size_t new_size = ret_value;
+	delete []comment_C;
+	comment_C = new char[new_size];	// new_size including null terminator
+	ret_value = H5Oget_comment_by_name(loc_id, name, comment_C, new_size, H5P_DEFAULT);
+   }
+
+   // if H5Oget_comment_by_name returns SUCCEED, return the string comment,
+   // otherwise, throw an exception
    if( ret_value < 0 )
    {
       throwException("getComment", "H5Oget_comment_by_name failed");
    }
    H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
-   return( comment );
+   return (comment);
 }
 
 //--------------------------------------------------------------------------
