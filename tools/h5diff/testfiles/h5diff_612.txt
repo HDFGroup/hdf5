@@ -13,12 +13,15 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -c, --compare           List objects that are not comparable
    -N, --nan               Avoid NaNs detection
    -n C, --count=C         Print differences up to C number
-   -d D, --delta=D         Print difference when greater than limit D
-   -p R, --relative=R      Print difference when greater than relative limit R
-
-  C - is a positive integer
-  D - is a positive number. Compare criteria is |a - b| > D
-  R - is a positive number. Compare criteria is |(b-a)/a| > R
+   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive number.
+   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive number.
+   --use-system-epsilon    Print difference if (|a-b| > EPSILON),
+                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the system epsilon value. 
+                           If the system epsilon is not defined, use the value below:
+                               FLT_EPSILON = 1.19209E-07 for float
+                               DBL_EPSILON = 2.22045E-16 for double
+                           -d, -p, and --use-system-epsilon options are used for comparing floating point values.
+                           By default, strict equality is used. Use -p or -d to set specific tolerance.
 
  Modes of output:
 
