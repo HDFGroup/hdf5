@@ -1254,6 +1254,7 @@
 ./c++/test/tfilter.cpp
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
+./c++/test/tlinks.cpp
 ./c++/test/trefer.cpp
 ./c++/test/ttypes.cpp
 ./c++/test/tvlstr.cpp
