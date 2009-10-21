@@ -652,7 +652,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         return "SOFF";
     else {
         error_msg(progname, "input error in filter type\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 

@@ -71,7 +71,9 @@ static struct long_options l_opts[] = {
  *
  * Purpose: h5repack main program
  *
- * Return: 1, error, 0, no error
+ * Return: Success: EXIT_SUCCESS(0)
+ *
+ * Failure: EXIT_FAILURE(1)
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -524,7 +526,7 @@ void read_info(const char *filename,
 
     if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
         error_msg(progname, "cannot open options file %s\n", filename);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     /* cycle until end of file reached */
@@ -561,7 +563,7 @@ void read_info(const char *filename,
 
             if (h5repack_addfilter(comp_info,options)==-1){
                 error_msg(progname, "could not add compression option\n");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -591,7 +593,7 @@ void read_info(const char *filename,
 
             if (h5repack_addlayout(comp_info,options)==-1){
                 error_msg(progname, "could not add chunck option\n");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
         /*-------------------------------------------------------------------------
@@ -600,7 +602,7 @@ void read_info(const char *filename,
         */
         else {
             error_msg(progname, "bad file format for %s", filename);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
