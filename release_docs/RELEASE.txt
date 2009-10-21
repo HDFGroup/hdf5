@@ -5,21 +5,21 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.3 and 
-HDF5 1.8.3-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.3-*. 
+HDF5 1.8.4, and contains information on the platforms tested and 
+known problems in HDF5-1.8.4
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.3 source code, documentation, and additional materials
+Links to the HDF5 1.8.4 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.3 release can be obtained from:
+The HDF5 1.8.4 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.3 can be accessed directly at this location: 
+User documentation for 1.8.4 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.3 (current 
-release) versus Release 1.8.2":
+from Release to Release" document, in the section "Release 1.8.4 (current 
+release) versus Release 1.8.3":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
