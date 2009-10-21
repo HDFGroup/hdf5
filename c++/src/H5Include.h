@@ -28,3 +28,7 @@ typedef int bool;
 const bool  false = 0;
 const bool  true  = 1;
 #endif
+
+// Used in src and test dirs
+#define LINK_BUF_SIZE   1024
+#define NAME_BUF_SIZE   1024

@@ -41,7 +41,7 @@ LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
 RUNTEST=$(LT_RUN)
 
 TESTHDF5_SRC=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
-	th5s.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+	th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
 TESTHDF5_OBJ=$(TESTHDF5_SRC:.cpp=.lo)
 
 TEST_SRC=dsets.cpp $(TESTHDF5_SRC)

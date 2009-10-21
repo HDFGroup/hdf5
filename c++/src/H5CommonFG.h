@@ -63,8 +63,8 @@ class H5_DLLCPP CommonFG {
 	void setComment(const H5std_string& name, const H5std_string& comment) const;
 
 	// Returns the name of the HDF5 object that the symbolic link points to.
-	H5std_string getLinkval(const char* name, size_t size) const;
-	H5std_string getLinkval(const H5std_string& name, size_t size) const;
+	H5std_string getLinkval(const char* name, size_t size=0) const;
+	H5std_string getLinkval(const H5std_string& name, size_t size=0) const;
 
 	// Returns the number of objects in this group.
 	hsize_t getNumObjs() const;

@@ -32,6 +32,10 @@
 #include "H5File.h"
 #include "H5Alltypes.h"
 
+#include <iostream>
+    using std::cerr;
+    using std::endl;
+
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
 // - getLocId is called by all functions, that call a C API, to get
@@ -234,7 +238,8 @@ void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* ne
    herr_t ret_value = H5Glink( getLocId(), link_type, curr_name, new_name );
    if( ret_value < 0 )
    {
-      throwException("link", "H5Glink failed");
+      throwException("link", new_name);
+      //throwException("link", "H5Glink failed");
    }
 }
 
@@ -385,16 +390,27 @@ void CommonFG::getObjinfo( const H5std_string& name, H5G_stat_t& statbuf ) const
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 {
-   char* value_C = new char[size+1];  // temporary C-string for C API
+    char* value_C;
+    herr_t ret_value;
 
-   herr_t ret_value = H5Gget_linkval( getLocId(), name, size, value_C );
-   if( ret_value < 0 )
-   {
-      throwException("getLinkval", "H5Gget_linkval failed");
-   }
-   H5std_string value = H5std_string( value_C );
-   delete []value_C;
-   return( value );
+    if (size == 0)
+    {
+	value_C = new char[LINK_BUF_SIZE];
+	ret_value = H5Gget_linkval( getLocId(), name, LINK_BUF_SIZE, value_C );
+    }
+    else
+    {
+	value_C = new char[size];  // temporary C-string for C API
+	ret_value = H5Gget_linkval( getLocId(), name, size, value_C );
+    }
+
+    if( ret_value < 0 )
+    {
+	throwException("getLinkval", "H5Gget_linkval failed");
+    }
+    H5std_string value = H5std_string(value_C);
+    delete []value_C;
+    return(value);
 }
 
 //--------------------------------------------------------------------------
