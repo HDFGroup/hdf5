@@ -120,7 +120,7 @@ obj_list_t* parse_filter(const char *str,
     {
         if (obj_list) free(obj_list);
         error_msg(progname, "input Error: Invalid compression type in <%s>\n",str);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     
     
@@ -158,7 +158,7 @@ obj_list_t* parse_filter(const char *str,
                         if (!isdigit(c) && l==-1){
                             if (obj_list) free(obj_list);
                             error_msg(progname, "compression parameter not digit in <%s>\n",str);
-                            exit(1);
+                            exit(EXIT_FAILURE);
                         }
                         if (l==-1)
                             stype[m]=c;
@@ -178,7 +178,7 @@ obj_list_t* parse_filter(const char *str,
                                 else
                                 {
                                     error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
-                                    exit(1);
+                                    exit(EXIT_FAILURE);
                                 }
                                 
                                 
@@ -205,7 +205,7 @@ obj_list_t* parse_filter(const char *str,
                         if (!isdigit(c)){
                             if (obj_list) free(obj_list);
                             error_msg(progname, "compression parameter is not a digit in <%s>\n",str);
-                            exit(1);
+                            exit(EXIT_FAILURE);
                         }
                         stype[m]=c;
                     } /* u */
@@ -251,7 +251,7 @@ obj_list_t* parse_filter(const char *str,
        { /*no more parameters, GZIP must have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "missing compression parameter in <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
    }
    
@@ -267,7 +267,7 @@ obj_list_t* parse_filter(const char *str,
        { /*no more parameters, SZIP must have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "missing compression parameter in <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
    }
    
@@ -283,7 +283,7 @@ obj_list_t* parse_filter(const char *str,
        { /*shuffle does not have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "extra parameter in SHUF <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
    }
   /*-------------------------------------------------------------------------
@@ -298,14 +298,14 @@ obj_list_t* parse_filter(const char *str,
        { /*shuffle does not have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "extra parameter in FLET <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
    }
   
    else {
        if (obj_list) free(obj_list);
        error_msg(progname, "invalid filter type in <%s>\n",str);
-       exit(1);
+       exit(EXIT_FAILURE);
    }
   }
  } /*i*/
@@ -328,7 +328,7 @@ obj_list_t* parse_filter(const char *str,
        {
            if (obj_list) free(obj_list);
            error_msg(progname, "invalid compression parameter in <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
        break;
        
@@ -343,19 +343,19 @@ obj_list_t* parse_filter(const char *str,
        {
            if (obj_list) free(obj_list);
            error_msg(progname, "pixels_per_block is not even in <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
        if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) 
        {
            if (obj_list) free(obj_list);
            error_msg(progname, "pixels_per_block is too large in <%s>\n",str);
-           exit(1);
+           exit(EXIT_FAILURE);
        }
        if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) 
        {
            if (obj_list) free(obj_list);
            error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
-           exit(1);
+           exit(EXIT_FAILURE);
        }
        break;
 
@@ -457,7 +457,7 @@ obj_list_t* parse_layout(const char *str,
     {
         if (obj_list) free(obj_list);
         error_msg(progname, "in parse layout, no characters after : in <%s>\n",str);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     
     /* get layout info */
@@ -474,7 +474,7 @@ obj_list_t* parse_layout(const char *str,
                 pack->layout=H5D_CHUNKED;
             else {
                 error_msg(progname, "in parse layout, not a valid layout in <%s>\n",str);
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
         else
@@ -498,7 +498,7 @@ obj_list_t* parse_layout(const char *str,
         {
             if (obj_list) free(obj_list);
             error_msg(progname, "in parse layout,  <%s> Chunk dimensions missing\n",str);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         
         for ( i=j, c_index=0; i<len; i++)
@@ -513,7 +513,7 @@ obj_list_t* parse_layout(const char *str,
                 if (obj_list) free(obj_list);
                 error_msg(progname, "in parse layout, <%s> Not a valid character in <%s>\n",
                     sdim,str);
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             
             if ( c=='x' || i==len-1)
@@ -526,7 +526,7 @@ obj_list_t* parse_layout(const char *str,
                         if (obj_list) free(obj_list);
                         error_msg(progname, "in parse layout, <%s> conversion to number in <%s>\n",
                             sdim,str);
-                        exit(1);
+                        exit(EXIT_FAILURE);
                     }
                     c_index++;
                 }
@@ -544,7 +544,7 @@ obj_list_t* parse_layout(const char *str,
                             if (obj_list) free(obj_list);
                             error_msg(progname, "in parse layout, <%s> conversion to number in <%s>\n",
                                 sdim,str);
-                            exit(1);
+                            exit(EXIT_FAILURE);
                         }
                         pack->chunk.rank=c_index+1;
                     }
