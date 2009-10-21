@@ -170,7 +170,7 @@ static int parse_flag(const char* str_flag, unsigned *flag)
   return -1;
  }
 
- *flag = fla;
+ *flag = (*flag) | fla;
 
  return 0;
 }
@@ -210,7 +210,7 @@ main (int argc, const char *argv[])
  /* Check for no command line parameters */
  if(argc == 1) {
    usage();
-   leave(EXIT_SUCCESS);
+   leave(EXIT_FAILURE);
  } /* end if */
 
  /* parse command line options */
