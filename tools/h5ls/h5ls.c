@@ -2036,9 +2036,9 @@ leave(int ret)
  *
  * Purpose: Opens a file and lists the specified group
  *
- * Return: Success: 0
+ * Return: Success: EXIT_SUCCESS(0)
  *
- *  Failure: 1
+ * Failure: EXIT_FAILURE(1)
  *
  * Programmer: Robb Matzke
  *              Monday, March 23, 1998
@@ -2091,7 +2091,7 @@ main (int argc, const char *argv[])
             break;
         } else if (!strcmp(argv[argno], "--help")) {
             usage();
-            leave(0);
+            leave(EXIT_SUCCESS);
         } else if (!strcmp(argv[argno], "--address")) {
             address_g = TRUE;
         } else if (!strcmp(argv[argno], "--data")) {
@@ -2117,25 +2117,25 @@ main (int argc, const char *argv[])
             width_g = (int)strtol(argv[argno]+8, &rest, 0);
             if (width_g<=0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if (!strcmp(argv[argno], "--width")) {
             if (argno+1>=argc) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if (!strcmp(argv[argno], "--verbose")) {
             verbose_g++;
         } else if (!strcmp(argv[argno], "--version")) {
             print_version(progname);
-            leave(0);
+            leave(EXIT_SUCCESS);
         } else if (!strcmp(argv[argno], "--hexdump")) {
             hexdump_g = TRUE;
         } else if (!strncmp(argv[argno], "-w", 2)) {
@@ -2143,14 +2143,14 @@ main (int argc, const char *argv[])
                 s = argv[argno]+2;
             } else if (argno+1>=argc) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if ('-'!=argv[argno][1]) {
             /* Single-letter switches */
@@ -2159,7 +2159,7 @@ main (int argc, const char *argv[])
                     case '?':
                     case 'h': /* --help */
                         usage();
-                        leave(0);
+                        leave(EXIT_SUCCESS);
                     case 'a': /* --address */
                         address_g = TRUE;
                         break;
@@ -2193,18 +2193,18 @@ main (int argc, const char *argv[])
                         break;
                     case 'V': /* --version */
                         print_version(progname);
-                        leave(0);
+                        leave(EXIT_SUCCESS);
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;
                         break;
                     default:
                         usage();
-                        leave(1);
+                        leave(EXIT_FAILURE);
                 }
             }
         } else {
             usage();
-            leave(1);
+            leave(EXIT_FAILURE);
         }
     }
 
@@ -2212,7 +2212,7 @@ main (int argc, const char *argv[])
      * absolutely nothing ;-) */
     if (argno>=argc) {
         usage();
-        leave(1);
+        leave(EXIT_FAILURE);
     }
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
@@ -2273,17 +2273,17 @@ main (int argc, const char *argv[])
             free(container);
 
         } else if ((root=H5Gopen(file, "/"))<0) {
-            leave(1); /*major problem!*/
+            leave(EXIT_FAILURE); /*major problem!*/
 
         } else {
             /* Specified name is a non-group object -- list that object.  The
             * container for the object is everything up to the base name. */
             iter.container = show_file_name_g ? fname : "/";
             list(root, oname, &iter);
-            if (H5Gclose(root)<0) leave(1);
+            if (H5Gclose(root)<0) leave(EXIT_FAILURE);
         }
         H5Fclose(file);
         free(fname);
     }
-    leave(0);
+    leave(EXIT_SUCCESS);
 }
