@@ -1,25 +1,25 @@
-HDF5 version 1.8.3-snap14 currently under development
+HDF5 version 1.8.4-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.3 and 
-HDF5 1.8.3-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.3-*. 
+This document describes the differences between HDF5-1.8.4 and 
+HDF5 1.8.4-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.4-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.3 source code, documentation, and additional materials
+Links to the HDF5 1.8.4 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.3 release can be obtained from:
+The HDF5 1.8.4 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.3 can be accessed directly at this location: 
+User documentation for 1.8.4 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.3 (current 
-release) versus Release 1.8.2":
+from Release to Release" document, in the section "Release 1.8.4 (current 
+release) versus Release 1.8.3":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.3
+- Bug Fixes since HDF5-1.8.4
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -56,21 +56,11 @@ New Features
 
     Configuration
     -------------
-    - Configuration suite now uses Automake 1.11 and Autoconf 2.64.
-      MAM 2009/08/31.
-    - Changed default Gnu fortran compiler from g95 to gfortran since
-      gfortran is more likely installed with gcc now. -AKC 2009/07/19- 
+    - None EIP 2009/10/21
 
     Library
     -------
-    - The embedded library information is displayed by H5check_version() if a
-      version mismatch is detected.  Also changed H5check_version() to
-      suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
-      or higher. (Old behavior treated 3 or higher the same as 1, that is
-      print a warning and allows the program to continue. (AKC - 2009/9/28)
-    - If a user does not care for the extra library information insert
-      in the executables, he may turn it off by --disable-embedded-libinfo
-      during configure. (AKC - 2009/9/15)
+    - None
 
     Parallel Library
     ----------------
@@ -78,11 +68,6 @@ New Features
  
     Tools
     -----
-     - h5diff: h5diff treats two INFINITY values different. Fixed by checking
-       (value==expect) before call ABS(...) at h5diff_array.c This will make that
-       (INF==INF) is true (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
-     - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
-            Change default to use strict equality (PC -- 2009/09/12)
 
 
     High-Level APIs
@@ -91,7 +76,7 @@ New Features
 
     F90 API
     -------
-     - Added H5Oopen_by_addr_f MSB - 9/14/09
+     - None
 
     C++ API
     -------
@@ -100,90 +85,32 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - PathScale compilers are recognized and can build the HDF5 library
-      properly. AKC - 2009/7/28 -
+    - None
 
 
-Bug Fixes since HDF5-1.8.3
+Bug Fixes since HDF5-1.8.4
 ==========================
 
     Configuration
     -------------
-    - Removed the following config files, as we no longer support them:
-        config/dec-osf*, config/hpux11.00, config/irix5.x, 
-        config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
-      MAM - 2009/10/08
-    - Modified configure and make process to properly preserve user's CFLAGS
-      (and company) environment variables. Build will now properly use
-      automake's AM_CFLAGS for any compiler flags set by the configure
-      process. Configure will no longer modify CFLAGS directly, nor will 
-      setting CFLAGS during make completely replace what configure has set up.
-      MAM - 2009/10/08
-    - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
-      machine has long retired. AKC - 2009/10/06.
-    - Added $(EXEEXT) extension to H5detect when it's executed in the
-      src/Makefile to generate H5Tinit.c so it works correctly on platforms 
-      that require the full extension when running executables.
-      MAM - 2009/10/01 - BZ #1613
-    - Configure will now set FC and CXX to "no" when fortran and c++
-      are not being compiled, respectively, so configure will not run
-      some of the compiler tests for these languages when they are not 
-      being used. MAM - 2009/10/01
-    - The --enable-static-exec flag has been fixed and will now install
-      statically-linked executables within the install directory when used
-      on systems that support the -static linker flag.
-      MAM - 2009/08/31 - BZ #1583
-    - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
-      recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
+    - None EIP - 2009/10/21
 
     Library
     -------
-    - Fixed error in library's internal caching mechanisms which could cause
-      an assertion failure (and attendent core dump) when encountering an
-      unusually formatted file.  (QAK - 2009/10/13)
-    - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
-    - Fixed an assertion failure that occurred when H5Ocopy was called on a
-      dataset using a vlen inside a compound. NAF - 2009/10/02 - 1597
-    - Fixed incorrect return value for H5Pget_filter_by_id1/2 in H5Ppublic.h.
-      NAF - 2009/09/25 - 1620
-    - Fixed a bug where properties weren't being compared with the registered
-      compare callback. NAF - 2009/09/25 - 1555
-    - Corrected problem where library would re-write the superblock in a file
-      opened for R/W access, even when no changes were made to the file.
-      (QAK - 2009/08/20, Bz#1473)
-    - Fixed a bug where H5Pget_filter_by_id would succeed when called for a
-      filter that wasn't present. NAF - 2009/06/25 - 1250
-    - Fixed an issue with committed compound datatypes containing a vlen. Also
-      fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
+    - None EIP - 2009/10/21
 
     Parallel Library
     ----------------
-    - None
+    - None EIP - 2009/10/21
 
     Tools
     -----
-    - h5dump/h5ls display buffer resize fixed in tools library.
-      ADB - 2009/7/21 - 1520
-    - perf_serial test added to Windows projects and check batch file. 
-      ADB - 2009/06/11 -1504
+    - None EIP - 2009/10/21
 
 
     F90 API
     ------
-    - Fixed bug in h5lget_info_by_idx_f by adding missing arguments, 
-      consequently changing the API. New API is:
-
-      SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
-        link_type, f_corder_valid, corder, cset, address, val_size, hdferr, lapl_id)
-
-        MSB - 2009/9/17 - 1652
-
-    - Corrected the values for the H5L_flags FORTRAN constants: 
-        H5L_LINK_ERROR_F, H5L_LINK_HARD_F, H5L_LINK_SOFT_F, H5L_LINK_EXTERNAL_F
-        MSB - 2009-09-17 - 1653
-
-    - Added FORTRAN equivalent of C constant H5T_ORDER_NONE: H5T_ORDER_NONE_F
-        MSB - 2009-9-24 - 1471
+    - None EIP - 2009/10/21
 
     C++ API
     ------
@@ -191,14 +118,11 @@ Bug Fixes since HDF5-1.8.3
 
     High-Level APIs:
     ------
-    - H5DSis_attached failed to account for different platform types. Added a
-      get native type call. ADB - 2009/9/29 - 1562
+    - None EIP - 2009/10/21
 
     Fortran High-Level APIs:
     ------
-    - Lite: the h5ltread_dataset_string_f and h5ltget_attribute_string_f functions 
-           had memory problems with the g95 fortran compiler. (PVN � 5/13/2009) 1522
-
+    - None EIP - 2009/10/21
 
 
 Platforms Tested
