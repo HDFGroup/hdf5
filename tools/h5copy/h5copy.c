@@ -210,7 +210,7 @@ main (int argc, const char *argv[])
  /* Check for no command line parameters */
  if(argc == 1) {
    usage();
-   leave(EXIT_SUCCESS);
+   leave(EXIT_FAILURE);
  } /* end if */
 
  /* parse command line options */
