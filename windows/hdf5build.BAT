@@ -303,7 +303,11 @@ rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
         ) else (
             devenv %hdf5_sln% %ccflags% /rebuild "%%a|%hdf5_platform%"
         )
-        if !errorlevel! neq 0 exit /b
+        if not errorlevel 0 (
+            set /a nerrors=!nerrors!+1
+			echo.  Building %%a FAILED
+			exit /b 1
+		)
     )
 
     exit /b
@@ -325,8 +329,8 @@ rem This is where the magic happens
 :main
 
     call :parse_params %*
-    if %errorlevel% neq 0 (
-        if !errorlevel! equ 1 (
+    if not errorlevel 0 (
+        if errorlevel equ 1 (
             rem This isn't an error case-- this means /? was specified.  Simply
             rem quit.
             goto end
@@ -339,7 +343,7 @@ rem This is where the magic happens
     )
     
     call :setup
-    if %errorlevel% neq 0 (
+    if not errorlevel 0 (
         echo.Error setting up build environment.
         goto error
     )
@@ -347,7 +351,7 @@ rem This is where the magic happens
     rem Upgrade the project files if needed
     if defined hdf5_vs2008 (
         call :upgrade
-        if !errorlevel! neq 0 (
+        if not errorlevel 0 (
             echo.Error upgrading project files!
             goto error
         )
@@ -363,7 +367,7 @@ rem This is where the magic happens
 
 
     call :all
-    if %errorlevel% neq 0 (
+    if not errorlevel (
         echo.Error building HDF5 libraries!
         goto error
     )
