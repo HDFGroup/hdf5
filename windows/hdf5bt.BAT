@@ -228,7 +228,7 @@ rem This is where the magic happens
 
     call :parse_params %*
     if %errorlevel% neq 0 (
-        if !errorlevel! equ 1 (
+        if %errorlevel% equ 1 (
             rem This isn't an error case-- this means /? was specified.  Simply
             rem quit.
             goto end
@@ -241,7 +241,7 @@ rem This is where the magic happens
     )
 
     call :setup
-    if %errorlevel% neq 0 (
+    if not errorlevel 0 (
         echo.Error setting up hdf5bt environment!
         goto error
     )
@@ -252,13 +252,13 @@ rem This is where the magic happens
     echo.
 
     call :build
-    if %errorlevel% neq 0 (
+    if not errorlevel 0 (
         echo.Error building HDF5 libraries!
         goto error
     )
 
     call :test
-    if %errorlevel% neq 0 (
+    if not errorlevel 0 (
         echo.Error testing HDF5 libraries!
         goto error
     )

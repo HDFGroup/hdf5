@@ -75,14 +75,19 @@ rem     %2 - "dll" or nothing
 :run_tests
     for %%a in (%hdf5_test_tests%) do (
         echo.
-        echo.************************************
+        echo.**==**==**==**==**==**==**==**==**==**
         echo.  Testing %%a ^(%1 %2^)
-        echo.************************************
+        echo.**==**==**==**==**==**==**==**==**==**
         
         rem Only add our parameters for batch scripts.
         call !hdf5_test_%%a_test:.bat= %1 %2!
         rem Exit early if test fails.
-        if !errorlevel! neq 0 exit /b
+        if errorlevel 1 (
+            set /a nerrors=!nerrors!+1
+			echo.  Testing %%a ^(%1 %2^)  FAILED
+			echo.**==**==**==**==**==**==**==**==**==**
+			exit /b 1
+		)
     )
     
     rem If we get here, that means all of our tests passed.
@@ -118,6 +123,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     rem We use "nodll" here because we cannot simply leave it blank.  Filter
     rem it out below. --SJW 9/10/07
     for %%b in (nodll dll) do (
+		echo.======================================
         for %%a in (debug release) do (
             set hdf5_config=%%a %%b
             call :run_tests !hdf5_config:nodll=!
@@ -125,11 +131,14 @@ rem on it for sending parameters.  --SJW 9/6/07
                 set /a nerrors=!nerrors!+1
             )
         )
+		echo.======================================
     )
     
-    if %nerrors% equ 0 (
+    if "%nerrors%"=="0" (
         echo.HDF5 Tests passed for all configurations!
-    )
+    ) else (
+        echo.** FAILED HDF5 Tests!
+	)
     
     popd
     endlocal & exit /b %nerrors%
