@@ -146,11 +146,11 @@ rem
     )
         
     fc /w %expect1_parsed% %actual% > nul
-    if %errorlevel% equ 0 (
+    if errorlevel 0 (
             call :testing PASSED %test_err%
     ) else (
         fc /w %expect2_parsed% %actual% > nul
-        if !errorlevel! equ 0 (
+        if errorlevel 0 (
             call :testing PASSED %test_err%
         ) else (
             call :testing *FAILED* %test_err%
@@ -193,9 +193,11 @@ rem ############################################################################
     rem test for error_test
     call :test error_test %1 %2
 
-    if %nerrors% equ 0 (
+    if "%nerrors%"=="0" (
         echo.All Error API tests passed.
-    )
+    ) else (
+        echo.** FAILED Error API tests
+	)
     
     popd
     endlocal & exit /b %nerrors%
