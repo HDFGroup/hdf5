@@ -124,6 +124,8 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test fheap%2 .\fheap%2\%1
     call :add_test earray%2 .\earray%2\%1
     call :add_test farray%2 .\farray%2\%1
+
+    call :add_test tcheckversion%2 .\tcheckversion%2\%1
     
     
     rem Run the tests, passing in which version to run

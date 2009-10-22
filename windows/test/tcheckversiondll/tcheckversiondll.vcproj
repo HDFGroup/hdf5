@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="testhdf5_cppdll"
-	ProjectGUID="{DBA493BD-3AF1-4616-8A80-F6FD41B70392}"
-	RootNamespace="testhdf5_cppdll"
+	Name="tcheckversiondll"
+	ProjectGUID="{7B3EB7A5-DA01-4488-A06B-63E2941EE078}"
+	RootNamespace="tcheckversiondll"
 	>
 	<Platforms>
 		<Platform
@@ -19,10 +19,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\c++\test\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -41,21 +41,20 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.tlb"
+				TypeLibraryName=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\c++\src"
-				PreprocessorDefinitions="HDF5CPP_USEDLL;WIN32;_DEBUG;_CONSOLE"
-				BasicRuntimeChecks="3"
+				AdditionalIncludeDirectories="..\..\..\test,..\..\..\src"
+				PreprocessorDefinitions="_DEBUG;WIN32;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.pch"
-				AssemblerListingLocation=".\../../../../c++/test/testhdf5_cppdll/Debug/"
-				ObjectFile=".\../../../../c++/test/testhdf5_cppdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../c++/test/testhdf5_cppdll/Debug/"
+				PrecompiledHeaderFile=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.pch"
+				AssemblerListingLocation=".\../../../test/tcheckversiondll/Debug/"
+				ObjectFile=".\../../../test/tcheckversiondll/Debug/"
+				ProgramDataBaseFileName=".\../../../test/tcheckversiondll/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -74,13 +73,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5ddll.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.pdb"
+				ProgramDatabaseFile=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -111,10 +109,10 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\c++\test\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -134,21 +132,20 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.tlb"
+				TypeLibraryName=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\c++\src"
-				PreprocessorDefinitions="HDF5CPP_USEDLL;WIN32;_DEBUG;_CONSOLE"
-				BasicRuntimeChecks="3"
+				AdditionalIncludeDirectories="..\..\..\test,..\..\..\src"
+				PreprocessorDefinitions="_DEBUG;WIN32;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.pch"
-				AssemblerListingLocation=".\../../../../c++/test/testhdf5_cppdll/Debug/"
-				ObjectFile=".\../../../../c++/test/testhdf5_cppdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../c++/test/testhdf5_cppdll/Debug/"
+				PrecompiledHeaderFile=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.pch"
+				AssemblerListingLocation=".\../../../test/tcheckversiondll/Debug/"
+				ObjectFile=".\../../../test/tcheckversiondll/Debug/"
+				ProgramDataBaseFileName=".\../../../test/tcheckversiondll/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -167,13 +164,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5ddll.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cppdll/Debug/testhdf5_cppdll.pdb"
+				ProgramDatabaseFile=".\../../../test/tcheckversiondll/Debug/tcheckversiondll.pdb"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -204,10 +200,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\c++\test\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -226,23 +222,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.tlb"
+				TypeLibraryName=".\../../../test/tcheckversiondll/Release/tcheckversiondll.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\c++\src"
-				PreprocessorDefinitions="HDF5CPP_USEDLL;WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\..\..\test,..\..\..\src"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.pch"
-				AssemblerListingLocation=".\../../../../c++/test/testhdf5_cppdll/Release/"
-				ObjectFile=".\../../../../c++/test/testhdf5_cppdll/Release/"
-				ProgramDataBaseFileName=".\../../../../c++/test/testhdf5_cppdll/Release/"
+				PrecompiledHeaderFile=".\../../../test/tcheckversiondll/Release/tcheckversiondll.pch"
+				AssemblerListingLocation=".\../../../test/tcheckversiondll/Release/"
+				ObjectFile=".\../../../test/tcheckversiondll/Release/"
+				ProgramDataBaseFileName=".\../../../test/tcheckversiondll/Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -260,12 +256,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5dll.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Release"
-				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.pdb"
+				ProgramDatabaseFile=".\../../../test/tcheckversiondll/Release/tcheckversiondll.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -296,10 +291,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\c++\test\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -319,23 +314,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.tlb"
+				TypeLibraryName=".\../../../test/tcheckversiondll/Release/tcheckversiondll.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\c++\src"
-				PreprocessorDefinitions="HDF5CPP_USEDLL;WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\..\..\test,..\..\..\src"
+				PreprocessorDefinitions="NDEBUG;WIN32;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.pch"
-				AssemblerListingLocation=".\../../../../c++/test/testhdf5_cppdll/Release/"
-				ObjectFile=".\../../../../c++/test/testhdf5_cppdll/Release/"
-				ProgramDataBaseFileName=".\../../../../c++/test/testhdf5_cppdll/Release/"
+				PrecompiledHeaderFile=".\../../../test/tcheckversiondll/Release/tcheckversiondll.pch"
+				AssemblerListingLocation=".\../../../test/tcheckversiondll/Release/"
+				ObjectFile=".\../../../test/tcheckversiondll/Release/"
+				ProgramDataBaseFileName=".\../../../test/tcheckversiondll/Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -353,12 +348,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5dll.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Release"
-				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cppdll/Release/testhdf5_cppdll.pdb"
+				ProgramDatabaseFile=".\../../../test/tcheckversiondll/Release/tcheckversiondll.pdb"
 				SubSystem="1"
 				TargetMachine="17"
 			/>
@@ -391,73 +385,10 @@
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+		<File
+			RelativePath="..\..\..\test\tcheck_version.c"
 			>
-			<File
-				RelativePath="..\..\..\..\c++\test\h5cpputil.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tattr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tcompound.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\test\testframe.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\testhdf5.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tfile.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tfilter.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\th5s.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tlinks.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\trefer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\ttypes.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\c++\test\tvlstr.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl"
-			>
-			<File
-				RelativePath="..\h5cpputil.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
-		</Filter>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
