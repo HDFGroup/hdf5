@@ -89,7 +89,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      fi; \
 	      echo "============================" >> $${log}; \
 	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+	         $(TIME) $(RUNTEST) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
 	         && touch $(@:.chkexe_=.chkexe) || \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
 	         (cat $${log} && false) || exit 1; \
@@ -160,7 +160,7 @@ _check-p: $(LIB) $(PROGS) $(TESTS)
 	@for test in $(TEST_PROGS_PARA) dummy; do                             \
 	   if test $$test != dummy; then                                      \
 	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
-	      RUNTESTS="$(RUNPARALLEL)" || exit 1; \
+	      RUNTEST="$(RUNPARALLEL)" || exit 1; \
 	   fi;                                                                \
 	done
 	@for test in $(TEST_SCRIPTS_PARA) dummy; do                           \
