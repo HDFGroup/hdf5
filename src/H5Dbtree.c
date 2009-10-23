@@ -1456,6 +1456,7 @@ herr_t
 H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 		 int fwidth, unsigned ndims)
 {
+    H5D_chunk_common_ud_t udata;        /* User data for B-tree callback */
     H5O_storage_chunk_t storage;        /* Storage information for B-tree callback */
     hbool_t     shared_init = FALSE;    /* Whether B-tree shared info is initialized */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1471,8 +1472,13 @@ H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
     shared_init = TRUE;
 
+    /* Set up user data for callback */
+    udata.layout = NULL;
+    udata.storage = &storage;
+    udata.offset = NULL;
+
     /* Dump the records for the B-tree */
-    (void)H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_BTREE, &ndims);
+    (void)H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_BTREE, &udata);
 
 done:
     if(shared_init) {
