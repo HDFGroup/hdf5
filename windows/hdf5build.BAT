@@ -330,7 +330,7 @@ rem This is where the magic happens
 
     call :parse_params %*
     if not errorlevel 0 (
-        if errorlevel equ 1 (
+        if errorlevel 1 (
             rem This isn't an error case-- this means /? was specified.  Simply
             rem quit.
             goto end
@@ -367,7 +367,7 @@ rem This is where the magic happens
 
 
     call :all
-    if not errorlevel (
+    if not errorlevel 0 (
         echo.Error building HDF5 libraries!
         goto error
     )
