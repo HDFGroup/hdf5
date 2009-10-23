@@ -248,7 +248,7 @@ rem This is where the magic happens
     echo.
 
     call :build
-    if not errorlevel (
+    if not errorlevel 0 (
         echo.Error building HDF5 libraries!
         goto error
     )
