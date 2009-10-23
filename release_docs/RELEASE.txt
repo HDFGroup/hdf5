@@ -122,7 +122,8 @@ Bug Fixes since HDF5-1.6.9 Release
 
     C++ API
     -------
-    - None
+    - The parameter 'size' in CommonFG::getLinkval now has default value
+      for user's convenience.  (BMR - 2009/10/23)
 
 
 Documentation
