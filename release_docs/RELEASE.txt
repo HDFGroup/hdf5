@@ -114,7 +114,9 @@ Bug Fixes since HDF5-1.8.4
 
     C++ API
     ------
-    - None
+    - The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
+      CommonFG::getComment, respectively, now have default values for
+      user's convenience.  (BMR - 2009/10/23)
 
     High-Level APIs:
     ------
