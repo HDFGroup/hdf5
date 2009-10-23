@@ -367,7 +367,7 @@ rem This is where the magic happens
 
 
     call :all
-    if not errorlevel (
+    if not errorlevel 0 (
         echo.Error building HDF5 libraries!
         goto error
     )
