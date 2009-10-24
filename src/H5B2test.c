@@ -66,6 +66,7 @@ static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
 /*********************/
 const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
+    "H5B2_TEST_ID",             /* Name of B-tree class */
     sizeof(hsize_t),            /* Size of native record */
     H5B2_test_store,            /* Record storage callback */
     H5B2_test_compare,          /* Record comparison callback */
@@ -316,7 +317,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2_locate_record(hdr->type, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
         if(cmp > 0)
             idx++;
 
@@ -356,7 +357,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */
-        cmp = H5B2_locate_record(hdr->type, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
 
         /* Unlock current node */
         if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)

@@ -100,8 +100,7 @@ H5FL_DEFINE(H5B2_hdr_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, size_t node_size,
-    size_t rrec_size, unsigned split_percent, unsigned merge_percent,
+H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     haddr_t *addr_p)
 {
     H5B2_hdr_t *hdr = NULL;             /* The new B-tree header information */
@@ -113,12 +112,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, size_t node_size,
      * Check arguments.
      */
     HDassert(f);
-    HDassert(type);
-    HDassert(node_size > 0);
-    HDassert(rrec_size > 0);
-    HDassert(merge_percent > 0 && merge_percent <= 100);
-    HDassert(split_percent > 0 && split_percent <= 100);
-    HDassert(merge_percent < (split_percent / 2));
+    HDassert(cparam);
     HDassert(addr_p);
 
     /*
@@ -131,7 +125,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, size_t node_size,
     hdr->root.addr = HADDR_UNDEF;
 
     /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(f, hdr, type, 0, node_size, rrec_size, split_percent, merge_percent) < 0)
+    if(H5B2_hdr_init(f, hdr, cparam, 0) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
@@ -388,7 +382,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2_locate_record(hdr->type, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
         if(cmp > 0)
             idx++;
 
@@ -433,7 +427,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */
-        cmp = H5B2_locate_record(hdr->type, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
 
         if(cmp != 0) {
             /* Unlock leaf node */
@@ -1030,7 +1024,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2_locate_record(hdr->type, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
         if(cmp > 0)
             idx++;
 
@@ -1084,7 +1078,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */
-        cmp = H5B2_locate_record(hdr->type, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
 
         if(cmp != 0) {
             /* Unlock leaf node */

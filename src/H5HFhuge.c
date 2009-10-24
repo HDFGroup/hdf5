@@ -105,8 +105,7 @@ static herr_t H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id,
 static herr_t
 H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
-    const H5B2_class_t *bt2_class;      /* v2 B-tree class to use */
-    size_t rrec_size;                   /* Size of 'raw' records on disk */
+    H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_bt2_create)
@@ -125,38 +124,40 @@ H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
      */
     if(hdr->huge_ids_direct) {
         if(hdr->filter_len > 0) {
-            rrec_size = hdr->sizeof_addr    /* Address of object */
+            bt2_cparam.rrec_size = hdr->sizeof_addr    /* Address of object */
                 + hdr->sizeof_size          /* Length of object */
                 + 4                         /* Filter mask for filtered object */
                 + hdr->sizeof_size;         /* Size of de-filtered object in memory */
-            bt2_class = H5HF_BT2_FILT_DIR;
+            bt2_cparam.cls = H5HF_BT2_FILT_DIR;
         } /* end if */
         else {
-            rrec_size = hdr->sizeof_addr    /* Address of object */
+            bt2_cparam.rrec_size = hdr->sizeof_addr    /* Address of object */
                 + hdr->sizeof_size;         /* Length of object */
-            bt2_class = H5HF_BT2_DIR;
+            bt2_cparam.cls = H5HF_BT2_DIR;
         } /* end else */
     } /* end if */
     else {
-        if (hdr->filter_len > 0) {
-            rrec_size = hdr->sizeof_addr    /* Address of filtered object */
+        if(hdr->filter_len > 0) {
+            bt2_cparam.rrec_size = hdr->sizeof_addr    /* Address of filtered object */
                 + hdr->sizeof_size          /* Length of filtered object */
                 + 4                         /* Filter mask for filtered object */
                 + hdr->sizeof_size          /* Size of de-filtered object in memory */
                 + hdr->sizeof_size;         /* Unique ID for object */
-            bt2_class = H5HF_BT2_FILT_INDIR;
+            bt2_cparam.cls = H5HF_BT2_FILT_INDIR;
         } /* end if */
         else {
-            rrec_size = hdr->sizeof_addr    /* Address of object */
+            bt2_cparam.rrec_size = hdr->sizeof_addr    /* Address of object */
                 + hdr->sizeof_size          /* Length of object */
                 + hdr->sizeof_size;         /* Unique ID for object */
-            bt2_class = H5HF_BT2_INDIR;
+            bt2_cparam.cls = H5HF_BT2_INDIR;
         } /* end else */
     } /* end else */
+    bt2_cparam.node_size = (size_t)H5HF_HUGE_BT2_NODE_SIZE;
+    bt2_cparam.split_percent = H5HF_HUGE_BT2_SPLIT_PERC;
+    bt2_cparam.merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
 
     /* Create v2 B-tree for tracking 'huge' objects */
-    if(H5B2_create(hdr->f, dxpl_id, bt2_class, (size_t)H5HF_HUGE_BT2_NODE_SIZE, rrec_size,
-            H5HF_HUGE_BT2_SPLIT_PERC, H5HF_HUGE_BT2_MERGE_PERC, &hdr->huge_bt2_addr/*out*/) < 0)
+    if(H5B2_create(hdr->f, dxpl_id, &bt2_cparam, &hdr->huge_bt2_addr/*out*/) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking 'huge' heap objects")
 
 done:

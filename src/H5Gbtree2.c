@@ -104,8 +104,9 @@ static herr_t H5G_dense_fh_name_cmp(const void *obj, size_t obj_len, void *op_da
 /* Package Variables */
 /*********************/
 /* v2 B-tree class for indexing 'name' field of links */
-const H5B2_class_t H5G_BT2_NAME[1]={{     /* B-tree class information */
+const H5B2_class_t H5G_BT2_NAME[1]={{   /* B-tree class information */
     H5B2_GRP_DENSE_NAME_ID,             /* Type of B-tree */
+    "H5B2_GRP_DENSE_NAME_ID",           /* Name of B-tree class */
     sizeof(H5G_dense_bt2_name_rec_t),   /* Size of native record */
     H5G_dense_btree2_name_store,        /* Record storage callback */
     H5G_dense_btree2_name_compare,      /* Record comparison callback */
@@ -117,6 +118,7 @@ const H5B2_class_t H5G_BT2_NAME[1]={{     /* B-tree class information */
 /* v2 B-tree class for indexing 'creation order' field of links */
 const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
     H5B2_GRP_DENSE_CORDER_ID,           /* Type of B-tree */
+    "H5B2_GRP_DENSE_CORDER_ID",         /* Name of B-tree class */
     sizeof(H5G_dense_bt2_corder_rec_t), /* Size of native record */
     H5G_dense_btree2_corder_store,      /* Record storage callback */
     H5G_dense_btree2_corder_compare,    /* Record comparison callback */
