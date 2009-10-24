@@ -122,19 +122,8 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Tree type ID:",
-	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
-              "Unknown!")))))))))));
+    HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
+	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      hdr->node_size);
@@ -244,19 +233,8 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Tree type ID:",
-	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
-              "Unknown!")))))))))));
+    HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
+	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      hdr->node_size);
@@ -368,19 +346,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Tree type ID:",
-	      (hdr->type->id == H5B2_TEST_ID ? "H5B2_TEST_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_INDIR_ID ? "H5B2_FHEAP_HUGE_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_INDIR_ID ? "H5B2_FHEAP_HUGE_FILT_INDIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_DIR_ID ? "H5B2_FHEAP_HUGE_DIR_ID" :
-                  (hdr->type->id == H5B2_FHEAP_HUGE_FILT_DIR_ID ? "H5B2_FHEAP_HUGE_FILT_DIR_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_NAME_ID ? "H5B2_GRP_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_GRP_DENSE_CORDER_ID ? "H5B2_GRP_DENSE_CORDER_ID" :
-                  (hdr->type->id == H5B2_SOHM_INDEX_ID ? "H5B2_SOHM_INDEX_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_NAME_ID ? "H5B2_ATTR_DENSE_NAME_ID" :
-                  (hdr->type->id == H5B2_ATTR_DENSE_CORDER_ID ? "H5B2_ATTR_DENSE_CORDER_ID" :
-              "Unknown!")))))))))));
+    HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
+	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      hdr->node_size);

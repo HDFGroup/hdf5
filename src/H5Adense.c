@@ -186,8 +186,8 @@ herr_t
 H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
 {
     H5HF_create_t fheap_cparam;         /* Fractal heap creation parameters */
+    H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
     H5HF_t *fheap;                      /* Fractal heap handle */
-    size_t bt2_rrec_size;               /* v2 B-tree raw record size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_create, FAIL)
@@ -239,14 +239,15 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
 
     /* Create the name index v2 B-tree */
-    bt2_rrec_size = 4 +                 /* Name's hash value */
+    bt2_cparam.cls = H5A_BT2_NAME;
+    bt2_cparam.node_size = (size_t)H5A_NAME_BT2_NODE_SIZE;
+    bt2_cparam.rrec_size = 4 +          /* Name's hash value */
             4 +                         /* Creation order index */
             1 +                         /* Message flags */
             H5O_FHEAP_ID_LEN;           /* Fractal heap ID */
-    if(H5B2_create(f, dxpl_id, H5A_BT2_NAME,
-            (size_t)H5A_NAME_BT2_NODE_SIZE, bt2_rrec_size,
-            H5A_NAME_BT2_SPLIT_PERC, H5A_NAME_BT2_MERGE_PERC,
-            &ainfo->name_bt2_addr) < 0)
+    bt2_cparam.split_percent = H5A_NAME_BT2_SPLIT_PERC;
+    bt2_cparam.merge_percent = H5A_NAME_BT2_MERGE_PERC;
+    if(H5B2_create(f, dxpl_id, &bt2_cparam, &ainfo->name_bt2_addr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 #ifdef QAK
 HDfprintf(stderr, "%s: ainfo->name_bt2_addr = %a\n", FUNC, ainfo->name_bt2_addr);
@@ -255,13 +256,14 @@ HDfprintf(stderr, "%s: ainfo->name_bt2_addr = %a\n", FUNC, ainfo->name_bt2_addr)
     /* Check if we should create a creation order index v2 B-tree */
     if(ainfo->index_corder) {
         /* Create the creation order index v2 B-tree */
-        bt2_rrec_size = 4 +             /* Creation order index */
+        bt2_cparam.cls = H5A_BT2_CORDER;
+        bt2_cparam.node_size = (size_t)H5A_CORDER_BT2_NODE_SIZE;
+        bt2_cparam.rrec_size = 4 +      /* Creation order index */
                 1 +                     /* Message flags */
                 H5O_FHEAP_ID_LEN;       /* Fractal heap ID */
-        if(H5B2_create(f, dxpl_id, H5A_BT2_CORDER,
-                (size_t)H5A_CORDER_BT2_NODE_SIZE, bt2_rrec_size,
-                H5A_CORDER_BT2_SPLIT_PERC, H5A_CORDER_BT2_MERGE_PERC,
-                &ainfo->corder_bt2_addr) < 0)
+        bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
+        bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
+        if(H5B2_create(f, dxpl_id, &bt2_cparam, &ainfo->corder_bt2_addr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 #ifdef QAK
 HDfprintf(stderr, "%s: ainfo->corder_bt2_addr = %a\n", FUNC, ainfo->corder_bt2_addr);

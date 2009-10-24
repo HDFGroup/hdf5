@@ -147,12 +147,11 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5B2_hdr_t *
-H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void UNUSED *udata)
+H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, void UNUSED *udata)
 {
-    const H5B2_class_t	*type = (const H5B2_class_t *) _type;   /* Type of B-tree */
-    unsigned depth;                     /* Depth of B-tree */
-    size_t node_size, rrec_size;        /* Size info for B-tree */
-    uint8_t split_percent, merge_percent;      /* Split & merge %s for B-tree */
+    const H5B2_class_t	*cls = (const H5B2_class_t *) _cls;   /* Class of B-tree client */
+    H5B2_create_t       cparam;         /* B-tree creation parameters */
+    unsigned            depth;          /* Depth of B-tree */
     H5B2_hdr_t		*hdr = NULL;    /* B-tree header */
     size_t		size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -168,7 +167,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(type);
+    HDassert(cls);
 
     /* Allocate new B-tree header and reset cache info */
     if(NULL == (hdr = H5FL_MALLOC(H5B2_hdr_t)))
@@ -202,22 +201,22 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     if(*p++ != H5B2_HDR_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header version")
 
-    /* B-tree type */
-    if(*p++ != (uint8_t)type->id)
+    /* B-tree class */
+    if(*p++ != (uint8_t)cls->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Node size (in bytes) */
-    UINT32DECODE(p, node_size);
+    UINT32DECODE(p, cparam.node_size);
 
     /* Raw key size (in bytes) */
-    UINT16DECODE(p, rrec_size);
+    UINT16DECODE(p, cparam.rrec_size);
 
     /* Depth of tree */
     UINT16DECODE(p, depth);
 
     /* Split & merge %s */
-    split_percent = *p++;
-    merge_percent = *p++;
+    cparam.split_percent = *p++;
+    cparam.merge_percent = *p++;
 
     /* Root node pointer */
     H5F_addr_decode(f, (const uint8_t **)&p, &(hdr->root.addr));
@@ -238,7 +237,8 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
 	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
 
     /* Initialize B-tree header info */
-    if(H5B2_hdr_init(f, hdr, type, depth, node_size, rrec_size, split_percent, merge_percent) < 0)
+    cparam.cls = cls;
+    if(H5B2_hdr_init(f, hdr, &cparam, depth) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
     /* Set the B-tree header's address */
@@ -317,7 +317,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = H5B2_HDR_VERSION;
 
         /* B-tree type */
-        *p++ = hdr->type->id;
+        *p++ = hdr->cls->id;
 
         /* Node size (in bytes) */
         UINT32ENCODE(p, hdr->node_size);
@@ -548,7 +548,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
 
     /* B-tree type */
-    if(*p++ != (uint8_t)udata->hdr->type->id)
+    if(*p++ != (uint8_t)udata->hdr->cls->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
@@ -567,12 +567,12 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     native = internal->int_native;
     for(u = 0; u < internal->nrec; u++) {
         /* Decode record */
-        if((udata->hdr->type->decode)(f, p, native) < 0)
+        if((udata->hdr->cls->decode)(f, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
         p += udata->hdr->rrec_size;
-        native += udata->hdr->type->nrec_size;
+        native += udata->hdr->cls->nrec_size;
     } /* end for */
 
     /* Deserialize node pointers for internal node */
@@ -659,19 +659,19 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         *p++ = H5B2_INT_VERSION;
 
         /* B-tree type */
-        *p++ = internal->hdr->type->id;
+        *p++ = internal->hdr->cls->id;
         HDassert((size_t)(p - internal->hdr->page) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
         /* Serialize records for internal node */
         native = internal->int_native;
         for(u = 0; u < internal->nrec; u++) {
             /* Encode record */
-            if((internal->hdr->type->encode)(f, p, native) < 0)
+            if((internal->hdr->cls->encode)(f, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
             p += internal->hdr->rrec_size;
-            native += internal->hdr->type->nrec_size;
+            native += internal->hdr->cls->nrec_size;
         } /* end for */
 
         /* Serialize node pointers for internal node */
@@ -904,7 +904,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node version")
 
     /* B-tree type */
-    if(*p++ != (uint8_t)hdr->type->id)
+    if(*p++ != (uint8_t)hdr->cls->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
@@ -918,12 +918,12 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     native = leaf->leaf_native;
     for(u = 0; u < leaf->nrec; u++) {
         /* Decode record */
-        if((hdr->type->decode)(f, p, native) < 0)
+        if((hdr->cls->decode)(f, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, NULL, "unable to decode B-tree record")
 
         /* Move to next record */
         p += hdr->rrec_size;
-        native += hdr->type->nrec_size;
+        native += hdr->cls->nrec_size;
     } /* end for */
 
     /* Compute checksum on internal node */
@@ -994,19 +994,19 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         *p++ = H5B2_LEAF_VERSION;
 
         /* b-tree type */
-        *p++ = leaf->hdr->type->id;
+        *p++ = leaf->hdr->cls->id;
         HDassert((size_t)(p - leaf->hdr->page) == (H5B2_LEAF_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
         /* Serialize records for leaf node */
         native = leaf->leaf_native;
         for(u = 0; u < leaf->nrec; u++) {
             /* Encode record */
-            if((leaf->hdr->type->encode)(f, p, native) < 0)
+            if((leaf->hdr->cls->encode)(f, p, native) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree record")
 
             /* Move to next record */
             p += leaf->hdr->rrec_size;
-            native += leaf->hdr->type->nrec_size;
+            native += leaf->hdr->cls->nrec_size;
         } /* end for */
 
         /* Compute metadata checksum */

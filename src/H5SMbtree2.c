@@ -63,6 +63,7 @@ static herr_t H5SM_btree_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
 /* v2 B-tree class for SOHM indexes*/
 const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
     H5B2_SOHM_INDEX_ID,               /* Type of B-tree */
+    "H5B2_SOHM_INDEX_ID",             /* Name of B-tree class */
     sizeof(H5SM_sohm_t),              /* Size of native record */
     H5SM_btree_store,                 /* Record storage callback */
     H5SM_message_compare,             /* Record comparison callback */

@@ -104,9 +104,8 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_class_t *type,
-    unsigned depth, size_t node_size, size_t rrec_size,
-    unsigned split_percent, unsigned merge_percent)
+H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
+    unsigned depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -114,6 +113,19 @@ H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_class_t *type,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_init)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(hdr);
+    HDassert(cparam);
+    HDassert(cparam->cls);
+    HDassert(cparam->node_size > 0);
+    HDassert(cparam->rrec_size > 0);
+    HDassert(cparam->merge_percent > 0 && cparam->merge_percent <= 100);
+    HDassert(cparam->split_percent > 0 && cparam->split_percent <= 100);
+    HDassert(cparam->merge_percent < (cparam->split_percent / 2));
 
     /* Initialize basic information */
     hdr->f = f;
@@ -124,13 +136,13 @@ H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_class_t *type,
     hdr->depth = depth;
 
     /* Assign user's information */
-    hdr->split_percent = split_percent;
-    hdr->merge_percent = merge_percent;
-    hdr->node_size = node_size;
-    hdr->rrec_size = rrec_size;
+    hdr->split_percent = cparam->split_percent;
+    hdr->merge_percent = cparam->merge_percent;
+    hdr->node_size = cparam->node_size;
+    hdr->rrec_size = cparam->rrec_size;
 
     /* Assign common type information */
-    hdr->type = type;
+    hdr->cls = cparam->cls;
 
     /* Allocate "page" for node I/O */
     if(NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
@@ -150,7 +162,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
     hdr->node_info[0].merge_nrec = (hdr->node_info[0].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[0].cum_max_nrec = hdr->node_info[0].max_nrec;
     hdr->node_info[0].cum_max_nrec_size = 0;
-    if(NULL == (hdr->node_info[0].nat_rec_fac = H5FL_fac_init(type->nrec_size * hdr->node_info[0].max_nrec)))
+    if(NULL == (hdr->node_info[0].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[0].max_nrec)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
     hdr->node_info[0].node_ptr_fac = NULL;
 
@@ -162,7 +174,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
     /* Initialize offsets in native key block */
     /* (uses leaf # of records because its the largest) */
     for(u = 0; u < hdr->node_info[0].max_nrec; u++)
-        hdr->nat_off[u] = type->nrec_size * u;
+        hdr->nat_off[u] = hdr->cls->nrec_size * u;
 
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
@@ -185,7 +197,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
             u_max_nrec_size = H5V_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
             H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
 
-            if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->type->nrec_size * hdr->node_info[u].max_nrec)))
+            if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
             if(NULL == (hdr->node_info[u].node_ptr_fac = H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[u].max_nrec + 1))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal 'branch' node node pointer block factory")

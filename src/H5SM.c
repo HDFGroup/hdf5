@@ -463,11 +463,16 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     } /* end if */
     /* index is a B-tree */
     else {
+        H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
+
         header->index_type = H5SM_BTREE;
 
-        if(H5B2_create(f, dxpl_id, H5SM_INDEX, (size_t)H5SM_B2_NODE_SIZE,
-                  (size_t)H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
-                  H5SM_B2_MERGE_PERCENT, &tree_addr) < 0)
+        bt2_cparam.cls = H5SM_INDEX;
+        bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
+        bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+        bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
+        bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
+        if(H5B2_create(f, dxpl_id, &bt2_cparam, &tree_addr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
         header->index_addr = tree_addr;
@@ -683,6 +688,7 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
 {
     H5SM_list_t *list;                  /* Pointer to the existing message list */
     H5SM_mesg_key_t key;                /* Key for inserting records in v2 B-tree */
+    H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
     haddr_t     tree_addr;              /* New v2 B-tree's address */
     size_t      num_messages;		/* Number of messages being tracked */
     size_t      x;
@@ -698,9 +704,12 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
     list = *_list;
 
     /* Create the new v2 B-tree for tracking the messages */
-    if(H5B2_create(f, dxpl_id, H5SM_INDEX, (size_t)H5SM_B2_NODE_SIZE,
-            (size_t)H5SM_SOHM_ENTRY_SIZE(f), H5SM_B2_SPLIT_PERCENT,
-            H5SM_B2_MERGE_PERCENT, &tree_addr) < 0)
+    bt2_cparam.cls = H5SM_INDEX;
+    bt2_cparam.node_size = (size_t)H5SM_B2_NODE_SIZE;
+    bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
+    bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
+    bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
+    if(H5B2_create(f, dxpl_id, &bt2_cparam, &tree_addr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
     /* Set up key values that all messages will use.  Since these messages

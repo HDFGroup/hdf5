@@ -159,7 +159,7 @@ typedef struct H5B2_hdr_t {
     haddr_t     addr;           /* Address of B-tree header in the file */
     size_t      rc;             /* Reference count of nodes using this header */
     hbool_t     pending_delete; /* B-tree is pending deletion */
-    const H5B2_class_t *type;	/* Type of tree			     */
+    const H5B2_class_t *cls;	/* Class of B-tree client */
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
     H5B2_node_info_t *node_info; /* Table of node info structs for current depth of B-tree */
@@ -242,9 +242,8 @@ H5_DLL herr_t H5B2_hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_dirty(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_delete(H5B2_hdr_t *hdr);
-H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_class_t *type,
-    unsigned depth, size_t node_size, size_t rrec_size,
-    unsigned split_percent, unsigned merge_percent);
+H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr,
+    const H5B2_create_t *cparam, unsigned depth);
 H5_DLL herr_t H5B2_hdr_free(H5B2_hdr_t *hdr);
 
 /* Routines for operating on internal nodes */

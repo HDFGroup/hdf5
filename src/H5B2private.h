@@ -82,6 +82,7 @@ typedef enum H5B2_compare_t {
 typedef struct H5B2_class_t H5B2_class_t;
 struct H5B2_class_t {
     H5B2_subid_t id;		/* ID of B-tree class, as found in file */
+    const char *name;		/* Name of B-tree class, for debugging */
     size_t nrec_size;           /* Size of native (memory) record */
 
     /* Store record from application to B-tree 'native' form */
@@ -100,6 +101,15 @@ struct H5B2_class_t {
         const void *udata);
 };
 
+/* v2 B-tree creation parameters */
+typedef struct H5B2_create_t {
+    const H5B2_class_t *cls;            /* v2 B-tree client class */
+    size_t node_size;                   /* Size of each node (in bytes) */
+    size_t rrec_size;                   /* Size of raw record (in bytes) */
+    unsigned split_percent;             /* % full to split nodes */
+    unsigned merge_percent;             /* % full to merge nodes */
+} H5B2_create_t;
+
 /* v2 B-tree metadata statistics info */
 typedef struct H5B2_stat_t {
     unsigned depth;             /* Depth of B-tree */
@@ -114,9 +124,8 @@ typedef struct H5B2_stat_t {
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    size_t node_size, size_t rrec_size, unsigned split_percent,
-    unsigned merge_percent, haddr_t *addr_p);
+H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
+    haddr_t *addr_p);
 H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
