@@ -361,6 +361,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5B2hdr.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5B2int.c"
 				>
 			</File>
