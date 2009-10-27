@@ -3727,6 +3727,17 @@ test_named (hid_t fapl)
         goto error;
     }
 
+    /* Verify that H5Tcommit_anon returns an error */
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
+    H5E_BEGIN_TRY {
+        status = H5Tcommit_anon(file, type, H5P_DEFAULT, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) {
+        H5_FAILED();
+        HDputs ("    Types should not be committable to a read-only file!");
+        goto error;
+    }
+
     /* Close */
     if(H5Tclose(type) < 0) goto error;
     if(H5Fclose(file) < 0) goto error;
