@@ -35,10 +35,9 @@ Contents:
 Preconditions:
 
    1. Installed Microsoft Visual Studio.  This document is written for Visual
-      Studio 2005, although we also support Visual Studio .NET 2003 and Visual
-      Studio 2008 as well.  Most of the instructions are the same, although some
-      features are unsupported in Visual Studio .NET.  For simple Visual Studio 
-      .NET instructions, see the document INSTALL_Windows_NET.TXT.
+      Studio 2005, although we also support Visual Studio 2008 as well.  Most 
+	  of the instructions are the same. We no longer support building HDF5 
+	  using Microsoft Visual Studio .NET 2003.
    
    2. (Optional) Installed Intel Compiler 9.1 or 10.1 if you want to build HDF5 
       Fortran libraries.
@@ -164,11 +163,8 @@ Notes:
       directory, run copy_hdf.bat first and then open all.sln under 
       hdf5/windows/proj/all to start building process.
 
-   2. Visual Studio 6.0 will not be supported in HDF5 1.8 or later release.
-
-   2. Users who prefer to use Visual Studio .NET can follow instructions in 
-      INSTALL_Windows_Short_Net.txt.  Note, however,  HDF5 Fortran product
-      will not be supported in HDF5 1.8 release with Visual Studio .NET.
+   2. Visual Studio 6.0 is no longer supported in HDF5 1.8 or later releases.
+      Visual Studio .NET is no longer support in HDF5 1.8.4 or later releases.
 
    3. For users who want to quickly build HDF5 library or do not want to know 
       HDF5 building and installation details, please read the 
@@ -1123,7 +1119,6 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are
         2. The Compaq Fortran Compiler is no longer supported for HDF5 1.8.
 
         3. Intel Fortran 9.1 works only under Visual Studio 2005 environments.
-           Building Fortran libraries under Visual Studio .NET is unsupported.
            Visual Studio 2008 is supported only with Intel Fortran 10.1.
         
         4. Parallel builds should be disabled.  To do so: Go to  Tools > 
@@ -1393,51 +1388,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are
 Notes: In Visual Studio 2005, the Single-threaded runtime libraries have been
        depreciated, and Multi-threaded is built by default.  Therefore, no extra
        work needs to be done to build Multi-threaded libraries in Visual Studio
-       2005.  This section applies only to Visual Studio .NET
-
-       Preconditions and Section I also apply to this section. Users who
-       want to build Multi-threaded version of HDF5 library, please read
-       those two sections carefully before go to the following part.
-
-       
-In Visual Studio .NET, users have the option of building multi-threaded
-libraries by manipulating the project settings.  Otherwise, the build process
-is very much the same.  Therefore, follow the instructions below, and refer
-to the earlier sections of this document for details on building and testing.
-
-
-1. Open the solution file
-
-    Refer to previous sections to open the appropriate solution file,
-    depending on whether you are building with or without Fortran libraries.
-        
-2. Change Project Settings
-
-    a) In Visual Studio, go to "Projects->Properties".
-
-    b) Make sure in the "Configuration" box, "Release" is selected.
-    
-    c) Select all of the static project file in the main window by holding 
-       the "Ctrl" key while clicking the project file name.
-       
-    d) In the "Properties" window, choose "C/C++", and then "Code
-       Generation".
-       
-    e) Under "Run-time Library", "Single-Threaded" should appear. If it is 
-      blank inside this box, check if you highlight some DLL project files. 
-      
-    d) Change "Single-Threaded" to "Multithreaded".
-
-    e) In the "Configuration" box, change to "Debug", keeping the static
-       projects selected.
-
-    f) Under "Run-time Library", change "Debug Single-Threaded" to "Debug 
-       Multithreaded".
-
-3. Build as Normal
-
-    Refer to previous sections to build and test the HDF5 libraries
-    and tools.
+       2005.  
     
     
 ========================================================================
@@ -1620,10 +1571,7 @@ to the earlier sections of this document for details on building and testing.
             Section IX: How to build HDF5 for 64-bit Windows
 ========================================================================
 
-HDF5 can be built for 64-bit Windows in Visual Studio 2005 or 2008.  Visual 
-Studio .NET has very primative 64-bit support, but it is very difficult to 
-set up, and debugging is not supported.  Therefore, we recommend all users 
-switch to Visual Studio 2005 or 2008 for 64-bit builds.  
+HDF5 can be built for 64-bit Windows in Visual Studio 2005 or 2008.  
 
 Notes:
   
@@ -1680,14 +1628,9 @@ some minor changes.  Therefore, follow the build instructions above, with the
 following considerations:
 
     1. Only Visual Studio 2005 and 2008 is currently supported on Windows Vista.
-       This is because Microsoft has ended their support for and .NET.
+       This is because Microsoft has ended their support for .NET.
        
-    2. Building Fortran libraries has not been tested, and is therefore also
-       unsupported.  You may attempt to build Fortran libraries following the
-       instructions above, but they should be considered experimental and used
-       for testing only.
-       
-    3. Elevated security permissions are required to test the HDF5 libraries.
+    2. Elevated security permissions are required to test the HDF5 libraries.
        This is because DLLs are installed in the system directory.  To enable
        elevated security:
        
