@@ -8754,8 +8754,8 @@ link_filters(hid_t fapl, hbool_t new_format)
             || filter_config_out != (H5Z_FILTER_CONFIG_ENCODE_ENABLED
             | H5Z_FILTER_CONFIG_DECODE_ENABLED))
         TEST_ERROR
-    if(H5Pget_filter2(gcpl2, 2, &flags_out, &cd_nelmts, &cd_value_out, (size_t)24,
-            name_out, &filter_config_out) < 0)
+    if(H5Pget_filter2(gcpl2, nfilters - 1, &flags_out, &cd_nelmts,
+            &cd_value_out, (size_t)24, name_out, &filter_config_out) < 0)
         TEST_ERROR
     if(flags_out != 0 || cd_value_out != cd_value
             || HDstrcmp(filter_class.name, name_out)

@@ -199,6 +199,10 @@ H5T_commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
     HDassert(tapl_id != H5P_DEFAULT);
     HDassert(dxpl_id != H5P_DEFAULT);
 
+    /* Check if we are allowed to write to this file */
+    if(0 == (H5F_INTENT(loc->oloc->file) & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "no write intent on file")
+
     /* Record the type's state so that we can revert to it if linking fails */
     old_state = dt->shared->state;
 
