@@ -1,9 +1,9 @@
-HDF5 version 1.6.9-snap9 currently under development
+HDF5 version 1.6.10 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.9 and
+This document describes the differences between HDF5-1.6.10 and
 HDF5-1.6.9-*.  
 It contains information on the platforms tested and known problems in
 HDF5-1.6.9-*. For more details, check the HISTORY.txt file in 
@@ -33,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.9
+- Bug Fixes since HDF5-1.6.10
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -231,12 +231,12 @@ Platforms Tested
     (NCSA tg-login)               Intel(R) Fortran Compiler Version 8.1.033
                                   mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
-    Windows XP                    Visual Studio 6.0
-                                  Visual Studio .NET (with Intel Fortran 9.1)
+    Windows XP                    Visual Studio .NET (with Intel Fortran 9.1)
                                   Visual Studio 2005 (with Intel Fortran 9.1)
                                   cygwin (gcc 3.4.4)
 
     Windows Vista                 Visual studio 2005
+	
     Mac OS X Intel 10.5.6         i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   g95 0.91
 
@@ -255,7 +255,6 @@ Solaris2.10 32-bit                    n        y    n        y    y     y
 Solaris2.10 64-bit                    n        y    n        n    y     y
 IRIX64_6.5 32-bit                     n        n    n        n    y     y
 IRIX64_6.5 64-bit                     n        y    n        n    y     y
-WinXP Visual Studio 6.0               n        n    n        y    y     y
 WinXP CYGWIN                          n        n    n        y    y     y
 WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
@@ -280,7 +279,6 @@ Platform                              Shared        static-  Thread-
 Solaris2.10 32- and 64-bit            y             n        y        
 IRIX64_6.5 32-bit                     y             n        y        
 IRIX64_6.5 64-bit                     y             n        y        
-WinXP Visual Studio 6.0               y             n        n        
 WinXP CYGWIN                          y             n        n        
 WinXP 2005                            y             n        n        
 WinXP .Net                            y             n        n        

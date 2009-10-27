@@ -12,7 +12,7 @@ Please read CAREFULLY about the following preconditions and notes first.
 Preconditions
 ~~~~~~~~~~~~~
 
-   1. Installed Microsoft Visual C++ 6.0 and 7zip or WinZip.
+   1. Installed Microsoft Visual C++ .NET and 7zip or WinZip.
        
       1.1 Installed Intel Fortran Compiler (9.1 or higher version), 
           if you want to build HDF5 Fortran libraries.    
@@ -42,17 +42,17 @@ Preconditions
 	        c:\                              (any drive)
 	        MyHDFstuff\                      (any folder name)
 
-   3. Download the hdf5-1.6.9 source code package and use 7zip or WinZip to 
+   3. Download the hdf5-1.6.10 source code package and use 7zip or WinZip to 
       extract the HDF5 package into c:\MyHDFstuff.  This creates a 
-      directory called 'hdf5-1.6.9' under MyHDFstuff which contains 
-      several files and directories.  Rename "hdf5-1.6.9" to "hdf5".  
+      directory called 'hdf5-1.6.10' under MyHDFstuff which contains 
+      several files and directories.  Rename "hdf5-1.6.10" to "hdf5".  
 
    4. HDF5 provides options for in-memory compression within the HDF5
       library.  Currently, two external compression libraries, Zlib and
       Szip, can be used with HDF5.
 
       4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
-          distributed with HDF5 library in 1.6.9 release. To use Zlib
+          distributed with HDF5 library in 1.6.10 release. To use Zlib
           library, you have to install your own Zlib DLL library or go
           to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows 
           to download the Zlib library.
@@ -114,8 +114,8 @@ Preconditions
       You have to read this part even if you want to only use Zlib
       or Szip.  You also need to read section V.
 
-      Invoke Microsoft Visual C++ and go to "Tools" and select
-      "Options", find "Directories";
+      Invoke Microsoft Visual Studio and go to "Tools" and select
+      "Options", select Projects, find "VC++ Directories";
       
       6.1 Find the box "Show directories for", choose 
           "Include files",
@@ -140,7 +140,7 @@ Notes
       want to know HDF5 building and installation details, please 
       read INSATLL_Windows_Short.txt.
 
-   3. For users who would like to build and test the HDF5 package from the 
+   3. For users who would like to test the HDF5 package from the 
       command line, please read INSATLL_Windows_From_Command_Line.txt.
    
    4. HDF4-related tools are not built and released with HDF5.  
@@ -151,10 +151,10 @@ Notes
    5. For DLL users, please do read and follow "DLL hints"
       at Section IV.
 
-   6. For .NET users, please read section VI.
- 
-   7. For fortran users, please read section VII.
+   6. For fortran users, please read section VII.
 
+   7. We no longer support Visual Studio 6.
+   
    8. We no longer support the compaq visual fortran compiler. Compaq visual
       fortran projects are still included for forward compatibility with intel
       fortran 9.1.  
@@ -172,7 +172,7 @@ The following sections discuss installation procedures in detail:
                  or DLL
    Section IV  : Helpful pointers
    Section V   : How to disable Gzip(Zlib)/Szip compression  
-   Section VI  : How to build HDF5 in Visual Studio .NET or 2005
+   Section VI  : How to build HDF5 in Visual Studio 2005
    Section VII : How to Build with Intel Fortran 9.1
    Section VIII: How to build and test HDF5 snapshot release
    Section IX  : How to build HDF5 Multithreaded Static Library
@@ -235,17 +235,17 @@ Section II: How to build and test HDF5 libraries and tools
       2. Invoke Microsoft Visual C++ compiler
     
       Invoke Microsoft Visual C++.  From the main menu, go to "File"
-      and select the "Open Workspace" option. Then open the
-      c:\MyHDFstuff\hdf5\proj\all\all.dsw workspace. 
+      and select the "Open Solution" option. Then open the
+      c:\MyHDFstuff\hdf5\proj\all\all.sln file. 
 
-      You should find windows project files listed as "all files, 
-      big files etc." on the left.        
+      You should find windows project files listed as "all, 
+      big etc." in the solution explorer.        
 
       3. (Optional) HDF5 C++ libraries
     
       3.1 Skip this step if you do not want to build HDF5 C++ libraries
         
-          Go to "Project" and select "dependencies";
+          Go to "Project" and select "project dependencies";
           Select "all" in the "Select project to modify:" box,
           then enable the desired projects:
       
@@ -256,17 +256,17 @@ Section II: How to build and test HDF5 libraries and tools
              testhdf5_cpp
              testhdf5_cppdll
                
-      4. Select "Build", then Select "Set Active Configuration".
+      4. Select "Build", then Select "Configuration Manager".
 
-         In "Project configurations", select the active configuration
+         In "Active Solution Configurations", select the active configuration
 
-            "all -- Win32 Debug" to build debug versions of
+            "Debug" to build debug versions of
                     single-threaded static libraries, Debug 
                     multithreaded DLLs and tests. 
                 
                     or
 
-            "all -- Win32 Release" to build release versions of
+            "Release" to build release versions of
                     single-threaded static libraries, 
                     multithreaded DLLs and tests.
 
@@ -578,22 +578,20 @@ Section II: How to build and test HDF5 libraries and tools
       <<---To build and test HDF5 C examples--->>
 
         1. Invoke Microsoft Visual C++, go to "File" and select
-        the "Open Workspace" option. 
+        the "Open Solution" option. 
       
         Then open the workspace
-        c:\MyHDFstuff\hdf5\examples\allexamples\allexamples.dsw.
+        c:\MyHDFstuff\hdf5\examples\allexamples\allexamples.sln.
 
-        2. Select "Build", then Select "Set Active Configuration".
+        2. Select "Build", then Select "Configuration Manager".
 
-        In "Project configurations", select the active configuration
+        In "Active Solution Configurations", select the active configuration
 
-        "allexamples -- Win32 Debug" to build debug versions of the
-                        C examples.
+        "Debug" to build debug versions of the C examples.
 
         and
 
-        "allexamples -- Win32 Release" to build release versions the 
-                        C examples.
+        "Release" to build release versions the  C examples.
 
         When the debug build or release build is done, there should be the 
         following subdirectories in c:\MyHDFstuff\hdf5\examples\
@@ -648,22 +646,20 @@ Section II: How to build and test HDF5 libraries and tools
       <<---To build and test HDF5 C++ examples--->>
 
         1. Invoke Microsoft Visual C++, go to "File" and select
-        the "Open Workspace" option. 
+        the "Open Solution" option. 
 
         Then open the workspace
-        c:\myHDFstuff\hdf5\c++\examples\allcppexamples\allcppexamples.dsw.
+        c:\myHDFstuff\hdf5\c++\examples\allcppexamples\allcppexamples.sln.
 
-        2. Select "Build", then Select "Set Active Configuration".
+        2. Select "Build", then Select "Configuration Manager".
 
-        In "Project configurations", select the active configuration
+        In "Active Solution Configurations", select the active configuration
 
-        "allcppexamples -- Win32 Debug" to build debug versions of the
-                           C++ examples.
+        "Debug" to build debug versions of the C++ examples.
 
         and
 	
-        "allcppexamples -- Win32 Release" to build release versions the 
-                           C++ examples.
+        "Release" to build release versions the C++ examples.
 
         When the debug build or release build is done, there should be  
         the following subdirectories in 
@@ -723,17 +719,15 @@ Section II: How to build and test HDF5 libraries and tools
         Then open the workspace
         c:\MyHDFstuff\hdf5\hl\examples\allhlcexamples\allhlcexamples.dsw.
 
-        2. Select "Build", then Select "Set Active Configuration".
+        2. Select "Build", then Select "Configuration Manager".
 
-        In "Project configurations", select the active configuration
+        In "Active Solution Configurations", select the active configuration
 
-       "allhlcexamples -- Win32 Debug" to build debug versions of the
-                          HL C examples.
+       "Debug" to build debug versions of the HL C examples.
 
         and
 
-       "allhlcexamples -- Win32 Release" to build release versions the 
-                          HL C examples.
+       "Release" to build release versions the HL C examples.
 
        When the debug build or release build is done, there should be the 
        following subdirectories in c:\MyHDFstuff\hdf5\hl\examples
@@ -923,22 +917,22 @@ Section IV: HELPFUL POINTERS
 
     Project name and location issues: 
        
-    If you must install all.dsw and all.dsp in another directory,
+    If you must install all.sln and all.vcproj in another directory,
     relative to hdf5 directory, you will be asked to locate the 
     sub-project files, when you open the project all.dsw.
 
     If you want to rename all (the entire project), you will need to
-    modify two files all.dsw and all.dsp as text (contrary to the
+    modify two files all.sln and all.vcproj as text (contrary to the
     explicit warnings in the files).
 
-    You can also modify all.dsw and all.dsp as text, to allow these 2
+    You can also modify all.sln and all.vcproj as text, to allow these 2
     files to be installed in another directory.
 
   
     Settings... details:
 
     If you create your own project, the necessary settings can be read
-    from the all.dsp file(as text), or from the Project Settings in the
+    from the all.vcproj file(as text), or from the Project Settings in the
     Developer Studio project settings dialog.
 
     Project
@@ -1067,38 +1061,13 @@ Section V: How to disable Gzip(Zlib)/Szip compression
       3.3 Run-compile HDF5 library according to section II.
 
 
-Section VI: How to build HDF5 in Visual Studio .NET or 2005
+Section VI: How to build HDF5 in Visual Studio 2005
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     We just briefly introduce you how to build HDF5 in Visual Studio 
-    .NET 2003 or 2005.
+    2005.
 
-    1. Build HDF5 in Visual Studio .NET or 2005
-
-    1.1 You need to specify the zlib and szip include header files 
-    and libraries under Tools->Options->Projects->VC++ Directories 
-    and choose Include libraries under the category of 
-    "show directories for" to add the corresponding path if you want 
-    to use compression feature inside HDF5.
-    
-    1.2 Open the old workspace file with the "Open solution" option,
-    Visual Studio will ask you whether you want to convert all VS 
-    6.0 project files to .NET corresponding project files, choose 
-    <CONVERT ALL>, .NET will automatically convert the data space 
-    file to solution file.
-    
-    1.3 Then find  "Build" and go to "Configuration Manager"; choose
-    "release" or "debug", if you don't want to build C++ or Fortran 
-    libraries, you need to explicitly turn off project files in the 
-    "Configuration Manager" and then choose "build all".
-   
-    1.4 If you want to change some project setting, select the project 
-        and right click the button to choose Properties; find the 
-        similar menu there as in 6.0.
-
-    NOTE: 
-    Please read section V if you do not want to use compression
-    feature inside HDF5.
+    1. Build HDF5 in Visual Studio 2005 is similiar to building in .NET
 
     
 Section VII: Building with Intel Fortran 9.1
@@ -1150,17 +1119,7 @@ Section VII: Building with Intel Fortran 9.1
             Fortran 9.1 Compiler.
 
             
-      1.1 Open all.dsw and Convert Project Files (.dsp) to Visual
-            C++ .Net Format (.vcproj)
-
-      Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
-      "File" and select "Open Solution". In the "Open Solution" window,
-      Change "Files of type" to "All Project Files". Choose "all.dsw"
-      under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the
-      pop up window, choose "Yes To All" to convert all project files
-      to Visual C++ .Net project format.
-
-      1.2 Extract Compaq Fortran Project Files
+      1.1 Extract Compaq Fortran Project Files
 
        a. Select project "flush1_fortran" in the Solution Explorer
        window. In the Project menu, select
@@ -1192,7 +1151,7 @@ Section VII: Building with Intel Fortran 9.1
 
        Note: In Visual Studio 2005, you may receive a message that 
        says "The attempt to convert the Fortran project file failed.
-       The project file (.dsp) has not been converted."  This message
+       The project file (.vcproj) has not been converted."  This message
        can safely be ignored.
 
 
@@ -1435,11 +1394,11 @@ Section IX: How to build Multi-threaded version of HDF5 library
     2. Invoke Microsoft Visual C++ compiler
         
        Invoke Microsoft Visual C++.  From the main menu, go to "File"
-       and select the "Open Workspace" option. Then open the
-       c:\MyHDFstuff\hdf5\proj\all\all.dsw workspace. 
+       and select the "Open Solution" option. Then open the
+       c:\MyHDFstuff\hdf5\proj\all\all.sln file. 
 
-       You should find windows project files listed as "all files, 
-       big files etc." on the left.        
+       You should find windows project files listed as "all, 
+       big etc." in the Solution Explorer.        
 
     3. Please refer to Section II, Step 1(3) to set the dependencies of 
        project "all.dsp".

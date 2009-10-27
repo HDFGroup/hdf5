@@ -4,14 +4,14 @@ Note: This short instruction is written for users who want to quickly
       build HDF5 library and tools from the HDF5 source code package
       but do not want to know HDF5 building and installation details
       on Windows XP.  This is written for the Microsoft Visual
-      Studio 6.0 compiler.
+      Studio .NET compiler.
          
       For detailed HDF5 build and install information, or if you have
       trouble following any steps in the instructions, please refer to
       INSTALL_Windows.txt for further information.
       
-      For users who would like to build and test HDF5 package from the
-      command line, please refer to
+      We no longer support building the HDF5 package from the
+      command line, for test and install using the command line please refer to
       INSATLL_Windows_From_Command_Line.txt.
         
 ***************************WARNINGS*************************************
