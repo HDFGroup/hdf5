@@ -138,6 +138,10 @@ H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     if(NULL == (file = H5G_insertion_file(loc, name, dxpl_id)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to find insertion point")
 
+    /* Check if we are allowed to write to this file */
+    if(0 == (H5F_get_intent(file) & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "no write intent on file")
+
     /* Check for a "sensible" datatype to store on disk */
     if(H5T_is_sensible(type) <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible")

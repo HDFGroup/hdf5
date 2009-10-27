@@ -3571,10 +3571,30 @@ test_named (hid_t fapl)
     if (H5Tclose (t3)<0) goto error;
     if (H5Dclose (dset)<0) goto error;
 
-    /* Clean up */
+    /* Close */
     if (H5Tclose (type)<0) goto error;
     if (H5Sclose (space)<0) goto error;
     if (H5Fclose (file)<0) goto error;
+
+    /* Reopen file with read only access */
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
+
+    /* Verify that H5Tcommit returns an error */
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
+    H5E_BEGIN_TRY {
+        status = H5Tcommit(file, "test_named_3 (should not exist)", type);
+    } H5E_END_TRY;
+    if(status >= 0) {
+        H5_FAILED();
+        HDputs ("    Types should not be committable to a read-only file!");
+        goto error;
+    }
+
+    /* Close */
+    if(H5Tclose(type) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
+
     PASSED();
     return 0;
 
