@@ -139,7 +139,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
       Warning messages can be ignored.
              
 ========================================================================
-               Testing HDF5 C/C++ Libraries with VS .NET
+               Testing HDF5 C/C++ Libraries
 ========================================================================
 
 HDF5 libraries and tools should be tested to make sure that they were

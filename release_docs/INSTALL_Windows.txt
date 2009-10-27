@@ -35,10 +35,9 @@ Contents:
 Preconditions:
 
    1. Installed Microsoft Visual Studio.  This document is written for Visual
-      Studio 2005, although we also support Visual Studio .NET 2003 and Visual
-      Studio 2008 as well.  Most of the instructions are the same, although some
-      features are unsupported in Visual Studio .NET.  For simple Visual Studio 
-      .NET instructions, see the document INSTALL_Windows_NET.TXT.
+      Studio 2005, although we also support Visual Studio 2008 as well.  Most 
+	  of the instructions are the same. We no longer support building HDF5 
+	  using Microsoft Visual Studio .NET 2003.
    
    2. (Optional) Installed Intel Compiler 9.1 or 10.1 if you want to build HDF5 
       Fortran libraries.
@@ -68,24 +67,24 @@ Preconditions:
             c:\                              (any drive)
             MyHDFstuff\                      (any folder name)
 
-   5. Download the hdf5-1.8.3 source code package and use 7zip or WinZip to
+   5. Download the hdf5-1.8.4 source code package and use 7zip or WinZip to
       extract the HDF5 package into c:\MyHDFstuff.  This creates a directory 
-      called 'hdf5-1.8.3' under MyHDFstuff which contains several files and 
-      directories.  Rename "hdf5-1.8.3" to "hdf5".
+      called 'hdf5-1.8.4' under MyHDFstuff which contains several files and 
+      directories.  Rename "hdf5-1.8.4" to "hdf5".
 
    6. HDF5 provide options to do in-memory compression  within HDF5 library.  
       Currently, two external compression libraries Zlib and Szip can be used 
       with HDF5.
 
       6.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
-          distributed with HDF5 library in 1.8.3 release. To use Zlib library, 
+          distributed with HDF5 library in 1.8.4 release. To use Zlib library, 
           you have to install your own Zlib DLL library or go to 
           ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows
           to download the Zlib library.
 
 
       6.2 HDF5 uses Szip version 2.1 for compression and Szip compression 
-          software is provided with HDF5 products in 1.8.3 release.  To use 
+          software is provided with HDF5 products in 1.8.4 release.  To use 
           Szip 2.1 library, you can download Szip source codes and binaries from
           ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
@@ -164,11 +163,8 @@ Notes:
       directory, run copy_hdf.bat first and then open all.sln under 
       hdf5/windows/proj/all to start building process.
 
-   2. Visual Studio 6.0 will not be supported in HDF5 1.8 or later release.
-
-   2. Users who prefer to use Visual Studio .NET can follow instructions in 
-      INSTALL_Windows_Short_Net.txt.  Note, however,  HDF5 Fortran product
-      will not be supported in HDF5 1.8 release with Visual Studio .NET.
+   2. Visual Studio 6.0 is no longer supported in HDF5 1.8 or later releases.
+      Visual Studio .NET is no longer support in HDF5 1.8.4 or later releases.
 
    3. For users who want to quickly build HDF5 library or do not want to know 
       HDF5 building and installation details, please read the 
@@ -940,7 +936,7 @@ project, you may choose one of the following two methods.
     3. Choose the build configuration you would like to modify in the drop 
        down menu labeled "Configuration:"
 
-    4. Choose the "Linker" tab, anc select "General".
+    4. Choose the "Linker" tab, and select "General".
 
     5. In a text-area labeled with "Additional Library Directories:", add 
        HDF5, Zlib, and Szip library files directories.  For example:
@@ -1123,7 +1119,6 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are
         2. The Compaq Fortran Compiler is no longer supported for HDF5 1.8.
 
         3. Intel Fortran 9.1 works only under Visual Studio 2005 environments.
-           Building Fortran libraries under Visual Studio .NET is unsupported.
            Visual Studio 2008 is supported only with Intel Fortran 10.1.
         
         4. Parallel builds should be disabled.  To do so: Go to  Tools > 
@@ -1393,52 +1388,8 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are
 Notes: In Visual Studio 2005, the Single-threaded runtime libraries have been
        depreciated, and Multi-threaded is built by default.  Therefore, no extra
        work needs to be done to build Multi-threaded libraries in Visual Studio
-       2005.  This section applies only to Visual Studio .NET
-
-       Preconditions and Section I also apply to this section. Users who
-       want to build Multi-threaded version of HDF5 library, please read
-       those two sections carefully before go to the following part.
-
-       
-In Visual Studio .NET, users have the option of building multi-threaded
-libraries by manipulating the project settings.  Otherwise, the build process
-is very much the same.  Therefore, follow the instructions below, and refer
-to the earlier sections of this document for details on building and testing.
-
-
-1. Open the solution file
-
-    Refer to previous sections to open the appropriate solution file,
-    depending on whether you are building with or without Fortran libraries.
-        
-2. Change Project Settings
-
-    a) In Visual Studio, go to "Projects->Properties".
-
-    b) Make sure in the "Configuration" box, "Release" is selected.
-    
-    c) Select all of the static project file in the main window by holding 
-       the "Ctrl" key while clicking the project file name.
-       
-    d) In the "Properties" window, choose "C/C++", and then "Code
-       Generation".
-       
-    e) Under "Run-time Library", "Single-Threaded" should appear. If it is 
-      blank inside this box, check if you highlight some DLL project files. 
-      
-    d) Change "Single-Threaded" to "Multithreaded".
-
-    e) In the "Configuration" box, change to "Debug", keeping the static
-       projects selected.
-
-    f) Under "Run-time Library", change "Debug Single-Threaded" to "Debug 
-       Multithreaded".
-
-3. Build as Normal
-
-    Refer to previous sections to build and test the HDF5 libraries
-    and tools.
-    
+       2005. 
+   
     
 ========================================================================
     Section VIII: How To Build And Test HDF5 With Thread-Safe Feature
@@ -1620,10 +1571,7 @@ to the earlier sections of this document for details on building and testing.
             Section IX: How to build HDF5 for 64-bit Windows
 ========================================================================
 
-HDF5 can be built for 64-bit Windows in Visual Studio 2005 or 2008.  Visual 
-Studio .NET has very primative 64-bit support, but it is very difficult to 
-set up, and debugging is not supported.  Therefore, we recommend all users 
-switch to Visual Studio 2005 or 2008 for 64-bit builds.  
+HDF5 can be built for 64-bit Windows in Visual Studio 2005 or 2008.  
 
 Notes:
   
@@ -1680,14 +1628,9 @@ some minor changes.  Therefore, follow the build instructions above, with the
 following considerations:
 
     1. Only Visual Studio 2005 and 2008 is currently supported on Windows Vista.
-       This is because Microsoft has ended their support for and .NET.
+       This is because Microsoft has ended their support for .NET.
        
-    2. Building Fortran libraries has not been tested, and is therefore also
-       unsupported.  You may attempt to build Fortran libraries following the
-       instructions above, but they should be considered experimental and used
-       for testing only.
-       
-    3. Elevated security permissions are required to test the HDF5 libraries.
+    2. Elevated security permissions are required to test the HDF5 libraries.
        This is because DLLs are installed in the system directory.  To enable
        elevated security:
        

@@ -82,7 +82,12 @@ rem     %2 - "dll" or nothing
         rem Only add our parameters for batch scripts.
         call !hdf5_test_%%a_test:.bat= %1 %2!
         rem Exit early if test fails.
-        if errorlevel 1 (
+        if not errorlevel 0 (
+            set /a nerrors=!nerrors!+1
+			echo.  Testing %%a ^(%1 %2^)  FAILED
+			echo.**==**==**==**==**==**==**==**==**==**
+			exit /b 1
+		) else if errorlevel 1 (
             set /a nerrors=!nerrors!+1
 			echo.  Testing %%a ^(%1 %2^)  FAILED
 			echo.**==**==**==**==**==**==**==**==**==**
@@ -127,7 +132,9 @@ rem on it for sending parameters.  --SJW 9/6/07
         for %%a in (debug release) do (
             set hdf5_config=%%a %%b
             call :run_tests !hdf5_config:nodll=!
-            if !errorlevel! neq 0 (
+            if not errorlevel 0 (
+                set /a nerrors=!nerrors!+1
+			) else if errorlevel 1 (
                 set /a nerrors=!nerrors!+1
             )
         )
