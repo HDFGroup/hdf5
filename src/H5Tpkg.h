@@ -307,6 +307,7 @@ typedef struct H5T_compnd_t {
     H5T_sort_t	sorted;		/*how are members sorted?	     */
     hbool_t     packed;		/*are members packed together?       */
     H5T_cmemb_t	*memb;		/*array of struct members	     */
+    size_t      memb_size;	/*total of all member sizes          */
 } H5T_compnd_t;
 
 /* An enumeration datatype */
@@ -1388,6 +1389,7 @@ H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
+H5_DLL void H5T_update_packed(const H5T_t *dt);
 H5_DLL H5T_subset_info_t *H5T_conv_struct_subset(const H5T_cdata_t *cdata);
 
 /* Enumerated type functions */
