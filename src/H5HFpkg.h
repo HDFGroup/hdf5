@@ -504,9 +504,6 @@ H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1];
 /* H5HF indirect section inherits serializable properties from H5FS_section_class_t */
 H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1];
 
-/* Declare a free list to manage the H5HF_hdr_t struct */
-H5FL_EXTERN(H5HF_hdr_t);
-
 /* Declare a free list to manage the H5HF_indirect_t struct */
 H5FL_EXTERN(H5HF_indirect_t);
 
@@ -564,6 +561,7 @@ H5_DLL herr_t H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr);
 H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF_hdr_empty(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_free(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* Indirect block routines */

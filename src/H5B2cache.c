@@ -170,9 +170,8 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, voi
     HDassert(cls);
 
     /* Allocate new B-tree header and reset cache info */
-    if(NULL == (hdr = H5FL_MALLOC(H5B2_hdr_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&hdr->cache_info, 0, sizeof(H5AC_info_t));
+    if(NULL == (hdr = H5B2_hdr_alloc()))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "allocation failed for B-tree header")
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
@@ -252,7 +251,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && hdr)
-        (void)H5B2_cache_hdr_dest(f, hdr);
+        if(H5B2_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, NULL, "can't release v2 B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -406,9 +406,6 @@ H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
     /* Release B-tree header info */
     if(H5B2_hdr_free(hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header info")
-
-    /* Free B-tree header info */
-    (void)H5FL_FREE(H5B2_hdr_t, hdr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -763,7 +760,7 @@ H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
 
     /* Free B-tree internal node info */
-    H5FL_FREE(H5B2_internal_t, internal);
+    internal = H5FL_FREE(H5B2_internal_t, internal);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1081,7 +1078,7 @@ H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
 
     /* Free B-tree leaf node info */
-    H5FL_FREE(H5B2_leaf_t, leaf);
+    leaf = H5FL_FREE(H5B2_leaf_t, leaf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

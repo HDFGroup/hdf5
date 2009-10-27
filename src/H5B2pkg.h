@@ -218,9 +218,6 @@ H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
 /* H5B2 leaf node inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
 
-/* Declare a free list to manage the H5B2_hdr_t struct */
-H5FL_EXTERN(H5B2_hdr_t);
-
 /* Declare a free list to manage the H5B2_internal_t struct */
 H5FL_EXTERN(H5B2_internal_t);
 
@@ -238,13 +235,16 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 /******************************/
 
 /* Routines for managing B-tree header info */
+H5_DLL H5B2_hdr_t *H5B2_hdr_alloc(void);
+H5_DLL haddr_t H5B2_hdr_create(H5F_t *f, hid_t dxpl_id,
+    const H5B2_create_t *cparam);
+H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr,
+    const H5B2_create_t *cparam, unsigned depth);
 H5_DLL herr_t H5B2_hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_dirty(H5B2_hdr_t *hdr);
-H5_DLL herr_t H5B2_hdr_delete(H5B2_hdr_t *hdr);
-H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr,
-    const H5B2_create_t *cparam, unsigned depth);
 H5_DLL herr_t H5B2_hdr_free(H5B2_hdr_t *hdr);
+H5_DLL herr_t H5B2_hdr_delete(H5B2_hdr_t *hdr);
 
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2_protect_internal(H5F_t *f, hid_t dxpl_id,

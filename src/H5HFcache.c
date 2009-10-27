@@ -434,7 +434,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && hdr)
-        (void)H5HF_cache_hdr_dest(f, hdr);
+        if(H5HF_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -623,16 +624,9 @@ H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap header")
     } /* end if */
 
-    /* Free the block size lookup table for the doubling table */
-    H5HF_dtable_dest(&hdr->man_dtable);
-
-    /* Release any I/O pipeline filter information */
-    if(hdr->pline.nused)
-        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
-
     /* Free the shared info itself */
-    (void)H5FL_FREE(H5HF_hdr_t, hdr);
-
+    if(H5HF_hdr_free(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to release fractal heap header")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_dest() */

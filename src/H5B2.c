@@ -41,7 +41,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MFprivate.h"	/* File memory management		*/
 
 
 /****************/
@@ -70,9 +69,6 @@ static herr_t H5B2_close(H5B2_hdr_t *hdr, hid_t dxpl_id);
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Declare a free list to manage the H5B2_hdr_t struct */
-H5FL_DEFINE(H5B2_hdr_t);
 
 
 /*****************************/
@@ -103,7 +99,7 @@ herr_t
 H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     haddr_t *addr_p)
 {
-    H5B2_hdr_t *hdr = NULL;             /* The new B-tree header information */
+    haddr_t hdr_addr;                   /* The new v2 B-tree header address */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_create, FAIL)
@@ -115,36 +111,14 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     HDassert(cparam);
     HDassert(addr_p);
 
-    /*
-     * Allocate file and memory data structures.
-     */
-    if(NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree header")
-
-    /* Assign non-zero information */
-    hdr->root.addr = HADDR_UNDEF;
-
-    /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(f, hdr, cparam, 0) < 0)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
-
-    /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree header")
-
-    /* Cache the new B-tree node */
-    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree header to cache")
+    /* Create shared v2 B-tree header */
+    if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create v2 B-tree header")
 
     /* Set the B-tree's address to return */
-    *addr_p = hdr->addr;
+    *addr_p = hdr_addr;
 
 done:
-    if(ret_value < 0) {
-	if(hdr)
-            (void)H5B2_cache_hdr_dest(f, hdr);
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
 
@@ -188,10 +162,9 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     ret_value = hdr;
 
 done:
-    if(!ret_value) {
-        if(hdr && H5B2_close(hdr, dxpl_id) < 0)
+    if(!ret_value && hdr) 
+        if(H5B2_close(hdr, dxpl_id) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close B-tree")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_open() */

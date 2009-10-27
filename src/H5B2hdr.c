@@ -79,6 +79,9 @@
 /* Local Variables */
 /*******************/
 
+/* Declare a free list to manage the H5B2_hdr_t struct */
+H5FL_DEFINE_STATIC(H5B2_hdr_t);
+
 /* Declare a free list to manage B-tree node pages to/from disk */
 H5FL_BLK_DEFINE_STATIC(node_page);
 
@@ -214,57 +217,98 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_hdr_free
+ * Function:	H5B2_hdr_alloc
  *
- * Purpose:	Free B-tree header info
+ * Purpose:	Allocate B-tree header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B2_hdr_t *
+H5B2_hdr_alloc(void)
+{
+    H5B2_hdr_t *hdr = NULL;             /* v2 B-tree header */
+    H5B2_hdr_t *ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_alloc)
+
+    /* Allocate space for the shared information */
+    if(NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header")
+
+    /* Assign non-zero information */
+    hdr->root.addr = HADDR_UNDEF;
+
+    /* Set return value */
+    ret_value = hdr;
+
+done:
+    if(!ret_value && hdr)
+        if(H5B2_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to free shared v2 B-tree info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_hdr_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_create
+ *
+ * Purpose:	Create new fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
- *		Feb  2 2005
+ *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5B2_hdr_free(H5B2_hdr_t *hdr)
+haddr_t
+H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
 {
-    herr_t ret_value = SUCCEED;
+    H5B2_hdr_t *hdr = NULL;     /* The new v2 B-tree header information */
+    haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_free)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_create)
 
-    /* Sanity check */
-    HDassert(hdr);
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(cparam);
 
-    /* Free the B-tree node buffer */
-    if(hdr->page)
-        (void)H5FL_BLK_FREE(node_page, hdr->page);
+    /* Allocate v2 B-tree header */
+    if(NULL == (hdr = H5B2_hdr_alloc()))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
-    /* Free the array of offsets into the native key block */
-    if(hdr->nat_off)
-        hdr->nat_off = H5FL_SEQ_FREE(size_t, hdr->nat_off);
+    /* Initialize shared B-tree info */
+    if(H5B2_hdr_init(f, hdr, cparam, 0) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
-    /* Release the node info */
-    if(hdr->node_info) {
-        unsigned u;             /* Local index variable */
+    /* Allocate space for the header on disk */
+    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
 
-        /* Destroy free list factories */
-        for(u = 0; u < (hdr->depth + 1); u++) {
-            if(hdr->node_info[u].nat_rec_fac)
-                if(H5FL_fac_term(hdr->node_info[u].nat_rec_fac) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's native record block factory")
-            if(hdr->node_info[u].node_ptr_fac)
-                if(H5FL_fac_term(hdr->node_info[u].node_ptr_fac) < 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
-        } /* end for */
+    /* Cache the new B-tree node */
+    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
 
-        /* Free the array of node info structs */
-        hdr->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, hdr->node_info);
-    } /* end if */
+    /* Set address of v2 B-tree header to return */
+    ret_value = hdr->addr;
 
 done:
+    if(!H5F_addr_defined(ret_value) && hdr)
+        if(H5B2_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header")
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_hdr_free() */
+} /* end H5B2_hdr_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -373,6 +417,63 @@ H5B2_hdr_dirty(H5B2_hdr_t *hdr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_hdr_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_hdr_free
+ *
+ * Purpose:	Free B-tree header info
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb  2 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_hdr_free(H5B2_hdr_t *hdr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_free)
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Free the B-tree node buffer */
+    if(hdr->page)
+        (void)H5FL_BLK_FREE(node_page, hdr->page);
+
+    /* Free the array of offsets into the native key block */
+    if(hdr->nat_off)
+        hdr->nat_off = H5FL_SEQ_FREE(size_t, hdr->nat_off);
+
+    /* Release the node info */
+    if(hdr->node_info) {
+        unsigned u;             /* Local index variable */
+
+        /* Destroy free list factories */
+        for(u = 0; u < (hdr->depth + 1); u++) {
+            if(hdr->node_info[u].nat_rec_fac)
+                if(H5FL_fac_term(hdr->node_info[u].nat_rec_fac) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy node's native record block factory")
+            if(hdr->node_info[u].node_ptr_fac)
+                if(H5FL_fac_term(hdr->node_info[u].node_ptr_fac) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
+        } /* end for */
+
+        /* Free the array of node info structs */
+        hdr->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, hdr->node_info);
+    } /* end if */
+
+    /* Free B-tree header info */
+    (void)H5FL_FREE(H5B2_hdr_t, hdr);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_hdr_free() */
 
 
 /*-------------------------------------------------------------------------

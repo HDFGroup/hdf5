@@ -196,10 +196,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 done:
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
-    if(!ret_value) {
-        if(fh)
-            (void)H5HF_close(fh, dxpl_id);
-    } /* end if */
+    if(!ret_value && fh)
+        if(H5HF_close(fh, dxpl_id) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_create() */
@@ -270,10 +269,9 @@ HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fs
 done:
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
-    if(!ret_value) {
-        if(fh)
-            (void)H5HF_close(fh, dxpl_id);
-    } /* end if */
+    if(!ret_value && fh)
+        if(H5HF_close(fh, dxpl_id) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, NULL, "unable to close fractal heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_open() */
