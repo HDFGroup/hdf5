@@ -269,9 +269,9 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                  */
                 dt->shared->u.compnd.nmembs = flags & 0xffff;
                 HDassert(dt->shared->u.compnd.nmembs > 0);
-                dt->shared->u.compnd.packed = TRUE; /* Start off packed */
                 dt->shared->u.compnd.nalloc = dt->shared->u.compnd.nmembs;
                 dt->shared->u.compnd.memb = (H5T_cmemb_t *)H5MM_calloc(dt->shared->u.compnd.nalloc * sizeof(H5T_cmemb_t));
+                dt->shared->u.compnd.memb_size = 0;
                 if(NULL == dt->shared->u.compnd.memb)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
                 for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
@@ -385,6 +385,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
                     /* Member size */
                     dt->shared->u.compnd.memb[i].size = temp_type->shared->size;
+                    dt->shared->u.compnd.memb_size += temp_type->shared->size;
 
                     /* Set the field datatype (finally :-) */
                     dt->shared->u.compnd.memb[i].type = temp_type;
@@ -400,30 +401,10 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
                     /* Update the maximum member position covered */
                     max_memb_pos = MAX(max_memb_pos, (dt->shared->u.compnd.memb[i].offset + dt->shared->u.compnd.memb[i].size));
-
-                    /* Check if the datatype stayed packed */
-                    if(dt->shared->u.compnd.packed) {
-                        /* Check if the member type is packed */
-                        if(H5T_is_packed(temp_type) > 0) {
-                            if(i == 0) {
-                                /* If the is the first member, the datatype is not packed
-                                 * if the first member isn't at offset 0
-                                 */
-                                if(dt->shared->u.compnd.memb[i].offset > 0)
-                                    dt->shared->u.compnd.packed = FALSE;
-                            } /* end if */
-                            else {
-                                /* If the is not the first member, the datatype is not
-                                 * packed if the new member isn't adjoining the previous member
-                                 */
-                                if(dt->shared->u.compnd.memb[i].offset != (dt->shared->u.compnd.memb[i - 1].offset + dt->shared->u.compnd.memb[i - 1].size))
-                                    dt->shared->u.compnd.packed = FALSE;
-                            } /* end else */
-                        } /* end if */
-                        else
-                            dt->shared->u.compnd.packed = FALSE;
-                    } /* end if */
                 } /* end for */
+
+                /* Check if the compound type is packed */
+                H5T_update_packed(dt);
 
                 /* Upgrade the compound if requested */
                 if(version < upgrade_to) {

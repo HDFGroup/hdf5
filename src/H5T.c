@@ -2976,8 +2976,8 @@ H5T_create(H5T_class_t type, size_t size)
             dt->shared->type = type;
 
             if(type==H5T_COMPOUND) {
-                dt->shared->u.compnd.packed=TRUE;       /* Start out packed */
-                dt->shared->u.compnd.sorted=H5T_SORT_VALUE; /* Start out sorted by value */
+                dt->shared->u.compnd.packed=FALSE;       /* Start out unpacked */
+                dt->shared->u.compnd.memb_size=0;
             } /* end if */
             else if(type==H5T_OPAQUE)
                 /* Initialize the tag in case it's not set later.  A null tag will
@@ -3678,7 +3678,13 @@ H5T_set_size(H5T_t *dt, size_t size)
 
                     if(size<(max_offset+max_size))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
+
+                    /* Compound must not have been packed previously */
+                    /* We will check if resizing changed the packed state of
+                     * this type at the end of this function */
+                    HDassert(!dt->shared->u.compnd.packed);
                 }
+
                 break;
 
             case H5T_STRING:
@@ -3754,6 +3760,10 @@ H5T_set_size(H5T_t *dt, size_t size)
                 dt->shared->u.atomic.prec = prec;
             }
         } /* end if */
+
+        /* Check if the new compound type is packed */
+        if(dt->shared->type == H5T_COMPOUND)
+            H5T_update_packed(dt);
     }
 
 done:
