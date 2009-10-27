@@ -303,13 +303,14 @@ The following platforms and compilers have been tested for this release.
     (LLNL Zeus)                   Versions 9.1.
 				  gcc/gfortran/g++ (GCC) 4.1.2.
 
-    Windows XP                    Visual Studio .NET
-                                  Visual Studio 2005 w/ Intel Fortran 9.1
+    Windows XP                    Visual Studio 2005 w/ Intel Fortran 9.1
                                   Cygwin(native gcc compiler and g95)
 
     Windows XP x64                Visual Studio 2005 w/ Intel Fortran 9.1
 
-    Windows Vista                 Visual Studio 2005
+    Windows Vista                 Visual Studio 2005 w/ Intel Fortran 9.1
+
+    Windows Vista x64             Visual Studio 2005 w/ Intel Fortran 9.1
 
     MAC OS  10.5.6 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
