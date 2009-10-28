@@ -411,7 +411,7 @@ Bug Fixes since HDF5-1.8.0 release
     High-Level APIs:
      ------
       - Fixed a bug where the H5TB API would forget the order of fields when
-          added out of offset order. (NAF - 2009/10/27)
+          added out of offset order. (NAF - 2009/10/27 - 1582)
       - H5DSis_attached failed to account for different platform types. Added a
           get native type call. (ADB - 2009/9/29 - 1562)
       - Dimension scales: The scale index return value in H5DSiterate_scales was not always 
