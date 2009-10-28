@@ -159,7 +159,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
@@ -251,7 +251,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
