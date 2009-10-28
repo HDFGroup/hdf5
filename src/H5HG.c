@@ -310,7 +310,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
      * Find an ID for the new object. ID zero is reserved for the free space
      * object.
      */
-    if(heap->nused<H5HG_MAXIDX)
+    if(heap->nused<=H5HG_MAXIDX)
         idx=heap->nused++;
     else {
         for (idx=1; idx<heap->nused; idx++)
@@ -326,17 +326,21 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
         H5HG_obj_t *new_obj;	/* New array of object descriptions */
 
         /* Determine the new number of objects to index */
-        new_alloc=MAX(heap->nalloc*2,(idx+1));
-        assert(new_alloc<=(H5HG_MAXIDX+1));
+        /* nalloc is *not* guaranteed to be a power of 2! - NAF 10/26/09 */
+        new_alloc = MIN(MAX(heap->nalloc * 2, (idx + 1)), (H5HG_MAXIDX + 1));
+        HDassert(idx < new_alloc);
 
         /* Reallocate array of objects */
         if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
 
+        /* Clear newly allocated space */
+        HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+
         /* Update heap information */
         heap->nalloc=new_alloc;
         heap->obj=new_obj;
-        assert(heap->nalloc>heap->nused);
+        HDassert(heap->nalloc>heap->nused);
     } /* end if */
 
     /* Initialize the new object */

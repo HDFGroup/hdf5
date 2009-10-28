@@ -194,6 +194,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug where writing and deleting many global heap objects (i.e.
+            variable length data) would render the file unreadable.  Previously
+            created files exhibiting this problem should now be readable.
+            NAF - 2009/10/27 - 1483
       - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
       - Fixed an assertion failure that occurred when H5Ocopy was called on a
             dataset using a vlen inside a compound. (NAF - 2009/10/02 - 1597)
