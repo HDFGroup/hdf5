@@ -373,7 +373,11 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,nalloc)))
+
+    /* Calloc the obj array because the file format spec makes no guarantee
+     * about the order of the objects, and unused slots must be set to zero.
+     */
+    if(NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->obj[0].size=heap->obj[0].nrefs=0;
     heap->obj[0].begin=NULL;
@@ -402,14 +406,19 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
                 /* Determine the new number of objects to index */
                 new_alloc=MAX(heap->nalloc*2,(idx+1));
+                HDassert(idx < new_alloc);
 
                 /* Reallocate array of objects */
                 if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
+                /* Clear newly allocated space */
+                HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+
                 /* Update heap information */
                 heap->nalloc=new_alloc;
                 heap->obj=new_obj;
+                HDassert(heap->nalloc>heap->nused);
             } /* end if */
 
 	    UINT16DECODE (p, heap->obj[idx].nrefs);
@@ -419,16 +428,16 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	    /*
 	     * The total storage size includes the size of the object header
 	     * and is zero padded so the next object header is properly
-	     * aligned. The last bit of space is the free space object whose
-	     * size is never padded and already includes the object header.
+	     * aligned. The entire obj array was calloc'ed, so no need to zero
+             * the space here. The last bit of space is the free space object
+             * whose size is never padded and already includes the object
+             * header.
 	     */
 	    if (idx>0) {
 		need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
 
-                /* Check for "gap" in index numbers (caused by deletions) and fill in heap object values */
-                if(idx>(max_idx+1))
-                    HDmemset(&heap->obj[max_idx+1],0,sizeof(H5HG_obj_t)*(idx-(max_idx+1)));
-                max_idx=idx;
+                if(idx > max_idx)
+                     max_idx = idx;
 	    } else {
 		need = heap->obj[idx].size;
 	    }
@@ -679,7 +688,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
      * Find an ID for the new object. ID zero is reserved for the free space
      * object.
      */
-    if(heap->nused<H5HG_MAXIDX)
+    if(heap->nused<=H5HG_MAXIDX)
         idx=heap->nused++;
     else {
         for (idx=1; idx<heap->nused; idx++)
@@ -693,17 +702,21 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
         H5HG_obj_t *new_obj;	/* New array of object descriptions */
 
         /* Determine the new number of objects to index */
-        new_alloc=MAX(heap->nalloc*2,(idx+1));
-        assert(new_alloc<=(H5HG_MAXIDX+1));
+        /* nalloc is *not* guaranteed to be a power of 2! - NAF 10/26/09 */
+        new_alloc = MIN(MAX(heap->nalloc * 2, (idx + 1)), (H5HG_MAXIDX + 1));
+        HDassert(idx < new_alloc);
 
         /* Reallocate array of objects */
         if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
 
+        /* Clear newly allocated space */
+        HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+
         /* Update heap information */
         heap->nalloc=new_alloc;
         heap->obj=new_obj;
-        assert(heap->nalloc>heap->nused);
+        HDassert(heap->nalloc>heap->nused);
     } /* end if */
 
     /* Initialize the new object */
