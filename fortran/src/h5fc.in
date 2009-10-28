@@ -295,7 +295,7 @@ if test "x$do_link" = "xyes"; then
   # module. It's okay if they're included twice in the compile line.
   link_args="$link_args $LIBS"
 
-  $SHOW $FLINKER $FFLAGS $F9XSUFFIXFLAG $fmodules $LDFLAGS $link_objs $link_args $shared_link
+  $SHOW $FLINKER $FFLAGS $F9XSUFFIXFLAG $fmodules $link_objs $link_args $shared_link $LDFLAGS
   status=$?
 fi
 
