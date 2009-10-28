@@ -332,7 +332,6 @@ TOOLTEST tnofilename.ddl
 # tests for super block
 TOOLTEST tboot1.ddl -H -B -d dset tfcontents1.h5
 TOOLTEST tboot2.ddl -B tfcontents2.h5
-TOOLTEST file_space.ddl -B file_space.h5
 
 # test -p with a non existing dataset
 TOOLTEST tperror.ddl -p -d bogus tfcontents1.h5
