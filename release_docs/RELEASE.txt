@@ -138,6 +138,10 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
+    - Fixed a bug where writing and deleting many global heap objects (i.e.
+      variable length data) would render the file unreadable.  Previously
+      created files exhibiting this problem should now be readable.
+      NAF - 2009/10/27 - 1483
     - Fixed error in library's internal caching mechanisms which could cause
       an assertion failure (and attendent core dump) when encountering an
       unusually formatted file.  (QAK - 2009/10/13)
