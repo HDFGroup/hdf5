@@ -1,9 +1,9 @@
-HDF5 version 1.6.9-snap8 released on Sun Oct 18 20:41:46 CDT 2009
+HDF5 version 1.6.10-pre1 released on Wed Oct 28 17:41:40 CDT 2009
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.9 and
+This document describes the differences between HDF5-1.6.10 and
 HDF5-1.6.9-*.  
 It contains information on the platforms tested and known problems in
 HDF5-1.6.9-*. For more details, check the HISTORY.txt file in 
@@ -33,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.9
+- Bug Fixes since HDF5-1.6.10
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -68,7 +68,12 @@ New Features
 
     Tools:
     ------
-    - None
+     - h5diff: h5diff treats two INFINITY values different. Fixed by checking (value==expect)
+            before call ABS(...) at h5diff_array.c This will make that (INF==INF) is true
+            (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
+     - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
+            Change default to use strict equality (PC -- 2009/09/12)
+
 
     F90 API:
     --------
@@ -76,7 +81,9 @@ New Features
 
     C++ API:
     --------
-    - None
+    - New member function DataSet::getInMemDataSize() to simplify
+      getting the dataset's data size in memory.  (BMR - 2009/07/26)
+
 
 
 Support for New Platforms, Languages and Compilers
@@ -89,6 +96,10 @@ Bug Fixes since HDF5-1.6.9 Release
 ==================================
     Library
     -------
+    - Fixed a bug where writing and deleting many global heap objects (i.e.
+      variable length data) would render the file unreadable.  Previously
+      created files exhibiting this problem should now be readable.
+      NAF - 2009/10/27 - 1483
     - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
     - Fixed incorrect return value for H5Pget_filter_by_id in H5Ppublic.h.
       NAF - 2009/09/25 - 1620
@@ -117,7 +128,11 @@ Bug Fixes since HDF5-1.6.9 Release
 
     C++ API
     -------
-    - None
+    - The parameter 'size' in CommonFG::getLinkval now has default value
+      for user's convenience.  (BMR - 2009/10/23)
+    - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
+    - read/write methods of DataSet and Attribute classes were fixed
+      to handle string correctly.  (BMR - 2009/07/26)
 
 
 Documentation
@@ -220,12 +235,12 @@ Platforms Tested
     (NCSA tg-login)               Intel(R) Fortran Compiler Version 8.1.033
                                   mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
-    Windows XP                    Visual Studio 6.0
-                                  Visual Studio .NET (with Intel Fortran 9.1)
+    Windows XP                    Visual Studio .NET (with Intel Fortran 9.1)
                                   Visual Studio 2005 (with Intel Fortran 9.1)
                                   cygwin (gcc 3.4.4)
 
     Windows Vista                 Visual studio 2005
+	
     Mac OS X Intel 10.5.6         i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   g95 0.91
 
@@ -244,7 +259,6 @@ Solaris2.10 32-bit                    n        y    n        y    y     y
 Solaris2.10 64-bit                    n        y    n        n    y     y
 IRIX64_6.5 32-bit                     n        n    n        n    y     y
 IRIX64_6.5 64-bit                     n        y    n        n    y     y
-WinXP Visual Studio 6.0               n        n    n        y    y     y
 WinXP CYGWIN                          n        n    n        y    y     y
 WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
@@ -269,7 +283,6 @@ Platform                              Shared        static-  Thread-
 Solaris2.10 32- and 64-bit            y             n        y        
 IRIX64_6.5 32-bit                     y             n        y        
 IRIX64_6.5 64-bit                     y             n        y        
-WinXP Visual Studio 6.0               y             n        n        
 WinXP CYGWIN                          y             n        n        
 WinXP 2005                            y             n        n        
 WinXP .Net                            y             n        n        
