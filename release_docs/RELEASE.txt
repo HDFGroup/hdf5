@@ -237,7 +237,7 @@ The following platforms and compilers have been tested for this release.
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 
-    Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2 20080704
+    Linux 2.6.18-164.el5          gcc (GCC) 4.1.2 20080704
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
     (jam)                         PGI C, Fortran, C++ 8.0-5 32-bit
                                   PGI C, Fortran, C++ 8.0-1 32-bit
@@ -343,13 +343,12 @@ Windows Vista                        n        n      n        y     y     y
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
-RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
-RedHat EL5 2.6.18-128 i686 GNU (1)W  y        y(2)   y        y     y     y
-RedHat EL5 2.6.18-128 i686 Intel  W  n        y      n        y     y     n
-RedHat EL5 2.6.18-128 i686 PGI    W  n        y      n        y     y     n
-SuSe Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
-SuSe Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
-SuSe Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
+RedHat EL5 2.6.18-164 i686 GNU (1)W  y        y(2)   y        y     y     y
+RedHat EL5 2.6.18-164 i686 Intel  W  n        y      n        y     y     n
+RedHat EL5 2.6.18-164 i686 PGI    W  n        y      n        y     y     n
+RedHat EL5 2.6.18-164 x86_64 GNU(1)W y        y(3)   y        y     y     y
+RedHat EL5 2.6.18-164 x86_64 IntelW  n        y      n        y     y     n
+RedHat EL5 2.6.18-164 x86_64 PGI  W  n        y      n        y     y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
 RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
 SuSe Linux 2.4.21 ia64 Intel      C  y        y      y        y     y     n
@@ -367,14 +366,13 @@ Windows XP x64                       y       y(4)      y         y
 Windows Vista                        y       n         n         y        
 Mac OS X 10.5                        y       n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
-FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
-RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
-RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
-RedHat EL5  2.6.18-128 i686 Intel W  y       y         y         n        
-RedHat EL5 2.6.18-128 i686 PGI    W  y       y         y         n        
-SuSe Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y        
-SuSe Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
-SuSe Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
+FreeBSD 6.3-STABLE 32&64 bit         y       y         y         y        
+RedHat EL5 2.6.18-164 i686 GNU (1)W  y       y(2)      y         y        
+RedHat EL5 2.6.18-164 i686 Intel  W  y       y         y         n        
+RedHat EL5 2.6.18-164 i686 PGI    W  y       y         y         n        
+RedHat EL5 2.6.18-164 x86_64 GNU(1)W y       y         y         y        
+RedHat EL5 2.6.18-164 x86_64 IntelW  y       y         y         n        
+RedHat EL5 2.6.18-164 x86_64 PGI  W  y       y         y         n        
 SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n        
 RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
 SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n        
