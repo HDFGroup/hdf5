@@ -230,18 +230,24 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_hdr_t *
-H5B2_hdr_alloc(void)
+H5B2_hdr_alloc(H5F_t *f)
 {
     H5B2_hdr_t *hdr = NULL;             /* v2 B-tree header */
     H5B2_hdr_t *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_hdr_alloc)
 
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header")
 
     /* Assign non-zero information */
+    hdr->f = f;
     hdr->root.addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -284,7 +290,7 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
     HDassert(cparam);
 
     /* Allocate v2 B-tree header */
-    if(NULL == (hdr = H5B2_hdr_alloc()))
+    if(NULL == (hdr = H5B2_hdr_alloc(f)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
@@ -387,6 +393,63 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5B2_hdr_fuse_incr
+ *
+ * Purpose:	Increment file reference count on shared v2 B-tree header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_fuse_incr)
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Increment file reference count on shared header */
+    hdr->file_rc++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B2_hdr_fuse_incr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_hdr_fuse_decr
+ *
+ * Purpose:	Decrement file reference count on shared v2 B-tree header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_fuse_decr)
+
+    /* Sanity check */
+    HDassert(hdr);
+    HDassert(hdr->file_rc);
+
+    /* Decrement file reference count on shared header */
+    hdr->file_rc--;
+
+    FUNC_LEAVE_NOAPI(hdr->file_rc)
+} /* end H5B2_hdr_fuse_decr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_hdr_dirty
  *
  * Purpose:	Mark B-tree header as dirty
@@ -479,7 +542,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5B2_hdr_delete
  *
- * Purpose:	Mark B-tree header for deletion
+ * Purpose:	Delete a v2 B-tree, starting with the header
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -490,15 +553,42 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_hdr_delete(H5B2_hdr_t *hdr)
+H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_hdr_delete)
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;  /* Flags for unprotecting v2 B-tree header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B2_hdr_delete, FAIL)
 
     /* Sanity check */
     HDassert(hdr);
 
-    /* Mark B-tree header as pending deletion */
-    hdr->pending_delete = TRUE;
+#ifndef NDEBUG
+{
+    unsigned hdr_status = 0;         /* v2 B-tree header's status in the metadata cache */
+
+    /* Check the v2 B-tree header's status in the metadata cache */
+    if(H5AC_get_entry_status(hdr->f, hdr->addr, &hdr_status) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to check metadata cache status for v2 B-tree header")
+
+    /* Sanity checks on v2 B-tree header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+} /* end block */
+#endif /* NDEBUG */
+
+    /* Delete all nodes in B-tree */
+    if(H5F_addr_defined(hdr->root.addr))
+        if(H5B2_delete_node(hdr->f, dxpl_id, hdr, hdr->depth, &hdr->root, hdr->remove_op, hdr->remove_op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
+
+    /* Indicate that the heap header should be deleted & file space freed */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+
+done:
+    /* Unprotect the header with appropriate flags */
+    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2_hdr_delete() */

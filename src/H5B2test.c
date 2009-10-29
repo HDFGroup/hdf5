@@ -20,6 +20,7 @@
  *
  */
 
+
 /****************/
 /* Module Setup */
 /****************/
@@ -27,12 +28,14 @@
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 
+
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+
 
 /****************/
 /* Local Macros */
@@ -52,6 +55,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
 static herr_t H5B2_test_store(void *nrecord, const void *udata);
 static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
@@ -61,9 +65,11 @@ static herr_t H5B2_test_decode(const H5F_t *f, const uint8_t *raw,
 static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *_udata);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
+
 const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
     "H5B2_TEST_ID",             /* Name of B-tree class */
@@ -75,6 +81,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_test_debug             /* Record debugging callback */
 }};
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -83,6 +90,7 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -228,7 +236,7 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
     haddr_t addr, haddr_t *root_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -238,12 +246,12 @@ H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(type);
+    HDassert(cls);
     HDassert(H5F_addr_defined(addr));
     HDassert(root_addr);
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, cls, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get B-tree root addr */
@@ -272,7 +280,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
     haddr_t addr, void *udata, H5B2_node_info_test_t *ninfo)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -286,11 +294,11 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(type);
+    HDassert(cls);
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, cls, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -374,11 +382,8 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
 done:
     /* Release header */
-    if(hdr) {
-        hdr->f = NULL;
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-    } /* end if */
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_get_node_info_test() */
@@ -401,7 +406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     void *udata)
 {
     H5B2_node_info_test_t ninfo;        /* Node information */
@@ -411,11 +416,11 @@ H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, hadd
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(type);
+    HDassert(cls);
     HDassert(H5F_addr_defined(addr));
 
     /* Get information abou the node */
-    if(H5B2_get_node_info_test(f, dxpl_id, type, addr, udata, &ninfo) < 0)
+    if(H5B2_get_node_info_test(f, dxpl_id, cls, addr, udata, &ninfo) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "error looking up node info")
 
     /* Set return value */

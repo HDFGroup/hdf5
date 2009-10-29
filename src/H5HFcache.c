@@ -483,9 +483,6 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         uint8_t heap_flags;     /* Status flags for heap */
         uint32_t metadata_chksum; /* Computed metadata checksum value */
 
-        /* Sanity check */
-        HDassert(hdr->dirty);
-
         /* Set the shared heap header's file context for this operation */
         hdr->f = f;
 
@@ -570,7 +567,6 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_HDR, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap header to disk")
 
-	hdr->dirty = FALSE;
 	hdr->cache_info.is_dirty = FALSE;
     } /* end if */
 

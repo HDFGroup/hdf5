@@ -170,7 +170,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, voi
     HDassert(cls);
 
     /* Allocate new B-tree header and reset cache info */
-    if(NULL == (hdr = H5B2_hdr_alloc()))
+    if(NULL == (hdr = H5B2_hdr_alloc(f)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "allocation failed for B-tree header")
 
     /* Wrap the local buffer for serialized header info */
@@ -730,6 +730,7 @@ H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
     /*
      * Check arguments.
      */
+    HDassert(f);
     HDassert(internal);
     HDassert(internal->hdr);
 
@@ -1052,6 +1053,7 @@ H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
     /*
      * Check arguments.
      */
+    HDassert(f);
     HDassert(leaf);
     HDassert(leaf->hdr);
 

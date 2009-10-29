@@ -172,7 +172,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Allocate fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info")
 
     /* Lock the heap header into memory */
     if(NULL == (hdr = (H5HF_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_WRITE)))
@@ -249,7 +249,7 @@ HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fs
 
     /* Create fractal heap info */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info")
 
     /* Point fractal heap wrapper at header */
     fh->hdr = hdr;

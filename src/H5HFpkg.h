@@ -335,7 +335,6 @@ typedef struct H5HF_hdr_t {
 
     /* Cached/computed values (not stored in header) */
     size_t      rc;             /* Reference count of heap's components using heap header */
-    hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     size_t      heap_size;      /* Size of heap header in the file */
     H5AC_protect_t mode;        /* Access mode for heap */

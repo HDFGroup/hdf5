@@ -116,6 +116,10 @@ typedef struct H5B2_stat_t {
     hsize_t nrecords;          /* Number of records */
 } H5B2_stat_t;
 
+/* v2 B-tree info (forward decl - defined in H5B2pkg.h) */
+typedef struct H5B2_t H5B2_t;
+
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/

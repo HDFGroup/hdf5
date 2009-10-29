@@ -409,9 +409,6 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Set "huge" object tracker v2 B-tree address to indicate that there aren't any yet */
     hdr->huge_bt2_addr = HADDR_UNDEF;
 
-    /* Note that the shared info is dirty (it's not written to the file yet) */
-    hdr->dirty = TRUE;
-
     /* First phase of header final initialization */
     /* (doesn't need ID length set up) */
     if(H5HF_hdr_finish_init_phase1(hdr) < 0)
@@ -695,9 +692,6 @@ HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
     /* Mark header as dirty in cache */
     if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
-
-    /* Set the dirty flags for the heap header */
-    hdr->dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
