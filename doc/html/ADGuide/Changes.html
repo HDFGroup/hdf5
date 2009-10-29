@@ -59,8 +59,91 @@ an application synchronized with the HDF5 library or related software.
 
 
 
+<a name="1610">
+<h2>Release 1.6.10 (current release) versus Release 1.6.9,
+    November 2009</h2> 
+</a>
+
+<dir>
+
+This section lists interface-level changes and 
+other user-visible changes in behavior 
+in the transition from HDF5 Release 1.6.9 to Release 1.6.10.
+
+</dir>
+<dir>
+
+    <h3>Embedded HDF5 Library Settings Information</h3>
+    
+        <dl>    
+            <dd>Library settings are now embedded in an HDF5 executable 
+                so that an &ldquo;orphaned&rdquo; executable can be queried 
+                (via the Unix strings command, for example) to display the 
+                library settings used to build it.   
+                The embedded settings information is the same as that
+                normally found in the <code>libhdf5.settings</code> file.
+                <p>
+                This capability may be disabled with the use of the
+                <code>--disable-embedded-libin</code> flag during configure. 
+        </dl>    
+
+    <h3>Function with Changed Interface or Behavior</h3>
+    
+        <dl>    
+            <dd><a href="../RM_H5.html#Library-VersCheck">
+                <code>H5check_version</code></a> now displays
+                embedded library information (see above) 
+                if a version mismatch is detected.
+                <p>
+                The function has also been changed to suppress the 
+                warning message entirely if 
+                <code>$HDF5_DISABLE_VERSION_CHECK</code> is set to 
+                <code>2</code> or higher.
+        </dl>    
+
+</dir>
+<dir>
+
+    <h3>New C++ Member Function</h3>
+    
+        <dl>    
+          <dd>A new C++ member function is provided to 
+              determine a dataset&rsquo;s data size in memory:
+              <p>
+              <code>
+              &nbsp;&nbsp;
+              size_t DataSet::getInMemDataSize() const</code>
+        </dl>    
+
+</dir>
+<dir>
+
+    <h3>Tool with Changed Interface or Behavior</h3>
+    
+        <dl>    
+            <dd><a href="../Tools.html#Tools-Diff"><code>h5diff</code></a>
+                has one new option:
+                <p>
+                <code>&nbsp;&nbsp;&nbsp;&nbsp;--use-system-epsilon</code>
+                <p>
+                With this option, <code>h5diff</code> returns a difference
+                if and only if the difference between two data values
+                exceeds the system value for epsilon
+                (that is, if <code>|a-b| &gt; <i>epsilon</i></code>).
+                <p>
+                The tool&rsquo;s default behavior has also changed; 
+                without this option, the tool now checks for strict equality.
+                <p>
+                This option has no short form.
+                <p>
+        </dl>    
+
+</dir>
+
+
+
 <a name="169">
-<h2>Release 1.6.9 (current release) versus Release 1.6.8,
+<h2>Release 1.6.9 versus Release 1.6.8,
     May 2009</h2> 
 </a>
 
@@ -229,9 +312,7 @@ in the transition from HDF5 Release 1.6.8 to Release 1.6.9.
                     avoid the performance penalty that NaN detection 
                     and comparison entalis.
                     (NaN detection and comparison became the default in 
-                    in HDF5 Release 1.6.8.  
-                    <font color=red><b><i>Correct?</b></i></font>
-                    )
+                    in HDF5 Release 1.6.8.)
                     <p>
                 <dd>This tool has two new options:
                     <p>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -3247,7 +3328,7 @@ Describes HDF5 Release 1.6.10, November 2009
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 21 April 2009 
+Last modified: 29 October 2009 
 <!-- hhmts end -->
 
 </body>
