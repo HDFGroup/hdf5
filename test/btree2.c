@@ -42,8 +42,35 @@ const char *FILENAME[] = {
 #define DELETE_MEDIUM           200
 #define DELETE_LARGE            2000
 
-/* B-tree creation parameters */
-static const H5B2_create_t cparam_g = {H5B2_TEST, 512, 8, 100, 40};
+
+/*-------------------------------------------------------------------------
+ * Function:	init_cparam
+ *
+ * Purpose:	Initialize v2 B-tree creation parameter structure
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October 29, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+init_cparam(H5B2_create_t *cparam)
+{
+    /* Wipe out background */
+    HDmemset(cparam, 0, sizeof(*cparam));
+
+    /* General parameters */
+    cparam->cls = H5B2_TEST;
+    cparam->node_size = (size_t)512;
+    cparam->rrec_size = (size_t)8;
+    cparam->split_percent = 100;
+    cparam->merge_percent = 40;
+
+    return(0);
+} /* init_cparam() */
 
 
 /*-------------------------------------------------------------------------
@@ -223,7 +250,7 @@ remove_cb(const void *_record, void *_op_data)
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_basic(hid_t fapl)
+test_insert_basic(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[1024];         /* Filename to use */
@@ -248,7 +275,7 @@ test_insert_basic(hid_t fapl)
      * Test v2 B-tree creation
      */
     TESTING("B-tree creation");
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
     if(!H5F_addr_defined(bt2_addr))
         FAIL_STACK_ERROR
@@ -408,7 +435,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_split_root(hid_t fapl)
+test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -439,7 +466,7 @@ test_insert_split_root(hid_t fapl)
     /*
      * Test v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert records to fill root leaf node */
@@ -584,7 +611,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level1_2leaf_redistrib(hid_t fapl)
+test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -613,7 +640,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -666,7 +693,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -744,7 +771,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level1_side_split(hid_t fapl)
+test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -773,7 +800,7 @@ test_insert_level1_side_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -831,7 +858,7 @@ test_insert_level1_side_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -915,7 +942,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level1_3leaf_redistrib(hid_t fapl)
+test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -945,7 +972,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -1063,7 +1090,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level1_middle_split(hid_t fapl)
+test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1093,7 +1120,7 @@ test_insert_level1_middle_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 leaves */
@@ -1187,7 +1214,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_make_level2(hid_t fapl)
+test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1218,7 +1245,7 @@ test_insert_make_level2(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
@@ -1371,7 +1398,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_leaf_redistrib(hid_t fapl)
+test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1401,7 +1428,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
@@ -1636,7 +1663,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_leaf_split(hid_t fapl)
+test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1666,7 +1693,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
@@ -1912,7 +1939,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_2internal_redistrib(hid_t fapl)
+test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -1942,7 +1969,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
@@ -2105,7 +2132,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_2internal_split(hid_t fapl)
+test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -2135,7 +2162,7 @@ test_insert_level2_2internal_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 2 internal nodes */
@@ -2308,7 +2335,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_3internal_redistrib(hid_t fapl)
+test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -2338,7 +2365,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 3 internal nodes */
@@ -2510,7 +2537,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_level2_3internal_split(hid_t fapl)
+test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -2540,7 +2567,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert enough records to force root to split into 3 internal nodes */
@@ -2715,7 +2742,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_insert_lots(hid_t fapl)
+test_insert_lots(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -2774,7 +2801,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert random records */
@@ -2921,7 +2948,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_basic(hid_t fapl)
+test_remove_basic(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -2949,7 +2976,7 @@ test_remove_basic(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Query the number of records in the B-tree */
@@ -3206,7 +3233,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_noredistrib(hid_t fapl)
+test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -3236,7 +3263,7 @@ test_remove_level1_noredistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -3429,7 +3456,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_redistrib(hid_t fapl)
+test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -3458,7 +3485,7 @@ test_remove_level1_redistrib(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -3629,7 +3656,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_2leaf_merge(hid_t fapl)
+test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -3658,7 +3685,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -3813,7 +3840,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_3leaf_merge(hid_t fapl)
+test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -3842,7 +3869,7 @@ test_remove_level1_3leaf_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -3941,7 +3968,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_promote(hid_t fapl)
+test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -3970,7 +3997,7 @@ test_remove_level1_promote(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 5 leaves */
@@ -4185,7 +4212,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
+test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4214,7 +4241,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -4338,7 +4365,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
+test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4367,7 +4394,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -4491,7 +4518,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_promote_2leaf_merge(hid_t fapl)
+test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4520,7 +4547,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 3 leaves */
@@ -4639,7 +4666,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_promote_3leaf_merge(hid_t fapl)
+test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4668,7 +4695,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 leaves */
@@ -4787,7 +4814,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level1_collapse(hid_t fapl)
+test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4815,7 +4842,7 @@ test_remove_level1_collapse(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-1 B-tree with 2 leaves */
@@ -4926,7 +4953,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_promote(hid_t fapl)
+test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -4955,7 +4982,7 @@ test_remove_level2_promote(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5217,7 +5244,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_promote_2internal_redistrib(hid_t fapl)
+test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5246,7 +5273,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5370,7 +5397,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_promote_3internal_redistrib(hid_t fapl)
+test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5399,7 +5426,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5523,7 +5550,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_promote_2internal_merge(hid_t fapl)
+test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5552,7 +5579,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5679,7 +5706,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_promote_3internal_merge(hid_t fapl)
+test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5708,7 +5735,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5835,7 +5862,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_2internal_merge_left(hid_t fapl)
+test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5864,7 +5891,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -5963,7 +5990,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_2internal_merge_right(hid_t fapl)
+test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -5992,7 +6019,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -6091,7 +6118,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_3internal_merge(hid_t fapl)
+test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -6120,7 +6147,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -6219,7 +6246,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_level2_collapse_right(hid_t fapl)
+test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -6249,7 +6276,7 @@ test_remove_level2_collapse_right(hid_t fapl)
     /*
      * v2 B-tree creation
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -6345,8 +6372,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-gen_l4_btree2(const char *filename, hid_t fapl, haddr_t *bt2_addr,
-    const hsize_t *records)
+gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
+    haddr_t *bt2_addr, const hsize_t *records)
 {
     hid_t	file = -1;
     H5F_t	*f = NULL;
@@ -6365,7 +6392,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, haddr_t *bt2_addr,
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert random records */
@@ -6412,7 +6439,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_lots(const char *env_h5_drvr, hid_t fapl)
+test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file = -1;
     char	filename[1024];
@@ -6465,7 +6492,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Generate the v2 B-tree to test */
-    if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+    if(gen_l4_btree2(filename, fapl, cparam, &bt2_addr, records))
         TEST_ERROR
 
     /* Check for VFD which stores data in multiple files */
@@ -6572,7 +6599,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end if */
     else {
         /* Re-generate the v2 B-tree to test */
-        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+        if(gen_l4_btree2(filename, fapl, cparam, &bt2_addr, records))
             TEST_ERROR
     } /* end else */
 
@@ -6646,7 +6673,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end if */
     else {
         /* Re-generate the v2 B-tree to test */
-        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+        if(gen_l4_btree2(filename, fapl, cparam, &bt2_addr, records))
             TEST_ERROR
     } /* end else */
 
@@ -6718,7 +6745,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end if */
     else {
         /* Re-generate the v2 B-tree to test */
-        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+        if(gen_l4_btree2(filename, fapl, cparam, &bt2_addr, records))
             TEST_ERROR
     } /* end else */
 
@@ -6808,7 +6835,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_find_neighbor(hid_t fapl)
+test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -6847,7 +6874,7 @@ test_find_neighbor(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert records */
@@ -7029,7 +7056,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_delete(hid_t fapl)
+test_delete(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -7071,7 +7098,7 @@ test_delete(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /*
@@ -7108,7 +7135,7 @@ test_delete(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert records */
@@ -7158,7 +7185,7 @@ test_delete(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert records */
@@ -7208,7 +7235,7 @@ test_delete(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Insert records */
@@ -7270,7 +7297,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_modify(hid_t fapl)
+test_modify(hid_t fapl, const H5B2_create_t *cparam)
 {
     hid_t	file=-1;
     char	filename[1024];
@@ -7302,7 +7329,7 @@ test_modify(hid_t fapl)
     /*
      * Create v2 B-tree
      */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, &cparam_g, &bt2_addr/*out*/) < 0)
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, cparam, &bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
 
     /* Create level-2 B-tree with 3 internal nodes */
@@ -7493,6 +7520,7 @@ error:
 int
 main(void)
 {
+    H5B2_create_t cparam;               /* Creation parameters for v2 B-tree */
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
     int		ExpressMode;
@@ -7509,61 +7537,64 @@ main(void)
     if (ExpressMode > 1)
         printf("***Express test mode on.  Some tests may be skipped\n");
 
+    /* Initialize v2 B-tree creation parameters */
+    init_cparam(&cparam);
+
     /* Test B-tree record insertion */
     /* Iteration, find & index routines tested in these routines as well */
-    nerrors += test_insert_basic(fapl);
-    nerrors += test_insert_split_root(fapl);
-    nerrors += test_insert_level1_2leaf_redistrib(fapl);
-    nerrors += test_insert_level1_side_split(fapl);
-    nerrors += test_insert_level1_3leaf_redistrib(fapl);
-    nerrors += test_insert_level1_middle_split(fapl);
-    nerrors += test_insert_make_level2(fapl);
-    nerrors += test_insert_level2_leaf_redistrib(fapl);
-    nerrors += test_insert_level2_leaf_split(fapl);
-    nerrors += test_insert_level2_2internal_redistrib(fapl);
-    nerrors += test_insert_level2_2internal_split(fapl);
-    nerrors += test_insert_level2_3internal_redistrib(fapl);
-    nerrors += test_insert_level2_3internal_split(fapl);
+    nerrors += test_insert_basic(fapl, &cparam);
+    nerrors += test_insert_split_root(fapl, &cparam);
+    nerrors += test_insert_level1_2leaf_redistrib(fapl, &cparam);
+    nerrors += test_insert_level1_side_split(fapl, &cparam);
+    nerrors += test_insert_level1_3leaf_redistrib(fapl, &cparam);
+    nerrors += test_insert_level1_middle_split(fapl, &cparam);
+    nerrors += test_insert_make_level2(fapl, &cparam);
+    nerrors += test_insert_level2_leaf_redistrib(fapl, &cparam);
+    nerrors += test_insert_level2_leaf_split(fapl, &cparam);
+    nerrors += test_insert_level2_2internal_redistrib(fapl, &cparam);
+    nerrors += test_insert_level2_2internal_split(fapl, &cparam);
+    nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam);
+    nerrors += test_insert_level2_3internal_split(fapl, &cparam);
     if (ExpressMode > 1)
         printf("***Express test mode on.  test_insert_lots skipped\n");
     else
-        nerrors += test_insert_lots(fapl);
+        nerrors += test_insert_lots(fapl, &cparam);
 
     /* Test B-tree record removal */
     /* Querying the number of records routine also tested in these routines as well */
-    nerrors += test_remove_basic(fapl);
-    nerrors += test_remove_level1_noredistrib(fapl);
-    nerrors += test_remove_level1_redistrib(fapl);
-    nerrors += test_remove_level1_2leaf_merge(fapl);
-    nerrors += test_remove_level1_3leaf_merge(fapl);
-    nerrors += test_remove_level1_promote(fapl);
-    nerrors += test_remove_level1_promote_2leaf_redistrib(fapl);
-    nerrors += test_remove_level1_promote_3leaf_redistrib(fapl);
-    nerrors += test_remove_level1_promote_2leaf_merge(fapl);
-    nerrors += test_remove_level1_promote_3leaf_merge(fapl);
-    nerrors += test_remove_level1_collapse(fapl);
-    nerrors += test_remove_level2_promote(fapl);
-    nerrors += test_remove_level2_promote_2internal_redistrib(fapl);
-    nerrors += test_remove_level2_promote_3internal_redistrib(fapl);
-    nerrors += test_remove_level2_promote_2internal_merge(fapl);
-    nerrors += test_remove_level2_promote_3internal_merge(fapl);
-    nerrors += test_remove_level2_2internal_merge_left(fapl);
-    nerrors += test_remove_level2_2internal_merge_right(fapl);
-    nerrors += test_remove_level2_3internal_merge(fapl);
-    nerrors += test_remove_level2_collapse_right(fapl);
+    nerrors += test_remove_basic(fapl, &cparam);
+    nerrors += test_remove_level1_noredistrib(fapl, &cparam);
+    nerrors += test_remove_level1_redistrib(fapl, &cparam);
+    nerrors += test_remove_level1_2leaf_merge(fapl, &cparam);
+    nerrors += test_remove_level1_3leaf_merge(fapl, &cparam);
+    nerrors += test_remove_level1_promote(fapl, &cparam);
+    nerrors += test_remove_level1_promote_2leaf_redistrib(fapl, &cparam);
+    nerrors += test_remove_level1_promote_3leaf_redistrib(fapl, &cparam);
+    nerrors += test_remove_level1_promote_2leaf_merge(fapl, &cparam);
+    nerrors += test_remove_level1_promote_3leaf_merge(fapl, &cparam);
+    nerrors += test_remove_level1_collapse(fapl, &cparam);
+    nerrors += test_remove_level2_promote(fapl, &cparam);
+    nerrors += test_remove_level2_promote_2internal_redistrib(fapl, &cparam);
+    nerrors += test_remove_level2_promote_3internal_redistrib(fapl, &cparam);
+    nerrors += test_remove_level2_promote_2internal_merge(fapl, &cparam);
+    nerrors += test_remove_level2_promote_3internal_merge(fapl, &cparam);
+    nerrors += test_remove_level2_2internal_merge_left(fapl, &cparam);
+    nerrors += test_remove_level2_2internal_merge_right(fapl, &cparam);
+    nerrors += test_remove_level2_3internal_merge(fapl, &cparam);
+    nerrors += test_remove_level2_collapse_right(fapl, &cparam);
     if (ExpressMode > 1)
         printf("***Express test mode on.  test_remove_lots skipped\n");
     else
-        nerrors += test_remove_lots(envval, fapl);
+        nerrors += test_remove_lots(envval, fapl, &cparam);
 
     /* Test more complex B-tree queries */
-    nerrors += test_find_neighbor(fapl);
+    nerrors += test_find_neighbor(fapl, &cparam);
 
     /* Test deleting B-trees */
-    nerrors += test_delete(fapl);
+    nerrors += test_delete(fapl, &cparam);
 
     /* Test modifying B-tree records */
-    nerrors += test_modify(fapl);
+    nerrors += test_modify(fapl, &cparam);
 
     if(nerrors)
         goto error;
