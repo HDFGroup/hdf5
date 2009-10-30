@@ -3,7 +3,7 @@
 <hr>
 <dl>
 <dt><div align=right><font color=999999 size=-1><i>
-    Last modified: 29 April 2009
+    Last modified: 30 October 2009
     </i></font></div>
 
 <dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp;&nbsp;
@@ -11,8 +11,10 @@
     <dd><code>h5diff </code> <em>file1</em> <em>file2</em> 
                     [<em>OPTIONS</em>]
 		    [<em>object1</em> [<em>object2</em> ] ]       
+    <p>
 <dt><strong>Purpose:</strong>
     <dd>Compares two HDF5 files and reports the differences.
+    <p>
 <dt><strong>Description:</strong>
     <dd><code>h5diff</code> is a command line tool that compares 
         two HDF5 files, <em>file1</em> and <em>file2</em>, and 
@@ -29,19 +31,21 @@
 	<em>object1</em> in <em>file1</em>
 	with <em>object2</em> in <em>file2</em>.
 	These objects must be HDF5 datasets.
-    <dd>
 	<p>
 	<em>object1</em> and <em>object2</em> must be expressed
 	as absolute paths from the respective file's root group.
-    <dd>
 	<p>
- <code>h5diff</code>  has the following four modes of output:<br>
-    Normal mode: print the number of differences found and where they occurred<br>
-    Report mode (-r): print the above plus the differences<br>
-    Verbose mode (-v): print the above plus a list of objects and warnings<br>
-    Quiet mode (-q): do not print output (h5diff always returns an exit code of
-    1 when differences are found).
-    <dd>
+        <code>h5diff</code>  has the following four modes of output:
+        <br>
+        Normal mode: Print the number of differences found and where 
+        they occurred.
+        <br>
+        Report mode (-r): Print the above plus the differences.
+        <br>
+        Verbose mode (-v): Print the above plus a list of objects and warnings.
+        <br>
+        Quiet mode (-q): Do not print output 
+        (h5diff always returns an exit code of 1 when differences are found).
 	<p>
 	Additional information, with several sample cases, 
 	can be found in the document 
@@ -68,6 +72,7 @@
         whether any of the differences are associated with NaN values.
 
 
+    <p>
 <dt><strong>Options and Parameters:</strong>
     <dd><dl>
         <dt><em>file1</em>
@@ -109,11 +114,27 @@
 		(e.g., <code>|1&ndash;(b/a)|&nbsp;&gt;&nbsp;<em>relative</em></code>
 		where <code>a</code> is a value in <em>file1</em> and
 		<code>b</code> is a value in <em>file2</em>).
+        <dt><code>--use-system-epsilon</code>
+            <dd>Return a difference if and only if the difference
+                between two data values exceeds the system value for epsilon.
+                That is, if <code><i>a</i></code> is a data value in one dataset,
+                <code><i>b</i></code> is the corresponding data value in the 
+                dataset with which the first dataset is being compared, and 
+                <code><i>epsilon</i></code> is the system epsilon,
+                return a difference if and only if 
+                <code>|<i>a</i>-<i>b</i>| > <i>epsilon</i></code>.
+                <br>
+                <em>Default:</em> Without this option, 
+                <code>h5diff</code> checks for strict equality.
+                <br>
+                This option has no single-letter short form.
+                </td></tr>
         <dt><em>object1</em>
         <dt><em>object2</em>
             <dd>Specific object(s) within the files to be compared.
     </dl></dd>
 <!-- NEW PAGE -->
+    <p>
 <dt><strong>Exit Status:</strong></dt>
     <dd><table border=0>
         <tr valign=top align=left>
@@ -130,39 +151,52 @@
         </tr>
     </table>
 
+    <p>
 <dt><strong>Examples:</strong>
     <dd>The following <code>h5diff</code> call compares
         the object <code>/a/b</code> in <code>file1</code> 
         with the object <code>/a/c</code> in <code>file2</code>:<br>
         <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2 /a/b /a/c</code>
-    <dd>This <code>h5diff</code> call compares
+        <p>
+        This <code>h5diff</code> call compares
         the object <code>/a/b</code> in <code>file1</code> 
         with the same object in <code>file2</code>:<br>
         <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2 /a/b</code>
-    <dd>And this <code>h5diff</code> call compares
+        <p>
+        And this <code>h5diff</code> call compares
         all objects in both files:<br>
         <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2</code>
-      &nbsp;<br>
-      file1 and file2 can be the same file. Use:<br>
+          <p>
+        <code>file1</code> and <code>file2</code> can be the same file. 
+        Use:<br>
         <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff </code><code> file1 file1 /g1/dset1 /g1/dset2</code>&nbsp;<br>
-      to compare <code>/g1/dset1</code>&nbsp; and <code>/g1/dset2</code> in the same file<!--
+        to compare <code>/g1/dset1</code>&nbsp; and <code>/g1/dset2</code> 
+        in the same file.
+
+<!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
 -->
+    <p>
 <dt><strong>History:</strong>
-    	<ul><table width="90%">
+    <dd><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>Command Line Tool</strong></td></tr>
+            <strong>Command Line Tool</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.0</td>
+          <td valign="top">1.6.0</td>
           <td valign="top">
-		    Tool introduced in this release.</td></tr>
-    </table></ul>
+            Tool introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.10</td>
+          <td valign="top">
+            <code>--use-system-epsilon</code>
+            option added in this release.</td></tr>
+    </table></dd>
 </dl>
 
 
