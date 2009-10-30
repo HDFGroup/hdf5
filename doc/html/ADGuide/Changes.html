@@ -107,12 +107,19 @@ in the transition from HDF5 Release 1.6.9 to Release 1.6.10.
     <h3>New C++ Member Function</h3>
     
         <dl>    
-          <dd>A new C++ member function is provided to 
-              determine a dataset&rsquo;s data size in memory:
+          <dd>New C++ member functions are provided to 
+              determine a dataset&rsquo;s or attribute&rsquo;s 
+              data size in memory:
               <p>
               <code>
               &nbsp;&nbsp;
               size_t DataSet::getInMemDataSize() const</code>
+              <br>
+              <code>
+              &nbsp;&nbsp;
+              size_t Attribute::getInMemDataSize() const</code>
+              <p>
+              The size in each case is in bytes.
         </dl>    
 
 </dir>
@@ -3328,7 +3335,7 @@ Describes HDF5 Release 1.6.10, November 2009
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 29 October 2009 
+Last modified: 30 October 2009 
 <!-- hhmts end -->
 
 </body>
