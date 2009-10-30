@@ -81,8 +81,9 @@ New Features
 
     C++ API:
     --------
-    - New member function DataSet::getInMemDataSize() to simplify
-      getting the dataset's data size in memory.  (BMR - 2009/07/26)
+    - New member functions DataSet::getInMemDataSize() and
+      Attribute::getInMemDataSize() simplify getting the dataset's or
+      attribute's data size, in bytes, in memory.  (BMR - 2009/07/26)
 
 
 
