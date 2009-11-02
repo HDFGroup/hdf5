@@ -175,10 +175,6 @@ Platforms Tested
                                   gcc 4.4.2 20091006
                                   g++ 4.4.2 20091006
 
-    IRIX64 6.5                    MIPSpro cc 7.4.4m
-    (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
-                                  C++ MIPSpro cc 7.4.4m
-
     Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2 20080704
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
     (jam)                         PGI C, Fortran, C++ 8.0-5 32-bit
@@ -250,8 +246,6 @@ Platform                              C        F90  F90      C++  zlib  SZIP
                                       parallel      parallel
 Solaris2.10 32-bit                    n        y    n        y    y     y
 Solaris2.10 64-bit                    n        y    n        n    y     y
-IRIX64_6.5 32-bit                     n        n    n        n    y     y
-IRIX64_6.5 64-bit                     n        y    n        n    y     y
 WinXP CYGWIN                          n        n    n        y    y     y
 WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
@@ -273,8 +267,6 @@ SuSe Linux 2.6.16 SGI Altix ia64  C   y        y    y        y    y     y
 Platform                              Shared        Thread-  
                                       libraries(4)  safe     
 Solaris2.10 32- and 64-bit            y             y        
-IRIX64_6.5 32-bit                     y             y        
-IRIX64_6.5 64-bit                     y             y        
 WinXP CYGWIN                          y             n        
 WinXP 2005                            y             n        
 WinXP .Net                            y             n        
@@ -302,6 +294,13 @@ Footnotes:
 
 Known Problems
 ==============
+* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
+  The error is due to insufficient memory requested. Request a large amount
+  of runtime memory by setting the following environment variable for more
+  memory.
+     LDR_CNTRL=MAXDATA=0x20000000@DSA
+  AKC - 2009/10/31
+
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
   existing. This is due to the MPI_File_open() call failing if the amode has
@@ -321,59 +320,15 @@ Known Problems
   --disable-production configure flag in order to configure in development
   mode. MAM - 2009/03/09.
 
-* We discovered two problems when running collective IO parallel HDF5 tests
-  with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
-  cluster at NCSA.
-  Under some complex selection cases, 
-  1) MPI_Get_element returns the wrong value.
-  2) MPI_Type_struct also generates the wrong derived datatype and corrupt 
-     data may be generated.
-  This only happens when turning on collective IO with chunking storage
-  with some complex selections. We haven't found these problems on other 
-  MPI-IO compilers. If you encounter these problems, you may use Independent 
-  IO instead.
-
-  To avoid this problem, change the following line in your code:
-      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-  to
-      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
-  KY - 2007/08/24
-
 * QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
   does not include the -lmpi properly.  This will be fixed in the next
   release.  AKC - 2007/08/07.
-
-* On IRIX64 6.5 (UCAR SGI mop1), when testing HDF5 tools with an HDF5 shared
-  library, especially for h5repacktst and h52gifgentst, the following (or a
-  similar) error message may appear:
-  "523648:lt-h5repacktst: rld: Fatal Error: Cannot Successfully map soname
-  'libh5test.so.1' under any of the filenames .......(bunch of directories)
-  "
-  And the testing will fail. 
-
-  We believe this is a libtool problem. One way to get rid of this is to
-  add the paths of libh5test.so.1 and libh5.so.1 to the shared library path.
-
-  You may do this, under csh:
-  setenv LD_LIBRARYN32_PATH [full path of HDF5 directory/test/.libs]:[full 
-  path of HDF5 directory/src/.libs]:(existing paths)...
-
-  NOTE: This problem ONLY affects the testing of the HDF5 library when you 
-  build from source. It won't affect any applications that would like to link 
-  with the HDF5 shared library since the shared library path needs to be set 
-  anyway.  KY - 2007/8/2
 
 * QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
   "calloc".  All other tests passed.  This indicates that a dataset using 
   chunked storage created by serial HDF5 may not work properly with parallel 
   HDF5.  The calloc test can be skipped by running "prun ... testphdf5 -x 
   calloc".  AKC - 2007/7/12.
-
-* When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 on IRIX
-  6.5, set the environment variable MPI_TYPE_MAX to be a bigger number, for 
-  example 120000, in order to pass the complicated collective IO tests inside 
-  the parallel HDF5 library. This is not a problem inside the parallel HDF5 
-  library. You can always set a bigger number on your system.  KY - 2005/10/6
 
 * A contiguous or chunked dataset created by a sequential version of HDF5 
   might not be able to be modified with a parallel version of the library. 
