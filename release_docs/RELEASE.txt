@@ -475,10 +475,6 @@ Platforms Tested
                                   g++ 4.2.1 20080123
                                   gfortran 4.2.1 20080123
 
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
-                                  F90 MIPSpro 7.4.4m 
-                                  C++ MIPSpro cc 7.4.4m
-				 
     Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
     Linux 2.4.21-47               gcc 3.2.3 20030502
@@ -499,10 +495,6 @@ Platforms Tested
     SunOS 5.10                    cc: Sun C 5.8 
     (linew)                       f90: Sun Fortran 95 8.2 
                                   CC: Sun C++ 5.8 
-    Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
-    (tungsten)	                  gcc 3.2.2 20030222
-                                  Intel(R) C++ Version 9.0
-                                  Intel(R) Fortran Compiler Version 9.0
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               gcc 3.2.2
                                   Intel(R) C++ Version 8.1
@@ -540,8 +532,6 @@ SunOS5.8 64-bit                    n        y      n        y     y     y
 SunOS5.8 32-bit                    n        y      n        y     y     y
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-IRIX64_6.5 64-bit                  n        y      y        y     y     y
-IRIX64_6.5 32-bit                  n        n      n        n     y     y
 AIX-5.2  32-bit                    y        y      y        y     y     y
 AIX-5.2  64-bit                    y        y      y        y     y     y
 Cray XT3 (not tested
@@ -575,8 +565,6 @@ SunOS 5.8 32-bit                    y        y         y         x        y
 SunOS 5.8 64-bit                    y        y         y         x        y
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-IRIX64_6.5 32-bit                   y        n         y         x        y
-IRIX64_6.5 64-bit                   y        y         n         x        y
 AIX-5.2 32-bit                      n        n         n         x        n
 AIX-5.2 64-bit                      n        n         n         x        n
 Cray XT3 (not tested
@@ -622,26 +610,6 @@ Known Problems
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO. (CMC - 2009/04/28)
 
-* We discovered two problems when running collective IO parallel HDF5 tests 
-  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux 
-  cluster at NCSA.
-  Under some complex selection cases, 
-  1) MPI_Get_element returns the wrong value.
-  2) MPI_Type_struct also generates wrong derived data type and corrupt data
-     may be generated.
-  This only happens when turning on collective IO with chunking storage 
-  with some complex selections. We haven't found these problems on other
-  MPI-IO compilers. If you encounter these problems, you may use Independent IO
-  instead.
-
-  Change the following line in your code:
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-
-  to
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
-
-  KY - 2007/08/24
-
 * For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
   tests failed with MPI-IO file locking message. AKC - 2007/6/25.
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
@@ -673,11 +641,6 @@ Known Problems
   contribute no IO and the application asks to do IO with collective, we found
   that when using 4 processors, a simple collective write will be hung
   sometimes. This can be verified with t_mpi test under testpar.
-* On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
-  code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment 
-  variable to some certian value in order to use collective irregular selection code.
-  For example, the current parallel HDF5 test needs to enlarge MPI_TYPE_MAX to 
-  200,000 to make the test pass.
 * The dataset created or rewritten with the v1.6.3 library or after can't 
   be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
   enabled.  There was a bug in the calculating code of the Fletcher32 
