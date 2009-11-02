@@ -320,16 +320,6 @@ Known Problems
   --disable-production configure flag in order to configure in development
   mode. MAM - 2009/03/09.
 
-* QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
-  does not include the -lmpi properly.  This will be fixed in the next
-  release.  AKC - 2007/08/07.
-
-* QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
-  "calloc".  All other tests passed.  This indicates that a dataset using 
-  chunked storage created by serial HDF5 may not work properly with parallel 
-  HDF5.  The calloc test can be skipped by running "prun ... testphdf5 -x 
-  calloc".  AKC - 2007/7/12.
-
 * A contiguous or chunked dataset created by a sequential version of HDF5 
   might not be able to be modified with a parallel version of the library. 
   Use the H5Pset_alloc_time function with H5D_ALLOC_TIME_EARLY to set up the 
@@ -390,19 +380,3 @@ Known Problems
 
 * Use the --disable-shared configure flag if building with an Absoft Fortran
   compiler.
-
-* Information about building with PGI and Intel compilers is available in
-  INSTALL file sections 5.7 and 5.8.
-
-* In LANL QSC, the new cc compiler has problems converting small values of
-  long long (absolute values less than 1**-308) to double.  This triggers
-  the test/dtypes to report failure in the following test:
-      Testing random sw long double -> double conversions
-  If -ieee is used, the converted doubles spread over the range 0.0 to 
-  10**-308.  If -ieee is not used, the converted double values are mostly 
-  0.0, but occasionally appear as 10**-308.  This has been reported to the 
-  system staff.
-
-  All other tests have passed.
-
-
