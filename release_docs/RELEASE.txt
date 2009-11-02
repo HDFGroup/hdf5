@@ -600,6 +600,13 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
+  The error is due to insufficient memory requested. Request a large amount
+  of runtime memory by setting the following environment variable for more
+  memory.
+     LDR_CNTRL=MAXDATA=0x20000000@DSA
+  AKC - 2009/10/31
+
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
   existing. This is due to the MPI_File_open() call failing if the amode has
