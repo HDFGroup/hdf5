@@ -60,7 +60,10 @@ New Features
 
     Library
     -------
-    - None
+    - Added support for filtering densely stored groups.  Many of the API
+      functions related to filters have been extended to support dense groups
+      as well as datasets.  Pipeline messages can now be stored in a group's
+      object header. (NAF/QAK - 2009/11/3)
 
     Parallel Library
     ----------------
