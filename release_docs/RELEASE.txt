@@ -60,6 +60,10 @@ New Features
 
     Library:
     --------
+    - Added support for filtering densely stored groups.  Many of the API
+      functions related to filters have been extended to support dense groups
+      as well as datasets.  Pipeline messages can now be stored in a group's
+      object header. (NAF/QAK - 2009/10/8)
     - The embedded library information is displayed by H5check_version() if a
       version mismatch is detected.  Also changed H5check_version() to
       suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
