@@ -2,15 +2,15 @@
 Expected output for HDF5 C examples tests
 #############################
 The value of the attribute "Integer attribute" is 1 
-Found string attribute; its index is 1 , value =   ABCD 
+Found string attribute; its index is 2 , value =   ABCD 
+
+Name : Character attribute
 
 Name : Float attribute
 Rank : 2 
 Dimension sizes : 2 3 
 Type : FLOAT 
 Values : -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 
-
-Name : Character attribute
 
 Name : Integer attribute
 
