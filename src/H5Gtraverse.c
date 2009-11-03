@@ -711,12 +711,15 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             if(target & H5G_CRT_INTMD_GROUP) {
                 const H5O_ginfo_t def_ginfo = H5G_CRT_GROUP_INFO_DEF;   /* Default group info settings */
                 const H5O_linfo_t def_linfo = H5G_CRT_LINK_INFO_DEF;    /* Default link info settings */
+                const H5O_pline_t def_pline = H5O_CRT_PIPELINE_DEF;     /* Default filter pipeline settings */
                 H5O_ginfo_t	par_ginfo;	/* Group info settings for parent group */
                 H5O_linfo_t	par_linfo;	/* Link info settings for parent group */
+                H5O_pline_t	par_pline;	/* Filter pipeline settings for parent group */
                 H5O_linfo_t	tmp_linfo;	/* Temporary link info settings */
                 htri_t          exists;         /* Whether a group or link info message exists */
                 const H5O_ginfo_t *ginfo;	/* Group info settings for new group */
                 const H5O_linfo_t *linfo;	/* Link info settings for new group */
+                const H5O_pline_t *pline;	/* Filter pipeline settings for new group */
 
                 /* Check for the parent group having a group info message */
                 /* (OK if not found) */
@@ -752,9 +755,25 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     /* Use default link info settings */
                     linfo = &def_linfo;
 
+                /* Check for the parent group having a filter pipeline message */
+                /* (OK if not found) */
+                if((exists = H5O_msg_exists(grp_loc.oloc, H5O_PLINE_ID, dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                if(exists) {
+                    /* Get the filter pipeline for parent group */
+                    if(NULL == H5O_msg_read(grp_loc.oloc, H5O_PLINE_ID, &par_pline, dxpl_id))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "filter pipeline message not present")
+
+                    /* Use parent filter pipeline settings */
+                    pline = &par_pline;
+                } /* end if */
+                else
+                    /* Use default filter pipeline settings */
+                    pline = &def_pline;
+
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */
-                if(H5G_obj_create(grp_oloc.file, dxpl_id, ginfo, linfo, H5P_GROUP_CREATE_DEFAULT, obj_loc.oloc/*out*/) < 0)
+                if(H5G_obj_create_real(grp_oloc.file, dxpl_id, ginfo, linfo, pline, H5P_GROUP_CREATE_DEFAULT, obj_loc.oloc/*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 
                 /* Insert new group into current group's symbol table */

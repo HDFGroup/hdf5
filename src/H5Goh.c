@@ -45,6 +45,8 @@
 /* Local Prototypes */
 /********************/
 
+static void *H5O_group_get_copy_file_udata(void);
+static void H5O_group_free_copy_file_udata(void *udata);
 static htri_t H5O_group_isa(H5O_t *loc);
 static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
     hid_t dxpl_id, hbool_t app_ref);
@@ -73,14 +75,83 @@ static herr_t H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 const H5O_obj_class_t H5O_OBJ_GROUP[1] = {{
     H5O_TYPE_GROUP,		/* object type			*/
     "group",			/* object name, for debugging	*/
-    NULL,			/* get 'copy file' user data	*/
-    NULL,			/* free 'copy file' user data	*/
+    H5O_group_get_copy_file_udata, /* get 'copy file' user data	*/
+    H5O_group_free_copy_file_udata, /* free 'copy file' user data */
     H5O_group_isa, 		/* "isa" message		*/
     H5O_group_open, 		/* open an object of this class */
     H5O_group_create, 		/* create an object of this class */
     H5O_group_get_oloc,		/* get an object header location for an object */
     H5O_group_bh_info 		/* get the index & heap info for an object */
 }};
+
+/* Declare the external free list to manage the H5O_ginfo_t struct */
+H5FL_DEFINE(H5G_copy_file_ud_t);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_group_get_copy_file_udata
+ *
+ * Purpose:	Allocates the user data needed for copying a group's
+ *		object header from file to file.
+ *
+ * Return:	Success:	Non-NULL pointer to user data
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Neil Fortner
+ *              Thursday, July 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_group_get_copy_file_udata(void)
+{
+    void *ret_value;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_copy_file_udata)
+
+    /* Allocate space for the 'copy file' user data for copying groups.
+     * Currently this is only a ginfo, so there is no specific struct type for
+     * this operation. */
+    if(NULL == (ret_value = H5FL_CALLOC(H5G_copy_file_ud_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_group_get_copy_file_udata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_group_free_copy_file_udata
+ *
+ * Purpose:	Release the user data needed for copying a group's
+ *		object header from file to file.
+ *
+ * Return:	<none>
+ *
+ * Programmer:	Neil Fortner
+ *              Thursday, July 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5O_group_free_copy_file_udata(void *_udata)
+{
+    H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *)_udata;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_group_free_copy_file_udata)
+
+    /* Sanity check */
+    HDassert(udata);
+
+    /* Free the ginfo struct (including nested data structs) */
+    H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
+
+    /* Release space for 'copy file' user data (ginfo struct) */
+    (void)H5FL_FREE(H5G_copy_file_ud_t, udata);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5O_group_free_copy_file_udata() */
 
 
 /*-------------------------------------------------------------------------

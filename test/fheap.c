@@ -2684,8 +2684,6 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
     if(!H5F_addr_defined(fh_addr))
         TEST_ERROR
 
-/* XXX: Check heap's I/O filter settings? */
-
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)
         FAIL_STACK_ERROR
@@ -2713,8 +2711,6 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
     if(H5HF_cmp_cparam_test(&tmp_cparam, &test_cparam))
         FAIL_STACK_ERROR
-
-/* XXX: Check heap's I/O filter settings? */
 
     /* Close the fractal heap */
     if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)

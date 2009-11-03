@@ -88,6 +88,8 @@ typedef struct H5O_t H5O_t;
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MIN_DENSE_NAME	"min dense attr"	/* Min. # of attributes to store densely */
 #define H5O_CRT_OHDR_FLAGS_NAME		"object header flags"	/* Object header flags */
+#define H5O_CRT_PIPELINE_NAME           "pline"                 /* Filter pipeline */
+#define H5O_CRT_PIPELINE_DEF            {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL}
 #ifdef H5O_ENABLE_BOGUS
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
@@ -440,6 +442,20 @@ typedef struct H5O_ginfo_t {
  * Filter pipeline message.
  * (Data structure in memory)
  */
+
+/* The initial version of the format */
+#define H5O_PLINE_VERSION_1	1
+
+/* This version encodes the message fields more efficiently */
+/* (Drops the reserved bytes, doesn't align the name and doesn't encode the
+ *      filter name at all if it's a filter provided by the library)
+ */
+#define H5O_PLINE_VERSION_2	2
+
+/* The latest version of the format.  Look through the 'encode' and 'size'
+ *      callbacks for places to change when updating this. */
+#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
+
 typedef struct H5O_pline_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
@@ -681,6 +697,9 @@ H5_DLL herr_t H5O_fill_set_latest_version(H5O_fill_t *fill);
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
+
+/* Filter pipeline operators */
+H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
