@@ -198,8 +198,8 @@ The following platforms and compilers have been tested for this release.
     SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.9 Patch 124867-09
     (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.3 
                                   Patch 127000-07
-                                  Sun WorkShop 6 update 2 C++ 5.8 
-                                  Patch 124863-11
+                                  Sun WorkShop 6 update 2 C++ 5.9 
+                                  Patch 124863-16 2009/09/15 
 
     Intel Xeon Linux 2.6.18-      gcc 3.4.6 20060404
     92.1.10.el5_lustre.1.6.6smp-  Intel(R) C++ Version 10.0.026
