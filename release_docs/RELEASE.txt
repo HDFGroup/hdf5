@@ -294,6 +294,10 @@ Footnotes:
 
 Known Problems
 ==============
+* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
+  it treats "exit(134) the same as if process 0 had received an abort signal.
+  This is fixed and will be available in the next release. AKC - 2009/11/3
+
 * Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
   The error is due to insufficient memory requested. Request a large amount
   of runtime memory by setting the following environment variable for more
