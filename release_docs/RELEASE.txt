@@ -337,7 +337,7 @@ RedHat EL5 2.6.18-164 x86_64 PGI  W  n        y      n        y     y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
 RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
 SuSe Linux 2.4.21 ia64 Intel      C  y        y      y        y     y     n
-Cray XT3 2.0.41                      y        y      y        y     y     n
+Cray XT3 2.0.62                      y        y      y        y     y     n
 
 
 Platform                           Shared  Shared    Shared    Thread-  
@@ -359,7 +359,7 @@ RedHat EL5 2.6.18-164 x86_64 PGI  W  y       y         y         n
 SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n        
 RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
 SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n        
-Cray XT3 2.0.41                      n       n         n         n
+Cray XT3 2.0.62                      n       n         n         n
 
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
