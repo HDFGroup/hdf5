@@ -410,12 +410,12 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#9cd3bb80240d7bcb15f6566bfdc2a1b8">setComment</a> (const H5std_string &amp;name, const H5std_string &amp;comment) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function in that it takes an <code>H5std_string</code> for <em>name</em> and <em>comment</em>.  <a href="#9cd3bb80240d7bcb15f6566bfdc2a1b8"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">H5std_string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#c96fd97d1957073afb48489f49328b05">getLinkval</a> (const char *name, size_t size) const </td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">H5std_string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#37f578942eaf63af90ee6711574d3e85">getLinkval</a> (const char *name, size_t size=0) const </td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the name of the object that the symbolic link points to.  <a href="#c96fd97d1957073afb48489f49328b05"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">H5std_string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#081133f6d513001cfdb88e821a3957ba">getLinkval</a> (const H5std_string &amp;name, size_t size) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the name of the object that the symbolic link points to.  <a href="#37f578942eaf63af90ee6711574d3e85"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">H5std_string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#78c5f5dd6ad7db25a4b9e841bd8fe4d4">getLinkval</a> (const H5std_string &amp;name, size_t size=0) const </td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function in that it takes an <code>H5std_string</code> for <em>name</em>.  <a href="#081133f6d513001cfdb88e821a3957ba"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This is an overloaded member function, provided for convenience. It differs from the above function in that it takes an <code>H5std_string</code> for <em>name</em>.  <a href="#78c5f5dd6ad7db25a4b9e841bd8fe4d4"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">hsize_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1CommonFG.html#ce728c93ccb415f5f6eafb5d0126813f">getNumObjs</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the number of objects in this group.  <a href="#ce728c93ccb415f5f6eafb5d0126813f"></a><br></td></tr>
@@ -1105,7 +1105,7 @@ This is an overloaded member function, provided for convenience. It differs from
 
 </div>
 </div><p>
-<a class="anchor" name="c96fd97d1957073afb48489f49328b05"></a><!-- doxytag: member="H5::CommonFG::getLinkval" ref="c96fd97d1957073afb48489f49328b05" args="(const char *name, size_t size) const " -->
+<a class="anchor" name="37f578942eaf63af90ee6711574d3e85"></a><!-- doxytag: member="H5::CommonFG::getLinkval" ref="37f578942eaf63af90ee6711574d3e85" args="(const char *name, size_t size=0) const " -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1119,7 +1119,7 @@ This is an overloaded member function, provided for convenience. It differs from
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&nbsp;</td>
-          <td class="paramname"> <em>size</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>size</em> = <code>0</code></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -1148,7 +1148,7 @@ Returns the name of the object that the symbolic link points to.
 
 </div>
 </div><p>
-<a class="anchor" name="081133f6d513001cfdb88e821a3957ba"></a><!-- doxytag: member="H5::CommonFG::getLinkval" ref="081133f6d513001cfdb88e821a3957ba" args="(const H5std_string &amp;name, size_t size) const " -->
+<a class="anchor" name="78c5f5dd6ad7db25a4b9e841bd8fe4d4"></a><!-- doxytag: member="H5::CommonFG::getLinkval" ref="78c5f5dd6ad7db25a4b9e841bd8fe4d4" args="(const H5std_string &amp;name, size_t size=0) const " -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -1162,7 +1162,7 @@ Returns the name of the object that the symbolic link points to.
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&nbsp;</td>
-          <td class="paramname"> <em>size</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>size</em> = <code>0</code></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -2450,7 +2450,7 @@ For subclasses, <a class="el" href="classH5_1_1H5File.html">H5File</a> and <a cl
 Implemented in <a class="el" href="classH5_1_1H5File.html#78fad4e8b2d4f26f8cb9c672dd7efd25">H5::H5File</a>, and <a class="el" href="classH5_1_1Group.html#d8fc36cebfc68acaa5f1d2266410a188">H5::Group</a>.
 </div>
 </div><p>
-<hr size="1"><address style="align: right;"><small>Generated on Mon Jun 1 07:53:28 2009 by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Wed Nov 4 14:13:07 2009 by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
 </body>

@@ -404,39 +404,42 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <a name="l00051"></a>00051         <a class="code" href="classH5_1_1StrType.html">StrType</a> getStrType() <span class="keyword">const</span>;
 <a name="l00052"></a>00052         <a class="code" href="classH5_1_1VarLenType.html">VarLenType</a> getVarLenType() <span class="keyword">const</span>;
 <a name="l00053"></a>00053 
-<a name="l00054"></a>00054         <span class="comment">// Gets the dataspace of this abstract dataset - pure virtual.</span>
-<a name="l00055"></a>00055         <span class="keyword">virtual</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a> getSpace() <span class="keyword">const </span>= 0;
+<a name="l00054"></a>00054         <span class="comment">// Gets the size in memory of this abstract dataset.</span>
+<a name="l00055"></a>00055         <span class="keyword">virtual</span> size_t getInMemDataSize() <span class="keyword">const </span>= 0;
 <a name="l00056"></a>00056 
-<a name="l00057"></a>00057         <span class="comment">// Gets the class of the datatype that is used by this abstract</span>
-<a name="l00058"></a>00058         <span class="comment">// dataset.</span>
-<a name="l00059"></a>00059         H5T_class_t getTypeClass() <span class="keyword">const</span>;
-<a name="l00060"></a>00060 
-<a name="l00061"></a>00061         <span class="comment">// Returns the amount of storage size required for this abstract</span>
-<a name="l00062"></a>00062         <span class="comment">// dataset - pure virtual.</span>
-<a name="l00063"></a>00063         <span class="keyword">virtual</span> hsize_t getStorageSize() <span class="keyword">const </span>= 0;
-<a name="l00064"></a>00064 
-<a name="l00065"></a>00065         <span class="comment">// Returns this class name</span>
-<a name="l00066"></a>00066         <span class="keyword">virtual</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass() <span class="keyword">const </span>= 0;
+<a name="l00057"></a>00057         <span class="comment">// Gets the dataspace of this abstract dataset - pure virtual.</span>
+<a name="l00058"></a>00058         <span class="keyword">virtual</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a> getSpace() <span class="keyword">const </span>= 0;
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060         <span class="comment">// Gets the class of the datatype that is used by this abstract</span>
+<a name="l00061"></a>00061         <span class="comment">// dataset.</span>
+<a name="l00062"></a>00062         H5T_class_t getTypeClass() <span class="keyword">const</span>;
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064         <span class="comment">// Returns the amount of storage size required for this abstract</span>
+<a name="l00065"></a>00065         <span class="comment">// dataset - pure virtual.</span>
+<a name="l00066"></a>00066         <span class="keyword">virtual</span> hsize_t getStorageSize() <span class="keyword">const </span>= 0;
 <a name="l00067"></a>00067 
-<a name="l00068"></a>00068         <span class="comment">// Copy constructor</span>
-<a name="l00069"></a>00069         AbstractDs( <span class="keyword">const</span> AbstractDs&amp; original );
+<a name="l00068"></a>00068         <span class="comment">// Returns this class name</span>
+<a name="l00069"></a>00069         <span class="keyword">virtual</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass() <span class="keyword">const </span>= 0;
 <a name="l00070"></a>00070 
-<a name="l00071"></a>00071         <span class="comment">// Destructor</span>
-<a name="l00072"></a>00072         <span class="keyword">virtual</span> ~AbstractDs();
+<a name="l00071"></a>00071         <span class="comment">// Copy constructor</span>
+<a name="l00072"></a>00072         AbstractDs( <span class="keyword">const</span> AbstractDs&amp; original );
 <a name="l00073"></a>00073 
-<a name="l00074"></a>00074    <span class="keyword">protected</span>:
-<a name="l00075"></a>00075         <span class="comment">// Default constructor</span>
-<a name="l00076"></a>00076         AbstractDs();
-<a name="l00077"></a>00077 
-<a name="l00078"></a>00078    <span class="keyword">private</span>:
-<a name="l00079"></a>00079         <span class="comment">// This member function is implemented by DataSet and Attribute.</span>
-<a name="l00080"></a>00080         <span class="keyword">virtual</span> hid_t p_get_type() <span class="keyword">const </span>= 0;
-<a name="l00081"></a>00081 };
-<a name="l00082"></a>00082 <span class="preprocessor">#ifndef H5_NO_NAMESPACE</span>
-<a name="l00083"></a>00083 <span class="preprocessor"></span>}
-<a name="l00084"></a>00084 <span class="preprocessor">#endif</span>
-<a name="l00085"></a>00085 <span class="preprocessor"></span><span class="preprocessor">#endif // _AbstractDs_H</span>
-</pre></div><hr size="1"><address style="align: right;"><small>Generated on Mon Jun 1 07:53:27 2009 by&nbsp;
+<a name="l00074"></a>00074         <span class="comment">// Destructor</span>
+<a name="l00075"></a>00075         <span class="keyword">virtual</span> ~AbstractDs();
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077    <span class="keyword">protected</span>:
+<a name="l00078"></a>00078         <span class="comment">// Default constructor</span>
+<a name="l00079"></a>00079         AbstractDs();
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081    <span class="keyword">private</span>:
+<a name="l00082"></a>00082         <span class="comment">// This member function is implemented by DataSet and Attribute.</span>
+<a name="l00083"></a>00083         <span class="keyword">virtual</span> hid_t p_get_type() <span class="keyword">const </span>= 0;
+<a name="l00084"></a>00084 };
+<a name="l00085"></a>00085 <span class="preprocessor">#ifndef H5_NO_NAMESPACE</span>
+<a name="l00086"></a>00086 <span class="preprocessor"></span>}
+<a name="l00087"></a>00087 <span class="preprocessor">#endif</span>
+<a name="l00088"></a>00088 <span class="preprocessor"></span><span class="preprocessor">#endif // _AbstractDs_H</span>
+</pre></div><hr size="1"><address style="align: right;"><small>Generated on Wed Nov 4 14:13:07 2009 by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
 </body>

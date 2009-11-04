@@ -402,77 +402,84 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <a name="l00049"></a>00049         <span class="keywordtype">void</span> getSpaceStatus(H5D_space_status_t&amp; status) <span class="keyword">const</span>;
 <a name="l00050"></a>00050 
 <a name="l00051"></a>00051         <span class="comment">// Returns the amount of storage size required for this dataset.</span>
-<a name="l00052"></a>00052         hsize_t getStorageSize() <span class="keyword">const</span>;
+<a name="l00052"></a>00052         <span class="keyword">virtual</span> hsize_t getStorageSize() <span class="keyword">const</span>;
 <a name="l00053"></a>00053 
-<a name="l00054"></a>00054         <span class="comment">// Returns the number of bytes required to store VL data.</span>
-<a name="l00055"></a>00055         hsize_t getVlenBufSize( <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space ) <span class="keyword">const</span>;
+<a name="l00054"></a>00054         <span class="comment">// Returns the in memory size of this attribute's data.</span>
+<a name="l00055"></a>00055         <span class="keyword">virtual</span> size_t getInMemDataSize() <span class="keyword">const</span>;
 <a name="l00056"></a>00056 
-<a name="l00057"></a>00057         <span class="comment">// Reclaims VL datatype memory buffers.</span>
-<a name="l00058"></a>00058         <span class="keyword">static</span> <span class="keywordtype">void</span> vlenReclaim(<span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist, <span class="keywordtype">void</span>* buf );
-<a name="l00059"></a>00059         <span class="keyword">static</span> <span class="keywordtype">void</span> vlenReclaim(<span class="keywordtype">void</span> *buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a>);
-<a name="l00060"></a>00060 
-<a name="l00061"></a>00061         <span class="comment">// Reads the data of this dataset and stores it in the provided buffer.</span>
-<a name="l00062"></a>00062         <span class="comment">// The memory and file dataspaces and the transferring property list</span>
-<a name="l00063"></a>00063         <span class="comment">// can be defaults.</span>
-<a name="l00064"></a>00064         <span class="keywordtype">void</span> read( <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
-<a name="l00065"></a>00065         <span class="keywordtype">void</span> read( <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
-<a name="l00066"></a>00066 
-<a name="l00067"></a>00067         <span class="comment">// Writes the buffered data to this dataset.</span>
-<a name="l00068"></a>00068         <span class="comment">// The memory and file dataspaces and the transferring property list</span>
-<a name="l00069"></a>00069         <span class="comment">// can be defaults.</span>
-<a name="l00070"></a>00070         <span class="keywordtype">void</span> write( <span class="keyword">const</span> <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
-<a name="l00071"></a>00071         <span class="keywordtype">void</span> write( <span class="keyword">const</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
-<a name="l00072"></a>00072 
-<a name="l00073"></a>00073         <span class="comment">// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet</span>
-<a name="l00074"></a>00074         <span class="keywordtype">int</span> iterateElems( <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space, H5D_operator_t op, <span class="keywordtype">void</span>* op_data = NULL );
+<a name="l00057"></a>00057         <span class="comment">// Returns the number of bytes required to store VL data.</span>
+<a name="l00058"></a>00058         hsize_t getVlenBufSize( <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space ) <span class="keyword">const</span>;
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060         <span class="comment">// Reclaims VL datatype memory buffers.</span>
+<a name="l00061"></a>00061         <span class="keyword">static</span> <span class="keywordtype">void</span> vlenReclaim(<span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist, <span class="keywordtype">void</span>* buf );
+<a name="l00062"></a>00062         <span class="keyword">static</span> <span class="keywordtype">void</span> vlenReclaim(<span class="keywordtype">void</span> *buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a>);
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064         <span class="comment">// Reads the data of this dataset and stores it in the provided buffer.</span>
+<a name="l00065"></a>00065         <span class="comment">// The memory and file dataspaces and the transferring property list</span>
+<a name="l00066"></a>00066         <span class="comment">// can be defaults.</span>
+<a name="l00067"></a>00067         <span class="keywordtype">void</span> read( <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
+<a name="l00068"></a>00068         <span class="keywordtype">void</span> read( <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070         <span class="comment">// Writes the buffered data to this dataset.</span>
+<a name="l00071"></a>00071         <span class="comment">// The memory and file dataspaces and the transferring property list</span>
+<a name="l00072"></a>00072         <span class="comment">// can be defaults.</span>
+<a name="l00073"></a>00073         <span class="keywordtype">void</span> write( <span class="keyword">const</span> <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
+<a name="l00074"></a>00074         <span class="keywordtype">void</span> write( <span class="keyword">const</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; mem_type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; mem_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; file_space = <a class="code" href="classH5_1_1DataSpace.html#f19fb72eae0855e07830c6d9a6f4748d">DataSpace::ALL</a>, <span class="keyword">const</span> <a class="code" href="classH5_1_1DSetMemXferPropList.html">DSetMemXferPropList</a>&amp; xfer_plist = <a class="code" href="classH5_1_1DSetMemXferPropList.html#47bb48aeb00da456b7c9f1d86fdc2acf">DSetMemXferPropList::DEFAULT</a> ) <span class="keyword">const</span>;
 <a name="l00075"></a>00075 
-<a name="l00076"></a>00076         <span class="comment">// Retrieves the type of object that an object reference points to.</span>
-<a name="l00077"></a>00077         H5G_obj_t getObjType(<span class="keywordtype">void</span> *ref, H5R_type_t ref_type = H5R_OBJECT) <span class="keyword">const</span>;
+<a name="l00076"></a>00076         <span class="comment">// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet</span>
+<a name="l00077"></a>00077         <span class="keywordtype">int</span> iterateElems( <span class="keywordtype">void</span>* buf, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataType.html">DataType</a>&amp; type, <span class="keyword">const</span> <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a>&amp; space, H5D_operator_t op, <span class="keywordtype">void</span>* op_data = NULL );
 <a name="l00078"></a>00078 
-<a name="l00079"></a>00079         <span class="comment">// Retrieves a dataspace with the region pointed to selected.</span>
-<a name="l00080"></a>00080         <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a> getRegion(<span class="keywordtype">void</span> *ref, H5R_type_t ref_type = H5R_DATASET_REGION) <span class="keyword">const</span>;
+<a name="l00079"></a>00079         <span class="comment">// Retrieves the type of object that an object reference points to.</span>
+<a name="l00080"></a>00080         H5G_obj_t getObjType(<span class="keywordtype">void</span> *ref, H5R_type_t ref_type = H5R_OBJECT) <span class="keyword">const</span>;
 <a name="l00081"></a>00081 
-<a name="l00082"></a>00082         <span class="comment">// Returns this class name</span>
-<a name="l00083"></a><a class="code" href="classH5_1_1DataSet.html#f789313a3635e675f76dccb10b39e141">00083</a>         <span class="keyword">virtual</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass ()<span class="keyword"> const </span>{ <span class="keywordflow">return</span>(<span class="stringliteral">"DataSet"</span>); }
+<a name="l00082"></a>00082         <span class="comment">// Retrieves a dataspace with the region pointed to selected.</span>
+<a name="l00083"></a>00083         <a class="code" href="classH5_1_1DataSpace.html">DataSpace</a> getRegion(<span class="keywordtype">void</span> *ref, H5R_type_t ref_type = H5R_DATASET_REGION) <span class="keyword">const</span>;
 <a name="l00084"></a>00084 
-<a name="l00085"></a>00085         <span class="comment">// Creates a dataset by way of dereference.</span>
-<a name="l00086"></a>00086         DataSet(<a class="code" href="classH5_1_1H5Object.html">H5Object</a>&amp; obj, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
-<a name="l00087"></a>00087         DataSet(<a class="code" href="classH5_1_1H5File.html">H5File</a>&amp; h5file, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
-<a name="l00088"></a>00088         DataSet(<a class="code" href="classH5_1_1Attribute.html">Attribute</a>&amp; attr, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
-<a name="l00089"></a>00089 
-<a name="l00090"></a>00090         <span class="comment">// Default constructor.</span>
-<a name="l00091"></a>00091         DataSet();
+<a name="l00085"></a>00085         <span class="comment">// Returns this class name</span>
+<a name="l00086"></a><a class="code" href="classH5_1_1DataSet.html#f789313a3635e675f76dccb10b39e141">00086</a>         <span class="keyword">virtual</span> <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a> fromClass ()<span class="keyword"> const </span>{ <span class="keywordflow">return</span>(<span class="stringliteral">"DataSet"</span>); }
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088         <span class="comment">// Creates a dataset by way of dereference.</span>
+<a name="l00089"></a>00089         DataSet(<a class="code" href="classH5_1_1H5Object.html">H5Object</a>&amp; obj, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
+<a name="l00090"></a>00090         DataSet(<a class="code" href="classH5_1_1H5File.html">H5File</a>&amp; h5file, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
+<a name="l00091"></a>00091         DataSet(<a class="code" href="classH5_1_1Attribute.html">Attribute</a>&amp; attr, <span class="keywordtype">void</span>* ref, H5R_type_t ref_type = H5R_OBJECT);
 <a name="l00092"></a>00092 
-<a name="l00093"></a>00093         <span class="comment">// Copy constructor.</span>
-<a name="l00094"></a>00094         DataSet( <span class="keyword">const</span> DataSet&amp; original );
+<a name="l00093"></a>00093         <span class="comment">// Default constructor.</span>
+<a name="l00094"></a>00094         DataSet();
 <a name="l00095"></a>00095 
-<a name="l00096"></a>00096         <span class="comment">// Creates a copy of an existing DataSet using its id.</span>
-<a name="l00097"></a>00097         DataSet(<span class="keyword">const</span> hid_t existing_id);
+<a name="l00096"></a>00096         <span class="comment">// Copy constructor.</span>
+<a name="l00097"></a>00097         DataSet( <span class="keyword">const</span> DataSet&amp; original );
 <a name="l00098"></a>00098 
-<a name="l00099"></a>00099         <span class="comment">// Gets the dataset id.</span>
-<a name="l00100"></a>00100         <span class="keyword">virtual</span> hid_t getId() <span class="keyword">const</span>;
+<a name="l00099"></a>00099         <span class="comment">// Creates a copy of an existing DataSet using its id.</span>
+<a name="l00100"></a>00100         DataSet(<span class="keyword">const</span> hid_t existing_id);
 <a name="l00101"></a>00101 
-<a name="l00102"></a>00102         <span class="comment">// Destructor: properly terminates access to this dataset.</span>
-<a name="l00103"></a>00103         <span class="keyword">virtual</span> ~DataSet();
+<a name="l00102"></a>00102         <span class="comment">// Gets the dataset id.</span>
+<a name="l00103"></a>00103         <span class="keyword">virtual</span> hid_t getId() <span class="keyword">const</span>;
 <a name="l00104"></a>00104 
-<a name="l00105"></a>00105    <span class="keyword">protected</span>:
-<a name="l00106"></a>00106         <span class="comment">// Sets the dataset id.</span>
-<a name="l00107"></a>00107         <span class="keyword">virtual</span> <span class="keywordtype">void</span> p_setId(<span class="keyword">const</span> hid_t new_id);
-<a name="l00108"></a>00108 
-<a name="l00109"></a>00109    <span class="keyword">private</span>:
-<a name="l00110"></a>00110         hid_t id;       <span class="comment">// HDF5 dataset id</span>
+<a name="l00105"></a>00105         <span class="comment">// Destructor: properly terminates access to this dataset.</span>
+<a name="l00106"></a>00106         <span class="keyword">virtual</span> ~DataSet();
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108    <span class="keyword">protected</span>:
+<a name="l00109"></a>00109         <span class="comment">// Sets the dataset id.</span>
+<a name="l00110"></a>00110         <span class="keyword">virtual</span> <span class="keywordtype">void</span> p_setId(<span class="keyword">const</span> hid_t new_id);
 <a name="l00111"></a>00111 
-<a name="l00112"></a>00112         <span class="comment">// This function contains the common code that is used by</span>
-<a name="l00113"></a>00113         <span class="comment">// getTypeClass and various API functions getXxxType</span>
-<a name="l00114"></a>00114         <span class="comment">// defined in AbstractDs for generic datatype and specific</span>
-<a name="l00115"></a>00115         <span class="comment">// sub-types</span>
-<a name="l00116"></a>00116         <span class="keyword">virtual</span> hid_t p_get_type() <span class="keyword">const</span>;
-<a name="l00117"></a>00117 };
-<a name="l00118"></a>00118 <span class="preprocessor">#ifndef H5_NO_NAMESPACE</span>
-<a name="l00119"></a>00119 <span class="preprocessor"></span>}
-<a name="l00120"></a>00120 <span class="preprocessor">#endif</span>
-<a name="l00121"></a>00121 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
-</pre></div><hr size="1"><address style="align: right;"><small>Generated on Mon Jun 1 07:53:27 2009 by&nbsp;
+<a name="l00112"></a>00112    <span class="keyword">private</span>:
+<a name="l00113"></a>00113         hid_t id;       <span class="comment">// HDF5 dataset id</span>
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115         <span class="comment">// This function contains the common code that is used by</span>
+<a name="l00116"></a>00116         <span class="comment">// getTypeClass and various API functions getXxxType</span>
+<a name="l00117"></a>00117         <span class="comment">// defined in AbstractDs for generic datatype and specific</span>
+<a name="l00118"></a>00118         <span class="comment">// sub-types</span>
+<a name="l00119"></a>00119         <span class="keyword">virtual</span> hid_t p_get_type() <span class="keyword">const</span>;
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121         <span class="comment">// Reads variable or fixed len strings from this dataset.</span>
+<a name="l00122"></a>00122         <span class="keywordtype">void</span> p_read_fixed_len(<span class="keyword">const</span> hid_t mem_type_id, <span class="keyword">const</span> hid_t mem_space_id, <span class="keyword">const</span> hid_t file_space_id, <span class="keyword">const</span> hid_t xfer_plist_id, <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; strg) <span class="keyword">const</span>;
+<a name="l00123"></a>00123         <span class="keywordtype">void</span> p_read_variable_len(<span class="keyword">const</span> hid_t mem_type_id, <span class="keyword">const</span> hid_t mem_space_id, <span class="keyword">const</span> hid_t file_space_id, <span class="keyword">const</span> hid_t xfer_plist_id, <a class="code" href="H5Exception_8h.html#5c3fdf56d98d169f63f1b114803db592">H5std_string</a>&amp; strg) <span class="keyword">const</span>;
+<a name="l00124"></a>00124 };
+<a name="l00125"></a>00125 <span class="preprocessor">#ifndef H5_NO_NAMESPACE</span>
+<a name="l00126"></a>00126 <span class="preprocessor"></span>}
+<a name="l00127"></a>00127 <span class="preprocessor">#endif</span>
+<a name="l00128"></a>00128 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+</pre></div><hr size="1"><address style="align: right;"><small>Generated on Wed Nov 4 14:13:07 2009 by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
 </body>

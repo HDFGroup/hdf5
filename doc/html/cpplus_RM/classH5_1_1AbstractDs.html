@@ -389,6 +389,8 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classH5_1_1VarLenType.html">VarLenType</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1AbstractDs.html#cca5d386d2dfd1a801af7a5c31f8c711">getVarLenType</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the floating-point datatype of this abstract dataset, which can be a dataset or an attribute.  <a href="#cca5d386d2dfd1a801af7a5c31f8c711"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">virtual size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1AbstractDs.html#bf03ce9861ccb7cb1b59eb3e54db253e">getInMemDataSize</a> () const =0</td></tr>
+
 <tr><td class="memItemLeft" nowrap align="right" valign="top">virtual <a class="el" href="classH5_1_1DataSpace.html">DataSpace</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1AbstractDs.html#3afefb3c3be0ec2efcf880361695706e">getSpace</a> () const =0</td></tr>
 
 <tr><td class="memItemLeft" nowrap align="right" valign="top">H5T_class_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1AbstractDs.html#e7c9c2ca8092d6ec1e6f265b82775c96">getTypeClass</a> () const </td></tr>
@@ -692,6 +694,27 @@ Returns the floating-point datatype of this abstract dataset, which can be a dat
 
 </div>
 </div><p>
+<a class="anchor" name="bf03ce9861ccb7cb1b59eb3e54db253e"></a><!-- doxytag: member="H5::AbstractDs::getInMemDataSize" ref="bf03ce9861ccb7cb1b59eb3e54db253e" args="() const =0" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual size_t H5::AbstractDs::getInMemDataSize           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"> const<code> [pure virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+
+<p>
+Implemented in <a class="el" href="classH5_1_1Attribute.html#b56b7f978368504a777e15759f4a6e6a">H5::Attribute</a>, and <a class="el" href="classH5_1_1DataSet.html#e74661cf21960e8579fa8c5c6a6cfd10">H5::DataSet</a>.
+</div>
+</div><p>
 <a class="anchor" name="3afefb3c3be0ec2efcf880361695706e"></a><!-- doxytag: member="H5::AbstractDs::getSpace" ref="3afefb3c3be0ec2efcf880361695706e" args="() const =0" -->
 <div class="memitem">
 <div class="memproto">
@@ -783,7 +806,7 @@ Implemented in <a class="el" href="classH5_1_1Attribute.html#f395a4a4469698576b9
 Implemented in <a class="el" href="classH5_1_1Attribute.html#800c95e9bfeaa725b3ed8d86351e90d5">H5::Attribute</a>, and <a class="el" href="classH5_1_1DataSet.html#f789313a3635e675f76dccb10b39e141">H5::DataSet</a>.
 </div>
 </div><p>
-<hr size="1"><address style="align: right;"><small>Generated on Mon Jun 1 07:53:28 2009 by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Wed Nov 4 14:13:07 2009 by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
 </body>

@@ -390,9 +390,12 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#69ce56bd2958d86c74cc1b923dfc23a9">getSpaceStatus</a> (H5D_space_status_t &amp;status) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Determines whether space has been allocated for a dataset.  <a href="#69ce56bd2958d86c74cc1b923dfc23a9"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">hsize_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#594d12bbf45a2f2824935d31f612e726">getStorageSize</a> () const </td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">virtual hsize_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#594d12bbf45a2f2824935d31f612e726">getStorageSize</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the amount of storage required for a dataset.  <a href="#594d12bbf45a2f2824935d31f612e726"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">virtual size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#e74661cf21960e8579fa8c5c6a6cfd10">getInMemDataSize</a> () const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Gets the size in memory of the dataset's data.  <a href="#e74661cf21960e8579fa8c5c6a6cfd10"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">hsize_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#5a840c880da67f8f569a5b1deca9421e">getVlenBufSize</a> (<a class="el" href="classH5_1_1DataType.html">DataType</a> &amp;type, <a class="el" href="classH5_1_1DataSpace.html">DataSpace</a> &amp;space) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the number of bytes required to store VL data.  <a href="#5a840c880da67f8f569a5b1deca9421e"></a><br></td></tr>
@@ -452,7 +455,7 @@ style='font-size:22.0pt'><o:p></o:p></span></b></p>
 <tr><td colspan="2"><br><h2>Protected Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classH5_1_1DataSet.html#b395dab52b95d5034be339b6fdbbbcc8">p_setId</a> (const hid_t new_id)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Sets the identifier of this dataset to a new value.  <a href="#b395dab52b95d5034be339b6fdbbbcc8"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Sets the identifier of this object to a new value.  <a href="#b395dab52b95d5034be339b6fdbbbcc8"></a><br></td></tr>
 </table>
 <hr><a name="_details"></a><h2>Detailed Description</h2>
 <dl compact><dt><b>Examples: </b></dt><dd>
@@ -1025,6 +1028,35 @@ Returns the amount of storage required for a dataset.
 Implements <a class="el" href="classH5_1_1AbstractDs.html#e90e2e730c114423a00a2643206abc44">H5::AbstractDs</a>.
 </div>
 </div><p>
+<a class="anchor" name="e74661cf21960e8579fa8c5c6a6cfd10"></a><!-- doxytag: member="H5::DataSet::getInMemDataSize" ref="e74661cf21960e8579fa8c5c6a6cfd10" args="() const " -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t H5::DataSet::getInMemDataSize           </td>
+          <td>(</td>
+          <td class="paramname">          </td>
+          <td>&nbsp;)&nbsp;</td>
+          <td width="100%"> const<code> [virtual]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>
+Gets the size in memory of the dataset's data. 
+<p>
+<dl compact><dt><b>Returns:</b></dt><dd>Size of data (in memory) </dd></dl>
+<dl compact><dt><b>Exceptions:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em><a class="el" href="classH5_1_1DataSetIException.html">H5::DataSetIException</a></em>&nbsp;</td><td></td></tr>
+  </table>
+</dl>
+
+<p>
+Implements <a class="el" href="classH5_1_1AbstractDs.html#bf03ce9861ccb7cb1b59eb3e54db253e">H5::AbstractDs</a>.
+</div>
+</div><p>
 <a class="anchor" name="5a840c880da67f8f569a5b1deca9421e"></a><!-- doxytag: member="H5::DataSet::getVlenBufSize" ref="5a840c880da67f8f569a5b1deca9421e" args="(DataType &amp;type, DataSpace &amp;space) const " -->
 <div class="memitem">
 <div class="memproto">
@@ -1247,7 +1279,7 @@ Reads raw data from the specified dataset.
           <td class="memname">void H5::DataSet::read           </td>
           <td>(</td>
           <td class="paramtype">H5std_string &amp;&nbsp;</td>
-          <td class="paramname"> <em>buf</em>, </td>
+          <td class="paramname"> <em>strg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1285,6 +1317,20 @@ Reads raw data from the specified dataset.
 <p>
 This is an overloaded member function, provided for convenience. It takes a reference to a <code>H5std_string</code> for the buffer. 
 <p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>buf</em>&nbsp;</td><td>- IN: Buffer for read data </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>mem_type</em>&nbsp;</td><td>- IN: Memory datatype </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>mem_space</em>&nbsp;</td><td>- IN: Memory dataspace </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>file_space</em>&nbsp;</td><td>- IN: Dataset's dataspace in the file </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>xfer_plist</em>&nbsp;</td><td>- IN: Transfer property list for this I/O operation </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Exceptions:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em><a class="el" href="classH5_1_1DataSetIException.html">H5::DataSetIException</a></em>&nbsp;</td><td></td></tr>
+  </table>
+</dl>
 
 </div>
 </div><p>
@@ -1599,7 +1645,7 @@ Implements <a class="el" href="classH5_1_1IdComponent.html#4b5dc282b178ac7170477
 <div class="memdoc">
 
 <p>
-Sets the identifier of this dataset to a new value. 
+Sets the identifier of this object to a new value. 
 <p>
 <dl compact><dt><b>Exceptions:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
@@ -1609,7 +1655,7 @@ Sets the identifier of this dataset to a new value.
 
 </div>
 </div><p>
-<hr size="1"><address style="align: right;"><small>Generated on Mon Jun 1 07:53:28 2009 by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Wed Nov 4 14:13:07 2009 by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.7 </small></address>
 </body>
