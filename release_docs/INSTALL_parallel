@@ -51,17 +51,21 @@ parallel HDF5 with one of the above, just set CC as it and configure.
 The "--enable-parallel" is optional in this case.
 
     $ CC=/usr/local/mpi/bin/mpicc ./configure --prefix=<install-directory>
-    $ make
-    $ make check
+    $ make		# build the library
+    $ make check	# verify the correctness
+			# Read the Details section about parallel tests.
     $ make install
 
 
 2.2. IBM SP
 -----------
-Make sure your environment variables are set correctly to compile and execute
-a single process mpi applications for the SP machine. Unfortunately, the
-setting varies from machine to machine.  E.g., the following works for the
-IBM SP machine at LLNL.
+During the build stage, the H5detect is compiled and executed to generate
+the source file H5Tinit.c which is compiled as part of the HDF5 library. In
+parallel mode, make sure your environment variables are set correctly to
+execute a single process mpi application. Otherwise, multiple processes
+attempt to write to the same H5Tinit.c file, resulting in a scrambled
+source file.  Unfortunately, the setting varies from machine to machine.
+E.g., the following works for the IBM SP machine at LLNL.
 
     setenv MP_PROCS     1
     setenv MP_NODES     1
