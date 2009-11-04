@@ -162,7 +162,7 @@ TESTING() {
 		;;
 	    *)	# W/A:   Warning, abort and exit non-0.
 		WarnMesg > $expect
-		expect_code=134	# Signal Abort exit code (128+6)
+		expect_code=6	# Signal Abort exit code (128+6)
 		;;
 	esac
     fi
