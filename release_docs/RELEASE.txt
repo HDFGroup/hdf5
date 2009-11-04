@@ -411,16 +411,13 @@ Known Problems
   commands.  First, ask your system administrator to clean them out.  
   Lastly, request IBM to provide a means to run poe without the debug socket.
 
-* The --enable-static-exec configure flag fails to compile for Solaris
-  platforms. This is due to the fact that not all of the system libraries on 
-  Solaris are available in a static format.
-
-  The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platforms for serial mode. The parallel mode works fine with 
-  this option.
-  
-  It is suggested that you do not use this option on these platforms
-  during configuration.
+* The --enable-static-exec configure flag will only statically link libraries
+  if the static version of that library is present. If only the shared version
+  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
+  for example, only have shared versions), the flag should still result in a 
+  successful compilation, but note that the installed executables will not be 
+  fully static. Thus, the only guarantee on these systems is that the 
+  executable is statically linked with just the HDF5 library.
 
 * There is also a configure error on Altix machines that incorrectly reports 
   when a version of Szip without an encoder is being used.
