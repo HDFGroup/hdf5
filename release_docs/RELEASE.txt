@@ -227,11 +227,6 @@ The following platforms and compilers have been tested for this release.
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 10.1.
     
-    Linux 2.6.18-63chaos #1 SMP   Intel(R) C, C++, Fortran Compilers for 
-    SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
-    (LLNL Zeus)                   Versions 9.1.
-				  gcc/gfortran/g++ (GCC) 4.1.2.
-
     Windows XP                    Visual Studio .NET
                                   Visual Studio 2005 w/ Intel Fortran 9.1
                                   Cygwin(native gcc compiler and g95)
@@ -314,6 +309,10 @@ Cray XT3 2.0.41                      n       n         n         n
 
 Known Problems
 ==============
+* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
+  it treats "exit(134) the same as if process 0 had received an abort signal.
+  This is fixed and will be available in the next release. AKC - 2009/11/3
+
 * Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
   The error is due to insufficient memory requested. Request a large amount
   of runtime memory by setting the following environment variable for more
@@ -383,10 +382,6 @@ Known Problems
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
   optimization causes failures in several HDF5 library tests. 
-
-* For LLNL, uP: both serial and parallel tests pass.  
-  Zeus: Serial tests pass but parallel tests fail with a known problem in MPI.
-  ubgl: Serial tests pass but parallel tests fail. 
 
 * On mpich 1.2.5 and 1.2.6, if more than two processes contribute no IO and 
   the application asks to do collective IO, we have found that when using 4 
