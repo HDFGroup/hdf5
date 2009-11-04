@@ -349,9 +349,10 @@ Bug Fixes since HDF5-1.8.0 release
       being used. MAM - 2009/10/01
     - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
       recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
-    - The --enable-static-exec flag has been fixed and will now generate
-      static executables within the installed bin directory when used.
-      MAM - 2009/07/23 - BZ #1583
+    - The --enable-static-exec flag will now properly place the -static flag
+      on the link line of all installed executables. This will force the
+      executable to link with static libraries over shared libraries, provided
+      the static libraries are available. MAM - 2009/08/31 - BZ #1583
     - The --includedir=DIR configuration option now works as intended, and can
       be used to specify the location to install C header files. The default
       location remains unchanged, residing at ${prefix}/include. 
@@ -690,16 +691,13 @@ Known Problems
   test again, change the port address in test/stream_test.c to one not
   being used in the host.
 
-* The --enable-static-exec configure flag fails to compile for Solaris
-  platforms. This is due to the fact that not all of the system
-  libraries on Solaris are available in a static format.
-
-  The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode. The parallel mode works fine
-  with this option.
-  
-  It is suggested that you don't use this option on these platforms
-  during configuration.
+* The --enable-static-exec configure flag will only statically link libraries
+  if the static version of that library is present. If only the shared version
+  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
+  for example, only have shared versions), the flag should still result in a 
+  successful compilation, but note that the installed executables will not be 
+  fully static. Thus, the only guarantee on these systems is that the 
+  executable is statically linked with just the HDF5 library.
 
 * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
