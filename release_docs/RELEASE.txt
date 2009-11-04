@@ -282,15 +282,10 @@ The following platforms and compilers have been tested for this release.
 
     Linux 2.6.9-55.0.9.EL_lustre  Intel(R) C, C++, Fortran Compilers for 
     .1.4.11.1smp #1 SMP           applications running on Intel(R) 64, 
-    SMP x86_64 GNU/Linux          Versions 9.1.
-    (SNL Spirit)             
-                                  
-    Linux 2.6.9-55.0.9.EL_lustre  Intel(R) C, C++, Fortran Compilers for 
-    .1.4.11.1smp #1 SMP           applications running on Intel(R) 64, 
     SMP x86_64 GNU/Linux          Versions 10.1.
     (SNL Thunderbird)             
                                   
-    Linux 2.6.18-63chaos #1 SMP   Intel(R) C, C++, Fortran Compilers for 
+    Linux 2.6.18-76chaos #1 SMP   Intel(R) C, C++, Fortran Compilers for 
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 10.1.
     
