@@ -494,12 +494,12 @@ Platforms Tested
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
                                   SGI MPI
-    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.10                    cc: Sun C 5.8 
-    (linew)                       f90: Sun Fortran 95 8.2 
-                                  CC: Sun C++ 5.8 
+    SunOS 5.10                    Sun C 5.9 SunOS_sparc 
+                                  Patch 124867-11 2009/04/30
+    (linew)                       Sun Fortran 95 8.3 SunOS_sparc 
+                                  Patch 127000-11 2009/10/06
+                                  Sun C++ 5.9 SunOS_sparc 
+                                  Patch 124863-16 2009/09/15
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               gcc 3.2.2
                                   Intel(R) C++ Version 8.1
@@ -515,8 +515,9 @@ Platforms Tested
     Windows Vista			
 			          Visual Studio 2005
 
-    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
+    MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
+                                  GNU Fortran (GCC) 4.3.0 20070810
     Alpha Open VMS 7.3
 
 
