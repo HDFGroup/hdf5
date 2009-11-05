@@ -534,8 +534,6 @@ Supported Configuration Features Summary
 
 Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
-SunOS5.8 64-bit                    n        y      n        y     y     y
-SunOS5.8 32-bit                    n        y      n        y     y     y
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
 AIX-5.2  32-bit                    y        y      y        y     y     y
@@ -545,8 +543,7 @@ Cray XT3 (not tested
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
 Windows Vista                      n        n      n        y     y     y
-Mac OS X 10.4 PowerPC              n               n
-Mac OS X 10.4 Intel                n        y      n        y     y     y
+Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 6.2 32-bit                 n        n      n        y     y     y
 FreeBSD 6.2 64-bit
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
@@ -567,8 +564,6 @@ Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
-SunOS 5.8 32-bit                    y        y         y         x        y
-SunOS 5.8 64-bit                    y        y         y         x        y
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
 AIX-5.2 32-bit                      n        n         n         x        n
@@ -578,7 +573,7 @@ Cray XT3 (not tested
 Windows XP                          y        y(3)      y         y        y
 Windows XP x64                      y        y(3)      y         y        y
 Windows Vista                       y        n         n         y        y
-Mac OS X 10.4 Intel Duo             y        y         y         x        n
+Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
