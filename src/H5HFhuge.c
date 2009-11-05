@@ -987,7 +987,7 @@ H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id)
 
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
-        if(H5B2_delete(hdr->f, dxpl_id, H5HF_BT2_INDIR, hdr->huge_bt2_addr, NULL, NULL) < 0)
+        if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
         /* Reset the information about 'huge' objects in the file */
@@ -1042,21 +1042,21 @@ H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     /* Delete the v2 B-tree */
     if(hdr->huge_ids_direct) {
         if(hdr->filter_len > 0) {
-            if(H5B2_delete(hdr->f, dxpl_id, H5HF_BT2_FILT_DIR, hdr->huge_bt2_addr, H5HF_huge_bt2_filt_dir_remove, &udata) < 0)
+            if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, H5HF_huge_bt2_filt_dir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
         } /* end if */
         else {
-            if(H5B2_delete(hdr->f, dxpl_id, H5HF_BT2_DIR, hdr->huge_bt2_addr, H5HF_huge_bt2_dir_remove, &udata) < 0)
+            if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, H5HF_huge_bt2_dir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
         } /* end else */
     } /* end if */
     else {
         if(hdr->filter_len > 0) {
-            if(H5B2_delete(hdr->f, dxpl_id, H5HF_BT2_FILT_INDIR, hdr->huge_bt2_addr, H5HF_huge_bt2_filt_indir_remove, &udata) < 0)
+            if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, H5HF_huge_bt2_filt_indir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
         } /* end if */
         else {
-            if(H5B2_delete(hdr->f, dxpl_id, H5HF_BT2_INDIR, hdr->huge_bt2_addr, H5HF_huge_bt2_indir_remove, &udata) < 0)
+            if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, H5HF_huge_bt2_indir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
         } /* end else */
     } /* end else */

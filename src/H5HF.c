@@ -322,7 +322,7 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_get_heap_addr(H5HF_t *fh, haddr_t *heap_addr_p)
+H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5HF_get_heap_addr)
 
