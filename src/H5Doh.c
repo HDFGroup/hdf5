@@ -401,7 +401,7 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     if((exists = H5O_msg_exists_oh(oh, H5O_EFL_ID)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for EFL message")
 
-    if(exists && H5D_efl_is_space_alloc(&layout)) {
+    if(exists && H5D_efl_is_space_alloc(&layout.storage)) {
 	H5O_efl_t efl;			/* External File List message */
 
         /* Start with clean EFL info */

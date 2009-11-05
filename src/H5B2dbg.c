@@ -221,7 +221,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree internal node
      */
-    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, hdr, addr, nrec, depth, H5AC_READ)))
+    if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, addr, nrec, depth, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */

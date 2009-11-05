@@ -609,7 +609,7 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_link_iterate_table, FAIL)
+    FUNC_ENTER_NOAPI_NOERR(H5G_link_iterate_table, -)
 
     /* Sanity check */
     HDassert(ltable);

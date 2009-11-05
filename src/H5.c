@@ -348,7 +348,7 @@ H5dont_atexit(void)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOFS(H5dont_atexit)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5dont_atexit)
     H5TRACE0("e","");
 
     if(H5_dont_atexit_g)
@@ -622,10 +622,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;            /* If we've already checked the version info */
     static unsigned int	disable_version_check = 0;      /* Set if the version check should be disabled */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-    static char *version_mismatch_warning=VERSION_MISMATCH_WARNING;
+    static const char *version_mismatch_warning = VERSION_MISMATCH_WARNING;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_NOINIT_NOFS(H5check_version)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5check_version)
     H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
 
     /* Don't check again, if we already have */
@@ -692,7 +692,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	 */
 	sprintf(lib_str, "HDF5 library version: %d.%d.%d",
 	    H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-	if (*substr){
+	if(*substr) {
 	    HDstrcat(lib_str, "-");
 	    HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
 	} /* end if */
@@ -769,7 +769,7 @@ H5close(void)
      * whole library just to release it all right away.  It is safe to call
      * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT_NOFS(H5close)
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS(H5close)
     H5TRACE0("e","");
 
     H5_term_library();

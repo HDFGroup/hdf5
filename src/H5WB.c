@@ -284,7 +284,7 @@ H5WB_unwrap(H5WB_t *wb)
     } /* end if */
 
     /* Release the buffer wrapper info */
-    H5FL_FREE(H5WB_t, wb);
+    wb = H5FL_FREE(H5WB_t, wb);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5WB_unwrap() */

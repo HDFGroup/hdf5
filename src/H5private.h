@@ -1748,10 +1748,14 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)
 #endif /* NDEBUG */
 
-#define FUNC_ENTER_COMMON(func_name,asrt)                                     \
-    static const char FUNC[]=#func_name;                                      \
+#define FUNC_ENTER_COMMON(func_name, asrt)                                    \
+    static const char FUNC[] = #func_name;                                    \
     hbool_t err_occurred = FALSE;					      \
-    FUNC_ENTER_COMMON_NOFUNC(func_name,asrt);
+    FUNC_ENTER_COMMON_NOFUNC(func_name, asrt);
+
+#define FUNC_ENTER_COMMON_NOERR(func_name, asrt)                              \
+    static const char FUNC[] = #func_name;                                    \
+    FUNC_ENTER_COMMON_NOFUNC(func_name, asrt);
 
 /* Threadsafety initialization code for API routines */
 #define FUNC_ENTER_API_THREADSAFE                                             \
@@ -1762,22 +1766,37 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
    H5_API_UNSET_CANCEL                                                        \
    H5_API_LOCK
 
-/* Threadsafety termination code for API routines */
-#define FUNC_LEAVE_API_THREADSAFE                                             \
-    H5_API_UNLOCK                                                             \
-    H5_API_SET_CANCEL
-
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS(func_name)                                        \
     MPE_LOG_VARS(func_name)                                                   \
     H5TRACE_DECL
 
+#define FUNC_ENTER_API_COMMON(func_name)				      \
+    FUNC_ENTER_API_VARS(func_name)                                            \
+    FUNC_ENTER_COMMON(func_name, H5_IS_API(#func_name));                      \
+    FUNC_ENTER_API_THREADSAFE;
+
+#define FUNC_ENTER_API_INIT(func_name,err)			       	      \
+   /* Initialize the library */           				      \
+   if(!(H5_INIT_GLOBAL)) {                                                    \
+       H5_INIT_GLOBAL = TRUE;                                                 \
+       if(H5_init_library() < 0)  					      \
+          HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err,		              \
+            "library initialization failed")		                      \
+   }								              \
+                                                                              \
+   /* Initialize the interface, if appropriate */		              \
+   H5_INTERFACE_INIT(err)						      \
+                                                                              \
+   /* Push the name of this function on the function stack */                 \
+   H5_PUSH_FUNC(#func_name)                                                   \
+                                                                              \
+   BEGIN_MPE_LOG(func_name)
+
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(func_name,err) {{                                      \
-    FUNC_ENTER_API_VARS(func_name)                                            \
-    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
-    FUNC_ENTER_API_THREADSAFE;                                                \
-    FUNC_ENTER_API_COMMON(func_name,err);		                      \
+    FUNC_ENTER_API_COMMON(func_name)                                          \
+    FUNC_ENTER_API_INIT(func_name,err);			                      \
     /* Clear thread error stack entering public functions */		      \
     H5E_clear_stack(NULL);				                      \
     {
@@ -1787,10 +1806,8 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *      like H5Eprint and H5Ewalk.
  */
 #define FUNC_ENTER_API_NOCLEAR(func_name,err) {{                              \
-    FUNC_ENTER_API_VARS(func_name)                                            \
-    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
-    FUNC_ENTER_API_THREADSAFE;                                                \
-    FUNC_ENTER_API_COMMON(func_name,err);		                      \
+    FUNC_ENTER_API_COMMON(func_name)                                          \
+    FUNC_ENTER_API_INIT(func_name,err);			                      \
     {
 
 /*
@@ -1800,9 +1817,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {{                                   \
-    FUNC_ENTER_API_VARS(func_name)                                            \
-    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
-    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_COMMON(func_name)                                          \
     H5_PUSH_FUNC(#func_name)                                                  \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
@@ -1814,16 +1829,30 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *      are: H5close, H5check_version, etc.
  *
  */
-#define FUNC_ENTER_API_NOINIT_NOFS(func_name) {{                              \
+#define FUNC_ENTER_API_NOINIT_NOERR_NOFS(func_name) {{                       \
     FUNC_ENTER_API_VARS(func_name)                                            \
-    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
-    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_COMMON_NOERR(func_name, H5_IS_API(#func_name));                      \
+    FUNC_ENTER_API_THREADSAFE;						      \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
+/* Note: this macro only works when there's _no_ interface initialization routine for the module */
+#define FUNC_ENTER_NOAPI_INIT(func_name,err)			       	      \
+   /* Initialize the interface, if appropriate */		              \
+   H5_INTERFACE_INIT(err)						      \
+                                                                              \
+   /* Push the name of this function on the function stack */                 \
+   H5_PUSH_FUNC(#func_name)
+
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(func_name,err) {                                     \
-    FUNC_ENTER_COMMON(func_name,!H5_IS_API(#func_name));                      \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                     \
+    FUNC_ENTER_NOAPI_INIT(func_name,err)		                      \
+    {
+
+/* Use this macro for all non-API functions, which propagate errors, but don't issue them */
+#define FUNC_ENTER_NOAPI_NOERR(func_name,err) {                               \
+    FUNC_ENTER_COMMON_NOERR(func_name, !H5_IS_API(#func_name));               \
     FUNC_ENTER_NOAPI_INIT(func_name,err)		                      \
     {
 
@@ -1841,8 +1870,22 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *      - functions which are called during library shutdown, since we don't
  *              want to re-initialize the library.
  */
-#define FUNC_ENTER_NOAPI_NOINIT(func_name) {                                        \
-    FUNC_ENTER_COMMON(func_name,!H5_IS_API(#func_name));                      \
+#define FUNC_ENTER_NOAPI_NOINIT(func_name) {                                  \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                     \
+    H5_PUSH_FUNC(#func_name)                                                  \
+    {
+
+/*
+ * Use this macro for non-API functions which fall into these categories:
+ *      - static functions, since they must be called from a function in the
+ *              interface, the library and interface must already be
+ *              initialized.
+ *      - functions which are called during library shutdown, since we don't
+ *              want to re-initialize the library.
+ *      - functions that propagate, but don't issue errors
+ */
+#define FUNC_ENTER_NOAPI_NOINIT_NOERR(func_name) {                            \
+    FUNC_ENTER_COMMON_NOERR(func_name, !H5_IS_API(#func_name));               \
     H5_PUSH_FUNC(#func_name)                                                  \
     {
 
@@ -1876,31 +1919,6 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \
     {
 
-#define FUNC_ENTER_API_COMMON(func_name,err)			       	      \
-   /* Initialize the library */           				      \
-   if (!(H5_INIT_GLOBAL)) {                                                   \
-       H5_INIT_GLOBAL = TRUE;                                                 \
-       if (H5_init_library()<0)  					      \
-          HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
-            "library initialization failed")		                      \
-   }								              \
-                                                                              \
-   /* Initialize the interface, if appropriate */		              \
-   H5_INTERFACE_INIT(err)						      \
-                                                                              \
-   /* Push the name of this function on the function stack */                 \
-   H5_PUSH_FUNC(#func_name)                                                   \
-                                                                              \
-   BEGIN_MPE_LOG(func_name)
-
-/* Note: this macro only works when there's _no_ interface initialization routine for the module */
-#define FUNC_ENTER_NOAPI_INIT(func_name,err)			       	      \
-   /* Initialize the interface, if appropriate */		              \
-   H5_INTERFACE_INIT(err)						      \
-                                                                              \
-   /* Push the name of this function on the function stack */                 \
-   H5_PUSH_FUNC(#func_name)
-
 /*-------------------------------------------------------------------------
  * Purpose:	Register function exit for code profiling.  This should be
  *		the last statement executed by a function.
@@ -1917,6 +1935,11 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *
  *-------------------------------------------------------------------------
  */
+/* Threadsafety termination code for API routines */
+#define FUNC_LEAVE_API_THREADSAFE                                             \
+    H5_API_UNLOCK                                                             \
+    H5_API_SET_CANCEL
+
 #define FUNC_LEAVE_API(ret_value)                                             \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
@@ -1924,28 +1947,26 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
         if(err_occurred)						      \
            (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
-        return (ret_value);						      \
+        return(ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 }} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
-        if(err_occurred)						      \
-           (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
-        return (ret_value);						      \
+        return(ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 }} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
-        H5_POP_FUNC                                                          \
-        return (ret_value);						      \
+        H5_POP_FUNC                                                           \
+        return(ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI_VOID                                                 \
-        H5_POP_FUNC                                                          \
+        H5_POP_FUNC                                                           \
         return;						                      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
@@ -1956,7 +1977,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *              (so far, just the H5CS routines themselves)
  */
 #define FUNC_LEAVE_NOAPI_NOFS(ret_value)                                      \
-        return (ret_value);						      \
+        return(ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 

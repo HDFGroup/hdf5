@@ -90,7 +90,6 @@ static herr_t H5A_dense_btree2_corder_debug(FILE *stream, const H5F_t *f, hid_t 
 
 /* v2 B-tree driver callbacks for 'name' index */
 static herr_t H5A_dense_btree2_name_store(void *native, const void *udata);
-static herr_t H5A_dense_btree2_name_retrieve(void *udata, const void *native);
 static herr_t H5A_dense_btree2_name_compare(const void *rec1, const void *rec2);
 static herr_t H5A_dense_btree2_name_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
