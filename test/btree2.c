@@ -477,7 +477,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 0)
         TEST_ERROR
@@ -495,7 +495,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -516,7 +516,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -651,7 +651,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -671,7 +671,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -704,7 +704,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -724,7 +724,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -811,7 +811,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -831,7 +831,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -869,7 +869,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -889,7 +889,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -983,7 +983,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -1003,7 +1003,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -1028,7 +1028,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -1131,7 +1131,7 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -1151,7 +1151,7 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -1261,7 +1261,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1445,7 +1445,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1473,7 +1473,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1500,7 +1500,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: redistrib left-most leaf in level 2 B-tree");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1532,7 +1532,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1559,7 +1559,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: redistrib middle leaf in level 2 B-tree");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1594,7 +1594,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1709,7 +1709,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1739,7 +1739,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1771,7 +1771,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: split left-most leaf in level 2 B-tree");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1799,7 +1799,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1831,7 +1831,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: split middle leaf in level 2 B-tree");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1864,7 +1864,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -1981,7 +1981,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2009,7 +2009,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2036,7 +2036,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: redist. 2 internal (l->r) in level 2 B-tree");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2066,7 +2066,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2174,7 +2174,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2202,7 +2202,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2234,7 +2234,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam)
     TESTING("B-tree insert: split side internal node to 2 in level 2 B-tree (l->2)");
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2264,7 +2264,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2381,7 +2381,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2421,7 +2421,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2459,7 +2459,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2584,7 +2584,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2624,7 +2624,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2662,7 +2662,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -2812,7 +2812,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 4)
         TEST_ERROR
@@ -2832,7 +2832,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Check up on B-tree after re-open */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 4)
         TEST_ERROR
@@ -6337,7 +6337,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -6403,7 +6403,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, *bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, *bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 4)
         TEST_ERROR
@@ -7104,7 +7104,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -7146,7 +7146,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 0)
         TEST_ERROR
@@ -7154,7 +7154,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7196,7 +7196,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 1)
         TEST_ERROR
@@ -7204,7 +7204,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7246,7 +7246,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR
@@ -7254,7 +7254,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7340,7 +7340,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam)
     } /* end for */
 
     /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, &bt2_stat) < 0)
         FAIL_STACK_ERROR
     if(bt2_stat.depth != 2)
         TEST_ERROR

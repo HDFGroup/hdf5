@@ -240,6 +240,9 @@ H5FL_EXTERN(H5B2_leaf_t);
 H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 #endif /* H5B2_TESTING */
 
+/* Array of v2 B-tree client ID -> client class mappings */
+extern const H5B2_class_t *const H5B2_client_class_g[];
+
 
 /******************************/
 /* Package Private Prototypes */

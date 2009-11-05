@@ -130,6 +130,8 @@ typedef struct H5B2_t H5B2_t;
 /***************************************/
 H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     haddr_t *addr_p);
+H5_DLL H5B2_t *H5B2_create_2(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam);
+H5_DLL herr_t H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr/*out*/);
 H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
@@ -153,12 +155,12 @@ H5_DLL herr_t H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *ty
     void *op_data);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, hsize_t *nrec);
-H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr, H5B2_remove_t op, void *op_data);
+H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    H5B2_remove_t op, void *op_data);
 
 /* Statistics routines */
-H5_DLL herr_t H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr, H5B2_stat_t *info);
+H5_DLL herr_t H5B2_stat_info(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    H5B2_stat_t *info);
 
 #endif /* _H5B2private_H */
 

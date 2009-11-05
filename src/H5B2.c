@@ -61,9 +61,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
-    haddr_t addr);
-static herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
+static H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 static herr_t H5B2_insert_2(H5B2_t *bt2, hid_t dxpl_id, void *udata);
 static herr_t H5B2_iterate_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op,
     void *op_data);
@@ -82,11 +80,41 @@ static herr_t H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5B2_modify_t op, void *op_data);
 static herr_t H5B2_iterate_size_2(H5B2_t *bt2, hid_t dxpl_id,
     hsize_t *btree_size);
+static herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* v2 B-tree client ID to class mapping */
+
+/* Remember to add client ID to H5B2_subid_t in H5B2private.h when adding a new
+ * client class..
+ */
+extern const H5B2_class_t H5B2_TEST[1];
+extern const H5B2_class_t H5HF_BT2_INDIR[1];
+extern const H5B2_class_t H5HF_BT2_FILT_INDIR[1];
+extern const H5B2_class_t H5HF_BT2_DIR[1];
+extern const H5B2_class_t H5HF_BT2_FILT_DIR[1];
+extern const H5B2_class_t H5G_BT2_NAME[1];
+extern const H5B2_class_t H5G_BT2_CORDER[1];
+extern const H5B2_class_t H5SM_INDEX[1];
+extern const H5B2_class_t H5A_BT2_NAME[1];
+extern const H5B2_class_t H5A_BT2_CORDER[1];
+
+const H5B2_class_t *const H5B2_client_class_g[] = {
+    H5B2_TEST,			/* 0 - H5B2_TEST_ID 			*/
+    H5HF_BT2_INDIR,		/* 1 - H5B2_FHEAP_HUGE_INDIR_ID 	*/
+    H5HF_BT2_FILT_INDIR,	/* 2 - H5B2_FHEAP_HUGE_FILT_INDIR_ID 	*/
+    H5HF_BT2_DIR,		/* 3 - H5B2_FHEAP_HUGE_DIR_ID 		*/
+    H5HF_BT2_FILT_DIR,		/* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID 	*/
+    H5G_BT2_NAME,		/* 5 - H5B2_GRP_DENSE_NAME_ID 		*/
+    H5G_BT2_CORDER,		/* 6 - H5B2_GRP_DENSE_CORDER_ID 		*/
+    H5SM_INDEX,			/* 7 - H5B2_SOHM_INDEX_ID 		*/
+    H5A_BT2_NAME,		/* 8 - H5B2_ATTR_DENSE_NAME_ID 		*/
+    H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 		*/
+};
 
 
 /*****************************/
@@ -101,6 +129,77 @@ static herr_t H5B2_iterate_size_2(H5B2_t *bt2, hid_t dxpl_id,
 /* Declare a free list to manage the H5B2_t struct */
 H5FL_DEFINE_STATIC(H5B2_t);
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_create_2
+ *
+ * Purpose:	Creates a new empty B-tree in the file.
+ *
+ * Return:	Non-negative on success (with address of new B-tree
+ *              filled in), negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 31 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B2_t *
+H5B2_create_2(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
+{
+    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
+    H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
+    haddr_t     hdr_addr;               /* B-tree header address */
+    H5B2_t	*ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B2_create_2, NULL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(cparam);
+
+    /* H5B2 interface sanity check */
+    HDcompile_assert(H5B2_NUM_BTREE_ID == NELMTS(H5B2_client_class_g));
+
+    /* Create shared v2 B-tree header */
+    if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't create v2 B-tree header")
+
+    /* Create v2 B-tree wrapper */
+    if(NULL == (bt2 = H5FL_MALLOC(H5B2_t)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for v2 B-tree info")
+
+    /* Look up the B-tree header */
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
+
+    /* Point v2 B-tree wrapper at header and bump it's ref count */
+    bt2->hdr = hdr;
+    if(H5B2_hdr_incr(bt2->hdr) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment reference count on shared v2 B-tree header")
+
+    /* Increment # of files using this v2 B-tree header */
+    if(H5B2_hdr_fuse_incr(bt2->hdr) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment file reference count on shared v2 B-tree header")
+
+    /* Set file pointer for this v2 B-tree open context */
+    bt2->f = f;
+
+    /* Set the return value */
+    ret_value = bt2;
+
+done:
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
+    if(!ret_value && bt2) 
+        if(H5B2_close(bt2, dxpl_id) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_create_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -160,7 +259,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5B2_t *
-H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr)
+H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -170,11 +269,10 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr)
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(cls);
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Check for pending heap deletion */
@@ -302,7 +400,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Insert the new record */
@@ -316,6 +414,37 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_get_addr
+ *
+ * Purpose:	Get the address of a v2 B-tree
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Nov  5 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5B2_get_addr)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(addr_p);
+
+    /* Retrieve the header address for this v2 B-tree */
+    *addr_p = bt2->hdr->addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B2_get_addr() */
 
 
 /*-------------------------------------------------------------------------
@@ -397,7 +526,7 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(op);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Iterate through records */
@@ -593,7 +722,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Operate on record */
@@ -804,7 +933,7 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(op);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Locate and operate on record */
@@ -921,7 +1050,7 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(H5F_addr_defined(addr));
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Attempt to remove record from B-tree */
@@ -1047,7 +1176,7 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
     HDassert(H5F_addr_defined(addr));
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Attempt to remove record from B-tree */
@@ -1121,7 +1250,7 @@ H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(nrec);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Get the number of records in the B-tree */
@@ -1241,7 +1370,7 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(op);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Attempt to find neighbor record in B-tree */
@@ -1456,7 +1585,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
     HDassert(op);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Locate & modify record */
@@ -1551,7 +1680,7 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
     HDassert(btree_size);
 
     /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, cls, addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
 
     /* Iterate through B-tree, collective size info */
@@ -1583,7 +1712,6 @@ done:
 static herr_t
 H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 {
-    const H5B2_class_t *cls = NULL;     /* Class of v2 B-tree client */
     haddr_t bt2_addr = HADDR_UNDEF;     /* Address of v2 B-tree (for deletion) */
     hbool_t pending_delete = FALSE;     /* Whether the v2 B-tree is pending deletion */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1606,7 +1734,6 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
              */
             pending_delete = TRUE;
             bt2_addr = bt2->hdr->addr;
-            cls = bt2->hdr->cls;
         } /* end if */
     } /* end if */
 
@@ -1623,10 +1750,9 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 
         /* Sanity check */
         HDassert(H5F_addr_defined(bt2_addr));
-        HDassert(cls);
 
         /* Lock the v2 B-tree header into memory */
-        if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, cls, NULL, H5AC_WRITE)))
+        if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, NULL, NULL, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
 
         /* Set the shared v2 B-tree header's file context for this operation */
@@ -1668,8 +1794,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    H5B2_remove_t op, void *op_data)
+H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5B2_remove_t op,
+    void *op_data)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -1678,14 +1804,13 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(cls);
     HDassert(H5F_addr_defined(addr));
 
     /* Lock the v2 B-tree header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, cls, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
 
     /* Remember the callback & context for later */

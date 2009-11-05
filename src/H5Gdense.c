@@ -1709,7 +1709,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.replace_names = FALSE;
 
         /* Delete the name index, adjusting the ref. count on links removed */
-        if(H5B2_delete(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, H5G_dense_remove_bt2_cb, &udata) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, H5G_dense_remove_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index")
 
         /* Close the fractal heap */
@@ -1718,7 +1718,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     } /* end if */
     else {
         /* Delete the name index, without adjusting the ref. count on the links  */
-        if(H5B2_delete(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index")
     } /* end else */
     linfo->name_bt2_addr = HADDR_UNDEF;
@@ -1727,7 +1727,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     if(linfo->index_corder) {
         /* Delete the creation order index, without adjusting the ref. count on the links  */
         HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
-        if(H5B2_delete(f, dxpl_id, H5G_BT2_CORDER, linfo->corder_bt2_addr, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->corder_bt2_addr, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
         linfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */

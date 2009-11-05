@@ -144,10 +144,10 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5B2_hdr_t *
-H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, void UNUSED *udata)
+H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, void UNUSED *udata2)
 {
-    const H5B2_class_t	*cls = (const H5B2_class_t *) _cls;   /* Class of B-tree client */
     H5B2_create_t       cparam;         /* B-tree creation parameters */
+    H5B2_subid_t        id;		/* ID of B-tree class, as found in file */
     unsigned            depth;          /* Depth of B-tree */
     H5B2_hdr_t		*hdr = NULL;    /* B-tree header */
     size_t		size;           /* Header size */
@@ -164,7 +164,6 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, voi
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(cls);
 
     /* Allocate new B-tree header and reset cache info */
     if(NULL == (hdr = H5B2_hdr_alloc(f)))
@@ -198,8 +197,9 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, voi
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header version")
 
     /* B-tree class */
-    if(*p++ != (uint8_t)cls->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
+    id = *p++;
+    if(id >= H5B2_NUM_BTREE_ID)
+	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "invalid B-tree type")
 
     /* Node size (in bytes) */
     UINT32DECODE(p, cparam.node_size);
@@ -233,7 +233,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, voi
 	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
 
     /* Initialize B-tree header info */
-    cparam.cls = cls;
+    cparam.cls = H5B2_client_class_g[id];
     if(H5B2_hdr_init(f, hdr, &cparam, depth) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
