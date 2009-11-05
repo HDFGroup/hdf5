@@ -250,7 +250,7 @@ WinXP CYGWIN                          n        n    n        y    y     y
 WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
-Mac OS X 10.4.10                      n        y    n        y    y     y
+Mac OS X 10.5.6                       n        y    n        y    y     y
 AIX 5.3 32- and 64-bit                n        y    n        y    y     n
 FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL5 2.6.18-164 i686 GNU    W   y        y    y        y    y     y
