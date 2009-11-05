@@ -1040,7 +1040,7 @@ H5D_btree_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     H5D_chunk_rec_t chunk_rec;  /* Generic chunk record for callback */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_btree_idx_iterate_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR(H5D_btree_idx_iterate_cb)
 
     /* Sanity check for memcpy() */
     HDcompile_assert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_btree_key_t, nbytes));
@@ -1082,7 +1082,7 @@ H5D_btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_btree_it_ud_t	udata;  /* User data for B-tree iterator callback */
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_btree_idx_iterate)
+    FUNC_ENTER_NOAPI_NOINIT_NOERR(H5D_btree_idx_iterate)
 
     HDassert(idx_info);
     HDassert(idx_info->f);

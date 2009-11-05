@@ -188,7 +188,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
     /* Initialize internal node info */
     if(depth > 0) {
         for(u = 1; u < (depth + 1); u++) {
-            sz_max_nrec = H5B2_NUM_INT_REC(f, hdr, u);
+            sz_max_nrec = H5B2_NUM_INT_REC(hdr, u);
             H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
             HDassert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
 
@@ -248,6 +248,8 @@ H5B2_hdr_alloc(H5F_t *f)
 
     /* Assign non-zero information */
     hdr->f = f;
+    hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
     hdr->root.addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -579,7 +581,7 @@ H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
     /* Delete all nodes in B-tree */
     if(H5F_addr_defined(hdr->root.addr))
-        if(H5B2_delete_node(hdr->f, dxpl_id, hdr, hdr->depth, &hdr->root, hdr->remove_op, hdr->remove_op_data) < 0)
+        if(H5B2_delete_node(hdr, dxpl_id, hdr->depth, &hdr->root, hdr->remove_op, hdr->remove_op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
     /* Indicate that the heap header should be deleted & file space freed */

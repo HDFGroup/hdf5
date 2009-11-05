@@ -779,13 +779,12 @@ void dump_string(const char * string)
   unsigned int length;
   unsigned int x;
 
-  printf("The string was:\n");
-  printf(string);
+  printf("The string was:\n %s", string);
   printf("Or in hex:\n");
 
   length = strlen(string);
 
-    for(x=0; x<length; x++)
+  for(x=0; x<length; x++)
     printf("%x ", string[x] & (0x000000FF));
 
   printf("\n");

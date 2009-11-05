@@ -823,7 +823,7 @@ done:\n\
         if(dt != NULL) {\n\
             if(dt->shared != NULL)\n\
                 H5FL_FREE(H5T_shared_t, dt->shared);\n\
-            H5FL_FREE(H5T_t, dt);\n\
+            dt = H5FL_FREE(H5T_t, dt);\n\
         } /* end if */\n\
     } /* end if */\n\
 \n\

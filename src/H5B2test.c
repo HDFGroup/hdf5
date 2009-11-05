@@ -321,7 +321,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, hdr, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
+        if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
