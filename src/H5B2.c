@@ -61,26 +61,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr);
-static herr_t H5B2_insert_2(H5B2_t *bt2, hid_t dxpl_id, void *udata);
-static herr_t H5B2_iterate_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op,
-    void *op_data);
-static htri_t H5B2_find_2(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    H5B2_found_t op, void *op_data);
-static herr_t H5B2_index_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
-    hsize_t idx, H5B2_found_t op, void *op_data);
-static herr_t H5B2_remove_2(H5B2_t *b2, hid_t dxpl_id, void *udata,
-    H5B2_remove_t op, void *op_data);
-static herr_t H5B2_remove_by_idx_2(H5B2_t *bt2, hid_t dxpl_id,
-    H5_iter_order_t order, hsize_t idx, H5B2_remove_t op, void *op_data);
-static herr_t H5B2_get_nrec_2(const H5B2_t *bt2, hsize_t *nrec);
-static herr_t H5B2_neighbor_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_compare_t range,
-    void *udata, H5B2_found_t op, void *op_data);
-static herr_t H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    H5B2_modify_t op, void *op_data);
-static herr_t H5B2_iterate_size_2(H5B2_t *bt2, hid_t dxpl_id,
-    hsize_t *btree_size);
-static herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 
 
 /*********************/
@@ -258,7 +238,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5B2_t *
+H5B2_t *
 H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
@@ -322,7 +302,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_insert_2(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -464,7 +444,7 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_iterate_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -565,7 +545,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
+htri_t
 H5B2_find_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     void *op_data)
 {
@@ -756,7 +736,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_index_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
     H5B2_found_t op, void *op_data)
 {
@@ -962,7 +942,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_remove_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
     void *op_data)
 {
@@ -1079,7 +1059,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_remove_by_idx_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
     hsize_t idx, H5B2_remove_t op, void *op_data)
 {
@@ -1205,7 +1185,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_get_nrec_2(const H5B2_t *bt2, hsize_t *nrec)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_get_nrec_2)
@@ -1291,7 +1271,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_neighbor_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_compare_t range, void *udata,
     H5B2_found_t op, void *op_data)
 {
@@ -1406,7 +1386,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
     void *op_data)
 {
@@ -1614,7 +1594,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_iterate_size_2(H5B2_t *bt2, hid_t dxpl_id, hsize_t *btree_size)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -1709,7 +1689,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 {
     haddr_t bt2_addr = HADDR_UNDEF;     /* Address of v2 B-tree (for deletion) */

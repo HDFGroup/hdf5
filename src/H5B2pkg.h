@@ -333,11 +333,15 @@ H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 #ifdef H5B2_TESTING
 H5_DLL herr_t H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id,
     const H5B2_class_t *type, haddr_t addr, haddr_t *root_addr);
+H5_DLL herr_t H5B2_get_root_addr_test_2(H5B2_t *bt2, haddr_t *root_addr);
 H5_DLL int H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id,
     const H5B2_class_t *type, haddr_t addr, void *udata);
+H5_DLL int H5B2_get_node_depth_test_2(H5B2_t *bt2, hid_t dxpl_id, void *udata);
 H5_DLL herr_t H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id,
     const H5B2_class_t *type, haddr_t addr, void *udata,
     H5B2_node_info_test_t *ninfo);
+H5_DLL herr_t H5B2_get_node_info_test_2(H5B2_t *bt2, hid_t dxpl_id,
+    void *udata, H5B2_node_info_test_t *ninfo);
 #endif /* H5B2_TESTING */
 
 #endif /* _H5B2pkg_H */
