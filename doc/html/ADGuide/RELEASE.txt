@@ -1,12 +1,12 @@
-HDF5 version 1.6.10 released on Mon Nov  9 11:00:32 CST 2009
+HDF5 version 1.6.10 released on Mon Nov  9 11:52:33 CST 2009
 ================================================================================
 
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.10 and
-HDF5-1.6.9-*.  
+HDF5-1.6.9.  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.9-*. For more details, check the HISTORY.txt file in 
+HDF5-1.6.9. For more details, check the HISTORY.txt file in 
 the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
@@ -33,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.10
+- Bug Fixes since HDF5-1.6.9
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
