@@ -1119,43 +1119,7 @@ Section VII: Building with Intel Fortran 9.1
             Fortran 9.1 Compiler.
 
             
-      1.1 Extract Compaq Fortran Project Files
-
-       a. Select project "flush1_fortran" in the Solution Explorer
-       window. In the Project menu, select
-       "Extract Compaq Visual Fortran Project".
-
-       Do the same thing for the following project files, but for now, skip
-       the projects labelled "**SKIP**":
-
-        flush1_fortrandll
-        flush2_fortran
-        flush2_fortrandll
-        hdf5_fortran
-        hdf5_fortrandll
-        **SKIP** libtest_fortran
-        libtest_fortrandll
-        testhdf5_fortran
-        testhdf5_fortrandll
-        
-             
-       b. Select project "libtest_fortran" in the Solution
-       Explorer window. In the Project menu, select
-       "Extract Compaq Visual Fortran Project". Since Project
-       file "libtest_fortran" contain both C and Fortran code,
-       you will be asked to specify which project, either
-       Fortran or C/C++, will serve as the main project for
-       this mixed language projects. Choose
-       "The Intel Fortran project" as the the main project and
-       click "OK".
-
-       Note: In Visual Studio 2005, you may receive a message that 
-       says "The attempt to convert the Fortran project file failed.
-       The project file (.vcproj) has not been converted."  This message
-       can safely be ignored.
-
-
-      1.3: Fix Project Output
+      1.1 Fix Project Output
       
       1) Change libtest_fortran_lib Release Output
       
@@ -1190,7 +1154,7 @@ Section VII: Building with Intel Fortran 9.1
             Then click "OK".
             
 
-      1.4: Change project dependencies
+      1.2: Change project dependencies
 
 
       To check the project dependencies,
@@ -1208,7 +1172,7 @@ Section VII: Building with Intel Fortran 9.1
             testhdf5_fortran
 
 
-      1.5 Building HDF5 C/C++/Fortran Libraries and Tools
+      1.3 Building HDF5 C/C++/Fortran Libraries and Tools
 
       Select "Build", then Select "Configuration Manager".
 
@@ -1216,7 +1180,7 @@ Section VII: Building with Intel Fortran 9.1
 
       Select "Ok". Select "Build" -> "Build" or "Rebuild All" to
       build Debug or Release version of HDF5 C, C++, fortran
-      Library using Intel fortran 9.1 Compiler with .Net 2003 or .Net 2005.
+      Library using Intel fortran 9.1 Compiler with .Net 2003 or VS 2005.
 
     
   2. Test HDF5 Static and High Level Fortran Library
@@ -1294,10 +1258,10 @@ Section VII: Building with Intel Fortran 9.1
 
             1. Invoke Intel Fortran Compiler 9.1 or above under Microsoft 
             Visual Studio development environment, go to "File" and select
-            the "Open Workspace" option.
+            the "Open Solution" option.
 
-            Then open the workspace
-            c:\MyHDFstuff\hdf5\fortran\examples\allf90examples\allf90examples.dsw.
+            Then open the solution
+            c:\MyHDFstuff\hdf5\fortran\examples\allf90examples\allf90examples.sln.
 
             2. Select "Build", then Select "Set Active Configuration".
 
