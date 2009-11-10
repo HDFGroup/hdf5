@@ -93,16 +93,13 @@ H5_DLL herr_t H5E_dump_api_stack(int is_api);
 /* Retrieve the error code description string and push it onto the error
  * stack.
  */
-#define	HSYS_ERROR(errnum) {						      \
-    HERROR(H5E_INTERNAL, H5E_SYSERRSTR, HDstrerror(errnum));                  \
-}
 #define	HSYS_DONE_ERROR(majorcode, minorcode, retcode, str) {		      \
-    HSYS_ERROR(errno);							      \
-    HDONE_ERROR(majorcode, minorcode, retcode, str);			      \
+    int myerrno = errno;							      \
+    HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno, HDstrerror(myerrno));			      \
 }
 #define	HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str) {		      \
-    HSYS_ERROR(errno);							      \
-    HGOTO_ERROR(majorcode, minorcode, retcode, str);			      \
+    int myerrno = errno;							      \
+    HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno, HDstrerror(myerrno));			      \
 }
 
 #ifdef H5_HAVE_PARALLEL
