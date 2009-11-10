@@ -1794,6 +1794,30 @@ external_link_root(hid_t fapl, hbool_t new_format)
 	goto error;
     }
 
+    /* Create external link to object in first file */
+    /* (add a few extra '/'s to make certain library normalizes external link object names) */
+    if(H5Lcreate_external(filename1, "///", fid, "ext_link2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Check information for external link */
+    if(H5Lget_info(fid, "ext_link", &linfo, H5P_DEFAULT) < 0) goto error;
+    if(H5L_TYPE_EXTERNAL != linfo.type) {
+	H5_FAILED();
+	puts("    Unexpected object type - should have been an external link");
+	goto error;
+    }
+    if(H5Lget_val(fid, "ext_link", objname, sizeof(objname), H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(objname, linfo.u.val_size, NULL, &file, &path) < 0) TEST_ERROR
+    if(HDstrcmp(file, filename1)) {
+	H5_FAILED();
+	puts("    External link file name incorrect");
+	goto error;
+    }
+    if(HDstrcmp(path, "/")) {
+	H5_FAILED();
+	puts("    External link path incorrect");
+	goto error;
+    }
+
     /* Close and re-open file to ensure that data is written to disk */
     if(H5Fclose(fid) < 0) TEST_ERROR
     if((fid = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
@@ -3411,8 +3435,8 @@ external_link_reltar(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[26], fapl, filename2, sizeof filename2);
 
     /* Create the target file */
-    if((fid=H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-    if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* closing for target file */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -3420,25 +3444,17 @@ external_link_reltar(hid_t fapl, hbool_t new_format)
 
 
     /* Create the main file */
-    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create external link to target file */
-    if(H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external(filename2, "///A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY {
-        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
-    } H5E_END_TRY;
-
-    /*
-     * Should be able to find the target file from:
-     * main file's current working directory + pathname of external linked targetfile
-     */
-    if (gid < 0) {
+    if((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0) {
 	H5_FAILED();
 	puts("    Should have found the file in tmp directory.");
 	goto error;
-    }
+    } /* end if */
 
     /* closing for main file */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -5301,7 +5317,8 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create external link */
-    if(H5Lcreate_external(filename2, "/dst", fid, "src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    /* (add a few extra '/'s to make certain library normalizes external link object names) */
+    if(H5Lcreate_external(filename2, "///dst//", fid, "src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Get size of buffer for external link */
     if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR

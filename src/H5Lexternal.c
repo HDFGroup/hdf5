@@ -514,6 +514,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
     H5G_loc_t	link_loc;               /* Group location to create link */
+    char       *norm_obj_name = NULL;	/* Pointer to normalized current name */
     void       *ext_link_buf = NULL;    /* Buffer to contain external link */
     size_t      buf_size;               /* Size of buffer to hold external link */
     uint8_t    *p;                      /* Pointer into external link buffer */
@@ -533,8 +534,12 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     if(!link_name || !*link_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
 
+    /* Get normalized copy of the link target */
+    if(NULL == (norm_obj_name = H5G_normalize(obj_name)))
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize object name")
+
     /* Combine the filename and link name into a single buffer to give to the UD link */
-    buf_size = 1 + (HDstrlen(file_name) + 1) + (HDstrlen(obj_name) + 1);
+    buf_size = 1 + (HDstrlen(file_name) + 1) + (HDstrlen(norm_obj_name) + 1);
     if(NULL == (ext_link_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer")
 
@@ -543,14 +548,14 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL;  /* External link version & flags */
     HDstrcpy((char *)p, file_name);     /* Name of file containing external link's object */
     p += HDstrlen(file_name) + 1;
-    HDstrcpy((char *)p, obj_name);       /* External link's object */
+    HDstrcpy((char *)p, norm_obj_name);       /* External link's object */
 
     /* Create an external link */
     if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-    if(ext_link_buf != NULL)
+    if(norm_obj_name)
         H5MM_free(ext_link_buf);
 
     FUNC_LEAVE_API(ret_value)

@@ -716,7 +716,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 
     /* Get the link value */
     if(H5L_get_val(&loc, name, buf, size, lapl_id, H5AC_ind_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value")
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value for '%s'", name)
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2120,7 +2120,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t *lnk,
+H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gv_t *udata = (H5L_trav_gv_t *)_udata;   /* User data passed in */
@@ -2130,7 +2130,7 @@ H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H
 
     /* Check if the name in this group resolved to a valid link */
     if(lnk == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "'%s' doesn't exist", name)
 
     /* Retrieve the value for the link */
     if(H5L_get_val_real(lnk, udata->buf, udata->size) < 0)
