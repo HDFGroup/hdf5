@@ -162,7 +162,9 @@ The following platforms and compilers have been tested for this release.
 
     Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
-    (jam)                         PGI C, Fortran, C++ 7.2-1 32-bit
+    (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
+                                  (Red Hat 4.1.2-46)
+                                  PGI C, Fortran, C++ 7.2-1 32-bit
                                   PGI C, Fortran, C++ 8.0-1 32-bit
                                   Intel(R) C Compiler for 32-bit
                                       applications, Versions 10.1, 11.0
@@ -179,17 +181,20 @@ The following platforms and compilers have been tested for this release.
     (kagiso)                      MPICH mpich2-1.0.8 compiled with
                                   gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!)
 
-    Linux 2.6.16.60-0.37-smp #1   gcc 4.1.2
-    SMP x86_64 GNU/Linux          G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
-    (smirom)                      Intel(R) C, C++, Fortran Compilers for 
+    Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704
+    x86_64 GNU/Linux              G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
+    (amani)                       tested for both 32- and 64-bit binaries
+                                  Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64, 
-                                  Versions 10.1, 11.0.
-                                  PGI C, Fortran, C++ Version 7.2-1, 8.0-1
+                                  Versions 11.1.
+                                  PGI C, Fortran, C++ Version 9.0-4
                                          for 64-bit target on x86-64
                                   gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
                                   MPICH mpich2-1.0.8 compiled with
                                   gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
-                                  tested for both 32- and 64-bit binaries
+                                  GNU Fortran (GCC) 4.1.2 20080704
+                                  (Red Hat 4.1.2-46)
+
 
     Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
     SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
