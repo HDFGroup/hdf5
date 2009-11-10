@@ -1,4 +1,4 @@
-HDF5 version 1.8.4 released on Mon Nov  9 11:33:59 CST 2009
+HDF5 version 1.8.4 released on Tue Nov 10 15:18:57 CST 2009
 ================================================================================
 
 INTRODUCTION
@@ -236,7 +236,9 @@ The following platforms and compilers have been tested for this release.
 
     Linux 2.6.18-164.el5          gcc (GCC) 4.1.2 20080704
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (jam)                         PGI C, Fortran, C++ 8.0-5 32-bit
+    (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
+                                  (Red Hat 4.1.2-46)
+                                  PGI C, Fortran, C++ 8.0-5 32-bit
                                   PGI C, Fortran, C++ 8.0-1 32-bit
                                   Intel(R) C Compiler for 32-bit
                                       applications, Versions 11.0, 11.1
@@ -246,19 +248,20 @@ The following platforms and compilers have been tested for this release.
                                       applications, Version 11.0, 11.1
                                   Absoft 32-bit Fortran 95 10.0.7
                                   MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
 
     Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704
     x86_64 GNU/Linux              G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (amani)                       Intel(R) C, C++, Fortran Compilers for 
+    (amani)                       tested for both 32- and 64-bit binaries
+                                  Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64, 
                                   Versions 11.1.
                                   PGI C, Fortran, C++ Version 9.0-4
                                          for 64-bit target on x86-64
                                   gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
                                   MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
-                                  tested for both 32- and 64-bit binaries
+                                  GNU Fortran (GCC) 4.1.2 20080704
+                                  (Red Hat 4.1.2-46)
+
 
     Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
     SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
