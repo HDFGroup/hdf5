@@ -4,9 +4,9 @@ HDF5 version 1.6.10 released on Mon Nov  9 11:00:32 CST 2009
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.10 and
-HDF5-1.6.9-*.  
+HDF5-1.6.9.  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.9-*. For more details, check the HISTORY.txt file in 
+HDF5-1.6.9. For more details, check the HISTORY.txt file in 
 the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
@@ -33,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.10
+- Bug Fixes since HDF5-1.6.9
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -177,7 +177,9 @@ Platforms Tested
 
     Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2 20080704
     #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (jam)                         PGI C, Fortran, C++ 8.0-5 32-bit
+    (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
+                                  (Red Hat 4.1.2-46)
+                                  PGI C, Fortran, C++ 8.0-5 32-bit
                                   PGI C, Fortran, C++ 8.0-1 32-bit
                                   Intel(R) C Compiler for 32-bit
                                       applications, Versions 11.0, 11.1
@@ -201,6 +203,8 @@ Platforms Tested
                                          for 64-bit target on x86-64
                                   MPICH mpich2-1.0.8 compiled with
                                   gcc 4.1.2
+                                  GNU Fortran (GCC) 4.1.2 20080704
+                                  (Red Hat 4.1.2-46)
 
     Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
     SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
