@@ -18,6 +18,7 @@ rem This batch file is used to build HDF5 C/C++/Fortran examples.
 rem This batch file takes the following options:
 rem .  /fort             Build HDF5 examples, including Fortran
 rem .  /useenv           Build HDF5 examples using compiler settings defined
+rem .  /nodebug          Note: Default is to build debug and release versions
 rem .                    in the environment, rather than the IDE.
 rem .  /?                Help information
 rem By Scott Wegner
@@ -42,6 +43,8 @@ pushd %~dp0
 
 set nerrors=0
 if "%1"=="/?" goto help
+set blddebug=debug
+set bldrelease=release
 goto main
 
 rem Print a help message
@@ -52,6 +55,7 @@ rem Print a help message
     echo.Usage: %~nx0 [OPTION]
     echo.
     echo.   /fort             Build HDF5 examples, including Fortran
+    echo.   /nodebug          Note: Default is to build debug and release versions
     echo.   /useenv           Build HDF5 examples using compiler settings defined
     echo.                     in the environment, rather than the IDE.
     echo.   /?                Help information
@@ -66,6 +70,10 @@ rem Parse through the parameters sent to file, and set appropriate variables
         if "%%a"=="/fort" (
             rem Enable Fortran
             set hdf5_enablefortran=true
+            
+        ) else if "%%a"=="/nodebug" (
+            rem Enable Fortran
+            set blddebug=
             
         ) else if "%%a"=="/useenv" (
             rem Pass /useenv flag to devenv
@@ -163,7 +171,7 @@ rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
             echo.**************************
             echo. Building %%a Examples
             echo.**************************
-            for %%b in (Debug Release) do (
+            for %%b in (%blddebug% %bldrelease%) do (
                 echo.Building %%a %%b examples...
                 devenv !%%a_SLN! %ccflags% /rebuild %%b
                 if !errorlevel! neq 0 (
