@@ -45,15 +45,8 @@ rem Add the DLLS to be copied here.
     rem HDF5 Library
     call :copy_dll proj\hdf5dll\debug\hdf5ddll.dll
     call :copy_dll proj\hdf5dll\release\hdf5dll.dll
-    rem We need this conditional because vs6 uses libtestD rather than libtestdll,
-    rem Remove later when we fix the VS6 project name.
-    if exist test\libtestdll\debug\libtestddll.dll (
-        call :copy_dll test\libtestdll\debug\libtestddll.dll
-        call :copy_dll test\libtestdll\release\libtestdll.dll
-    ) else (
-        call :copy_dll test\libtestD\debug\libtestDd.dll
-        call :copy_dll test\libtestD\release\libtestD.dll
-    )
+    call :copy_dll test\libtestdll\debug\libtestddll.dll
+    call :copy_dll test\libtestdll\release\libtestdll.dll
     
     rem C++
     call :copy_dll proj\hdf5_cppdll\debug\hdf5_cppddll.dll

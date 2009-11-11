@@ -22,12 +22,10 @@ rem .                    Note: Default is Visual Studio 2005
 rem .  /fort             Build HDF5 with Fortran libraries
 rem .  /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
 rem .  /ivf91            Note: Default is Intel Visual Fortran 9.1
+rem .  /nodebug          Note: Default is to build debug and release versions
 rem .  /useenv           Build HDF5 using compiler settings defined
 rem .                    in the environment, rather than the IDE.
 rem .  /?                Help information
-rem By Xuan Bai
-rem Created: Aug. 16, 2004
-rem Last Updated: Scott Wegner, 7/2/08
 
 rem This batch file makes the following assumptions:
 rem    - The appropriate version of Visual Studio is installed and setup
@@ -48,6 +46,8 @@ pushd %~dp0
 
 set nerrors=0
 if "%1"=="/?" goto help
+set blddebug=debug
+set bldrelease=release
 goto main
 
 rem Print a help message
@@ -64,6 +64,7 @@ rem Print a help message
     echo.                       Intel Fortran version specified, or 9.1 by default
     echo.   /ivf101             Build HDF5 Fortran using Intel Visual Fortran 10.1
     echo.   /ivf91              Note: Default is Intel Visual Fortran 9.1
+    echo.   /nodebug            Note: Default is to build debug and release versions
     echo.   /useenv             Build HDF5 using compiler settings defined
     echo.                       in the environment, rather than the IDE.
     echo.   /?                  Help information
@@ -94,6 +95,10 @@ rem Parse through the parameters sent to file, and set appropriate variables
         ) else if "%%a"=="/ivf101" (
             rem Enable Fortran
             set hdf5_ivf101=true
+            
+        ) else if "%%a"=="/nodebug" (
+            rem Enable Fortran
+            set blddebug=
             
         ) else if "%%a"=="/useenv" (
             rem Pass /useenv flag to devenv
@@ -287,7 +292,7 @@ rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
     echo.
 
     rem Build both debug and release versions
-    for %%a in (debug release) DO (
+    for %%a in (%blddebug% %bldrelease%) DO (
         echo.Building %hdf5_platform% %%a libraries...
         devenv %hdf5_sln% %ccflags% /rebuild "%%a|%hdf5_platform%"
         if not errorlevel 0 (
