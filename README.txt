@@ -1,4 +1,4 @@
-HDF5 version 1.6.10 released on Mon Nov  9 11:00:32 CST 2009
+HDF5 version 1.6.10-snap0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

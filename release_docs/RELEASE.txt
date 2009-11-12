@@ -1,12 +1,12 @@
-HDF5 version 1.6.10 released on Mon Nov  9 11:00:32 CST 2009
+HDF5 version 1.6.10-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.10 and
-HDF5-1.6.9.  
+HDF5-1.6.10-*  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.9. For more details, check the HISTORY.txt file in 
+HDF5-1.6.10-*. For more details, check the HISTORY.txt file in 
 the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
@@ -33,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.9
+- Bug Fixes since HDF5-1.6.10
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -44,22 +44,12 @@ New Features
 ============
     Configuration:
     -------------------------
-    - Changed default Gnu fortran compiler from g95 to gfortran since
-      gfortran is more likely installed with gcc now. -AKC 2009/07/19- 
+    -  None       -EIP 2009/11/12 
+
 
     Library:
     --------
-    - The embedded library information is displayed by H5check_version() if a
-      version mismatch is detected.  Also changed H5check_version() to
-      suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
-      or higher. (Old behavior treated 3 or higher the same as 1, that is
-      print a warning and allows the program to continue. (AKC - 2009/9/28)
-    - Embed the content of libhdf5.settings into the hdf5 executables so that
-      an "orphaned" executables can display (via the Unix strings command, for
-      example) the library settings used to build the executables.
-      If a user does not care for the extra library information insert
-      in the executables, he may turn it off by --disable-embedded-libinfo
-      during configure. (AKC - 2009/9/30)
+    - None
 
     Parallel Library:
     -----------------
@@ -68,14 +58,7 @@ New Features
 
     Tools:
     ------
-     - h5diff: h5diff treats two INFINITY values different. Fixed by checking 
-       (value==expect) before call ABS(...) at h5diff_array.c.  This will 
-       make that (INF==INF) is true (INF is treated as an number instead of 
-       NaN) (PC -- 2009/07/28)
-     - h5diff: add option "--use-system-epsilon" to print difference if 
-       (|a-b| > EPSILON).  Change default to use strict equality 
-       (PC -- 2009/09/12)
-
+     - None
 
     F90 API:
     --------
@@ -83,43 +66,28 @@ New Features
 
     C++ API:
     --------
-    - New member functions DataSet::getInMemDataSize() and
-      Attribute::getInMemDataSize() simplify getting the dataset's or
-      attribute's data size, in bytes, in memory.  (BMR - 2009/07/26)
+    - None
 
 
 
 Support for New Platforms, Languages and Compilers
 ==================================================
-    - PathScale compilers are recognized and can build the HDF5 library
-      properly. AKC - 2009/7/28 -
+    - None
 
 
-Bug Fixes since HDF5-1.6.9 Release
+Bug Fixes since HDF5-1.6.10 Release
 ==================================
     Library
     -------
-    - Fixed a bug where writing and deleting many global heap objects (i.e.
-      variable length data) would render the file unreadable.  Previously
-      created files exhibiting this problem should now be readable.
-      NAF - 2009/10/27 - 1483
-    - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
-    - Fixed incorrect return value for H5Pget_filter_by_id in H5Ppublic.h.
-      NAF - 2009/09/25 - 1620
-    - Fixed a bug where properties weren't being compared with the registered
-      compare callback. NAF - 2009/09/25 - 1555
-    - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
-      filter that wasn't present. NAF - 2009/06/25 - 1250
-    - Fixed an issue with committed compound datatypes containing a vlen. Also
-      fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
+    - None
 
     Configuration
     -------------
-    - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
-      recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
+    - None 
 
     Performance
     -----------
+    - None
 
     Tools
     -----
@@ -131,11 +99,7 @@ Bug Fixes since HDF5-1.6.9 Release
 
     C++ API
     -------
-    - The parameter 'size' in CommonFG::getLinkval now has default value
-      for user's convenience.  (BMR - 2009/10/23)
-    - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
-    - read/write methods of DataSet and Attribute classes were fixed
-      to handle string correctly.  (BMR - 2009/07/26)
+    - None
 
 
 Documentation
