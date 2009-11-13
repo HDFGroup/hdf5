@@ -195,7 +195,7 @@ H5F_get_fcpl(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+uint8_t
 H5F_sizeof_addr(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
@@ -222,7 +222,7 @@ H5F_sizeof_addr(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+uint8_t
 H5F_sizeof_size(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
