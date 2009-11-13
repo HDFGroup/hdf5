@@ -305,7 +305,7 @@ H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
     /* Retrieve the heap's address in the file */
     if(H5HF_get_heap_addr(fheap, &(linfo->fheap_addr)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get fractal heap address")
 #ifdef QAK
 HDfprintf(stderr, "%s: linfo->fheap_addr = %a\n", FUNC, linfo->fheap_addr);
 #endif /* QAK */
@@ -331,7 +331,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
 
     /* Retrieve the v2 B-tree's address in the file */
     if(H5B2_get_addr(bt2_name, &(linfo->name_bt2_addr)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get v2 B-tree address for name index")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get v2 B-tree address for name index")
 #ifdef QAK
 HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr);
 #endif /* QAK */
@@ -351,7 +351,7 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
 
         /* Retrieve the v2 B-tree's address in the file */
         if(H5B2_get_addr(bt2_corder, &(linfo->corder_bt2_addr)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get v2 B-tree address for creation order index")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get v2 B-tree address for creation order index")
 #ifdef QAK
 HDfprintf(stderr, "%s: linfo->corder_bt2_addr = %a\n", FUNC, linfo->corder_bt2_addr);
 #endif /* QAK */

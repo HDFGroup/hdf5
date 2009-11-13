@@ -160,8 +160,8 @@ typedef struct H5B2_hdr_t {
     size_t      rc;             /* Reference count of nodes using this header */
     size_t      file_rc;        /* Reference count of files using this header */
     hbool_t     pending_delete; /* B-tree is pending deletion */
-    size_t      sizeof_size;    /* Size of file sizes */
-    size_t      sizeof_addr;    /* Size of file addresses */
+    uint8_t     sizeof_size;    /* Size of file sizes */
+    uint8_t     sizeof_addr;    /* Size of file addresses */
     H5B2_remove_t remove_op;    /* Callback operator for deleting B-tree */
     void        *remove_op_data;/* B-tree deletion callback's context */
     const H5B2_class_t *cls;	/* Class of B-tree client */

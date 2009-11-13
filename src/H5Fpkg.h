@@ -197,8 +197,8 @@ typedef struct H5F_file_t {
     H5F_mtab_t	mtab;		/* File mount table                     */
 
     /* Cached values from FCPL/superblock */
-    size_t	sizeof_addr;	/* Size of addresses in file            */
-    size_t	sizeof_size;	/* Size of offsets in file              */
+    uint8_t	sizeof_addr;	/* Size of addresses in file            */
+    uint8_t	sizeof_size;	/* Size of offsets in file              */
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */

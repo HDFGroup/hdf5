@@ -469,8 +469,8 @@ H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, h
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
-H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
-H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
+H5_DLL uint8_t H5F_sizeof_addr(const H5F_t *f);
+H5_DLL uint8_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);

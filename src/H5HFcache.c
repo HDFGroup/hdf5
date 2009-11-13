@@ -291,7 +291,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the 'base' size of the fractal heap header on disk */
-    size = H5HF_HEADER_SIZE(hdr);
+    size = (size_t)H5HF_HEADER_SIZE(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -361,9 +361,9 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         filter_info_off = (size_t)(p - buf);
 
         /* Compute the size of the extra filter information */
-        filter_info_size = hdr->sizeof_size     /* Size of size for filtered root direct block */
-            + 4                                 /* Size of filter mask for filtered root direct block */
-            + hdr->filter_len;                  /* Size of encoded I/O filter info */
+        filter_info_size = (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
+            + (unsigned)4                       /* Size of filter mask for filtered root direct block */
+            + hdr->filter_len);                 /* Size of encoded I/O filter info */
 
         /* Compute the heap header's size */
         hdr->heap_size = size + filter_info_size;
@@ -1433,7 +1433,7 @@ HDfprintf(stderr, "%s: nbytes = %Zu, read_size = %Zu, read_buf = %p\n", FUNC, nb
     } /* end if */
 
     /* Sanity check */
-    HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
+    HDassert((size_t)(p - dblock->blk) == (size_t)H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
     /* Set return value */
     ret_value = dblock;
@@ -1521,7 +1521,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         } /* end if */
 
         /* Sanity check */
-        HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
+        HDassert((size_t)(p - dblock->blk) == (size_t)H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
         /* Check for I/O filters on this heap */
         if(hdr->filter_len > 0) {

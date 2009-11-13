@@ -55,10 +55,10 @@
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
 #define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_CHUNK_IK_DEF}
 /* Definitions for byte number in an address                */
-#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
+#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(uint8_t)
 #define H5F_CRT_ADDR_BYTE_NUM_DEF    H5F_OBJ_ADDR_SIZE
 /* Definitions for byte number for object size              */
-#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(size_t)
+#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(uint8_t)
 #define H5F_CRT_OBJ_BYTE_NUM_DEF      H5F_OBJ_SIZE_SIZE
 /* Definitions for version number of the superblock         */
 #define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
@@ -142,8 +142,8 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     hsize_t userblock_size = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
     unsigned sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
     unsigned btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
-    size_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
-    size_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
+    uint8_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
+    uint8_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
     unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
     unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
     unsigned sohm_index_flags[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
@@ -351,46 +351,48 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_sizes, FAIL);
+    FUNC_ENTER_API(H5Pset_sizes, FAIL)
     H5TRACE3("e", "izz", plist_id, sizeof_addr, sizeof_size);
 
     /* Check arguments */
-    if (sizeof_addr) {
-        if (sizeof_addr != 2 && sizeof_addr != 4 &&
-                sizeof_addr != 8 && sizeof_addr != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid");
-    }
-    if (sizeof_size) {
-        if (sizeof_size != 2 && sizeof_size != 4 &&
-                sizeof_size != 8 && sizeof_size != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid");
-    }
+    if(sizeof_addr) {
+        if(sizeof_addr != 2 && sizeof_addr != 4 && sizeof_addr != 8 && sizeof_addr != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid")
+    } /* end if */
+    if(sizeof_size) {
+        if(sizeof_size != 2 && sizeof_size != 4 && sizeof_size != 8 && sizeof_size != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid")
+    } /* end if */
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if (sizeof_addr)
-        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address");
-    if (sizeof_size)
-        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ");
+    if(sizeof_addr) {
+        uint8_t tmp_sizeof_addr = (uint8_t)sizeof_addr;
+
+        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address")
+    } /* end if */
+    if(sizeof_size) {
+        uint8_t tmp_sizeof_size = (uint8_t)sizeof_size;
+
+        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ")
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_sizes() */
 
 
 /*-------------------------------------------------------------------------
@@ -401,41 +403,45 @@ done:
  *		even both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
  *
  * Return:	Success:	Non-negative, sizes returned through arguments.
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sizes(hid_t plist_id,
-	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
+H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr, size_t *sizeof_size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_sizes, FAIL);
+    FUNC_ENTER_API(H5Pget_sizes, FAIL)
     H5TRACE3("e", "ixx", plist_id, sizeof_addr, sizeof_size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if (sizeof_addr)
-        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
-    if (sizeof_size)
-        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ");
+    if(sizeof_addr) {
+        uint8_t tmp_sizeof_addr;
+
+        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address")
+        *sizeof_addr = tmp_sizeof_addr;
+    } /* end if */
+    if(sizeof_size) {
+        uint8_t tmp_sizeof_size;
+
+        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ")
+        *sizeof_size = tmp_sizeof_size;
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_sizes() */
 
 
 /*-------------------------------------------------------------------------
