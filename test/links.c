@@ -141,7 +141,7 @@ const char *FILENAME[] = {
 
 #define FAMILY_SIZE	1024
 #define CORE_INCREMENT  1024
-#define NUM400		400
+#define NUM40		40
 
 /* do not do check_all_closed() for "ext*" files and "tmp/ext*" */
 #define EXTSTOP		12
@@ -3811,7 +3811,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
                 cwdpath[NAME_BUF_SIZE];
     hid_t       core_fapl, space, dset, did, dapl_id, dcpl;
     hsize_t     dims[2];
-    int		points[NUM400][NUM400];
+    int		points[NUM40][NUM40];
     h5_stat_size_t	filesize, new_filesize;
     int		i, j, n;
 
@@ -3845,8 +3845,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if((fid=H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, core_fapl)) < 0) TEST_ERROR
     if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    dims[0] = NUM400;
-    dims[1] = NUM400;
+    dims[0] = NUM40;
+    dims[1] = NUM40;
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 
     /* Create dataset creation property list */
@@ -3892,8 +3892,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     }
 
     /* Initialize the dataset */
-    for(i = n = 0; i < NUM400; i++)
-        for(j = 0; j < NUM400; j++)
+    for(i = n = 0; i < NUM40; i++)
+        for(j = 0; j < NUM40; j++)
             points[i][j] = n++;
 
     /* Write the data to the dataset */
