@@ -336,6 +336,8 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     htri_t	exists;                 /* Flag if header message of interest exists */
     H5HF_t      *fheap = NULL;          /* Fractal heap handle */
+    H5B2_t      *bt2_name = NULL;       /* v2 B-tree handle for name index */
+    H5B2_t      *bt2_corder = NULL;     /* v2 B-tree handle for creation order index */
     herr_t      ret_value = SUCCEED;  	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_group_bh_info)
@@ -355,30 +357,37 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LINFO_ID, &linfo))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't read LINFO message")
 
-        /* Get creation order B-tree size, if available */
-	if(H5F_addr_defined(linfo.corder_bt2_addr))
-            if(H5B2_iterate_size(f, dxpl_id, H5G_BT2_CORDER, linfo.corder_bt2_addr, &bh_info->index_size) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+        /* Check if name index available */
+        if(H5F_addr_defined(linfo.name_bt2_addr)) {
+            /* Open the name index v2 B-tree */
+            if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo.name_bt2_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
-        /* Get name order B-tree size, if available */
-        if(H5F_addr_defined(linfo.name_bt2_addr))
-            if(H5B2_iterate_size(f, dxpl_id, H5G_BT2_NAME, linfo.name_bt2_addr, &bh_info->index_size) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+            /* Get name index B-tree size */
+            if(H5B2_iterate_size_2(bt2_name, dxpl_id, &bh_info->index_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info for name index")
+        } /* end if */
+
+        /* Check if creation order index available */
+	if(H5F_addr_defined(linfo.corder_bt2_addr)) {
+            /* Open the creation order index v2 B-tree */
+            if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, linfo.corder_bt2_addr)))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
+
+            /* Get creation order index B-tree size */
+            if(H5B2_iterate_size_2(bt2_corder, dxpl_id, &bh_info->index_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info for creation order index")
+        } /* end if */
 
         /* Get fractal heap size, if available */
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Open the fractal heap for links */
             if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo.fheap_addr)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
             /* Get heap storage size */
             if(H5HF_size(fheap, dxpl_id, &bh_info->heap_size) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
-
-            /* Release the fractal heap */
-            if(H5HF_close(fheap, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
-            fheap = NULL;
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
         } /* end if */
     } /* end if */
     else {
@@ -396,7 +405,11 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 done:
     /* Release resources */
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap")
+    if(bt2_name && H5B2_close(bt2_name, dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+    if(bt2_corder && H5B2_close(bt2_corder, dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_group_bh_info() */

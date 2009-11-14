@@ -126,9 +126,10 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
 herr_t
 H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
 {
-    H5HF_hdr_t *hdr;                            /* Fractal heap header */
-    herr_t      ret_value = SUCCEED;            /* Return value */
-    hsize_t	meta_size = 0;			/* free space storage size */
+    H5HF_hdr_t *hdr;                    /* Fractal heap header */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree handle for index */
+    hsize_t	meta_size = 0;		/* free space storage size */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_size, FAIL)
 
@@ -151,35 +152,29 @@ H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
         if(H5HF_man_iblock_size(hdr->f, dxpl_id, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0, heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get fractal heap storage info for indirect block")
 
-    /* Get B-tree storage for huge objects in fractal heap */
+    /* Check for B-tree storage of huge objects in fractal heap */
     if(H5F_addr_defined(hdr->huge_bt2_addr)) {
-        const H5B2_class_t *huge_bt2_class;     /* Class for huge v2 B-tree */
+        /* Open the huge object index v2 B-tree */
+        if(NULL == (bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' objects")
 
-        /* Determine the class of the huge v2 B-tree */
-        if(hdr->huge_ids_direct)
-	    if(hdr->filter_len > 0)
-                huge_bt2_class = H5HF_BT2_FILT_DIR;
-            else
-                huge_bt2_class = H5HF_BT2_DIR;
-        else
-	    if(hdr->filter_len > 0)
-                huge_bt2_class = H5HF_BT2_FILT_INDIR;
-            else
-                huge_bt2_class = H5HF_BT2_INDIR;
-
-        /* Get the B-tree storage for the appropriate class */
-        if(H5B2_iterate_size(hdr->f, dxpl_id, huge_bt2_class, hdr->huge_bt2_addr, heap_size) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+        /* Get the B-tree storage */
+        if(H5B2_iterate_size_2(bt2, dxpl_id, heap_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
     } /* end if */
 
     /* Get storage for free-space tracking info */
     if(H5F_addr_defined(hdr->fs_addr)) {
         if(H5HF_space_size(hdr, dxpl_id, &meta_size) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
 	*heap_size += meta_size;
-    }
+    } /* end if */
 
 done:
+    /* Release resources */
+    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for tracking 'huge' objects")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_size() */
 
