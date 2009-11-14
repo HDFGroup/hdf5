@@ -458,7 +458,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
 
     /* Check if we should create a creation order index v2 B-tree record */
     if(linfo->index_corder) {
-        /* Open the name index v2 B-tree */
+        /* Open the creation order index v2 B-tree */
         HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
         if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, linfo->corder_bt2_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
