@@ -138,7 +138,7 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     /* Allocate space for the master table in memory */
     if(NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read number of indexes and version from file superblock */
     table->num_indexes = f->shared->sohm_nindexes;
@@ -179,13 +179,13 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 
     /* Allocate space for the index headers in memory*/
     if(NULL == (table->indexes = (H5SM_index_header_t *)H5FL_ARR_MALLOC(H5SM_index_header_t, (size_t)table->num_indexes)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
+	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed for SOHM indexes")
 
     /* Read in the index headers */
     for(x = 0; x < table->num_indexes; ++x) {
         /* Verify correct version of index list */
         if(H5SM_LIST_VERSION != *p++)
-            HGOTO_ERROR(H5E_FILE, H5E_VERSION, NULL, "bad shared message list version number")
+            HGOTO_ERROR(H5E_SOHM, H5E_VERSION, NULL, "bad shared message list version number")
 
         /* Type of the index (list or B-tree) */
         table->indexes[x].index_type= (H5SM_index_type_t)*p++;
@@ -479,12 +479,12 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     /* Allocate space for the SOHM list data structure */
     if(NULL == (list = H5FL_MALLOC(H5SM_list_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
     if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_max)) == NULL)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
+	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
 
     list->header = header;
 
