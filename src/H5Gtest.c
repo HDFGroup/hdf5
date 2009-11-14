@@ -382,6 +382,8 @@ done:
 herr_t
 H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
 {
+    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
+    H5B2_t *bt2_corder = NULL;  /* v2 B-tree handle for creation order index */
     H5O_linfo_t linfo;		/* Link info message */
     H5G_t *grp = NULL;          /* Pointer to group */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -402,20 +404,34 @@ H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     if(!H5F_addr_defined(linfo.name_bt2_addr))
         HGOTO_DONE(FAIL)
 
+    /* Open the name index v2 B-tree */
+    if(NULL == (bt2_name = H5B2_open(grp->oloc.file, H5AC_dxpl_id, linfo.name_bt2_addr)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
     /* Retrieve # of records in name index */
-    if(H5B2_get_nrec(grp->oloc.file, H5AC_dxpl_id, H5G_BT2_NAME, linfo.name_bt2_addr, name_count) < 0)
+    if(H5B2_get_nrec_2(bt2_name, name_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
 
     /* Check if there is a creation order index */
     if(H5F_addr_defined(linfo.corder_bt2_addr)) {
+        /* Open the creation order index v2 B-tree */
+        if(NULL == (bt2_corder = H5B2_open(grp->oloc.file, H5AC_dxpl_id, linfo.corder_bt2_addr)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
+
         /* Retrieve # of records in creation order index */
-        if(H5B2_get_nrec(grp->oloc.file, H5AC_dxpl_id, H5G_BT2_CORDER, linfo.corder_bt2_addr, corder_count) < 0)
+        if(H5B2_get_nrec_2(bt2_corder, corder_count) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from creation order index")
     } /* end if */
     else
         *corder_count = 0;
 
 done:
+    /* Release resources */
+    if(bt2_name && H5B2_close(bt2_name, H5AC_dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+    if(bt2_corder && H5B2_close(bt2_corder, H5AC_dxpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5G_new_dense_info_test() */
 
