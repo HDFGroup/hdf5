@@ -41,11 +41,15 @@
 /**************************/
 
 /* Size of storage for number of records per node (on disk) */
-#define H5B2_SIZEOF_RECORDS_PER_NODE    2
+#define H5B2_SIZEOF_RECORDS_PER_NODE    (unsigned)2
 
 /* Size of a "tree pointer" (on disk) */
 /* (essentially, the largest internal pointer allowed) */
-#define H5B2_TREE_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE+H5F_SIZEOF_SIZE(f))
+#define H5B2_TREE_POINTER_SIZE(h)       (                                     \
+    (h)->sizeof_addr +                                                        \
+    H5B2_SIZEOF_RECORDS_PER_NODE +                                            \
+    (h)->sizeof_size                                                          \
+    )
 
 /* Size of a internal node pointer (on disk) */
 #define H5B2_INT_POINTER_SIZE(h, d) (                                         \
@@ -59,24 +63,24 @@
 
 /* Format overhead for all v2 B-tree metadata in the file */
 #define H5B2_METADATA_PREFIX_SIZE (                                           \
-    H5_SIZEOF_MAGIC   /* Signature */                                         \
-    + 1 /* Version */                                                         \
-    + 1 /* Tree type */                                                       \
-    + H5B2_SIZEOF_CHKSUM /* Metadata checksum */                              \
+    (unsigned)H5_SIZEOF_MAGIC   /* Signature */                               \
+    + (unsigned)1 /* Version */                                               \
+    + (unsigned)1 /* Tree type */                                             \
+    + (unsigned)H5B2_SIZEOF_CHKSUM /* Metadata checksum */                    \
     )
 
 /* Size of the v2 B-tree header on disk */
-#define H5B2_HEADER_SIZE(f)     (                                             \
+#define H5B2_HEADER_SIZE(h)   (                                             \
     /* General metadata fields */                                             \
     H5B2_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Header specific fields */                                              \
-    + 4 /* Node size, in bytes */                                             \
-    + 2 /* Record size, in bytes */                                           \
-    + 2 /* Depth of tree */                                                   \
-    + 1 /* Split % of full (as integer, ie. "98" means 98%) */                \
-    + 1 /* Merge % of full (as integer, ie. "98" means 98%) */                \
-    + H5B2_TREE_POINTER_SIZE(f)  /* Node pointer to root node in tree */      \
+    + (unsigned)4 /* Node size, in bytes */                                   \
+    + (unsigned)2 /* Record size, in bytes */                                 \
+    + (unsigned)2 /* Depth of tree */                                         \
+    + (unsigned)1 /* Split % of full (as integer, ie. "98" means 98%) */      \
+    + (unsigned)1 /* Merge % of full (as integer, ie. "98" means 98%) */      \
+    + H5B2_TREE_POINTER_SIZE(h)  /* Node pointer to root node in tree */      \
     )
 
 /* Size of the v2 B-tree internal node prefix */
@@ -119,7 +123,7 @@
 /* A "node pointer" to another B-tree node */
 typedef struct {
     haddr_t     addr;           /* Address of other node */
-    unsigned    node_nrec;      /* Number of records used in node pointed to */
+    uint16_t    node_nrec;      /* Number of records used in node pointed to */
     hsize_t     all_nrec;       /* Number of records in node pointed to and all it's children */
 } H5B2_node_ptr_t;
 
@@ -143,13 +147,13 @@ typedef struct H5B2_hdr_t {
     H5B2_node_ptr_t root;       /* Node pointer to root node in B-tree        */
 
     /* Information set by user (stored) */
-    unsigned    split_percent;  /* Percent full at which to split the node, when inserting */
-    unsigned    merge_percent;  /* Percent full at which to merge the node, when deleting */
-    size_t      node_size;      /* Size of B-tree nodes, in bytes             */
-    size_t      rrec_size;      /* Size of "raw" (on disk) record, in bytes   */
+    uint8_t     split_percent;  /* Percent full at which to split the node, when inserting */
+    uint8_t     merge_percent;  /* Percent full at which to merge the node, when deleting */
+    uint32_t    node_size;      /* Size of B-tree nodes, in bytes             */
+    uint32_t    rrec_size;      /* Size of "raw" (on disk) record, in bytes   */
 
     /* Dynamic information (stored) */
-    unsigned	depth;		/* B-tree's overall depth                     */
+    uint16_t	depth;		/* B-tree's overall depth                     */
 
     /* Derived information from user's information (not stored) */
     uint8_t     max_nrec_size;  /* Size to store max. # of records in any node (in bytes) */
@@ -178,7 +182,7 @@ typedef struct H5B2_leaf_t {
     /* Internal B-tree information */
     H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
     uint8_t     *leaf_native;   /* Pointer to native records                  */
-    unsigned    nrec;           /* Number of records in node                  */
+    uint16_t    nrec;           /* Number of records in node                  */
 } H5B2_leaf_t;
 
 /* B-tree internal node information */
@@ -190,8 +194,8 @@ typedef struct H5B2_internal_t {
     H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
     uint8_t     *int_native;    /* Pointer to native records                  */
     H5B2_node_ptr_t *node_ptrs; /* Pointer to node pointers                   */
-    unsigned    nrec;           /* Number of records in node                  */
-    unsigned    depth;          /* Depth of this node in the B-tree           */
+    uint16_t    nrec;           /* Number of records in node                  */
+    uint16_t    depth;          /* Depth of this node in the B-tree           */
 } H5B2_internal_t;
 
 /* v2 B-tree */
@@ -203,8 +207,8 @@ struct H5B2_t {
 /* User data for metadata cache 'load' callback */
 typedef struct {
     H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
-    unsigned    nrec;           /* Number of records in node to load */
-    unsigned    depth;          /* Depth of node to load */
+    uint16_t    nrec;           /* Number of records in node to load */
+    uint16_t    depth;          /* Depth of node to load */
 } H5B2_int_load_ud1_t;
 
 #ifdef H5B2_TESTING
@@ -253,7 +257,7 @@ H5_DLL H5B2_hdr_t *H5B2_hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5B2_hdr_create(H5F_t *f, hid_t dxpl_id,
     const H5B2_create_t *cparam);
 H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr,
-    const H5B2_create_t *cparam, unsigned depth);
+    const H5B2_create_t *cparam, uint16_t depth);
 H5_DLL herr_t H5B2_hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr);
@@ -281,7 +285,7 @@ H5_DLL herr_t H5B2_insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
 /* Routines for iterating over nodes/records */
 H5_DLL herr_t H5B2_iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     const H5B2_node_ptr_t *curr_node, H5B2_operator_t op, void *op_data);
-H5_DLL herr_t H5B2_iterate_size_node(H5B2_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5B2_node_size(H5B2_hdr_t *hdr, hid_t dxpl_id,
     unsigned depth, const H5B2_node_ptr_t *curr_node, hsize_t *op_data);
 
 /* Routines for locating records */
@@ -331,16 +335,9 @@ H5_DLL herr_t H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
 /* Testing routines */
 #ifdef H5B2_TESTING
-H5_DLL herr_t H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id,
-    const H5B2_class_t *type, haddr_t addr, haddr_t *root_addr);
-H5_DLL herr_t H5B2_get_root_addr_test_2(H5B2_t *bt2, haddr_t *root_addr);
-H5_DLL int H5B2_get_node_depth_test(H5F_t *f, hid_t dxpl_id,
-    const H5B2_class_t *type, haddr_t addr, void *udata);
-H5_DLL int H5B2_get_node_depth_test_2(H5B2_t *bt2, hid_t dxpl_id, void *udata);
-H5_DLL herr_t H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id,
-    const H5B2_class_t *type, haddr_t addr, void *udata,
-    H5B2_node_info_test_t *ninfo);
-H5_DLL herr_t H5B2_get_node_info_test_2(H5B2_t *bt2, hid_t dxpl_id,
+H5_DLL herr_t H5B2_get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr);
+H5_DLL int H5B2_get_node_depth_test(H5B2_t *bt2, hid_t dxpl_id, void *udata);
+H5_DLL herr_t H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id,
     void *udata, H5B2_node_info_test_t *ninfo);
 #endif /* H5B2_TESTING */
 

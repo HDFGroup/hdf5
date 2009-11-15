@@ -1885,7 +1885,7 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Get name index B-tree size */
-                if(H5B2_iterate_size_2(bt2_name, dxpl_id, &(bh_info->index_size)) < 0)
+                if(H5B2_size(bt2_name, dxpl_id, &(bh_info->index_size)) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
             } /* end if */
 
@@ -1896,7 +1896,7 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
                 /* Get creation order index B-tree size */
-                if(H5B2_iterate_size_2(bt2_corder, dxpl_id, &(bh_info->index_size)) < 0)
+                if(H5B2_size(bt2_corder, dxpl_id, &(bh_info->index_size)) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
             } /* end if */
 

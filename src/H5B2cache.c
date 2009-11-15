@@ -151,7 +151,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
 {
     H5B2_create_t       cparam;         /* B-tree creation parameters */
     H5B2_subid_t        id;		/* ID of B-tree class, as found in file */
-    unsigned            depth;          /* Depth of B-tree */
+    uint16_t            depth;          /* Depth of B-tree */
     H5B2_hdr_t		*hdr = NULL;    /* B-tree header */
     size_t		size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -177,7 +177,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the size of the serialized B-tree header on disk */
-    size = H5B2_HEADER_SIZE(f);
+    size = H5B2_HEADER_SIZE(hdr);
 
     /* Get a pointer to a buffer that's large enough for header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -300,7 +300,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
         /* Compute the size of the serialized B-tree header on disk */
-        size = H5B2_HEADER_SIZE(f);
+        size = H5B2_HEADER_SIZE(hdr);
 
         /* Get a pointer to a buffer that's large enough for header */
         if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -399,7 +399,7 @@ H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr)
     if(hdr->cache_info.free_file_space_on_destroy) {
         /* Release the space on disk */
         /* (XXX: Nasty usage of internal DXPL value! -QAK) */
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)H5B2_HEADER_SIZE(f)) < 0)
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)H5B2_HEADER_SIZE(hdr)) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header")
     } /* end if */
 
@@ -465,7 +465,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_size(const H5F_t *f, const H5B2_hdr_t UNUSED *hdr, size_t *size_ptr)
+H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_size)
 
@@ -474,7 +474,7 @@ H5B2_cache_hdr_size(const H5F_t *f, const H5B2_hdr_t UNUSED *hdr, size_t *size_p
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5B2_HEADER_SIZE(f);
+    *size_ptr = H5B2_HEADER_SIZE(hdr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_hdr_size() */
@@ -574,7 +574,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
 
     /* Deserialize node pointers for internal node */
     int_node_ptr = internal->node_ptrs;
-    for(u = 0; u < internal->nrec + 1; u++) {
+    for(u = 0; u < (unsigned)(internal->nrec + 1); u++) {
         /* Decode node pointer */
         H5F_addr_decode(f, (const uint8_t **)&p, &(int_node_ptr->addr));
         UINT64DECODE_VAR(p, int_node_ptr->node_nrec, udata->hdr->max_nrec_size);
@@ -673,7 +673,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
 
         /* Serialize node pointers for internal node */
         int_node_ptr = internal->node_ptrs;
-        for(u = 0; u < internal->nrec + 1; u++) {
+        for(u = 0; u < (unsigned)(internal->nrec + 1); u++) {
             /* Encode node pointer */
             H5F_addr_encode(f, &p, int_node_ptr->addr);
             UINT64ENCODE_VAR(p, int_node_ptr->node_nrec, internal->hdr->max_nrec_size);
@@ -854,7 +854,7 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
 static H5B2_leaf_t *
 H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, void *_hdr)
 {
-    const unsigned      *nrec = (const unsigned *)_nrec;
+    const uint16_t      *nrec = (const uint16_t *)_nrec;
     H5B2_hdr_t 	        *hdr = (H5B2_hdr_t *)_hdr;  /* B-tree header information */
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
     uint8_t		*p;             /* Pointer into raw data buffer */

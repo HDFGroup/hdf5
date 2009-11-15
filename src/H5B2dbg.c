@@ -154,7 +154,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 
     /* Print relevant node info */
     HDfprintf(stream, "%*sNode Info: (max_nrec/split_nrec/merge_nrec)\n", indent, "");
-    for(u = 0; u < (hdr->depth + 1); u++) {
+    for(u = 0; u < (unsigned)(hdr->depth + 1); u++) {
         sprintf(temp_str, "Depth %u:", u);
         HDfprintf(stream, "%*s%-*s (%u/%u/%u)\n", indent + 3, "", MAX(0, fwidth - 3),
             temp_str,

@@ -159,7 +159,7 @@ H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' objects")
 
         /* Get the B-tree storage */
-        if(H5B2_iterate_size_2(bt2, dxpl_id, heap_size) < 0)
+        if(H5B2_size(bt2, dxpl_id, heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
     } /* end if */
 

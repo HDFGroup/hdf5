@@ -336,7 +336,7 @@ H5G_obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 
                 /* Retrieve # of records in "name" B-tree */
                 /* (should be same # of records in all indices) */
-                if(H5B2_get_nrec_2(bt2_name, &linfo->nlinks) < 0)
+                if(H5B2_get_nrec(bt2_name, &linfo->nlinks) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
             } /* end if */
             else {

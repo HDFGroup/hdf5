@@ -246,7 +246,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
             H5O_FHEAP_ID_LEN;           /* Fractal heap ID */
     bt2_cparam.split_percent = H5A_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5A_NAME_BT2_MERGE_PERC;
-    if(NULL == (bt2_name = H5B2_create_2(f, dxpl_id, &bt2_cparam)))
+    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -267,7 +267,7 @@ HDfprintf(stderr, "%s: ainfo->name_bt2_addr = %a\n", FUNC, ainfo->name_bt2_addr)
                 H5O_FHEAP_ID_LEN;       /* Fractal heap ID */
         bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
-        if(NULL == (bt2_corder = H5B2_create_2(f, dxpl_id, &bt2_cparam)))
+        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -399,7 +399,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *na
     udata.found_op_data = &ret_value;
 
     /* Find & copy the attribute in the 'name' index */
-    if((attr_exists = H5B2_find_2(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
+    if((attr_exists = H5B2_find(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't search for attribute in name index")
     else if(attr_exists == FALSE)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute in name index")
@@ -545,7 +545,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     /* udata.id already set */
 
     /* Insert attribute into 'name' tracking v2 B-tree */
-    if(H5B2_insert_2(bt2_name, dxpl_id, &udata) < 0)
+    if(H5B2_insert(bt2_name, dxpl_id, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
 
     /* Check if we should create a creation order index v2 B-tree record */
@@ -556,7 +556,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Insert the record into the creation order index v2 B-tree */
-        if(H5B2_insert_2(bt2_corder, dxpl_id, &udata) < 0)
+        if(H5B2_insert(bt2_corder, dxpl_id, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
     } /* end if */
 
@@ -676,7 +676,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
             udata.found_op_data = NULL;
 
             /* Modify record for creation order index */
-            if(H5B2_modify_2(bt2_corder, op_data->dxpl_id, &udata, H5A_dense_write_bt2_cb2, &op_data->attr->sh_loc.u.heap_id) < 0)
+            if(H5B2_modify(bt2_corder, op_data->dxpl_id, &udata, H5A_dense_write_bt2_cb2, &op_data->attr->sh_loc.u.heap_id) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
         } /* end if */
 
@@ -814,7 +814,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     op_data.corder_bt2_addr = ainfo->corder_bt2_addr;
 
     /* Modify attribute through 'name' tracking v2 B-tree */
-    if(H5B2_modify_2(bt2_name, dxpl_id, &udata, H5A_dense_write_bt2_cb, &op_data) < 0)
+    if(H5B2_modify(bt2_name, dxpl_id, &udata, H5A_dense_write_bt2_cb, &op_data) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
 
 done:
@@ -952,7 +952,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.found_op_data = &attr_copy;
 
     /* Get copy of attribute through 'name' tracking v2 B-tree */
-    if((attr_exists = H5B2_find_2(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
+    if((attr_exists = H5B2_find(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index")
     else if(attr_exists == FALSE)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute in name index")
@@ -1231,7 +1231,7 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainf
 
         /* Iterate over the records in the v2 B-tree's "native" order */
         /* (by hash of name) */
-        if((ret_value = H5B2_iterate_2(bt2, dxpl_id, H5A_dense_iterate_bt2_cb, &udata)) < 0)
+        if((ret_value = H5B2_iterate(bt2, dxpl_id, H5A_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_ATTR, H5E_BADITER, "attribute iteration failed");
 
         /* Update the last attribute examined, if requested */
@@ -1298,7 +1298,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_udata)
         udata->common.corder = attr->shared->crt_idx;
 
         /* Remove the record from the creation order index v2 B-tree */
-        if(H5B2_remove_2(bt2_corder, udata->common.dxpl_id, udata, NULL, NULL) < 0)
+        if(H5B2_remove(bt2_corder, udata->common.dxpl_id, udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from creation order index v2 B-tree")
     } /* end if */
 
@@ -1401,7 +1401,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.corder_bt2_addr = ainfo->corder_bt2_addr;
 
     /* Remove the record from the name index v2 B-tree */
-    if(H5B2_remove_2(bt2_name, dxpl_id, &udata, H5A_dense_remove_bt2_cb, &udata) < 0)
+    if(H5B2_remove(bt2_name, dxpl_id, &udata, H5A_dense_remove_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from name index v2 B-tree")
 
 done:
@@ -1506,7 +1506,7 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Set the common information for the v2 B-tree remove operation */
 
         /* Remove the record from the "other" index v2 B-tree */
-        if(H5B2_remove_2(bt2, bt2_udata->dxpl_id, &other_bt2_udata, NULL, NULL) < 0)
+        if(H5B2_remove(bt2, bt2_udata->dxpl_id, &other_bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove record from 'other' index v2 B-tree")
     } /* end if */
 
@@ -1644,7 +1644,7 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
         udata.other_bt2_addr = idx_type == H5_INDEX_NAME ? ainfo->corder_bt2_addr : ainfo->name_bt2_addr;
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove_by_idx_2(bt2, dxpl_id, order, n, H5A_dense_remove_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl_id, order, n, H5A_dense_remove_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from v2 B-tree index")
     } /* end if */
     else {
@@ -1751,7 +1751,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.found_op_data = NULL;
 
     /* Find the attribute in the 'name' index */
-    if((ret_value = H5B2_find_2(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
+    if((ret_value = H5B2_find(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index")
 
 done:
