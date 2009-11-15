@@ -334,7 +334,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
     /* Retrieve # of records in "name" B-tree */
     /* (should be same # of records in all indices) */
-    if(H5B2_get_nrec_2(bt2_name, &nrec) < 0)
+    if(H5B2_get_nrec(bt2_name, &nrec) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
 
     /* Set size of table */
@@ -730,7 +730,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 
                 /* Retrieve # of records in "name" B-tree */
                 /* (should be same # of records in all indices) */
-                if(H5B2_get_nrec_2(bt2_name, &ainfo->nattrs) < 0)
+                if(H5B2_get_nrec(bt2_name, &ainfo->nattrs) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
             } /* end if */
             else

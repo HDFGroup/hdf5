@@ -326,7 +326,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
             fheap_id_len;               /* Fractal heap ID */
     bt2_cparam.split_percent = H5G_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5G_NAME_BT2_MERGE_PERC;
-    if(NULL == (bt2_name = H5B2_create_2(f, dxpl_id, &bt2_cparam)))
+    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -346,7 +346,7 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
                 fheap_id_len;           /* Fractal heap ID */
         bt2_cparam.split_percent = H5G_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5G_CORDER_BT2_MERGE_PERC;
-        if(NULL == (bt2_corder = H5B2_create_2(f, dxpl_id, &bt2_cparam)))
+        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -453,7 +453,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
     /* udata.id already set in H5HF_insert() call */
 
     /* Insert link into 'name' tracking v2 B-tree */
-    if(H5B2_insert_2(bt2_name, dxpl_id, &udata) < 0)
+    if(H5B2_insert(bt2_name, dxpl_id, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
 
     /* Check if we should create a creation order index v2 B-tree record */
@@ -464,7 +464,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Insert the record into the creation order index v2 B-tree */
-        if(H5B2_insert_2(bt2_corder, dxpl_id, &udata) < 0)
+        if(H5B2_insert(bt2_corder, dxpl_id, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert record into v2 B-tree")
     } /* end if */
 
@@ -570,7 +570,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.found_op_data = lnk;
 
     /* Find & copy the named link in the 'name' index */
-    if((ret_value = H5B2_find_2(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
+    if((ret_value = H5B2_find(bt2_name, dxpl_id, &udata, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in name index")
 
 done:
@@ -743,7 +743,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         udata.lnk = lnk;
 
         /* Find & copy the link in the appropriate index */
-        if(H5B2_index_2(bt2, dxpl_id, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_index(bt2, dxpl_id, order, n, H5G_dense_lookup_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in index")
     } /* end if */
     else {      /* Otherwise, we need to build a table of the links and sort it */
@@ -1056,7 +1056,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
         /* Iterate over the records in the v2 B-tree's "native" order */
         /* (by hash of name) */
-        if((ret_value = H5B2_iterate_2(bt2, dxpl_id, H5G_dense_iterate_bt2_cb, &udata)) < 0)
+        if((ret_value = H5B2_iterate(bt2, dxpl_id, H5G_dense_iterate_bt2_cb, &udata)) < 0)
             HERROR(H5E_SYM, H5E_BADITER, "link iteration failed");
 
         /* Update the last link examined, if requested */
@@ -1255,7 +1255,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
         udata.name_size = size;
 
         /* Retrieve the name according to the v2 B-tree's index order */
-        if(H5B2_index_2(bt2, dxpl_id, order, n, H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_index(bt2, dxpl_id, order, n, H5G_dense_get_name_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "can't locate object in v2 B-tree")
 
         /* Set return value */
@@ -1334,7 +1334,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         bt2_udata.corder = lnk->corder;
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove_2(bt2, udata->dxpl_id, &bt2_udata, NULL, NULL) < 0)
+        if(H5B2_remove(bt2, udata->dxpl_id, &bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from creation order index v2 B-tree")
     } /* end if */
 
@@ -1457,7 +1457,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.replace_names = TRUE;
 
     /* Remove the record from the name index v2 B-tree */
-    if(H5B2_remove_2(bt2, dxpl_id, &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
+    if(H5B2_remove(bt2, dxpl_id, &udata, H5G_dense_remove_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from name index v2 B-tree")
 
 done:
@@ -1583,7 +1583,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Set the common information for the v2 B-tree remove operation */
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove_2(bt2, bt2_udata->dxpl_id, &other_bt2_udata, NULL, NULL) < 0)
+        if(H5B2_remove(bt2, bt2_udata->dxpl_id, &other_bt2_udata, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove link from 'other' index v2 B-tree")
     } /* end if */
 
@@ -1694,7 +1694,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         udata.grp_full_path_r = grp_full_path_r;
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove_by_idx_2(bt2, dxpl_id, order, n, H5G_dense_remove_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl_id, order, n, H5G_dense_remove_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from indexed v2 B-tree")
     } /* end if */
     else {      /* Otherwise, we need to build a table of the links and sort it */

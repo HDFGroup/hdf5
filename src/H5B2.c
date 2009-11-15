@@ -112,7 +112,7 @@ H5FL_DEFINE_STATIC(H5B2_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_create_2
+ * Function:	H5B2_create
  *
  * Purpose:	Creates a new empty B-tree in the file.
  *
@@ -126,14 +126,14 @@ H5FL_DEFINE_STATIC(H5B2_t);
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_create_2(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
+H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
     haddr_t     hdr_addr;               /* B-tree header address */
     H5B2_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_create_2, NULL)
+    FUNC_ENTER_NOAPI(H5B2_create, NULL)
 
     /*
      * Check arguments.
@@ -178,48 +178,6 @@ done:
         if(H5B2_close(bt2, dxpl_id) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, NULL, "unable to close v2 B-tree")
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_create_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_create
- *
- * Purpose:	Creates a new empty B-tree in the file.
- *
- * Return:	Non-negative on success (with address of new B-tree
- *              filled in), negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 31 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    haddr_t *addr_p)
-{
-    haddr_t hdr_addr;                   /* The new v2 B-tree header address */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_create, FAIL)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(cparam);
-    HDassert(addr_p);
-
-    /* Create shared v2 B-tree header */
-    if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create v2 B-tree header")
-
-    /* Set the B-tree's address to return */
-    *addr_p = hdr_addr;
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_create() */
 
@@ -290,7 +248,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_insert_2
+ * Function:	H5B2_insert
  *
  * Purpose:	Adds a new record to the B-tree.
  *
@@ -303,12 +261,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_insert_2(H5B2_t *bt2, hid_t dxpl_id, void *udata)
+H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_insert_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_insert, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -349,50 +307,6 @@ H5B2_insert_2(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_insert_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_insert
- *
- * Purpose:	Adds a new record to the B-tree.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb  2 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-           void *udata)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_insert, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Insert the new record */
-    if(H5B2_insert_2(bt2, dxpl_id, udata) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_insert() */
 
 
@@ -428,7 +342,7 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_iterate_2
+ * Function:	H5B2_iterate
  *
  * Purpose:	Iterate over all the records in the B-tree, in "in-order"
  *		order, making a callback for each record.
@@ -445,12 +359,12 @@ H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr_p)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_iterate_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
+H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR(H5B2_iterate_2, -)
+    FUNC_ENTER_NOAPI_NOERR(H5B2_iterate, -)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -470,60 +384,11 @@ H5B2_iterate_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op, void *op_data)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_iterate_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_iterate
- *
- * Purpose:	Iterate over all the records in the B-tree, in "in-order"
- *		order, making a callback for each record.
- *
- *              If the callback returns non-zero, the iteration breaks out
- *              without finishing all the records.
- *
- * Return:	Value from callback: non-negative on success, negative on error
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 11 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    H5B2_operator_t op, void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_iterate, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(op);
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Iterate through records */
-    if((ret_value = H5B2_iterate_2(bt2, dxpl_id, op, op_data)) < 0)
-        HERROR(H5E_BTREE, H5E_CANTLIST, "B-tree iteration failed");
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_find_2
+ * Function:	H5B2_find
  *
  * Purpose:	Locate the specified information in a B-tree and return
  *		that information by calling the provided 'OP' routine with an
@@ -546,7 +411,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5B2_find_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
+H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -556,7 +421,7 @@ H5B2_find_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     unsigned    idx;                    /* Location of record which matches key */
     htri_t	ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_find_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_find, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -661,65 +526,11 @@ H5B2_find_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_find_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_find
- *
- * Purpose:	Locate the specified information in a B-tree and return
- *		that information by calling the provided 'OP' routine with an
- *		OP_DATA pointer.  The UDATA parameter points to data passed
- *		to the key comparison function.
- *
- *              The 'OP' routine is called with the record found and the
- *              OP_DATA pointer, to allow caller to return information about
- *              the record.
- *
- *              If 'OP' is NULL, then this routine just returns "TRUE" when
- *              a record is present in the B-tree.
- *
- * Return:	Non-negative (TRUE/FALSE) on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 23 2005
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    void *udata, H5B2_found_t op, void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    htri_t	ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_find, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Operate on record */
-    if((ret_value = H5B2_find_2(bt2, dxpl_id, udata, op, op_data)) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree find operation failed")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_find() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_index_2
+ * Function:	H5B2_index
  *
  * Purpose:	Locate the IDX'th record in a B-tree according to the
  *              ordering used by the B-tree.  The IDX values are 0-based.
@@ -737,7 +548,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_index_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
+H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
     H5B2_found_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -745,7 +556,7 @@ H5B2_index_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
     unsigned    depth;                  /* Current depth of the tree */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_index_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_index, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -876,61 +687,11 @@ H5B2_index_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_index_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_index
- *
- * Purpose:	Locate the IDX'th record in a B-tree according to the
- *              ordering used by the B-tree.  The IDX values are 0-based.
- *
- *              The 'OP' routine is called with the record found and the
- *              OP_DATA pointer, to allow caller to return information about
- *              the record.
- *
- * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 23 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    H5_iter_order_t order, hsize_t idx, H5B2_found_t op, void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_index, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(op);
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Locate and operate on record */
-    if(H5B2_index_2(bt2, dxpl_id, order, idx, op, op_data) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree index operation failed")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_index() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_remove_2
+ * Function:	H5B2_remove
  *
  * Purpose:	Removes a record from a B-tree.
  *
@@ -943,13 +704,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_remove_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
+H5B2_remove(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
     void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_remove_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_remove, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -982,7 +743,7 @@ H5B2_remove_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
                 if(H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
 
-            hdr->depth -= depth_decreased;
+            hdr->depth -= (uint16_t)depth_decreased;
         } /* end for */
     } /* end if */
     else {
@@ -999,55 +760,11 @@ H5B2_remove_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_remove_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_remove
- *
- * Purpose:	Removes a record from a B-tree.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 25 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    void *udata, H5B2_remove_t op, void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_remove, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Attempt to remove record from B-tree */
-    if(H5B2_remove_2(bt2, dxpl_id, udata, op, op_data) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_remove() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_remove_by_idx_2
+ * Function:	H5B2_remove_by_idx
  *
  * Purpose:	Removes the n'th record from a B-tree.
  *
@@ -1060,13 +777,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_remove_by_idx_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
+H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
     hsize_t idx, H5B2_remove_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_remove_by_idx_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_remove_by_idx, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -1107,7 +824,7 @@ H5B2_remove_by_idx_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
                 if(H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
 
-            hdr->depth -= depth_decreased;
+            hdr->depth -= (uint16_t)depth_decreased;
         } /* end for */
     } /* end if */
     else {
@@ -1124,81 +841,7 @@ H5B2_remove_by_idx_2(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_remove_by_idx_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_remove_by_idx
- *
- * Purpose:	Removes the n'th record from a B-tree.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov 14 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
-    haddr_t addr, H5_iter_order_t order, hsize_t idx, H5B2_remove_t op,
-    void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_remove_by_idx, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Attempt to remove record from B-tree */
-    if(H5B2_remove_by_idx_2(bt2, dxpl_id, order, idx, op, op_data) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_remove_by_idx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_get_nrec_2
- *
- * Purpose:	Retrieves the number of records in a B-tree
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 25 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_get_nrec_2(const H5B2_t *bt2, hsize_t *nrec)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_get_nrec_2)
-
-    /* Check arguments. */
-    HDassert(bt2);
-    HDassert(nrec);
-
-    /* Get B-tree number of records */
-    *nrec = bt2->hdr->root.all_nrec;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_get_nrec_2() */
 
 
 /*-------------------------------------------------------------------------
@@ -1215,98 +858,19 @@ H5B2_get_nrec_2(const H5B2_t *bt2, hsize_t *nrec)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-           hsize_t *nrec)
+H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec)
 {
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_get_nrec, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(nrec);
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Get the number of records in the B-tree */
-    if(H5B2_get_nrec_2(bt2, nrec) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to get # of records in B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_get_nrec() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_neighbor_2
- *
- * Purpose:	Locate a record relative to the specified information in a
- *              B-tree and return that information by filling in fields of the
- *              caller-supplied UDATA pointer depending on the type of leaf node
- *		requested.  The UDATA can point to additional data passed
- *		to the key comparison function.
- *
- *              The 'OP' routine is called with the record found and the
- *              OP_DATA pointer, to allow caller to return information about
- *              the record.
- *
- *              The RANGE indicates whether to search for records less than or
- *              equal to, or greater than or equal to the information passed
- *              in with UDATA.
- *
- * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar  8 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_neighbor_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_compare_t range, void *udata,
-    H5B2_found_t op, void *op_data)
-{
-    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_neighbor_2, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_get_nrec)
 
     /* Check arguments. */
     HDassert(bt2);
-    HDassert(op);
+    HDassert(nrec);
 
-    /* Set the shared v2 B-tree header's file context for this operation */
-    bt2->hdr->f = bt2->f;
+    /* Get B-tree number of records */
+    *nrec = bt2->hdr->root.all_nrec;
 
-    /* Get the v2 B-tree header */
-    hdr = bt2->hdr;
-
-    /* Check for empty tree */
-    if(!H5F_addr_defined(hdr->root.addr))
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
-
-    /* Attempt to find neighbor record in B-tree */
-    if(hdr->depth > 0) {
-        if(H5B2_neighbor_internal(hdr, dxpl_id, hdr->depth, &hdr->root, NULL, range, udata, op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree internal node")
-    } /* end if */
-    else {
-        if(H5B2_neighbor_leaf(hdr, dxpl_id, &hdr->root, NULL, range, udata, op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree leaf node")
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_neighbor_2() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_get_nrec() */
 
 
 /*-------------------------------------------------------------------------
@@ -1335,39 +899,45 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    H5B2_compare_t range, void *udata, H5B2_found_t op, void *op_data)
+H5B2_neighbor(H5B2_t *bt2, hid_t dxpl_id, H5B2_compare_t range, void *udata,
+    H5B2_found_t op, void *op_data)
 {
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
+    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_neighbor, FAIL)
 
     /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(bt2);
     HDassert(op);
 
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
+
+    /* Get the v2 B-tree header */
+    hdr = bt2->hdr;
+
+    /* Check for empty tree */
+    if(!H5F_addr_defined(hdr->root.addr))
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
 
     /* Attempt to find neighbor record in B-tree */
-    if(H5B2_neighbor_2(bt2, dxpl_id, range, udata, op, op_data) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree")
+    if(hdr->depth > 0) {
+        if(H5B2_neighbor_internal(hdr, dxpl_id, hdr->depth, &hdr->root, NULL, range, udata, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree internal node")
+    } /* end if */
+    else {
+        if(H5B2_neighbor_leaf(hdr, dxpl_id, &hdr->root, NULL, range, udata, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to find neighbor record in B-tree leaf node")
+    } /* end else */
 
 done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_neighbor() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_modify_2
+ * Function:	H5B2_modify
  *
  * Purpose:	Locate the specified information in a B-tree and modify it.
  *		The UDATA points to additional data passed
@@ -1387,7 +957,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
+H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
     void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
@@ -1397,7 +967,7 @@ H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
     unsigned    idx;                    /* Location of record which matches key */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_modify_2, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_modify, FAIL)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -1526,154 +1096,7 @@ H5B2_modify_2(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_modify_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_modify
- *
- * Purpose:	Locate the specified information in a B-tree and modify it.
- *		The UDATA points to additional data passed
- *		to the key comparison function for locating the record to
- *              modify.
- *
- *              The 'OP' routine is called with the record found and the
- *              OP_DATA pointer, to allow caller to modify information about
- *              the record.
- *
- * Return:	Non-negative on success, negative on failure.
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 10 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls, haddr_t addr,
-    void *udata, H5B2_modify_t op, void *op_data)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_modify, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(op);
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Locate & modify record */
-    if(H5B2_modify_2(bt2, dxpl_id, udata, op, op_data) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL, "'modify' callback failed for B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_modify() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_iterate_size_2
- *
- * Purpose:     Iterate over all the records in the B-tree, collecting
- *              storage info.
- *
- * Return:      non-negative on success, negative on error
- *
- * Programmer:  Vailin Choi
- *              June 19 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_iterate_size_2(H5B2_t *bt2, hid_t dxpl_id, hsize_t *btree_size)
-{
-    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_iterate_size_2, FAIL)
-
-    /* Check arguments. */
-    HDassert(bt2);
-    HDassert(btree_size);
-
-    /* Set the shared v2 B-tree header's file context for this operation */
-    bt2->hdr->f = bt2->f;
-
-    /* Get the v2 B-tree header */
-    hdr = bt2->hdr;
-
-    /* Add size of header to B-tree metadata total */
-    *btree_size += H5B2_HEADER_SIZE(hdr->f);
-
-    /* Iterate through records */
-    if(hdr->root.node_nrec > 0) {
-        /* Check for root node being a leaf */
-        if(hdr->depth == 0)
-            *btree_size += hdr->node_size;
-        else
-            /* Iterate through nodes */
-            if(H5B2_iterate_size_node(hdr, dxpl_id, hdr->depth, &hdr->root, btree_size) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_iterate_size_2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_iterate_size
- *
- * Purpose:     Iterate over all the records in the B-tree, collecting
- *              storage info.
- *
- * Return:      non-negative on success, negative on error
- *
- * Programmer:  Vailin Choi
- *              June 19 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *cls,
-    haddr_t addr, hsize_t *btree_size)
-{
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B2_iterate_size, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(cls);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(btree_size);
-
-    /* Open the B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, addr)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTOPENOBJ, FAIL, "unable to open B-tree")
-
-    /* Iterate through B-tree, collective size info */
-    if(H5B2_iterate_size_2(bt2, dxpl_id, btree_size) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't get size information for B-tree")
-
-done:
-    /* Close the B-tree */
-    if(bt2 && H5B2_close(bt2, dxpl_id) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTCLOSEOBJ, FAIL, "unable to close B-tree")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_iterate_size() */
 
 
 /*-------------------------------------------------------------------------

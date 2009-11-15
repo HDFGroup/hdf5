@@ -198,7 +198,7 @@ H5O_is_attr_empty_test(hid_t oid)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in name index */
-                if(H5B2_get_nrec_2(bt2_name, &nattrs) < 0)
+                if(H5B2_get_nrec(bt2_name, &nattrs) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
             } /* end if */
 
@@ -285,7 +285,7 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
             /* Retrieve # of records in name index */
-            if(H5B2_get_nrec_2(bt2_name, &obj_nattrs) < 0)
+            if(H5B2_get_nrec(bt2_name, &obj_nattrs) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
         } /* end if */
 
@@ -367,7 +367,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in name index */
-    if(H5B2_get_nrec_2(bt2_name, name_count) < 0)
+    if(H5B2_get_nrec(bt2_name, name_count) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
 
     /* Check if there is a creation order index */
@@ -377,7 +377,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Retrieve # of records in creation order index */
-        if(H5B2_get_nrec_2(bt2_corder, corder_count) < 0)
+        if(H5B2_get_nrec(bt2_corder, corder_count) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from creation order index")
     } /* end if */
     else

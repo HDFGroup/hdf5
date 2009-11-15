@@ -157,7 +157,7 @@ H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
     bt2_cparam.merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
 
     /* Create v2 B-tree for tracking 'huge' objects */
-    if(NULL == (hdr->huge_bt2 = H5B2_create_2(hdr->f, dxpl_id, &bt2_cparam)))
+    if(NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, dxpl_id, &bt2_cparam)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking 'huge' heap objects")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -403,7 +403,7 @@ HDfprintf(stderr, "%s: obj_rec = {%a, %Hu, %x, %Hu}\n", FUNC, obj_rec.addr, obj_
 #endif /* QAK */
 
             /* Insert record for object in v2 B-tree */
-            if(H5B2_insert_2(hdr->huge_bt2, dxpl_id, &obj_rec) < 0)
+            if(H5B2_insert(hdr->huge_bt2, dxpl_id, &obj_rec) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "couldn't insert object tracking record in v2 B-tree")
 
             /* Encode ID for user */
@@ -424,7 +424,7 @@ HDfprintf(stderr, "%s: obj_rec = {%a, %Hu}\n", FUNC, obj_rec.addr, obj_rec.len);
 #endif /* QAK */
 
             /* Insert record for object in v2 B-tree */
-            if(H5B2_insert_2(hdr->huge_bt2, dxpl_id, &obj_rec) < 0)
+            if(H5B2_insert(hdr->huge_bt2, dxpl_id, &obj_rec) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "couldn't insert object tracking record in v2 B-tree")
 
             /* Encode ID for user */
@@ -471,7 +471,7 @@ HDfprintf(stderr, "%s: indir_rec = {%a, %Hu, %Hu}\n", FUNC, indir_rec.addr, indi
         } /* end else */
 
         /* Insert record for tracking object in v2 B-tree */
-        if(H5B2_insert_2(hdr->huge_bt2, dxpl_id, ins_rec) < 0)
+        if(H5B2_insert(hdr->huge_bt2, dxpl_id, ins_rec) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "couldn't insert object tracking record in v2 B-tree")
 
         /* Encode ID for user */
@@ -557,7 +557,7 @@ H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
             UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
 
             /* Look up object in v2 B-tree */
-            if(H5B2_find_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_found, &found_rec) != TRUE)
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_found, &found_rec) != TRUE)
                 HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
 
             /* Retrieve the object's length */
@@ -571,7 +571,7 @@ H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
             UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
 
             /* Look up object in v2 B-tree */
-            if(H5B2_find_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
                 HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
 
             /* Retrieve the object's length */
@@ -648,7 +648,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
             UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
 
             /* Look up object in v2 B-tree */
-            if(H5B2_find_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_found, &found_rec) != TRUE)
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_found, &found_rec) != TRUE)
                 HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
 
             /* Retrieve the object's address & length */
@@ -664,7 +664,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
             UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
 
             /* Look up object in v2 B-tree */
-            if(H5B2_find_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
                 HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
 
             /* Retrieve the object's address & length */
@@ -792,7 +792,7 @@ H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
 
         /* Look up object in v2 B-tree */
-        if(H5B2_find_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
+        if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
             HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
 
         /* Retrieve the object's address & length */
@@ -937,7 +937,7 @@ H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
-            if(H5B2_remove_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_dir_remove, &udata) < 0)
+            if(H5B2_remove(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_dir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
         } /* end if */
         else {
@@ -950,7 +950,7 @@ H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
-            if(H5B2_remove_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_dir_remove, &udata) < 0)
+            if(H5B2_remove(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_dir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
         } /* end else */
     } /* end if */
@@ -963,7 +963,7 @@ H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
-            if(H5B2_remove_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_remove, &udata) < 0)
+            if(H5B2_remove(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
         } /* end if */
         else {
@@ -974,7 +974,7 @@ H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
-            if(H5B2_remove_2(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_remove, &udata) < 0)
+            if(H5B2_remove(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_remove, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
         } /* end else */
     } /* end else */

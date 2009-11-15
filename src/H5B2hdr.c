@@ -108,7 +108,7 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  */
 herr_t
 H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
-    unsigned depth)
+    uint16_t depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -187,7 +187,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
 
     /* Initialize internal node info */
     if(depth > 0) {
-        for(u = 1; u < (depth + 1); u++) {
+        for(u = 1; u < (unsigned)(depth + 1); u++) {
             sz_max_nrec = H5B2_NUM_INT_REC(hdr, u);
             H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
             HDassert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
@@ -296,11 +296,11 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(f, hdr, cparam, 0) < 0)
+    if(H5B2_hdr_init(f, hdr, cparam, (uint16_t)0) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(hdr))))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
 
     /* Cache the new B-tree node */
@@ -520,7 +520,7 @@ H5B2_hdr_free(H5B2_hdr_t *hdr)
         unsigned u;             /* Local index variable */
 
         /* Destroy free list factories */
-        for(u = 0; u < (hdr->depth + 1); u++) {
+        for(u = 0; u < (unsigned)(hdr->depth + 1); u++) {
             if(hdr->node_info[u].nat_rec_fac)
                 if(H5FL_fac_term(hdr->node_info[u].nat_rec_fac) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy node's native record block factory")

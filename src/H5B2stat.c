@@ -71,7 +71,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_stat_info_2
+ * Function:	H5B2_stat_info
  *
  * Purpose:	Retrieve metadata statistics for a v2 B-tree
  *
@@ -84,11 +84,11 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_stat_info_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_stat_t *info)
+H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_stat_info_2)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_stat_info)
 
     /* Check arguments. */
     HDassert(info);
@@ -104,49 +104,55 @@ H5B2_stat_info_2(H5B2_t *bt2, hid_t dxpl_id, H5B2_stat_t *info)
     info->nrecords = hdr->root.all_nrec;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_stat_info_2() */
+} /* H5B2_stat_info() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_stat_info
+ * Function:    H5B2_size
  *
- * Purpose:	Retrieve metadata statistics for a v2 B-tree
+ * Purpose:     Iterate over all the records in the B-tree, collecting
+ *              storage info.
  *
- * Return:	Success:	non-negative
+ * Return:      non-negative on success, negative on error
  *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, March  6, 2006
+ * Programmer:  Vailin Choi
+ *              June 19 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_stat_info(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5B2_stat_t *info)
+H5B2_size(H5B2_t *bt2, hid_t dxpl_id, hsize_t *btree_size)
 {
-    H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
+    FUNC_ENTER_NOAPI(H5B2_size, FAIL)
 
     /* Check arguments. */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(info);
+    HDassert(bt2);
+    HDassert(btree_size);
 
-    /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
 
-    /* Get information about the B-tree */
-    info->depth = hdr->depth;
-    info->nrecords = hdr->root.all_nrec;
+    /* Get the v2 B-tree header */
+    hdr = bt2->hdr;
+
+    /* Add size of header to B-tree metadata total */
+    *btree_size += H5B2_HEADER_SIZE(hdr);
+
+    /* Iterate through records */
+    if(hdr->root.node_nrec > 0) {
+        /* Check for root node being a leaf */
+        if(hdr->depth == 0)
+            *btree_size += hdr->node_size;
+        else
+            /* Iterate through nodes */
+            if(H5B2_node_size(hdr, dxpl_id, hdr->depth, &hdr->root, btree_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+    } /* end if */
 
 done:
-    /* Release B-tree header node */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_stat_info() */
+} /* H5B2_size() */
 
