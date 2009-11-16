@@ -73,14 +73,14 @@ case "X-$CC_BASENAME" in
       #    1429:  the `long long' type is not standard
       #    1685:  turn off warnings about turning off invalid warnings
       #    3201:  remark - parameter not referenced
-      #CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
+      #H5_CFLAGS="$H5_CFLAGS -woff 1174,1429,1209,1196,1685,3201"
       H5_CFLAGS="$H5_CFLAGS -woff 1209,3201"
 
       # Always turn off these compiler warnings for the old compiler:
       #    799:   the `long long' type is not standard
       #    803:   turn off warnings about turning off invalid warnings
       #    835:   __vfork() (this is an SGI config problem)
-      #CFLAGS="$CFLAGS -woff 799,803,835"
+      #H5_CFLAGS="$H5_CFLAGS -woff 799,803,835"
 
       # Always turn off these loader warnings:
       # (notice the peculiar syntax)
@@ -133,7 +133,7 @@ fi
 if test -z "$cxx_flags_set"; then
   # -LANG:std required for std use; -ptused causes templates used to be
   # instantiated
-  CPPFLAGS="$CPPFLAGS -LANG:std"
+  AM_CPPFLAGS="$AM_CPPFLAGS -LANG:std"
   H5_CPPFLAGS="$H5_CPPFLAGS -ptused"
 
   # libCio is a default library, since libtool before 1.5 doesn't fully 
@@ -176,18 +176,18 @@ hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate='no'}
 # Versions 7.4.2m or newer work.
 # Up to version 7.4.4m, it cannot handle collective IO with non-contribution 
 # of some processes.
-# Fix $hdf5_mpi_complex_derived_datatype_works if it is not set and is using cc.
-if [ -z "$hdf5_mpi_complex_derived_datatype_works" -a $CC_BASENAME = cc ]; then
+# Fix $hdf5_cv_mpi_complex_derived_datatype_works if it is not set and is using cc.
+if [ -z "$hdf5_cv_mpi_complex_derived_datatype_works" -a $CC_BASENAME = cc ]; then
     ccversion=`$CC -version 2>&1 | sed -e 's/.*Version //p'`
     ccversion1=`echo $ccversion | cut -f1 -d.`
     ccversion2=`echo $ccversion | cut -f2 -d.`
     # Assume all versions 7.4.* or newer are okay
     # and assume ccversion2 is never larger than 99.
     ccversionval=`expr $ccversion1 \* 100 + $ccversion2`
-    hdf5_mpi_special_collective_io_works='no'
+    hdf5_cv_mpi_special_collective_io_works='no'
     if [ $ccversionval -lt 704 ]; then
-        hdf5_mpi_complex_derived_datatype_works='no'
-#        hdf5_mpi_special_collective_io_works='no'
+        hdf5_cv_mpi_complex_derived_datatype_works='no'
+#        hdf5_cv_mpi_special_collective_io_works='no'
     fi
 fi
 

@@ -357,6 +357,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5B2hdr.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5B2int.c"
 				>
 			</File>
@@ -562,6 +566,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5FDcore.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Fdeprec.c"
 				>
 			</File>
 			<File
@@ -938,6 +946,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Ofill.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Ofsinfo.c"
 				>
 			</File>
 			<File

@@ -1581,6 +1581,9 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
  done:
     free(ptdata);
     
+    if(H5Tclose(type_id) < 0)
+        HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+    
     if(H5Tclose(dtype) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
@@ -1880,6 +1883,9 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
 
  done:
     free(ptdata);
+    
+    if(H5Tclose(type_id) < 0)
+        HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
     if(H5Tclose(dtype) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");

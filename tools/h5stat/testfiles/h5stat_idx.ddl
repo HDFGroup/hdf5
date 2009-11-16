@@ -5,16 +5,19 @@ Filename: h5stat_idx.h5
 File information
 	# of unique groups: 1
 	# of unique datasets: 2
-	# of unique named dataypes: 0
+	# of unique named datatypes: 0
 	# of unique links: 0
 	# of unique other: 0
 	Max. # of links to object: 1
 	Max. # of objects in group: 2
-Object header size: (total/unused)
-	Groups: 147/47
-	Datasets: 568/362
-	Datatypes: 0/0
-Storage information:
+File space information for file metadata (in bytes):
+	Superblock: 48
+	Superblock extension: 0
+	User block: 0
+	Object headers: (total/unused)
+		Groups: 147/47
+		Datasets(exclude compact data): 568/362
+		Datatypes: 0/0
 	Groups:
 		B-tree/List: 0
 		Heap: 0
@@ -23,11 +26,15 @@ Storage information:
 		Heap: 0
 	Chunked datasets:
 		Index: 202
+	Datasets:
+		Heap: 0
 	Shared Messages:
 		Header: 0
 		B-tree/List: 0
 		Heap: 0
-	Superblock extension: 0
+	Free-space managers:
+		Header: 0
+		Amount of free space: 0
 Small groups:
 	# of groups of size 2: 1
 	Total # of small groups: 1
@@ -47,6 +54,7 @@ Dataset dimension information:
 		Total # of datasets: 2
 Dataset storage information:
 	Total raw data size: 110
+	Total external raw data size: 0
 Dataset layout information:
 	Dataset layout counts[COMPACT]: 0
 	Dataset layout counts[CONTIG]: 0
@@ -73,3 +81,15 @@ Small # of attributes:
 Attribute bins:
 	Total # of objects with attributes: 0
 	Max. # of attributes to objects: 0
+Free-space section threshold: 1 bytes
+Small size free-space sections (< 10 bytes):
+	Total # of small size sections: 0
+Free-space section bins:
+	Total # of sections: 0
+File space management strategy: H5F_FILE_SPACE_ALL
+Summary of file space information:
+  File metadata: 965 bytes
+  Raw data: 110 bytes
+  Amount/Percent of tracked free space: 0 bytes/0.0%
+  Unaccounted space: 1131 bytes
+Total space: 2206 bytes

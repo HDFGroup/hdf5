@@ -53,6 +53,8 @@ static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
 static void *H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
+static herr_t H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_ih_info_t *bh_info);
 
 
 /*********************/
@@ -78,7 +80,8 @@ const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
     H5O_dset_isa, 		/* "isa" message		*/
     H5O_dset_open, 		/* open an object of this class */
     H5O_dset_create, 		/* create an object of this class */
-    H5O_dset_get_oloc 		/* get an object header location for an object */
+    H5O_dset_get_oloc, 		/* get an object header location for an object */
+    H5O_dset_bh_info 		/* get the index & heap info for an object */
 }};
 
 /* Declare a free list to manage the H5D_copy_file_ud_t struct */
@@ -152,8 +155,8 @@ H5O_dset_free_copy_file_udata(void *_udata)
         H5T_close(udata->src_dtype);
 
     /* Release copy of dataset's filter pipeline, if it was set */
-    if(udata->src_pline)
-        H5O_msg_free(H5O_PLINE_ID, udata->src_pline);
+    if(udata->common.src_pline)
+        H5O_msg_free(H5O_PLINE_ID, udata->common.src_pline);
 
     /* Release copy of dataset's layout, if it was set */
     if(udata->src_layout)
@@ -362,13 +365,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     H5O_layout_t        layout;         	/* Data storage layout message */
-    herr_t      	ret_value = SUCCEED;      /* Return value */
+    htri_t		exists;                 /* Flag if header message of interest exists */
+    herr_t      	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dset_bh_info, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_bh_info)
 
     /* Sanity check */
     HDassert(f);
@@ -391,7 +395,6 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Check for chunked dataset storage */
     if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout.storage)) {
         H5O_pline_t pline;              /* I/O pipeline message */
-        htri_t	exists;                 /* Flag if header message of interest exists */
 
         /* Check for I/O pipeline message */
         if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
@@ -405,6 +408,25 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 
         if(H5D_chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
+    } /* end if */
+
+    /* Check for External File List message in the object header */
+    if((exists = H5O_msg_exists_oh(oh, H5O_EFL_ID)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for EFL message")
+
+    if(exists && H5D_efl_is_space_alloc(&layout.storage)) {
+	H5O_efl_t efl;			/* External File List message */
+
+        /* Start with clean EFL info */
+        HDmemset(&efl, 0, sizeof(efl));
+
+	/* Get External File List message from the object header */
+	if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_EFL_ID, &efl))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find EFL message")
+
+	/* Get size of local heap for EFL message's file list */
+	if(H5D_efl_bh_info(f, dxpl_id, &efl, &(bh_info->heap_size)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine EFL heap info")
     } /* end if */
 
 done:

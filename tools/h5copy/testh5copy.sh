@@ -166,11 +166,7 @@ TOOLTEST_FAIL()
 H5DIFFTEST() 
 {
     VERIFY  $@
-    if [ "`uname -s`" = "TFLOPS O/S" ]; then
-        $RUNSERIAL $H5DIFF_BIN -q $@ 
-    else
-        $RUNSERIAL $H5DIFF_BIN -q "$@" 
-    fi
+    $RUNSERIAL $H5DIFF_BIN -q "$@" 
     RET=$?
     if [ $RET != 0 ] ; then
          echo "*FAILED*"
@@ -185,11 +181,7 @@ H5DIFFTEST()
 H5DIFFTEST_FAIL() 
 {
     VERIFY  $@
-    if [ "`uname -s`" = "TFLOPS O/S" ]; then
-        $RUNSERIAL $H5DIFF_BIN -q $@ 
-    else
-        $RUNSERIAL $H5DIFF_BIN -q "$@" 
-    fi
+    $RUNSERIAL $H5DIFF_BIN -q "$@" 
     RET=$?
 
     if [ $RET != 1 ] ; then

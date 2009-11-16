@@ -85,8 +85,8 @@ Abrt_Handler (int UNUSED sig)
     int i, n;
 
     for (i=0; i<T_NUMCLASSES; i++) {
-        fprintf (stderr, "%s ID reference count: %n", IDNAME[i], &n);
-        fprintf (stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
+        fprintf(stderr, "%s ID reference count: %n", IDNAME[i], &n);
+        fprintf(stderr, "%*d\n", (n < ERR_WIDTH) ? (ERR_WIDTH - n) : 0, rc[i]);
     }
 }
 

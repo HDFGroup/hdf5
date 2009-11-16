@@ -178,6 +178,9 @@ H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
 H5_DLL H5P_genclass_t *H5P_get_class_parent(const H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_close_class(void *_pclass);
+H5_DLL herr_t H5P_get_filter(const H5Z_filter_info_t *filter,
+    unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
+    size_t namelen, char name[], unsigned *filter_config);
 
 /* Testing functions */
 #ifdef H5P_TESTING

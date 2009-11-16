@@ -1286,7 +1286,7 @@ H5B_iterate(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 {
     herr_t		ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_iterate, FAIL)
+    FUNC_ENTER_NOAPI_NOERR(H5B_iterate, -)
 
     /*
      * Check arguments.

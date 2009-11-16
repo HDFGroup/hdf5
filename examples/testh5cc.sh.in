@@ -19,6 +19,8 @@
 # Modification:
 #	Albert Cheng, 2008/9/27
 #	Added -shlib tests and verbose control.
+#	Albert Cheng, 2009/10/28
+#	Added version compatibility tests.
 #
 
 # Initializations
@@ -40,6 +42,8 @@ DIFF='diff -c'
 nerrors=0
 verbose=${HDF5_VERBOSE:-1}      # 0: none; 1: default; 2: chatty; 3: everything
 test $verbose -gt 2 && set -x
+H5_NO_DEPRECATED_SYMBOLS=`grep '#define H5_NO_DEPRECATED_SYMBOLS ' ../src/H5pubconf.h`
+H5_USE_16_API_DEFAULT=`grep '#define H5_USE_16_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`
@@ -54,6 +58,10 @@ fi
 suffix=c		# source file suffix
 hdf5main=${H5TOOL}_hdf5main.$suffix
 hdf5main_o=${H5TOOL}_hdf5main.o
+v16main=${H5TOOL}_v16main.$suffix
+v16main_o=${H5TOOL}_v16main.o
+v18main=${H5TOOL}_v18main.$suffix
+v18main_o=${H5TOOL}_v18main.o
 appmain=${H5TOOL}_appmain.$suffix
 appmain_o=${H5TOOL}_appmain.o
 prog1=${H5TOOL}_prog1.$suffix
@@ -67,7 +75,7 @@ applib=libapp${H5TOOL}.a
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
 # by otehr test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
-temp_SRC="$hdf5main $appmain $prog1 $prog2"
+temp_SRC="$hdf5main $v16main $v18main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out $applib"
 
@@ -118,7 +126,6 @@ EOF
 # An HDF5 sample program that calls hdf5 functions.
 cat > $hdf5main <<EOF
 #include "hdf5.h"
-#define H5_USE_16_API
 #define H5FILE_NAME        "tmp.h5"
 int
 main (void)
@@ -138,6 +145,56 @@ main (void)
 
     return 0;
 }     
+EOF
+
+# Generate HDF5 v1.6 Main Program:
+# This makes unique V1.6 API calls.
+cat > $v16main <<EOF
+/* This is a V1.6 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+int
+main (void)
+{
+    hid_t       file, group, group1;    /* file and group handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Gcreate(file, "/Group", 0);
+    group1 = H5Gcreate1(file, "/Group1.6", 0);
+    H5Gclose(group1);
+    H5Gclose(group);
+    H5Fclose(file);
+
+    printf("HDF5 C program created with V1.6 API ran successfully. "
+       "File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+    return 0;
+}
+EOF
+
+# Generate HDF5 v1.8 Main Program:
+# This makes unique V1.8 API calls.
+cat > $v18main <<EOF
+/* This is a V1.8 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+int
+main (void)
+{
+    hid_t       file, group, group2;    /* file and group handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Gcreate(file, "/Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    group2 = H5Gcreate2(file, "/Group1.8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group2);
+    H5Gclose(group);
+    H5Fclose(file);
+
+    printf("HDF5 C program created with V1.8 API ran successfully. "
+       "File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+    return 0;
+}
 EOF
 
 
@@ -245,6 +302,36 @@ TOOLTEST -shlib $appmain_o $applib
 echo "***"Just preprocess, no compile, no link.
 TOOLTEST -E $hdf5main
 TOOLTEST -E $appmain $prog1 $prog2
+
+# Group5: Version compatibility tests.
+echo "***"Version compatibility tests.
+# Test these two cases now. More later.
+# If H5_NO_DEPRECATED_SYMBOLS;
+# then only v18main works.
+# else if H5_USE_16_API_DEFAULT;
+#      then v16main works and -DH5_NO_DEPRECATED_SYMBOLS v18main also works.
+#      else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+#
+if [ -n "$H5_USE_16_API_DEFAULT" ]; then
+    echo "H5_USE_16_API_DEFAULT is defined."
+else
+    echo "H5_USE_16_API_DEFAULT is not defined."
+fi
+if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
+    echo "H5_NO_DEPRECATED_SYMBOLS is defined."
+else
+    echo "H5_NO_DEPRECATED_SYMBOLS is not defined."
+fi
+if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
+    echo "Skipping $v16main test"
+    TOOLTEST $v18main
+elif [ -n "$H5_USE_16_API_DEFAULT" ]; then
+    TOOLTEST $v16main
+    TOOLTEST -DH5_NO_DEPRECATED_SYMBOLS $v18main
+else
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST $v18main
+fi
 
 ##############################################################################
 # END

@@ -63,6 +63,7 @@ static herr_t H5SM_btree_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
 /* v2 B-tree class for SOHM indexes*/
 const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
     H5B2_SOHM_INDEX_ID,               /* Type of B-tree */
+    "H5B2_SOHM_INDEX_ID",             /* Name of B-tree class */
     sizeof(H5SM_sohm_t),              /* Size of native record */
     H5SM_btree_store,                 /* Record storage callback */
     H5SM_message_compare,             /* Record comparison callback */
@@ -159,7 +160,7 @@ H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
             /* Check if the message is dirty & flush it to the object header if so */
             if(mesg->dirty)
                 if(H5O_msg_flush(udata->key->file, oh, mesg) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode object header message")
+                    HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode object header message")
 
             HDassert(udata->key->encoding_size <= mesg->raw_size);
             udata->ret = HDmemcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);

@@ -5,16 +5,19 @@ Filename: h5stat_filters.h5
 File information
 	# of unique groups: 1
 	# of unique datasets: 15
-	# of unique named dataypes: 1
+	# of unique named datatypes: 1
 	# of unique links: 0
 	# of unique other: 0
 	Max. # of links to object: 1
 	Max. # of objects in group: 16
-Object header size: (total/unused)
-	Groups: 48/8
-	Datasets: 4936/1344
-	Datatypes: 80/0
-Storage information:
+File space information for file metadata (in bytes):
+	Superblock: 96
+	Superblock extension: 0
+	User block: 0
+	Object headers: (total/unused)
+		Groups: 48/8
+		Datasets(exclude compact data): 4136/1344
+		Datatypes: 80/0
 	Groups:
 		B-tree/List: 1200
 		Heap: 288
@@ -23,11 +26,15 @@ Storage information:
 		Heap: 0
 	Chunked datasets:
 		Index: 31392
+	Datasets:
+		Heap: 72
 	Shared Messages:
 		Header: 0
 		B-tree/List: 0
 		Heap: 0
-	Superblock extension: 0
+	Free-space managers:
+		Header: 0
+		Amount of free space: 0
 Small groups:
 	Total # of small groups: 0
 Group bins:
@@ -46,7 +53,8 @@ Dataset dimension information:
 		# of datasets of size 100 - 999: 1
 		Total # of datasets: 1
 Dataset storage information:
-	Total raw data size: 9059
+	Total raw data size: 8659
+	Total external raw data size: 400
 Dataset layout information:
 	Dataset layout counts[COMPACT]: 1
 	Dataset layout counts[CONTIG]: 2
@@ -76,3 +84,16 @@ Small # of attributes:
 Attribute bins:
 	Total # of objects with attributes: 0
 	Max. # of attributes to objects: 0
+Free-space section threshold: 1 bytes
+Small size free-space sections (< 10 bytes):
+	Total # of small size sections: 0
+Free-space section bins:
+	Total # of sections: 0
+File space management strategy: H5F_FILE_SPACE_ALL
+Summary of file space information:
+  File metadata: 37312 bytes
+  Raw data: 8659 bytes
+  Amount/Percent of tracked free space: 0 bytes/0.0%
+  Unaccounted space: 301 bytes
+Total space: 46272 bytes
+External raw data: 400 bytes

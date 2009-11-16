@@ -90,7 +90,6 @@ static herr_t H5A_dense_btree2_corder_debug(FILE *stream, const H5F_t *f, hid_t 
 
 /* v2 B-tree driver callbacks for 'name' index */
 static herr_t H5A_dense_btree2_name_store(void *native, const void *udata);
-static herr_t H5A_dense_btree2_name_retrieve(void *udata, const void *native);
 static herr_t H5A_dense_btree2_name_compare(const void *rec1, const void *rec2);
 static herr_t H5A_dense_btree2_name_encode(const H5F_t *f, uint8_t *raw,
     const void *native);
@@ -108,7 +107,8 @@ static herr_t H5A_dense_fh_name_cmp(const void *obj, size_t obj_len, void *op_da
 /*********************/
 /* v2 B-tree class for indexing 'name' field of attributes */
 const H5B2_class_t H5A_BT2_NAME[1]={{  /* B-tree class information */
-    H5B2_ATTR_DENSE_NAME_ID,                /* Type of B-tree */
+    H5B2_ATTR_DENSE_NAME_ID,           /* Type of B-tree */
+    "H5B2_ATTR_DENSE_NAME_ID",         /* Name of B-tree class */
     sizeof(H5A_dense_bt2_name_rec_t),  /* Size of native record */
     H5A_dense_btree2_name_store,       /* Record storage callback */
     H5A_dense_btree2_name_compare,     /* Record comparison callback */
@@ -118,8 +118,9 @@ const H5B2_class_t H5A_BT2_NAME[1]={{  /* B-tree class information */
 }};
 
 /* v2 B-tree class for indexing 'creation order' field of attributes */
-const H5B2_class_t H5A_BT2_CORDER[1]={{  /* B-tree class information */
-    H5B2_ATTR_DENSE_CORDER_ID,                /* Type of B-tree */
+const H5B2_class_t H5A_BT2_CORDER[1]={{ /* B-tree class information */
+    H5B2_ATTR_DENSE_CORDER_ID,         /* Type of B-tree */
+    "H5B2_ATTR_DENSE_CORDER_ID",       /* Name of B-tree class */
     sizeof(H5A_dense_bt2_corder_rec_t),/* Size of native record */
     H5A_dense_btree2_corder_store,     /* Record storage callback */
     H5A_dense_btree2_corder_compare,   /* Record comparison callback */

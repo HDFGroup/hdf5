@@ -569,7 +569,7 @@ H5O_storage_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_CHUNKED:
             if(H5D_chunk_is_space_alloc(storage_src)) {
                 /* Create chunked layout */
-                if(H5D_chunk_copy(file_src, &storage_src->u.chunk, &udata->src_layout->u.chunk, file_dst, &storage_dst->u.chunk, udata->src_space_extent, udata->src_dtype, udata->src_pline, cpy_info, dxpl_id) < 0)
+                if(H5D_chunk_copy(file_src, &storage_src->u.chunk, &udata->src_layout->u.chunk, file_dst, &storage_dst->u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
             } /* end if */
             break;

@@ -1640,7 +1640,7 @@ gpfs_invalidate_file_cache(const char *filename)
         filename);
     fprintf(stderr, " errno=%d errorOffset=%d\n",
         errno, inv_cache_hint.hdr.errorOffset);
-    exit(1);
+    exit(EXIT_FAILURE);
     }
 
     /* Close the file */
@@ -1649,7 +1649,7 @@ gpfs_invalidate_file_cache(const char *filename)
         "could not close file '%s' after flushing file cache, ",
         filename);
     fprintf(stderr, "errno=%d\n", errno);
-    exit(1);
+    exit(EXIT_FAILURE);
     }
 }
 

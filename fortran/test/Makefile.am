@@ -21,7 +21,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include files
-AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
+AM_FCFLAGS+=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/fortran/src
 
 # The Fortran test library
@@ -32,7 +32,7 @@ noinst_LTLIBRARIES=libh5test_fortran.la
 # pass the -static flag to the library linker.
 if FORTRAN_SHARED_CONDITIONAL
 else
-   AM_LDFLAGS=-static
+   AM_LDFLAGS+=-static
 endif
 
 # Our main targets, the tests themselves

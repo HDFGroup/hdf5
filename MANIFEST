@@ -80,21 +80,16 @@
 ./config/conclude.am
 ./config/craynv
 ./config/dec-flags
-./config/dec-osf4.x
-./config/dec-osf5.x
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/hpux11.00
 ./config/hpux11.23
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/intel-fflags
 ./config/intel-flags
-./config/intel-osf1
-./config/irix5.x
 ./config/irix6.x
 ./config/linux-gnu
 ./config/linux-gnuaout
@@ -106,17 +101,9 @@
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
-./config/powerpc-ibm-aix4.x
 ./config/powerpc-ibm-aix5.x
-./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
 ./config/sv1-cray
-./config/unicos
-./config/unicos10.0.X
-./config/unicosmk
-./config/unicosmk2.0.X
-./config/unicosmk2.0.5.X
-./config/unicosmk2.0.6.X
 ./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
@@ -363,6 +350,7 @@
 ./c++/test/tfilter.cpp
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
+./c++/test/tlinks.cpp
 ./c++/test/ttypes.cpp
 ./c++/test/trefer.cpp
 ./c++/test/tvlstr.cpp
@@ -459,6 +447,7 @@
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
+./src/H5B2hdr.c
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
@@ -520,6 +509,7 @@
 ./src/H5F.c
 ./src/H5Faccum.c
 ./src/H5Fdbg.c
+./src/H5Fdeprec.c
 ./src/H5Ffake.c
 ./src/H5Fio.c
 ./src/H5Fmount.c
@@ -674,6 +664,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
@@ -832,6 +823,8 @@
 ./test/family_v16_00003.h5
 ./test/farray.c
 ./test/fheap.c
+./test/filespace_1_8.h5
+./test/filespace_1_6.h5
 ./test/freespace.c
 ./test/fill_old.h5
 ./test/fillval.c
@@ -841,6 +834,7 @@
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
+./test/gen_filespace.c                  _DO_NOT_DISTRIBUTE_
 ./test/gen_idx.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
@@ -854,6 +848,7 @@
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_specmetaread.c		_DO_NOT_DISTRIBUTE_
 ./test/gen_udlinks.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
@@ -879,6 +874,7 @@
 ./test/pool.c
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
+./test/specmetaread.h5
 ./test/stab.c
 ./test/swmr_common.c
 ./test/swmr_common.h
@@ -1144,6 +1140,8 @@
 ./tools/testfiles/family_file00015.h5
 ./tools/testfiles/family_file00016.h5
 ./tools/testfiles/family_file00017.h5
+./tools/testfiles/file_space.h5
+./tools/testfiles/file_space.ddl
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl
@@ -1681,11 +1679,14 @@
 ./hl/test/image24plane.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
+./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_table.c
+./hl/test/test_ds_le.h5
+./hl/test/test_ds_be.h5
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
@@ -2134,6 +2135,8 @@
 ./windows/test/set_extentdll/set_extentdll.vcproj
 ./windows/test/stab/stab.vcproj
 ./windows/test/stabdll/stabdll.vcproj
+./windows/test/tcheckversion/tcheckversion.vcproj
+./windows/test/tcheckversiondll/tcheckversiondll.vcproj
 ./windows/test/tellub/tellub.vcproj
 ./windows/test/testhdf5/testhdf5.vcproj
 ./windows/test/testhdf5dll/testhdf5dll.vcproj

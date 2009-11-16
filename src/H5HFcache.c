@@ -294,7 +294,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the 'base' size of the fractal heap header on disk */
-    size = H5HF_HEADER_SIZE(hdr);
+    size = (size_t)H5HF_HEADER_SIZE(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -364,9 +364,9 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         filter_info_off = (size_t)(p - buf);
 
         /* Compute the size of the extra filter information */
-        filter_info_size = hdr->sizeof_size     /* Size of size for filtered root direct block */
-            + 4                                 /* Size of filter mask for filtered root direct block */
-            + hdr->filter_len;                  /* Size of encoded I/O filter info */
+        filter_info_size = (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
+            + (unsigned)4                       /* Size of filter mask for filtered root direct block */
+            + hdr->filter_len);                 /* Size of encoded I/O filter info */
 
         /* Compute the heap header's size */
         hdr->heap_size = size + filter_info_size;
@@ -434,7 +434,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && hdr)
-        (void)H5HF_cache_hdr_dest(f, hdr);
+        if(H5HF_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -481,9 +482,6 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         size_t	size;           /* Header size on disk */
         uint8_t heap_flags;     /* Status flags for heap */
         uint32_t metadata_chksum; /* Computed metadata checksum value */
-
-        /* Sanity check */
-        HDassert(hdr->dirty);
 
         /* Set the shared heap header's file context for this operation */
         hdr->f = f;
@@ -569,7 +567,6 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_HDR, addr, size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap header to disk")
 
-	hdr->dirty = FALSE;
 	hdr->cache_info.is_dirty = FALSE;
     } /* end if */
 
@@ -623,16 +620,9 @@ H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap header")
     } /* end if */
 
-    /* Free the block size lookup table for the doubling table */
-    H5HF_dtable_dest(&hdr->man_dtable);
-
-    /* Release any I/O pipeline filter information */
-    if(hdr->pline.nused)
-        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
-
     /* Free the shared info itself */
-    (void)H5FL_FREE(H5HF_hdr_t, hdr);
-
+    if(H5HF_hdr_free(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to release fractal heap header")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_dest() */
@@ -1445,7 +1435,7 @@ HDfprintf(stderr, "%s: nbytes = %Zu, read_size = %Zu, read_buf = %p\n", FUNC, nb
     } /* end if */
 
     /* Sanity check */
-    HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
+    HDassert((size_t)(p - dblock->blk) == (size_t)H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
     /* Set return value */
     ret_value = dblock;
@@ -1533,7 +1523,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         } /* end if */
 
         /* Sanity check */
-        HDassert((size_t)(p - dblock->blk) == H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
+        HDassert((size_t)(p - dblock->blk) == (size_t)H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr));
 
         /* Check for I/O filters on this heap */
         if(hdr->filter_len > 0) {

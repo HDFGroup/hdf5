@@ -44,42 +44,42 @@
 #define H5SM_SIZEOF_CHECKSUM 4
 
 #define H5SM_HEAP_LOC_SIZE (                                                  \
-        4                               /* Reference count */                 \
+        (unsigned)4                     /* Reference count */                 \
         + sizeof(H5O_fheap_id_t)        /* size of heap ID on disk */         \
     )
 
 #define H5SM_OH_LOC_SIZE(f) (                                                 \
-        1                       /* reserved (possible flags?) */              \
-        + 1                     /* message type ID */			      \
-        + 2                     /* creation index of message in OH */         \
+        (unsigned)1             /* reserved (possible flags?) */              \
+        + (unsigned)1           /* message type ID */			      \
+        + (unsigned)2           /* creation index of message in OH */         \
         + H5F_SIZEOF_ADDR(f)    /* address of OH */                           \
     )
 
 #define H5SM_SOHM_ENTRY_SIZE(f) (                                             \
-        1                       /* Message location */                        \
-        + 4                     /* Hash value */                              \
+        (unsigned)1             /* Message location */                        \
+        + (unsigned)4           /* Hash value */                              \
         + MAX(H5SM_HEAP_LOC_SIZE, H5SM_OH_LOC_SIZE(f))  /* Entry */           \
     )
 
 #define H5SM_TABLE_SIZE(f) (                                                  \
-        H5_SIZEOF_MAGIC                 /* Signature */                       \
-         + H5SM_SIZEOF_CHECKSUM         /* Checksum */                        \
+        (unsigned)H5_SIZEOF_MAGIC       /* Signature */                       \
+         + (unsigned)H5SM_SIZEOF_CHECKSUM /* Checksum */                      \
     )
 
 #define H5SM_INDEX_HEADER_SIZE(f) (                                           \
-        1                       /* Whether index is a list or B-tree */       \
-        + 1                     /* Version of index format */                 \
-        + 2                     /* Type of messages stored in the index */    \
-        + 4                     /* Minimum size of messages to share */       \
-        + (3 * 2)               /* B-tree cutoff, list cutoff, # of shared messages */ \
+        (unsigned)1             /* Whether index is a list or B-tree */       \
+        + (unsigned)1           /* Version of index format */                 \
+        + (unsigned)2           /* Type of messages stored in the index */    \
+        + (unsigned)4           /* Minimum size of messages to share */       \
+        + (unsigned)(3 * 2)     /* B-tree cutoff, list cutoff, # of shared messages */ \
         + H5F_SIZEOF_ADDR(f)    /* Location of list or B-tree */              \
         + H5F_SIZEOF_ADDR(f)    /* Address of heap */                         \
     )
 
 #define H5SM_LIST_SIZE(f, num_mesg) (                                         \
-         H5_SIZEOF_MAGIC                /* Signature */                       \
+        (unsigned) H5_SIZEOF_MAGIC      /* Signature */                       \
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg) /* Message entries */         \
-         + H5SM_SIZEOF_CHECKSUM         /* Checksum */                        \
+         + (unsigned)H5SM_SIZEOF_CHECKSUM /* Checksum */                      \
     )
 
 #define H5SM_B2_NODE_SIZE 512

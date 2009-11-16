@@ -85,6 +85,7 @@ main(int argc, char *argv[])
     AddTest("types", test_types, cleanup_types,  "Generic Data Types", NULL);
     AddTest("compound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
     AddTest("filter", test_filters, cleanup_filters,  "Various Filters", NULL);
+    AddTest("links", test_links, cleanup_links,  "Various Links", NULL);
 /* Comment out tests that are not done yet. - BMR, Feb 2001
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);

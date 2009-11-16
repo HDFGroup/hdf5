@@ -509,7 +509,7 @@ int_f
 nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab, int_f *shhdr)
 {
      int ret_value = -1;
-     hid_t c_prp_id;
+#ifndef H5_NO_DEPRECATED_SYMBOLS
      herr_t ret;
      unsigned c_boot;
      unsigned c_freelist;
@@ -519,14 +519,22 @@ nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab,
      /*
       * Call H5Pget_version function.
       */
-     c_prp_id = *prp_id;
-     ret = H5Pget_version(c_prp_id, &c_boot, &c_freelist, &c_stab, &c_shhdr);
+     ret = H5Pget_version((hid_t)*prp_id, &c_boot, &c_freelist, &c_stab, &c_shhdr);
      if (ret < 0) return ret_value;
 
      *boot = (int_f)c_boot;
      *freelist = (int_f)c_freelist;
      *stab = (int_f)c_stab;
      *shhdr = (int_f)c_shhdr;
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+     /*
+      * Fill in fake values [since we need a file ID to call H5Fget_info :-( -QAK ]
+      */
+     *boot = (int_f)0;
+     *freelist = (int_f)0;
+     *stab = (int_f)0;
+     *shhdr = (int_f)0;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
      ret_value = 0;
 
      return ret_value;

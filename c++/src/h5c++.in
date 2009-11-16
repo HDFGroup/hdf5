@@ -56,9 +56,9 @@ get_output_file="no"
 SHOW="eval"
 CXXBASE="@CXX@"
 CXXLINKERBASE="@CXX@"
-CXXFLAGS="@CXXFLAGS@"
-CPPFLAGS="@CPPFLAGS@"
-LDFLAGS="@LDFLAGS@"
+CXXFLAGS="@AM_CXXFLAGS@ @CXXFLAGS@"
+CPPFLAGS="@AM_CPPFLAGS@ @CPPFLAGS@"
+LDFLAGS="@AM_LDFLAGS@ @LDFLAGS@"
 LIBS="@LIBS@"
 
 CXX="${HDF5_CXX:-$CXXBASE}"
@@ -317,7 +317,7 @@ if test "x$do_link" = "xyes"; then
   # module. It's okay if they're included twice in the compile line.
   link_args="$link_args $LIBS"
 
-  $SHOW $CXXLINKER $CPPFLAGS $CXXFLAGS $LDFLAGS $clibpath $link_objs $link_args $shared_link
+  $SHOW $CXXLINKER $CPPFLAGS $CXXFLAGS $clibpath $link_objs $link_args $shared_link $LDFLAGS
 
   status=$?
 fi

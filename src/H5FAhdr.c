@@ -95,14 +95,13 @@ H5FL_DEFINE_STATIC(H5FA_hdr_t);
  */
 BEGIN_FUNC(PKG, ERR,
 H5FA_hdr_t *, NULL, NULL,
-H5FA__hdr_alloc(H5F_t *f, const H5FA_class_t *cls, void *udata))
+H5FA__hdr_alloc(H5F_t *f))
 
     /* Local variables */
     H5FA_hdr_t *hdr = NULL;          /* Shared Fixed Array header */
 
     /* Check arguments */
     HDassert(f);
-    HDassert(cls);
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5FA_hdr_t)))
@@ -116,13 +115,6 @@ H5FA__hdr_alloc(H5F_t *f, const H5FA_class_t *cls, void *udata))
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
 
-    /* Set the class of the array */
-    hdr->cparam.cls = cls;
-
-    /* Create the callback context */
-    if(NULL == (hdr->cb_ctx = (*cls->crt_context)(udata)))
-	H5E_THROW(H5E_CANTCREATE, "unable to create fixed array client callback context")
-
     /* Set the return value */
     ret_value = hdr;
 
@@ -132,6 +124,44 @@ CATCH
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array header")
 
 END_FUNC(PKG)   /* end H5FA__hdr_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__hdr_init
+ *
+ * Purpose:	Initialize shared fixed array header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Sunday, November 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata))
+
+    /* Local variables */
+
+    /* Check arguments */
+    HDassert(hdr);
+
+    /* Set size of header on disk (locally and in statistics) */
+    hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE(hdr);
+
+    /* Set number of elements for Fixed Array in statistics */
+    hdr->stats.nelmts = hdr->cparam.nelmts;
+
+    /* Create the callback context, if there's one */
+    if(hdr->cparam.cls->crt_context) {
+        if(NULL == (hdr->cb_ctx = (*hdr->cparam.cls->crt_context)(ctx_udata)))
+            H5E_THROW(H5E_CANTCREATE, "unable to create fixed array client callback context")
+    } /* end if */
+
+CATCH
+
+END_FUNC(PKG)   /* end H5FA__hdr_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -175,7 +205,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
-    if(NULL == (hdr = H5FA__hdr_alloc(f, cparam->cls, ctx_udata)))
+    if(NULL == (hdr = H5FA__hdr_alloc(f)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for Fixed Array shared header")
 
     hdr->dblk_addr = HADDR_UNDEF;
@@ -183,11 +213,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Set the creation parameters for the array */
     HDmemcpy(&hdr->cparam, cparam, sizeof(hdr->cparam));
 
-    /* Set size of header on disk (locally and in statistics) */
-    hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE(hdr);
-
-    /* Set number of elements for Fixed Array in statistics */
-    hdr->stats.nelmts = hdr->cparam.nelmts;
+    /* Finish initializing fixed array header */
+    if(H5FA__hdr_init(hdr, ctx_udata) < 0)
+	H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_FARRAY_HDR, dxpl_id, (hsize_t)hdr->size)))
@@ -445,8 +473,10 @@ H5FA__hdr_dest(H5FA_hdr_t *hdr))
     HDassert(hdr->rc == 0);
 
     /* Destroy the callback context */
-    if((*hdr->cparam.cls->dst_context)(hdr->cb_ctx) < 0)
-	H5E_THROW(H5E_CANTRELEASE, "unable to destroy fixed array client callback context")
+    if(hdr->cb_ctx) {
+        if((*hdr->cparam.cls->dst_context)(hdr->cb_ctx) < 0)
+            H5E_THROW(H5E_CANTRELEASE, "unable to destroy fixed array client callback context")
+    } /* end if */
     hdr->cb_ctx = NULL;
     
     /* Free the shared info itself */

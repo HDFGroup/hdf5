@@ -26,12 +26,14 @@
 
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
+
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+
 
 /****************/
 /* Local Macros */
@@ -74,7 +76,6 @@
  * Purpose:	Retrieve metadata statistics for a v2 B-tree
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -83,37 +84,75 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
-    haddr_t addr, H5B2_stat_t *info)
+H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
 {
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
-    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;    /* Return value */
+    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_stat_info)
 
     /* Check arguments. */
-    HDassert(f);
-    HDassert(type);
-    HDassert(H5F_addr_defined(addr));
     HDassert(info);
 
-    /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
 
-    /* Get pointer to reference counted shared B-tree info */
-    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
+    /* Get the v2 B-tree header */
+    hdr = bt2->hdr;
 
     /* Get information about the B-tree */
-    info->depth = shared->depth;
-    info->nrecords = bt2->root.all_nrec;
+    info->depth = hdr->depth;
+    info->nrecords = hdr->root.all_nrec;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_stat_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_size
+ *
+ * Purpose:     Iterate over all the records in the B-tree, collecting
+ *              storage info.
+ *
+ * Return:      non-negative on success, negative on error
+ *
+ * Programmer:  Vailin Choi
+ *              June 19 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_size(H5B2_t *bt2, hid_t dxpl_id, hsize_t *btree_size)
+{
+    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B2_size, FAIL)
+
+    /* Check arguments. */
+    HDassert(bt2);
+    HDassert(btree_size);
+
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
+
+    /* Get the v2 B-tree header */
+    hdr = bt2->hdr;
+
+    /* Add size of header to B-tree metadata total */
+    *btree_size += H5B2_HEADER_SIZE(hdr);
+
+    /* Iterate through records */
+    if(hdr->root.node_nrec > 0) {
+        /* Check for root node being a leaf */
+        if(hdr->depth == 0)
+            *btree_size += hdr->node_size;
+        else
+            /* Iterate through nodes */
+            if(H5B2_node_size(hdr, dxpl_id, hdr->depth, &hdr->root, btree_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+    } /* end if */
 
 done:
-    /* Release B-tree header node */
-    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_stat_info() */
+} /* H5B2_size() */
 

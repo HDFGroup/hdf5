@@ -782,14 +782,22 @@ H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */
     new_plist->plist_id=new_plist_id;
 
-    /* Call the class callback (if it exists) now that we have the property list ID */
-    if(new_plist->pclass->copy_func!=NULL) {
-        if((new_plist->pclass->copy_func)(new_plist_id,old_plist->plist_id,old_plist->pclass->copy_data) < 0) {
-            /* Delete ID, ignore return value */
-            H5I_remove(new_plist_id);
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property");
+    /* Call the class callback (if it exists) now that we have the property list ID
+     * (up through chain of parent classes also)
+     */
+    tclass = new_plist->pclass;
+    while(NULL != tclass) {
+        if(NULL != tclass->copy_func) {
+            if((tclass->copy_func)(new_plist_id, old_plist->plist_id, old_plist->pclass->copy_data) < 0) {
+                /* Delete ID, ignore return value */
+                H5I_remove(new_plist_id);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property")
+            } /* end if */
         } /* end if */
-    } /* end if */
+
+        /* Go up to parent class */
+        tclass = tclass->parent;
+    } /* end while */
 
     /* Set the class initialization flag */
     new_plist->class_init=1;
@@ -1658,8 +1666,9 @@ done:
 hid_t
 H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
 {
-    H5P_genplist_t	*plist=NULL;    /* Property list created */
-    hid_t plist_id=FAIL;        /* Property list ID */
+    H5P_genclass_t *tclass;         /* Temporary class pointer */
+    H5P_genplist_t *plist = NULL;   /* Property list created */
+    hid_t plist_id = FAIL;      /* Property list ID */
     hid_t ret_value;            /* return value */
 
     FUNC_ENTER_NOAPI(H5P_create_id, FAIL);
@@ -1677,14 +1686,22 @@ H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */
     plist->plist_id=plist_id;
 
-    /* Call the class callback (if it exists) now that we have the property list ID */
-    if(plist->pclass->create_func!=NULL) {
-        if((plist->pclass->create_func)(plist_id,plist->pclass->create_data) < 0) {
-            /* Delete ID, ignore return value */
-            H5I_remove(plist_id);
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property");
+    /* Call the class callback (if it exists) now that we have the property list ID
+     * (up through chain of parent classes also)
+     */
+    tclass = plist->pclass;
+    while(NULL != tclass) {
+        if(NULL != tclass->create_func) {
+            if((tclass->create_func)(plist_id, tclass->create_data) < 0) {
+                /* Delete ID, ignore return value */
+                H5I_remove(plist_id);
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property")
+            } /* end if */
         } /* end if */
-    } /* end if */
+
+        /* Go up to parent class */
+        tclass = tclass->parent;
+    } /* end while */
 
     /* Set the class initialization flag */
     plist->class_init=1;
@@ -4058,10 +4075,20 @@ H5P_close(void *_plist)
 
     assert(plist);
 
-    /* Make call to property list class close callback, if needed */
-    if(plist->class_init!=0 && plist->pclass->close_func!=NULL) {
-        /* Call user's "close" callback function, ignoring return value */
-        (plist->pclass->close_func)(plist->plist_id,plist->pclass->close_data);
+    /* Make call to property list class close callback, if needed
+     * (up through chain of parent classes also)
+     */
+    if(plist->class_init !=0) {
+        tclass = plist->pclass;
+        while(NULL != tclass) {
+            if(NULL != tclass->close_func) {
+                /* Call user's "close" callback function, ignoring return value */
+                (tclass->close_func)(plist->plist_id, tclass->close_data);
+            } /* end if */
+
+            /* Go up to parent class */
+            tclass = tclass->parent;
+        } /* end while */
     } /* end if */
 
     /* Create the skip list to hold names of properties already seen

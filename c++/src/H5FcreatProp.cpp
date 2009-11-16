@@ -55,6 +55,7 @@ FileCreatPropList::FileCreatPropList( const FileCreatPropList& original ) : Prop
 //--------------------------------------------------------------------------
 FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::getVersion
 ///\brief	Retrieves version information for various parts of a file.
@@ -76,6 +77,7 @@ void FileCreatPropList::getVersion(unsigned& super, unsigned& freelist, unsigned
 		"H5Pget_version failed");
    }
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	FileCreatPropList::setUserblock

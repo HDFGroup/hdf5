@@ -731,7 +731,6 @@ H5D_farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 static herr_t
 H5D_farray_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
-    const H5FA_class_t *cls;            /* Fixed array class to use */
     H5D_farray_ctx_ud_t udata;          /* User data for fixed array open call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -753,8 +752,7 @@ H5D_farray_idx_open(const H5D_chk_idx_info_t *idx_info)
     udata.chunk_size = idx_info->layout->size;
 
     /* Open the fixed array for the chunk index */
-    cls = (idx_info->pline->nused > 0) ?  H5FA_CLS_FILT_CHUNK : H5FA_CLS_CHUNK;
-    if(NULL == (idx_info->storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, cls, &udata)))
+    if(NULL == (idx_info->storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array")
 
 done:
@@ -1390,6 +1388,7 @@ H5D_farray_idx_delete(const H5D_chk_idx_info_t *idx_info)
     if(H5F_addr_defined(idx_info->storage->idx_addr)) {
         H5FA_t      *fa;            /* Pointer to fixed array structure */
         H5FA_stat_t fa_stat;        /* Fixed array statistics */
+        H5D_farray_ctx_ud_t ctx_udata;  /* User data for fixed array open call */
 
         /* Check if the fixed array is open yet */
         if(NULL == idx_info->storage->u.farray.fa) {
@@ -1425,8 +1424,12 @@ H5D_farray_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array")
         idx_info->storage->u.farray.fa = NULL;
 
+        /* Set up the user data */
+        ctx_udata.f = idx_info->f;
+        ctx_udata.chunk_size = idx_info->layout->size;
+
         /* Delete fixed array */
-        if(H5FA_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr) < 0)
+        if(H5FA_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &ctx_udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk fixed array")
         idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */

@@ -79,7 +79,7 @@
 /*********************/
 
 /* Declare a free list to manage the H5HF_hdr_t struct */
-H5FL_DEFINE(H5HF_hdr_t);
+H5FL_DEFINE_STATIC(H5HF_hdr_t);
 
 
 /*****************************/
@@ -110,7 +110,7 @@ H5HF_hdr_t *
 H5HF_hdr_alloc(H5F_t *f)
 {
     H5HF_hdr_t *hdr = NULL;          /* Shared fractal heap header */
-    H5HF_hdr_t *ret_value = NULL;   /* Return value */
+    H5HF_hdr_t *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_alloc)
 
@@ -121,7 +121,7 @@ H5HF_hdr_alloc(H5F_t *f)
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5HF_hdr_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap shared header")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "allocation failed for fractal heap shared header")
 
     /* Set the internal parameters for the heap */
     hdr->f = f;
@@ -132,9 +132,9 @@ H5HF_hdr_alloc(H5F_t *f)
     ret_value = hdr;
 
 done:
-    if(!ret_value)
-        if(hdr)
-            (void)H5HF_cache_hdr_dest(f, hdr);
+    if(!ret_value && hdr)
+        if(H5HF_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -409,9 +409,6 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Set "huge" object tracker v2 B-tree address to indicate that there aren't any yet */
     hdr->huge_bt2_addr = HADDR_UNDEF;
 
-    /* Note that the shared info is dirty (it's not written to the file yet) */
-    hdr->dirty = TRUE;
-
     /* First phase of header final initialization */
     /* (doesn't need ID length set up) */
     if(H5HF_hdr_finish_init_phase1(hdr) < 0)
@@ -423,6 +420,17 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
      *  length is already set in that case (its stored in the header on disk))
      */
     if(cparam->pline.nused > 0) {
+        /* Check if the filters in the DCPL can be applied to this dataset */
+        if(H5Z_can_apply_direct(&(cparam->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "I/O filters can't operate on this heap")
+
+        /* Mark the filters as checked */
+        hdr->checked_filters = TRUE;
+
+        /* Make the "set local" filter callbacks for this dataset */
+        if(H5Z_set_local_direct(&(cparam->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to set local filter parameters")
+
         /* Copy the I/O filter pipeline from the creation parameters to the header */
         if(NULL == H5O_msg_copy(H5O_PLINE_ID, &(cparam->pline), &(hdr->pline)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
@@ -430,7 +438,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         /* Pay attention to the latest version flag for the file */
         if(H5F_USE_LATEST_FORMAT(hdr->f))
             /* Set the latest version for the I/O pipeline message */
-            if(H5Z_set_latest_version(&(hdr->pline)) < 0)
+            if(H5O_pline_set_latest_version(&(hdr->pline)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set latest version of I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */
@@ -446,9 +454,13 @@ HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
             + 4                                 /* Size of filter mask for filtered root direct block */
             + hdr->filter_len;                  /* Size of encoded I/O filter info */
     } /* end if */
-    else
+    else {
         /* Set size of header on disk */
         hdr->heap_size = H5HF_HEADER_SIZE(hdr);
+
+        /* Mark filters as checked, for performance reasons */
+        hdr->checked_filters = TRUE;
+    } /* end else */
 
     /* Set the length of IDs in the heap */
     /* (This code is not in the "finish init phase" routines because those
@@ -457,7 +469,7 @@ HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
      */
     switch(cparam->id_len) {
         case 0: /* Set the length of heap IDs to just enough to hold the offset & length of 'normal' objects in the heap */
-            hdr->id_len = 1 + hdr->heap_off_size + hdr->heap_len_size;
+            hdr->id_len = (unsigned)1 + hdr->heap_off_size + hdr->heap_len_size;
             break;
 
         case 1: /* Set the length of heap IDs to just enough to hold the information needed to directly access 'huge' objects in the heap */
@@ -505,15 +517,15 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 
     /* Cache the new fractal heap header */
     if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't add fractal heap header to cache")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
     ret_value = hdr->heap_addr;
 
 done:
-    if(!H5F_addr_defined(ret_value))
-        if(hdr)
-            (void)H5HF_cache_hdr_dest(NULL, hdr);
+    if(!H5F_addr_defined(ret_value) && hdr)
+        if(H5HF_hdr_free(hdr) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_create() */
@@ -680,9 +692,6 @@ HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
     /* Mark header as dirty in cache */
     if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
-
-    /* Set the dirty flags for the heap header */
-    hdr->dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1493,6 +1502,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_free
+ *
+ * Purpose:	Free shared fractal heap header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Oct 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_free(H5HF_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Free the block size lookup table for the doubling table */
+    H5HF_dtable_dest(&hdr->man_dtable);
+
+    /* Release any I/O pipeline filter information */
+    if(hdr->pline.nused)
+        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
+
+    /* Free the shared info itself */
+    hdr = H5FL_FREE(H5HF_hdr_t, hdr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_hdr_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_delete
  *
  * Purpose:	Delete a fractal heap, starting with the header
@@ -1508,8 +1554,8 @@ done:
 herr_t
 H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
-    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting heap header */
-    herr_t ret_value = SUCCEED;
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;  /* Flags for unprotecting heap header */
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_hdr_delete, FAIL)
 

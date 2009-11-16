@@ -231,7 +231,7 @@ int options_add_layout( obj_list_t *obj_list,
                     if (table->objs[i].chunk.rank>0)
                     {
                         error_msg(progname, "chunk information already inserted for <%s>\n",obj_list[j].obj);
-                        exit(1);
+                        exit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
                     else

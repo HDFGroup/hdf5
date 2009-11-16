@@ -727,7 +727,6 @@ done:
 static herr_t
 H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
-    const H5EA_class_t *cls;            /* Extensible array class to use */
     H5D_earray_ctx_ud_t udata;          /* User data for extensible array open call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -749,8 +748,7 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     udata.chunk_size = idx_info->layout->size;
 
     /* Open the extensible array for the chunk index */
-    cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
-    if(NULL == (idx_info->storage->u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, cls, &udata)))
+    if(NULL == (idx_info->storage->u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
 
     /* Check for SWMR writes to the file */
@@ -1528,6 +1526,7 @@ H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
     /* Check if the index data structure has been allocated */
     if(H5F_addr_defined(idx_info->storage->idx_addr)) {
         H5D_earray_ud_t udata;         /* User data for callback */
+        H5D_earray_ctx_ud_t ctx_udata; /* User data for extensible array open call */
 
         /* Initialize user data for callback */
         udata.f = idx_info->f;
@@ -1542,8 +1541,12 @@ H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
         idx_info->storage->u.earray.ea = NULL;
 
+        /* Set up the context user data */
+        ctx_udata.f = idx_info->f;
+        ctx_udata.chunk_size = idx_info->layout->size;
+
         /* Delete extensible array */
-        if(H5EA_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr) < 0)
+        if(H5EA_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &ctx_udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk extensible array")
         idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */

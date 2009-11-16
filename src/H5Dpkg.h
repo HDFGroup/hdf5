@@ -668,6 +668,11 @@ H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src,
     H5F_t *f_dst, H5O_storage_compact_t *storage_dst, H5T_t *src_dtype,
     H5O_copy_t *cpy_info, hid_t dxpl_id);
 
+/* Functions that operate on EFL (External File List)*/
+H5_DLL hbool_t H5D_efl_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL herr_t H5D_efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl,
+    hsize_t *heap_size);
+
 /* Functions that perform fill value operations on datasets */
 H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);

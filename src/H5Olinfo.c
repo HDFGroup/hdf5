@@ -377,11 +377,12 @@ done:
  */
 static void *
 H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata,
+    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
     hid_t dxpl_id)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
     H5O_linfo_t          *linfo_dst = NULL;
+    H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *) _udata;
     void                 *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_copy_file)
@@ -411,7 +412,8 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
          *      dense link storage components and use those - QAK)
          */
         if(H5F_addr_defined(linfo_src->fheap_addr)) {
-            if(H5G_dense_create(file_dst, dxpl_id, linfo_dst) < 0)
+            /* Create the dense link storage */
+            if(H5G_dense_create(file_dst, dxpl_id, linfo_dst, udata->common.src_pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
         } /* end if */
     } /* end else */

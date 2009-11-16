@@ -350,6 +350,8 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index */
 #define H5F_CRT_SHMSG_LIST_MAX_NAME  "shmsg_list_max"   /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
+#define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */
+#define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold"  /* Free space section threshold */
 
 
 
@@ -400,6 +402,11 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
                                                     if it is changed, the code
                                                     must compensate. -QAK
                                                  */
+
+/* Default file space handling strategy */
+#define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL
+/* Default free space section threshold used by free-space managers */
+#define H5F_FREE_SPACE_THRESHOLD_DEF	        1
 
 /* Macros to define signatures of all objects in the file */
 
@@ -475,8 +482,8 @@ H5_DLL haddr_t H5F_get_next_proxy_addr(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
-H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
-H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
+H5_DLL uint8_t H5F_sizeof_addr(const H5F_t *f);
+H5_DLL uint8_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);

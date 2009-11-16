@@ -52,6 +52,7 @@ typedef enum H5EA_cls_id_t {
     H5EA_CLS_CHUNK_ID = 0,      /* Extensible array is for indexing dataset chunks w/o filters */
     H5EA_CLS_FILT_CHUNK_ID,     /* Extensible array is for indexing dataset chunks w/filters */
 
+    /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
     H5EA_CLS_TEST_ID,	        /* Extensible array is for testing (do not use for actual data) */
     H5EA_NUM_CLS_ID             /* Number of Extensible Array class IDs (must be last) */
@@ -124,8 +125,7 @@ typedef struct H5EA_t H5EA_t;
 /* General routines */
 H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
     void *ctx_udata);
-H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
-    const H5EA_class_t *cls, void *ctx_udata);
+H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
 H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
@@ -137,7 +137,7 @@ H5_DLL herr_t H5EA_support(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx,
 H5_DLL herr_t H5EA_unsupport(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx,
     H5AC_info_t *child_entry);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
-H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
+H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
 
 /* Statistics routines */
 H5_DLL herr_t H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats);

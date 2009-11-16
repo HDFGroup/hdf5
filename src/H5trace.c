@@ -658,6 +658,81 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     }
                     break;
 
+                case 'f':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5F_file_space_type_t fs_type = va_arg(ap, H5F_file_space_type_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(fs_type) {
+                            case H5F_FILE_SPACE_DEFAULT:
+                                fprintf(out, "H5F_FILE_SPACE_DEFAULT");
+                                break;
+                            case H5F_FILE_SPACE_ALL_PERSIST:
+                                fprintf(out, "H5F_FILE_SPACE_ALL_PERSIST");
+                                break;
+                            case H5F_FILE_SPACE_ALL:
+                                fprintf(out, "H5F_FILE_SPACE_ALL");
+                                break;
+                            case H5F_FILE_SPACE_AGGR_VFD:
+                                fprintf(out, "H5F_FILE_SPACE_AGGR_VFD");
+                                break;
+                            case H5F_FILE_SPACE_VFD:
+                                fprintf(out, "H5F_FILE_SPACE_VFD");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)fs_type);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                case 'm':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5F_mem_t mem_type = va_arg(ap, H5F_mem_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(mem_type) {
+                            case H5FD_MEM_NOLIST:
+                                fprintf(out, "H5FD_MEM_NOLIST");
+                                break;
+                            case H5FD_MEM_DEFAULT:
+                                fprintf(out, "H5FD_MEM_DEFAULT");
+                                break;
+                            case H5FD_MEM_SUPER:
+                                fprintf(out, "H5FD_MEM_SUPER");
+                                break;
+                            case H5FD_MEM_BTREE:
+                                fprintf(out, "H5FD_MEM_BTREE");
+                                break;
+                            case H5FD_MEM_DRAW:
+                                fprintf(out, "H5FD_MEM_DRAW");
+                                break;
+                            case H5FD_MEM_GHEAP:
+                                fprintf(out, "H5FD_MEM_GHEAP");
+                                break;
+                            case H5FD_MEM_LHEAP:
+                                fprintf(out, "H5FD_MEM_LHEAP");
+                                break;
+                            case H5FD_MEM_OHDR:
+                                fprintf(out, "H5FD_MEM_OHDR");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)mem_type);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
                 case 's':
                     if(ptr) {
                         if(vp)
@@ -1379,7 +1454,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                 /* This may generate recursive call to the library... -QAK */
                 if(NULL != (pclass = (H5P_genclass_t *)H5I_object(pclass_id)) &&
                         (class_name = H5P_get_class_name(pclass))!=NULL) {
-		    fprintf (out, class_name);
+		    fprintf(out, "%s", class_name);
                     H5MM_xfree(class_name);
                 } /* end if */
                 else {

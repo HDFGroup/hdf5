@@ -20,9 +20,7 @@ rem    1. hdf5check                -- HDF5 tools and c library tests
 rem    2. hdf5check enablecpp      -- HDF5 tools and c/c++ library tests
 rem    3. hdf5check enablefortran  -- HDF5 tools and c/fortran library tests
 rem    4. hdf5check enableall      -- HDF5 tools and c/c++/fortran library tests
-rem  By Xuan Bai
-rem  Created: Aug. 12, 2004
-rem  Last Updated: Scott Wegner, 9/10/07
+rem    disabledebug                -- can be added to any of the above to not test debug versions
 
 setlocal enabledelayedexpansion
 pushd %~dp0
@@ -35,6 +33,8 @@ rem --SJW 9/5/07
 set hdf5_test_=foo
 for /f "tokens=1 delims==" %%a in ('set hdf5_test_') do set %%a=
 set hdf5_test_tests=
+set chkdebug=debug
+set chkrelease=release
 
 rem Put built DLLs in the system folder for testing
 call install_dll.BAT
@@ -50,6 +50,11 @@ if /i "%1" equ "enablecpp" (
 ) else if /i "%1" equ "enableall" (
     set build_cpp_conditional=true
     set build_fortran_conditional=true
+) else if /i "%1" equ "disabledebug" (
+    set chkdebug=
+)
+if /i "%2" equ "disabledebug" (
+    set chkdebug=
 )
 
 goto main
@@ -75,14 +80,24 @@ rem     %2 - "dll" or nothing
 :run_tests
     for %%a in (%hdf5_test_tests%) do (
         echo.
-        echo.************************************
+        echo.**==**==**==**==**==**==**==**==**==**
         echo.  Testing %%a ^(%1 %2^)
-        echo.************************************
+        echo.**==**==**==**==**==**==**==**==**==**
         
         rem Only add our parameters for batch scripts.
         call !hdf5_test_%%a_test:.bat= %1 %2!
         rem Exit early if test fails.
-        if !errorlevel! neq 0 exit /b
+        if not errorlevel 0 (
+            set /a nerrors=!nerrors!+1
+			echo.  Testing %%a ^(%1 %2^)  FAILED
+			echo.**==**==**==**==**==**==**==**==**==**
+			exit /b 1
+		) else if errorlevel 1 (
+            set /a nerrors=!nerrors!+1
+			echo.  Testing %%a ^(%1 %2^)  FAILED
+			echo.**==**==**==**==**==**==**==**==**==**
+			exit /b 1
+		)
     )
     
     rem If we get here, that means all of our tests passed.
@@ -118,18 +133,24 @@ rem on it for sending parameters.  --SJW 9/6/07
     rem We use "nodll" here because we cannot simply leave it blank.  Filter
     rem it out below. --SJW 9/10/07
     for %%b in (nodll dll) do (
-        for %%a in (debug release) do (
+		echo.======================================
+        for %%a in (%chkdebug% %chkrelease%) do (
             set hdf5_config=%%a %%b
             call :run_tests !hdf5_config:nodll=!
-            if !errorlevel! neq 0 (
+            if not errorlevel 0 (
+                set /a nerrors=!nerrors!+1
+			) else if errorlevel 1 (
                 set /a nerrors=!nerrors!+1
             )
         )
+		echo.======================================
     )
     
-    if %nerrors% equ 0 (
+    if "%nerrors%"=="0" (
         echo.HDF5 Tests passed for all configurations!
-    )
+    ) else (
+        echo.** FAILED HDF5 Tests!
+	)
     
     popd
     endlocal & exit /b %nerrors%

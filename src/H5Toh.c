@@ -76,7 +76,8 @@ const H5O_obj_class_t H5O_OBJ_DATATYPE[1] = {{
     H5O_dtype_isa, 		/* "isa" 			*/
     H5O_dtype_open, 		/* open an object of this class */
     H5O_dtype_create, 		/* create an object of this class */
-    H5O_dtype_get_oloc 		/* get an object header location for an object */
+    H5O_dtype_get_oloc,		/* get an object header location for an object */
+    NULL 			/* get the index & heap info for an object */
 }};
 
 

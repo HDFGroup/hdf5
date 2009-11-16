@@ -1991,9 +1991,9 @@ done:
  *
  * Purpose: Begins iteration on an object
  *
- * Return: Success: 0
+ * Return: Success: EXIT_SUCCESS(0)
  *
- *  Failure: -1
+ * Failure: EXIT_FAILURE(1)
  *
  * Programmer: Neil Fortner
  *              Wednesday, August 21, 2008
@@ -2109,15 +2109,12 @@ get_width(void)
         width = w[0];
     }
 #elif defined(H5_HAVE_TIOCGWINSZ) && defined(H5_HAVE_IOCTL)
-#ifndef __PUMAGON__
-/* the ioctl() call coredump on TFLOPS.  Turn it off for now. */
     {
         /* Unix with ioctl(TIOCGWINSZ) */
         struct winsize w;
         if (ioctl(2, TIOCGWINSZ, &w)>=0 && w.ws_col>0)
             width = w.ws_col;
     }
-#endif
 #elif defined(H5_HAVE_TIOCGETD) && defined(H5_HAVE_IOCTL)
     {
         /* Unix with ioctl(TIOCGETD) */
@@ -2203,7 +2200,7 @@ main(int argc, const char *argv[])
             break;
         } else if(!HDstrcmp(argv[argno], "--help")) {
             usage();
-            leave(0);
+            leave(EXIT_SUCCESS);
         } else if(!HDstrcmp(argv[argno], "--address")) {
             address_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--data")) {
@@ -2234,25 +2231,25 @@ main(int argc, const char *argv[])
                 no_line_wrap_g = TRUE;
             else if(width_g < 0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if(!HDstrcmp(argv[argno], "--width")) {
             if((argno + 1) >= argc) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)HDstrtol(s, &rest, 0);
             if(width_g <= 0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if(!HDstrcmp(argv[argno], "--verbose")) {
             verbose_g++;
         } else if(!HDstrcmp(argv[argno], "--version")) {
             print_version(progname);
-            leave(0);
+            leave(EXIT_SUCCESS);
         } else if(!HDstrcmp(argv[argno], "--hexdump")) {
             hexdump_g = TRUE;
         } else if(!HDstrncmp(argv[argno], "-w", 2)) {
@@ -2260,7 +2257,7 @@ main(int argc, const char *argv[])
                 s = argv[argno] + 2;
             } else if((argno + 1) >= argc) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             } else {
                 s = argv[++argno];
             }
@@ -2270,7 +2267,7 @@ main(int argc, const char *argv[])
                 no_line_wrap_g = TRUE;
             else if(width_g < 0 || *rest) {
                 usage();
-                leave(1);
+                leave(EXIT_FAILURE);
             }
         } else if('-'!=argv[argno][1]) {
             /* Single-letter switches */
@@ -2279,7 +2276,7 @@ main(int argc, const char *argv[])
                     case '?':
                     case 'h': /* --help */
                         usage();
-                        leave(0);
+                        leave(EXIT_SUCCESS);
 
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2328,7 +2325,7 @@ main(int argc, const char *argv[])
 
                     case 'V': /* --version */
                         print_version(progname);
-                        leave(0);
+                        leave(EXIT_SUCCESS);
 
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;
@@ -2336,12 +2333,12 @@ main(int argc, const char *argv[])
 
                     default:
                         usage();
-                        leave(1);
+                        leave(EXIT_FAILURE);
                 } /* end switch */
             } /* end for */
         } else {
             usage();
-            leave(1);
+            leave(EXIT_FAILURE);
         }
     } /* end for */
 
@@ -2349,14 +2346,14 @@ main(int argc, const char *argv[])
      * absolutely nothing ;-) */
     if(argno >= argc) {
         usage();
-        leave(1);
+        leave(EXIT_FAILURE);
     } /* end if */
 
     /* Check for conflicting arguments */
     if(recursive_g && grp_literal_g) {
         fprintf(stderr, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
         usage();
-        leave(1);
+        leave(EXIT_FAILURE);
     } /* end if */
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
@@ -2419,7 +2416,7 @@ main(int argc, const char *argv[])
             x = oname;
             if(NULL == (oname = HDstrdup(oname))) {
                 fprintf(stderr, "memory allocation failed\n");
-                leave(1);
+                leave(EXIT_FAILURE);
             }
             *x = '\0';
             /* Delay specifying the name start point so the original object name
@@ -2452,7 +2449,7 @@ main(int argc, const char *argv[])
             /* Check the type of link given */
             if(H5Lget_info(file, oname, &li, H5P_DEFAULT) < 0) {
                 display_obj_name(stdout, &iter, oname, "**NOT FOUND**");
-                leave(1);
+                leave(EXIT_FAILURE);
             } /* end if */
         } /* end if */
         else
@@ -2461,7 +2458,7 @@ main(int argc, const char *argv[])
         /* Open the object and display it's information */
         if(li.type == H5L_TYPE_HARD) {
             if(visit_obj(file, oname, &iter) < 0)
-                leave(1);
+                leave(EXIT_FAILURE);
         } /* end if(li.type == H5L_TYPE_HARD) */
         else {
             /* Specified name is not for object -- list that link */
@@ -2481,6 +2478,6 @@ main(int argc, const char *argv[])
         HDfree(elink_list.objs);
     } /* end while */
 
-    leave(0);
+    leave(EXIT_SUCCESS);
 } /* end main() */
 

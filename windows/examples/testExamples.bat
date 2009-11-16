@@ -19,111 +19,17 @@ REM Last Modified: 10/16/2004
 
 if %1.==. GOTO WRONG
 if "%1"=="/?" GOTO HELP
-if %1==release GOTO RELEASE
-if %1==debug GOTO DEBUG
-GOTO WRONG
 
-:RELEASE
-if %2.==. GOTO REL
-if %2==dll GOTO RELDLL
-GOTO WRONG
-
-:REL
 type nul > %1.txt
-cd examplesREL
-attributetest >> ..\%1.txt
-compoundtest >> ..\%1.txt
-extendwritetest >> ..\%1.txt
-grouptest >> ..\%1.txt
-intermgrouptest >> ..\%1.txt
-selectest >> ..\%1.txt
-writetest >> ..\%1.txt
-chunkread >> ..\%1.txt
-readtest >> ..\%1.txt
-cd ..
-more /e +3 testExamples_exp_output.txt  > output.txt
-fc %1.txt output.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo All HDF5 C examples tests passed.
-) else (
-   echo HDF5 C examples tests failed.
-   echo.
-   more temp.txt
-)
-del output.txt
-del temp.txt
-GOTO END
-
-:RELDLL
-type nul > %1.txt
-cd examplesRELDLL
-attributetestdll >> ..\%1.txt
-compoundtestdll >> ..\%1.txt
-extendwritetestdll >> ..\%1.txt
-grouptestdll >> ..\%1.txt
-intermgrouptestdll >> ..\%1.txt
-selectestdll >> ..\%1.txt
-writetestdll >> ..\%1.txt
-chunkreaddll >> ..\%1.txt
-readtestdll >> ..\%1.txt
-cd ..
-more /e +3 testExamples_exp_output.txt  > output.txt
-fc %1.txt output.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo All HDF5 C examples tests passed.
-) else (
-   echo HDF5 C examples tests failed.
-   echo.
-   more temp.txt
-)
-del output.txt
-del temp.txt
-GOTO END
-
-:DEBUG
-if %2.==. GOTO DBG
-if %2==dll GOTO DBGDLL
-GOTO WRONG
-
-:DBG
-type nul > %1.txt
-cd examplesDBG
-attributetest >> ..\%1.txt
-compoundtest >> ..\%1.txt
-extendwritetest >> ..\%1.txt
-grouptest >> ..\%1.txt
-intermgrouptest >> ..\%1.txt
-selectest >> ..\%1.txt
-writetest >> ..\%1.txt
-chunkread >> ..\%1.txt
-readtest >> ..\%1.txt
-cd ..
-more /e +3 testExamples_exp_output.txt  > output.txt
-fc %1.txt output.txt >temp.txt
-if %ERRORLEVEL%==0 (
-   echo All HDF5 C examples tests passed.
-) else (
-   echo HDF5 C examples tests failed.
-   echo.
-   more temp.txt
-)
-del output.txt
-del temp.txt
-GOTO END
-
-:DBGDLL
-type nul > %1.txt
-cd examplesDBGDLL
-attributetestdll >> ..\%1.txt
-compoundtestdll >> ..\%1.txt
-extendwritetestdll >> ..\%1.txt
-grouptestdll >> ..\%1.txt
-intermgrouptestdll >> ..\%1.txt
-selectestdll >> ..\%1.txt
-writetestdll >> ..\%1.txt
-chunkreaddll >> ..\%1.txt
-readtestdll >> ..\%1.txt
-cd ..
+attributetest%2\%1\attributetest%2 >> %1.txt
+compoundtest%2\%1\compoundtest%2 >> %1.txt
+extendwritetest%2\%1\extendwritetest%2 >> %1.txt
+grouptest%2\%1\grouptest%2 >> %1.txt
+intermgrouptest%2\%1\intermgrouptest%2 >> %1.txt
+selectest%2\%1\selectest%2 >> %1.txt
+writetest%2\%1\writetest%2 >> %1.txt
+chunkread%2\%1\chunkread%2 >> %1.txt
+readtest%2\%1\readtest%2 >> %1.txt
 more /e +3 testExamples_exp_output.txt  > output.txt
 fc %1.txt output.txt >temp.txt
 if %ERRORLEVEL%==0 (

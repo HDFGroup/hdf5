@@ -55,10 +55,10 @@
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
 #define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_CHUNK_IK_DEF}
 /* Definitions for byte number in an address                */
-#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
+#define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(uint8_t)
 #define H5F_CRT_ADDR_BYTE_NUM_DEF    H5F_OBJ_ADDR_SIZE
 /* Definitions for byte number for object size              */
-#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(size_t)
+#define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(uint8_t)
 #define H5F_CRT_OBJ_BYTE_NUM_DEF      H5F_OBJ_SIZE_SIZE
 /* Definitions for version number of the superblock         */
 #define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
@@ -75,6 +75,11 @@
 #define H5F_CRT_SHMSG_LIST_MAX_DEF      (50)
 #define H5F_CRT_SHMSG_BTREE_MIN_SIZE    sizeof(unsigned)
 #define H5F_CRT_SHMSG_BTREE_MIN_DEF     (40)
+/* Definitions for file space handling strategy */
+#define H5F_CRT_FILE_SPACE_STRATEGY_SIZE       sizeof(unsigned)
+#define H5F_CRT_FILE_SPACE_STRATEGY_DEF        H5F_FILE_SPACE_STRATEGY_DEF
+#define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE      sizeof(hsize_t)
+#define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
 
 
 /******************/
@@ -142,14 +147,16 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     hsize_t userblock_size = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
     unsigned sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
     unsigned btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
-    size_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
-    size_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
+    uint8_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
+    uint8_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
     unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
     unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
     unsigned sohm_index_flags[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
     unsigned sohm_index_minsizes[H5O_SHMESG_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
     unsigned sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
     unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
+    unsigned file_space_strategy = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
+    hsize_t free_space_threshold = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_fcrt_reg_prop)
@@ -192,62 +199,16 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register(pclass,H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE, &sohm_btree_min,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the file space handling strategy */
+    if(H5P_register(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE, &file_space_strategy, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the free space section threshold */
+    if(H5P_register(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &free_space_threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_fcrt_reg_prop() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_version
- *
- * Purpose:	Retrieves version information for various parts of a file.
- *
- *		SUPER:		The file super block.
- *		FREELIST:	The global free list.
- *		STAB:		The root symbol table entry.
- *		SHHDR:		Shared object headers.
- *
- *		Any (or even all) of the output arguments can be null
- *		pointers.
- *
- * Return:	Success:	Non-negative, version information is returned
- *				through the arguments.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/,
-    unsigned *stab/*out*/, unsigned *shhdr/*out*/)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_API(H5Pget_version, FAIL)
-    H5TRACE5("e", "ixxxx", plist_id, super, freelist, stab, shhdr);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Get values */
-    if(super)
-        if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, super) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get superblock version")
-    if(freelist)
-        *freelist = HDF5_FREESPACE_VERSION;     /* (hard-wired) */
-    if(stab)
-        *stab = HDF5_OBJECTDIR_VERSION;         /* (hard-wired) */
-    if(shhdr)
-        *shhdr = HDF5_SHAREDHEADER_VERSION;     /* (hard-wired) */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_version() */
 
 
 /*-------------------------------------------------------------------------
@@ -351,46 +312,48 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_sizes, FAIL);
+    FUNC_ENTER_API(H5Pset_sizes, FAIL)
     H5TRACE3("e", "izz", plist_id, sizeof_addr, sizeof_size);
 
     /* Check arguments */
-    if (sizeof_addr) {
-        if (sizeof_addr != 2 && sizeof_addr != 4 &&
-                sizeof_addr != 8 && sizeof_addr != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid");
-    }
-    if (sizeof_size) {
-        if (sizeof_size != 2 && sizeof_size != 4 &&
-                sizeof_size != 8 && sizeof_size != 16)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid");
-    }
+    if(sizeof_addr) {
+        if(sizeof_addr != 2 && sizeof_addr != 4 && sizeof_addr != 8 && sizeof_addr != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid")
+    } /* end if */
+    if(sizeof_size) {
+        if(sizeof_size != 2 && sizeof_size != 4 && sizeof_size != 8 && sizeof_size != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid")
+    } /* end if */
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if (sizeof_addr)
-        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address");
-    if (sizeof_size)
-        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ");
+    if(sizeof_addr) {
+        uint8_t tmp_sizeof_addr = (uint8_t)sizeof_addr;
+
+        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address")
+    } /* end if */
+    if(sizeof_size) {
+        uint8_t tmp_sizeof_size = (uint8_t)sizeof_size;
+
+        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ")
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_sizes() */
 
 
 /*-------------------------------------------------------------------------
@@ -401,41 +364,45 @@ done:
  *		even both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
  *
  * Return:	Success:	Non-negative, sizes returned through arguments.
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sizes(hid_t plist_id,
-	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
+H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr, size_t *sizeof_size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_sizes, FAIL);
-    H5TRACE3("e", "ixx", plist_id, sizeof_addr, sizeof_size);
+    FUNC_ENTER_API(H5Pget_sizes, FAIL)
+    H5TRACE3("e", "i*z*z", plist_id, sizeof_addr, sizeof_size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if (sizeof_addr)
-        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, sizeof_addr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
-    if (sizeof_size)
-        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, sizeof_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ");
+    if(sizeof_addr) {
+        uint8_t tmp_sizeof_addr;
+
+        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &tmp_sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address")
+        *sizeof_addr = tmp_sizeof_addr;
+    } /* end if */
+    if(sizeof_size) {
+        uint8_t tmp_sizeof_size;
+
+        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &tmp_sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ")
+        *sizeof_size = tmp_sizeof_size;
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_sizes() */
 
 
 /*-------------------------------------------------------------------------
@@ -942,4 +909,89 @@ H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *mi
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_shared_mesg_phase_change() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_file_space
+ *
+ * Purpose:	Sets the strategy that the library employs in managing file space.
+ *		If strategy is zero, the property is not changed; the existing
+ *			strategy is retained.
+ *		Sets the threshold value that the file's free space
+ *			manager(s) will use to track free space sections.
+ *		If threshold is zero, the property is not changed; the existing
+ *			threshold is retained.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; June 10, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pset_file_space, FAIL)
+    H5TRACE3("e", "iFfh", plist_id, strategy, threshold);
+
+    if((unsigned)strategy >= H5F_FILE_SPACE_NTYPES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid strategy")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set value(s), if non-zero */
+    if(strategy)
+	if(H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
+	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set file space strategy")
+    if(threshold)
+	if(H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
+	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set free-space threshold")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_file_space() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_file_space
+ *
+ * Purpose:	Retrieves the strategy that the library uses in managing file space.
+ *		Retrieves the threshold value that the file's free space
+ *			managers use to track free space sections.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; June 10, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pget_file_space, FAIL)
+    H5TRACE3("e", "i*Ff*h", plist_id, strategy, threshold);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value(s) */
+    if(strategy)
+        if(H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, strategy) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy")
+    if(threshold)
+        if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_file_space() */
 

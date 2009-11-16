@@ -107,12 +107,7 @@ static int  clean_file_g = -1;  /*whether to cleanup temporary test     */
  * is about the best guess.
  */
 #ifndef HDF5_PARAPREFIX
-#  ifdef __PUMAGON__
-/* For the PFS of TFLOPS */
-#    define HDF5_PARAPREFIX     "pfs:/pfs_grande/multi/tmp_1"
-#  else
 #    define HDF5_PARAPREFIX     ""
-#  endif    /* __PUMAGON__ */
 #endif  /* !HDF5_PARAPREFIX */
 
 #ifndef MIN
@@ -3033,7 +3028,7 @@ gpfs_invalidate_file_cache(const char *filename)
         filename);
     fprintf(stderr, " errno=%d errorOffset=%d\n",
         errno, inv_cache_hint.hdr.errorOffset);
-    exit(1);
+    exit(EXIT_FAILURE);
     }
 
     /* Close the file */
@@ -3042,7 +3037,7 @@ gpfs_invalidate_file_cache(const char *filename)
         "could not close file '%s' after flushing file cache, ",
         filename);
     fprintf(stderr, "errno=%d\n", errno);
-    exit(1);
+    exit(EXIT_FAILURE);
     }
 }
 

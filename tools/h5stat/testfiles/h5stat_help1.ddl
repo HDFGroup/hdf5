@@ -5,13 +5,14 @@ Usage: h5stat [OPTIONS] file
 
       OPTIONS
      -h, --help            Print a usage message and exit
-     -V, --version         Print version number and exit
+     -v, --version         Print version number and exit
      -f, --file            Print file information
-     -F, --filemetadata    Print file metadata
+     -F, --FILEmetadata    Print file space information for file's metadata
      -g, --group           Print group information
-     -G, --groupmetadata   Print group metadata
+     -G, --GROUPmetadata   Print file space information for groups' metadata
      -d, --dset            Print dataset information
-     -D, --dsetmetadata    Print dataset metadata
-     -T, --dtypemetadata   Print datatype metadata
-     -A, --attribute       Print attribute information
-
+     -D, --DSETmetadata    Print file space information for datasets' metadata
+     -T, --DSETtypeinfo    Print datasets' datatype information
+     -a, --attribute       Print attribute information
+     -s, --freespace       Print free space information
+     -S, --summary         Print summary of file space information

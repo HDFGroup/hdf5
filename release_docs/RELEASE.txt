@@ -1,4 +1,4 @@
-HDF5 version 1.9.47-FA_a4 currently under development
+HDF5 version 1.9.51-FA_a4 currently under development
 ================================================================================
 
 
@@ -60,15 +60,17 @@ New Features
 
     Library:
     --------
+    - Added support for filtering densely stored groups.  Many of the API
+      functions related to filters have been extended to support dense groups
+      as well as datasets.  Pipeline messages can now be stored in a group's
+      object header. (NAF/QAK - 2009/10/8)
     - The embedded library information is displayed by H5check_version() if a
       version mismatch is detected.  Also changed H5check_version() to
       suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
       or higher. (Old behavior treated 3 or higher the same as 1, that is
       print a warning and allows the program to continue. (AKC - 2009/9/28)
-    - Added a new feature that have the library information in the file
-      libhdf5.settings embedded in the hdf5 library and statically linked
-      executables.  If a user does not care for the extra library information
-      in the executable, he may turn it off by --disable-embedded-libinfo
+    - If a user does not care for the extra library information insert
+      in the executables, he may turn it off by --disable-embedded-libinfo
       during configure. (AKC - 2009/9/15)
     - Corrected problem where library would re-write the superblock in a file
       opened for R/W access, even when no changes were made to the file.
@@ -173,6 +175,9 @@ New Features
      - h5diff: h5diff treats two INFINITY values different. Fixed by checking  (value==expect) 
             before call ABS(...) at h5diff_array.c This will make that (INF==INF) is true 
             (INF is treated as an number instead of NaN) (PC -- 2009/07/28)
+     - h5diff: add option "--use-system-epsilon" to print difference if (|a-b| > EPSILON)
+            Change default to use strict equality (PC -- 2009/09/12)
+
     
     High-Level APIs:
     ------
@@ -193,6 +198,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug where writing and deleting many global heap objects (i.e.
+            variable length data) would render the file unreadable.  Previously
+            created files exhibiting this problem should now be readable.
+            NAF - 2009/10/27 - 1483
+      - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
+      - Fixed an assertion failure that occurred when H5Ocopy was called on a
+            dataset using a vlen inside a compound. (NAF - 2009/10/02 - 1597)
       - Fixed incorrect return value for H5Pget_filter_by_id1/2 in H5Ppublic.h.
             (NAF - 2009/09/25 - 1620)
       - Fixed a bug where properties weren't being compared with the registered
@@ -315,11 +327,32 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed the following config files, as we no longer support them:
+        config/dec-osf*, config/hpux11.00, config/irix5.x, 
+        config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
+      MAM - 2009/10/08
+    - Modified configure and make process to properly preserve user's CFLAGS
+      (and company) environment variables. Build will now properly use
+      automake's AM_CFLAGS for any compiler flags set by the configure
+      process. Configure will no longer modify CFLAGS directly, nor will 
+      setting CFLAGS during make completely replace what configure has set up.
+      MAM - 2009/10/08
+    - Support for TFLOPS, config/intel-osf1, is removed since the TFLOPS
+      machine has long retired. AKC - 2009/10/06.
+    - Added $(EXEEXT) extension to H5detect when it's executed in the 
+      src/Makfile to generate H5Tinit.c so it works correctly on platforms 
+      that require the full extension when running executables.
+      MAM - 2009/10/01 - BZ #1613
+    - Configure will now set FC and CXX to "no" when fortran and c++
+      are not being compiled, respectively, so configure will not run
+      some of the compiler tests for these languages when they are not
+      being used. MAM - 2009/10/01
     - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
       recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
-    - The --enable-static-exec flag has been fixed and will now generate
-      static executables within the installed bin directory when used.
-      MAM - 2009/07/23 - BZ #1583
+    - The --enable-static-exec flag will now properly place the -static flag
+      on the link line of all installed executables. This will force the
+      executable to link with static libraries over shared libraries, provided
+      the static libraries are available. MAM - 2009/08/31 - BZ #1583
     - The --includedir=DIR configuration option now works as intended, and can
       be used to specify the location to install C header files. The default
       location remains unchanged, residing at ${prefix}/include. 
@@ -382,6 +415,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+      - Fixed a bug where the H5TB API would forget the order of fields when
+          added out of offset order. (NAF - 2009/10/27 - 1582)
+      - H5DSis_attached failed to account for different platform types. Added a
+          get native type call. (ADB - 2009/9/29 - 1562)
       - Dimension scales: The scale index return value in H5DSiterate_scales was not always 
           incremented. (PVN - 2009/4/8 - 1538)
 
@@ -443,10 +480,6 @@ Platforms Tested
                                   g++ 4.2.1 20080123
                                   gfortran 4.2.1 20080123
 
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
-                                  F90 MIPSpro 7.4.4m 
-                                  C++ MIPSpro cc 7.4.4m
-				 
     Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
     Linux 2.4.21-47               gcc 3.2.3 20030502
@@ -461,16 +494,12 @@ Platforms Tested
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
                                   SGI MPI
-    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.10                    cc: Sun C 5.8 
-    (linew)                       f90: Sun Fortran 95 8.2 
-                                  CC: Sun C++ 5.8 
-    Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
-    (tungsten)	                  gcc 3.2.2 20030222
-                                  Intel(R) C++ Version 9.0
-                                  Intel(R) Fortran Compiler Version 9.0
+    SunOS 5.10                    Sun C 5.9 SunOS_sparc 
+                                  Patch 124867-11 2009/04/30
+    (linew)                       Sun Fortran 95 8.3 SunOS_sparc 
+                                  Patch 127000-11 2009/10/06
+                                  Sun C++ 5.9 SunOS_sparc 
+                                  Patch 124863-16 2009/09/15
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               gcc 3.2.2
                                   Intel(R) C++ Version 8.1
@@ -486,8 +515,9 @@ Platforms Tested
     Windows Vista			
 			          Visual Studio 2005
 
-    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
+    MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
+                                  GNU Fortran (GCC) 4.3.0 20070810
     Alpha Open VMS 7.3
 
 
@@ -504,12 +534,8 @@ Supported Configuration Features Summary
 
 Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
-SunOS5.8 64-bit                    n        y      n        y     y     y
-SunOS5.8 32-bit                    n        y      n        y     y     y
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-IRIX64_6.5 64-bit                  n        y      y        y     y     y
-IRIX64_6.5 32-bit                  n        n      n        n     y     y
 AIX-5.2  32-bit                    y        y      y        y     y     y
 AIX-5.2  64-bit                    y        y      y        y     y     y
 Cray XT3 (not tested
@@ -517,8 +543,7 @@ Cray XT3 (not tested
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
 Windows Vista                      n        n      n        y     y     y
-Mac OS X 10.4 PowerPC              n               n
-Mac OS X 10.4 Intel                n        y      n        y     y     y
+Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 6.2 32-bit                 n        n      n        y     y     y
 FreeBSD 6.2 64-bit
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
@@ -539,12 +564,8 @@ Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
-SunOS 5.8 32-bit                    y        y         y         x        y
-SunOS 5.8 64-bit                    y        y         y         x        y
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-IRIX64_6.5 32-bit                   y        n         y         x        y
-IRIX64_6.5 64-bit                   y        y         n         x        y
 AIX-5.2 32-bit                      n        n         n         x        n
 AIX-5.2 64-bit                      n        n         n         x        n
 Cray XT3 (not tested
@@ -552,7 +573,7 @@ Cray XT3 (not tested
 Windows XP                          y        y(3)      y         y        y
 Windows XP x64                      y        y(3)      y         y        y
 Windows Vista                       y        n         n         y        y
-Mac OS X 10.4 Intel Duo             y        y         y         x        n
+Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
@@ -580,6 +601,17 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
+  it treats "exit(134) the same as if process 0 had received an abort signal.
+  This is fixed and will be available in the next release. AKC - 2009/11/3
+
+* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
+  The error is due to insufficient memory requested. Request a large amount
+  of runtime memory by setting the following environment variable for more
+  memory.
+     LDR_CNTRL=MAXDATA=0x20000000@DSA
+  AKC - 2009/10/31
+
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
   existing. This is due to the MPI_File_open() call failing if the amode has
@@ -590,26 +622,6 @@ Known Problems
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO. (CMC - 2009/04/28)
 
-* We discovered two problems when running collective IO parallel HDF5 tests 
-  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux 
-  cluster at NCSA.
-  Under some complex selection cases, 
-  1) MPI_Get_element returns the wrong value.
-  2) MPI_Type_struct also generates wrong derived data type and corrupt data
-     may be generated.
-  This only happens when turning on collective IO with chunking storage 
-  with some complex selections. We haven't found these problems on other
-  MPI-IO compilers. If you encounter these problems, you may use Independent IO
-  instead.
-
-  Change the following line in your code:
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-
-  to
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
-
-  KY - 2007/08/24
-
 * For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
   tests failed with MPI-IO file locking message. AKC - 2007/6/25.
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
@@ -619,9 +631,6 @@ Known Problems
   shared libraries (tested for 1.8.0-beta2)
 * For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
   and the parallel tests also pass with lots of non-fatal error messages.
-* For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
-  parallel fails with a known proglem in MPI.  ubgl: serial passes but
-  parallel fails. 
 * on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test 
 * configuring with --enable-debug=all produces compiler errors on most
   platforms.  Users who want to run HDF5 in debug mode should use
@@ -641,11 +650,6 @@ Known Problems
   contribute no IO and the application asks to do IO with collective, we found
   that when using 4 processors, a simple collective write will be hung
   sometimes. This can be verified with t_mpi test under testpar.
-* On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
-  code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment 
-  variable to some certian value in order to use collective irregular selection code.
-  For example, the current parallel HDF5 test needs to enlarge MPI_TYPE_MAX to 
-  200,000 to make the test pass.
 * The dataset created or rewritten with the v1.6.3 library or after can't 
   be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
   enabled.  There was a bug in the calculating code of the Fletcher32 
@@ -683,16 +687,13 @@ Known Problems
   test again, change the port address in test/stream_test.c to one not
   being used in the host.
 
-* The --enable-static-exec configure flag fails to compile for Solaris
-  platforms. This is due to the fact that not all of the system
-  libraries on Solaris are available in a static format.
-
-  The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode. The parallel mode works fine
-  with this option.
-  
-  It is suggested that you don't use this option on these platforms
-  during configuration.
+* The --enable-static-exec configure flag will only statically link libraries
+  if the static version of that library is present. If only the shared version
+  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
+  for example, only have shared versions), the flag should still result in a 
+  successful compilation, but note that the installed executables will not be 
+  fully static. Thus, the only guarantee on these systems is that the 
+  executable is statically linked with just the HDF5 library.
 
 * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
@@ -701,17 +702,6 @@ Known Problems
         warning: ANSI C does not support `long long'
   
   This warning is innocuous and can be safely ignored.
-
-
-* The Stream VFD was not tested yet under Windows. It is not supported
-  in the TFLOPS machine.
-
-
-* The ./dsets tests failed in the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The hdf5 library still works
-  correctly with the -O option.  The test program works fine if it is
-  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
-  program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
     - Cray J90 and Cray T90IEEE give errors during testing when displaying

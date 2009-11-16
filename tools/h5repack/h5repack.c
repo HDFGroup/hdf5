@@ -90,13 +90,15 @@ int h5repack(const char* infile,
 *-------------------------------------------------------------------------
 */
 
-int h5repack_init (pack_opt_t *options, int verbose, int latest)
+int 
+h5repack_init(pack_opt_t *options, int verbose, int latest,
+    H5F_file_space_type_t strategy, hsize_t threshold)
 {
     int k, n;
     memset(options,0,sizeof(pack_opt_t));
     options->min_comp = 1024;
     options->verbose  = verbose;
-    options->latest = latest ;
+    options->latest = latest;
 
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
     {
@@ -105,6 +107,9 @@ int h5repack_init (pack_opt_t *options, int verbose, int latest)
         for ( k = 0; k < CD_VALUES; k++)
             options->filter_g[n].cd_values[k] = 0;
     }
+
+    options->fs_strategy = strategy;
+    options->fs_threshold = threshold;
 
     return (options_table_init(&(options->op_tbl)));
 }
@@ -649,7 +654,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         return "SOFF";
     else {
         error_msg(progname, "input error in filter type\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 

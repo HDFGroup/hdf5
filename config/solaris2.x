@@ -45,7 +45,7 @@ if test "X-" = "X-$cc_flags_set"; then
 	5.9*)
 	    # Need the xopenmp flag to build the Fortran library
 	    if test X-$enable_fortran = X-yes; then
-		LDFLAGS="$LDFLAGS -xopenmp=stubs"
+		AM_LDFLAGS="$AM_LDFLAGS -xopenmp=stubs"
 	    fi
 	    ;;
     esac
@@ -56,8 +56,7 @@ if test "X-" = "X-$cc_flags_set"; then
        && PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O//'`"
 fi
 
-# Add socket lib for the Stream Virtual File Driver
-LIBS="$LIBS -lsocket"
+LIBS="$LIBS"
 
 # The default Fortran 90 compiler
 
@@ -68,9 +67,9 @@ fi
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG=""
   FSEARCH_DIRS=""
-  FCFLAGS="$FCFLAGS"
-  DEBUG_FCFLAGS=""
-  PROD_FCFLAGS=""
+  H5_FCFLAGS="$H5_FCFLAGS"
+  DEBUG_FCFLAGS="-g"
+  PROD_FCFLAGS="-O2"
   PROFILE_FCFLAGS=""
   f9x_flags_set=yes
 fi

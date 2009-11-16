@@ -88,6 +88,7 @@ const char *FILENAME[] = {
 #define NAME_DATASET_MULTI_OHDR2 	"dataset_multi_ohdr2"
 #define NAME_DATASET_VL 	"dataset_vl"
 #define NAME_DATASET_VL_VL 	"dataset_vl_vl"
+#define NAME_DATASET_CMPD_VL 	"dataset_cmpd_vl"
 #define NAME_DATASET_SUB_SUB 	"/g0/g00/g000/dataset_simple"
 #define NAME_GROUP_UNCOPIED 	"/uncopied"
 #define NAME_GROUP_EMPTY 	"/empty"
@@ -850,8 +851,82 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
     /* Check size of each element */
     if((elmt_size = H5Tget_size(tid)) == 0) TEST_ERROR
 
-    /* Check for vlen datatype */
-    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+    /* If the type is a compound containing a vlen, loop over all elements for
+     * each compound member.  Compounds containing reference  are not supported
+     * yet. */
+    if((H5Tget_class(tid) == H5T_COMPOUND)
+            && (H5Tdetect_class(tid, H5T_VLEN) == TRUE)) {
+        hid_t           memb_id;    /* Member id */
+        const uint8_t   *memb1;     /* Pointer to current member */
+        const uint8_t   *memb2;     /* Pointer to current member */
+        int             nmembs;     /* Number of members */
+        size_t          memb_off;   /* Member offset */
+        size_t          memb_size;  /* Member size */
+        unsigned        memb_idx;   /* Member index */
+        size_t          elmt;       /* Current element */
+
+        /* Get number of members in compound */
+        if((nmembs = H5Tget_nmembers(tid)) < 0) TEST_ERROR
+
+        /* Loop over members */
+        for(memb_idx=0; memb_idx<(unsigned)nmembs; memb_idx++) {
+            /* Get member offset.  Note that we cannot check for an error here.
+             */
+            memb_off = H5Tget_member_offset(tid, memb_idx);
+
+            /* Get member id */
+            if((memb_id = H5Tget_member_type(tid, memb_idx)) < 0) TEST_ERROR
+
+            /* Get member size */
+            if((memb_size = H5Tget_size(memb_id)) == 0) TEST_ERROR
+
+            /* Set up pointers to member in the first element */
+            memb1 = (const uint8_t *)buf1 + memb_off;
+            memb2 = (const uint8_t *)buf2 + memb_off;
+
+            /* Check if this member contains (or is) a vlen */
+            if(H5Tget_class(memb_id) == H5T_VLEN) {
+                hid_t base_id;  /* vlen base type id */
+
+                /* Get base type of vlen datatype */
+                if((base_id = H5Tget_super(memb_id)) < 0) TEST_ERROR
+
+                /* Iterate over all elements, recursively calling this function
+                 * for each */
+                for(elmt=0; elmt<nelmts; elmt++) {
+                    /* Check vlen lengths */
+                    if(((const hvl_t *)memb1)->len
+                            != ((const hvl_t *)memb2)->len)
+                        TEST_ERROR
+
+                    /* Check vlen data */
+                    if(!compare_data(parent1, parent2, pid, base_id,
+                            ((const hvl_t *)memb1)->len,
+                            ((const hvl_t *)memb1)->p,
+                            ((const hvl_t *)memb2)->p, obj_owner))
+                        TEST_ERROR
+
+                    /* Update member pointers */
+                    memb1 += elmt_size;
+                    memb2 += elmt_size;
+                } /* end for */
+            } else {
+                /* vlens cannot currently be nested below the top layer of a
+                 * compound */
+                HDassert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
+
+                /* Iterate over all elements, calling memcmp() for each */
+                for(elmt=0; elmt<nelmts; elmt++) {
+                    if(HDmemcmp(memb1, memb2, memb_size))
+                        TEST_ERROR
+
+                    /* Update member pointers */
+                    memb1 += elmt_size;
+                    memb2 += elmt_size;
+                } /* end for */
+            } /* end else */
+        } /* end for */
+    } else if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
         const hvl_t *vl_buf1, *vl_buf2; /* Aliases for buffers to compare */
         hid_t base_tid;                 /* Base type of vlen datatype */
         size_t u;                       /* Local index variable */
@@ -878,7 +953,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
     else if(H5Tdetect_class(tid, H5T_REFERENCE) == TRUE) {
         size_t u;                       /* Local index variable */
 
-        /* Check for "simple" vlen datatype */
+        /* Check for "simple" reference datatype */
         if(H5Tget_class(tid) != H5T_REFERENCE) TEST_ERROR
 
         /* Check for object or region reference */
@@ -7212,6 +7287,443 @@ error:
     return 1;
 } /* end test_copy_dataset_compressed_vl_vl */
 
+/*
+ * Common data structure for the copy_dataset_*_cmpd_vl tests.
+ */
+typedef struct cmpd_vl_t {
+    int a;
+    hvl_t b;
+    double c;
+} cmpd_vl_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_contig_cmpd_vl
+ *
+ * Purpose:     Create a contiguous dataset w/VLEN datatype contained in
+ *              a compound in SRC file and copy it to DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Tuseday, September 29, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1, tid2;                       /* Datatype IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    unsigned int i, j;                          /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    cmpd_vl_t buf[DIM_SIZE_1];                  /* Buffer for writing data */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): contiguous dataset with compound VLEN datatype");
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++) {
+        buf[i].a = i * (i - 1);
+        buf[i].b.len = i+1;
+        buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        for(j = 0; j < buf[i].b.len; j++)
+            ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
+        buf[i].c = 1. / (i + 1.);
+    } /* end for */
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid2 = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(cmpd_vl_t))) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "a", HOFFSET(cmpd_vl_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "b", HOFFSET(cmpd_vl_t, b), tid2) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "c", HOFFSET(cmpd_vl_t, c), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CMPD_VL, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_CMPD_VL, fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the dataset for copy */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the destination dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the source dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* Reclaim vlen buffer */
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close datatype */
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did2);
+    	H5Dclose(did);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Tclose(tid2);
+    	H5Tclose(tid);
+    	H5Sclose(sid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_dataset_contig_cmpd_vl */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_chunked_cmpd_vl
+ *
+ * Purpose:     Create a chunked dataset w/VLEN datatype contained in a
+ *              compound in SRC file and copy it to DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesdat, September 30 , 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1, tid2 = -1;                  /* Datatype IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t pid = -1;                             /* Dataset creation property list ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    unsigned int i, j;                          /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};    /* Chunk dimensions */
+    cmpd_vl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): chunked dataset with compound VLEN datatype");
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++) {
+        buf[i].a = i * (i - 1);
+        buf[i].b.len = i+1;
+        buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        for(j = 0; j < buf[i].b.len; j++)
+            ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
+        buf[i].c = 1. / (i + 1.);
+    } /* end for */
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid2 = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(cmpd_vl_t))) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "a", HOFFSET(cmpd_vl_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "b", HOFFSET(cmpd_vl_t, b), tid2) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "c", HOFFSET(cmpd_vl_t, c), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+
+    /* create and set chunk plist */
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CMPD_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* close chunk plist */
+    if(H5Pclose(pid) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_CMPD_VL, fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the dataset for copy */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the destination dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the source dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* Reclaim vlen buffer */
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close datatype */
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did2);
+    	H5Dclose(did);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Tclose(tid2);
+    	H5Tclose(tid);
+    	H5Sclose(sid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_dataset_chunked_cmpd_vl */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_dataset_compact_cmpd_vl
+ *
+ * Purpose:     Create a compact dataset w/VLEN datatype contained in a
+ *              compound in SRC file and copy it to DST file
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Peter Cao
+ *              Sunday, December 11, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t tid = -1, tid2 = -1;                  /* Datatype IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t pid = -1;                             /* Dataset creation property list ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    unsigned int i, j;                          /* Local index variables */
+    hsize_t dim1d[1];                           /* Dataset dimensions */
+    cmpd_vl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
+    char src_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): compact dataset with compound VLEN datatype");
+
+    /* set initial data values */
+    for(i = 0; i < DIM_SIZE_1; i++) {
+        buf[i].a = i * (i - 1);
+        buf[i].b.len = i+1;
+        buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        for(j = 0; j < buf[i].b.len; j++)
+            ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
+        buf[i].c = 1. / (i + 1.);
+    } /* end for */
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0) TEST_ERROR
+
+    /* Set dataspace dimensions */
+    dim1d[0]=DIM_SIZE_1;
+
+    /* create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* create datatype */
+    if((tid2 = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(cmpd_vl_t))) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "a", HOFFSET(cmpd_vl_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "b", HOFFSET(cmpd_vl_t, b), tid2) < 0) TEST_ERROR
+    if(H5Tinsert(tid, "c", HOFFSET(cmpd_vl_t, c), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+
+    /* create and set compact plist */
+    if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
+
+    /* create dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CMPD_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* write data into file */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close compact plist */
+    if(H5Pclose(pid) < 0) TEST_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_CMPD_VL, fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* open the dataset for copy */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CMPD_VL, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Check if the datasets are equal */
+    if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
+
+    /* close the destination dataset */
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* close the source dataset */
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0) TEST_ERROR
+
+
+    /* Reclaim vlen buffer */
+    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* close datatype */
+    if(H5Tclose(tid2) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did2);
+    	H5Dclose(did);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Tclose(tid2);
+    	H5Tclose(tid);
+    	H5Sclose(sid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_dataset_compact_cmpd_vl */
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy_option
@@ -7629,6 +8141,9 @@ main(void)
             nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_chunked_vl_vl(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_compressed_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_contig_cmpd_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_chunked_cmpd_vl(fcpl_src, fcpl_dst, my_fapl);
+            nerrors += test_copy_dataset_compact_cmpd_vl(fcpl_src, fcpl_dst, my_fapl);
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
             nerrors += test_copy_old_layout(fcpl_dst, my_fapl);

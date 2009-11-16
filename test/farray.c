@@ -263,8 +263,7 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
  */
 static int
 reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
-    H5FA_t **fa, haddr_t fa_addr, const H5FA_class_t *fa_cls,
-    const farray_test_param_t *tparam)
+    H5FA_t **fa, haddr_t fa_addr, const farray_test_param_t *tparam)
 {
     /* Check for closing & re-opening the array */
     /* (actually will close & re-open the file as well) */
@@ -292,7 +291,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
 
         /* Re-open array, if given */
         if(fa) {
-            if(NULL == (*fa = H5FA_open(*f, dxpl, fa_addr, fa_cls, NULL)))
+            if(NULL == (*fa = H5FA_open(*f, dxpl, fa_addr, NULL)))
                 FAIL_STACK_ERROR
         } /* end if */
     } /* end if */
@@ -317,12 +316,12 @@ error:
  */
 static int
 create_array(H5F_t *f, hid_t dxpl, const H5FA_create_t *cparam,
-    H5FA_t **fa, haddr_t *fa_addr, void *cb)
+    H5FA_t **fa, haddr_t *fa_addr)
 {
     farray_state_t state;               /* State of extensible array */
 
     /* Create array */
-    if(NULL == (*fa = H5FA_create(f, dxpl, cparam, cb)))
+    if(NULL == (*fa = H5FA_create(f, dxpl, cparam, NULL)))
         FAIL_STACK_ERROR
 
     /* Check status of array */
@@ -397,7 +396,7 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
         FAIL_STACK_ERROR
 
     /* Delete array */
-    if(H5FA_delete(f, H5P_DATASET_XFER_DEFAULT, fa_addr) < 0)
+    if(H5FA_delete(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -509,7 +508,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t UNUSED *tpara
     TESTING("fixed array creation");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     PASSED()
@@ -569,7 +568,7 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     TESTING("create, close & reopen fixed array");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Close the fixed array */
@@ -577,11 +576,11 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, NULL, tparam) < 0)
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, tparam) < 0)
         TEST_ERROR
 
     /* Re-open the array */
-    if(NULL == (fa = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL)))
+    if(NULL == (fa = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -639,11 +638,11 @@ test_open_twice(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     TESTING("open fixed array twice");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Open the array again, through the first file handle */
-    if(NULL == (fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL)))
+    if(NULL == (fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -658,7 +657,7 @@ test_open_twice(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     fa2 = NULL;
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, cparam->cls, tparam) < 0)
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, tparam) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -670,7 +669,8 @@ test_open_twice(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Open the fixed array through the second file handle */
-    if(NULL == (fa2 = H5FA_open(f2, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL))) FAIL_STACK_ERROR
+    if(NULL == (fa2 = H5FA_open(f2, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL)))
+        FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
     if(verify_cparam(fa, cparam) < 0)
@@ -741,15 +741,15 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     TESTING("deleting open fixed array");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Open the array again */
-    if(NULL == (fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL)))
+    if(NULL == (fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL)))
         FAIL_STACK_ERROR
 
     /* Request that the array be deleted */
-    if(H5FA_delete(f, H5P_DATASET_XFER_DEFAULT, fa_addr) < 0)
+    if(H5FA_delete(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -765,7 +765,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
     H5E_BEGIN_TRY {
-        fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL);
+        fa2 = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL);
     } H5E_END_TRY;
     if(fa2) {
         /* Close opened array */
@@ -781,12 +781,12 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     fa = NULL;
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, NULL, tparam) < 0)
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, tparam) < 0)
         TEST_ERROR
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
     H5E_BEGIN_TRY {
-        fa = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, cparam->cls, NULL);
+        fa = H5FA_open(f, H5P_DATASET_XFER_DEFAULT, fa_addr, NULL);
     } H5E_END_TRY;
     if(fa) {
         /* Close opened array */
@@ -1185,7 +1185,7 @@ static const farray_iter_t fa_iter_cyc = {
  *-------------------------------------------------------------------------
  */
 static int
-check_elmt(farray_test_param_t *tparam, void *_relmt, void *_welmt)
+check_elmt(void *_relmt, void *_welmt)
 {
     uint64_t *relmt = (uint64_t *)_relmt;
     uint64_t *welmt = (uint64_t *)_welmt;
@@ -1245,7 +1245,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
@@ -1253,7 +1253,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, cparam->cls, tparam) < 0)
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, tparam) < 0)
         TEST_ERROR
 
     if(H5FA_get_nelmts(fa, &fa_nelmts) < 0)
@@ -1289,7 +1289,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved is correct */
-        if(check_elmt(tparam, &relmt, NULL))
+        if(check_elmt(&relmt, NULL))
             TEST_ERROR
     } /* end for */
 
@@ -1316,7 +1316,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved element is correct */
-        if(check_elmt(tparam, &relmt, NULL))
+        if(check_elmt(&relmt, NULL))
             TEST_ERROR
 
         /* Set element of array */
@@ -1330,7 +1330,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
             FAIL_STACK_ERROR
 
         /* Verify that the retrieved element is correct */
-        if(check_elmt(tparam, &relmt, &welmt))
+        if(check_elmt(&relmt, &welmt))
             TEST_ERROR
     } /* end for */
 
@@ -1400,7 +1400,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr, NULL) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
@@ -1408,7 +1408,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         TEST_ERROR
 
     /* Check for closing & re-opening the file */
-    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, cparam->cls, tparam) < 0)
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &fa, fa_addr, tparam) < 0)
         TEST_ERROR
 
     if(H5FA_get_nelmts(fa, &fa_nelmts) < 0)
@@ -1434,7 +1434,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         FAIL_STACK_ERROR
 
     /* Verify that the retrieved is correct */
-    if(check_elmt(tparam, &relmt, NULL))
+    if(check_elmt(&relmt, NULL))
         TEST_ERROR
 
     /* Set element of array */
@@ -1454,7 +1454,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
         FAIL_STACK_ERROR
 
     /* Verify that the retrieved is correct */
-    if(check_elmt(tparam, &relmt, &welmt))
+    if(check_elmt(&relmt, &welmt))
         TEST_ERROR
 
     if(check_rest) {
@@ -1466,7 +1466,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
                 FAIL_STACK_ERROR
 
             /* Verify that the retrieved is correct */
-            if(check_elmt(tparam, &relmt, NULL))
+            if(check_elmt(&relmt, NULL))
                 TEST_ERROR
         } /* end for */
     } /* end if */

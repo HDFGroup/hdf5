@@ -159,7 +159,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
@@ -251,7 +251,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
@@ -312,7 +312,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!mem_space)
         mem_space = file_space;
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
     /* Fill the DXPL cache values for later use */

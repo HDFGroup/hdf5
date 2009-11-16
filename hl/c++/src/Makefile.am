@@ -28,12 +28,12 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src
 lib_LTLIBRARIES=libhdf5_hl_cpp.la
 
 # Add libtool numbers to the HDF5 HL C++ library (from config/lt_vers.am)
-libhdf5_hl_cpp_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
+libhdf5_hl_cpp_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
 
 # Shared C++ libraries aren't universally supported.
 if CXX_SHARED_CONDITIONAL
 else
-  AM_LDFLAGS=-static
+  AM_LDFLAGS+=-static
 endif
 
 # Source files for the library

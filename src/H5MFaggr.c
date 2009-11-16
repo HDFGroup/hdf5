@@ -177,11 +177,11 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
 
     /*
-     * If the aggregation feature is enabled for this file, allocate "generic"
-     * space and sub-allocate out of that, if possible. Otherwise just allocate
-     * through H5FD_alloc()
+     * If the aggregation feature is enabled for this file and strategy is not H5F_FILE_SPACE_VFD,
+     * allocate "generic" space and sub-allocate out of that, if possible. 
+     * Otherwise just allocate through H5FD_alloc().
      */
-    if(f->shared->feature_flags & aggr->feature_flag) {
+    if((f->shared->feature_flags & aggr->feature_flag) && f->shared->fs_strategy != H5F_FILE_SPACE_VFD) {
         haddr_t	aggr_frag_addr = HADDR_UNDEF;   /* Address of aggregrator fragment */
         hsize_t	aggr_frag_size = 0;             /* Size of aggregator fragment */
         hsize_t alignment;                      /* Alignment of this section */

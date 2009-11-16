@@ -40,7 +40,8 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
-CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5
-DISTCLEANFILES=go Makefile testph5.sh
+# go is used for debugging. See testphdf5.c.
+CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5 go
+DISTCLEANFILES=testph5.sh
 
 include $(top_srcdir)/config/conclude.am

@@ -178,7 +178,7 @@ H5D_init_interface(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve external file list")
     if(H5P_get(def_dcpl, H5D_CRT_FILL_VALUE_NAME, &H5D_def_dset.dcpl_cache.fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value")
-    if(H5P_get(def_dcpl, H5D_CRT_DATA_PIPELINE_NAME, &H5D_def_dset.dcpl_cache.pline) < 0)
+    if(H5P_get(def_dcpl, H5O_CRT_PIPELINE_NAME, &H5D_def_dset.dcpl_cache.pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve pipeline filter")
 
     /* Reset the "default DXPL cache" information */
@@ -978,7 +978,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
         /* Retrieve the properties we need */
         pline = &new_dset->shared->dcpl_cache.pline;
-        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, pline) < 0)
+        if(H5P_get(dc_plist, H5O_CRT_PIPELINE_NAME, pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve pipeline filter")
         layout = &new_dset->shared->layout;
         if(H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
@@ -1009,7 +1009,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Set the latest version of the layout, pline & fill messages, if requested */
     if(H5F_USE_LATEST_FORMAT(file)) {
         /* Set the latest version for the I/O pipeline message */
-        if(H5Z_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
+        if(H5O_pline_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
 
         /* Set the latest version for the fill value message */

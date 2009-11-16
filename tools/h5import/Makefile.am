@@ -35,7 +35,7 @@ SCRIPT_DEPEND=h5import$(EXEEXT)
 bin_PROGRAMS=h5import
 
 # Add h5import specific linker flags here
-h5import_LDFLAGS = $(LT_STATIC_EXEC)
+h5import_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All programs depend on the main hdf5 library and the tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

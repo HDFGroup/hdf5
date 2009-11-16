@@ -335,25 +335,26 @@ typedef struct H5HF_hdr_t {
 
     /* Cached/computed values (not stored in header) */
     size_t      rc;             /* Reference count of heap's components using heap header */
-    hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     size_t      heap_size;      /* Size of heap header in the file */
     H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      file_rc;        /* Reference count of files using heap header */
     hbool_t     pending_delete; /* Heap is pending deletion */
-    size_t      sizeof_size;    /* Size of file sizes */
-    size_t      sizeof_addr;    /* Size of file addresses */
+    uint8_t     sizeof_size;    /* Size of file sizes */
+    uint8_t     sizeof_addr;    /* Size of file addresses */
     struct H5HF_indirect_t *root_iblock;    /* Pointer to pinned root indirect block */
     H5FS_t      *fspace;        /* Free space list for objects in heap */
     H5HF_block_iter_t next_block;   /* Block iterator for searching for next block with space */
+    H5B2_t      *huge_bt2;      /* v2 B-tree handle for huge objects */
     hsize_t     huge_max_id;    /* Max. 'huge' heap ID before rolling 'huge' heap IDs over */
+    uint8_t     huge_id_size;   /* Size of 'huge' heap IDs (in bytes) */
     hbool_t     huge_ids_direct; /* Flag to indicate that 'huge' object's offset & length are stored directly in heap ID */
     size_t      tiny_max_len;   /* Max. size of tiny objects for this heap */
     hbool_t     tiny_len_extended; /* Flag to indicate that 'tiny' object's length is stored in extended form (i.e. w/extra byte) */
-    uint8_t     huge_id_size; /* Size of 'huge' heap IDs (in bytes) */
-    uint8_t     heap_off_size; /* Size of heap offsets (in bytes) */
-    uint8_t     heap_len_size; /* Size of heap ID lengths (in bytes) */
+    uint8_t     heap_off_size;  /* Size of heap offsets (in bytes) */
+    uint8_t     heap_len_size;  /* Size of heap ID lengths (in bytes) */
+    hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -503,9 +504,6 @@ H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1];
 /* H5HF indirect section inherits serializable properties from H5FS_section_class_t */
 H5_DLLVAR H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1];
 
-/* Declare a free list to manage the H5HF_hdr_t struct */
-H5FL_EXTERN(H5HF_hdr_t);
-
 /* Declare a free list to manage the H5HF_indirect_t struct */
 H5FL_EXTERN(H5HF_indirect_t);
 
@@ -563,6 +561,7 @@ H5_DLL herr_t H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr);
 H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF_hdr_empty(H5HF_hdr_t *hdr);
+H5_DLL herr_t H5HF_hdr_free(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* Indirect block routines */

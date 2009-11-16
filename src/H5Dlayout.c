@@ -509,7 +509,7 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
 
         /* Set the I/O pipeline info in the property list */
-        if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
+        if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline")
     } /* end if */
 

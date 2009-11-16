@@ -70,7 +70,7 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     FC_BASENAME=ifort
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FCFLAGS="$FCFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS"
 
     # Production
     PROD_FCFLAGS="-O3"
