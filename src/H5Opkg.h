@@ -449,11 +449,11 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_AINFO[1];
 /* Reference Count Message. (0x0016) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_REFCOUNT[1];
 
-/* Placeholder for unknown message. (0x0017) */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
-
-/* Free-space Manager Info message. (0x0018) */
+/* Free-space Manager Info message. (0x0017) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_FSINFO[1];
+
+/* Placeholder for unknown message. (0x0018) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
 /*
  * Object header "object" types

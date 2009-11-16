@@ -167,9 +167,9 @@ typedef struct H5O_copy_t {
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
-#define H5O_UNKNOWN_ID  0x0017          /* Placeholder message ID for unknown message.  */
+#define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
+#define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-#define H5O_FSINFO_ID   0x0018          /* Free-space manager info message.  */
 
 
 /* Shared object message types.
