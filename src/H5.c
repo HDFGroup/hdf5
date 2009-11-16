@@ -61,6 +61,10 @@ static void H5_debug_mask(const char*);
 /* Library Private Variables */
 /*****************************/
 
+/* HDF5 API Entered variable */
+/* (move to H5.c when new FUNC_ENTER macros in actual use -QAK) */
+hbool_t H5_api_entered_g = FALSE;
+
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
 #ifdef H5_HAVE_THREADSAFE

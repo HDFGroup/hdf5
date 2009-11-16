@@ -46,9 +46,7 @@
 
 /* Fixed Array class IDs */
 typedef enum H5FA_cls_id_t {
-    H5FA_CLS_CHUNK_ID = 0,      /* Fixed array is for indexing dataset chunks w/o filters */
-    H5FA_CLS_FILT_CHUNK_ID,     /* Fixed array is for indexing dataset chunks w/filters */
-
+    /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
     H5FA_CLS_TEST_ID,	        /* Fixed array is for testing (do not use for actual data) */
     H5FA_NUM_CLS_ID             /* Number of Fixed Array class IDs (must be last) */
@@ -113,15 +111,14 @@ typedef int (*H5FA_operator_t)(hsize_t idx, const void *_elmt, void *_udata);
 /* General routines */
 H5_DLL H5FA_t *H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam,
     void *ctx_udata);
-H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5FA_class_t *cls, 
-    void *ctx_udata);
+H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
 H5_DLL herr_t H5FA_get_nelmts(const H5FA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5FA_get_addr(const H5FA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5FA_set(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
 H5_DLL herr_t H5FA_get(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
-H5_DLL herr_t H5FA_close(H5FA_t *ea, hid_t dxpl_id);
-H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
 H5_DLL herr_t H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata);
+H5_DLL herr_t H5FA_close(H5FA_t *ea, hid_t dxpl_id);
+H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
 
 /* Statistics routines */
 H5_DLL herr_t H5FA_get_stats(const H5FA_t *ea, H5FA_stat_t *stats);

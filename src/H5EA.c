@@ -79,9 +79,16 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 /* Package Variables */
 /*********************/
 
-/* HDF5 API Entered variable */
-/* (move to H5.c when new FUNC_ENTER macros in actual use -QAK) */
-hbool_t H5_api_entered_g = FALSE;
+/* Extensible array client ID to class mapping */
+
+/* Remember to add client ID to H5EA_cls_id_t in H5EAprivate.h when adding a new
+ * client class..
+ */
+extern const H5EA_class_t H5EA_CLS_TEST[1];
+
+const H5EA_class_t *const H5EA_client_class_g[] = {
+    H5EA_CLS_TEST,		/* 0 - H5EA_TEST_ID 			*/
+};
 
 
 /*****************************/
@@ -131,6 +138,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(f);
     HDassert(cparam);
 
+    /* H5EA interface sanity check */
+    HDcompile_assert(H5EA_NUM_CLS_ID == NELMTS(H5EA_client_class_g));
+
     /* Create extensible array header */
     if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "can't create extensible array header")
@@ -140,7 +150,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cparam->cls, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, ctx_udata, H5AC_WRITE)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Point extensible array wrapper at header and bump it's ref count */
@@ -185,8 +195,7 @@ END_FUNC(PRIV)  /* end H5EA_create() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls,
-    void *ctx_udata))
+H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
@@ -197,13 +206,12 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls,
      */
     HDassert(f);
     HDassert(H5F_addr_defined(ea_addr));
-    HDassert(cls);
 
     /* Load the array header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cls, ctx_udata, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, ctx_udata, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for pending array deletion */
@@ -1031,28 +1039,52 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
         } /* end if */
     } /* end if */
 
-    /* Decrement the reference count on the array header */
-    /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
-     *  immediately -QAK)
-     */
-    if(H5EA__hdr_decr(ea->hdr) < 0)
-        H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
-
     /* Check for pending array deletion */
     if(pending_delete) {
         H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
+#ifndef NDEBUG
+{
+    unsigned hdr_status = 0;         /* Header's status in the metadata cache */
+
+    /* Check the header's status in the metadata cache */
+    if(H5AC_get_entry_status(ea->f, ea_addr, &hdr_status) < 0)
+        H5E_THROW(H5E_CANTGET, "unable to check metadata cache status for extensible array header")
+
+    /* Sanity checks on header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PINNED);
+    HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+}
+#endif /* NDEBUG */
+
         /* Lock the array header into memory */
+        /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
         if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(ea->f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, NULL, H5AC_WRITE)))
             H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
 
         /* Set the shared array header's file context for this operation */
         hdr->f = ea->f;
 
+        /* Decrement the reference count on the array header */
+        /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
+         *  immediately -QAK)
+         */
+        if(H5EA__hdr_decr(ea->hdr) < 0)
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+
         /* Delete array, starting with header (unprotects header) */
         if(H5EA__hdr_delete(hdr, dxpl_id) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array")
     } /* end if */
+    else {
+        /* Decrement the reference count on the array header */
+        /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
+         *  immediately -QAK)
+         */
+        if(H5EA__hdr_decr(ea->hdr) < 0)
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+    } /* end else */
 
     /* Release the extensible array wrapper */
     ea = (H5EA_t *)H5FL_FREE(H5EA_t, ea);
@@ -1077,7 +1109,7 @@ END_FUNC(PRIV)  /* end H5EA_close() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr))
+H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;             /* The fractal heap header information */
@@ -1092,7 +1124,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, ctx_udata, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for files using shared array header */
