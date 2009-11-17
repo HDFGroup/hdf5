@@ -1,4 +1,4 @@
-HDF5 version 1.9.51 currently under development
+HDF5 version 1.9.52 currently under development
 ================================================================================
 
 
