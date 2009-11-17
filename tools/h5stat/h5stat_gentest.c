@@ -59,7 +59,7 @@ static void gen_file(void)
 
     /* Set file space handling strategy */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, 0);
+    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
     assert(ret >= 0);
 
      /* Create dataset */
