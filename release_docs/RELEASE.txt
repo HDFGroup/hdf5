@@ -138,6 +138,8 @@ New Features
 
     Tools:
     ------
+     - h5diff: fix for displaying garbage value on LE machine for BE data.
+	   (JKM - 2009/11/20)
      - h5dump subsetting now allows default for count. Also trailing ; in short form
        can be omitted after last specified value. (ADB - 2009/09/04)
      - h5dump/h5ls now can display data in region references 
