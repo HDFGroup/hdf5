@@ -71,6 +71,8 @@ New Features
  
     Tools
     -----
+    - h5diff: fix for displaying garbage value on LE machine for BE data.
+      (JKM - 2009/11/20)
 
 
     High-Level APIs

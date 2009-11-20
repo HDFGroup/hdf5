@@ -49,7 +49,7 @@
 int
 print_objname (diff_opt_t * options, hsize_t nfound)
 {
- return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
+    return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -359,6 +359,11 @@ out:
  * Modifications: Jan 2005 Leon Arber, larber@uiuc.edu
  *    Added support for parallel diffing
  *
+ * Pedro Vicente, pvn@hdfgroup.org, Nov 4, 2008
+ *    Compare the graph and make h5diff return 1 for difference if
+ * 1) the number of objects in file1 is not the same as in file2
+ * 2) the graph does not match, i.e same names (absolute path)
+ * 3) objects with the same name are not of the same type
  *-------------------------------------------------------------------------
  */
 hsize_t diff_match(hid_t file1_id,
@@ -911,45 +916,27 @@ hsize_t diff(hid_t file1_id,
         *-------------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
-           /*-------------------------------------------------------------------------
-            * verbose, always print name
-            *-------------------------------------------------------------------------
-            */
-            if(options->m_verbose)
+			/* verbose (-v) and report (-r) mode */
+            if(options->m_verbose || options->m_report)
             {
-                if(print_objname(options, (hsize_t)1))
-                    do_print_objname("dataset", path1, path2);
+                do_print_objname("dataset", path1, path2);
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
                 print_found(nfound);
-            } /* end if */
-           /*-------------------------------------------------------------------------
-            * non verbose, check first if we have differences by enabling quiet mode
-            * so that printing is off, and compare again if differences found,
-            * disabling quiet mode
-            *-------------------------------------------------------------------------
-            */
+            }
+            /* quiet mode (-q), just count differences */
+            else if(options->m_quiet)
+            {
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            }
+			/* the rest (-c, none, ...) */
             else
             {
-                if(options->m_quiet == 0)
-                {
-                    /* shut up temporarily */
-                    options->m_quiet = 1;
-                    nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
-
-                    /* print again */
-                    options->m_quiet = 0;
-                    if(nfound)
-                    {
-                        if(print_objname(options,nfound))
-                            do_print_objname("dataset", path1, path2);
-                        nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
-                        print_found(nfound);
-                    } /* end if */
-                }  /* end if */
-                /* in quiet mode, just count differences */
-                else
-                    nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
-            } /* end else */
+                do_print_objname("dataset", path1, path2);
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+                /* not comparable, no display the different number */
+                if (!options->not_cmp)
+                    print_found(nfound);	
+            }
             break;
 
        /*-------------------------------------------------------------------------
