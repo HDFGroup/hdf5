@@ -43,9 +43,13 @@
 static hid_t H5FD_SEC2_g = 0;
 
 /* File operations */
-#define OP_UNKNOWN	0
-#define OP_READ		1
-#define OP_WRITE	2
+typedef enum {
+    OP_UNKNOWN = 0,             /* Unknown last file operation */
+    OP_READ = 1,                /* Last file I/O operation was a read */
+    OP_WRITE = 2                /* Last file I/O operation was a write */
+} H5FD_sec2_file_op_t;
+
+#define H5FD_SEC2_MAX_FILENAME_LEN      1024
 
 /*
  * The description of a file belonging to this driver. The `eoa' and `eof'
@@ -65,7 +69,8 @@ typedef struct H5FD_sec2_t {
     haddr_t	eoa;			/*end of allocated region	*/
     haddr_t	eof;			/*end of file; current file size*/
     haddr_t	pos;			/*current file I/O position	*/
-    int		op;			/*last operation		*/
+    H5FD_sec2_file_op_t	op;		/*last operation		*/
+    char	filename[H5FD_SEC2_MAX_FILENAME_LEN];     /* Copy of file name from open operation */
 #ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -379,7 +384,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
-#else
+#else /* _WIN32 */
     file->device = sb.st_dev;
 #ifdef H5_VMS
     file->inode[0] = sb.st_ino[0];
@@ -389,7 +394,11 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->inode = sb.st_ino;
 #endif /*H5_VMS*/
 
-#endif
+#endif /* _WIN32 */
+
+    /* Retain a copy of the name used to open the file, for possible error reporting */
+    HDstrncpy(file->filename, name, sizeof(file->filename));
+    file->filename[sizeof(file->filename) - 1] = '\0';
 
     /* Check for non-default FAPL */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
@@ -751,8 +760,13 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
         do {
             nbytes = HDread(file->fd, buf, size);
         } while(-1 == nbytes && EINTR == errno);
-        if(-1 == nbytes) /* error */
-            HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+        if(-1 == nbytes) { /* error */
+            int myerrno = errno;
+            time_t mytime = HDtime(NULL);
+            file_offset_t myoffset = HDlseek(file->fd, (file_offset_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, size = %lu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long)size, (unsigned long long)myoffset);
+        } /* end if */
         if(0 == nbytes) {
             /* end of file but not end of format address space */
             HDmemset(buf, 0, size);
@@ -832,8 +846,13 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         do {
             nbytes = HDwrite(file->fd, buf, size);
         } while(-1 == nbytes && EINTR == errno);
-        if(-1 == nbytes) /* error */
-            HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+        if(-1 == nbytes) { /* error */
+            int myerrno = errno;
+            time_t mytime = HDtime(NULL);
+            file_offset_t myoffset = HDlseek(file->fd, (file_offset_t)0, SEEK_CUR);
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, size = %lu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long)size, (unsigned long long)myoffset);
+        } /* end if */
         HDassert(nbytes > 0);
         HDassert((size_t)nbytes <= size);
         H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
