@@ -417,7 +417,7 @@ H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr, size_t *sizeof_size)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_sizes, FAIL)
-    H5TRACE3("e", "ixx", plist_id, sizeof_addr, sizeof_size);
+    H5TRACE3("e", "i*z*z", plist_id, sizeof_addr, sizeof_size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))

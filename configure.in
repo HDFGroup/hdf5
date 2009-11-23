@@ -1985,13 +1985,11 @@ AC_MSG_RESULT([no]))
 
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
-dnl tmpfile needed by h5pdiff.
 dnl
-AC_CHECK_FUNCS(alarm fork frexpf frexpl gethostname getpwuid getrusage)
-AC_CHECK_FUNCS(BSDgettimeofday siglongjmp longjmp setsysinfo sigaction)
-AC_CHECK_FUNCS(signal snprintf vasprintf strdup system waitpid)
-AC_CHECK_FUNCS(rand_r random srandom)
-AC_CHECK_FUNCS(tmpfile)
+AC_CHECK_FUNCS(alarm BSDgettimeofday fork frexpf frexpl)
+AC_CHECK_FUNCS(gethostname getpwuid getrusage longjmp lstat)
+AC_CHECK_FUNCS(rand_r random setsysinfo siglongjmp signal)
+AC_CHECK_FUNCS(snprintf srandom strdup system tmpfile vasprintf waitpid)
 
 dnl Check for vsnprintf() separately, so we can detect situations where it
 dnl doesn't return the correct size for formatted strings that are too large

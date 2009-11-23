@@ -724,11 +724,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
  * xxx64 versions if available.
  */
-#if !defined(HDfstat) || !defined(HDstat)
+#if !defined(HDfstat) || !defined(HDstat) || !defined(HDlstat)
     #if H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat64(F,B)
         #endif /* HDfstat */
+        #ifndef HDlstat
+            #define HDlstat(S,B)  	lstat64(S,B)
+        #endif /* HDlstat */
         #ifndef HDstat
             #define HDstat(S,B)  	stat64(S,B)
         #endif /* HDstat */
@@ -739,6 +742,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat(F,B)
         #endif /* HDfstat */
+        #ifndef HDlstat
+            #define HDlstat(S,B)  	lstat(S,B)
+        #endif /* HDlstat */
         #ifndef HDstat
             #define HDstat(S,B)  	stat(S,B)
         #endif /* HDstat */
@@ -1074,9 +1080,6 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)	setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
-#ifndef HDsigaction
-    #define HDsigaction(N,A)	sigaction(N,A)
-#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)	sigaddset(S,N)
 #endif /* HDsigaddset */

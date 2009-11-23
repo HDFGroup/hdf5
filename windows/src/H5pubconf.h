@@ -224,6 +224,9 @@
 /* Define to 1 if you have the `lseek64' function. */
 /* #undef H5_HAVE_LSEEK64 */
 
+/* Define to 1 if you have the `lstat' function. */
+/* #undef H5_HAVE_LSTAT */
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define H5_HAVE_MEMORY_H 1
 
@@ -259,9 +262,6 @@
 
 /* Define to 1 if you have the `setsysinfo' function. */
 /* #undef H5_HAVE_SETSYSINFO */
-
-/* Define to 1 if you have the `sigaction' function. */
-/* #undef H5_HAVE_SIGACTION */
 
 /* Define to 1 if you have the `siglongjmp' function. */
 /* #undef H5_HAVE_SIGLONGJMP */
