@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "H5Eget_minor" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 25 November 2009
+    </i></font></div>
+
 <dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
 <dt><strong>Signature:</strong>
     <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
@@ -11,10 +15,17 @@
 <dt><strong>Description:</strong>
     <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
         constant character string that describes the error.
+        <p>
+        Memory associated with the return value cannot be freed by
+        an application calling this function with an HDF5 library of 
+        Release 1.6.x or earlier, while an application calling this 
+        function with an HDF5 library of Release 1.8.0 or later 
+        must free the memory associated with the return value 
+        to prevent memory leaks.
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>H5E_minor_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>H5E_minor_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Minor error number.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -31,11 +42,5 @@ SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
 END SUBROUTINE h5eget_minor_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
