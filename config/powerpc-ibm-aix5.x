@@ -43,7 +43,7 @@ fi
 # `--enable-debug' switch of configure.
 
 case $CC_BASENAME in
-  xlc|mpcc_r)
+  xlc|xlc-*|mpcc_r|mpcc_r-*)
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
     # Use -D_LARGE_FILES by default to support large file size.
