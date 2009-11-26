@@ -56,7 +56,10 @@ New Features
 
     Configuration
     -------------
-    - None EIP 2009/10/21
+    - Added the xlc-* and mpcc_r-* BASENAME patterns to be recognized as IBM
+      compilers so that the ibm compiler options can be added properly.  This
+      allows non-system-default compiler command names (e.g. xlc-m.n.k.l) be
+      recognized. AKC 2009/11/26.
 
     Library
     -------
