@@ -39,6 +39,10 @@ New Features
 
     Configuration:
     -------------
+    - Added the xlc-* and mpcc_r-* BASENAME patterns to be recognized as IBM
+      compilers so that the ibm compiler options can be added properly.  This
+      allows non-system-default compiler command names (e.g. xlc-m.n.k.l) be
+      recognized. AKC 2009/11/26.
     - Configuration suite now uses Automake 1.11 and Autoconf 2.64.
       MAM 2009/08/11.
     - Changed default Gnu fortran compiler from g95 to gfortran since
