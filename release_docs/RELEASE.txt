@@ -143,9 +143,9 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3                       xlc 7.0.0.8
-    (LLNL Up)                     xlf 09.01.0000.0008
-                                  xlC 7.0.0.8
+    AIX 5.3                       xlc 7.0.0.8, 8.0.0.20, 9.0.0.4
+    (LLNL Up)                     xlC 7.0.0.8, 8.0.0.20, 9.0.0.4
+                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
                                   mpcc_r 7.0.0.8
                                   mpxlf_r 09.01.0000.0008
 
