@@ -58,7 +58,8 @@ New Features
 
     Tools:
     ------
-     - None
+    - h5diff: fix for displaying garbage value on LE machine for BE data.
+      Imported from trunk. (JKM - 2009/11/30)
 
     F90 API:
     --------
