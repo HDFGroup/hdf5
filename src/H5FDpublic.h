@@ -171,6 +171,12 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * is flushed/closed.
      */
 #define H5FD_FEAT_DIRTY_SBLK_LOAD       0x00000040
+    /*
+     * Defining the H5FD_FEAT_POSIX_COMPAT_HANDLE for a VFL driver means that
+     * the handle for the VFD (returned with the 'get_handle' callback) is
+     * of type 'int' and is compatible with POSIX I/O calls.
+     */
+#define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080
 
 
 /* Forward declaration */

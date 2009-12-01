@@ -67,7 +67,6 @@ typedef struct H5F_olist_t {
 /* PRIVATE PROTOTYPES */
 static size_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
-static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
@@ -705,13 +704,10 @@ done:
  *              driver.
  *
  * Return:      Success:        non-negative value.
- *
- *              Failture:       negative.
+ *              Failure:        negative.
  *
  * Programmer:  Raymond Lu
  *              Sep. 16, 2002
- *
- * Modification:
  *
  *-------------------------------------------------------------------------
  */
@@ -719,7 +715,7 @@ herr_t
 H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
 {
     H5F_t               *file;          /* File to query */
-    herr_t              ret_value;      /* Return value */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Fget_vfd_handle, FAIL)
     H5TRACE3("e", "ii**x", file_id, fapl, file_handle);
@@ -732,44 +728,13 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
 
-    ret_value = H5F_get_vfd_handle(file, fapl, file_handle);
+    /* Retrieve the VFD handle for the file */
+    if(H5F_get_vfd_handle(file, fapl, file_handle) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_vfd_handle() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_vfd_handle
- *
- * Purpose:     Returns a pointer to the file handle of the low-level file
- *              driver.  This is the private function for H5Fget_vfd_handle.
- *
- * Return:      Success:        Non-negative.
- *
- *              Failture:       negative.
- *
- * Programmer:  Raymond Lu
- *              Sep. 16, 2002
- *
- * Modification:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void**file_handle)
-{
-    herr_t ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5F_get_vfd_handle)
-
-    assert(file_handle);
-    if((ret_value=H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
 
 
 /*-------------------------------------------------------------------------
@@ -1112,7 +1077,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     }
 
     /* Free the non-shared part of the file */
-    f->name = (char *)H5MM_xfree(f->name);
+    f->open_name = (char *)H5MM_xfree(f->open_name);
+    f->actual_name = (char *)H5MM_xfree(f->actual_name);
     f->extpath = (char *)H5MM_xfree(f->extpath);
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
@@ -1162,7 +1128,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		cause the default file access parameters to be used.
  *
  * Return:	Success:	A new file pointer.
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
@@ -1192,7 +1157,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * Otherwise it is the application's responsibility to never open the
      * same file more than once at a time.
      */
-    if((drvr = H5FD_get_class(fapl_id)) == NULL)
+    if(NULL == (drvr = H5FD_get_class(fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
 
     /*
@@ -1278,7 +1243,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * file can be accessed through the C library.
      */
     file->intent = flags;
-    file->name = H5MM_xstrdup(name);
+    file->open_name = H5MM_xstrdup(name);
 
     /*
      * Read or write the file superblock, depending on whether the file is
@@ -1336,9 +1301,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
     } /* end if */
 
-    /* formulate the absolute path for later search of target file for external link */
-    if (H5_build_extpath(name, &file->extpath) < 0)
+    /* Formulate the absolute path for later search of target file for external links */
+    if(H5_build_extpath(name, &file->extpath) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
+
+    /* Formulate the actual file name, after following symlinks, etc. */
+    if(H5F_build_actual_name(file, name, &file->actual_name) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
     /* Success */
     ret_value = file;
@@ -2001,8 +1970,9 @@ H5Freopen(hid_t file_id)
     /* Keep old file's read/write intent in new file */
     new_file->intent = old_file->intent;
 
-    /* Duplicate old file's name */
-    new_file->name = H5MM_xstrdup(old_file->name);
+    /* Duplicate old file's names */
+    new_file->open_name = H5MM_xstrdup(old_file->open_name);
+    new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
 
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
@@ -2103,37 +2073,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_eoa
- *
- * Purpose:	Quick and dirty routine to retrieve the file's 'eoa' value
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		June 1, 2004
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
-{
-    haddr_t	ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_get_eoa, HADDR_UNDEF)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* Dispatch to driver */
-    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_eoa() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_incr_nopen_objs
  *
  * Purpose:	Increment the number of open objects for a file.
@@ -2185,6 +2124,100 @@ H5F_decr_nopen_objs(H5F_t *f)
 
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_build_actual_name
+ *
+ * Purpose:	Retrieve the name of a file, after following symlinks, etc.
+ *
+ * Note:	Currently only working for "POSIX I/O compatible" VFDs
+ *
+ * Return:	Success:        0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *		November 25, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_build_actual_name(const H5F_t *f, const char *name, char **actual_name/*out*/)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_build_actual_name)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(name);
+    HDassert(actual_name);
+
+    /* Clear actual name pointer to begin with */
+    *actual_name = NULL;
+
+/* Assume that if the OS can't create symlinks, that we don't need to worry
+ *      about resolving them either. -QAK
+ */
+#ifdef H5_HAVE_SYMLINK
+    /* Check for POSIX I/O compatible file handle */
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_POSIX_COMPAT_HANDLE)) {
+        h5_stat_t lst;   /* Stat info from lstat() call */
+
+        /* Call lstat() on the file's name */
+        if(HDlstat(name, &lst) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stat info for file")
+
+        /* Check for symbolic link */
+        if(S_IFLNK == (lst.st_mode & S_IFMT)) {
+            int *fd;                    /* POSIX I/O file descriptor */
+            h5_stat_t st;               /* Stat info from stat() call */
+            h5_stat_t fst;              /* Stat info from fstat() call */
+            char realname[PATH_MAX];    /* Fully resolved path name of file */
+
+            /* Perform a sanity check that the file or link wasn't switched
+             * between when we opened it and when we called lstat().  This is
+             * according to the security best practices for lstat() documented
+             * here: https://www.securecoding.cert.org/confluence/display/seccode/POS35-C.+Avoid+race+conditions+while+checking+for+the+existence+of+a+symbolic+link
+             */
+
+            /* Retrieve the file handle */
+            if(H5F_get_vfd_handle(f, H5P_DEFAULT, (void **)&fd) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve POSIX file descriptor")
+
+            /* Stat the filename we're resolving */
+            if(HDstat(name, &st) < 0)
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat file")
+
+            /* Stat the file we opened */
+            if(HDfstat(*fd, &fst) < 0)
+                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to fstat file")
+
+            /* Verify that the files are really the same */
+            if(st.st_mode != fst.st_mode || st.st_ino != fst.st_ino || st.st_dev != fst.st_dev)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "files' st_ino or st_dev fields changed!")
+
+            /* Get the resolved path for the file name */
+            if(NULL == HDrealpath(name, realname))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve real path for file")
+
+            /* Duplicate the resolved path for the file name */
+            if(NULL == (*actual_name = (char *)H5MM_strdup(realname)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't duplicate real path")
+        } /* end if */
+    } /* end if */
+#endif /* H5_HAVE_SYMLINK */
+
+    /* Check if we've resolved the file's name */
+    if(NULL == *actual_name) {
+        /* Just duplicate the name used to open the file */
+        if(NULL == (*actual_name = (char *)H5MM_strdup(name)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't duplicate open name")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_build_actual_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -2723,6 +2756,9 @@ done:
  *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
  *              is unchanged and the function returns a negative value.
  *
+ * Note:	This routine returns the name that was used to open the file,
+ *		not the actual name after resolving symlinks, etc.
+ *
  * Return:      Success:        The length of the file name
  *              Failure:        Negative
  *
@@ -2758,10 +2794,10 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
         f = loc.oloc->file;
     } /* end else */
 
-    len = HDstrlen(f->name);
+    len = HDstrlen(H5F_OPEN_NAME(f));
 
     if(name) {
-        HDstrncpy(name, f->name, MIN(len+1,size));
+        HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
         if(len >= size)
             name[size-1]='\0';
     } /* end if */

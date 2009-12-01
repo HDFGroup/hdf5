@@ -106,7 +106,9 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
-    - None EIP - 2009/10/21
+    - Allow "child" files from external links to be correctly located when
+        relative to a "parent" file that is opened through a symbolic link.
+        (QAK - 2009/12/01)
 
     Parallel Library
     ----------------
