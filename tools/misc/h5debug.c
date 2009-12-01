@@ -82,19 +82,19 @@ get_H5B2_class(const uint8_t *sig)
             break;
 
         case H5B2_FHEAP_HUGE_INDIR_ID:
-            cls = H5HF_BT2_INDIR;
+            cls = H5HF_HUGE_BT2_INDIR;
             break;
 
         case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-            cls = H5HF_BT2_FILT_INDIR;
+            cls = H5HF_HUGE_BT2_FILT_INDIR;
             break;
 
         case H5B2_FHEAP_HUGE_DIR_ID:
-            cls = H5HF_BT2_DIR;
+            cls = H5HF_HUGE_BT2_DIR;
             break;
 
         case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-            cls = H5HF_BT2_FILT_DIR;
+            cls = H5HF_HUGE_BT2_FILT_DIR;
             break;
 
         case H5B2_GRP_DENSE_NAME_ID:

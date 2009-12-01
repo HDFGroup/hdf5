@@ -43,6 +43,7 @@
 /******************/
 /* Local Typedefs */
 /******************/
+
 /* Udata struct for calls to H5SM_read_iter_op */
 typedef struct H5SM_read_udata_t {
     H5F_t *file;                    /* File in which sharing is happening (in) */
@@ -475,7 +476,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
         bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
         bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
         bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
-        if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam)))
+        if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -575,7 +576,7 @@ H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Delete the B-tree. */
-        if(H5B2_delete(f, dxpl_id, header->index_addr, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, header->index_addr, f, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
         /* Revert to list unless B-trees can have zero records */
@@ -721,7 +722,7 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
     bt2_cparam.rrec_size = (size_t)H5SM_SOHM_ENTRY_SIZE(f);
     bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
     bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
-    if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam)))
+    if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -828,7 +829,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
     /* Delete the B-tree and have messages copy themselves to the
      * list as they're deleted
      */
-    if(H5B2_delete(f, dxpl_id, btree_addr, H5SM_btree_convert_to_list_op, list) < 0)
+    if(H5B2_delete(f, dxpl_id, btree_addr, f, H5SM_bt2_convert_to_list_op, list) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
 done:
@@ -1250,7 +1251,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* Set up callback info */
@@ -1344,7 +1345,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
             /* Open the index v2 B-tree, if it isn't already */
             if(NULL == bt2) {
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr)))
+                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
             } /* end if */
 
@@ -1703,7 +1704,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* If this returns failure, it means that the message wasn't found.
@@ -1733,7 +1734,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         else {
             /* Open the index v2 B-tree, if it isn't already */
             if(NULL == bt2) {
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr)))
+                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
             } /* end if */
 
@@ -1909,86 +1910,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_message_encode
- *
- * Purpose:	Serialize a H5SM_sohm_t struct into a buffer RAW.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
-{
-    const H5SM_sohm_t *message = (const H5SM_sohm_t *)_nrecord;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_encode)
-
-    *raw++ = message->location;
-    UINT32ENCODE(raw, message->hash);
-
-    if(message->location == H5SM_IN_HEAP) {
-        UINT32ENCODE(raw, message->u.heap_loc.ref_count);
-        UINT64ENCODE(raw, message->u.heap_loc.fheap_id);
-    } /* end if */
-    else {
-        HDassert(message->location == H5SM_IN_OH);
-
-        *raw++ = 0;     /* reserved (possible flags byte) */
-        *raw++ = (uint8_t)message->msg_type_id;
-        UINT16ENCODE(raw, message->u.mesg_loc.index);
-        H5F_addr_encode(f, &raw, message->u.mesg_loc.oh_addr);
-    } /* end else */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_encode */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_message_decode
- *
- * Purpose:	Read an encoded SOHM message from RAW into an H5SM_sohm_t struct.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
-{
-    H5SM_sohm_t *message = (H5SM_sohm_t *)_nrecord;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
-
-    message->location = (H5SM_storage_loc_t)*raw++;
-    UINT32DECODE(raw, message->hash);
-
-    if(message->location == H5SM_IN_HEAP) {
-        UINT32DECODE(raw, message->u.heap_loc.ref_count);
-        UINT64DECODE(raw, message->u.heap_loc.fheap_id);
-    } /* end if */
-    else {
-        HDassert(message->location == H5SM_IN_OH);
-
-        raw++;          /* reserved */
-        message->msg_type_id = *raw++;
-        UINT16DECODE(raw, message->u.mesg_loc.index);
-        H5F_addr_decode(f, &raw, &message->u.mesg_loc.oh_addr);
-    } /* end else */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_message_decode */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5SM_reconstitute
  *
  * Purpose:     Reconstitute a shared object header message structure from
@@ -2140,7 +2061,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* Look up the message in the v2 B-tree */
@@ -2585,7 +2506,7 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 	if(table->indexes[u].index_type == H5SM_BTREE) {
 	    if(H5F_addr_defined(table->indexes[u].index_addr)) {
                 /* Open the index v2 B-tree */
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, table->indexes[u].index_addr)))
+                if(NULL == (bt2 = H5B2_open(f, dxpl_id, table->indexes[u].index_addr, f)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
 		if(H5B2_size(bt2, dxpl_id, &(finfo->sohm.msgs_info.index_size)) < 0)

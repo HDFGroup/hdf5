@@ -331,7 +331,7 @@ H5G_obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
             /* Check if we are using "dense" link storage */
             if(H5F_addr_defined(linfo->fheap_addr)) {
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(grp_oloc->file, dxpl_id, linfo->name_bt2_addr)))
+                if(NULL == (bt2_name = H5B2_open(grp_oloc->file, dxpl_id, linfo->name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in "name" B-tree */
