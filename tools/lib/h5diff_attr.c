@@ -130,9 +130,9 @@ hsize_t diff_attr(hid_t loc1_id,
             goto error;
 
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * check for comparable TYPE and SPACE
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
 
         if ( msize1 != msize2
@@ -175,9 +175,9 @@ hsize_t diff_attr(hid_t loc1_id,
         }
 
 
-        /*-------------------------------------------------------------------------
+        /*---------------------------------------------------------------------
         * read
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         nelmts1=1;
         for (j=0; j<rank1; j++)
@@ -198,13 +198,14 @@ hsize_t diff_attr(hid_t loc1_id,
         sprintf(np1,"%s of <%s>",name1,path1);
         sprintf(np2,"%s of <%s>",name2,path2);
 
-        /*-------------------------------------------------------------------------
+        /*---------------------------------------------------------------------
         * array compare
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
 
         /* always print name */
-        if (options->m_verbose)
+        /* verbose (-v) and report (-r) mode */
+        if(options->m_verbose || options->m_report)
         {
             do_print_objname ("attribute", np1, np2);
             nfound = diff_array(buf1,
@@ -222,67 +223,48 @@ hsize_t diff_attr(hid_t loc1_id,
             print_found(nfound);
 
         }
-        /* check first if we have differences */
+        /* quiet mode (-q), just count differences */
+        else if(options->m_quiet)
+        {
+            nfound = diff_array(buf1,
+                buf2,
+                nelmts1,
+                (hsize_t)0,
+                rank1,
+                dims1,
+                options,
+                np1,
+                np2,
+                mtype1_id,
+                attr1_id,
+                attr2_id);
+        }
+        /* the rest (-c, none, ...) */
         else
         {
-            if (options->m_quiet==0)
-            {
-                /* shut up temporarily */
-                options->m_quiet=1;
-                nfound = diff_array(buf1,
-                    buf2,
-                    nelmts1,
-                    (hsize_t)0,
-                    rank1,
-                    dims1,
-                    options,
-                    np1,
-                    np2,
-                    mtype1_id,
-                    attr1_id,
-                    attr2_id);
-                /* print again */
-                options->m_quiet=0;
-                if (nfound)
-                {
-                    do_print_objname ("attribute", np1, np2);
-                    nfound = diff_array(buf1,
-                        buf2,
-                        nelmts1,
-                        (hsize_t)0,
-                        rank1,
-                        dims1,
-                        options,
-                        np1,
-                        np2,
-                        mtype1_id,
-                        attr1_id,
-                        attr2_id);
+            do_print_objname ("attribute", np1, np2);
+            nfound = diff_array(buf1,
+                buf2,
+                nelmts1,
+                (hsize_t)0,
+                rank1,
+                dims1,
+                options,
+                np1,
+                np2,
+                mtype1_id,
+                attr1_id,
+                attr2_id);
+
+                /* not comparable, no display the different number */
+                if (!options->not_cmp)
                     print_found(nfound);
-                } /*if*/
-            } /*if*/
-            /* in quiet mode, just count differences */
-            else
-            {
-                nfound = diff_array(buf1,
-                    buf2,
-                    nelmts1,
-                    (hsize_t)0,
-                    rank1,
-                    dims1,
-                    options,
-                    np1,
-                    np2,
-                    mtype1_id,
-                    attr1_id,
-                    attr2_id);
-            } /*else quiet */
-        } /*else verbose */
+        }
 
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * close
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
 
         if (H5Tclose(ftype1_id)<0)
