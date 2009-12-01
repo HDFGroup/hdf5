@@ -462,6 +462,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 {
     H5SM_list_t *list;          /* The SOHM list being read in */
     H5SM_index_header_t *header = (H5SM_index_header_t *) udata2;     /* Index header for this list */
+    H5SM_bt2_ctx_t ctx;         /* Message encoding context */
     size_t size;                /* Size of SOHM list on disk */
     H5WB_t *wb = NULL;          /* Wrapped buffer for list index data */
     uint8_t lst_buf[H5SM_LST_BUF_SIZE]; /* Buffer for list index */
@@ -512,8 +513,9 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     p += H5_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
+    ctx.sizeof_addr = H5F_SIZEOF_ADDR(f);
     for(x = 0; x < header->num_messages; x++) {
-        if(H5SM_message_decode(f, p, &(list->messages[x])) < 0)
+        if(H5SM_message_decode(p, &(list->messages[x]), &ctx) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message")
         p += H5SM_SOHM_ENTRY_SIZE(f);
     } /* end for */
@@ -580,6 +582,7 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
     HDassert(list->header);
 
     if(list->cache_info.is_dirty) {
+        H5SM_bt2_ctx_t ctx;         /* Message encoding context */
         uint8_t *buf;               /* Temporary buffer */
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t size;                /* Header size on disk */
@@ -606,9 +609,10 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 
         /* Write messages from the messages array to disk */
         mesgs_written = 0;
+        ctx.sizeof_addr = H5F_SIZEOF_ADDR(f);
         for(x = 0; x < list->header->list_max && mesgs_written < list->header->num_messages; x++) {
             if(list->messages[x].location != H5SM_NO_LOC) {
-                if(H5SM_message_encode(f, p, &(list->messages[x])) < 0)
+                if(H5SM_message_encode(p, &(list->messages[x]), &ctx) < 0)
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to write shared message to disk")
 
                 p+=H5SM_SOHM_ENTRY_SIZE(f);

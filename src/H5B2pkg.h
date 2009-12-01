@@ -168,10 +168,13 @@ typedef struct H5B2_hdr_t {
     uint8_t     sizeof_addr;    /* Size of file addresses */
     H5B2_remove_t remove_op;    /* Callback operator for deleting B-tree */
     void        *remove_op_data;/* B-tree deletion callback's context */
-    const H5B2_class_t *cls;	/* Class of B-tree client */
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
     H5B2_node_info_t *node_info; /* Table of node info structs for current depth of B-tree */
+
+    /* Client information (not stored) */
+    const H5B2_class_t *cls;	/* Class of B-tree client */
+    void        *cb_ctx;        /* Client callback context */
 } H5B2_hdr_t;
 
 /* B-tree leaf node information */
@@ -255,9 +258,9 @@ extern const H5B2_class_t *const H5B2_client_class_g[];
 /* Routines for managing B-tree header info */
 H5_DLL H5B2_hdr_t *H5B2_hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5B2_hdr_create(H5F_t *f, hid_t dxpl_id,
-    const H5B2_create_t *cparam);
+    const H5B2_create_t *cparam, void *ctx_udata);
 H5_DLL herr_t H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr,
-    const H5B2_create_t *cparam, uint16_t depth);
+    const H5B2_create_t *cparam, void *ctx_udata, uint16_t depth);
 H5_DLL herr_t H5B2_hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr);

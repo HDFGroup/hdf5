@@ -108,7 +108,7 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  */
 herr_t
 H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
-    uint16_t depth)
+    void *ctx_udata, uint16_t depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -124,6 +124,8 @@ H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
     HDassert(hdr);
     HDassert(cparam);
     HDassert(cparam->cls);
+    HDassert((cparam->cls->crt_context && cparam->cls->dst_context) ||
+        (NULL == cparam->cls->crt_context && NULL == cparam->cls->dst_context));
     HDassert(cparam->node_size > 0);
     HDassert(cparam->rrec_size > 0);
     HDassert(cparam->merge_percent > 0 && cparam->merge_percent <= 100);
@@ -149,14 +151,14 @@ H5B2_hdr_init(H5F_t *f, H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
 
     /* Allocate "page" for node I/O */
     if(NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
 #ifdef H5_CLEAR_MEMORY
 HDmemset(hdr->page, 0, hdr->node_size);
 #endif /* H5_CLEAR_MEMORY */
 
     /* Allocate array of node info structs */
     if(NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize leaf node info */
     sz_max_nrec = H5B2_NUM_LEAF_REC(hdr->node_size, hdr->rrec_size);
@@ -166,13 +168,13 @@ HDmemset(hdr->page, 0, hdr->node_size);
     hdr->node_info[0].cum_max_nrec = hdr->node_info[0].max_nrec;
     hdr->node_info[0].cum_max_nrec_size = 0;
     if(NULL == (hdr->node_info[0].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[0].max_nrec)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
     hdr->node_info[0].node_ptr_fac = NULL;
 
     /* Allocate array of pointers to internal node native keys */
     /* (uses leaf # of records because its the largest) */
     if(NULL == (hdr->nat_off = H5FL_SEQ_MALLOC(size_t, (size_t)hdr->node_info[0].max_nrec)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize offsets in native key block */
     /* (uses leaf # of records because its the largest) */
@@ -201,10 +203,16 @@ HDmemset(hdr->page, 0, hdr->node_size);
             H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
 
             if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
             if(NULL == (hdr->node_info[u].node_ptr_fac = H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[u].max_nrec + 1))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create internal 'branch' node node pointer block factory")
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create internal 'branch' node node pointer block factory")
         } /* end for */
+    } /* end if */
+
+    /* Create the callback context, if the callback exists */
+    if(hdr->cls->crt_context) {
+        if(NULL == (hdr->cb_ctx = (*hdr->cls->crt_context)(ctx_udata)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "unable to create v2 B-tree client callback context")
     } /* end if */
 
 done:
@@ -278,7 +286,8 @@ done:
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
+H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
+    void *ctx_udata)
 {
     H5B2_hdr_t *hdr = NULL;     /* The new v2 B-tree header information */
     haddr_t ret_value;          /* Return value */
@@ -296,7 +305,7 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(f, hdr, cparam, (uint16_t)0) < 0)
+    if(H5B2_hdr_init(f, hdr, cparam, ctx_udata, (uint16_t)0) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
@@ -506,6 +515,13 @@ H5B2_hdr_free(H5B2_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
+
+    /* Destroy the callback context */
+    if(hdr->cb_ctx) {
+        if((*hdr->cls->dst_context)(hdr->cb_ctx) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "can't destroy v2 B-tree client callback context")
+        hdr->cb_ctx = NULL;
+    } /* end if */
 
     /* Free the B-tree node buffer */
     if(hdr->page)
