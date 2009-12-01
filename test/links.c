@@ -36,57 +36,17 @@
 #define LINKED_FILE  "be_extlink2.h5"
 
 #ifdef H5_VMS
-const char *FILENAME[] = {
-    "links0",
-    "links1",
-    "links2",
-    "links3",
-    "links4a", /* 4 */
-    "links4b", /* 5 */
-    "links4c", /* 6 */
-    "links4d", /* 7 */
-    "links5",  /* 8 */
-    "links6",  /* 9 */
-    "links7",  /* 10 */
-    "links8",  /* 11 */
-    "extlinks0",	/* 12: main files */
-    "[.tmp]extlinks0",	/* 13: */
-    "extlinks1",	/* 14: target files */
-    "[.tmp]extlinks1",	/* 15: */
-    "extlinks2",	/* 16: */
-    "[.tmp]extlinks2",	/* 17: */
-    "extlinks3",	/* 18: */
-    "[.tmp]extlinks3",	/* 19: */
-    "extlinks4",	/* 20: */
-    "[.tmp]extlinks4",	/* 21: */
-    "extlinks5",	/* 22: */
-    "[.tmp]extlinks6",	/* 23: */
-    "extlinks7",	/* 24: */
-    "[.tmp]extlinks7",	/* 25: */
-    "[.tmp]extlinks8",	/* 26: */
-    "extlinks9",	/* 27: */
-    "[.tmp]extlinks9",	/* 28: */
-    "extlinks10",	/* 29: */ /* TESTS for windows */
-    "[.tmp]extlinks10",	/* 30: */
-    "[.tmp]extlinks11",	/* 31: */
-    "[.tmp]extlinks12",	/* 32: */
-    "extlinks13",	/* 33: */
-    "[.tmp]extlinks13",	/* 34: */
-    "[.tmp]extlinks14",	/* 35: */
-    "[.tmp]extlinks15",	/* 36: */
-    "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
-    "extlinks16B",	/* 38: */
-    "extlinks17",	/* 39: */
-    "extlinks18A",	/* 40: */
-    "extlinks18B",	/* 41: */
-    "extlinks19A",	/* 42: */
-    "extlinks19B",	/* 43: */
-    "extlinks20",	/* 44: */
-    NULL
-};
-
 #define TMPDIR          "[.tmp]"
-#else
+#define TMPDIR2         "[.tmp2]"
+#else /* H5_VMS */
+#define TMPDIR          "tmp/"
+#define TMPDIR2         "tmp2/"
+#endif /* H5_VMS */
+
+/* Symlinks for external link symlink test */
+#define SYMLINK1  TMPDIR "sym1.h5"
+#define SYMLINK2  TMPDIR2 "sym2.h5"
+
 const char *FILENAME[] = {
     "links0",
     "links1",
@@ -101,30 +61,30 @@ const char *FILENAME[] = {
     "links7",  /* 10 */
     "links8",  /* 11 */
     "extlinks0",	/* 12: main files */
-    "tmp/extlinks0",	/* 13: */
+    TMPDIR "extlinks0",	/* 13: */
     "extlinks1",	/* 14: target files */
-    "tmp/extlinks1",	/* 15: */
+    TMPDIR "extlinks1",	/* 15: */
     "extlinks2",	/* 16: */
-    "tmp/extlinks2",	/* 17: */
+    TMPDIR "extlinks2",	/* 17: */
     "extlinks3",	/* 18: */
-    "tmp/extlinks3",	/* 19: */
+    TMPDIR "extlinks3",	/* 19: */
     "extlinks4",	/* 20: */
-    "tmp/extlinks4",	/* 21: */
+    TMPDIR "extlinks4",	/* 21: */
     "extlinks5",	/* 22: */
-    "tmp/extlinks6",	/* 23: */
+    TMPDIR "extlinks6",	/* 23: */
     "extlinks7",	/* 24: */
-    "tmp/extlinks7",	/* 25: */
-    "tmp/extlinks8",	/* 26: */
+    TMPDIR "extlinks7",	/* 25: */
+    TMPDIR "extlinks8",	/* 26: */
     "extlinks9",	/* 27: */
-    "tmp/extlinks9",	/* 28: */
+    TMPDIR "extlinks9",	/* 28: */
     "extlinks10",	/* 29: */ /* TESTS for windows */
-    "tmp/extlinks10",	/* 30: */
-    "tmp/extlinks11",	/* 31: */
-    "tmp/extlinks12",	/* 32: */
+    TMPDIR "extlinks10",/* 30: */
+    TMPDIR "extlinks11",/* 31: */
+    TMPDIR "extlinks12",/* 32: */
     "extlinks13",	/* 33: */
-    "tmp/extlinks13",	/* 34: */
-    "tmp/extlinks14",	/* 35: */
-    "tmp/extlinks15",	/* 36: */
+    TMPDIR "extlinks13",/* 34: */
+    TMPDIR "extlinks14",/* 35: */
+    TMPDIR "extlinks15",/* 36: */
     "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
     "extlinks16B",	/* 38: */
     "extlinks17",	/* 39: */
@@ -133,11 +93,15 @@ const char *FILENAME[] = {
     "extlinks19A",	/* 42: */
     "extlinks19B",	/* 43: */
     "extlinks20",	/* 44: */
+    "extlinks21A",	/* 45: Files for symlink() tests*/
+    TMPDIR2 "extlinks21B",/* 46: */
+    TMPDIR2 "extlinks21C",/* 47: */
+    "extlinks21C",	/* 48: (same as #47, only without the TMPDIR2 prefix) */
+    TMPDIR "extlinks21D",/* 49: */
+    TMPDIR "extlinks21E",/* 50: */
+    "extlinks21E",	/* 51: (same as #50, only without the TMPDIR prefix) */
     NULL
 };
-
-#define TMPDIR          "tmp"
-#endif
 
 #define FAMILY_SIZE	1024
 #define CORE_INCREMENT  1024
@@ -349,6 +313,37 @@ typedef struct {
     const obj_visit_t *info;    /* Pointer to the object visit structure to use */
 } ovisit_ud_t;
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    fix_ext_filename
+ *
+ * Purpose:     Internal function to append path to file name.  It handles
+ *              path name of Unix, Windows, and OpenVMS.
+ *
+ * Return:      void
+ *
+ * Programmer:  Raymond Lu
+ *              14 Jan. 2009
+ *-------------------------------------------------------------------------
+ */
+static void 
+fix_ext_filename(char *path_name, char *cwd, const char *file_name)
+{
+    HDstrcpy(path_name, cwd);
+
+#ifdef H5_VMS
+    if(file_name[0] == '[') {
+        char *tmp = file_name;
+        path_name[strlen(cwd)-1] = '\0';
+        HDstrcat(path_name, ++tmp);
+    } else
+        HDstrcat(path_name, file_name);
+#else
+    HDstrcat(path_name, "/");
+    HDstrcat(path_name, file_name);
+#endif
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2754,7 +2749,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
     /* set up name for external linked target file: "extlinks1" */
     h5_fixname(FILENAME[14], fapl, filename2, sizeof filename2);
 
-    if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+    if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
 	TEST_ERROR
 
     /* set up name for target file: "tmp/extlinks1" */
@@ -2896,37 +2891,6 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     return -1;
 } /* end external_link_prefix() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    fix_ext_filename
- *
- * Purpose:     Internal function to append path to file name.  It handles
- *              path name of Unix, Windows, and OpenVMS.
- *
- * Return:      void
- *
- * Programmer:  Raymond Lu
- *              14 Jan. 2009
- *-------------------------------------------------------------------------
- */
-static void 
-fix_ext_filename(char *path_name, char *cwd, const char *file_name)
-{
-    HDstrcpy(path_name, cwd);
-
-#ifdef H5_VMS
-    if(file_name[0] == '[') {
-        char *tmp = file_name;
-        path_name[strlen(cwd)-1] = '\0';
-        HDstrcat(path_name, ++tmp);
-    } else
-        HDstrcat(path_name, file_name);
-#else
-    HDstrcat(path_name, "/");
-    HDstrcat(path_name, file_name);
-#endif
-}
 
 
 /*-------------------------------------------------------------------------
@@ -6428,6 +6392,208 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end external_link_strong() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_symlink
+ *
+ * Purpose:     Verify functionality of external links when symlinks are
+ *              used for parent/child files
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Nov. 23, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_symlink(hid_t fapl, hbool_t new_format)
+{
+#ifdef H5_HAVE_SYMLINK
+    hid_t       file1 = -1, file2 = -1, file3 = -1, file4 = -1, file5 = -1;
+    hid_t       group2 = -1, group3 = -1, group4 = -1, group5 = -1;
+    char	filename1[NAME_BUF_SIZE],
+    		filename2a[NAME_BUF_SIZE],
+    		filename2b[NAME_BUF_SIZE],
+    		filename3a[NAME_BUF_SIZE],
+    		filename3b[NAME_BUF_SIZE],
+    		filename4a[NAME_BUF_SIZE],
+    		filename4b[NAME_BUF_SIZE],
+    		filename5a[NAME_BUF_SIZE],
+    		filename5b[NAME_BUF_SIZE],
+    		tmpname[NAME_BUF_SIZE],
+    		cwdpath[NAME_BUF_SIZE];
+#endif /* H5_HAVE_SYMLINK */
+
+    if(new_format)
+        TESTING("external links w/symlink files (w/new group format)")
+    else
+        TESTING("external links w/symlink files")
+
+#ifdef H5_HAVE_SYMLINK
+    /* set up name for main file: "extlinks21A" */
+    h5_fixname(FILENAME[45], fapl, filename1, sizeof(filename1));
+
+    /* create tmp directory and get current working directory path */
+    if(HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+    if(HDmkdir(TMPDIR2, (mode_t)0755) < 0 && errno != EEXIST)
+        TEST_ERROR
+    if(NULL == HDgetcwd(cwdpath, NAME_BUF_SIZE))
+        TEST_ERROR
+
+    /* Set up names for files in the subdirectories */
+
+    /* set up names for file #2 in temporary directory #2: "tmp2/extlinks21B" */
+    h5_fixname(FILENAME[46], fapl, filename2a, sizeof(filename2a));
+    fix_ext_filename(tmpname, cwdpath, FILENAME[46]);
+    h5_fixname(tmpname, fapl, filename2b, sizeof(filename2b));
+
+    /* Create symbolic link #1 in temporary directory #1 to file #2 in temporary directory #2 */
+    /* (i.e. tmp/sym1.h5 -> <full path to>/tmp2/extlinks21B.h5) */
+    if(HDsymlink(filename2b, SYMLINK1) < 0 && errno != EEXIST) TEST_ERROR
+
+    /* set up name for file #3 in temporary directory #2: "tmp2/extlinks21C" */
+    h5_fixname(FILENAME[47], fapl, filename3a, sizeof(filename3a));
+    h5_fixname(FILENAME[48], fapl, filename3b, sizeof(filename3b));
+
+    /* set up name for file #4 in temporary directory #1: "tmp/extlinks21D" */
+    h5_fixname(FILENAME[49], fapl, filename4a, sizeof(filename4a));
+    fix_ext_filename(tmpname, cwdpath, FILENAME[49]);
+    h5_fixname(tmpname, fapl, filename4b, sizeof(filename4b));
+
+    /* Create symbolic link #2 in temporary directory #2 to file #4 in temporary directory #1 */
+    /* (i.e. tmp2/sym2.h5 -> <full path to>/tmp/extlinks21D.h5) */
+    if(HDsymlink(filename4b, SYMLINK2) < 0 && errno != EEXIST) TEST_ERROR
+
+    /* set up name for file #5 in temporary directory #1: "tmp/extlinks21E" */
+    h5_fixname(FILENAME[50], fapl, filename5a, sizeof(filename5a));
+    h5_fixname(FILENAME[51], fapl, filename5b, sizeof(filename5b));
+
+
+    /* Create file #1 in current directory */
+    if((file1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to file & object in temporary directory #2, using symlink #1 name */
+    if(H5Lcreate_external(SYMLINK1, "group2", file1, "extlink2-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+
+    /* Create file #2 in tmp directory #2 */
+    if((file2 = H5Fcreate(filename2a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if(H5Fclose(file2) < 0) TEST_ERROR
+
+    /* Re-open file #2 in tmp directory through symlink */
+    if((file2 = H5Fopen(SYMLINK1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #2 in temporary directory */
+    if((group2 = H5Gcreate2(file2, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file #3 & object in temporary directory #2 */
+    if(H5Lcreate_external(filename3b, "group3", group2, "extlink3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #2 */
+    if(H5Gclose(group2) < 0) TEST_ERROR
+
+    /* Close file #2 */
+    if(H5Fclose(file2) < 0) TEST_ERROR
+
+
+    /* Create file #3 in temp. directory #2 */
+    if((file3 = H5Fcreate(filename3a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #3 */
+    if((group3 = H5Gcreate2(file3, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file & object in temporary directory #1, using symlink #2 name */
+    if(H5Lcreate_external(SYMLINK2, "group4", group3, "extlink4-sym", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #3 */
+    if(H5Gclose(group3) < 0) TEST_ERROR
+
+    /* Close file #3 */
+    if(H5Fclose(file3) < 0) TEST_ERROR
+
+
+    /* Create file #4 in temporary directory #1 */
+    if((file4 = H5Fcreate(filename4b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #4 in 'temporary' directory */
+    if((group4 = H5Gcreate2(file4, "group4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create external link to file #5 & object in temporary directory #1 */
+    if(H5Lcreate_external(filename5b, "group5", group4, "extlink5", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close group in file #4 */
+    if(H5Gclose(group4) < 0) TEST_ERROR
+
+    /* Close file #4 */
+    if(H5Fclose(file4) < 0) TEST_ERROR
+
+
+    /* Create file #5 in temporary directory #1 */
+    if((file5 = H5Fcreate(filename5a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group in file #5 in 'temporary' directory #1 */
+    if((group5 = H5Gcreate2(file5, "group5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(group5) < 0) TEST_ERROR
+
+    /* Close file #5 */
+    if(H5Fclose(file5) < 0) TEST_ERROR
+
+
+    /* Actual tests... */
+
+    /* Reopen file #1 */
+    if((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+
+    /* Open group in file #2, through external link w/symlink */
+    if((group2 = H5Gopen2(file1, "extlink2-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2) < 0) TEST_ERROR
+
+    /* Open group in file #3, through external link w/symlink to external link */
+    if((group3 = H5Gopen2(file1, "extlink2-sym/extlink3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3) < 0) TEST_ERROR
+
+    /* Open group in file #4, through external link w/symlink to external link w/symlink */
+    if((group4 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4) < 0) TEST_ERROR
+
+    /* Open group in file #5, through external link w/symlink to external link w/symlink to external link */
+    if((group5 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym/extlink5", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5) < 0) TEST_ERROR
+
+    /* Close file #1 */
+    if(H5Fclose(file1) < 0) TEST_ERROR
+
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Gclose(group5);
+        H5Gclose(group4);
+        H5Gclose(group3);
+        H5Gclose(group2);
+        H5Fclose(file5);
+        H5Fclose(file4);
+        H5Fclose(file3);
+        H5Fclose(file2);
+        H5Fclose(file1);
+    } H5E_END_TRY;
+    return -1;
+#else /* H5_HAVE_SYMLINK */
+    SKIPPED();
+    puts("    Current file system or operating system doesn't support symbolic links");
+
+    return 0;
+#endif /* H5_HAVE_SYMLINK */
+} /* end external_symlink() */
 
 
 /*-------------------------------------------------------------------------
@@ -13434,6 +13600,7 @@ main(void)
         nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
+        nerrors += external_symlink(my_fapl, new_format) < 0 ? 1 : 0;
 
         /* These tests assume that external links are a form of UD links,
          * so assume that everything that passed for external links
@@ -13506,8 +13673,13 @@ main(void)
     }
     printf("All link tests passed.\n");
 
+    /* clean up symlink created by external link tests */
+    HDremove(SYMLINK1);
+    HDremove(SYMLINK2);
+
     /* clean up tmp directory created by external link tests */
     HDrmdir(TMPDIR);
+    HDrmdir(TMPDIR2);
 
     return 0;
 

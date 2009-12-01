@@ -409,7 +409,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name,
     const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
@@ -420,7 +420,7 @@ H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 
     /* Check if the name in this group resolved to a valid object */
     if(obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object '%s' doesn't exist", name)
 
     /* Take ownership of the object's group location */
     /* (Group traversal callbacks are responsible for either taking ownership

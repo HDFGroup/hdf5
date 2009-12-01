@@ -1978,7 +1978,8 @@ dnl
 AC_CHECK_FUNCS(alarm BSDgettimeofday fork frexpf frexpl)
 AC_CHECK_FUNCS(gethostname getpwuid getrusage longjmp lstat)
 AC_CHECK_FUNCS(rand_r random setsysinfo siglongjmp signal)
-AC_CHECK_FUNCS(snprintf srandom strdup system tmpfile vasprintf waitpid)
+AC_CHECK_FUNCS(snprintf srandom strdup symlink system)
+AC_CHECK_FUNCS(tmpfile vasprintf waitpid)
 
 dnl Check for vsnprintf() separately, so we can detect situations where it
 dnl doesn't return the correct size for formatted strings that are too large

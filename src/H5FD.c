@@ -2036,8 +2036,6 @@ done:
  * Programmer:  Raymond Lu
  *              Sep. 16, 2002
  *
- * Modifications:
- *
  *--------------------------------------------------------------------------
  */
 herr_t
@@ -2047,11 +2045,13 @@ H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
 
     FUNC_ENTER_NOAPI(H5FD_get_vfd_handle, FAIL)
 
+    /* Sanity check */
+    HDassert(file);
     HDassert(file_handle);
 
     if(NULL == file->cls->get_handle)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "file driver has no `get_vfd_handle' method")
-    if((ret_value = file->cls->get_handle(file, fapl, file_handle)) < 0)
+    if((file->cls->get_handle)(file, fapl, file_handle) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:

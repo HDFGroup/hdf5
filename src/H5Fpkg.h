@@ -224,7 +224,7 @@ typedef struct H5F_file_t {
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hbool_t	latest_format;	/* Always use the latest format?	*/
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
-    int	ncwfs;			/* Num entries on cwfs list		*/
+    int         ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
@@ -232,7 +232,7 @@ typedef struct H5F_file_t {
 
     /* File space allocation information */
     H5F_file_space_type_t fs_strategy;	/* File space handling strategy		*/
-    hsize_t               fs_threshold;	/* Free space section threshold 	*/
+    hsize_t     fs_threshold;	/* Free space section threshold 	*/
     hbool_t     use_tmp_space;  /* Whether temp. file space allocation is allowed */
     haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
@@ -252,14 +252,12 @@ typedef struct H5F_file_t {
 /*
  * This is the top-level file descriptor.  One of these structures is
  * allocated every time H5Fopen() is called although they may contain pointers
- * to shared H5F_file_t structs. The reference count (nrefs) indicates the
- * number of times the file has been opened (the application can only open a
- * file once explicitly, but the library can open the file a second time to
- * indicate that the file is mounted on some other file).
+ * to shared H5F_file_t structs.
  */
 struct H5F_t {
     unsigned		intent;		/* The flags passed to H5F_open()*/
-    char		*name;		/* Name used to open file	*/
+    char		*open_name;	/* Name used to open file	*/
+    char		*actual_name;	/* Actual name of the file, after resolving symlinks, etc. */
     char               	*extpath;       /* Path for searching target external link file */
     H5F_file_t		*shared;	/* The shared file info		*/
     unsigned		nopen_objs;	/* Number of open object headers*/

@@ -801,22 +801,20 @@ done:
 static herr_t
 H5FD_log_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_log_query, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_query)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-    }
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE; /* VFD handle is POSIX I/O call compatible */
+    } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_log_query() */
 
 
 /*-------------------------------------------------------------------------

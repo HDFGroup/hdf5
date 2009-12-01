@@ -2493,7 +2493,7 @@ H5AC_stats(const H5F_t *f)
     HDassert(f->shared->cache);
 
     /* at present, this can't fail */
-    (void)H5C_stats(f->shared->cache, f->name, FALSE);
+    (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
