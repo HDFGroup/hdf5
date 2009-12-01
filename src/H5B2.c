@@ -73,10 +73,10 @@
  * client class..
  */
 extern const H5B2_class_t H5B2_TEST[1];
-extern const H5B2_class_t H5HF_BT2_INDIR[1];
-extern const H5B2_class_t H5HF_BT2_FILT_INDIR[1];
-extern const H5B2_class_t H5HF_BT2_DIR[1];
-extern const H5B2_class_t H5HF_BT2_FILT_DIR[1];
+extern const H5B2_class_t H5HF_HUGE_BT2_INDIR[1];
+extern const H5B2_class_t H5HF_HUGE_BT2_FILT_INDIR[1];
+extern const H5B2_class_t H5HF_HUGE_BT2_DIR[1];
+extern const H5B2_class_t H5HF_HUGE_BT2_FILT_DIR[1];
 extern const H5B2_class_t H5G_BT2_NAME[1];
 extern const H5B2_class_t H5G_BT2_CORDER[1];
 extern const H5B2_class_t H5SM_INDEX[1];
@@ -85,10 +85,10 @@ extern const H5B2_class_t H5A_BT2_CORDER[1];
 
 const H5B2_class_t *const H5B2_client_class_g[] = {
     H5B2_TEST,			/* 0 - H5B2_TEST_ID 			*/
-    H5HF_BT2_INDIR,		/* 1 - H5B2_FHEAP_HUGE_INDIR_ID 	*/
-    H5HF_BT2_FILT_INDIR,	/* 2 - H5B2_FHEAP_HUGE_FILT_INDIR_ID 	*/
-    H5HF_BT2_DIR,		/* 3 - H5B2_FHEAP_HUGE_DIR_ID 		*/
-    H5HF_BT2_FILT_DIR,		/* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID 	*/
+    H5HF_HUGE_BT2_INDIR,	/* 1 - H5B2_FHEAP_HUGE_INDIR_ID 	*/
+    H5HF_HUGE_BT2_FILT_INDIR,	/* 2 - H5B2_FHEAP_HUGE_FILT_INDIR_ID 	*/
+    H5HF_HUGE_BT2_DIR,		/* 3 - H5B2_FHEAP_HUGE_DIR_ID 		*/
+    H5HF_HUGE_BT2_FILT_DIR,	/* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID 	*/
     H5G_BT2_NAME,		/* 5 - H5B2_GRP_DENSE_NAME_ID 		*/
     H5G_BT2_CORDER,		/* 6 - H5B2_GRP_DENSE_CORDER_ID 		*/
     H5SM_INDEX,			/* 7 - H5B2_SOHM_INDEX_ID 		*/
@@ -126,7 +126,7 @@ H5FL_DEFINE_STATIC(H5B2_t);
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
+H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam, void *ctx_udata)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -145,7 +145,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
     HDcompile_assert(H5B2_NUM_BTREE_ID == NELMTS(H5B2_client_class_g));
 
     /* Create shared v2 B-tree header */
-    if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam)))
+    if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam, ctx_udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't create v2 B-tree header")
 
     /* Create v2 B-tree wrapper */
@@ -153,7 +153,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for v2 B-tree info")
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, NULL, ctx_udata, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
@@ -197,7 +197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr)
+H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -210,7 +210,7 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, ctx_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Check for pending heap deletion */
@@ -1140,13 +1140,6 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
         } /* end if */
     } /* end if */
 
-    /* Decrement the reference count on the B-tree header */
-    /* (don't put in H5B2_hdr_fuse_decr() as the B-tree header may be evicted
-     *  immediately -QAK)
-     */
-    if(H5B2_hdr_decr(bt2->hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement reference count on shared v2 B-tree header")
-
     /* Check for pending v2 B-tree deletion */
     if(pending_delete) {
         H5B2_hdr_t *hdr;            /* Another pointer to v2 B-tree header */
@@ -1154,17 +1147,49 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
         /* Sanity check */
         HDassert(H5F_addr_defined(bt2_addr));
 
+#ifndef NDEBUG
+{
+    unsigned hdr_status = 0;         /* Header's status in the metadata cache */
+
+    /* Check the header's status in the metadata cache */
+    if(H5AC_get_entry_status(bt2->f, bt2_addr, &hdr_status) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to check metadata cache status for v2 B-tree header, address = %llu", (unsigned long long)bt2_addr)
+
+    /* Sanity checks on header */
+    HDassert(hdr_status & H5AC_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC_ES__IS_PINNED);
+    HDassert(!(hdr_status & H5AC_ES__IS_PROTECTED));
+}
+#endif /* NDEBUG */
+
         /* Lock the v2 B-tree header into memory */
+        /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
         if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, NULL, NULL, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
 
         /* Set the shared v2 B-tree header's file context for this operation */
         hdr->f = bt2->f;
 
+        /* Decrement the reference count on the B-tree header */
+        /* (don't put in H5B2_hdr_fuse_decr() as the B-tree header may be evicted
+         *  immediately -QAK)
+         */
+        if(H5B2_hdr_decr(bt2->hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement reference count on shared v2 B-tree header")
+
         /* Delete v2 B-tree, starting with header (unprotects header) */
         if(H5B2_hdr_delete(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree")
     } /* end if */
+    else {
+        /* Decrement the reference count on the B-tree header */
+        /* (don't put in H5B2_hdr_fuse_decr() as the B-tree header may be evicted
+         *  immediately -QAK)
+         */
+        if(H5B2_hdr_decr(bt2->hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement reference count on shared v2 B-tree header")
+
+    } /* end else */
 
     /* Release the v2 B-tree wrapper */
     bt2 = H5FL_FREE(H5B2_t, bt2);
@@ -1197,8 +1222,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5B2_remove_t op,
-    void *op_data)
+H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
+    H5B2_remove_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -1213,8 +1238,8 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5B2_remove_t op,
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, NULL, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, NULL, ctx_udata, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
     /* Remember the callback & context for later */
     hdr->remove_op = op;

@@ -220,6 +220,9 @@
 /* Define to 1 if you have the `lseek64' function. */
 #undef HAVE_LSEEK64
 
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -255,9 +258,6 @@
 
 /* Define to 1 if you have the `setsysinfo' function. */
 #undef HAVE_SETSYSINFO
-
-/* Define to 1 if you have the `sigaction' function. */
-#undef HAVE_SIGACTION
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #undef HAVE_SIGLONGJMP
@@ -306,6 +306,9 @@
 
 /* Define if `struct videoconfig' is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
+
+/* Define to 1 if you have the `symlink' function. */
+#undef HAVE_SYMLINK
 
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM

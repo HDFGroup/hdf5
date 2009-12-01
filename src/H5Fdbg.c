@@ -73,7 +73,9 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     HDfprintf(stream, "%*sFile Super Block...\n", indent, "");
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "File name:", f->name);
+	      "File name (as opened):", H5F_OPEN_NAME(f));
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "File name (after resolving symlinks):", H5F_ACTUAL_NAME(f));
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
 	      "File access flags", f->shared->flags);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,

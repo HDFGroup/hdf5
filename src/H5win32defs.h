@@ -40,6 +40,7 @@ typedef __int64             h5_stat_size_t;
 #endif
 #define HDfstat(F,B)        _fstati64(F,B)
 #define HDisatty(F)         _isatty(F)
+#define HDlstat(S,B)        _lstati64(S,B)
 #define HDstat(S,B)         _stati64(S,B)
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)

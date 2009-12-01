@@ -326,7 +326,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
             fheap_id_len;               /* Fractal heap ID */
     bt2_cparam.split_percent = H5G_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5G_NAME_BT2_MERGE_PERC;
-    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam)))
+    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -346,7 +346,7 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
                 fheap_id_len;           /* Fractal heap ID */
         bt2_cparam.split_percent = H5G_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5G_CORDER_BT2_MERGE_PERC;
-        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam)))
+        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -438,7 +438,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link into fractal heap")
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo->name_bt2_addr)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo->name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the callback information for v2 B-tree record insertion */
@@ -460,7 +460,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
     if(linfo->index_corder) {
         /* Open the creation order index v2 B-tree */
         HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
-        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, linfo->corder_bt2_addr)))
+        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, linfo->corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Insert the record into the creation order index v2 B-tree */
@@ -557,7 +557,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo->name_bt2_addr)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo->name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Construct the user data for v2 B-tree callback */
@@ -733,7 +733,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Construct the user data for v2 B-tree callback */
@@ -1042,7 +1042,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Construct the user data for v2 B-tree iterator callback */
@@ -1244,7 +1244,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1326,7 +1326,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         H5G_bt2_ud_common_t bt2_udata;         /* Info for B-tree callbacks */
 
         /* Open the creation order index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(udata->f, udata->dxpl_id, udata->corder_bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(udata->f, udata->dxpl_id, udata->corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1440,7 +1440,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl_id, linfo->name_bt2_addr)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl_id, linfo->name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1577,7 +1577,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         } /* end else */
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->other_bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->other_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for 'other' index")
 
         /* Set the common information for the v2 B-tree remove operation */
@@ -1682,7 +1682,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Set up the user data for the v2 B-tree 'remove by index' callback */
@@ -1776,7 +1776,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         udata.replace_names = FALSE;
 
         /* Delete the name index, adjusting the ref. count on links removed */
-        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, H5G_dense_remove_bt2_cb, &udata) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, NULL, H5G_dense_remove_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index")
 
         /* Close the fractal heap */
@@ -1785,7 +1785,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     } /* end if */
     else {
         /* Delete the name index, without adjusting the ref. count on the links  */
-        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->name_bt2_addr, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index")
     } /* end else */
     linfo->name_bt2_addr = HADDR_UNDEF;
@@ -1794,7 +1794,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
     if(linfo->index_corder) {
         /* Delete the creation order index, without adjusting the ref. count on the links  */
         HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
-        if(H5B2_delete(f, dxpl_id, linfo->corder_bt2_addr, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, linfo->corder_bt2_addr, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
         linfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */

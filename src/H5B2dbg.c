@@ -91,6 +91,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     const H5B2_class_t *type)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header info */
+    void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned    u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -106,11 +107,20 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(type);
+    HDassert((type->crt_dbg_ctx && type->dst_dbg_ctx) ||
+        (NULL == type->crt_dbg_ctx && NULL == type->dst_dbg_ctx));
+
+    /* Check for debugging context callback available */
+    if(type->crt_dbg_ctx) {
+        /* Create debugging context */
+        if(NULL == (dbg_ctx = (type->crt_dbg_ctx)(f, dxpl_id, addr)))
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to create v2 B-tree debugging context")
+    } /* end if */
 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, dbg_ctx, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -162,6 +172,8 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     } /* end for */
 
 done:
+    if(dbg_ctx && (type->dst_dbg_ctx)(dbg_ctx) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to release v2 B-tree debugging context")
     if(hdr) {
         hdr->f = NULL;
         if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
@@ -191,6 +203,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_internal_t	*internal = NULL;   /* B-tree internal node */
+    void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value=SUCCEED;      /* Return value */
@@ -206,13 +219,22 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(type);
+    HDassert((type->crt_dbg_ctx && type->dst_dbg_ctx) ||
+        (NULL == type->crt_dbg_ctx && NULL == type->dst_dbg_ctx));
     HDassert(H5F_addr_defined(hdr_addr));
     HDassert(nrec > 0);
+
+    /* Check for debugging context callback available */
+    if(type->crt_dbg_ctx) {
+        /* Create debugging context */
+        if(NULL == (dbg_ctx = (type->crt_dbg_ctx)(f, dxpl_id, addr)))
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to create v2 B-tree debugging context")
+    } /* end if */
 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, dbg_ctx, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -276,6 +298,8 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
               internal->node_ptrs[u].addr);
 
 done:
+    if(dbg_ctx && (type->dst_dbg_ctx)(dbg_ctx) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to release v2 B-tree debugging context")
     if(hdr) {
         hdr->f = NULL;
         if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
@@ -307,6 +331,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_leaf_t	*leaf = NULL;           /* B-tree leaf node */
+    void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -322,13 +347,22 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(type);
+    HDassert((type->crt_dbg_ctx && type->dst_dbg_ctx) ||
+        (NULL == type->crt_dbg_ctx && NULL == type->dst_dbg_ctx));
     HDassert(H5F_addr_defined(hdr_addr));
     HDassert(nrec > 0);
+
+    /* Check for debugging context callback available */
+    if(type->crt_dbg_ctx) {
+        /* Create debugging context */
+        if(NULL == (dbg_ctx = (type->crt_dbg_ctx)(f, dxpl_id, addr)))
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to create v2 B-tree debugging context")
+    } /* end if */
 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, dbg_ctx, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -373,6 +407,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     } /* end for */
 
 done:
+    if(dbg_ctx && (type->dst_dbg_ctx)(dbg_ctx) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to release v2 B-tree debugging context")
     if(hdr) {
         hdr->f = NULL;
         if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)

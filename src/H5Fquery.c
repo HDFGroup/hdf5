@@ -103,6 +103,58 @@ H5F_get_intent(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_open_name
+ *
+ * Purpose:	Retrieve the name used to open a file.
+ *
+ * Return:	Success:	The name of the file.
+ * 		Failure:	? (should not happen)
+ *
+ * Programmer:	Neil Fortner
+ *		December 15 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_get_open_name(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_open_name)
+
+    HDassert(f);
+    HDassert(f->open_name);
+
+    FUNC_LEAVE_NOAPI(f->open_name)
+} /* end H5F_get_open_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_actual_name
+ *
+ * Purpose:	Retrieve the actual name of a file, after resolving symlinks, etc.
+ *
+ * Return:	Success:	The name of the file.
+ * 		Failure:	? (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		November 25 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_get_actual_name(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_actual_name)
+
+    HDassert(f);
+    HDassert(f->actual_name);
+
+    FUNC_LEAVE_NOAPI(f->actual_name)
+} /* end H5F_get_actual_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_extpath
  *
  * Purpose:	Retrieve the file's 'extpath' flags
@@ -122,35 +174,10 @@ H5F_get_extpath(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_extpath)
 
     HDassert(f);
+    HDassert(f->extpath);
 
     FUNC_LEAVE_NOAPI(f->extpath)
 } /* end H5F_get_extpath() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_name
- *
- * Purpose:	Retrieve the name of a file.
- *
- * Return:	Success:	The name of the file.
- *
- * 		Failure:	? (should not happen)
- *
- * Programmer:	Neil Fortner
- *		December 15 2008
- *
- *-------------------------------------------------------------------------
- */
-char *
-H5F_get_name(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_name)
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->name)
-} /* end H5F_get_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -687,6 +714,71 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_fileno() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_eoa
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'eoa' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		June 1, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
+{
+    haddr_t	ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_get_eoa, HADDR_UNDEF)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_vfd_handle
+ *
+ * Purpose:     Returns a pointer to the file handle of the low-level file
+ *              driver.  This is the private function for H5Fget_vfd_handle.
+ *
+ * Return:      Success:        Non-negative.
+ *              Failure:        negative.
+ *
+ * Programmer:  Raymond Lu
+ *              Sep. 16, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_get_vfd_handle, FAIL)
+
+    /* Sanity check */
+    HDassert(file);
+    HDassert(file_handle);
+
+    /* Get the VFD handle */
+    if(H5FD_get_vfd_handle(file->shared->lf, fapl, file_handle) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_vfd_handle() */
 
 
 /*-------------------------------------------------------------------------

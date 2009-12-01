@@ -80,6 +80,8 @@ static herr_t H5FA__test_decode(const void *raw, void *elmt, size_t nelmts,
     void *ctx);
 static herr_t H5FA__test_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
+static void *H5FA__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id,
+    haddr_t obj_addr);
 
 
 /*********************/
@@ -97,8 +99,8 @@ const H5FA_class_t H5FA_CLS_TEST[1]={{
     H5FA__test_encode,          /* Element encoding callback */
     H5FA__test_decode,          /* Element decoding callback */
     H5FA__test_debug,           /* Element debugging callback */
-    NULL,			/* Create debugging context */
-    NULL 			/* Destroy debugging context */
+    H5FA__test_crt_dbg_context, /* Create debugging context */
+    H5FA__test_dst_context      /* Destroy debugging context */
 }};
 
 
@@ -224,10 +226,12 @@ END_FUNC(STATIC)  /* end H5FA__test_fill() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
+H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void UNUSED *_ctx))
 
     /* Local variables */
+#ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+#endif /* NDEBUG */
     const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
 
     /* Sanity checks */
@@ -267,10 +271,12 @@ END_FUNC(STATIC)  /* end H5FA__test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
+H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void UNUSED *_ctx))
 
     /* Local variables */
+#ifndef NDEBUG
     H5FA__test_ctx_t *ctx = (H5FA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+#endif /* NDEBUG */
     uint64_t *elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
@@ -327,6 +333,41 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
         (unsigned long long)*(const uint64_t *)elmt);
 
 END_FUNC(STATIC)  /* end H5FA__test_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__test_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 1, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+void *, NULL, NULL,
+H5FA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED obj_addr))
+
+    /* Local variables */
+    H5FA__test_ctx_t *ctx;              /* Context for callbacks */
+
+    /* Allocate new context structure */
+    if(NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
+	H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
+
+    /* Initialize the context */
+    ctx->bogus = H5FA__TEST_BOGUS_VAL;
+
+    /* Set return value */
+    ret_value = ctx;
+
+CATCH
+
+END_FUNC(STATIC)  /* end H5FA__test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------

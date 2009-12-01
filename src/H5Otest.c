@@ -194,7 +194,7 @@ H5O_is_attr_empty_test(hid_t oid)
                 HDassert(nattrs == 0);
 
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr)))
+                if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in name index */
@@ -281,7 +281,7 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
             HDassert(obj_nattrs == 0);
 
             /* Open the name index v2 B-tree */
-            if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr)))
+            if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
             /* Retrieve # of records in name index */
@@ -363,7 +363,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_DONE(FAIL)
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr)))
+    if(NULL == (bt2_name = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in name index */
@@ -373,7 +373,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     /* Check if there is a creation order index */
     if(H5F_addr_defined(ainfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        if(NULL == (bt2_corder = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.corder_bt2_addr)))
+        if(NULL == (bt2_corder = H5B2_open(oloc->file, H5AC_ind_dxpl_id, ainfo.corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Retrieve # of records in creation order index */

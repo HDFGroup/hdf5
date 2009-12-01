@@ -46,6 +46,11 @@
 /* Local Typedefs */
 /******************/
 
+/* v2 B-tree client callback context */
+typedef struct H5B2_test_ctx_t {
+    uint8_t     sizeof_size;    /* Size of file sizes */
+} H5B2_test_ctx_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -56,14 +61,15 @@
 /* Local Prototypes */
 /********************/
 
+static void *H5B2_test_crt_context(void *udata);
+static herr_t H5B2_test_dst_context(void *ctx);
 static herr_t H5B2_test_store(void *nrecord, const void *udata);
 static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
-static herr_t H5B2_test_encode(const H5F_t *f, uint8_t *raw,
-    const void *nrecord);
-static herr_t H5B2_test_decode(const H5F_t *f, const uint8_t *raw,
-    void *nrecord);
+static herr_t H5B2_test_encode(uint8_t *raw, const void *nrecord, void *ctx);
+static herr_t H5B2_test_decode(const uint8_t *raw, void *nrecord, void *ctx);
 static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *_udata);
+static void *H5B2_test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
 /*********************/
@@ -74,11 +80,15 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
     "H5B2_TEST_ID",             /* Name of B-tree class */
     sizeof(hsize_t),            /* Size of native record */
+    H5B2_test_crt_context,      /* Create client callback context */
+    H5B2_test_dst_context,      /* Destroy client callback context */
     H5B2_test_store,            /* Record storage callback */
     H5B2_test_compare,          /* Record comparison callback */
     H5B2_test_encode,           /* Record encoding callback */
     H5B2_test_decode,           /* Record decoding callback */
-    H5B2_test_debug             /* Record debugging callback */
+    H5B2_test_debug,            /* Record debugging callback */
+    H5B2_test_crt_dbg_context,  /* Create debugging context */
+    H5B2_test_dst_context       /* Destroy debugging context */
 }};
 
 
@@ -92,6 +102,79 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
 /*******************/
 
 
+/* Declare a free list to manage the H5B2_test_ctx_t struct */
+H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_test_crt_context
+ *
+ * Purpose:	Create client callback context
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 26, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5B2_test_crt_context(void *_f)
+{
+    H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
+    H5B2_test_ctx_t *ctx;       /* Callback context structure */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_test_crt_context)
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Allocate callback context */
+    if(NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context")
+
+    /* Determine the size of lengths in the file */
+    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
+
+    /* Set return value */
+    ret_value = ctx;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_test_crt_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_test_dst_context
+ *
+ * Purpose:	Destroy client callback context
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 26, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_test_dst_context(void *_ctx)
+{
+    H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_dst_context)
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Release callback context */
+    ctx = H5FL_FREE(H5B2_test_ctx_t, ctx);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_test_dst_context() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B2_test_store
@@ -99,7 +182,6 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
  * Purpose:	Store native information into record for B-tree
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -147,7 +229,6 @@ H5B2_test_compare(const void *rec1, const void *rec2)
  * Purpose:	Encode native information into raw form for storing on disk
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -156,11 +237,16 @@ H5B2_test_compare(const void *rec1, const void *rec2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
+H5B2_test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
 {
+    H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_encode)
 
-    H5F_ENCODE_LENGTH(f, raw, *(const hsize_t *)nrecord);
+    /* Sanity check */
+    HDassert(ctx);
+
+    H5F_ENCODE_LENGTH_LEN(raw, *(const hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_encode() */
@@ -172,7 +258,6 @@ H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
  * Purpose:	Decode raw disk form of record into native form
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -181,11 +266,16 @@ H5B2_test_encode(const H5F_t *f, uint8_t *raw, const void *nrecord)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
+H5B2_test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 {
+    H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_test_decode)
 
-    H5F_DECODE_LENGTH(f, raw, *(hsize_t *)nrecord);
+    /* Sanity check */
+    HDassert(ctx);
+
+    H5F_DECODE_LENGTH_LEN(raw, *(hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_decode() */
@@ -197,7 +287,6 @@ H5B2_test_decode(const H5F_t *f, const uint8_t *raw, void *nrecord)
  * Purpose:	Debug native form of record
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -219,6 +308,46 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_test_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 1, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5B2_test_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
+{
+    H5B2_test_ctx_t *ctx;       /* Callback context structure */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_test_crt_dbg_context)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Allocate callback context */
+    if(NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context")
+
+    /* Determine the size of addresses & lengths in the file */
+    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
+
+    /* Set return value */
+    ret_value = ctx;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------

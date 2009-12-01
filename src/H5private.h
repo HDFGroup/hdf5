@@ -730,11 +730,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
  * xxx64 versions if available.
  */
-#if !defined(HDfstat) || !defined(HDstat)
+#if !defined(HDfstat) || !defined(HDstat) || !defined(HDlstat)
     #if H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat64(F,B)
         #endif /* HDfstat */
+        #ifndef HDlstat
+            #define HDlstat(S,B)  	lstat64(S,B)
+        #endif /* HDlstat */
         #ifndef HDstat
             #define HDstat(S,B)  	stat64(S,B)
         #endif /* HDstat */
@@ -745,6 +748,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat(F,B)
         #endif /* HDfstat */
+        #ifndef HDlstat
+            #define HDlstat(S,B)  	lstat(S,B)
+        #endif /* HDlstat */
         #ifndef HDstat
             #define HDstat(S,B)  	stat(S,B)
         #endif /* HDstat */
@@ -1027,6 +1033,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDrealloc
     #define HDrealloc(M,Z)		realloc(M,Z)
 #endif /* HDrealloc */
+#ifndef HDrealpath
+    #define HDrealpath(F1,F2)		realpath(F1,F2)
+#endif /* HDrealloc */
 #ifdef H5_VMS
     #ifdef __cplusplus
         extern "C" {
@@ -1080,9 +1089,6 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDsetvbuf
     #define HDsetvbuf(F,S,M,Z)	setvbuf(F,S,M,Z)
 #endif /* HDsetvbuf */
-#ifndef HDsigaction
-    #define HDsigaction(N,A)	sigaction(N,A)
-#endif /* HDsigaction */
 #ifndef HDsigaddset
     #define HDsigaddset(S,N)	sigaddset(S,N)
 #endif /* HDsigaddset */
@@ -1224,6 +1230,11 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #ifndef HDstrxfrm
     #define HDstrxfrm(X,Y,Z)	strxfrm(X,Y,Z)
 #endif /* HDstrxfrm */
+#ifdef H5_HAVE_SYMLINK
+    #ifndef HDsymlink
+        #define HDsymlink(F1,F2)	symlink(F1,F2)
+    #endif /* HDsymlink */
+#endif /* H5_HAVE_SYMLINK */
 #ifndef HDsysconf
     #define HDsysconf(N)		sysconf(N)
 #endif /* HDsysconf */
@@ -1478,7 +1489,6 @@ extern char *strdup(const char *s);
 #endif
 
 #define 	COLON_SEPC	':'
-H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 
 /*
@@ -2284,6 +2294,9 @@ H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_lookup3(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_hash_string(const char *str);
+
+/* Functions for building paths, etc. */
+H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
