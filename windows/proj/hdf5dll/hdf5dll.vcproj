@@ -1138,6 +1138,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5SMmessage.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Smpio.c"
 				>
 			</File>
