@@ -462,8 +462,17 @@ hsize_t diff_datasetid( hid_t did1,
                 assert(sm_nbytes > 0);
             }
             
+	    /* malloc return code should be verified.
+             * If fail, need to handle the error.
+             * This else branch should be recoded as a separate function.
+             * Note that there are many "goto error" within this branch
+             * that fails to address freeing other objects created here.
+	     * E.g., sm_space.
+	     */
             sm_buf1 = malloc((size_t)sm_nbytes);
+	    assert(sm_buf1);
             sm_buf2 = malloc((size_t)sm_nbytes);
+	    assert(sm_buf2);
             
             sm_nelmts = sm_nbytes / p_type_nbytes;
             sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
@@ -537,18 +546,11 @@ hsize_t diff_datasetid( hid_t did1,
             
             H5Sclose(sm_space);
             /* free */
-            if (sm_buf1!=NULL)
-            {
-                free(sm_buf1);
-                sm_buf1=NULL;
-            }
-            if (sm_buf2!=NULL)
-            {
-                free(sm_buf2);
-                sm_buf2=NULL;
-            }
-            
- } /* hyperslab read */
+	    HDfree(sm_buf1);
+	    sm_buf1 = NULL;
+	    HDfree(sm_buf2);
+	    sm_buf2 = NULL;
+     } /* hyperslab read */
  }/*can_compare*/
  
   /*-------------------------------------------------------------------------

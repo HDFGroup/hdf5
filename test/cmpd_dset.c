@@ -1998,9 +1998,10 @@ error:
 static int
 test_ooo_order(char *filename)
 {
-    hid_t       file;               /* File ID */
-    hid_t       dtype, dtype_tmp;   /* Datatype IDs */
-    H5T_t       *dt;                /* Datatype pointer */
+    hid_t       file = -1;          /* File ID */
+    hid_t       dtype = -1;         /* Datatype IDs */
+    hid_t       dtype_tmp = -1;     /* Temp Datatype ID */
+    H5T_t       *dt = NULL;         /* Datatype pointer */
 
     TESTING("that compound member insertion order is preserved")
 

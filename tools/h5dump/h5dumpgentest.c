@@ -5802,12 +5802,12 @@ gent_binary(void)
 static void
 gent_bigdims(void)
 {
-    hid_t   fid;
-    hid_t   did;
-    hid_t   f_sid;
-    hid_t   m_sid;
-    hid_t   tid;
-    hid_t   dcpl;
+    hid_t   fid = -1;
+    hid_t   did = -1;
+    hid_t   f_sid = -1;
+    hid_t   m_sid = -1;
+    hid_t   tid = -1;
+    hid_t   dcpl = -1;
     hsize_t dims[1]={DIM_4GB};                 /* dataset dimensions */
     hsize_t chunk_dims[1]={1024};              /* chunk dimensions */
     hsize_t hs_start[1];
@@ -5865,14 +5865,21 @@ gent_bigdims(void)
     buf=NULL;
 
     /* close */
+    if(H5Tclose(tid) < 0)
+        goto out;
+    tid = -1;
     if(H5Sclose(f_sid) < 0)
         goto out;
+    f_sid = -1;
     if(H5Sclose(m_sid) < 0)
         goto out;
+    m_sid = -1;
     if(H5Pclose(dcpl) < 0)
         goto out;
+    dcpl = -1;
     if(H5Dclose(did) < 0)
         goto out;
+    did = -1;
 
     ret = H5Fclose(fid);
     assert(ret >= 0);
@@ -5885,11 +5892,11 @@ out:
         H5Pclose(dcpl);
         H5Sclose(f_sid);
         H5Sclose(m_sid);
+        H5Tclose(tid);
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
     return;
-
 }
 
 
@@ -5936,10 +5943,10 @@ gent_hyperslab(void)
 static void
 gent_group_creation_order(void)
 {
-    hid_t    fid;      /* file ID */
-    hid_t    gid;      /* group ID */
-    hid_t    gcpl_id;  /* group creation property list ID */
-    hid_t    fcpl_id;  /* file creation property list ID (to set root group order) */
+    hid_t    fid = -1;      /* file ID */
+    hid_t    gid = -1;      /* group ID */
+    hid_t    gcpl_id = -1;  /* group creation property list ID */
+    hid_t    fcpl_id = -1;  /* file creation property list ID (to set root group order) */
 
     if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0)
         goto out;
@@ -5965,37 +5972,45 @@ gent_group_creation_order(void)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
     if((gid = H5Gcreate2(fid, "2/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "2/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "2/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
     if((gid = H5Gcreate2(fid, "2/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "2/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
      if((gid = H5Gcreate2(fid, "2/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "2/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
 
 /*-------------------------------------------------------------------------
@@ -6010,45 +6025,56 @@ gent_group_creation_order(void)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
     if((gid = H5Gcreate2(fid, "1/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "1/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "1/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
     if((gid = H5Gcreate2(fid, "1/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "1/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
      if((gid = H5Gcreate2(fid, "1/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
     if((gid = H5Gcreate2(fid, "1/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
 
     if(H5Pclose(gcpl_id) < 0)
         goto out;
+    gcpl_id = -1;
     if(H5Pclose(fcpl_id) < 0)
         goto out;
+    fcpl_id = -1;
     if(H5Fclose(fid) < 0)
         goto out;
+    fid = -1;
 
     return;
 
@@ -6076,15 +6102,15 @@ out:
 static void
 gent_attr_creation_order(void)
 {
-    hid_t    fid;      /* file id */
-    hid_t    gid;      /* group id */
-    hid_t    did;      /* dataset id */
-    hid_t    sid;      /* space id */
-    hid_t    aid;      /* attribute id */
-    hid_t    tid;      /* datatype id */
-    hid_t    gcpl_id;  /* group creation property list ID */
-    hid_t    dcpl_id;  /* dataset creation property list ID */
-    hid_t    tcpl_id;  /* datatype creation property list ID */
+    hid_t    fid = -1;      /* file id */
+    hid_t    gid = -1;      /* group id */
+    hid_t    did = -1;      /* dataset id */
+    hid_t    sid = -1;      /* space id */
+    hid_t    aid = -1;      /* attribute id */
+    hid_t    tid = -1;      /* datatype id */
+    hid_t    gcpl_id = -1;  /* group creation property list ID */
+    hid_t    dcpl_id = -1;  /* dataset creation property list ID */
+    hid_t    tcpl_id = -1;  /* datatype creation property list ID */
     int      i;
     const char *attr_name[3] = {"c", "b", "a" };
 
@@ -6137,10 +6163,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
+        aid = -1;
     } /* end for */
 
     if(H5Dclose(did) < 0)
         goto out;
+    did = -1;
 
 
 /*-------------------------------------------------------------------------
@@ -6161,10 +6189,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
+        aid = -1;
     } /* end for */
 
     if(H5Dclose(did) < 0)
         goto out;
+    did = -1;
 
 
 
@@ -6185,11 +6215,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-
+        aid = -1;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
+    gid = -1;
 
 /*-------------------------------------------------------------------------
  * create a group without creation order tracked for attributes and atributes in it
@@ -6208,12 +6239,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-
+        aid = -1;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
-
+    gid = -1;
 
 /*-------------------------------------------------------------------------
  * create a named datatype with creation order tracked for attributes and atributes in it
@@ -6235,11 +6266,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-
+        aid = -1;
     } /* end for */
 
     if(H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
 /*-------------------------------------------------------------------------
  * create a named datatype without creation order tracked for attributes and atributes in it
@@ -6261,11 +6293,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-
+        aid = -1;
     } /* end for */
 
     if(H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
 /*-------------------------------------------------------------------------
  * add some attributes to the root group
@@ -6283,12 +6316,12 @@ gent_attr_creation_order(void)
         /* close attribute */
         if(H5Aclose(aid) < 0)
             goto out;
-
+        aid = -1;
     } /* end for */
 
     if(H5Gclose(gid) < 0)
         goto out;
-
+    gid = -1;
 
 /*-------------------------------------------------------------------------
  * close
@@ -6296,15 +6329,19 @@ gent_attr_creation_order(void)
  */
     if(H5Sclose(sid) < 0)
         goto out;
-
+    sid = -1;
     if(H5Pclose(dcpl_id) < 0)
         goto out;
+    dcpl_id = -1;
     if(H5Pclose(gcpl_id) < 0)
         goto out;
+    gcpl_id = -1;
     if(H5Pclose(tcpl_id) < 0)
         goto out;
+    tcpl_id = -1;
     if(H5Fclose(fid) < 0)
         goto out;
+    fid = -1;
 
 
 

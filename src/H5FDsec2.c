@@ -425,9 +425,11 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = (H5FD_t*)file;
 
 done:
-    if(ret_value==NULL) {
-        if(fd>=0)
+    if(NULL == ret_value) {
+        if(fd >= 0)
             HDclose(fd);
+        if(file)
+            file = H5FL_FREE(H5FD_sec2_t, file);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -464,7 +466,7 @@ H5FD_sec2_close(H5FD_t *_file)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     /* Release the file info */
-    (void)H5FL_FREE(H5FD_sec2_t, file);
+    file = H5FL_FREE(H5FD_sec2_t, file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

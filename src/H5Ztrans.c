@@ -335,28 +335,28 @@ H5Z_unget_token(H5Z_token *current)
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_get_token
+ *
  * Purpose:     Determine what the next valid H5Z_token is in the expression
  *              string. The current position within the H5Z_token string is
  *              kept internal to the H5Z_token and handled by this and the
  *              unget_H5Z_token function.
+ *
  * Return:      Succeess:       The passed in H5Z_token with a valid tok_type
  *                              field.
  *              Failure:        The passed in H5Z_token but with the tok_type
  *                              field set to ERROR.
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
- *               Leon Arber:  Added FUNC_ENTER / FUNC_LEAVE pairs
+ *
  *-------------------------------------------------------------------------
  */
 static H5Z_token *
 H5Z_get_token(H5Z_token *current)
 {
-
-    void*         ret_value=current;
+    void *ret_value = current;
 
     FUNC_ENTER_NOAPI(H5Z_get_token, NULL)
-
 
     /* check args */
     assert(current);
@@ -463,11 +463,11 @@ H5Z_get_token(H5Z_token *current)
     if (current->tok_begin[0] == '\0')
         current->tok_type = H5Z_XFORM_END;
 
-    HGOTO_DONE(current);
+    /* Set return value */
+    ret_value = (void *)current;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 }
 
 
@@ -498,17 +498,17 @@ H5Z_xform_destroy_parse_tree(H5Z_node *tree)
     FUNC_LEAVE_NOAPI_VOID
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_parse
+ *
  * Purpose:     Entry function for parsing the expression string.
+ *
  * Return:      Success:    Valid H5Z_node ptr to an expression tree.
  *              NULLure:    NULL
+ *
  * Programmer:  Bill Wendling
  *              26. August 2003
- * Modifications:
- *              Leon Arber:  Added FUNC_ENTER / FUNC_LEAVE pairs
  *
  *-------------------------------------------------------------------------
  */
@@ -518,11 +518,10 @@ H5Z_xform_parse(const char *expression, H5Z_datval_ptrs* dat_val_pointers)
     H5Z_token tok;
     void* ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_parse)
+    FUNC_ENTER_NOAPI(H5Z_xform_parse, NULL)
 
-    if (!expression)
-        HGOTO_DONE(NULL)
-
+    if(!expression)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "No expression provided?")
 
     /* Set up the initial H5Z_token for parsing */
     tok.tok_expr = tok.tok_begin = tok.tok_end = expression;
@@ -573,7 +572,7 @@ H5Z_parse_expression(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
                 if (!new_node) {
                     H5Z_xform_destroy_parse_tree(expr);
-                    HGOTO_DONE(expr)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
                 }
 
                 new_node->lchild = expr;
@@ -592,7 +591,7 @@ H5Z_parse_expression(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
                 if (!new_node) {
                     H5Z_xform_destroy_parse_tree(expr);
-                    HGOTO_DONE(expr)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
                 }
 
                 new_node->lchild = expr;
@@ -643,7 +642,7 @@ static H5Z_node *
 H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node *term = NULL;
-    void*         ret_value;
+    H5Z_node *ret_value;
 
     FUNC_ENTER_NOAPI(H5Z_parse_term, NULL);
     term = H5Z_parse_factor(current, dat_val_pointers);
@@ -659,7 +658,7 @@ H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
                 if (!new_node) {
                     H5Z_xform_destroy_parse_tree(term);
-                    HGOTO_DONE(term)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
                 }
 
                 new_node->lchild = term;
@@ -678,7 +677,7 @@ H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
                 if (!new_node) {
                     H5Z_xform_destroy_parse_tree(term);
-                    HGOTO_DONE(term)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
                 }
 
                 new_node->lchild = term;
@@ -744,7 +743,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 	    factor = H5Z_new_node(H5Z_XFORM_INTEGER);
 
 	    if (!factor)
-		HGOTO_DONE(factor)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
             sscanf(current->tok_begin, "%ld", &factor->value.int_val);
 	    break;
 
@@ -752,7 +751,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 	    factor = H5Z_new_node(H5Z_XFORM_FLOAT);
 
 	    if (!factor)
-		HGOTO_DONE(factor)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
             sscanf(current->tok_begin, "%lf", &factor->value.float_val);
 	    break;
 
@@ -760,7 +759,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 	    factor = H5Z_new_node(H5Z_XFORM_SYMBOL);
 
 	    if (!factor)
-		HGOTO_DONE(factor)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
 
             factor->value.dat_val = &(dat_val_pointers->ptr_dat_val[dat_val_pointers->num_ptrs]);
 	    dat_val_pointers->num_ptrs++;
@@ -770,7 +769,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 	    factor = H5Z_parse_expression(current, dat_val_pointers);
 
 	    if (!factor)
-		HGOTO_DONE(factor)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
 
             current = H5Z_get_token(current);
 

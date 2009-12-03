@@ -570,8 +570,10 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 
    // if the actual length of the comment is longer than bufsize and bufsize
    // was the default value, i.e., not given by the user, then call
-   // H5Oget_comment_by_name again with the correct value
-   if ((size_t)ret_value > bufsize && bufsize == 256)
+   // H5Oget_comment_by_name again with the correct value.
+   // If the call to H5Oget_comment_by_name returned an error, skip this block
+   // and throw an exception below.
+   if (ret_value >= 0 && (size_t)ret_value > bufsize && bufsize == 256)
    {
 	size_t new_size = ret_value;
 	delete []comment_C;
