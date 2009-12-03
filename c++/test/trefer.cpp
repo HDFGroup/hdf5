@@ -217,6 +217,12 @@ static void test_reference_obj(void)
 	H5std_string read_comment1 = group.getComment(".", 10);
 	verify_val(read_comment1, write_comment, "Group::getComment", __LINE__, __FILE__);
 
+        // Test that getComment handles failures gracefully
+        try {
+            H5std_string read_comment_tmp = group.getComment(NULL);
+        }
+        catch (Exception E) {} // We expect this to fail
+
 	// Close group
 	group.close();
 

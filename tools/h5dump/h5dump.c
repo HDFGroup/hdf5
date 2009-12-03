@@ -5734,7 +5734,6 @@ xml_dump_group(hid_t gid, const char *name)
     char                    type_name[1024], *tmp = NULL;
     char                   *par = NULL;
     int                     isRoot = 0;
-    char                   *ptrstr;
     char                   *t_objname;
     char                   *par_name;
     unsigned                crt_order_flags;
@@ -5787,6 +5786,7 @@ xml_dump_group(hid_t gid, const char *name)
     indent += COL;
 
     H5Oget_info(gid, &oinfo);
+
     if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
 
@@ -5804,6 +5804,8 @@ xml_dump_group(hid_t gid, const char *name)
             char *parentxid = malloc(100);
 
             if(found_obj->displayed) {
+                char *ptrstr = malloc(100);
+
                 /* already seen: enter a groupptr */
                 if(isRoot) {
                     /* probably can't happen! */
@@ -5824,7 +5826,6 @@ xml_dump_group(hid_t gid, const char *name)
                 }
 
                 indentation(indent + COL);
-                ptrstr = malloc(100);
                 t_objname = xml_escape_the_name(found_obj->objname);/* point to the NDT by name */
                 par_name = xml_escape_the_name(par);
                 xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
@@ -5835,6 +5836,7 @@ xml_dump_group(hid_t gid, const char *name)
                             ptrstr, t_objname, parentxid, par_name);
                 free(t_objname);
                 free(par_name);
+                free(ptrstr);
             } else {
 
                 /* first time this group has been seen -- describe it  */
