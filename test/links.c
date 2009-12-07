@@ -6434,10 +6434,11 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         TESTING("external links w/symlink files")
 
 #ifdef H5_HAVE_SYMLINK
-    /* Skip test when using VFDs that have their own 'alloc' callback, which
-     *  don't push mis-aligned space fragments on the file free space list
+    /* Skip test when using VFDs that can't provide a POSIX compatible file
+     *  descriptor.
      */
     have_posix_compat_vfd = (hbool_t)(!HDstrcmp(env_h5_drvr, "sec2")
+            || !HDstrcmp(env_h5_drvr, "core")
             || !HDstrcmp(env_h5_drvr, "nomatch"));
     if(have_posix_compat_vfd) {
         /* set up name for main file: "extlinks21A" */

@@ -101,18 +101,23 @@
 #define H5F_ACS_FAMILY_OFFSET_DEF               0
 /* Definition for new member size of family driver. It's private
  * property only used by h5repart */
-#define H5F_ACS_FAMILY_NEWSIZE_SIZE            sizeof(hsize_t)
-#define H5F_ACS_FAMILY_NEWSIZE_DEF             0
+#define H5F_ACS_FAMILY_NEWSIZE_SIZE             sizeof(hsize_t)
+#define H5F_ACS_FAMILY_NEWSIZE_DEF              0
 /* Definition for whether to convert family to sec2 driver. It's private
  * property only used by h5repart */
-#define H5F_ACS_FAMILY_TO_SEC2_SIZE            sizeof(hbool_t)
-#define H5F_ACS_FAMILY_TO_SEC2_DEF             FALSE
+#define H5F_ACS_FAMILY_TO_SEC2_SIZE             sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SEC2_DEF              FALSE
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
 /* Definition for 'use latest format version' flag */
 #define H5F_ACS_LATEST_FORMAT_SIZE              sizeof(hbool_t)
 #define H5F_ACS_LATEST_FORMAT_DEF               FALSE
+/* Definition for whether to query the file descriptor from the core VFD
+ * instead of the memory address.  (Private to library)
+ */
+#define H5F_ACS_WANT_POSIX_FD_SIZE              sizeof(hbool_t)
+#define H5F_ACS_WANT_POSIX_FD_DEF               FALSE
 
 
 /******************/
@@ -204,6 +209,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     hbool_t family_to_sec2 = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
     H5FD_mem_t mem_type = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
     hbool_t latest_format = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
+    hbool_t want_posix_fd = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_facc_reg_prop)
@@ -278,6 +284,11 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the 'use the latest version of the format' flag */
     if(H5P_register(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &latest_format, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the private property of whether to retrieve the file descriptor from the core VFD */
+    /* (used internally to the library only) */
+    if(H5P_register(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &want_posix_fd, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
