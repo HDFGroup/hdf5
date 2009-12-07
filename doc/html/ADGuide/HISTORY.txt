@@ -4,6 +4,7 @@ This file contains history of the HDF5 libraries releases
 
 CONTENTS
 
+24.     Release Information for hdf5-1.6.10
 23.     Release Information for hdf5-1.6.9
 22.     Release Information for hdf5-1.6.8
 21.     Release Information for hdf5-1.6.7
@@ -32,7 +33,400 @@ CONTENTS
 [Search on the string '%%%%' for per-release section breaks.]
 
 
-%%%%1.6.9%%%%   Release Information for hdf5-1.6.8 (1/May/2009)
+%%%%1.6.10%%%%   Release Information for hdf5-1.6.10 (9/Nove/2009)
+
+
+HDF5 version 1.6.10 released on Mon Nov  9 11:00:32 CST 2009
+================================================================================
+
+INTRODUCTION
+============
+This document describes the differences between HDF5-1.6.10 and
+HDF5-1.6.9.  
+It contains information on the platforms tested and known problems in
+HDF5-1.6.9. For more details, check the HISTORY.txt file in 
+the HDF5 source.
+
+HDF5 documentation can be found in the distributed release source code
+in the subdirectory doc/html/ or on the THG (The HDF Group) FTP server: 
+
+     ftp://ftp.hdfgroup.org/HDF5/docs/
+
+Documentation for the current release in the HDF5 Release 1.6.x series is 
+also on the HDF web site:
+
+     http://hdfgroup.org/HDF5/doc1.6/
+
+For more information, see the HDF5 home page:
+
+     http://hdfgroup.org/products/hdf5/
+
+If you have any questions or comments, please see the HDF Support page
+for a list of available resources:
+
+     http://hdfgroup.org/services/support.html
+
+
+CONTENTS
+========
+- New Features
+- Support for New Platforms, Languages and Compilers
+- Bug Fixes since HDF5-1.6.9
+- Documentation
+- Platforms Tested
+- Supported Configuration Features Summary
+- Known Problems
+
+
+New Features
+============
+    Configuration:
+    -------------------------
+    - Changed default Gnu fortran compiler from g95 to gfortran since
+      gfortran is more likely installed with gcc now. -AKC 2009/07/19- 
+
+    Library:
+    --------
+    - The embedded library information is displayed by H5check_version() if a
+      version mismatch is detected.  Also changed H5check_version() to
+      suppress the warning message totally if $HDF5_DISABLE_VERSION_CHECK is 2
+      or higher. (Old behavior treated 3 or higher the same as 1, that is
+      print a warning and allows the program to continue. (AKC - 2009/9/28)
+    - Embed the content of libhdf5.settings into the hdf5 executables so that
+      an "orphaned" executables can display (via the Unix strings command, for
+      example) the library settings used to build the executables.
+      If a user does not care for the extra library information insert
+      in the executables, he may turn it off by --disable-embedded-libinfo
+      during configure. (AKC - 2009/9/30)
+
+    Parallel Library:
+    -----------------
+    - None
+
+
+    Tools:
+    ------
+     - h5diff: h5diff treats two INFINITY values different. Fixed by checking 
+       (value==expect) before call ABS(...) at h5diff_array.c.  This will 
+       make that (INF==INF) is true (INF is treated as an number instead of 
+       NaN) (PC -- 2009/07/28)
+     - h5diff: add option "--use-system-epsilon" to print difference if 
+       (|a-b| > EPSILON).  Change default to use strict equality 
+       (PC -- 2009/09/12)
+
+
+    F90 API:
+    --------
+    - None
+
+    C++ API:
+    --------
+    - New member functions DataSet::getInMemDataSize() and
+      Attribute::getInMemDataSize() simplify getting the dataset's or
+      attribute's data size, in bytes, in memory.  (BMR - 2009/07/26)
+
+
+
+Support for New Platforms, Languages and Compilers
+==================================================
+    - PathScale compilers are recognized and can build the HDF5 library
+      properly. AKC - 2009/7/28 -
+
+
+Bug Fixes since HDF5-1.6.9 Release
+==================================
+    Library
+    -------
+    - Fixed a bug where writing and deleting many global heap objects (i.e.
+      variable length data) would render the file unreadable.  Previously
+      created files exhibiting this problem should now be readable.
+      NAF - 2009/10/27 - 1483
+    - Fixed incorrect return value for H5Pget_preserve. AKC - 2009/10/08 - 1628
+    - Fixed incorrect return value for H5Pget_filter_by_id in H5Ppublic.h.
+      NAF - 2009/09/25 - 1620
+    - Fixed a bug where properties weren't being compared with the registered
+      compare callback. NAF - 2009/09/25 - 1555
+    - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
+      filter that wasn't present. NAF - 2009/06/25 - 1250
+    - Fixed an issue with committed compound datatypes containing a vlen. Also
+      fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
+
+    Configuration
+    -------------
+    - The PathScale compiler (v3.2) was mistaken as gcc v4.2.0 but it fails to
+      recognize some gcc options. Fixed. (see bug 1301). AKC - 2009/7/28 -
+
+    Performance
+    -----------
+
+    Tools
+    -----
+    - None
+
+    F90 API
+    -------
+    - None
+
+    C++ API
+    -------
+    - The parameter 'size' in CommonFG::getLinkval now has default value
+      for user's convenience.  (BMR - 2009/10/23)
+    - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
+    - read/write methods of DataSet and Attribute classes were fixed
+      to handle string correctly.  (BMR - 2009/07/26)
+
+
+Documentation
+=============
+    HDF5 documentation can be found in the distributed release source 
+    code in the subdirectory doc/html/ (start with index.html) or on the 
+    THG (The HDF Group) FTP server: 
+
+         ftp://ftp.hdfgroup.org/HDF5/docs/
+
+    Online documentation for the current release in the HDF5 Release 1.6.x 
+    series can be found on the THG web site:
+
+         http://hdfgroup.org/HDF5/doc1.6/
+
+    A listing of interface changes from release to release can be found
+    in the document "HDF5 Software Changes from Release to Release":
+
+         http://hdfgroup.org/HDF5/doc1.6/ADGuide/Changes.html
+
+
+Platforms Tested
+================
+    AIX 5.3                       xlc 7.0.0.8
+                                  xlf 09.01.0000.0008
+                                  xlC 7.0.0.8
+                                  mpcc_r 7.0.0.8
+                                  mpxlf_r 09.01.0000.0008
+
+    FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
+    (duty)                        g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.3.5 20091004
+                                  g++ 4.3.5 20091004
+
+    FreeBSD 6.3-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
+    (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.4.2 20091006
+                                  g++ 4.4.2 20091006
+
+    Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2 20080704
+    #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
+    (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
+                                  (Red Hat 4.1.2-46)
+                                  PGI C, Fortran, C++ 8.0-5 32-bit
+                                  PGI C, Fortran, C++ 8.0-1 32-bit
+                                  Intel(R) C Compiler for 32-bit
+                                      applications, Versions 11.0, 11.1
+                                  Intel(R) C++ Compiler for 32-bit
+                                      applications, Version 11.0, 11.1
+                                  Intel(R) Fortran Compiler for 32-bit
+                                      applications, Version 11.0, 11.1
+                                  Absoft 32-bit Fortran 95 10.0.7
+                                  MPICH mpich2-1.0.8 compiled with
+                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+
+    Linux 2.6.16.46-0.12-debug #1 Intel(R) C++ Version 10.0.025
+        SMP ia64 GNU/Linux        Intel(R) Fortran Itanium(R) Version 10.0.025
+    (ucar hir1)                   
+
+    Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704
+    x86_64 GNU/Linux              Intel(R) C, C++, Fortran Compilers for 
+    (amani)                       applications running on Intel(R) 64,
+                                  Versions 11.1.
+                                  PGI C, Fortran, C++ Version 9.0-4
+                                         for 64-bit target on x86-64
+                                  MPICH mpich2-1.0.8 compiled with
+                                  gcc 4.1.2
+                                  GNU Fortran (GCC) 4.1.2 20080704
+                                  (Red Hat 4.1.2-46)
+
+    Linux 2.6.16.60-0.42.5 #1     Intel(R) C++ Version 10.1.017
+    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
+    (cobalt)                      SGI MPI 1.38
+
+    SunOS 5.10 32- and 64-bit     Sun C 5.9 SunOS_sparc 
+                                  Patch 124867-11 2009/04/30
+    (linew)                       Sun Fortran 95 8.3 SunOS_sparc
+                                  Patch 127000-11 2009/10/06
+                                  Sun C++ 5.9 SunOS_sparc
+                                  Patch 124863-16 2009/09/15
+
+    Intel Xeon Linux 2.6.18-      Intel(R) C++ Version 10.0.026 
+    92.1.10.el5_lustre.1.6.6smp-  Intel(R) Fortran Compiler Version 10.0.026
+    perfctr #2 SMP                Open MPI 1.2.2
+    (abe)                         MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
+                                  compiled with icc v10.0.026 and ifort 10.0.026
+
+    IA-64 Linux 2.4.21-309.tg1    gcc (GCC) 3.2.2
+    #1 SMP ia64                   Intel(R) C++ Version 8.1.037
+    (NCSA tg-login)               Intel(R) Fortran Compiler Version 8.1.033
+                                  mpich-gm-1.2.7p1..16-intel-8.1.037-r1
+
+    Windows XP                    Visual Studio .NET (with Intel Fortran 9.1)
+                                  Visual Studio 2005 (with Intel Fortran 9.1)
+                                  cygwin (gcc 3.4.4)
+
+    Windows Vista                 Visual studio 2005
+	
+    Mac OS X Intel 10.5.6         i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
+                                  g95 0.91
+
+
+Supported Configuration Features Summary
+========================================
+Key:   y   = Tested and supported
+       n   = Not supported or not tested in this release
+       C   = Cluster
+       W   = Workstation
+       ( ) = Footnote appears below second table
+
+Platform                              C        F90  F90      C++  zlib  SZIP
+                                      parallel      parallel
+Solaris2.10 32-bit                    n        y    n        y    y     y
+Solaris2.10 64-bit                    n        y    n        n    y     y
+WinXP CYGWIN                          n        n    n        y    y     y
+WinXP 2005                            n        y    n        y    y     y
+WinXP .Net                            n        y    n        y    y     y
+WinVista 2005                         n        n    n        y    y     y
+Mac OS X 10.5.6                       n        y    n        y    y     y
+AIX 5.3 32- and 64-bit                n        y    n        y    y     n
+FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
+RedHat EL5 2.6.18-164 i686 GNU    W   y        y    y        y    y     y
+RedHat EL5 2.6.18-164 i686 Intel  W   n        y    n        y    y     n
+RedHat EL5 2.6.18-164 i686 PGI    W   n        y    n        y    y     n
+RedHat EL5 2.6.16 x86_64 GNU (1)  W   y        y    n        y    y     y
+RedHat EL5 2.6.16 x86_64 Intel    W   n        y    n        y    y     n
+RedHat EL5 2.6.16 x86_64 PGI      W   n        y    n        y    y     n
+RedHat EL 4 2.6.18 Xeon Lustre    C   y        y    y        y    y     y
+SuSE Linux 2.4.21 ia64            C   y        y    y        y    y     y
+SuSe Linux 2.6.16 SGI Altix ia64  C   y        y    y        y    y     y
+
+
+Platform                              Shared        Thread-  
+                                      libraries(4)  safe     
+Solaris2.10 32- and 64-bit            y             y        
+WinXP CYGWIN                          y             n        
+WinXP 2005                            y             n        
+WinXP .Net                            y             n        
+WinVista 2005                         y             n        
+Mac OS X 10.5.6                       n             n        
+AIX 5.3 32- and 64-bit                n             n        
+FreeBSD 6.3 32- and 64-bit            y             n        
+RedHat EL5 2.6.18-164 i686 GNU    W   y             y        
+RedHat EL5 2.6.18-164 i686 Intel  W   y             n        
+RedHat EL5 2.6.18-164 i686 PGI    W   n             n        
+RedHat EL5 2.6.18-164 x86_64 GNU(1)W  y             y        
+RedHat EL5 2.6.18-164 x86_64 IntelW   y             n        
+RedHat EL5 2.6.18-164 x86_64 PGI  W   n             n        
+RedHat EL4 2.6.18 Xeon Lustre     C   y             n        
+SuSE Linux 2.4.21 ia64            C   y             n        
+SuSe Linux 2.6.16 SGI Altix ia64  C   n             n        
+
+Compiler versions for each platform are listed in the "Platforms Tested" 
+table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
+compilers used are the system compilers.
+
+Footnotes:
+(1) Fortran compiled with g95.
+
+
+Known Problems
+==============
+* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
+  it treats "exit(134) the same as if process 0 had received an abort signal.
+  This is fixed and will be available in the next release. AKC - 2009/11/3
+
+* Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
+  The error is due to insufficient memory requested. Request a large amount
+  of runtime memory by setting the following environment variable for more
+  memory.
+     LDR_CNTRL=MAXDATA=0x20000000@DSA
+  AKC - 2009/10/31
+
+* The PathScale MPI implementation, accessing a Panasas file system, would
+  cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file is not
+  existing. This is due to the MPI_File_open() call failing if the amode has
+  the MPI_MODE_EXCL bit set. (See bug 1468 for details.) AKC - 2009/8/11
+ 
+* Parallel tests failed with 15, 16, and 32 processes with data inconsistency
+  at testphdf5 / dataset_readAll. Parallel tests also failed with 64 processes
+  with collective abort of all ranks at testphdf5  / collective irregular simple
+  chunk write. CMC - 2009/04/28
+
+* h5repack may not handle committed datatypes correctly. NAF - 2009/4/20 - 1516/
+  1466
+
+* When in production mode, any presence of the '-g' flag within CFLAGS is
+  stripped out during configuration. This currently cannot be overridden. 
+  In order to build with '-g' specified within CFLAGS, use the
+  --disable-production configure flag in order to configure in development
+  mode. MAM - 2009/03/09.
+
+* A contiguous or chunked dataset created by a sequential version of HDF5 
+  might not be able to be modified with a parallel version of the library. 
+  Use the H5Pset_alloc_time function with H5D_ALLOC_TIME_EARLY to set up the 
+  dataset creation property list to avoid the problem.  EIP - 2005/09/09
+
+* A dataset created or rewritten with the v1.6.3 library or after can't 
+  be read with the v1.6.2 library or before when Fletcher32 EDC (a filter) is 
+  enabled.  There was a bug in the calculating code of the Fletcher32 
+  checksum in the library before v1.6.3.  The checksum value wasn't consistent 
+  between big-endian and little-endian systems.  This bug was fixed in 
+  Release 1.6.3.  However, after fixing the bug, the checksum value is no 
+  longer the same as before on little-endian system.  HDF5 library releases 
+  after 1.6.4 can still read datasets created or rewritten with an HDF5 
+  library of v1.6.2 or before.  SLU - 2005/7/8
+
+* test/big fails sometimes with the message "Possible overlap with another
+  region."  The test selects regions randomly, and this error occurs when
+  two regions overlap each other; it is a bug in the test and not in
+  HDF5.  Since the error is triggered by a random situation, it will
+  usually disappear if the test is re-run.
+
+* Newer SGI MIPSpro compilers (version 7.4.x) support C99 features but 
+  have a "guard" statement in stdint.h that will #error and skip the rest
+  of the header file if the C99 option is not used explicitly.  Hardsetting
+  $CC to c99 will resolve the problem. AKC - 2004/12/13
+
+* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
+  messages like "INFO: 0031-XXX ...".  This is from the command poe.
+  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
+  and run the tests again.
+
+  The tests may also fail with messages like "The socket name is already
+  in use".  HDF5 does not use sockets.  This is due to problems of the 
+  poe command trying to set up the debug socket.  Check whether there are 
+  many old /tmp/s.pedb.* files staying around.  These are sockets used by 
+  the poe command and left behind due to failed commands.  Ask your system 
+  administrator to clean them out.  Lastly, request IBM to provide a means 
+  to run poe without the debug socket.
+
+* The h5dump tests may fail to match the expected output on some platforms
+  (e.g. parallel jobs, Windows) where the error messages directed to
+  "stderr" do not appear in the "right order" with output from stdout.
+  This is not an error.
+
+* The --enable-static-exec configure flag fails to compile for Solaris
+  platforms. This is due to the fact that not all of the system
+  libraries on Solaris are available in a static format.
+
+  The --enable-static-exec configure flag also fails to correctly compile
+  on the IBM SP2 platform for the serial mode. The parallel mode works fine
+  with this option.
+
+  The --enable-static-exec configure flag also fails to correctly compile
+  on the HPUX 11.00.
+
+  It is suggested that you don't use this option on these platforms
+  during configuration.
+
+* Use the --disable-shared configure flag if building with an Absoft Fortran
+  compiler.
+%%%%1.6.9%%%%   Release Information for hdf5-1.6.9 (1/May/2009)
 
 HDF5 version 1.6.9 released on Fri May  1 15:26:44 CDT 2009
 ================================================================================
