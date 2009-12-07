@@ -328,19 +328,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5FD_t *
 H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    int	o_flags;
-    int		fd=(-1);
-    H5FD_sec2_t	*file=NULL;
+    H5FD_sec2_t	*file = NULL;   /* sec2 VFD info */
+    int	fd = (-1);              /* File descriptor */
+    int	o_flags;                /* Flags for open() call */
 #ifdef _WIN32
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t	sb;
-    H5FD_t	*ret_value;
+    H5FD_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_open, NULL)
 
