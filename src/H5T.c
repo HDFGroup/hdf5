@@ -1913,12 +1913,9 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     if(!(cls > H5T_NO_CLASS && cls < H5T_NCLASSES))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype class")
 
-    /* Set return value.  Consider VL string as a string for API, as a VL for
-     * internal use. */
-    if(H5T_IS_VL_STRING(dt->shared))
-        ret_value = (H5T_STRING == cls);
-    else
-        ret_value = H5T_detect_class(dt, cls, TRUE);
+    /* Set return value */
+    if((ret_value = H5T_detect_class(dt, cls, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5T_NO_CLASS, "can't get datatype class")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1948,7 +1945,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_detect_class (const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
+H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
 {
     unsigned	i;
     htri_t      ret_value=FALSE;        /* Return value */
@@ -1958,9 +1955,11 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
     assert(dt);
     assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
 
-    /* Consider VL string as a string for API, as a VL for internal use.  The same
-     * check is also in H5Tdetect_class.  Do it again to check members of nested 
-     * compound type and base type of array and VL type. */
+    /* Consider VL string as a string for API, as a VL for internal use. */
+    /* (note that this check must be performed before checking if the VL
+     *  string belongs to the H5T_VLEN class, which would otherwise return
+     *  true. -QAK)
+     */
     if(from_api && H5T_IS_VL_STRING(dt->shared))
         HGOTO_DONE(H5T_STRING == cls);
  
@@ -1973,11 +1972,6 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
         case H5T_COMPOUND:
             for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
                 htri_t nested_ret;      /* Return value from nested call */
-
-                /* Consider VL string as a string for API, as a VL for internal use.  
-                 * Do it again here to check members of compound type. */
-                if(from_api && H5T_IS_VL_STRING(dt->shared->u.compnd.memb[i].type->shared))
-                    HGOTO_DONE(H5T_STRING == cls);
 
                 /* Check if this field's type is the correct type */
                 if(dt->shared->u.compnd.memb[i].type->shared->type==cls)
