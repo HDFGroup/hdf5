@@ -412,7 +412,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
     /* If there's a VLEN source datatype, do type conversion information */
-    if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+    if(H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
         H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
         H5T_t *dt_dst;              /* Destination datatype */
         H5T_t *dt_mem;              /* Memory datatype */

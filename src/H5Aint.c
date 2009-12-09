@@ -944,7 +944,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Check if we need to convert data */
-        if(H5T_detect_class(attr_src->shared->dt, H5T_VLEN) > 0) {
+        if(H5T_detect_class(attr_src->shared->dt, H5T_VLEN, FALSE) > 0) {
             H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
             H5T_t *dt_mem;              /* Memory datatype */
             size_t src_dt_size;         /* Source datatype size */

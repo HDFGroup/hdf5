@@ -2996,7 +2996,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 noop_conv = TRUE;
 
             /* Check if we need a temporary buffer for this conversion */
-            parent_is_vlen = H5T_detect_class(dst->shared->parent, H5T_VLEN);
+            parent_is_vlen = H5T_detect_class(dst->shared->parent, H5T_VLEN, FALSE);
             if(tpath->cdata.need_bkg || parent_is_vlen) {
                 /* Set up initial background buffer */
                 tmp_buf_size = MAX(src_base_size,dst_base_size);

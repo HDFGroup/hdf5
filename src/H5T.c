@@ -1918,7 +1918,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     if(H5T_IS_VL_STRING(dt->shared))
         ret_value = (H5T_STRING == cls);
     else
-        ret_value = H5T_detect_class(dt, cls);
+        ret_value = H5T_detect_class(dt, cls, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1937,11 +1937,18 @@ done:
  *		Wednesday, November 29, 2000
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              4 December 2009
+ *              Added a flag as a parameter to indicate whether the caller is
+ *              H5Tdetect_class.  I also added the check for VL string type 
+ *              just like the public function.  Because we want to tell users
+ *              VL string is a string type but we treat it as a VL type 
+ *              internally, H5T_detect_class needs to know where the caller
+ *              is from.
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
+H5T_detect_class (const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
 {
     unsigned	i;
     htri_t      ret_value=FALSE;        /* Return value */
@@ -1951,6 +1958,12 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
     assert(dt);
     assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
 
+    /* Consider VL string as a string for API, as a VL for internal use.  The same
+     * check is also in H5Tdetect_class.  Do it again to check members of nested 
+     * compound type and base type of array and VL type. */
+    if(from_api && H5T_IS_VL_STRING(dt->shared))
+        HGOTO_DONE(H5T_STRING == cls);
+ 
     /* Check if this type is the correct type */
     if(dt->shared->type==cls)
         HGOTO_DONE(TRUE);
@@ -1961,13 +1974,18 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
             for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
                 htri_t nested_ret;      /* Return value from nested call */
 
+                /* Consider VL string as a string for API, as a VL for internal use.  
+                 * Do it again here to check members of compound type. */
+                if(from_api && H5T_IS_VL_STRING(dt->shared->u.compnd.memb[i].type->shared))
+                    HGOTO_DONE(H5T_STRING == cls);
+
                 /* Check if this field's type is the correct type */
                 if(dt->shared->u.compnd.memb[i].type->shared->type==cls)
                     HGOTO_DONE(TRUE);
 
                 /* Recurse if it's VL, compound, enum or array */
                 if(H5T_IS_COMPLEX(dt->shared->u.compnd.memb[i].type->shared->type))
-                    if((nested_ret=H5T_detect_class(dt->shared->u.compnd.memb[i].type,cls))!=FALSE)
+                    if((nested_ret=H5T_detect_class(dt->shared->u.compnd.memb[i].type, cls, from_api))!=FALSE)
                         HGOTO_DONE(nested_ret);
             } /* end for */
             break;
@@ -1975,7 +1993,7 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_ENUM:
-            HGOTO_DONE(H5T_detect_class(dt->shared->parent,cls));
+            HGOTO_DONE(H5T_detect_class(dt->shared->parent, cls, from_api));
 
         default:
             break;
@@ -5125,7 +5143,7 @@ H5T_is_relocatable(const H5T_t *dt)
     HDassert(dt);
 
     /* VL and reference datatypes are relocatable */
-    if(H5T_detect_class(dt, H5T_VLEN) || H5T_detect_class(dt, H5T_REFERENCE))
+    if(H5T_detect_class(dt, H5T_VLEN, FALSE) || H5T_detect_class(dt, H5T_REFERENCE, FALSE))
         ret_value = TRUE;
 
 done:
