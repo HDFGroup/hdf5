@@ -7289,8 +7289,8 @@ error:
 static herr_t 
 test_idx_compatible(void)
 {
-    hid_t	fid;		/* File id */
-    hid_t       did;		/* Dataset id */
+    hid_t	fid = -1;	/* File id */
+    hid_t       did = -1;	/* Dataset id */
     char  	*srcdir = HDgetenv("srcdir"); /* where the src code is located */
     char        filename[FILENAME_BUF_SIZE] = "";  /* old test file name */
 
