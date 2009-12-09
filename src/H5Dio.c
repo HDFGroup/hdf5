@@ -485,7 +485,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         /* If MPI based VFD is used, no VL datatype support yet. */
         /* This is because they use the global heap in the file and we don't */
         /* support parallel access of that yet */
-        if(H5T_detect_class(type_info.mem_type, H5T_VLEN) > 0)
+        if(H5T_detect_class(type_info.mem_type, H5T_VLEN, FALSE) > 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet")
 
         /* If MPI based VFD is used, no VL datatype support yet. */
@@ -543,7 +543,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
 
         /* Always allow fill values to be written if the dataset has a VL datatype */
-        if(H5T_detect_class(dataset->shared->type, H5T_VLEN))
+        if(H5T_detect_class(dataset->shared->type, H5T_VLEN, FALSE))
             full_overwrite = FALSE;
         else
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
@@ -751,7 +751,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
         type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
 
         /* Check if we need a background buffer */
-        if(do_write && H5T_detect_class(dset->shared->type, H5T_VLEN))
+        if(do_write && H5T_detect_class(dset->shared->type, H5T_VLEN, FALSE))
             type_info->need_bkg = H5T_BKG_YES;
         else {
             H5T_bkg_t path_bkg;     /* Type conversion's background info */

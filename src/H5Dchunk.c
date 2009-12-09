@@ -4150,7 +4150,7 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Check parameter for type conversion */
     if(udata->do_convert) {
-        if(H5T_detect_class(udata->dt_src, H5T_VLEN) > 0)
+        if(H5T_detect_class(udata->dt_src, H5T_VLEN, FALSE) > 0)
             is_vlen = TRUE;
         else if((H5T_get_class(udata->dt_src, FALSE) == H5T_REFERENCE) && (udata->file_src != udata->idx_info_dst->f))
             fix_ref = TRUE;
@@ -4384,7 +4384,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
     /* If there's a VLEN source datatype, set up type conversion information */
-    if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+    if(H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
         H5T_t *dt_dst;              /* Destination datatype */
         H5T_t *dt_mem;              /* Memory datatype */
         size_t mem_dt_size;         /* Memory datatype size */

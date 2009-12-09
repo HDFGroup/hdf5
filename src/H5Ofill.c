@@ -689,7 +689,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
     HDassert(fill);
 
     if(fill->buf) {
-        if(fill->type && H5T_detect_class(fill->type, H5T_VLEN) > 0) {
+        if(fill->type && H5T_detect_class(fill->type, H5T_VLEN, FALSE) > 0) {
             H5T_t *fill_type;           /* Copy of fill value datatype */
             H5S_t *fill_space;          /* Scalar dataspace for fill value element */
 

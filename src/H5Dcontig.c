@@ -1275,7 +1275,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
     /* If there's a VLEN source datatype, set up type conversion information */
-    if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
+    if(H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
