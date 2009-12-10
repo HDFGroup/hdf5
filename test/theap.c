@@ -93,7 +93,7 @@ test_heap_init(void)
 
     /* Create randomized set of numbers */
     curr_time=time(NULL);
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
     for(u=0; u<NUM_ELEMS; u++)
         /* Generate random numbers from -1000 to 1000 */
         rand_num[u].val=(int)(HDrandom()%2001)-1001;

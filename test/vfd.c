@@ -808,7 +808,6 @@ test_family_compat(void)
     char        filename[1024];
     char        pathname[1024], pathname_individual[1024];
     char        newname[1024], newname_individual[1024];
-    FILE        *tmp_fp, *old_fp;       /* Pointers to temp & old files */
     int         counter = 0;
 
     TESTING("FAMILY file driver backward compatibility");
@@ -837,10 +836,6 @@ test_family_compat(void)
         sprintf(newname_individual, newname, counter);
         sprintf(pathname_individual, pathname, counter);
     }
-
-    if ((NULL != (old_fp = HDfopen(pathname_individual,"rb"))) && 
-        (NULL != (tmp_fp = HDfopen(newname_individual,"wb"))))
-	TEST_ERROR;
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */

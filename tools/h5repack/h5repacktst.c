@@ -4047,6 +4047,7 @@ int make_dset_reg_ref(hid_t loc_id)
     hdset_reg_ref_t *wbuf=NULL;  /* buffer to write to disk */
     int             *dwbuf=NULL; /* Buffer for writing numeric data to disk */
     int             i;      /* counting variables */
+    int             retval = -1;  /* return value */
 
     /* Allocate write & read buffers */
     wbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
@@ -4102,24 +4103,23 @@ int make_dset_reg_ref(hid_t loc_id)
     if (H5Dclose(did2) < 0)
         goto out;
 
-    if (wbuf)
-        free(wbuf);
-    if (dwbuf)
-        free(dwbuf);
-
-    return 0;
+    retval = 0;
 
 out:
+    if(wbuf)
+        free(wbuf);
+    if(dwbuf)
+        free(dwbuf);
+
     H5E_BEGIN_TRY 
     {
-
         H5Sclose(sid1);
         H5Sclose(sid2);
         H5Dclose(did1);
         H5Dclose(did2);
-
     } H5E_END_TRY;
-    return -1;
+
+    return retval;
 }
 
 /*-------------------------------------------------------------------------

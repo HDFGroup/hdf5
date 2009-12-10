@@ -6338,7 +6338,7 @@ main(void)
     hid_t		fapl = -1;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();

@@ -7370,7 +7370,7 @@ main(void)
         envval = "nomatch";
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     /* Testing setup */
     h5_reset();

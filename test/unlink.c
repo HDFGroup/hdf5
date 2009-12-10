@@ -1487,8 +1487,8 @@ delete_node(hid_t pid, hid_t id)
 static int
 test_unlink_rightleaf(hid_t fid)
 {
-    hid_t rootid,       /* Group ID for root group */
-        *gids;          /* Array of IDs for groups created */
+    hid_t rootid = -1,  /* Group ID for root group */
+        *gids = NULL;   /* Array of IDs for groups created */
     int n,              /* Local index variable */
         ngroups = 150;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
@@ -1496,7 +1496,7 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1514,8 +1514,10 @@ test_unlink_rightleaf(hid_t fid)
     } /* end for */
 
     /* Close all the groups */
-    for (n = 0; n < ngroups; n++)
+    for (n = 0; n < ngroups; n++) {
         if(H5Gclose(gids[n]) < 0) TEST_ERROR
+        gids[n] = 0;
+    } /* end for */
 
     /* Close root group ID */
     if(H5Gclose(rootid) < 0) TEST_ERROR
@@ -1527,6 +1529,20 @@ test_unlink_rightleaf(hid_t fid)
     return 0;
 
 error:
+    if(gids) {
+        /* Close any open groups */
+        for (n = 0; n < ngroups; n++)
+            if(gids[n]) {
+                H5E_BEGIN_TRY {
+                    H5Gclose(gids[n]);
+                } H5E_END_TRY;
+            } /* end if */
+        HDfree(gids);
+    } /* end if */
+    H5E_BEGIN_TRY {
+        H5Gclose(rootid);
+    } H5E_END_TRY;
+
     return 1;
 } /* end test_unlink_rightleaf() */
 
@@ -1550,8 +1566,8 @@ error:
 static int
 test_unlink_rightnode(hid_t fid)
 {
-    hid_t rootid,       /* Group ID for root group */
-        *gids;          /* Array of IDs for groups created */
+    hid_t rootid = -1,       /* Group ID for root group */
+        *gids = NULL;   /* Array of IDs for groups created */
     int n,              /* Local index variable */
         ngroups = 150;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
@@ -1559,7 +1575,7 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1570,8 +1586,10 @@ test_unlink_rightnode(hid_t fid)
     } /* end for */
 
     /* Close all the groups */
-    for (n = 0; n < ngroups; n++)
+    for (n = 0; n < ngroups; n++) {
         if(H5Gclose(gids[n]) < 0) FAIL_STACK_ERROR
+        gids[n] = 0;
+    } /* end for */
 
     /* Unlink specific objects to trigger deletion of right leaf in non-leaf node */
     if(H5Ldelete(fid, "/ZoneB77", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -1590,6 +1608,20 @@ test_unlink_rightnode(hid_t fid)
     return 0;
 
 error:
+    if(gids) {
+        /* Close any open groups */
+        for (n = 0; n < ngroups; n++)
+            if(gids[n]) {
+                H5E_BEGIN_TRY {
+                    H5Gclose(gids[n]);
+                } H5E_END_TRY;
+            } /* end if */
+        HDfree(gids);
+    } /* end if */
+    H5E_BEGIN_TRY {
+        H5Gclose(rootid);
+    } H5E_END_TRY;
+
     return 1;
 } /* end test_unlink_rightnode() */
 
@@ -1613,8 +1645,8 @@ error:
 static int
 test_unlink_middlenode(hid_t fid)
 {
-    hid_t rootid,       /* Group ID for root group */
-        *gids;          /* Array of IDs for groups created */
+    hid_t rootid = -1,  /* Group ID for root group */
+        *gids = NULL;   /* Array of IDs for groups created */
     int n,              /* Local index variable */
         ngroups = 250;  /* Number of groups to create */
     char name[256];     /* Name of object to create */
@@ -1622,7 +1654,7 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1633,8 +1665,10 @@ test_unlink_middlenode(hid_t fid)
     } /* end for */
 
     /* Close all the groups */
-    for (n = 0; n < ngroups; n++)
+    for (n = 0; n < ngroups; n++) {
         if(H5Gclose(gids[n]) < 0) FAIL_STACK_ERROR
+        gids[n] = 0;
+    } /* end for */
 
     /* Unlink specific objects to trigger deletion of all leafs in "interior" non-leaf node */
     if(H5Ldelete(fid, "/ZoneC11", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -1796,6 +1830,20 @@ test_unlink_middlenode(hid_t fid)
     return 0;
 
 error:
+    if(gids) {
+        /* Close any open groups */
+        for (n = 0; n < ngroups; n++)
+            if(gids[n]) {
+                H5E_BEGIN_TRY {
+                    H5Gclose(gids[n]);
+                } H5E_END_TRY;
+            } /* end if */
+        HDfree(gids);
+    } /* end if */
+    H5E_BEGIN_TRY {
+        H5Gclose(rootid);
+    } H5E_END_TRY;
+
     return 1;
 } /* end test_unlink_middlenode() */
 
@@ -1819,7 +1867,7 @@ error:
 static int
 test_resurrect_dataset(hid_t fapl)
 {
-    hid_t       f =-1, s =-1, d =-1;
+    hid_t       f = -1, s = -1, d = -1;
     char	filename[1024];
 
     TESTING("resurrecting dataset after deletion");
@@ -2404,7 +2452,7 @@ main(void)
     double rdcc_w0;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     /* Open */
     h5_reset();

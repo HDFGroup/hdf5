@@ -1485,8 +1485,9 @@ done:
         /* Free the raw B-tree node buffer */
         if(NULL == storage.u.btree.shared)
             HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
-        if(H5RC_DEC(storage.u.btree.shared) < 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+        else
+            if(H5RC_DEC(storage.u.btree.shared) < 0)
+                HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

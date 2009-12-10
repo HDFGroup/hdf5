@@ -596,7 +596,7 @@ main(int argc, char *argv[])
     printf("\n");
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     /* Reset library */
     h5_reset();
