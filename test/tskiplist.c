@@ -71,7 +71,7 @@ test_skiplist_init(void)
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
 
     /* Create randomized set of numbers */
     for(u=0; u<NUM_ELEMS; u++) {

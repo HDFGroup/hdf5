@@ -1760,7 +1760,7 @@ done:
 H5B_shared_t *
 H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
 {
-    H5B_shared_t *shared;               /* New shared B-tree struct */
+    H5B_shared_t *shared = NULL;        /* New shared B-tree struct */
     size_t	u;                      /* Local index variable */
     H5B_shared_t *ret_value;            /* Return value */
 
@@ -1772,8 +1772,8 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     HDassert(type);
 
     /* Allocate space for the shared structure */
-    if(NULL == (shared = H5FL_MALLOC(H5B_shared_t)))
-	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "memory allocation failed for shared B-tree info")
+    if(NULL == (shared = H5FL_CALLOC(H5B_shared_t)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for shared B-tree info")
 
     /* Set up the "global" information for this file's groups */
     shared->type = type;
@@ -1788,12 +1788,12 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
 
     /* Allocate shared buffers */
     if(NULL == (shared->page = H5FL_BLK_MALLOC(page, shared->sizeof_rnode)))
-	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree page")
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree page")
 #ifdef H5_CLEAR_MEMORY
 HDmemset(shared->page, 0, shared->sizeof_rnode);
 #endif /* H5_CLEAR_MEMORY */
     if(NULL == (shared->nkey = H5FL_SEQ_MALLOC(size_t, (size_t)(shared->two_k + 1))))
-	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree page")
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree native keys")
 
     /* Initialize the offsets into the native key buffer */
     for(u = 0; u < (shared->two_k + 1); u++)
@@ -1803,6 +1803,15 @@ HDmemset(shared->page, 0, shared->sizeof_rnode);
     ret_value = shared;
 
 done:
+    if(NULL == ret_value)
+        if(shared) {
+            if(shared->page)
+                shared->page = H5FL_BLK_FREE(page, shared->page);
+            if(shared->nkey)
+                shared->nkey = H5FL_SEQ_FREE(size_t, shared->nkey);
+            shared = H5FL_FREE(H5B_shared_t, shared);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_shared_new() */
 

@@ -9814,12 +9814,8 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t * cache_ptr)
         i++;
     }
 
-    HDassert( i < H5C__MAX_EPOCH_MARKERS );
-
-    if ( (cache_ptr->epoch_marker_active)[i] != FALSE ) {
-
+    if(i >= H5C__MAX_EPOCH_MARKERS)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't find unused marker.")
-    }
 
     HDassert( ((cache_ptr->epoch_markers)[i]).addr == (haddr_t)i );
     HDassert( ((cache_ptr->epoch_markers)[i]).next == NULL );

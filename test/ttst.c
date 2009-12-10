@@ -124,7 +124,7 @@ test_tst_init(void)
     for(u=0; u<num_uniq_words; u++)
         rand_uniq_words[u]=uniq_words[u];
     curr_time=HDtime(NULL);
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
     for(u=0; u<num_uniq_words; u++) {
         v=u+(HDrandom()%(num_uniq_words-u));
         if(u!=v) {

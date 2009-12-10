@@ -1587,16 +1587,29 @@ static int
 parsePathInfo(struct path_info *path, char *temp)
 {
   const char delimiter[] = "/";
-  char *token = (char*) malloc(255*sizeof(char));
+  char *token; 
   int i=0;
+  const char *err1 = "Path string larger than MAX_PATH_NAME_LENGTH.\n";
 
-  HDstrcpy(path->group[i++],HDstrtok (temp, delimiter));
+  token = HDstrtok (temp, delimiter);
+  if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) 
+  {
+    (void) fprintf(stderr, err1);
+    return (-1);
+  } 
+   HDstrcpy(path->group[i++],token);
+
 
   while (1)
   {
     token = HDstrtok (NULL, delimiter);
     if (token == NULL)
       break;
+    if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH)
+    {
+      (void) fprintf(stderr, err1);
+      return (-1);
+    } 
     HDstrcpy(path->group[i++],token);
   }
   path->count = i;
@@ -1608,11 +1621,12 @@ parseDimensions(struct Input *in, char *strm)
 {
   const char delimiter[] = ",";
   char temp[255];
-  char *token = (char*) malloc(255*sizeof(char));
+  char *token; 
   int i=0;
   const char *err1 = "Unable to allocate dynamic memory.\n";
 
-  HDstrcpy(temp, strm);
+  HDstrncpy(temp, strm, sizeof(temp));
+  temp[sizeof(temp)-1] = '\0';
   HDstrtok (temp, delimiter);
 
   while (1)
@@ -1631,7 +1645,8 @@ parseDimensions(struct Input *in, char *strm)
   }
 
   i=0;
-  HDstrcpy(temp, strm);
+  HDstrncpy(temp, strm, sizeof(temp));
+  temp[sizeof(temp)-1] = '\0';
   in->sizeOfDimension[i++] = HDstrtol(HDstrtok (temp, delimiter), NULL, BASE_10);
 
   while (1)

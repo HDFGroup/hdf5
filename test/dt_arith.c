@@ -5218,7 +5218,7 @@ main(void)
     unsigned long	nerrors = 0;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     reset_hdf5();
 
