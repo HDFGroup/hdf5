@@ -106,6 +106,9 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - H5Tdetect_class said a VL string is a string type.  But when it's in
+        a compound type, it said it's a VL type (Bug #1584).  I fixed it to
+        be consistent.  It always return string type. (SLU - 2009/12/10)
     - Allow "child" files from external links to be correctly located when
         relative to a "parent" file that is opened through a symbolic link.
         (QAK - 2009/12/01)
