@@ -5810,6 +5810,51 @@ int print_data(diff_opt_t *options)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: print_header
+ *
+ * Purpose: print header for difference
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void print_header(int        pp,        /* print percentage */
+                int        rank,
+                hsize_t    *dims,
+                const char *obj1,
+                const char *obj2 )
+{
+    int i;
+
+    /* print header */
+    parallel_print("%-16s","size:");
+    print_dimensions (rank,dims);
+    parallel_print("%-11s","");
+    print_dimensions (rank,dims);
+    parallel_print("\n");
+
+    if (pp)
+    {
+        parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
+            "position",
+            (obj1!=NULL) ? obj1 : " ",
+            (obj2!=NULL) ? obj2 : " ",
+            "difference",
+            "relative");
+        parallel_print("------------------------------------------------------------------------\n");
+    }
+    else
+    {
+        parallel_print("%-15s %-15s %-15s %-20s\n",
+            "position",
+            (obj1!=NULL) ? obj1 : " ",
+            (obj2!=NULL) ? obj2 : " ",
+            "difference");
+        parallel_print("------------------------------------------------------------\n");
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function: print_pos
  *
  * Purpose: print in matrix notation, converting from an array index position
@@ -5835,31 +5880,7 @@ void print_pos( int        *ph,       /* print header */
     {
         *ph=0;
 
-        parallel_print("%-16s","size:");
-        print_dimensions (rank,dims);
-        parallel_print("%-11s","");
-        print_dimensions (rank,dims);
-        parallel_print("\n");
-
-        if (pp)
-        {
-            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference",
-                "relative");
-            parallel_print("------------------------------------------------------------------------\n");
-        }
-        else
-        {
-            parallel_print("%-15s %-15s %-15s %-20s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference");
-            parallel_print("------------------------------------------------------------\n");
-        }
+        print_header(pp, rank, dims, obj1, obj2);
     } /* end print header */
 
     for ( i = 0; i < rank; i++)
@@ -5912,31 +5933,7 @@ void print_char_pos( int        *ph,       /* print header */
     {
         *ph=0;
 
-        parallel_print("%-16s","size:");
-        print_dimensions (rank,dims);
-        parallel_print("%-11s","");
-        print_dimensions (rank,dims);
-        parallel_print("\n");
-
-        if (pp)
-        {
-            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference",
-                "relative");
-            parallel_print("------------------------------------------------------------------------\n");
-        }
-        else
-        {
-            parallel_print("%-15s %-15s %-15s %-20s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference");
-            parallel_print("------------------------------------------------------------\n");
-        }
+        print_header(pp, rank, dims, obj1, obj2);
     } /* end print header */
 
     for ( i = 0; i < rank; i++)
