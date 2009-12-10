@@ -114,6 +114,7 @@ h5repack_init(pack_opt_t *options, int verbose, int latest,
     return (options_table_init(&(options->op_tbl)));
 }
 
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_end
 *
@@ -127,6 +128,7 @@ int h5repack_end  (pack_opt_t *options)
     return options_table_free(options->op_tbl);
 }
 
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_addfilter
 *
@@ -137,7 +139,6 @@ int h5repack_end  (pack_opt_t *options)
 *
 *-------------------------------------------------------------------------
 */
-
 int h5repack_addfilter(const char* str,
                        pack_opt_t *options)
 {
@@ -149,38 +150,33 @@ int h5repack_addfilter(const char* str,
 
 
     /* parse the -f option */
-    obj_list=parse_filter(str,&n_objs,&filter,options,&is_glb);
-    if (obj_list==NULL)
-    {
+    if(NULL == (obj_list = parse_filter(str, &n_objs, &filter, options, &is_glb)))
         return -1;
-    }
 
     /* if it applies to all objects */
-    if (is_glb)
+    if(is_glb)
     {
-
         int n;
 
         n = options->n_filter_g++; /* increase # of global filters */
 
-        if (options->n_filter_g > H5_REPACK_MAX_NFILTERS)
+        if(options->n_filter_g > H5_REPACK_MAX_NFILTERS)
         {
-            error_msg(progname, "maximum number of filters exceeded for <%s>\n",str);
+            error_msg(progname, "maximum number of filters exceeded for <%s>\n", str);
+            free(obj_list);
             return -1;
-
         }
 
         options->filter_g[n] = filter;
     }
-
     else
-        options_add_filter(obj_list,n_objs,filter,options->op_tbl);
+        options_add_filter(obj_list, n_objs, filter, options->op_tbl);
 
     free(obj_list);
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
 * Function: h5repack_addlayout
 *

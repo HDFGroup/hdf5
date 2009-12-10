@@ -150,32 +150,21 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
 
     /* Re-allocate the table if necessary */
     if(udata->curr_attr == udata->atable->nattrs) {
-        size_t i;
-        size_t n = MAX(1, 2 * udata->atable->nattrs);
-        H5A_t **table = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, n);
+        H5A_t **new_table;          /* New table for attributes */
+        size_t new_table_size;      /* Number of attributes in new table */
 
-        /* Use attribute functions for operation */
-        for(i=0; i<udata->atable->nattrs; i++) {
-            table[i] = (H5A_t *)H5FL_CALLOC(H5A_t);
-            if(NULL == H5A_copy(table[i], udata->atable->attrs[i]))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
-            if(H5A_close(udata->atable->attrs[i]) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close attribute")
-        }
-
-        if(udata->atable->nattrs)
-            udata->atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, udata->atable->attrs);
-
-        if(!table)
+        /* Allocate larger table */
+        new_table_size = MAX(1, 2 * udata->atable->nattrs);
+        if(NULL == (new_table = (H5A_t **)H5FL_SEQ_REALLOC(H5A_t_ptr, udata->atable->attrs, new_table_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "unable to extend attribute table")
-        udata->atable->attrs = table;
-        udata->atable->nattrs = n;
+
+        /* Update table information in user data */
+        udata->atable->attrs = new_table;
+        udata->atable->nattrs = new_table_size;
     } /* end if */
 
     /* Copy attribute into table */
-    udata->atable->attrs[udata->curr_attr] = (H5A_t *)H5FL_CALLOC(H5A_t);
-
-    if(NULL == H5A_copy(udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
+    if(NULL == (udata->atable->attrs[udata->curr_attr] = H5A_copy(NULL, (const H5A_t *)mesg->native)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Assign [somewhat arbitrary] creation order value, if requested */
@@ -944,7 +933,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Check if we need to convert data */
-        if(H5T_detect_class(attr_src->shared->dt, H5T_VLEN) > 0) {
+        if(H5T_detect_class(attr_src->shared->dt, H5T_VLEN, FALSE) > 0) {
             H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
             H5T_t *dt_mem;              /* Memory datatype */
             size_t src_dt_size;         /* Source datatype size */

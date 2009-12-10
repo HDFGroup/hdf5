@@ -721,7 +721,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
     /* Release raw data buffers */
     HDfree(rbuf);
+    rbuf = NULL;
     HDfree(rbuf2);
+    rbuf2 = NULL;
 
     /* close the source dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -738,11 +740,11 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     return TRUE;
 
 error:
+    if(rbuf)
+        HDfree(rbuf);
+    if(rbuf2)
+        HDfree(rbuf2);
     H5E_BEGIN_TRY {
-        if(rbuf)
-            HDfree(rbuf);
-        if(rbuf2)
-            HDfree(rbuf2);
         H5Sclose(sid2);
         H5Sclose(sid);
         H5Tclose(tid2);
@@ -7315,9 +7317,11 @@ static int
 test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
-    hid_t tid = -1, tid2;                       /* Datatype IDs */
+    hid_t tid = -1;                             /* Datatype ID */   
+    hid_t tid2 = -1;                            /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
-    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t did = -1;                             /* Dataset ID */
+    hid_t did2 = -1;                            /* Dataset ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     cmpd_vl_t buf[DIM_SIZE_1];                  /* Buffer for writing data */

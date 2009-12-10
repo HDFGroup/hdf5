@@ -78,6 +78,11 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 
     FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0)
 
+    /* Sanity check */
+    HDassert(*buf_size > 0);
+    HDassert(buf);
+    HDassert(*buf);
+
     /* Check arguments */
     if (cd_nelmts!=1 || cd_values[0]>9)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level")

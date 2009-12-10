@@ -4105,6 +4105,7 @@ int make_dset_reg_ref(hid_t loc_id)
     hdset_reg_ref_t *wbuf=NULL;  /* buffer to write to disk */
     int             *dwbuf=NULL; /* Buffer for writing numeric data to disk */
     int             i;      /* counting variables */
+    int             retval = -1;  /* return value */
 
     /* Allocate write & read buffers */
     wbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
@@ -4160,24 +4161,23 @@ int make_dset_reg_ref(hid_t loc_id)
     if (H5Dclose(did2) < 0)
         goto out;
 
-    if (wbuf)
-        free(wbuf);
-    if (dwbuf)
-        free(dwbuf);
-
-    return 0;
+    retval = 0;
 
 out:
+    if(wbuf)
+        free(wbuf);
+    if(dwbuf)
+        free(dwbuf);
+
     H5E_BEGIN_TRY 
     {
-
         H5Sclose(sid1);
         H5Sclose(sid2);
         H5Dclose(did1);
         H5Dclose(did2);
-
     } H5E_END_TRY;
-    return -1;
+
+    return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -4211,9 +4211,9 @@ int write_attr_in(hid_t loc_id,
         GREEN
     } e_t;
 
-    hid_t   aid;
-    hid_t   sid;
-    hid_t   tid;
+    hid_t   aid = -1;
+    hid_t   sid = -1;
+    hid_t   tid = -1;
     int     val, i, j, k, n;
     float   f;
 
@@ -4295,6 +4295,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -4324,6 +4325,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -4350,6 +4352,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -4387,6 +4390,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -4435,6 +4439,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -4479,10 +4484,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
+    aid = -1;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
     if (H5Sclose(sid) < 0)
         goto out;
+    sid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -4517,6 +4525,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -4594,6 +4603,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -4626,6 +4636,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -4653,6 +4664,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -4688,6 +4700,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -4742,6 +4755,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -4791,10 +4805,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
+    aid = -1;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
     if (H5Sclose(sid) < 0)
         goto out;
+    sid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -4837,6 +4854,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
@@ -4956,6 +4974,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_BITFIELD
@@ -5010,6 +5029,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -5023,6 +5043,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_COMPOUND
@@ -5113,6 +5134,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_REFERENCE
@@ -5197,6 +5219,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_VLEN
@@ -5251,10 +5274,13 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
+    aid = -1;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
     if (H5Sclose(sid) < 0)
         goto out;
+    sid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_ARRAY
@@ -5288,6 +5314,7 @@ int write_attr_in(hid_t loc_id,
         goto out;
     if (H5Tclose(tid) < 0)
         goto out;
+    tid = -1;
 
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT

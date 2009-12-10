@@ -240,7 +240,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
          * then do conversion on each element so that each of them has a copy
          * of the VL data.
          */
-        if(TRUE == H5T_detect_class(fill_type, H5T_VLEN)) {
+        if(TRUE == H5T_detect_class(fill_type, H5T_VLEN, FALSE)) {
             H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
             H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
             H5S_sel_iter_t mem_iter;            /* Memory selection iteration info */
@@ -397,7 +397,7 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
         htri_t has_vlen_type;   /* Whether the datatype has a VL component */
 
         /* Detect whether the datatype has a VL component */
-        if((has_vlen_type = H5T_detect_class(dset_type, H5T_VLEN)) < 0)
+        if((has_vlen_type = H5T_detect_class(dset_type, H5T_VLEN, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to detect vlen datatypes?")
         fb_info->has_vlen_fill_type = (hbool_t)has_vlen_type;
 

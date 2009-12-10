@@ -2770,7 +2770,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam,
 curr_time=1109170019;
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif /* QAK */
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
 
     /*
      * Test inserting many records into v2 B-tree
@@ -6445,7 +6445,7 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
 curr_time = 1163537969;
 HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif /* QAK */
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
 
     /*
      * Test removing many records into v2 B-tree

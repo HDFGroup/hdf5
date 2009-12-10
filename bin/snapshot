@@ -460,7 +460,9 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
 	    bin/release -d $ReleaseDir $METHODS
 	    perl bin/h5vers -i
-	    svn -q commit -m "Snapshot $RELEASE_VERSION"
+            echo "Committing snapshot from current/bin/snapshot."
+            ls
+	    svn -q commit -m "Snapshot $RELEASE_VERSION" .
 	)
 	errcode=$?
     fi

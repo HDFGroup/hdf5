@@ -69,6 +69,8 @@ static size_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_objs, h
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
+static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
+    const char *name, char ** /*out*/ actual_name);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_close(H5F_t *f);
 
@@ -1142,7 +1144,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+    hid_t dxpl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
     H5F_file_t         *shared = NULL;      /*shared part of `file'         */
@@ -1319,7 +1322,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
 
     /* Formulate the actual file name, after following symlinks, etc. */
-    if(H5F_build_actual_name(file, name, &file->actual_name) < 0)
+    if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
     /* Success */
@@ -2170,15 +2173,18 @@ H5F_decr_nopen_objs(H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5F_build_actual_name(const H5F_t *f, const char *name, char **actual_name/*out*/)
+static herr_t
+H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
+    char **actual_name/*out*/)
 {
+    hid_t       new_fapl_id = -1;       /* ID for duplicated FAPL */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_build_actual_name)
 
     /* Sanity check */
     HDassert(f);
+    HDassert(fapl);
     HDassert(name);
     HDassert(actual_name);
 
@@ -2199,10 +2205,12 @@ H5F_build_actual_name(const H5F_t *f, const char *name, char **actual_name/*out*
 
         /* Check for symbolic link */
         if(S_IFLNK == (lst.st_mode & S_IFMT)) {
+            H5P_genplist_t *new_fapl;   /* Duplicated FAPL */
             int *fd;                    /* POSIX I/O file descriptor */
             h5_stat_t st;               /* Stat info from stat() call */
             h5_stat_t fst;              /* Stat info from fstat() call */
             char realname[PATH_MAX];    /* Fully resolved path name of file */
+            hbool_t want_posix_fd;      /* Flag for retrieving file descriptor from VFD */
 
             /* Perform a sanity check that the file or link wasn't switched
              * between when we opened it and when we called lstat().  This is
@@ -2210,8 +2218,19 @@ H5F_build_actual_name(const H5F_t *f, const char *name, char **actual_name/*out*
              * here: https://www.securecoding.cert.org/confluence/display/seccode/POS35-C.+Avoid+race+conditions+while+checking+for+the+existence+of+a+symbolic+link
              */
 
+            /* Copy the FAPL object to modify */
+            if((new_fapl_id = H5P_copy_plist(fapl, FALSE)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "unable to copy file access property list")
+            if(NULL == (new_fapl = (H5P_genplist_t *)H5I_object(new_fapl_id)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "can't get property list")
+
+            /* Set the character encoding on the new property list */
+            want_posix_fd = TRUE;
+            if(H5P_set(new_fapl, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
+
             /* Retrieve the file handle */
-            if(H5F_get_vfd_handle(f, H5P_DEFAULT, (void **)&fd) < 0)
+            if(H5F_get_vfd_handle(f, new_fapl_id, (void **)&fd) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve POSIX file descriptor")
 
             /* Stat the filename we're resolving */
@@ -2245,6 +2264,9 @@ H5F_build_actual_name(const H5F_t *f, const char *name, char **actual_name/*out*
     } /* end else */
 
 done:
+    if(new_fapl_id > 0 && H5Pclose(new_fapl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close duplicated FAPL")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
 

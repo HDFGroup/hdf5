@@ -818,9 +818,11 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Enlarge member array */
         if(file->nmembs >= file->amembs) {
             unsigned n = MAX(64, 2 * file->amembs);
-            H5FD_t **x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *));
+            H5FD_t **x;
 
-            if(!x)
+            HDassert(n > 0);
+            /* coverity["freed_arg"] */
+            if(NULL == (x = (H5FD_t **)H5MM_realloc(file->memb, n * sizeof(H5FD_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to reallocate members")
             file->amembs = n;
             file->memb = x;

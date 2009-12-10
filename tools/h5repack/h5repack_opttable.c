@@ -136,6 +136,7 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
     return 0;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function: options_table_init
  *
@@ -145,33 +146,34 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
  *
  *-------------------------------------------------------------------------
  */
-
 int options_table_init( pack_opttbl_t **tbl )
 {
     unsigned int i;
-    pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
-    if (table==NULL) {
+    pack_opttbl_t *table;
+
+    if(NULL == (table = (pack_opttbl_t *)malloc(sizeof(pack_opttbl_t))))
+    {
         error_msg(progname, "not enough memory for options table\n");
         return -1;
     }
 
     table->size   = 30;
     table->nelems = 0;
-    table->objs   = (pack_info_t*) malloc(table->size * sizeof(pack_info_t));
-    if (table->objs==NULL) {
+    if(NULL == (table->objs = (pack_info_t*)malloc(table->size * sizeof(pack_info_t))))
+    {
         error_msg(progname, "not enough memory for options table\n");
+        free(table);
         return -1;
     }
 
-    for ( i=0; i<table->size; i++)
-    {
+    for(i = 0; i < table->size; i++)
         init_packobject(&table->objs[i]);
-    }
 
     *tbl = table;
     return 0;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function: options_table_free
  *

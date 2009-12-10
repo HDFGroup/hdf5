@@ -619,7 +619,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
+H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genplist_t *new_plist=NULL;  /* New property list generated from copy */

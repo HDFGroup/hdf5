@@ -325,7 +325,10 @@ test_copy(void)
  *              Saturday, August 30, 2003
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              8 December 2009
+ *              I added a field of VL string in the compound type to test 
+ *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -342,6 +345,7 @@ test_detect(void)
         hobj_ref_t arr_r[3][3];
         int i;
         hvl_t vl_f;
+        hvl_t vl_s;
         char c;
         short s;
     };
@@ -441,6 +445,7 @@ test_detect(void)
     if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id) < 0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT) < 0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vlf_id) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), atom_vls_id) < 0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
 
@@ -450,12 +455,12 @@ test_detect(void)
     if(H5Tdetect_class(cplx_cmpd_id,H5T_REFERENCE)!=TRUE) TEST_ERROR
     if(H5Tdetect_class(cplx_cmpd_id,H5T_INTEGER)!=TRUE) TEST_ERROR
     if(H5Tdetect_class(cplx_cmpd_id,H5T_FLOAT)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_STRING)!=TRUE) TEST_ERROR
     if(H5Tdetect_class(cplx_cmpd_id,H5T_VLEN)!=TRUE) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
     if(H5Tdetect_class(cplx_cmpd_id,H5T_TIME)!=FALSE) TEST_ERROR
     if(H5Tdetect_class(cplx_cmpd_id,H5T_ENUM)!=FALSE) TEST_ERROR
-    if(H5Tdetect_class(cplx_cmpd_id,H5T_STRING)!=FALSE) TEST_ERROR
 
     /* Close complex compound datatype */
     if(H5Tclose(cplx_cmpd_id) < 0) TEST_ERROR
@@ -6332,7 +6337,7 @@ main(void)
     hid_t		fapl = -1;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned)HDtime(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();

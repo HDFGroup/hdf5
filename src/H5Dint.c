@@ -736,7 +736,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
 
     /* Special case handling for variable-length types */
-    if(H5T_detect_class(type, H5T_VLEN)) {
+    if(H5T_detect_class(type, H5T_VLEN, FALSE)) {
         /* If the default fill value is chosen for variable-length types, always write it */
         if(fill_prop->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_DEFAULT) {
             /* Update dataset creation property */
@@ -927,7 +927,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
 
     /* Check if the datatype is/contains a VL-type */
-    if(H5T_detect_class(type, H5T_VLEN))
+    if(H5T_detect_class(type, H5T_VLEN, FALSE))
         has_vl_type = TRUE;
 
     /* Check if the dataspace has an extent set (or is NULL) */

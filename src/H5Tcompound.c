@@ -403,7 +403,7 @@ H5Tpack(hid_t type_id)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_detect_class(dt, H5T_COMPOUND) <= 0)
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)) || H5T_detect_class(dt, H5T_COMPOUND, TRUE) <= 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
 
     /* Pack */
@@ -534,7 +534,7 @@ H5T_pack(const H5T_t *dt)
 
     HDassert(dt);
 
-    if(H5T_detect_class(dt, H5T_COMPOUND) > 0) {
+    if(H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
         if(TRUE == H5T_is_packed(dt))
             HGOTO_DONE(SUCCEED)

@@ -58,21 +58,23 @@ same_contents (const char *name1, const char *name2)
 
     fd1 = HDopen(name1, O_RDONLY, 0666);
     fd2 = HDopen(name2, O_RDONLY, 0666);
-    assert (fd1>=0 && fd2>=0);
+    assert(fd1 >= 0 && fd2 >= 0);
 
-    while (1) {
-	n1 = HDread(fd1, buf1, sizeof(buf1));
-	n2 = HDread(fd2, buf2, sizeof(buf2));
-	assert (n1>=0 && (size_t)n1<=sizeof(buf1));
-	assert (n2>=0 && (size_t)n2<=sizeof(buf2));
-	assert (n1==n2);
-
-	if (n1<=0 && n2<=0) break;
-	if (memcmp (buf1, buf2, (size_t)n1)) {
-	    HDclose(fd1);
-	    HDclose(fd2);
-	    return 0;
-	}
+    while(1) { 
+        /* Asserts will catch negative return values */
+        n1 = HDread(fd1, buf1, sizeof(buf1));
+        n2 = HDread(fd2, buf2, sizeof(buf2));
+        assert(n1 >= 0 && (size_t)n1 <= sizeof(buf1));
+        assert(n2 >= 0 && (size_t)n2 <= sizeof(buf2));
+        assert(n1 == n2);
+    
+        if(n1 == 0 && n2 == 0)
+            break;
+        if(HDmemcmp(buf1, buf2, (size_t)n1)) {
+            HDclose(fd1);
+            HDclose(fd2);
+            return 0;
+        }
     }
     HDclose(fd1);
     HDclose(fd2);
@@ -838,10 +840,13 @@ test_3 (hid_t fapl)
 static int
 test_4 (hid_t fapl)
 {
-    hid_t       fid, gid, xid, xid2;
-    char	filename[1024];		/*file name			*/
-    char        pathname[1024];
-    char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+    hid_t fid = -1;
+    hid_t gid = -1;
+    hid_t xid = -1;
+    hid_t xid2 = -1;
+    char  filename[1024];		/*file name			*/
+    char  pathname[1024];
+    char *srcdir = getenv("srcdir"); /*where the src code is located*/
 
     TESTING("opening external link twice");
 
@@ -911,7 +916,7 @@ test_4 (hid_t fapl)
         H5Gclose(gid);
         H5Gclose(xid);
         H5Gclose(xid2);
-	H5Fclose(fid);
+        H5Fclose(fid);
     } H5E_END_TRY;
     return 1;
 }

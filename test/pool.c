@@ -645,7 +645,7 @@ test_allocate_random(void)
 curr_time=1115412944;
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif /* QAK */
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
 
     /* Create a memory pool */
     if(NULL == (mp = H5MP_create((size_t)MPOOL_PAGE_SIZE, MPOOL_FLAGS)))
