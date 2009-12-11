@@ -240,6 +240,7 @@ The following platforms and compilers have been tested for this release.
     Windows XP                    Visual Studio .NET
                                   Visual Studio 2005 w/ Intel Fortran 9.1
                                   Cygwin(native gcc compiler and g95)
+                                  MinGW(5.1.6 with gcc 4.4.0)
 
     Windows XP x64                Visual Studio 2005 w/ Intel Fortran 9.1
 
@@ -319,6 +320,10 @@ Cray XT3 2.0.62                      n       n         n         n
 
 Known Problems
 ==============
+* MinGW has a missing libstdc++.dll.a library file and will not successfully link
+  C++ applications/tests. Do not use the enable-cxx configure option. Read all of
+  the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
+  
 * Parallel mode in AIX will fail some of the testcheck_version.sh tests where
   it treats "exit(134) the same as if process 0 had received an abort signal.
   This is fixed and will be available in the next release. AKC - 2009/11/3
