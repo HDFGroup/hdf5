@@ -1,0 +1,2320 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+
+<title>HDF5 User's Guide: Groups</title>
+
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+
+
+<!--(Meta)==========================================================-->
+
+<!--(Links)=========================================================-->
+
+<!--( Begin styles definition )=====================================-->
+<link href="ed_styles/NewUGelect.css" rel="stylesheet" type="text/css">
+<!--( End styles definition )=======================================-->
+
+</head> 
+
+<body>
+
+<!-- HEADER LEFT "HDF5 User's Guide" -->
+<!-- HEADER RIGHT "HDF5 Groups" -->
+
+<!--( TOC )=========================================================-->
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<table x-use-null-cells
+                align=right
+		width=240
+		cellspacing=0
+		class="tocTable">
+  <tr valign=top> 
+    <td class="tocTableHeaderCell" colspan="2"> 
+        <span class=TableHead>Chapter Contents</span></td>
+  </tr>
+<!-- Table Version 1
+  <tr valign=top> 
+    <td class="tocTableContentCell" colspan="2"> 
+    <a href="#Intro">1: Introduction</a> 
+    <br> 
+    <a href="#DGroupObj">2: Description of the Group</a>
+    <br> 
+    <a href="#h5dump">3: Using <code>h5dump</code></a>
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DGroupObj">Object</a> 
+    <br>
+    <a href="#GroupFuncSums">4: Group Function</a> 
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#GroupFuncSums">Summaries</a> 
+    <br> 
+    <a href="#ProgModel">5: The Programming Model</a> 
+    <br> 
+    <a href="#DiscoverInfo">6: Discovering Information</a> 
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DiscoverInfo">About Objects</a>
+    <br>
+    <a href="#DiscoverAll">7: Discovering All the</a>
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DiscoverAll">Objects in the File</a>
+    <br>
+    <a href="#Examples">8: Examples of File</a> 
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Examples">Structures</a>
+    <br>
+    <a href="#Appendix">9: Appendix</a> 
+    </td>
+  </tr>
+-->
+<!-- Table Version 2
+  <tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#Intro">1</a></td>
+    <td class="tocTableContentCell3"><a href="#Intro">Introduction</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DGroupObj">2</a></td>
+    <td class="tocTableContentCell3"><a href="#DGroupObj">Description of the Group Object</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#h5dump">3</a></td>
+    <td class="tocTableContentCell3"><a href="#h5dump">Using <code>h5dump</code></a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#GroupFuncSums">4</a></td>
+    <td class="tocTableContentCell3"><a href="#GroupFuncSums">Group Function Summaries</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#ProgModel">5</a></td>
+    <td class="tocTableContentCell3"><a href="#ProgModel">Programming Model</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverInfo">6</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverInfo">Discovering Information About Objects</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverAll">7</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverGrObjs">Discovering Objects in a Group</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverAll">8</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverAll">Discovering All the Objects in the File</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#Examples">9</a></td>
+    <td class="tocTableContentCell3"><a href="#Examples">Examples of File Structures</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell"> 
+    <a href="#Appendix">10</a></td>
+    <td class="tocTableContentCell4"><a href="#Appendix">Appendix</a></td>
+  </tr>
+-->
+<!-- Table Version 3 
+-->
+  <tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#Intro">1.</a></td>
+    <td class="tocTableContentCell3"><a href="#Intro">Introduction</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DGroupObj">2.</a></td>
+    <td class="tocTableContentCell3"><a href="#DGroupObj">Description of the Group Object</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#h5dump">3.</a></td>
+    <td class="tocTableContentCell3"><a href="#h5dump">Using <code>h5dump</code></a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#GroupFuncSums">4.</a></td>
+    <td class="tocTableContentCell3"><a href="#GroupFuncSums">Group Function Summaries</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#ProgModel">5.</a></td>
+    <td class="tocTableContentCell3"><a href="#ProgModel">Programming Model</a> 
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverInfo">6.</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverInfo">Discovering Information About Objects</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverAll">7.</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverGrObjs">Discovering Objects in a Group</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell2"> 
+    <a href="#DiscoverAll">8.</a></td>
+    <td class="tocTableContentCell3"><a href="#DiscoverAll">Discovering All the Objects in the File</a>
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell"> 
+<!-- editingComment -- 'tocTableContentCell' and 'tocTableContentCell4' are the table-closing cell class.
+    <td class="tocTableContentCell2"> 
+-->
+    <a href="#Examples"></a></td>
+    <td class="tocTableContentCell4"><a href="#Examples">Examples of File Structures</a>
+<!-- editingComment -- This section not currently complete or validated.
+  </tr><tr valign=top> 
+    <td class="tocTableContentCell"> 
+    <a href="#Appendix">10</a></td>
+    <td class="tocTableContentCell4"><a href="#Appendix">Appendix</a></td>
+-->
+  </tr>
+</table>
+")
+-->
+</SCRIPT>
+<!--(End TOC)=======================================================-->
+
+<div align="center">
+<a name="TOP">
+<h2>Chapter 3<br><font size="7">HDF5 Groups</font></h2>
+</a>
+</div>
+
+<a name="Intro">
+<h3>1. Introduction</h3>
+</a>
+
+<!-- editingComment
+<span class="editingComment">
+   [ [ [ 
+   The use of the term "path name" becomes rather stilted in this chapter.  Add a note early on
+   that the shorthand "path" is generally used as an equivalent.  Then edit "path name" ==> "path"
+   where appropriate. 
+   ] ] ]
+  </span>
+-->
+
+  <p>
+  As suggested by the name Hierarchical Data Format, 
+  an HDF5 file is hierarchically structured.  
+  The HDF5 group and link objects implement this hierarchy. 
+
+  <p>
+  In the simple and most common case, 
+  the file structure is a tree structure;
+  in the general case, the file structure may be a 
+  directed graph with a designated entry point.
+  The tree structure is very similar to the file system 
+  structures employed on UNIX systems, directories and files, 
+  and on Apple Macintosh and Microsoft Windows systems, 
+  folders and files.
+  HDF5 groups are analogous to the directories and folders;
+  HDF5 datasets are analogous to the files.
+ 
+  <p>
+  The one <span class=termemphasis>very important difference</span> 
+  between the HDF5 file structure and 
+  the above-mentioned file system anologs 
+  is that HDF5 groups are linked as a directed graph, 
+  allowing circular references;  
+  the file systems are strictly hierarchical, 
+  allowing no circular references.
+  The figures below illustrate the range of possibilities.  
+
+  <p>
+  In Figure 1, the group structure is strictly hierarchical, 
+  identical to the file system analogs.
+  
+
+   <p>
+   In Figures 2 and 3, the structure takes advantage of the 
+   directed graph's allowance of circular references.  
+   In Figure 2, <code>GroupA</code> is not only 
+   a member of the root group, <code>/</code>, 
+   but a member of <code>GroupC</code>.  
+   Since Group C is a member of Group B 
+   and Group B is a member of Group A, 
+   Dataset1 can be accessed by means of the circular reference
+   <code>/Group A/Group B/Group C/Group A/Dataset1</code>.
+   Figure 3 illustrates an extreme case in which 
+   <code>GroupB</code> is a member of itself, enabling a 
+   reference to a member dataset such as 
+   <code>/Group A/Group B/Group B/Group B/Dataset2</code>.
+
+   <p>
+<table align="center" width="100%" border="0">
+  <tr valign="center" align="center"><td class="fullImgTableImgCell" width="32%">
+        <img height="250" src="Images/Group_fig1.jpg" 
+        alt="Strictly hierarchical HDF5 group structure">
+    </td><td width="2%">&nbsp;
+    </td><td class="fullImgTableImgCell" width="32%">
+        <img height="250" src="Images/Group_fig2,8.jpg" 
+        alt="Directed graph HDF5 group structure with circular linkage">
+    </td><td width="2%">&nbsp;
+    </td><td class="fullImgTableImgCell" width="32%">
+        <img height="250" src="Images/Group_fig3.jpg" 
+        alt="Directed graph HDF5 group structure with self-reference">
+    </td></tr>
+  <tr valign="center" align="center"><td class="fullImgTableCapCell">
+        <span class="figureNumber">Figure 1:</span>
+        An HDF5 file with a strictly hierarchical group structure
+    </td><td>&nbsp;
+    </td><td class="fullImgTableCapCell">
+        <span class="figureNumber">Figure 2:</span>
+        An HDF5 file with a directed graph group structure,
+        including a circular reference
+    </td><td>&nbsp;
+    </td><td class="fullImgTableCapCell">
+        <span class="figureNumber">Figure 3:</span>
+        An HDF5 file with a directed graph group structure
+        and one group as a member of itself
+    </td></tr>
+</table>
+
+  
+<!-- NEW PAGE -->
+  <p>
+  As becomes apparent upon reflection,
+  directed graph structures can become quite complex;
+  caution is advised!
+
+  <p>
+  The balance of this chapter discusses the following topics:
+  <ul>
+    <li>The HDF5 group object (or a group) 
+        and its structure in more detail
+    <li>HDF5 link objects (or links)
+    <li>The programming model for working with groups and links
+    <li>HDF5 functions provided for working with groups, group members, and links
+    <li>Retrieving information about objects in a group
+    <li>Discovery of the structure of an HDF5 file and the contained objects
+    <li>Examples of file structures
+  </ul>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DGroupObj">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>2. Description of the Group Object</h3>
+
+<h4>2.1 The Group Object</h4>
+
+  <p>
+  Abstractly, an HDF5 group contains zero or more objects 
+  and every object must be a member of at least one group. 
+  The root group, the sole exception, may not belong to any group.
+  
+  <p>
+<table x-use-null-cells
+		width=50%
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig4.JPG">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class="figureNumber">Figure 4:</span> 
+    Abstract model of the HDF5 group object
+</td></tr>
+</table>
+  
+  <p>
+  Group membership is actually implemented via 
+  <em>link</em> objects (see Figure 4). 
+  A link object is owned by a group and points to a 
+  <em>named object</em>. 
+  Each link has a <em>name</em>, and each link points to 
+  exactly one object. 
+  Each named object has at least one and possibly many links to it.
+
+  <p>There are three classes of named objects: <em>group</em>, 
+  <em>dataset</em>, and <em>named datatype</em> (see Figure 5).  
+  Each of these objects is the member of at least one group, 
+  which means there is at least one link to it.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig5.JPG">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class="figureNumber">Figure 5</span>: 
+</td></tr>
+</table>
+<!-- editingComment
+<span class="editingComment">
+      [ [ [ 
+      This and several subsequent figures still need captions. 
+      ] ] ]
+      </span>
+-->
+  
+<!-- NEW PAGE -->
+  <p>
+  The primary operations on a group are to 
+  add and remove members and to discover member objects. 
+  These abstract operations, as listed in Figure 6, 
+  are implemented in the H5G APIs, as listed in section 4, 
+  &ldquo;<a href="#GroupFuncSums">Group Function Summaries</a>.&rdquo;
+  
+  <p>
+  To add and delete members of a group, 
+  links from the group to <em>existing</em> objects in the file 
+  are created and deleted with the 
+  <code><em>link</em></code> and <code><em>unlink</em></code> operations. 
+  When a <em>new</em> named object is created,
+  the HDF5 library executes the link operation in the background 
+  immediately after creating the object 
+  (i.e., a new object is added as a member of the group in which it 
+  is created without further user intervention).
+  <p>
+  Given the name of an object, the <em>get_object_info</em> 
+  method retrieves a description of the object, 
+  including the number of references to it. 
+  The <em>iterate</em> method iterates through the members of 
+  the group, returning the name and type of each object.
+  
+  <p>
+<!--
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig3.JPG">
+-->
+
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------------->  
+<table x-use-null-cells
+                border="0"
+		align="right">
+  <tr valign=top><td>&nbsp;&nbsp;</td>
+    <td class="fullImgTableImgCell" align="center">
+    <br>
+    <table align="center" border="1">
+    <tr><td align="center"><code><b>Group</b></code></td></tr>
+    <tr><td align="left"><code>size:size_t</code></td></tr>
+    <tr><td align="left"><code>create()<br>
+                               open()<br>
+			       close()<br>
+			       <br>
+			       link()<br>
+			       unlink()<br>
+			       move()<br>
+			       <br>
+			       iterate()<br>
+			       get_object_info()<br>
+			       get_link_info()</code></td></tr>
+    </table>
+    <br>
+</td><td>&nbsp;&nbsp;</td></tr>
+<tr><td>&nbsp;&nbsp;</td>
+<td align=center class="fullImgTableCapCell">
+    <span class="figureNumber">Figure 6:</span><br>
+    The group object
+</td><td>&nbsp;&nbsp;</td></tr>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION --------------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<table x-use-null-cells
+                border="0"
+		align="center">
+  <tr valign=top><td>&nbsp;&nbsp;</td>
+    <td class="fullImgTableImgCell" align="center">
+    <br>
+    <table align="center" border="1">
+    <tr><td align="center"><code><b>Group</b></code></td></tr>
+    <tr><td align="left"><code>size:size_t</code></td></tr>
+    <tr><td align="left"><code>create()<br>
+                               open()<br>
+			       close()<br>
+			       <br>
+			       link()<br>
+			       unlink()<br>
+			       move()<br>
+			       <br>
+			       iterate()<br>
+			       get_object_info()<br>
+			       get_link_info()</code></td></tr>
+    </table>
+    <br>
+</td><td>&nbsp;&nbsp;</td></tr>
+<tr><td>&nbsp;&nbsp;</td>
+<td align=center class="fullImgTableCapCell">
+    <span class="figureNumber">Figure 6:</span><br>
+    The group object
+</td><td>&nbsp;&nbsp;</td></tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+
+  <p>
+  Every HDF5 File has a single root group, with the 
+  name <code>/</code>.  The root group is identical to any 
+  other HDF5 group, except:
+
+  <ul>
+      <li>The root group is automatically created when the 
+          HDF5 file is created (<code>H5Fcreate</code>).
+      <li>The root group has no parent, but, by convention 
+          has a reference count of 1.
+      <li>The root group cannot be deleted (i.e., unlinked)!
+  </ul>
+
+<!-- NEW PAGE -->
+<h4>2.2 The Hierarchy of Data Objects</h4>
+
+  An HDF5 file is organized as a rooted, directed graph using 
+  HDF5 group objects.  The named data objects are the nodes of the graph, 
+  and the links are the directed arcs. 
+  Each arc of the graph has a name, with the special name <code>/</code>
+  reserved for the root group.  
+  New objects are created and then inserted into the graph with a link 
+  operation tht is automatically executed by the library;
+  existing objects are inserted into the graph with a link operation  
+  explicitly called by the user, which creates a named link from 
+  a group to the object. 
+ 
+  An object can be the target of more than one link.
+  
+  <p>
+  <a name="SupScript1">The names on the links must be 
+  unique within each group, but there may be 
+  many links with the same name in different groups. 
+  These are unambiguous, because some ancestor must have a different name, 
+  or else they are the same object. 
+  The graph is navigated with path names, analogous to Unix file 
+  systems (see section 2.3, 
+  &ldquo;<a href="#PathNames">HDF5 Path Names</a>&rdquo;). 
+  An object can be opened with a full path starting 
+  at the root group, or with a relative path and a starting point.
+  That starting point is always a group, though it may be the 
+  current working group, another specified group, or 
+  the root group of the file. 
+  Note that all paths are relative to a single HDF5 File. 
+  In this sense, an HDF5 file is analogous to a single UNIX file system.
+  <a href="#FootNote"><sup><font size="-1">1</font></sup></a></a>
+  
+  <p>
+  It is important to note that, just like the UNIX file system, 
+  HDF5 objects do not have <em>names</em>, the names are associated 
+  with <em>paths</em>. 
+  An object has an <em>object identifier</em> that is unique within the file, 
+  but a single object may have many <em>names</em> because there may be  
+  many paths to the same object. 
+  An object can be renamed, or moved to another group, by adding and 
+  deleting links. In this case, the object itself never moves.  
+  For that matter, membership in a group has no implication 
+  for the physical location of the stored object.
+  
+  <p>
+  <a name="SupScript2">Deleting a link to an object does not 
+  necessarily delete the object. 
+  The object remains available as long as there is at least one link to it.  
+  After all links to an object are deleted, it can no longer be opened, 
+  although the storage may or may not be reclaimed.</a>
+  <a href="#FootNote"><sup><font size="-1">2</font></sup></a> 
+  
+  <p>
+  It is also important to realize that the linking mechanism 
+  can be used to construct very complex graphs of objects. 
+  For example, it is possible for object to be shared between several 
+  groups and even to have more than one name in the same group. 
+  It is also possible for a group to be a member of itself, 
+  or to create other <em>cycles</em> in the graph, such as 
+  in the case where a child group is linked to one of its ancestors. 
+  
+  <p>
+  HDF5 also has <em>soft links</em> similar to UNIX soft links. 
+  A <em>soft link</em> is an object that has a name and a path name for 
+  the target object.  The soft link can be followed to open the target 
+  of the link just like a regular or <em>hard</em> link. 
+  The differences are that the hard link cannot be created if the 
+  target object does not exist and it always points to the same object. 
+  A soft link can be created with any path name, whether or not the 
+  object exists; it may or may not, therefore, be possible to follow 
+  a soft link.
+  Furthermore, a soft link's target object may be changed.
+
+<a name="PathNames">
+
+<!-- NEW PAGE -->
+<h4>2.3 HDF5 Path Names</h4></a>
+
+<!-- editingComment
+  <span class="editingComment">  
+       [ [ [ 
+       The opening paragraph here is still foggy, and now a bit redundant.  
+       A discussion of objects before launching into the discussion of l
+       inks might be helpful? 
+       ] ] ]
+       </span>
+-->
+       
+  <p>
+  The structure of the HDF5 file constitutes the name space 
+  for the objects in the file. 
+  A path name is a string of components separated by slashes 
+  (<code>/</code>). 
+  Each component is the name of a hard or soft link which points to 
+  an object in the file. 
+  The slash not only separates the components, but indicates their
+  hierarchical releationship; the component indicated by the link name  
+  following a slash is a always a member of the component indicated by 
+  the link name preceding that slash.
+  
+  <p>
+  The first component in the path name may be any of the following:
+  <ul><li>the special character dot (<code>.</code>, a period), 
+          indicating the current group 
+      <li>the special character slash (<code>/</code>), 
+          indicating the root group 
+      <li>any member of the current group 
+  </ul>
+  
+  <p>
+  Component link names may be any string of ASCII characters 
+  not containing a slash or a dot 
+  (<code>/</code> and <code>.</code>, which are reserved as noted above).
+  However, users are advised to avoid the use of punctuation and 
+  non-printing characters, as they may create problems for other software. 
+  Figure 7 provides a BNF grammar for HDF5 path names.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  PathName ::= AbsolutePathName | RelativePathName
+  Separator ::= "/" ["/"]*
+  AbsolutePathName ::= Separator [ RelativePathName ]
+  RelativePathName ::= Component [ Separator RelativePathName ]*
+  Component ::=  "." |  Characters
+  Characters ::= Character+   -  { "." }
+  Character ::= {c:  c Î { { legal ASCII characters } - {'/'} }
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 7</span>: 
+    A BNF grammar for for HDF5 path names 
+</td></tr>
+</table><br>
+
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------------->
+<table width="150" align="right" border="0">
+  <tr valign="bottom" align="center"><td class="fullImgTableImgCell">
+        <img src="Images/Group_fig2,8.jpg" 
+        alt="Directed graph HDF5 group structure with circular linkage">
+    </td></tr>
+  <tr valign="top" align="center"><td class="fullImgTableCapCell">
+        <span class="figureNumber">Figure 8:</span>
+        An HDF5 file with a directed graph group structure,
+        including a circular reference
+    </td></tr>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION --------------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<table width="150" align="center" border="0">
+  <tr valign="bottom" align="center"><td class="fullImgTableImgCell">
+        <img src="Images/Group_fig2,8.jpg" 
+        alt="Directed graph HDF5 group structure with circular linkage">
+    </td></tr>
+  <tr valign="top" align="center"><td class="fullImgTableCapCell">
+        <span class="figureNumber">Figure 8:</span>
+        An HDF5 file with a directed graph group structure,
+        including a circular reference
+    </td></tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION ------------------------------------->
+
+<!-- NEW PAGE -->
+  An object can always be addressed by a either a
+  <em>full or absolute</em> path name, starting at the root group,
+  or by a <em>relative</em> path name, starting in a known location 
+  such as the current working group.
+  As noted elsewhere, a given object may have multiple full and 
+  relative path names. 
+  
+  <p>
+  Consider, for example, the file illustrated in Figure 8.
+  <code>Dataset1</code> can be identified by either of these 
+  absolute path names:<br>
+  <pre>
+    /GroupA/Dataset1
+    /GroupA/GroupB/GroupC/Dataset1</pre>
+  <br>
+  Since an HDF5 file is a directed graph structure, and is therefore 
+  not limited to a strict tree structure, and 
+  since this illustrated file includes the sort of circular reference
+  that a directed graph enables, 
+  <code>Dataset1</code> can also be identified by this absolute path name:<br>
+  <pre>
+    /GroupA/GroupB/GroupC/GroupA/Dataset1</pre>
+
+  <p>
+  Alternatively, if the current working location is <code>GroupB</code>,
+  <code>Dataset1</code> can be identified by either of these 
+  relative path names:<br>
+  <pre>
+    GroupC/Dataset1
+    GroupC/GroupA/Dataset1</pre>
+  
+  <p>
+  Note that relative path names in HDF5 do not employ the 
+  <code>../</code> notation, the UNIX notation indicating a 
+  parent directory, to indicate a parent group.
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="h5dump">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>3. Using <code>h5dump</code></h3>
+
+  You can use <code>h5dump</code>, the command-line utility 
+  distributed with HDF5, to examine a file for purposes either of 
+  determining where to create an object within an HDF5 file or 
+  to verify that you have created an object in the intended place.
+  inspecting the contents of an HDF5 file.
+
+  <p>
+  In the case of the new group created in section 5.1, 
+  &ldquo;<a href="#ModelCreateGroup">Creating a group</a>,&rdquo; 
+  the following <code>h5dump</code> command will display the 
+  contents of <code>FileA.h5</code>:
+
+<pre><dir>
+h5dump FileA.h5 
+</dir></pre>
+
+  <p>
+  Assuming that the discussed objects, <code>GroupA</code> and 
+  <code>GroupB</code> are the only objects that exist in 
+  <code>FileA.h5</code>, the output will look something like the 
+  following:
+
+<dir><pre>
+HDF5 "FileA.h5" {
+GROUP "/" {
+GROUP GroupA {
+GROUP GroupB {
+}
+}
+}
+}
+</pre></dir>
+
+  <p>
+  <code>h5dump</code> is fully described on the 
+  <a href="../Tools.html" target="RMwindow">Tools</a> page of the 
+  <a href="../RM_H5Front.html" 
+  target="RMwindow"><cite>HDF5 Reference Manual</cite></a>.
+  
+  The HDF5 DDL grammar is fully described in the document
+  <a href="../ddl.html" target="RMwindow">DDL in BNF for HDF5</a>, 
+  an element of the <a href="../H5.user.html" 
+  target="RMwindow"><cite>HDF5 User's Guide</cite></a>.
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="GroupFuncSums">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>4. Group Function Summaries (H5G)</h3>
+
+<table x-use-null-cells
+		class="functTable"
+		width=600
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	<code>H5Gcreate<br>h5gcreate_f</code> 
+    </td>
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	Creates a new empty group and gives it a name.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gopen<br>h5gopen_f</code> 
+    </td>
+    <td class="functTableCell">
+	Opens an existing group for modification and returns a group identifier for that group.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gclose<br>h5gclose_f</code> 
+    </td>
+    <td class="functTableCell">
+	Closes the specified group.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gset_comment<br>h5gset_comment_f</code> 
+    </td>
+    <td class="functTableCell">
+	Sets the comment for the specified object.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gget_comment<br>h5gget_comment_f</code> 
+    </td>
+    <td class="functTableCell">
+	Retrieves the comment for the specified object.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Glink<br>h5glink_f</code> 
+    </td>
+    <td class="functTableCell">
+	Creates a link of the specified type from a new name to a current name.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Glink2<br>h5glink2_f</code> 
+    </td>
+    <td class="functTableCell">
+	Creates a link of the specified type from a new name to a current name.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gunlink<br>h5gunlink_f</code> 
+    </td>
+    <td class="functTableCell">
+	Removes a link to an object from a group.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gmove<br>h5gmove_f</code> 
+    </td>
+    <td class="functTableCell">
+	Renames an object within an HDF5 file.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gmove2<br>h5gmove2_f</code> 
+    </td>
+    <td class="functTableCell">
+	Renames an object within an HDF5 file.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Giterate<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Iterates an operation over the entries of a group.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>(none)<br>h5gget_obj_info_idx_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns the name and type of a specified group member.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>(none)<br>h5gn_members_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns the number of group members.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gget_objinfo<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Returns information about an object.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gget_num_objs<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Returns number of objects in the specified group.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gget_objname_by_idx<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Returns a name of an object specified by its index.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Gget_objtype_by_idx<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Returns the type of an object specified by its index.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Gget_linkval<br>h5gget_linkval_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Returns the name of the object that the specified symbolic 
+	link points to.
+    </td>
+  </tr>
+</table>
+  
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="ProgModel">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>5. Programming Model: Working with Groups</h3>
+
+
+  <p>The programming model for working with groups is as follows:
+
+  <ol>
+      <li>Create a new group or open an existing one. 
+      <li>Perform the desired operations on the group.  
+      <ul>
+          <li>Create new objects in the group.
+          <li>Insert existing objects as group members.
+	  <li>Delete existing members.
+	  <li>Open and close member objects.
+	  <li>Access information regarding member objects.
+	  <li>Iterate across group members.
+	  <li>Manipulate links.
+      </ul>
+      <li>Terminate access to the group.  (Close the group.)
+  </ol>
+ 
+<a name="ModelCreateGroup"> 
+<h4>5.1 Creating a Group</h4></a>
+ 
+  <p>
+  To create a group, use <code>H5Gcreate</code>, specifying the 
+  location and the path of the new group. 
+  The location is the identifier of the file or the group in a file
+  with respect to which the new group is to be identified.  
+  The path is a string that provides wither an absolute path or a 
+  relative path to the new group (see section 2.3, 
+  &ldquo;<a href="#PathNames">HDF5 Path Names</a>&rdquo;).  
+  A path that begins with a slash (<code>/</code>) is an absolute path
+  indicating that it locates the new group from the root group of the 
+  HDF5 file.  
+  A path that begins with any other character is a relative path. 
+  When the location is a file, a relative path is a path from that 
+  file's root group; 
+  when the location is a group, a relative path is a path from that group.
+  
+  <p>
+  The sample code in Figure 9 creates three groups. 
+  The group <code>Data</code> is created in the root directory;  
+  two groups are then created in <code>/Data</code>, 
+  one with absolute path, the other with a relative path.</p>
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  hid_t file;
+  file = H5Fopen(....);
+
+  group = H5Gcreate(file, "/Data", 0);
+  group_new1 = H5Gcreate(file, "/Data/Data_new1", 0);
+  group_new2 = H5Gcreate(group, "Data_new2", 0);
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 9</span>: 
+    Creating three new groups
+</td></tr>
+</table>
+
+<!-- editingComment
+<span class="editingComment">
+      [ [ [ 
+      Add figures:
+          picture of above resulting file and 
+          corresponding h5dump output. 
+      ] ] ]
+  </span>
+-->
+
+  <p>
+  The third <code>H5Gcreate</code> parameter optionally specifies 
+  how much file space to reserve to store the names that will 
+  appear in this group.  If a non-positive value is supplied, 
+  a default size is chosen.  
+<!-- editingComment
+  <span class="editingComment"> 
+      (See XXX for an explanation of performance tuning.)
+      </span>
+-->  
+
+<!-- NEW PAGE -->
+<h4>5.2 Opening a group and accessing an object in that group</h4>
+  
+  Though it is not always necessary, it is often useful to explicitely
+  open a group when working with objects in that group.
+  Using the file created in the example above,  
+  Figure 10 illustrates the use of a previously-acquired file identifier 
+  and a path relative to that file to open the group <code>Data</code>. 
+
+  <p>
+  Any object in a group can be also accessed by its absolute or relative path. 
+  To open an object using a relative path, an application must first open 
+  the group or file on which that relative path is based.  
+  To open an object using an absolute path, the application can use any 
+  location identifier in the same file as the target object;
+  the file identifier is commonly used, but object identifier for any object 
+  in that file will work.  
+  Both of these approaches are illustrated in Figure 10 offers example code in the first two lines 
+  to open a group then open a dataset with the appropriate relative path
+  to open the same 
+  dataset with an abslolute path and .
+  
+  <p>
+  Using the file created in the examples above, 
+  Figure 10 provides example code illustrating the use of both 
+  relative and absolute paths to access an HDF5 data object.  
+  The first sequence (two function calls) uses a previously-acquired 
+  file identifier to open the group <code>Data</code> 
+  then uses the returned group identifier and a relative path to open 
+  the dataset <code>CData</code>.  
+  The second approach (one function call) uses the same previously-acquired 
+  file identifier and an absolute path to open the same dataset. 
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  group = H5Gopen(file, "Data");
+  dataset1 = H5Dopen(group, "CData");
+  
+  dataset2 = H5Dopen(file, "/Data/CData");
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 10</span>: 
+    Open a dataset with relative and absolute paths
+</td></tr>
+</table>
+
+
+<h4>5.3 Creating a dataset in a specific group</h4>
+  
+  Any dataset must be created in a particular group. 
+  As with groups, a dataset may be created in a particular group 
+  by specifying its absolute path or a relative path. 
+  Figure 11 illustrates both approaches to creating a 
+  dataset in the group <code>/Data</code>.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+   dataspace = H5Screate_simple(RANK, dims, NULL);
+   dataset1 = H5Dcreate(file, "/Data/CData", H5T_NATIVE_INT,
+                     dataspace, H5P_DEFAULT);
+
+   group = H5Gopen(file, "Data");
+   dataset2 = H5Dcreate(group, "Cdata2", H5T_NATIVE_INT,
+                     dataspace, plist);
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 11</span>:
+    Create a dataset with absolute and relative paths
+</td></tr>
+</table>
+
+<!-- NEW PAGE -->
+<h4>5.4 Closing a group</h4>
+  
+  To ensure the integrity of HDF5 objects and to release system 
+  resources, an application should always call the appropriate 
+  close function when it is through working with an HDF5 object. 
+  In the case of groups, <code>H5Gclose</code> ends access to the group 
+  and releases any resources the HDF5 library has maintained 
+  in support of that access, including the group identifier.  
+  
+  <p> 
+  As illustrated in Figure 12, all that is required for an 
+  <code>H5Gclose</code> call is the group identifier acquired when 
+  the group was opened; there are no relative versus absolute path 
+  considerations.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  herr_t status;
+  status = H5Gclose(group);
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 12</span>: 
+    Close a group
+</td></tr>
+</table>
+
+  <p>
+  A non-negative return value indicates that the group was successuflly 
+  closed and the resources released; a negative return value indicates that
+  the attempt to close the group or release resources failed.
+
+<!-- editingComment
+  <span class="editingComment">  
+         [ [ [ 
+	 Return values have been decidely under-discussed prior to this mention. 
+	 Probably ought to be mentioned with the discussion of each new function call. 
+	 ] ] ]
+	 </span> 
+-->
+
+
+<h4>5.5 Creating Links</h4>
+
+  As previously mentioned, every object is created in a specific group. 
+  Once created, an object can be made a member of additional groups by means  
+  of links created with <code>H5Glink</code> or <code>H5Glink2</code>. 
+  
+  <p>
+  A <span class="termDefinition">link</span> is, in effect, is a path 
+  by which the target object can be accessed; it therefore has a 
+  name which functions as a single path component. 
+  A link can be removed with an <code>H5Gunlink</code> call, effectively 
+  removing the target object from the group that contained the link
+  (assuming, of course, that the removed link was the only link to the 
+  target object in the group). 
+
+  <p>
+  <strong>Hard links</strong><br>
+  There are two kinds of links, <span class="termDefinition">hard links</span> 
+  and <span class="termDefinition">soft links</span>. 
+  Hard links are reference counted; soft links are not. 
+  When an object is created, a hard link is automatically created.
+  An object can be deleted from the file by removing all the hard links to it.
+
+  <p>
+  Working with the file from the previous examples, 
+  the code in Figure 13 illustrates the creation of a hard link,
+  named <code>Data_link</code>, in the root group, <code>/</code>, 
+  to the group <code>Data</code>. 
+  Once that link is created, the dataset <code>Cdata</code> can be accessed 
+  via either of two absolute paths, <code>/Data/Cdata</code> or 
+  <code>/Data_Link/Cdata</code>.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+    status = H5Glink(file, H5G_LINK_HARD, "Data", "Data_link");
+
+    dataset1 = H5Dopen(file, "/Data_link/CData");
+    dataset2 = H5Dopen(file, "/Data/CData");
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 13</span> 
+</td></tr>
+</table>
+<!-- editingComment
+  <span class="editingComment">
+       [ [ [ 
+       Need H5Glink2 example? <br>
+       Add picture with both 'Data' and 'Data_link' links to 'CData'. 
+       Add also 14 and 15 pix.
+       ] ] ]
+       </span>
+-->
+
+  <p>
+  This and subsequent examples could also use <code>H5Glink2</code>,
+  which is used exactly like <code>H5Glink</code> except that a
+  second location identifier is specified and the new object name 
+  is specified relative to the second location identifier.
+  
+<!-- NEW PAGE -->
+  <p>
+  Figure 14 shows example code to delete a link,
+  deleting the hard link <code>Data</code> from the root group. 
+  The group <code>/Data</code> and its members are still in the file, 
+  but they can no longer be accessed via a path using the component 
+  <code>/Data</code>.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+    status = H5Gunlink(file, "Data");
+
+    dataset1 = H5Dopen(file, "/Data_link/CData");
+               /*  This call should succeed; all path component still exist*/
+    dataset2 = H5Dopen(file, "/Data/CData");  
+               /*  This call will fail; the path component '/Data' has been deleted*/
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 14</span> 
+</td></tr>
+</table>
+
+  <p>
+  When the last hard link to an object is deleted, the object is no longer 
+  accessible (although space in the file may not be deallocated). 
+  Figure 15 shows deletion of the last link, <code>Data_link</code>,
+  to the group originally called <code>Data</code>. 
+  After the unlinking operation, the group is no longer accessible; 
+  consequently, the dataset <code>Cdata</code> is inaccessible.</p>
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+    status = H5Gunlink(file, "Data_link");
+
+    dataset = H5Dopen(file, "/Data_link/CData"); 
+              /*  This call will fail; the dataset is no longer accessible */
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 15</span> 
+</td></tr>
+</table>
+
+  <p>
+  <strong>Soft links</strong><br>
+  <span class="termDefinition">Soft links</span> are objects that assign a name 
+  in a group to a path. 
+  Notably, the target object is determined only when the soft link is accessed, 
+  and may, in fact, not exist.  Soft links are not reference counted, 
+  so there may be one or more soft links to an object. 
+
+  <p>
+  Like hard links, soft links are also created and deleted with 
+  the <code>H5Glink</code>, <code>H5Glink2</code>, and 
+  <code>H5Gunlink</code> functions,  
+  except that soft links are created as type <code>H5G_LINK_SOFT</code> 
+  while hard links are created as type <code>H5G_LINK_HARD</code>.
+
+<!-- NEW PAGE -->
+  <p>
+  Returning to our sample file as it was initially created, 
+  Figure 16 shows examples of creating two soft links to the 
+  group <code>/Data</code>. 
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+    status = H5Glink(file, H5G_LINK_SOFT, "Data", "Soft2");
+    status = H5Glink(file, H5G_LINK_SOFT, "Soft2", "Soft3");
+
+    dataset = H5Dopen(file, "/Soft2/CData");
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 16</span> 
+</td></tr>
+</table>
+
+  <p>
+  With the soft links defined in Figure 16, the dataset <code>CData</code> 
+  in the group <code>/Data</code> can now be opened with any of the names 
+  <code>/Data/CData</code>, <code>/Soft2/CData</code>, or 
+  <code>/Soft2/CData</code>.
+
+  <p>
+  <strong>Not regarding hard links versus soft links</strong><br>
+  Note that an object's existence in a file is governed by the presence
+  of at least one hard link to that object.
+  If the last hard link to an object is removed, the object is removed 
+  from the file and any remaining soft link becomes a 
+  <span class="termDefinition">dangling link</span>, a link whose target
+  object does not exist.
+  
+  <p>
+  <strong>Moving or renaming objects, and a warning</strong><br>
+  An object can be renamed by changing the name of a link to it with 
+  either <code>H5Gmove</code> or <code>H5Gmove2</code>. 
+  This has the same effect as creating a new link with the new name and 
+  deleting the link with the old name.
+  
+<!-- editingComment
+  <p>
+  <span class="editingComment">
+        [ [ [ 
+	Need H5Gmove example (and H5Gmove2?). 
+	] ] ]
+        </span>
+-->
+
+  <p>
+  Exercise caution in the use of <code>H5Gmove</code>, <code>H5Gmove2</code> 
+  and <code>H5Gunlink</code> as these functions each include a step that 
+  unlinks a pointer to a dataset or group. 
+  If the link that is removed is on the only path leading to an HDF5 object, 
+  that object will become permanently inaccessible in the file. 
+
+  <p>Consider the following example: assume that the group <code>group2</code> 
+  can only be accessed via the following path, where <code>top_group</code> 
+  is a member of the file&lsquo;s root group: <br>
+  
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/top_group/group1/group2/</code>
+
+  <p>
+  Using <code>H5Gmove</code> or <code>H5Gmove2</code>, <code>top_group</code> 
+  is renamed to be a member  of <code>group2</code>. At this point, 
+  since <code>top_group</code> was the only route from the root group to 
+  <code>group1</code>, there is no longer a path by which one can access 
+  <code>group1</code>, <code>group2</code>, or any member datasets. 
+  And since <code>top_group</code> is now a member of <code>group2</code>,
+  <code>top_group</code> itself and any member datasets have thereby also 
+  become inaccessible.
+  
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DiscoverInfo">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>6. Discovering Information about Objects</h3>
+
+  There is often a need to retrieve information about a particular object.
+  The <code>H5Gget_objinfo</code> function fills this niche by returning a 
+  description of the specified object in an <code>H5G_stat_t</code> structure.
+  The structure contains the following information: 
+  <ul> 
+      <li>The file and object identifiers, which together provide unique 
+          identification of the object
+<!-- editingComment
+	  <span class="editingComment"><br>
+	        [ [ [ 
+		Why are there 2 of each? 
+		] ] ]
+	        </span>
+-->
+      <li>The number of references, or hard links, to the object
+      <li>The object type: group, dataset, named datatype, or soft link, 
+          returned as <code>H5G_GROUP</code>, <code>H5G_DATASET</code>, 
+	  <code>H5G_TYPE</code>, or <code>H5G_LINK</code>, respectively
+      <li>The modification time (datasets only)
+      <li>A link length value; the length of the path name of a symbolic 
+          link's target object 
+	  (returned for symolic links, or soft links, only)
+  </ul>
+  
+  <p>
+  The <code>H5G_stat_t</code> structure specification and the 
+  <code>H5Gget_objinfo</code> function signature appear in Figure 17.
+  The <code>H5G_stat_t</code> structure elements are as listed above.
+  The <code>H5Gget_objinfo</code> function parameters are used follows:
+  <ul>
+      <li><code><em>loc_id</em></code> specifies the object for which 
+          information being sought.
+      <li>A path to the object is returned in <code><em>name</em></code>.
+          <!--  editingComment
+	        "A path"  -- Per Quincey, this tries to be the first path, 
+	        but it becomes problematic when an object has moved around much.
+	  -->
+      <li><code><em>follow_link</em></code> is a Boolean value specifying
+          whether to follow a soft link and open the target object 
+	  (<code>TRUE</code>) or not (<code>FALSE</code>).
+      <li>The <code>H5G_stat_t</code> struct is returned in the
+          <code><em>statbuf</em></code> buffer.   
+  </ul> 
+    
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  typedef struct H5G_stat_t {
+                             unsigned long fileno[2];
+                             unsigned long objno[2];
+                             unsigned nlink;
+                             int type;
+                             time_t mtime; 
+                             size_t linklen;
+                          } H5G_stat_t
+
+  herr_t H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *statbuf )
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 17</span>: 
+    The <code>H5G_stat_t</code> struct specification and 
+    the <code>H5Gget_objinfo</code> function signature
+</td></tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Figure 18 provides a code example that prints the local paths 
+  to the members of a group, following a soft link when it is found.    
+  
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre><code>
+    H5G_stat_t statbuf;
+
+    H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
+    switch (statbuf.type) {
+    case H5G_GROUP: 
+         printf(" Object with name %s is a group \n", name);
+         break;
+    case H5G_DATASET: 
+         printf(" Object with name %s is a dataset \n", name);
+         break;
+    case H5G_TYPE: 
+         printf(" Object with name %s is a named datatype \n", name);
+         break;
+    case H5G_LINK: 	
+        lname = (char *)malloc(statbuf.linklen);
+
+         H5Gget_linkval(loc_id, name, statbuf.linklen, lname);
+         printf(" Object with name %s is a link to %s \n", name, lname);
+         H5Gget_objinfo(loc_id, name, TRUE, &statbuf);
+         switch (statbuf.type) {
+             case H5G_GROUP: 
+                 printf(" Target of link name %s is a group \n", name);
+                 break;
+            case H5G_DATASET: 
+                 printf(" Target of link name %s is a dataset \n", name);
+                 break;
+            case H5G_TYPE: 
+                 printf(" Target of link name %s is a named datatype \n", name);
+                 break;
+           case H5G_LINK: 
+                printf(" Target of link name %s is a soft link \n", name);
+                break;
+           default:
+              printf(" Unable to identify target ");
+           }
+          break;
+    default:
+         printf(" Unable to identify an object ");
+    }
+</code></pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 18</span>:
+    Printing a specified object's name and type and, 
+    in the case of a link, opening the target object
+</td></tr>
+</table>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DiscoverGrObjs">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>7. Discovering Objects in a Group</h3>
+
+
+  There are two means of examining all the objects in a group.
+  The first, <code>H5Giterate</code>, is discussed below
+  <code>H5Giterate</code> is useful both with a single group and 
+  in an iterative process that examines an entire file 
+  or section of a file (the contents of a group, the contents 
+  of all the groups that are members of that group, etc.)
+  and acts on objects as they are encountered.
+   
+  <p>
+  An alternative approach is to determine the number of objects
+  in a group then approach them one at a time.  
+  This is accomplished with the functions
+  <code>H5Gget_num_objs</code>,
+  <code>H5Gget_objname_by_idx</code>, and
+  <code>H5Gget_objtype_by_idx</code>.
+  
+  <p>
+  <code>H5Gget_num_objs</code> retrieves the number of objects,
+  say <code><em>n</em></code>, in the group.  
+  The values from <code>0</code> through <code><em>n</em> - 1</code>
+  can then be used as indices to access the members of the group.
+  For example, 
+  an index value of <code>0</code> identifies the first member,
+  an index value of <code>1</code> identifies the second member, and
+  an index value of <code><em>n</em> - 1</code> identifies the last member.
+  (Note that HDF5 objects do not have permanent indices; 
+  these values are strictly transient and may be different each time a 
+  group is opened.)
+  
+  <p>
+  Using the index described above, the name and object type can
+  be retrieved using <code>H5Gget_objname_by_idx</code> and
+  <code>H5Gget_objtype_by_idx</code>, respectively.
+  With the name and object type, an application can proceed to
+  operate as necessary on all or selected group members.
+
+<!--  editingComment
+      Need examples (and maybe illustration?).
+-->
+  
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DiscoverAll">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>8. Discovering All the Objects in the File</h3>
+
+
+  The structure of an HDF5 file is 
+  <span class="termDefinition">self-describing</span>, 
+  meaning that an application can navigate an HDF5 file 
+  to discover and understand all the objects it contains. 
+  This is an iterative process wherein the structure is traversed as a graph, 
+  starting at one node and recursively visiting linked nodes. 
+  To explore the entire file, the traversal should start at the root group.
+  
+  <p>
+  The function <code>H5Giterate</code>, used to discover the members of 
+  a group, is the key to the discovery process. 
+  An application calls <code>H5Giterate</code> with a pointer to a 
+  callback function (see Figure 19). 
+  The HDF5 library iterates through the group specified by the 
+  <code>loc_id</code> and <code>name</code> parameters, 
+  calling the callback function once for each group member. 
+  The callback function must have the signature defined by 
+  <code>H5G_iterate_t</code>. 
+  When invoked, the arguments to the callback function are 
+      the group being iterated, 
+      the group member&rsquo;s name (the object name), and 
+      a pointer set by the user program. 
+  The callback function is part of the application, 
+  so it can execute any actions the program requires 
+  to discover and store information about the objects.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<pre>
+  typedef herr_t (*H5G_iterate_t)(hid_t group_id, const char *member_name, 
+      void *operator_data);
+  H5Giterate(hid_t loc_id, const char * name, int *idx, H5G_iterate_t operator, 
+      void *operator_data );
+</pre>
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 19</span>
+</td></tr>
+</table>
+
+  <p>
+  Note that the <code>H5Giterate</code> function is following the links 
+  from a single group; 
+  these links correspond to the components in a path name. 
+  To iterate over an entire substructure, <code>H5Giterate</code> must be 
+  recursively on every member of the original group that turns out to also
+  be a group.
+  To iterate over an entire file, the first call to <code>H5Giterate</code> 
+  must iterate over the root group; subsequent calls to <code>H5Giterate</code> 
+  must then iterate over every subsequent group.
+  
+<!-- NEW PAGE -->
+  <p>
+  Figure 20 illustrates the relationship between the calling module
+  of the application, the callback function (<code>do_obj</code>), 
+  and calls to the HDF5 library.  
+  In this diagram, &ldquo;Global Variables and Functions&rdquo; 
+  symbolizes the fact that the callback function executes as part 
+  of the application, and may therefore call functions and 
+  update data structures to describe the file and its objects.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig20.JPG">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figureNumber>Figure 20</span>:
+    Relationships between a calling module, the callback function,
+    and the callback function's calls back to the HDF5 library
+</td></tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Figure 21 illustrates the sequence of events precipitated by an 
+  <code>H5Giterate</code> call. 
+  <ol>
+    <li>The application first calls <code>H5Giterate</code>, 
+        passing a pointer to a callback function 
+	(<code>do_obj</code> in the figure).
+        Note that the callback function is part of the application.
+    <li>The HDF5 library then iterates through the members of the group, 
+        calling the callback function in the application once for each
+	group member.
+    <li>When the iteration is complete, the <code>H5Giterate</code> 
+        call returns to the calling application.
+  </ol>
+  
+  <p> 
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig21.JPG">
+</td></tr>
+<tr>
+<td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 21</span>
+</td></tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Figure 22 shows the sequence of calls involved in one iteration of a 
+  callback function that employs the HDF5 function <code>H5Gget_objinfo</code> 
+  to discover properties of the object that is the subject of the current step 
+  of the iteration (e.g., the object&rsquo;s type and reference count). 
+  The HDF5 library then calls the application&rsquo;s callback function 
+  <code>do_obj()</code>, which in turn calls the HDF5 library to get the 
+  object information. 
+  The callback function can process the information as needed, 
+  accessing any function or data structure of the application program, 
+  and it can call the HDF5 library again to, for example, 
+  iterate through a group member that is itself a group.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig22.JPG">
+</td></tr>
+<tr>
+    <td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 22</span> </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Over the course of a successful <code>H5Giterate</code> call, 
+  the HDF5 library will call the application&rsquo;s callback function 
+  once for each member of the group, as illustrated in Figure 23. 
+  At each iteration, the callback function must return a status which
+  implies a subsequent course of action: <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+      <code>1&nbsp;&nbsp;</code>
+      Continue iterating.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+      <code>0&nbsp;&nbsp;</code>
+      Stop iterating and return to the caller.<br>
+  Once the iteration has been completed, <code>H5Giterate</code> returns 
+  to the calling application.</p>
+
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig23.JPG">
+</td></tr>
+<tr>
+    <td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 23</span> </td>
+  </tr>
+</table>
+
+  <p>
+  The overall sequence of calls can become quite complex, especially when 
+  the callback function in turn calls the HDF5 library. 
+  Figure 24 provides a sequence diagram for a case similar to the simple
+  case described above: 
+  <ol>
+      <li>The calling program invokes <code>H5Giterate</code> on a group,
+      <li>which calls <code>do_obj</code> once for each group members
+          (three group members in this case).
+      <li>The <em>do_obj</em> callback function in turn calls 
+          <code>H5Gget_objinfo</code> each time it is invoked to discover 
+	  information about each object.
+  </ol> 
+    
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig24.JPG">
+</td></tr>
+<tr>
+    <td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 24</span> </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Recursively iterating through the members of every group will result in 
+  visiting an object once for each link to it. 
+  This may result in visiting an object more than once. 
+  The calling application must be prepared to recognize this case and 
+  handle it appropriately.  
+  If an action should be undertaken only once per object, 
+  the application must make sure that it does not repeat the action for an 
+  object with two links. 
+  For example, if the objects are being copied, it is important that 
+  an object with two names be copied once, not twice.  
+  Figure 25 illustrates this case.
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td colspan="2" align="center" class="fullImgTableImgTopCell"> 
+      <img src="Images/groups_fig25_a.JPG"><br>
+      a) The required action is to copy all the objects from one file 
+      to another.</td>
+  </tr>
+  <tr valign="top"> 
+    <td align="center" class="fullImgTableImgBottomCell"> 
+      <img src="Images/groups_fig25_b.JPG" align="left">      
+    </td>
+    <td align="center" class="fullImgTableImgBottomCell"> 
+      <img src="Images/groups_fig25_c.JPG" align="right">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+	  b) A shared dataset should not be copied twice.
+	</td>
+	<td align="center">
+	  c) A shared dataset should be copied once and 
+	  the apppropriate link should be created.
+	</td>
+  </tr>
+  <tr> 
+    <td height="24" colspan="2" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 25</span> 
+    </td>
+  </tr>
+</table>
+
+  <p>
+<!--
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig21.JPG">
+</td></tr>
+<tr>
+    <td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 26</span> </td>
+  </tr>
+</table>
+-->
+
+<!-- editingComment  Revisit right-alignment of following table. 
+     It's centered for now simply because right-alignment yields an 
+     over-write that I don't have time to fix right now.   
+     Remove the width definition at that point.                  -->
+<table x-use-null-cells
+		cellspacing=0
+		width=600
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/groups_fig26.JPG">
+</td></tr>
+<tr>
+    <td height="24" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 26</span> </td>
+  </tr>
+</table>
+
+  There is a second important case when the twice-visited member is a group. 
+  Any Group with more than one link to it can potentially be part of a 
+  circular path. 
+  I.e., recursively iterating through member groups may eventually bring the 
+  the iteration back to the current group and may generate an infinite path
+  within the file&rsquo;s linked structure.
+  To embark upon the resulting infinite iteration would clearly be unacceptable
+  in the general case. 
+  Figure 26 illustrates an HDF5 file with such potential.
+    
+  <p>
+  In such a case, the callback function should check the reference count in 
+  the <code>H5G_stat_t</code> buffer as returned by <em>H5Gget_objinfo</em>. 
+  If the count is greater than one, there is more than one path to 
+  the object in question and it may be in a loop; 
+  the program should act accordingly. 
+  For example, it may be necessary to construct a global table of all the 
+  objects visited. 
+  Note that the object&rsquo;s name is not unique, but the full path and the
+  object number (found in the above-mentioned <code>H5G_stat_t</code> buffer) 
+  are unique within an individual HDF5 file.
+  
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="Examples">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>9. Examples of File Structures</h3>
+
+  This section presents several samples of HDF5 file structures.
+  
+  <p>
+<table x-use-null-cells
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td align="center" class="fullImgTableImgTopCell"> 
+      <img src="Images/groups_fig27_a.JPG">
+    </td><td align="center" valign="top" class="fullImgTableImgTopCell">&nbsp;&nbsp;</td>
+    <td align="center" class="fullImgTableImgTopCell">
+      <img src="Images/groups_fig27_b.JPG"> 
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+    a) The file contains three groups: 
+    the root group, <code>/group1</code>, and <code>/group2</code>.
+    </td><td align="center" valign="top">&nbsp;&nbsp;</td>
+    <td align="center" width="50%">
+    b) The dataset <code>dset1</code> (or <code>/group1/dset1</code>) 
+    is created in <code>/group1</code>.
+    </td> 
+  </tr>
+  <tr valign=top> 
+    <td align="center"> 
+      <img src="Images/groups_fig27_aa.JPG">
+    </td><td align="center" valign="top">&nbsp;&nbsp;</td>
+    <td align="center">
+      <img src="Images/groups_fig27_bb.JPG"> 
+    </td>
+  </tr>
+  <tr> 
+    <td align="center" valign="top" class="fullImgTableImgBottomCell">
+    c) A link named <code>dset2</code> to the same dataset 
+    is created in <code>/group2</code>. 
+    </td><td align="center" valign="top" class="fullImgTableImgBottomCell">&nbsp;&nbsp;</td>
+    <td align="center" class="fullImgTableImgBottomCell">
+    d) The link from <code>/group1</code> to <code>dset1</code> is removed. 
+    The dataset is still in the file, but can be accessed only as 
+    <code>/group2/dset2</code>.
+    </td>
+  </tr>
+  <tr> 
+    <td height="24" colspan="3" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 27</span> 
+    </td>
+  </tr>
+</table>
+  
+  <p>
+  Figure 27 shows examples of the structure of a file with three groups 
+  and one dataset. 
+  The file in Figure 27a contains three groups: 
+  the root group and two member groups. 
+  In Figure 27b, the dataset <code>dset1</code> has been created 
+  in <code>/group1</code>. 
+  In Figure 27c, a link named <code>dset2</code> from <code>/group2</code> 
+  to the dataset has been added. 
+  Note that there is only one copy of the dataset; 
+  there are two links to it and it can be accessed either as 
+  <code>/group1/dset1</code> or as <code>/group2/dset2</code>.
+  
+<p>
+<!-- NEW PAGE -->
+  Figure 27d illustrates that one of the two links to the dataset 
+  can be deleted. 
+  In this case, the link from <code>/group1</code> has been removed.  
+  The dataset itself has not been deleted; it is still in the file 
+  but can only be accessed as <code>/group1/dset2</code>.</p>
+  
+  <p>
+<table x-use-null-cells
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td align="center" class="fullImgTableImgTopCell"> 
+      <img src="Images/groups_fig28_a.JPG">
+    </td><td align="center" valign="top" class="fullImgTableImgTopCell">&nbsp;&nbsp;</td>
+    <td align="center" class="fullImgTableImgTopCell">
+      <img src="Images/groups_fig28_b.JPG"> 
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+    a) <code>dset1</code> has two names: 
+    <code>/group2/dset1</code> and <code>/group1/GXX/dset1</code>.
+    </td><td>&nbsp;&nbsp;</td>
+    <td align="center" width="50%">
+    b) <code>dset1</code> again has two names: 
+    <code>/group1/dset1</code> and <code>/group1/dset2</code>.
+    </td> 
+  </tr>
+  <tr valign=top> 
+    <td align="center"> 
+      <img src="Images/groups_fig28_c.JPG">
+    </td><td>&nbsp;&nbsp;</td>
+    <td align="center">
+      <img src="Images/groups_fig28_d.JPG"> 
+    </td>
+  </tr>
+  <tr> 
+    <td align="center" valign="top" class="fullImgTableImgBottomCell">
+    c) <code>dset1</code> has three names: 
+    <code>/group1/dset1</code>, <code>/group2/dset2</code>, 
+    and <code>/group1/GXX/dset2</code>.
+    </td><td align="center" valign="top" class="fullImgTableImgBottomCell">&nbsp;&nbsp;</td>
+    <td align="center" class="fullImgTableImgBottomCell">
+    d) <code>dset1</code> has an infinite number of available path names.
+    </td>
+  </tr>
+  <tr> 
+    <td height="24" colspan="3" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 28</span> 
+    </td>
+  </tr>
+</table>
+
+  <p>
+  Figure 28 illustrates loops in an HDF5 file structure. 
+  The file in Figure 28a contains three groups and a dataset;
+  <code>group2</code> is a member of the root group and of the 
+  root group&rsquo;s other member group, <code>group1</code>. 
+  <code>group2</code> thus can be accessed by either of two paths: 
+  <code>/group2</code> or <code>/group1/GXX</code>. 
+  Similarly, the dataset can be accessed either as 
+  <code>/group2/dset1</code> or as <code>/group1/GXX/dset1</code>.
+
+  <p>
+  Figure 28b illustrates a different case: the dataset is a 
+  member of a single group but with two links, or names, in that group. 
+  In this case, the dataset again has two names,
+  <code>/group1/dset1</code> and <code>/group1/dset2</code>.
+  
+  <p>
+<!-- NEW PAGE -->
+  In Figure 28c, the dataset <code>dset1</code> is a member of two groups, 
+  one of which can be accessed by either of two names. 
+  The dataset thus has three path names: <code>/group1/dset1</code>, 
+  <code>/group2/dset2</code>, and <code>/group1/GXX/dset2</code>. 
+  
+  <p>
+  And in Figure 28d, two of the groups are members of 
+  each other and the dataset is a member of both groups. 
+  In this case, there are an infinite number of paths to the dataset 
+  because <code>GXX</code> and <code>GYY</code> can be traversed 
+  any number of times on the om the root group, <code>/</code>, 
+  way frto the dataset.
+  This can yield a path name such as 
+  <code>/group1/GXX/GYY/GXX/GYY/GXX/dset2</code>.
+
+  <p>
+<table x-use-null-cells
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td align="center" class="fullImgTableImgTopCell"> 
+      <img src="Images/groups_fig29_a.JPG">
+    </td><td align="center" valign="top" class="fullImgTableImgTopCell">&nbsp;&nbsp;</td>
+    <td align="center" class="fullImgTableImgTopCell">
+      <img src="Images/groups_fig29_b.JPG"> 
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="48%">
+    a) The file contains only hard links.
+    </td><td>&nbsp;&nbsp;</td>
+    <td align="center" valign="top" width="48%">
+    b) A soft link is added from <code>group2</code> 
+    to <code>/group1/dset1</code>.
+    </td> 
+  </tr>
+  <tr valign=top> 
+    <td align="center"> 
+      <img src="Images/groups_fig29_c.JPG">
+    </td><td>&nbsp;&nbsp;</td>
+    <td align="center">
+      <img src="Images/groups_fig29_d.JPG"> 
+    </td>
+  </tr>
+  <tr> 
+    <td align="center" valign="top" class="fullImgTableImgBottomCell">
+    c) A soft link named <code>dset3</code> is added with a target 
+    that does not yet exist.
+    </td><td align="center" valign="top" class="fullImgTableImgBottomCell">&nbsp;&nbsp;</td>
+    <td align="center" valign="top" class="fullImgTableImgBottomCell">
+    d) Tht target of soft link is created or linked.
+    </td>
+  </tr>
+  <tr> 
+    <td height="24" colspan="3" align=center class="fullImgTableCapCell"> 
+    <span class=figureNumber>Figure 29</span> 
+    </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>
+  Figure 29 takes us into the realm of soft links.
+  The original file, in Figure 29a, contains only three hard links.
+  In Figure 29b, a soft link named <code>dset2</code> from 
+  <code>group2</code> to <code>/group1/dset1</code> has been created, 
+  making this dataset accessible as <code>/group2/dset2</code>.
+  
+  <p>
+  In Figure 29c, another soft link has been created in <code>group2</code>.  
+  But this time the soft link, <code>dset3</code>, points to a target object 
+  that does not yet exist.  
+  That target object, <code>dset</code>, has been added in Figure 29d 
+  and is now accessible as either <code>/group2/dset</code> or
+  <code>/group2/dset3</code>.
+   
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="Appendix">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- editingComment -- Removed until we can make sure it's (1) finished and (2) right.
+
+<h3 class=pagebefore>10. Appendix:  Mapping HDF5 to a Graph</h3>
+
+<dir>
+
+  <span class="editingComment">
+        [ [ [
+	Unless someone says it ought to be otherwise, 
+	this section will be commented out for this release.
+	] ] ]
+	</span>
+  <p>{<em>Is this material wanted?  It will take some effort to flesh this out 
+  and make sure it is correct.</em>}</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="ColumnHdr"> 
+        <p><span class=TableHead>Box 1:  An HDF5 file can be mapped to a 
+	rooted directed graph.</span>	
+	<p>A rooted, directed graph can be defined as a 
+	set: G = {V(G), A(G), <em>root</em> },</p>
+	
+        <dir>
+	<p>V(G) = the set of vertices
+	<br>A(G) = the set of arcs	
+	<p>The graph is directed. By definition <em>a</em> &#949; A(G): 
+	<em>a</em> = (<em>s, d</em>), for some source vertex <em>s</em> 
+	in V(G) and destination vertex <em>d</em> &#949; V(G).	
+	<p><em>root</em> &#949; V(G), <em>root</em> is a distinguished node.
+	</dir>
+	
+	<p>HDF5 can be mapped to this graph:
+	
+	<dir>
+	<p>An HDF5 file is a graph: {V(G), A(G), <em>root</em>}
+	<p>V(G) = { Named Objects } = { Datasets Groups Named Datatypes }
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vertices (nodes) are labeled with <em>object ids</em>.
+	<br>A(G) = { hard links ]
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Arcs are labeled with <em>path components</em>.
+	<p>The root group is the <em>root</em> vertex. The root vertex is distinguished by the special path name, "/". By convention, the root group has in-degree of 1.
+	</dir>
+	
+	<p>Some properties of the HDF5 file graph:
+	<p>1. The HDF5 file is a connected graph.
+	
+	<dir>
+	<p>a) Every node (vertex) must have an in-degree of 1.
+	<p>b) When a link is deleted, if the in-degree of the node becomes 0, the node is permanently inaccessible and may be deleted.
+	</dir>
+	
+	<p>2. A Group may have out-degree 0.
+	<p>3. A Dataset or Named Datatype has an out-degree = 0.
+	<p>4. The HDF5 file may contain loops, cycles, and circuits.
+	
+	<dir>
+	<p>A loop is an arc with the same source and destination: <em>a</em> = (<em>v, v</em>).
+	<p>A <em>path</em> is a sequence of arcs, { <em>a&sub1;, a&sub2;, ... </em>}, such that the source of each arc is the destination of the previous arc, except for the first and last arc.
+	<p>A <em>circuit</em> is a path for which the last vertex is the same as the first vertex.
+	<p>If the graph is considered undirected, so that:
+	<br>&nbsp;&nbsp;&nbsp;For any <em>a&sub1;</em> = (<em>v, w</em>), and <em>a&sub2;</em> = (<em>w, v</em>), <em>w</em>, <em>v</em> &#949; V(G) <em>a&sub1;</em> = <em>a&sub2;</em>.
+	<p>....{finish this...}
+	</dir>	
+    </td>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="ColumnHdr"> 
+        <p><span class=TableHead>Box 2: Applying graph algorithms to HDF5</span>
+	<p>It follows from the observation that an HDF5 can be mapped to a rooted directed graph, that graph algorithms can be applied to the structure of the HDF5 file. For example, the objects of the HDF5 file can be visited by "traversing" the graph.
+	<h4><em>Algorithm 1: Depth First Traversal</em></h4>
+	<pre>
+	      visit_df (Group g) {
+                 process (g);  // a pre-order traversal
+                 for all m in g.members() {
+                         if (m is a group) {
+                                  visit_df(m);  // recur
+                         } else {
+                                 process (m);  //  m is a dataset or named datatype
+                         }
+                 }
+        }
+	</pre>	
+    </td>
+</table>
+
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</dir>
+
+-->
+
+<br><br><br>
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+
+<a name="FootNote"><hr width="200px" align="left"></a>
+
+  <p><font size="-1"><sup><a href="#SupScript1">1</a></sup>It could be said that 
+  HDF5 extends the organizing concepts of a file system to the internal structure 
+  of a single file.</font></p>
+  
+  <p><font size="-1"><sup><a href="#SupScript2">2</a></sup>As of HDF5-1.4, the 
+  storage used for an object is reclaimed, even if all links 
+  are deleted.</font></p>
+
+<!-- HEADER RIGHT " " -->
+  
+</body>
+</html>
+

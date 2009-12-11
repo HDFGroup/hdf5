@@ -1,0 +1,48 @@
+<table x-use-null-cells
+		class="genTable"
+		width=600
+		height=145
+		cellspacing=0>
+<col style="width: 23.025%;">
+<col style="width: 76.975%;">
+
+<tr valign=top>
+<td class="genTableLeftHdr"
+	width=23.025%>
+<p><span class=TableHead>LEFT COLUMN TITLE</span></td>
+<td class="genTableRightHdr"
+	width=76.975%>
+<p><span class=TableHead>RIGHT COLUMN</span></td></tr>
+
+<tr valign=top>
+<td class="genTableCell"
+	width=23.025%>
+<p>(1)</td>
+<td class="genTableCell"
+	width=76.975%>
+<p>(2)</td></tr>
+
+<tr valign=top>
+<td class="genTableCell"
+	width=23.025%>
+<p>(1)</td>
+<td class="genTableCell"
+	width=76.975%>
+<p>(2)</td></tr>
+
+<tr valign=top>
+<td class="genTableCell"
+	width=23.025%>
+<p>(1)</td>
+<td class="genTableCell"
+	width=76.975%>
+<p>(2)</td></tr>
+
+<tr valign=top>
+<td class="genTableBottom"
+	width=23.025%>
+<p>(1)</td>
+<td class="genTableBottom"
+	width=76.975%>
+<p>(2)</td></tr>
+</table>

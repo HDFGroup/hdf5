@@ -1,0 +1,75 @@
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0>
+<col style="width: 15%;">
+<col style="width: 15%;">
+<col style="width: 60%;">
+<col style="width: 10%;">
+
+<tr valign=top>
+<td class="ColumnLeftHdr">
+<p><span class=TableHead>Column A</span></td>
+<td class="ColumnHdr">
+<p><span class=TableHead>Column B</span></td>
+<td class="ColumnHdr">
+<p><span class=TableHead>Column C</span></td>
+<td class="ColumnRightHdr">
+<p><span class=TableHead>Column D</span></td>
+
+<tr valign=top>
+<td class="ColumnLeftCell">
+<p><code>(1)</code>
+</td>
+<td class="ColumnCell">
+<p>(2)</td>
+<td class="ColumnCell">
+<p>(3)</td>
+<td class="ColumnRightCell">
+<p>(4)</td></tr>
+
+<tr valign=top>
+<td class="ColumnLeftCell">
+<p><code>(1)</code>
+</td>
+<td class="ColumnCell">
+<p>(2)</td>
+<td class="ColumnCell">
+<p>(3)</td>
+<td class="ColumnRightCell">
+<p>(4)</td></tr>
+
+<tr valign=top>
+<td class="ColumnLeftCell">
+<p><code>(1)</code>
+</td>
+<td class="ColumnCell">
+<p>(2)</td>
+<td class="ColumnCell">
+<p>(3)</td>
+<td class="ColumnRightCell">
+<p>(4)</td></tr>
+
+<tr valign=top>
+<td class="ColumnLeftCell">
+<p><code>(1)</code>
+</td>
+<td class="ColumnCell">
+<p>(2)</td>
+<td class="ColumnCell">
+<p>(3)</td>
+<td class="ColumnRightCell">
+<p>(4)</td></tr>
+
+<tr valign=top>
+<td class="ColumnLeftBottom">
+<p><code>(1)</code>
+</td>
+<td class="ColumnBottom">
+<p>(2)</td>
+<td class="ColumnBottom">
+<p>(3)</td>
+<td class="ColumnRightBottom">
+<p>(4)</td></tr>
+
+</table>

@@ -1,0 +1,2646 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+
+<title>HDF5 User's Guide: Datasets</title>
+
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+
+
+<!--(Meta)==========================================================-->
+
+<!--(Links)=========================================================-->
+
+<!--( Begin styles definition )=====================================-->
+<link href="ed_styles/NewUGelect.css" rel="stylesheet" type="text/css">
+<!--( End styles definition )=======================================-->
+
+</head> 
+
+<body>
+
+<!-- HEADER LEFT "HDF5 User's Guide" -->
+<!-- HEADER RIGHT "HDF5 Datasets" -->
+
+<!--( TOC )=========================================================-->
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<table x-use-null-cells
+                align=right
+		width=240
+		cellspacing=0
+		class="tocTable">
+  <tr valign=top> 
+    <td class="tocTableHeaderCell"> <span class=TableHead>Chapter Contents</span></td>
+  </tr>
+  <tr valign=top> 
+    <td class="tocTableContentCell"> 
+    <a href="#Intro">1. Introduction</a> 
+    <br>
+    <a href="#FileFunctSums">2. File Function Summaries</a> 
+    <br>
+    <a href="#PModel">3. Programming Model</a> 
+    <br>
+    <a href="#DTransfer">4. Data Transfer</a> 
+    <br> 
+    <a href="#Allocation">5. Allocation of Space</a>
+    </td>
+  </tr>
+</table>
+")
+-->
+</SCRIPT>
+<!--(End TOC)=======================================================-->
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  ] ] ]</span>
+-->
+
+<!-- editingComment
+-->
+
+<div align="center">
+<a name="TOP">
+<h2>Chapter 4<br><font size="7">HDF5 Datasets</font></h2>
+</a>
+</div>
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Original title.  Which is proper?
+  <h2>10. Datasets I/O</h2>
+  ] ] ]</span>
+-->
+
+<a name="Intro">
+<h3>1. Introduction</h3>
+</a>
+
+  <p>An HDF5 dataset is an object composed of a collection of data elements, 
+  or raw data, and metadata that stores a description of the data elements, 
+  data layout, and all other information necessary to write, read, and interpret 
+  the stored data. From the viewpoint of the application the raw data is stored 
+  as a one-dimensional or multi-dimensional array of elements (the <em>raw data</em>), 
+  those elements can be any of several numerical or character types, small arrays, 
+  or even compound types similar to C structs. The Dataset object may have Attribute 
+  objects.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig1.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 1</span></td>
+  </tr>
+</table>
+
+<!-- editingComment
+  <span class="editingComment">
+  <p>Datatypes are described in  [ [ [ "Datatypes" ] ] ]. and in the [ [ [ "HDF5 
+  Datatypes" chapter in this guide ] ] ], Dataspace objects are described in 
+  [ [ [ Dataspace ] ] ], and Attributes are described in [ [ [ Attributes ] ] ].
+  </span>
+-->
+
+  <p>A Dataset objects is stored in a file in two parts: a header and a data array. 
+  The header contains information that is needed to interpret the array portion of 
+  the dataset, as well as metadata (or pointers to metadata) that describes or 
+  annotates the dataset. Header information includes the name of the object, its 
+  dimensionality, its number-type, information about how the data itself is stored 
+  on disk (the <em>storage layout</em>), and other information used by the library 
+  to speed up access to the dataset or maintain the file's integrity. 
+
+  <p>The HDF5 dataset interface, comprising the H5D functions, provides a mechanism 
+  for managing HDF5 datasets, including the transfer of data between memory and 
+  disk and the description of dataset properties. 
+
+  <p>A Dataset is used by other HDF5 APIs, either by name or by a handle (e.g., 
+  returned by H5Dopen).
+
+<!-- NEW PAGE -->
+<h4><em>Link/Unlink</em></h4>
+
+  <p>A Dataset can be added to a Group with the H5Glink call, and deleted from a 
+  group with H5Gunlink. The link and unlink operations use the name of an object, 
+  which may be a dataset. The dataset does not have to open to be linked or unlinked.
+
+<h4><em>Object reference</em></h4>
+
+  <p>A Dataset may be the target of an object reference.  The object reference is 
+  create by H5Rcreate, with the name of an object which may be a dataset and the 
+  reference type H5R_OBJECT. The Dataset does not have to be open to create a 
+  reference to it.
+
+  <p>An object reference may also refer to a region (selection) of a Dataset. 
+  The reference is created with H5Rcreate and a reference type of 
+  H5R_DATASET_REGION.
+
+  <p>An object reference can be accessed by a call to H5Rdereference. When the 
+  reference is to a Dataset or Dataset region, the H5Rdeference call returns a 
+  handle to the Dataset, just as if H5open has been called.
+
+<h4><em>Adding attributes</em></h4>
+
+  <p>A Dataset may have user defined Attributes, which are created with H5Acreate, 
+  and accessed through the H5A API. To create an attribute for a Dataset, the 
+  Dataset must be open, and the handle is passed to H5Acreate. The attributes of 
+  a Dataset are discovered, and opened using H5Aopen_name, H5Aopen_idx, or H5Aiterate; 
+  which use the handle of the Dataset. An Attribute can be deleted with H5Adelete, 
+  which uses the handle of the Dataset.
+
+<!-- editingComment
+  <span class="editingComment">
+  <p>The remaining sections of this chapter discuss... [To be written last.]</p>
+  </span>
+-->
+
+<br>
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="FileFunctSums">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>2. File Function Summaries</h3>
+
+<br>
+
+<table x-use-null-cells
+		class="functTable"
+		width=600
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	<code>H5Dcreate<br>h5dcreate_f</code> 
+    </td>
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	Creates a dataset at the specified location.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dopen<br>h5dopen_f</code> 
+    </td>
+    <td class="functTableCell">
+	Opens an existing dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dclose<br>h5dclose_f</code> 
+    </td>
+    <td class="functTableCell">
+	Closes the specified dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_space<br>h5dget_space_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns an identifier for a copy of the dataspace for a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_space_status<br>h5dget_space_status_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines whether space has been allocated for a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_type<br>h5dget_type_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns an identifier for a copy of the datatype for a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_create_plist<br>h5dget_create_plist_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns an identifier for a copy of the dataset creation property list for a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_offset<br>h5dget_offset_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns dataset address in file.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dget_storage_size<br>h5dget_storage_size_f</code> 
+    </td>
+    <td class="functTableCell">
+	Returns the amount of storage required for a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dvlen_get_buf_size<br>h5dvlen_get_max_len_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines the number of bytes required to store VL data.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dvlen_reclaim<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Reclaims VL datatype memory buffers.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dread<br>h5dread_f</code> 
+    </td>
+    <td class="functTableCell">
+	Reads raw data from a dataset into a buffer.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dwrite<br>h5dwrite_f</code> 
+    </td>
+    <td class="functTableCell">
+	Writes raw data from a buffer to a dataset.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Diterate<br>(none)</code> 
+    </td>
+    <td class="functTableCell">
+	Iterates over all selected elements in a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Dextend<br>h5dextend_f</code> 
+    </td>
+    <td class="functTableCell">
+	Extends a dataset with unlimited dimension.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Dfill<br>h5dfill_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Fills dataspace elements with a fill value in a memory buffer.
+    </td>
+  </tr>
+</table>
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="PModel">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>3. Programming Model</h3>
+
+
+  <p>This section explains the programming model for a Datasets.
+
+<h4>3.1 General Model</h4>
+
+  <p>The programming model for using a Dataset has three main phases:
+  
+  <p>obtain access to the dataset operate on the dataset using the Dataset handle 
+  returned above release the dataset. A Dataset may be opened several times, and 
+  operations performed with several different handles to the same Dataset. All the 
+  operations affect the dataset, although the calling program must synchronize if 
+  necessary to serialize accesses.
+
+  <p>Note that the Dataset remains open until the last handle is closed. 
+  Figure 2 shows the basic sequence of operations.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig2.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 2</span></td>
+  </tr>
+</table>
+
+  <p>Creation and data access operations may have optional parameters which are set 
+  with property lists.  The general programming model is:
+
+  <ol>
+      <li>create property list of appropriate class (dataset create, 
+          dataset transfer)
+      <li>set properties as needed.  Each type of property has its own 
+          format and datatype.
+      <li>pass the property list as a parameter of the API call.
+  </ol>
+
+
+<h4><em>Step 1. Obtain Access</em></h4>
+
+  <p>A new dataset is created by a call to H5Dcreate. If successful, the call 
+  returns a handle for the newly created Dataset.
+
+  <p>Access to an existing Dataset is obtained by a call to H5Dopen. This call 
+  returns a handle for the existing Dataset.
+
+  <p>An Object Reference 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  (Chapter ???) 
+  ] ] ]</span>
+-->
+  may be dereferenced to obtain a handle to 
+  the dataset it points to.
+  
+  <p>In each of these cases, the successful call returns a handle to the dataset. 
+  The handle is used in subsequent operations until it is closed.
+
+<h4><em>Step 2. Operate on the Dataset</em></h4>
+
+  <p>The Dataset handle can be used to write and read data to the Dataset, to query 
+  and set properties, and to perform other operations such as adding attributes, 
+  linking in groups, creating references, and so on.
+
+  <p>The Dataset handle can be used for any number of 
+  operations until it is closed.
+
+<h4><em>Step 3. Close the Dataset</em></h4>
+
+  <p>When all operations are completed, the Dataset handle should be closed. 
+  This releases the dataset. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  { and writes all metadata to the file? }
+  ] ] ]</span>
+-->
+
+  <p>After the handle is closed, it cannot be used for further operations.
+
+<h4>3.2 Create Dataset</h4>
+
+  <p>A Dataset is created and initialized with a call to H5Dcreate. The Dataset 
+  create operation sets permanent properties of the Dataset:</p>
+
+  <ul>
+      <li>name
+      <li>dataspace
+      <li>datatype
+      <li>storage properties
+  </ul>
+
+  <p>These properties cannot be changed for the life of the Dataset, although the 
+  dataspace may be expanded up to its maximum dimensions.
+
+<h4><em>Name</em></h4>
+
+  <p>A Dataset name is a sequence of alphanumeric ASCII characters. The full name 
+  would include a tracing of the group hierarchy from the root group of the file, 
+  e.g., /rootGroup/groupA/subgroup23/dataset1. The local name or relative name 
+  within the lowest-level group containing the dataset would include none of the 
+  group hierarchy. e.g., Dataset1. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  [[See ??]]
+  ] ] ]</span>
+-->
+
+<!-- NEW PAGE -->
+<h4><em>Dataspace</em></h4>
+
+  <p>The Dataspace of a dataset defines the number of dimensions and the size of 
+  each dimension. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  [[Dataspace]]. 
+  ] ] ]</span>
+-->
+  The Dataspace defines the number of dimensions, 
+  and the maximum dimension sizes and current size of each dimension. The maximum 
+  dimension size can be a fixed value or the constant H5D_UNLIMITED, in which case 
+  the actual dimension size can be incremented with calls to H5Dextend, up to the 
+  maximum. The maximum dimension size is set when the Dataset is created and cannot 
+  be changed.
+
+<h4><em>Datatype</em></h4>
+
+  <p>Raw data has a Datatype, which describes the layout of the raw data stored in 
+  the file. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  (See [[Datatype]]. 
+  ] ] ]</span>
+-->
+  The file Datatype is set when the Dataset is created 
+  and can never be changed. When data is transferred to and from the Dataset, 
+  the HDF5 library will assure that the data is transformed to and 
+  from the stored format.
+
+<h4><em>Storage Properties</em></h4>
+
+  <p>Storage properties of the Dataset are set when it is created. Table 1 shows the 
+  categories of storage properties. The storage properties cannot be changed after 
+  the Dataset is created. The storage properties are described 
+  below. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  in [[storage properties]]
+  ] ] ]</span>
+-->
+
+<h4><em>Filters</em></h4>
+
+  <p>When a Dataset is created, optional filters are specified. The filters are 
+  added to the data transfer pipeline when data is read or written. The standard 
+  library includes filters to implement compression, data shuffling, and error 
+  detection code.  Additional user defined filters may also be used. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  See [[[filter]]].
+  ] ] ]</span>
+-->
+
+  <p>The required filters are stored as part of the Dataset, and the list may 
+  not be changed after the Dataset is created. The HDF5 library automatically 
+  applies the filters whenever data is transferred.
+
+<h4><em>Summary</em></h4>
+
+  <p>A newly created Dataset has no attributes and no data values. The dimensions, 
+  data type (in the file), storage properties, and selected filters are set. 
+  Table 1 lists the required inputs, Table 2 lists the optional inputs.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 1</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Required inputs</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Dataspace</td>
+    <td class="ColumnRightCell"> <p>The shape of the array</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Datatype</td>
+    <td class="ColumnRightCell"> <p>The layout of the stored elements</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>name</td>
+    <td class="ColumnRightBottom"> <p>The name of the dataset in the group</td>
+  </tr>
+</table>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 2</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Optional Setting</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Storage Layout</td>
+    <td class="ColumnRightCell"> 
+        <p>How the data is organized in the file, including chunking.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Fill value</td>
+    <td class="ColumnRightCell"> 
+        <p>The behavior and value for uninitialized data.</td>
+  </tr>
+    <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>External Storage (optional)</td>
+    <td class="ColumnRightCell"> 
+        <p>Option to store the raw data in an external file.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Folders</td>
+    <td class="ColumnRightBottom"> 
+        <p>Select optional filters to be applied, e.g., compression.</td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+<h4><em>Example</em></h4>
+
+  <p>To create a new dataset</p>
+
+<dir>
+  Set dataset characteristics. (Optional where default settings are acceptable)
+<br> 
+<dir>               
+  Datatype
+<br> 
+  Dataspace
+<br> 
+  Dataset creation property list
+</dir> 
+  Create the dataset.
+<br> 
+  Close the datatype, dataspace, and property list. (As necessary)
+<br> 
+  Close the dataset.
+</dir>
+
+  <p>Figure 3 shows example code to create an empty dataset. The Dataspace is 7 X 8, 
+  the Datatype is a Big Endian integer. The dataset is created with the name "dset1", 
+  it is a member of the root group, "/".</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+    Hid_t    dataset, datatype, dataspace;   
+
+     /* 
+      * Create dataspace: Describe the size of the array and 
+      * create the data space for fixed size dataset. 
+     */
+     dimsf[0] = 7;
+     dimsf[1] = 8;
+     dataspace = H5Screate_simple(2, dimsf, NULL); 
+     /*
+      * Define datatype for the data in the file.
+      * For this example, store little-endian integer numbers.
+      */
+     datatype = H5Tcopy(H5T_NATIVE_INT);
+     status = H5Tset_order(datatype, H5T_ORDER_LE);
+     /*
+      * Create a new dataset within the file using defined 
+      * dataspace and datatype. No properties are set.
+      */
+     dataset = H5Dcreate(file, "/dset", datatype, dataspace, H5P_DEFAULT);
+
+     H5Dclose(dataset);
+     H5Sclose(dataspace);
+     H5Tclose(datatype);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 3</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Figure 4 shows example code to create a similar Dataset with a fill value of '-1'. 
+  This code has the same steps as in Figure 3, but uses a non-default property list. 
+  A file creation property list is created, and then the fill value is set to the 
+  desired value. Then the property list is passed to the H5Dcreate call.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+    hid_t    dataset, datatype, dataspace;
+     hid_t plist;  /* property list */
+     int fillval = -1;
+     dimsf[0] = 7;
+     dimsf[1] = 8;
+     dataspace = H5Screate_simple(2, dimsf, NULL); 
+     
+     datatype = H5Tcopy(H5T_NATIVE_INT);
+     status = H5Tset_order(datatype, H5T_ORDER_LE);
+
+     /*
+      * Example of Dataset Creation property list: set fill value to '-1'
+      */
+     plist = H5Pcreate((H5P_DATASET_CREATE);
+     status = H5Pset_fill_value(plist,datatype, &fillval);
+
+    /* Same as above, but use the property list */
+     dataset = H5Dcreate(file, "/dset", datatype, dataspace, plist);
+
+     H5Dclose(dataset);
+     H5Sclose(dataspace);
+     H5Tclose(datatype);
+     H5Pclose(plist);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 4</span></td>
+  </tr>
+</table>
+
+  <p>After this code is executed, the dataset has been created and written to the file. 
+  The data array is uninitialized.  Depending on the storage strategy and fill value 
+  options that have been selected, some or all of the space may be allocated in the 
+  file, and fill values may be written in the file.  
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  See &lt;&lt;below&gt;&gt;.
+  ] ] ]</span>
+-->
+
+<h4>3.3 Data Transfer Operations on a Dataset</h4>
+
+  <p>Data is transferred between from memory and the raw data array of the Dataset 
+  through H5Dwrite and H5Dread operations. A data transfer has the 
+  following basic steps:</p>
+  
+  <ol>
+      <li>allocate and initialize memory space as needed
+      <li>define the datatype of the memory elements
+      <li>define the elements to be transferred (a selection, or all the elements)
+      <li>set data transfer properties (including parameters for filters or 
+          File Drivers) as needed
+      <li>call the H5D API
+  </ol>
+
+  <p>Note that the location of the data in the file, the Datatype of the data in 
+  the file, the storage properties, and the filters do not need to be specified, 
+  because these are stored as a permanent part of the Dataset. A selection of 
+  elements from the Dataspace is specified, which may be the whole dataspace.
+
+<!-- NEW PAGE -->
+  <p>Figure 5 shows a diagram of a write operation, which transfers a data array from 
+  memory to a dataset in the file (usually on disk). A read operation has similar 
+  parameters, with the data flowing the other direction.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig5.JPG" width="700">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 5</span></td>
+  </tr>
+</table>
+
+<h4><em>Memory Space</em></h4>
+
+  <p>The calling program must allocate sufficient memory to store the data elements 
+  to be transferred. For a write (from memory to the file), the memory must be 
+  initialized with the data to be written to the file.  For a read, the memory must 
+  be large enough to store the elements that will be read. The amount of storage 
+  needed can be computed from the memory Datatype (which defines the size of each 
+  Data element) and the number of elements in the selection.
+
+<!-- NEW PAGE -->
+<h4><em>Memory Datatype</em></h4>
+
+  <p>The memory layout of a single data element is specified by the Memory Datatype. 
+  This specifies the size, alignment, and byte order of the element, as well as the 
+  Datatype Class. Note that the memory data type must be the same Datatype Class 
+  as the file, but may have different byte order and other properties.  The HDF5 
+  library automatically transforms data elements between the source and destination 
+  layouts. See the chapter "<a href="11_Datatypes.html">HDF5 Datatypes</a>" 
+  for more details.
+
+  <p>For a write, the memory Datatype defines the layout of the data to be written, 
+  e.g., IEEE floating point numbers in native byte order. If the file Datatype (defined 
+  when the Dataset is created) is different but compatible, the HDF5 library will 
+  transform each data element when it is written. For example, if the file byte 
+  order is different than the native byte order, the HDF5 library 
+  will swap the bytes.
+
+  <p>For a read, the memory Datatype defines the desired layout of the data to be read. 
+  This must be compatible with the file Datatype, but should generally use native 
+  formats, e.g., byte orders. The HDF5 library will transform each data 
+  element as it is read.
+
+<h4><em>Selection</em></h4>
+
+  <p>The data transfer will transfer some or all of the elements of the Dataset, 
+  depending on the Dataspace selection. The selection is two Dataspace objects 
+  (one for the source, and one for the destination) which describe which elements 
+  of the Dataspace to be transferred, which may be all of the data, or just some 
+  elements (partial I/O). Partial I/O is defined by defining hyperslabs or lists 
+  of elements in a Dataspace object.
+
+  <p>The Dataspace selection for the source defines the indices of the elements 
+  to be read, the Dataspace selection for the destination defines the indices of 
+  the elements to be written. The two selections must define the same number of 
+  points, but the order and layout may be different.  The HDF5 library 
+  automatically selects and distributes the elements, according to the selections, 
+  e.g., to perform a scatter-gather or sub-set of the data. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  See [[Selections]].
+  ] ] ]</span>
+-->
+
+<h4><em>Data Transfer Properties</em></h4>
+
+  <p>For some data transfers, additional parameters should be set using the 
+  transfer property list. Table 2 lists the categories of transfer properties. 
+  These properties set parameters for the HDF5 library, and may be used to 
+  pass parameters for optional filters and file drivers. For example, transfer 
+  properties are used to select independent or collective 
+  operation when using MPI-I/O.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 3</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Properties</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Library parameters</td>
+    <td class="ColumnRightCell"> <p>Internal caches, buffers, B-Trees, etc.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Memory management</td>
+    <td class="ColumnRightCell"> 
+        <p>Variable length memory management, data overwrite</td>
+  </tr>
+    <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>File driver management</td>
+    <td class="ColumnRightCell"> <p>Parameters for file drivers</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Filter management</td>
+    <td class="ColumnRightBottom"> <p>Parameters for filters</td>
+  </tr>
+</table>
+
+<h4><em>Data Transfer Operation (read or write)</em></h4>
+
+  <p>The data transfer is done by calling H5Dread or H5Dwrite with the parameters 
+  described above. The HDF5 library constructs the required pipe-line, 
+  which will scatter-gather, transform data types, apply the requested filters, 
+  and use the correct file driver.
+
+  <p>During the data transfer, the transformations and filters are applied to 
+  each element of the data, in the required order, until all the 
+  data is transferred.
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  <p>[[See Data Transfer Below]]
+  ] ] ]</span>
+-->
+
+<h4><em>Summary</em></h4>
+
+  <p>To perform a data transfer, it is necessary to allocate and initialize memory, 
+  describe the source and destination, set required and optional transfer properties, 
+  and call the H5D API. 
+
+<h4><em>Examples</em></h4>
+
+  <p>The basic procedure to write to a dataset</p>
+
+<dir>
+  Open the dataset.<br> 
+  Set dataset dataspace of write. (Optional if dataspace is H5S_SELECT_ALL) <br>
+  Write data.<br> 
+  Close the datatype, dataspace, and property list. (As necessary)<br> 
+  Close the dataset.
+</dir> 
+
+  <p>Figure 6 shows example code to write a 4 X 6 array of integers.  In the example, 
+  the data is initialized in the memory array dset_data.  The dataset has already 
+  been created in the file, so it is opened with H5Dopen.
+
+  <p>The Data is written with H5Dwrite. The arguments are the dataset handle, the memory 
+  datatype (H5T_NATIVE_INT), the memory and file selections (H5S_ALL in this case: 
+  the whole array), and the default (empty) property list. The last argument is 
+  the data to be transferred.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+   hid_t       file_id, dataset_id;  /* identifiers */
+   herr_t      status;
+   int         i, j, dset_data[4][6];
+
+   /* Initialize the dataset. */
+   for (i = 0; i < 4; i++)
+      for (j = 0; j < 6; j++)
+         dset_data[i][j] = i * 6 + j + 1;
+
+   /* Open an existing file. */
+   file_id = H5Fopen("dset.h5", H5F_ACC_RDWR, H5P_DEFAULT);
+
+   /* Open an existing dataset. */
+   dataset_id = H5Dopen(file_id, "/dset");
+
+   /* Write the entire dataset, using 'dset_data': 
+         memory type is 'native int'
+         write the entire dataspace to the entire dataspace,
+         no transfer properties,
+    */
+   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, 
+           H5S_ALL, H5P_DEFAULT, dset_data);
+
+
+   status = H5Dclose(dataset_id);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 6</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Figure 7 shows a similar write, setting a non-default value for the transfer buffer. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  &lt;&lt;explain what this does&gt;&gt;.  
+  ] ] ]</span>
+-->
+  The code is the same as Figure 6, but a transfer 
+  property list is created and the desired buffer size is set. The H5Dwrite has the 
+  same arguments, but uses the property list to set the buffer.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+   hid_t       file_id, dataset_id;  
+   hid_t  xferplist;
+   herr_t      status;
+   int         i, j, dset_data[4][6];
+
+   file_id = H5Fopen("dset.h5", H5F_ACC_RDWR, H5P_DEFAULT);
+
+   dataset_id = H5Dopen(file_id, "/dset");
+
+   /*
+     * Example: set type conversion buffer to 64MB
+     */
+    xferplist = H5Pcreate(H5P_DTASET_XFER);
+    status = H5Pset_buffer( xferplist, 64 * 1024 *1024, NULL, NULL);
+
+   /* Write the entire dataset, using 'dset_data': 
+         memory type is 'native int'
+         write the entire dataspace to the entire dataspace,
+         set the buffer size with the property list,
+    */
+   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, 
+           H5S_ALL, plist, dset_data);
+
+
+   status = H5Dclose(dataset_id);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 7</span></td>
+  </tr>
+</table>
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  <p>Partial writes (i.e., of selected data elements, such as a hyperslab) 
+  are explained below [[partial I/O]]
+  ] ] ]</span>
+-->
+
+  <p>To read from a dataset</p>
+
+<dir>
+  Define memory dataspace of read. (Optional if dataspace is H5S_SELECT_ALL)<br> 
+  Open the dataset.<br> 
+  Get the dataset dataspace. (If using H5S_SELECT_ALL above)<br> 
+<dir>Else define dataset dataspace of read.</dir> 
+  Define the memory datatype. (Optional)<br> 
+  Define the memory buffer.<br> 
+  Open the dataset.<br> 
+  Read data.<br> 
+  Close the datatype, dataspace, and property list. (As necessary)<br> 
+  Close the dataset.
+</dir>
+  
+<!-- NEW PAGE -->
+  <p>Figure 8 shows example code that reads a 4 X 6 array of integers from a dataset 
+  called "dset1". First, the dataset is opened. 
+  The H5Dread call has parameters:</p>
+  
+  <ul>
+      <li>the dataset handle (from H5Dopen)
+      <li>The memory datatype (H5T_NATVE_INT)
+      <li>The memory and file dataspace (H5S_ALL, the whole array)
+      <li>A default (empty) property list
+      <li>The memory to be filled.
+  </ul>
+  
+<br>  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+   Hid_t       file_id, dataset_id;  
+   herr_t      status;
+   int         i, j, dset_data[4][6];
+
+
+   /* Open an existing file. */
+   file_id = H5Fopen("dset.h5", H5F_ACC_RDWR, H5P_DEFAULT);
+
+   /* Open an existing dataset. */
+   dataset_id = H5Dopen(file_id, "/dset");
+
+   /* read the entire dataset, into 'dset_data': 
+         memory type is 'native int'
+         read the entire dataspace to the entire dataspace,
+         no transfer properties,
+    */
+   status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, 
+           H5S_ALL, H5P_DEFAULT, dset_data);
+
+   status = H5Dclose(dataset_id);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 8</span></td>
+  </tr>
+</table>
+
+<h4>3.4 Retrieve properties of a Dataset</h4>
+
+  <p>The Dataset can be queried to discover its properties (Table 4).  The Dataspace 
+  and Datatype, and Dataset creation properties can be retrieved.  
+  These calls return a handle to an object.
+
+  <p>The total size of the data can be retrieved. This is the amount of stored 
+  data for the raw data or for variable length data. This is the amount of memory 
+  that must be allocated to read the whole array.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Query Function</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Dget_space</td>
+    <td class="ColumnRightCell"> <p>Retrieve the file dataspace</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Dget_type</td>
+    <td class="ColumnRightCell"> <p>Retrieve the file datatype</td>
+  </tr>
+    <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Dget_create_plist</td>
+    <td class="ColumnRightCell"> <p>Retrieve the creation properties</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Dget_storage_size</td>
+    <td class="ColumnRightCell"> 
+        <p>Retrieve the total bytes for all the data of the dataset</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5Dvlen_get_buf_size</td>
+    <td class="ColumnRightBottom"> 
+        <p>Retrieve the total bytes for all the variable length 
+	data of the dataset</td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+<h4><em>Example</em></h4>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell"> 
+    <pre><code>
+   hid_t       file_id, dataset_id;
+   hid_t    dspace_id, dtype_id, plist_id; 
+   herr_t      status;
+
+   /* Open an existing file. */
+   file_id = H5Fopen("dset.h5", H5F_ACC_RDWR, H5P_DEFAULT);
+
+   /* Open an existing dataset. */
+   dataset_id = H5Dopen(file_id, "/dset");
+
+   dspace_id = H5Dget_space(dataset_id);
+   dtype_id = H5Dget_type(dataset_id);
+   plist_id = H5Dget_create_plist(dataset_id);
+
+   /* use the objects to discover the properties of the dataset */
+
+   status = H5Dclose(dataset_id);
+    </code></pre>
+    </td>
+  </tr>
+</table>
+
+<h4>3.5 Other Operations</h4>
+
+  <p>The Dataset is used for other miscellaneous operations.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 4</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr" width="50%"> 
+        <p><span class=TableHead>Operation</span></td>
+    <td class="ColumnRightHdr" width="50%"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Dextend</td>
+    <td class="ColumnRightCell"> <p>See below</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Diterate</td>
+    <td class="ColumnRightCell"> <p>&nbsp;</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5Dvlen_reclaim</td>
+    <td class="ColumnRightBottom"> <p>See below</td>
+  </tr>
+</table>
+<br>
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DTransfer">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>4. Data Transfer: Raw Data I/O</h3>
+
+
+  <p>The HDF5 library implements data transfers through a pipeline which implements 
+  data transformations (according to the Datatype and selections), chunking (as 
+  requested), and I/O operations using different mechanisms (file drivers). 
+  The pipeline is automatically configured by the HDF5 library. Metadata is 
+  stored in the file so that the correct pipeline can be constructed to retrieve 
+  the data. In addition, optional filters, such as compression, may be 
+  added to the standard pipeline. 
+
+  <p>Figure 9 illustrates data layouts for different layers of an application using HDF5. 
+  The application data is organized as a multidimensional array of elements. 
+  The HDF5 format specification
+<!-- editingComment
+  <span class="editingComment">[ [ [
+   [[cite it]] 
+  ] ] ]</span>
+-->
+  defines the stored layout of the data 
+  and metadata.  The storage layout properties define the organization of the 
+  abstract data. This data is written and read to and from some storage medium.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig9.JPG" width="700">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 9</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>The last stage of a write (and first stage of a read) is managed by an HDF5 
+  File Driver module.  The Virtual File Layer of the HDF5 library implements a 
+  standard interface to alternative I/O methods, including memory (AKA "core") files, 
+  single serial file I/O, multiple file I/O, and parallel I/O. The File Driver maps 
+  a simple abstract HDF5 file to the specific access methods.
+
+  <p>The raw data of an HDF5 Dataset is conceived to be a multi-dimensional array of 
+  data elements. This array may be stored in the file according to 
+  several storage strategies:</p> 
+
+  <ul>
+      <li>COMPACT
+      <li>CONTIGUOUS
+      <li>CHUNKED
+  </ul>
+
+  <p>The storage strategy does not affect data access methods, except that certain 
+  operations may be more or less efficient depending on the storage strategy 
+  and the access patterns.
+
+  <p>Overall, the data transfer operations (H5Dread and H5Dwrite) work identically 
+  for any storage method, for any file driver, and for any filters and transformations. 
+  The HDF5 library automatically manages the data transfer process. In some cases, 
+  transfer properties should or must be used to pass additional parameters, such as 
+  MPI/IO directives when used the parallel file driver.
+
+<h4>4.1 Data pipeline</h4>
+
+  <p>When data is written or read to or from and HDF5 file, the HDF5 library passes 
+  the data through a sequence of processing steps, the HDF5 data pipeline. This data 
+  pipeline performs operations on the data in memory, including byte swapping, alignment, 
+  scatter-gather, and hyperslab selections. The HDF5 library automatically determines 
+  which operations are needed and manages the organization of memory operations, 
+  such as extracting selected elements from a data block. The data pipeline modules 
+  operate on data buffers, each processes the buffer and passes the 
+  transformed buffer to the next stage.
+
+  <p>Table 5 lists the stages of the data pipeline Figure 10 shows the order of processing 
+  during a read or write.</p>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 5</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Layers</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>I/O initiation</td>
+    <td class="ColumnRightCell"> 
+        <p>Initiation of HDF5 I/O activities in user's application program, 
+	i.e. H5Dwrite and H5Dread.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Memory hyperslab operation</td>
+    <td class="ColumnRightCell"> 
+        <p>Data is scattered to (for read), or gathered from (for write) application's 
+	memory buffer (bypassed if no datatype conversion is needed).</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Datatype conversion</td>
+    <td class="ColumnRightCell"> 
+        <p>Datatype is converted if it is different between memory and storage 
+	(bypassed if no datatype conversion is needed).</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>File hyperslab operation</td>
+    <td class="ColumnRightCell"> 
+        <p>Data is gathered from (for read), or scattered to (for write) to 
+	file space in memory (bypassed if no datatype conversion is needed).</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Filter pipeline</td>
+    <td class="ColumnRightCell"> 
+        <p>Data is processed by filters when it passes.  Data can be modified and 
+	restored here (bypassed if no datatype conversion is needed, no filter is 
+	enabled, or dataset is not chunked).</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Virtual File Layer</td>
+    <td class="ColumnRightCell"> 
+        <p>Facilitate easy plug-in file drivers, like MPIO, POSIX I/O.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Actual I/O</td>
+    <td class="ColumnRightBottom"> 
+        <p>Actual file driver used by the library, like MPIO or STDIO.</td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig10.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 10</span></td>
+  </tr>
+</table>
+
+  <br>
+  <p>The HDF5 Library automatically applies the stages as needed.  
+
+  <p>When the memory Dataspace selection is other than the whole Dataspace, the Memory 
+  Hyperslab stage scatters/gathers the data elements between the appliation 
+  memory (described by the selection) and contiguous memory buffer for the pipeline. 
+  On a write, this is a gather operation, on a read, this is a scatter operation.
+
+  <p>When the Memory Datatype is different from the File Datatype, the Datatype 
+  Conversion stage transforms each data element. For example, if data is written 
+  from 32-bit Big Endian memory, and the File Datatype is 32-bit Little Endian, 
+  the Datatype Conversion stage will swap the bytes of every elements.  Similarly, 
+  when data is read from the file to native memory, byte swapping will be 
+  applied automatically when needed.
+
+  <p>The File Hyperslab stage is similar to the Memory Hyperslab stage, 
+  but is managing the arrangement of the elements according to the File 
+  Dataspace selection. When data is read, data elements are gathered from 
+  the data blocks from the file to fill the contiguous buffers, which are 
+  processed by the pipeline. When data is read, the elements from a buffer 
+  are scattered to the data blocks of the file.
+
+<h4>4.2 Filters</h4>
+
+  <p>In addition to the standard pipeline, optional stages, called filters, 
+  can be inserted in the pipeline. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  see [[chunked]]) 
+  ] ] ]</span>
+-->
+  The standard distribution includes optional filters to 
+  implement compression and error checking. User applications may 
+  add custom filters as well.
+
+  <p>The HDF5 Library distribution includes or employs 
+  several optional filters, as listed in Table 6. 
+  The filters are applied in the pipeline between the Virtual File Layer and 
+  the File Hyperslab Operation (Figure 10). The application can use any 
+  number of filters, in any order.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 6</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Filters</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>gzip compression</td>
+    <td class="ColumnRightCell"> <p>Data compression using 
+      <code>zlib</code>.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Szip&nbsp;compression&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td class="ColumnRightCell"> <p>Data compression using the 
+      Szip library.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Shuffling</td>
+    <td class="ColumnRightCell"> 
+        <p>To improve compression performance, data is regrouped by its byte position 
+	in the data unit.  I.e. 1<sup><font size="-1">st</font></sup>, 
+	2<sup><font size="-1">nd</font></sup>, 3<sup><font size="-1">rd</font></sup>, 
+	4<sup><font size="-1">th</font></sup> bytes of integers are stored together 
+	respectively.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Fletcher32</td>
+    <td class="ColumnRightBottom"> 
+        <p>Fletcher32 checksum for error-detection.</td>
+  </tr>
+</table>
+
+
+  <p>Filters may be used only for chunked data and are applied to chunks of 
+  data between the file hyperslab stage and the virtual file layer. At this 
+  stage in the pipeline, the data is organized as fixed-size blocks of elements,
+  and the filter stage processes each chunk separately.
+
+  <p>Filters are selected by dataset creation properties, and some behavior may 
+  be controlled by data transfer properties. The library determines what 
+  filters must be applied and in what order.
+  
+  <p>See The HDF Group website for 
+  <a href="http://www.hdfgroup.org/doc_resource/SZIP/" target="Ext1">further 
+  information</a> regarding the Szip filter.
+
+
+<h4>4.3 File drivers</h4>
+
+  <p>I/O is performed by the HDF5 Virtual File layer. The File Driver interface 
+  writes and reads blocks of data, each driver module implements the interface 
+  using different I/O mechanisms. Table 7 lists the File Drivers currently supported. 
+  Note that the I/O mechanisms are separated from the pipeline processing: 
+  the pipeline and filter operations are identical no matter what 
+  data access mechanism is used.</p>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 7</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>File Driver</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_CORE</td>
+    <td class="ColumnRightCell"> 
+        <p>Store in memory (optional backing store to disk file)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_DPSS</td>
+    <td class="ColumnRightCell"> <p>
+    &nbsp;
+<!-- editingComment
+  <span class="editingComment">[ [ [
+    ???
+  ] ] ]</span>
+-->
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_FAMILY</td>
+    <td class="ColumnRightCell"> <p>Store in a set of files 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+    (See [[??]])
+  ] ] ]</span>
+-->
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_LOG</td>
+    <td class="ColumnRightCell"> <p>Store in logging file.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_MPIO</td>
+    <td class="ColumnRightCell"> <p>Store using MPI/IO 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+    (See [[cite]])
+  ] ] ]</span>
+-->
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_MULTI</td>
+    <td class="ColumnRightCell"> 
+        <p>Store in multiple files, several options to control layout.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_SEC2</td>
+    <td class="ColumnRightCell"> 
+        <p>Serial I/O to file using Unix "section 2" functions.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5FD_STDIO</td>
+    <td class="ColumnRightCell"> 
+        <p>Serial I/O to file using Unix "stdio" functions</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5FD_STREAM</td>
+    <td class="ColumnRightBottom"> <p>I/O to socket.</td>
+  </tr>
+</table>
+
+  <p>Each File Driver writes/reads contiguous blocks of bytes from a logically 
+  contiguous address space. The File Driver is responsible for managing the 
+  details of the different physical storage methods.
+
+  <p>In general, everything above the Virtual File Layer works identically no 
+  matter what storage method is used. However, some combinations of storage 
+  strategies and file drivers are not allowed.  Also, some options may have 
+  substantially different performance depending on the file driver that is used. 
+  In particular, multi-file and parallel I/O may perform considerably differently 
+  from serial drivers, depending on chunking and other settings.
+
+<h4>4.4 Data Transfer Properties to manage the pipeline</h4>
+
+  <p>Data Transfer properties set optional parameters that control parts of the 
+  data pipeline. Table 8 lists three transfer properties that control the behavior 
+  of the library.  
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  &lt;&lt;Developers: explain what these do!&gt;&gt;</p>
+  ] ] ]</span>
+-->
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 8</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Property</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Pset_buffer</td>
+    <td class="ColumnRightCell"> 
+        <p>Maximum size for the type conversion buffer and background buffer and 
+	optionally supplies pointers to application-allocated buffers</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Pset_hyper_cache</td>
+    <td class="ColumnRightCell"> 
+        <p>Whether to cache hyperslab blocks during I/O.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5Pset_btree_ratios</td>
+    <td class="ColumnRightBottom"> 
+        <p>Set the B-tree split ratios for a dataset transfer property list. 
+	The split ratios determine what percent of children go in the 
+	first node when a node splits.</td>
+  </tr>
+</table>
+
+  <p>Some filters and File Drivers require or use additional parameters from the 
+  application program. These can be passed in the transfer property list. 
+  Table 9 lists the four File Driver property lists.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 9</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Property</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Pset_dxpl_mpio</td>
+    <td class="ColumnRightCell"> 
+        <p>Control the MPI I/O transfer mode (independent or collective) 
+	during data I/O operations.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Pset_dxpl_multi</td>
+    <td class="ColumnRightCell">
+    &nbsp;
+<!-- editingComment
+  <span class="editingComment">[ [ [
+    <p>??
+  ] ] ]</span>
+-->
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Pset_small_data_block_size</td>
+    <td class="ColumnRightCell"> 
+        <p>Reserves blocks of size bytes for the contiguous storage of the raw 
+	data portion of small datasets. The HDF5 library then writes the raw data 
+	from small datasets to this reserved space, thus reducing unnecessary 
+	discontinuities within blocks of meta data and 
+	improving IO performance.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5Pset_edc_check</td>
+    <td class="ColumnRightBottom"> 
+        <p>Disable/enable EDC checking for read.  (When selected, EDC 
+	is always written)</td>
+  </tr>
+</table>
+
+  <p>The Transfer Properties are set in a property list, which is passed as a 
+  parameter of the H5Dread or H5Dwrite call.  The transfer properties are 
+  passed to each pipeline stage, which may use or ignore any property in the 
+  list. In short, there is one property list, which contains all the properties.
+
+<!-- NEW PAGE -->
+<h4>4.5 Storage strategies</h4>
+
+  <p>The raw data is conceptually a multi-dimensional array of elements, 
+  stored as a contiguous array of bytes. The data may be physically stored 
+  in the file in several ways. Table 6 lists the storage strategies 
+  for a dataset.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 10</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Storage Strategy</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>CONTIGUOUS</td>
+    <td class="ColumnRightCell"> 
+        <p>The dataset is stored as one continuous array of bytes</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>CHUNKED</td>
+    <td class="ColumnRightCell"> 
+        <p>The dataset is stored as fixed sized chunks.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>COMPACT</td>
+    <td class="ColumnRightBottom"> 
+        <p>A small dataset is stored in the metadata header.</td>
+  </tr>
+</table>
+
+  <br>
+  <p>The different storage strategies do not affect the data transfer operations of 
+  the dataset: reads and writes work the same for any storage strategy.
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  <p>&lt;&lt;Relationship between storage strategies, and pipeline, filters, 
+  and file drivers.??&gt;&gt;
+  ] ] ]</span>
+-->
+
+  <p>These strategies are described in the following sections.
+
+<!-- NEW PAGE -->
+<h4><em>Contiguous</em></h4>
+
+  <p>A contiguous dataset is stored in the file as a header and a single 
+  continuous array of bytes. (Figure 12) The data elements are arranged in row major order, 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Verify "row major order" statement
+  ] ] ]</span>
+-->
+  with according to the datatype. By default, data is stored contiguously.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig12.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 12</span></td>
+  </tr>
+</table>
+
+  <p>Contiguous storage is the simplest model. It has several limitations. 
+  First, the dataset must be a fixed size: it is not possible to extend the 
+  limit of dataset, or to have unlimited dimensions. Second, because data is 
+  passed through the pipeline as fixed sized blocks, compression and other 
+  filters cannot be used with contiguous data.
+
+<h4><em>Chunked</em></h4>
+
+  <p>The data of a dataset may be stored as fixed sized chunks (Figure 13). A chunk is 
+  a hyper-rectangle of any shape (less than or equal to the rank of the dataset).  
+  When a dataset is chunked, each chunk is read or written as a single I/O operation, 
+  and passed from stage to stage of the pipeline and filters.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig13.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 13</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Chunks may be any size and shape that fits in the Dataspace of the dataset. 
+  For example, a three dimensional Dataspace can be chunked as 3-D cubes, 
+  2-D planes, or 1-D lines. The chunks may extend beyond the size of the 
+  Dataspace, for example a 3 X 3 dataset might by chunked in 2 X 2 chunks. 
+  Sufficient chunks will be allocated to store the array, any extra space 
+  will not be accessible. So, to store the 3X3 array, four 2X2 chunks would 
+  be allocated, with 5 unused elements stored.
+
+  <p>Chunked datasets can be unlimited (in any direction), 
+  and can be compressed or filtered.
+
+  <p>Since the data is read or written by chunks, chunking can have a dramatic 
+  effect on performance by optimizing what is read and written.  Note, too, 
+  that for specific access patterns (e.g., parallel I./O) decomposition into 
+  chunks can have a large impact on performance.
+  
+<h4><em>Compact</em></h4>
+
+  <p>For Contiguous and Chunked storage, the Dataset header information and data 
+  are stored in two (or more) blocks (Figure 14). Therefore, at least two I/O operations 
+  are required to access the data, one to access the header, and one (or more) 
+  to access data. For a small dataset, this is considerable overhead.
+
+<table x-use-null-cells
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig14.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 14</span></td>
+  </tr>
+</table>
+
+  <p>A small dataset may be stored in a continuous array of bytes in the 
+  header block, using the COMPACT storage option. This dataset can be read 
+  entirely in one operation, which retrieves the header and data.  
+  The dataset must fit in the header, which varies depending on what 
+  metadata may be stored. In general, a compact dataset should be 
+  approximately 30 KB or less total size.
+
+<h4>4.6 Partial I/O-Subseting and Hyperslabs</h4>
+
+  <p>Data transfers can write or read some of the data elements of the dataset. 
+  This is controlled by specifying two selections, one for the source and one for 
+  the destination. Selections are specified by creating a Dataspace 
+  with selections. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  (see [[dataspace chapter]])
+  ] ] ]</span>
+-->
+
+  <p>Selections may be a union of hyperslabs, where a hyperslab is a contiguous 
+  hyper-rectangle from the Dataspace. A second form of selection is a list 
+  of points. Selected fields of compound data type may be read or written. 
+  In this case, the selection is controlled by the memory and file Datatypes.
+
+  <p>Summary of Procedure:</p>
+  
+  <ol>
+      <li>open the Dataset
+      <li>define the memory Datatype
+      <li>define the memory Dataspace selection and file Dataspace selection
+      <li>transfer data (H5Dread or H5Dwrite)
+  </ol>
+
+  <p>For a detailed explanation of selections, see the chapter
+  "<a href="12_Dataspaces.html">HDF5 Dataspaces and Partial I/O</a>."
+  
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="Allocation">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+<!-- NEW PAGE -->
+<h3 class=pagebefore>5. Allocation of Space in the File</h3>
+
+  <p>When a dataset is created, space is allocated in the file for its header and 
+  initial data. The amount of space allocated when the dataset is created depends 
+  on the storage properties. When the Dataset is modified (data is written, 
+  attributes added, or other changes), additional storage may be 
+  allocated if necessary.</p>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 11</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Object</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Size (bytes)</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Header</td>
+    <td class="ColumnRightCell"> 
+        <p>Variable, but typically around 256 bytes at the creation of 
+        a simple dataset with a simple datatype</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Data</td>
+    <td class="ColumnRightBottom"> 
+        <p>Size of the data array (number of elements X size of element). 
+	Space allocated in the file depends on storage strategy 
+	and allocation strategy.</td>
+  </tr>
+</table>
+
+<h4><em>Header</em></h4>
+
+  <p>A dataset header consists of one or more header messages containing 
+  persistent metadata describing various aspects of the dataset. 
+  These records are defined in the <cite>HDF5 File Format Specification</cite>. 
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  [[cite format]]. 
+  ] ] ]</span>
+-->
+  The amount of storage required for the metadata depends on the metadata 
+  to be stored. Table 12 summarizes the metadata.</p>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 12</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr" width="50%"> 
+        <p><span class=TableHead>Header Information</span></td>
+    <td class="ColumnRightHdr" width="50%"> 
+        <p><span class=TableHead>Approximate Storage Size</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Datatype (required)</td>
+    <td class="ColumnRightCell"> <p>bytes  or more, depends on type
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Verify
+  ] ] ]</span>
+-->
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Dataspace (required)</td>
+    <td class="ColumnRightCell"> 
+        <p>bytes or more, depends on number of dimensions and hsize_t
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Verify
+  ] ] ]</span>
+-->
+	</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> 
+        <p>Layout (required) - points to the stored data</td>
+    <td class="ColumnRightCell"> 
+        <p>bytes or more, depends on hsize_t and number of dimensions
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Verify
+  ] ] ]</span>
+-->
+	</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Filters</td>
+    <td class="ColumnRightBottom"> 
+        <p>Depends on the number of filters, size of filter message depends on 
+	name and data that will be passed.</td>
+  </tr>
+</table>
+
+  <p>The header blocks also store the name and values of attributes, so the total 
+  storage depends on the number and size of the attributes.
+
+  <p>In addition, the data set must have at least one link, including a name, 
+  which is stored in the file and in the Group it is a linked from.
+
+  <p>The different storage strategies determine when and how much space is 
+  allocated for the data array. See the discussion of fill values below
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Link
+  ] ] ]</span>
+-->
+  for a detailed explanation of the storage allocation.
+
+<h4><em>Contiguous Storage</em></h4>
+
+  <p>For a continuous storage option, the data is stored in a single, 
+  contiguous block in the file.  The data is nominally a fixed size, 
+  (number of elements X size of element). Figure 15 shows and example of a two 
+  dimensional array, stored as a contiguous dataset.
+
+  <p>Depending on the fill value properties, the space may be allocated when the 
+  dataset is created or when first written (default), and filled with fill values 
+  if specified. For parallel I/O, by default the space is allocated 
+  when the dataset if created.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig15.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 15</span></td>
+  </tr>
+</table>
+
+<h4><em>Chunked</em></h4>
+
+  <p>For chunked storage, the data is stored in one or more chunks.  Each chunk 
+  is a continuous block in the file, but chunks are not necessarily stored 
+  contiguously. Each chunk has the same size.  The data array has the same 
+  nominal size as a contiguous array (number of elements X size of element), 
+  but the storage is allocated in chunks, so the total size in the file can 
+  be larger that the nominal size of the array.
+  
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  <p class="editingComment" align="center">
+  - - - Figure 16 may be  improperly placed - - -
+  </p>
+  ] ] ]</span>
+-->
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig16.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 16</span></td>
+  </tr>
+</table>
+
+  <p>If a fill value is defined, each chunk will be filled with the fill value. 
+  Chunks must be allocated when data is written, but they may be allocated when 
+  the file is created, as the file expands, or when data is written. 
+
+  <p>For serial I/O, by default chunks are allocated incrementally, as data is 
+  written to the chunk. For a sparse dataset, chunks are allocated only for the 
+  parts of the dataset that are written. In this case, if the dataset is extended, 
+  no storage is allocated.
+
+  <p>For parallel I/O, by default the chunks are allocate when the dataset is 
+  created or extended., with fill values written to the chunk.
+
+  <p>In either case, the default can be changed using fill value properties.  
+  For example, using serial I/O, the properties can select to can allocate 
+  chunks when the dataset is created
+
+  <p>H5Dextend is used to change the current dimensions of the Dataset, within 
+  the limits of the Dataspace.  Each dimension can be extended up to its maximum, 
+  or unlimited. Extending the Dataspace may or may not allocate space in the file, 
+  and may or may not write fill values, if they are defined.  See the next 
+  section for an explanation.
+  
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  <p class="editingComment" align="center">
+  - - - Figure 17 may be improperly placed - - -
+  </p>
+  ] ] ]</span>
+-->
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+   hid_t       file_id, dataset_id;  
+   Herr_t      status;
+   size_t        newdims[2];
+
+
+   /* Open an existing file. */
+   file_id = H5Fopen("dset.h5", H5F_ACC_RDWR, H5P_DEFAULT);
+
+   /* Open an existing dataset. */
+   dataset_id = H5Dopen(file_id, "/dset");
+
+   /* Example:  dataset is 2 X 3, each dimension is UNLIMITED */
+   /* extend to 2 X 7 */
+   newdims[0] = 2;
+   newdims[1] = 7;
+
+   status = H5Dextend(dataset_id, newdims);
+
+   /* dataset is now 2 X 7 */
+
+   status = H5Dclose(dataset_id);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 17</span></td>
+  </tr>
+</table>
+  
+<h4>5.1 Storage Allocation in the File: Early, Incremental, Late</h4>
+
+  <p>The HDF5 Library implements several strategies for when storage is allocated 
+  if and when it is filled with fill values for elements not yet written by the user. 
+  Different strategies are recommended for different storage layouts and file drivers. 
+  In particular, a parallel program needs storage allocated during a collective call 
+  (e.g., create or extend), while serial programs may benefit from delaying the 
+  allocation until the data is written.
+
+  <p>Two File Creation properties control "when to allocate space", "when to 
+  write the fill-value" and the actual fill-value to write. 
+
+  <p>Table 13 shows the three options for when data is allocated in the file. "Early" 
+  allocation is done during dataset create call. Certain File Drivers (especially 
+  MPI-I/O and MPI-posix) require space to be allocated when a dataset is created, 
+  so all processors will have the correct view of the data.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 13</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Strategy</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Early</td>
+    <td class="ColumnRightCell"> 
+        <p>Allocate storage for the dataset immediately when the dataset 
+	is created. </td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Late</td>
+    <td class="ColumnRightCell"> 
+        <p>Defer allocating space for storing the dataset until the 
+	dataset is written.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Incremental</td>
+    <td class="ColumnRightCell"> 
+        <p>Defer allocating space for storing each chunk until 
+	the chunk is written.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Default</td>
+    <td class="ColumnRightBottom"> 
+        <p>Use the strategy (Early, Late, Incremental) for the storage method 
+	and access method. (Recommended)</td>
+  </tr>
+</table>
+
+  <p>"Late" allocation is done at the time of the first write to dataset. Space 
+  for the whole Dataset is allocated at the first write.
+
+  <p>"Incremental" allocation (chunks only) is done at the time of the first 
+  write to the chunk. Chunks that have never been written are not allocated 
+  in the file. In a sparsely populated Dataset, this option allocates chunks 
+  only where data is actually written.
+
+  <p>The "Default" property selects the option recommended as appropriate for 
+  the storage method and access method. The defaults are shown in Table 14. 
+  Note that "Early" allocation is recommended for all Parallel I/O, while 
+  other options are recommended as the default for serial I/O cases.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="3" align="center" valign="bottom"><h4>Table 14</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr" width="33%"> 
+        <p><span class=TableHead>&nbsp;</span></td>
+    <td class="ColumnLeftHdr" width="34%"> 
+        <p><span class=TableHead>Serial I/O</span></td>
+    <td class="ColumnRightHdr" width="33%"> 
+        <p><span class=TableHead>Parallel I/O</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Contiguous Storage</td>
+    <td class="ColumnCell"> <p>Late</td>
+    <td class="ColumnRightCell"> <p>Early</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Chunked Storage</td>
+    <td class="ColumnCell"> <p>Incremental</td>
+    <td class="ColumnRightCell"> <p>Early</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Compact Storage</td>
+    <td class="ColumnBottom"> <p>Early</td>
+    <td class="ColumnRightBottom"> <p>Early</td>
+  </tr>
+</table>
+ 
+  <p>The second property is when to write fill value, "Never" and "Allocation". 
+  Table 15 shows these options.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 15</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>When</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Never</td>
+    <td class="ColumnRightCell"> <p>Fill value will never be written.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Allocation</td>
+    <td class="ColumnRightBottom"> 
+        <p>Fill value is written when space is allocated. (Default for chunked 
+	and contiguous data storage.)</td>
+  </tr>
+</table>
+
+  <p>The third property is the fill value to write. Table 16 shows the values. 
+  By default, the data is filled with zeroes. The application may choose no 
+  fill value (Undefined), in which case uninitialized data may have any random 
+  values. The application may define a fill-value of the appropriate type.  
+  See the chapter "<a href="11_Datatypes.html">HDF5 Datatypes</a>" 
+  for more information regarding fill values.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>What to Write</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Undefined</td>
+    <td class="ColumnRightCell"> 
+        <p>No value stored, do not fill with zeroes (the default)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Default</td>
+    <td class="ColumnRightCell"> 
+        <p>By default, the library defines a fill-value of all zero bytes</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>User-defined</td>
+    <td class="ColumnRightBottom"> 
+        <p>The applications specifies the fill value.</td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Together these three properties control the library's behavior. 
+  Table 16 summarizes the possible behavior of during the dataset 
+  create-write-close cycle.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="4" align="center"><h4>Table 16</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr" width="16.5%"> 
+        <p align="center"><span class=TableHead>When to allocate space</span></td>
+    <td class="ColumnHdr" width="16.5%"> 
+        <p align="center"><span class=TableHead>When to write fill value</span></td>
+    <td class="ColumnHdr" width="17%"> 
+        <p align="center"><span class=TableHead>What fill value to write</span></td>
+    <td class="ColumnRightHdr" width="50%"> 
+        <p align="center">
+	<span class=TableHead>Library create-write-close behavior</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Early</td>
+    <td class="ColumnCell"> <p>Never</td>
+    <td class="ColumnCell"> <p>-</td>
+    <td class="ColumnRightCell"> 
+        <p>Library allocates space when dataset is created, but never writes fill 
+	value to dataset. (Read of unwritten data returns undefined values.)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Late</td>
+    <td class="ColumnCell"> <p>Never</td>
+    <td class="ColumnCell"> <p>-</td>
+    <td class="ColumnRightCell"> 
+        <p>Library allocates space when dataset is written to, but never writes 
+	fill value to dataset. (Read of unwritten data returns 
+	undefined values.)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Incremental</td>
+    <td class="ColumnCell"> <p>Never</td>
+    <td class="ColumnCell"> <p>-</td>
+    <td class="ColumnRightCell"> 
+        <p>Library allocates space when dataset or chunk (whichever is smallest 
+	unit of space) is written to, but never writes fill value to dataset or 
+	chunk. (Read of unwritten data returns undefined values.)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>-</td>
+    <td class="ColumnCell"> <p>Allocation</td>
+    <td class="ColumnCell"> <p>undefined</td>
+    <td class="ColumnRightCell"> 
+        <p><strong>Error</strong> on creating dataset, dataset not created.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Early</td>
+    <td class="ColumnCell"> <p>Allocation</td>
+    <td class="ColumnCell"> <p>default or user-defined</td>
+    <td class="ColumnRightCell"> 
+        <p>Allocate space for dataset when dataset is created. Write fill value 
+	(default or user-defined) to entire dataset when dataset is created.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Late</td>
+    <td class="ColumnCell"> <p>Allocation</td>
+    <td class="ColumnCell"> <p>default or user-defined</td>
+    <td class="ColumnRightCell"> 
+        <p>Allocate space for dataset when application first writes data values 
+	to the dataset. Write fill value to entire dataset before writing 
+	application data value.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>Incremental</td>
+    <td class="ColumnBottom"> <p>Allocation</td>
+    <td class="ColumnBottom"> <p>default or user-defined</td>
+    <td class="ColumnRightBottom"> 
+        <p>Allocate space for dataset when application first writes data values 
+	to the dataset or chunk (whichever is smallest unit of space). 
+	Write fill value to entire dataset or chunk before writing 
+	user's data value. </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>During the H5Dread function call, the library behavior depends on whether 
+  space has been allocated, whether fill value has been written to storage, 
+  how fill value is defined, and when to write fill value. Table 17 summarizes 
+  the different behaviors.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="4" align="center"><h4>Table 17</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr" width="16.5%"> 
+        <p align="center">
+	<span class=TableHead>Is space allocated in the file?</span></td>
+    <td class="ColumnHdr" width="16.5%"> 
+        <p align="center">
+	<span class=TableHead>What is the fill value?</span></td>
+    <td class="ColumnHdr" width="17%"> 
+        <p align="center">
+	<span class=TableHead>When to write fill value?</span></td>
+    <td class="ColumnRightHdr" width="50%"> 
+        <p align="center">
+	<span class=TableHead>Library read behavior</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>No</td>
+    <td class="ColumnCell"> <p>undefined</td>
+    <td class="ColumnCell"> <p>&lt;&lt;any&gt;&gt;</td>
+    <td class="ColumnRightCell"> 
+        <p><strong>Error</strong>. Cannot create this dataset.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>&nbsp;</td>
+    <td class="ColumnCell"> <p>default or user-defined</td>
+    <td class="ColumnCell"> <p>&lt;&lt;any&gt;&gt;</td>
+    <td class="ColumnRightCell"> <p>Fill memory buffer with the fill value.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Yes</td>
+    <td class="ColumnCell"> <p>undefined</td>
+    <td class="ColumnCell"> <p>&lt;&lt;any&gt;&gt;</td>
+    <td class="ColumnRightCell"> 
+        <p>Return data from storage (dataset), trash is possible if user has not 
+	written data to portion of dataset being read.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>&nbsp;</td>
+    <td class="ColumnCell"> <p>default or user-defined</td>
+    <td class="ColumnCell"> <p>Never</td>
+    <td class="ColumnRightCell"> 
+        <p>Return data from storage (dataset), trash is possible if user has not 
+	written data to portion of dataset being read.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>&nbsp;</td>
+    <td class="ColumnBottom"> <p>default or user-defined</td>
+    <td class="ColumnBottom"> <p>Allocation</td>
+    <td class="ColumnRightBottom"> <p>Return data from storage (dataset).</td>
+  </tr>
+</table>
+
+  <p>There are two cases to consider, depending on whether the space in the file 
+  has been allocated before the read or not. When space has not yet been allocated, 
+  if a fill value is defined the memory buffer will be filled with the values 
+  and returned (no read from disk).
+
+  <p>If the space has been allocated, the values are returned from the stored 
+  data. The unwritten elements will be filled according to the fill value, 
+  or undefined.
+
+<h4>5.2  Deleting a dataset from a file, reclaiming space</h4>
+
+  <p>The size of the dataset cannot be reduced after it is created. The dataset 
+  can be expanded by extending one or more dimensions, with H5Dextend. It is 
+  not possible to contract a Dataspace, or to reclaim allocated space.
+
+  <p>HDF5 does not at this time provide a mechanism to remove a Dataset from a 
+  file, or to reclaim the storage from deleted objects. Through the H5Gunlink 
+  function one can remove links to a dataset from the file structure. Once all 
+  links to a dataset have been removed, that dataset becomes inaccessible to any 
+  application and is effectively removed from the file. But this does not recover 
+  the space the dataset occupies. 
+
+  <p>The only way to recover the space is to write all the objects of the file 
+  into a new file. Any unlinked object is inaccessible to the application and 
+  will not be included in the new file. 
+
+  <p>See the chapter "<a href="09_Groups.html">HDF5 Groups</a>" for 
+  further discussion of HDF5 file structures and the use of links. 
+
+<h4>5.3 Releasing memory resources (handles) when no longer needed</h4>
+
+  <p>The system resources required for HDF5 objects, including Datasets, 
+  Datatypes, and Dataspaces, should be released once access to the object is 
+  no longer needed. This is accomplished via the appropriate close function. 
+  This is not particular to datasets but a general requirement when working 
+  with the HDF5 library; failure to close objects will result in resource leaks. 
+
+  <p>In the case where a Dataset is created or data has been transferred, 
+  there are several objects that must be closed, 
+<!-- editingComment
+<span class="editingComment">
+   [ [ [ 
+   (T? above) 
+   originally appeared here.  On the full editorial pass, 
+   see if there is any apparent reason for the question.
+   ] ] ]
+  </span>
+-->
+  including  the Dataset, 
+  the Datatype, Dataspace, and property lists. 
+
+  <p>The application program must free any memory variables and buffers it 
+  allocates. When accessing data from the file, the amount of memory required 
+  can be determined by determining the size of the memory Datatype and the 
+  number of elements in the memory selection.
+
+  <p>Variable length data are organized in two or more areas of memory 
+  (see "<a href="11_Datatypes.html">HDF5 Datatypes</a>").
+  When writing data, the application 
+  creates an array of vl_info_t, which contains pointers to the elements, 
+  e.g., strings. In the file, the Variable Length data is stored in two parts: 
+  a heap with the variable length values of the data elements, and an array 
+  vlinfo_t elements. When the data is read, the amount of memory required 
+  for the heap can be determined with the H5Dget_vlen_buf_size call.
+
+  <p>The a Data Transfer property may be used to set a custom memory manager 
+  for allocating variable length data for a H5Dread. This is set with the 
+  H5Pset_vlen_mem_manager call.
+
+  <p>To free the memory for Variable Length data, it is necessary to visit each 
+  element, free the variable length data, and reset the element. The application 
+  must free the memory it has allocated. For memory allocated by the HDF5 Library 
+  during a read, the H5Dvlen_reclaim function can be used to perform this operation.
+
+<h4>5.4 External Storage Properties</h4>
+
+  <p>The External storage format allows data to be stored across a set of 
+  non-HDF5 files. A set segments (offsets and sizes) in one or more files 
+  is defined as an external file list, or EFL, and the contiguous logical 
+  addresses of the data storage are mapped onto these segments. Currently, 
+  only the H5D_CONTIGUOUS storage format allows external storage. External 
+  storage is enabled by a Dataset Creation Property. Table 18 shows the API.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0
+		align="center">
+  <tr valign="bottom">
+    <td colspan="2" align="center" valign="bottom"><h4>Table 18</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> 
+        <p><span class=TableHead>Function</span></td>
+    <td class="ColumnRightHdr"> 
+        <p><span class=TableHead>Description</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> 
+        <p>herr_t H5Pset_external (hid_t plist, const char *name, off_t offset, 
+	hsize_t size) 
+</td>
+    <td class="ColumnRightCell"> 
+        <p>This function adds a new segment to the end of the external file list 
+	of the specified dataset creation property list. The segment begins a 
+	byte offset of file name and continues for size bytes. The space 
+	represented by this segment is adjacent to the space already represented 
+	by the external file list. The last segment in a file list may have the 
+	size H5F_UNLIMITED, in which case the external file may be of unlimited 
+	size and no more files can be added to the external files list.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>int H5Pget_external_count (hid_t plist)</td>
+    <td class="ColumnRightCell"> 
+        <p>Calling this function returns the number of segments in an external 
+	file list. If the dataset creation property list has no external 
+	data then zero is returned.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> 
+        <p>herr_t H5Pget_external (hid_t plist, unsigned idx, size_t name_size, 
+	char *name, off_t *offset, hsize_t *size)</td>
+    <td class="ColumnRightBottom"> 
+        <p>This is the counterpart for the H5Pset_external() function. Given a 
+	dataset creation property list and a zero-based index into that list, 
+	the file name, byte offset, and segment size are returned through non-null 
+	arguments. At most name_size characters are copied into the name argument 
+	which is not null terminated if the file name is longer than the supplied 
+	name buffer (this is similar to strncpy()). </td>
+  </tr>
+</table>
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  - - - The text and figures that 
+  follow may not correspond properly - - -
+  <br>
+  (Made a quick pass today to sort it out -- FMB, 24 Jy '03.)
+  ] ] ]</span>
+-->
+
+<!-- NEW PAGE -->
+  <p>Figure 19 shows an example of how a contiguous, one-dimensional dataset is 
+  partitioned into three parts and each of those parts is stored in a segment 
+  of an external file. The top rectangle represents the logical address space 
+  of the dataset while the bottom rectangle represents an external file.
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dsets_fig19.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 19</span></td>
+  </tr>
+</table>
+  
+  <p>Figure 19a shows code that defines the external storage for the example. Note that 
+  the segments are defined in order of the logical addresses they represent, 
+  not their order within the external file. It would also have been possible 
+  to put the segments in separate files. Care should be taken when setting up 
+  segments in a single file since the library doesn't automatically check for 
+  segments that overlap.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+ Plist = H5Pcreate (H5P_DATASET_CREATE);
+  H5Pset_external (plist, "velocity.data", 3000, 1000);
+  H5Pset_external (plist, "velocity.data", 0, 2500);
+  H5Pset_external (plist, "velocity.data", 4500, 1500);</code></pre>
+	</td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 19a</span></td>
+  </tr>
+</table>
+
+  <p>Figure 20 shows an example of how a contiguous, two-dimensional dataset is 
+  partitioned into three parts and each of those parts is stored in a separate 
+  external file. The top rectangle represents the logical address space of the 
+  dataset while the bottom rectangles represent external files.</p>
+  
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+	<img src="Images/Dsets_fig20.jpg">
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 20</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Figure 21 shows code for this example.
+
+  <p>In this example, the library maps the multi-dimensional array onto a linear 
+  address space as defined by the HDF5 Format Specification, and then maps that 
+  address space into the segments defined in the external file list. 
+
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+ Plist = H5Pcreate (H5P_DATASET_CREATE);
+  H5Pset_external (plist, "scan1.data", 0, 24);
+  H5Pset_external (plist, "scan2.data", 0, 24);
+  H5Pset_external (plist, "scan3.data", 0, 16);
+    </code></pre></td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 21</span></td>
+  </tr>
+</table>
+
+  <p>The segments of an external file can exist beyond the end of the (external) 
+  file. The library reads that part of a segment as zeros. When writing to a 
+  segment that exists beyond the end of a file, the external file is automatically 
+  extended. Using this feature, one can create a segment (or set of segments) 
+  which is larger than the current size of the dataset, which allows to dataset 
+  to be extended at a future time (provided the data space also allows the 
+  extension).
+
+  <p>All referenced external data files must exist before performing raw data I/O 
+  on the dataset. This is normally not a problem since those files are being managed 
+  directly by the application, or indirectly through some other library. However, 
+  if the file is transferred from its original context, care must be taken to assure 
+  that all the external files are accessible in the new location.</p>
+
+<!-- HEADER RIGHT " " -->
+
+</body>
+</html>
+
+  

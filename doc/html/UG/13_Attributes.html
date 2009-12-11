@@ -1,0 +1,1419 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+<head>
+
+<title>HDF5 User's Guide: Attributes</title>
+
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+
+
+<!--(Meta)==========================================================-->
+
+
+<!--(Links)=========================================================-->
+
+<link href="ed_styles/NewUGelect.css" rel="stylesheet" type="text/css">
+
+<!--( Begin styles definition )=====================================-->
+<!--     Replaced with external stylesheet 'styles_NewUG.css'.      -->
+<!--( End styles definition )=======================================-->
+
+</head>
+
+
+<body>
+
+<!-- HEADER LEFT "HDF5 User's Guide" -->
+<!-- HEADER RIGHT "HDF5 Attributes" -->
+
+<!--( TOC )=========================================================-->
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+			border-spacing: 0px;
+			border-left-width: 20px;
+			border-left-style: Solid;
+			border-left-color: #FFFFFF;
+			border-bottom-width: 20px;
+			border-bottom-style: Solid;
+			border-bottom-color: #FFFFFF;
+				float: aligncenter;
+				left: 56px;
+				top: 615px;
+				width: 220;"
+                align=right
+		width=220
+		cellspacing=0>
+
+<tr valign=top>
+<td style="border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-left-width: 6px;
+			border-left-style: Solid;
+			border-left-color: #008000;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;">
+<span class=TableHead>Chapter Contents</span></td></tr>
+
+<tr valign=top>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			border-left-width: 1px;
+			border-left-color: #008000;
+			border-left-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;">
+<a href="#Intro">1. Introduction</a>
+
+<br>
+<a href="#Model">2. Programming Model</a>
+
+<!--
+<br>
+<a href="#h5dump">Using <code>h5dump</code></a>
+-->
+
+<br>
+<a href="#Functions">3. Function Summaries</a>
+
+<br>
+<a href="#Working1">4. Working with Attributes</a>
+
+<br>
+&nbsp;&nbsp;&nbsp;
+Attribute structure
+<br>
+&nbsp;&nbsp;&nbsp;
+Create, write, read
+<br>
+&nbsp;&nbsp;&nbsp;
+Access by name or index
+<br>
+&nbsp;&nbsp;&nbsp;
+Obtain information
+<br>
+&nbsp;&nbsp;&nbsp;
+Iterate, delete, close
+
+<br>
+<a href="#SpecIssues">5. Special Issues</a>
+
+<br>
+&nbsp;&nbsp;&nbsp;
+Large attributes
+<br>
+&nbsp;&nbsp;&nbsp;
+Attribute names
+<br>
+&nbsp;&nbsp;&nbsp;
+No partial I/O
+
+<!--
+<br>
+<a href="#Examples">Code Examples</a>
+-->
+
+</td></tr>
+</table>
+")
+-->
+</SCRIPT>
+<!--(End TOC)=======================================================-->
+
+
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  ] ] ]</span>
+-->
+
+<!-- editingComment
+-->
+
+<div align="center">
+<a name="TOP">
+<h2>Chapter 7<br><font size="7">HDF5 Attributes</font></h2>
+</a>
+</div>
+
+
+<a name="Intro">
+<h3>1. Introduction</h3>
+</a>
+
+<p>An HDF5 <span class=termdefinition>attribute</span> is 
+ a small meta data object describing the nature and/or 
+ intended usage of a 
+ <span class=termdefinition>primary data object</span>,
+ which may be a dataset, group, or named datatype.
+ </p>
+ 
+<p>Attributes are assumed to be very small as data objects go, so 
+ storing them as standard HDF5 datasets would be quite inefficient.
+ HDF5 attributes are therefore managed through a special 
+ attributes interface, H5A, which is designed to easily 
+ attach attributes to primary data objects as 
+ small datasets containing metadata information and 
+ to minimize storage requirements
+
+<p>Consider, as examples of the simplest case, a set of 
+ laboratory readings taken under known temperature and 
+ pressure conditions of 18.0 degrees celsius and 
+ 0.5 atmospheres, respectively.  
+ The temperature and pressure could be stored as attributes of the 
+ dataset could be described as the following name/value pairs:
+   <pre>
+   temp=18.0
+   pressure=0.5</pre>
+
+<p>While HDF5 attributes are not standard HDF5 datasets, 
+ they have much in common:
+ <ul>
+    <li>An attribute has a user-defined dataspace and 
+        the included metadata has a user-assigned datatype.
+    <li>That metadata can be of any valid HDF5 datatype.
+    <li>Attributes are addressed by name.
+ </ul>
+
+
+<!--( Comment box )=================================================-->
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------------->
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				border-spacing: 0px;
+			border-left-width: 20px;
+			border-left-style: Solid;
+			border-left-color: #FFFFFF;
+			border-bottom-width: 20px;
+			border-bottom-style: Solid;
+			border-bottom-color: #FFFFFF;
+				float: aligncenter;
+				left: 56px;
+				top: 615px;
+				width: 220;"
+                align=right
+		width=220
+		cellspacing=0>
+
+<tr valign=top>
+<td style="border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-left-width: 6px;
+			border-left-style: Solid;
+			border-left-color: #008000;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;">
+<span class=TableHead>Note</span></td></tr>
+
+<tr valign=top>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			border-left-width: 1px;
+			border-left-color: #008000;
+			border-left-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;">
+
+Attributes are small datasets but not separate objects;
+they are contained within the object header of a primary data object.  
+As such, attributes are opened, read, or written only with H5A functions.
+
+</td></tr>
+</table>
+<!---- FOR USE WITH ELECTRONIC VERSION --------------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				border-spacing: 0px;
+			border-left-width: 20px;
+			border-left-style: Solid;
+			border-left-color: #FFFFFF;
+			border-bottom-width: 20px;
+			border-bottom-style: Solid;
+			border-bottom-color: #FFFFFF;
+				float: aligncenter;
+				left: 56px;
+				top: 615px;
+				width: 220;"
+                align=left
+		width=220
+		cellspacing=0>
+
+<tr valign=top>
+<td style="border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-left-width: 6px;
+			border-left-style: Solid;
+			border-left-color: #008000;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;">
+<span class=TableHead>Note:</span></td></tr>
+
+<tr valign=top>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			border-left-width: 1px;
+			border-left-color: #008000;
+			border-left-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;">
+
+Attributes are small datasets but not separate objects;
+they are contained within the object header of a primary data object.  
+As such, attributes are opened, read, or written only with H5A functions.
+
+</td></tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+<!--(End Comment Box)===============================================-->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+ <br>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+
+ But there are some very important differences:
+ <ul>
+    <li>There is not provision for special storage, 
+        such as compression or chunking.
+    <li>There is no partial I/O or subsetting capability for attribute data.
+    <li>Attributes cannot be shared.
+    <li>Being small, an attributes is stored in the object header 
+        of the object it describes and is thus attached directly to 
+        that object.
+ </ul>
+
+ <span class="termemphasis">Large attributes</span>,
+ described below in &ldquo;<a href="#SpecIssues">Special Issues</a>&rdquo;, 
+ are best stored as separate HDF5 datasets and are not subject to the above 
+ limitations.
+
+<!-- NEW PAGE -->
+<p>This chapter discusses or lists the following:
+
+<ul>
+	<li class=BulletCompact>The HDF5 attributes programming model
+	<li class=BulletCompact>H5A function summaries
+	<li class=BulletCompact>Working with HDF5 attributes
+        <ul>
+	<li class=BulletCompact>The structure of an attribute
+	<li class=BulletCompact>Creating, writing, and reading attributes
+	<li class=BulletCompact>Accessing attributes by name or index
+	<li class=BulletCompact>Obtaining information regarding 
+	    an object's attributes 
+	<li class=BulletCompact>Iterating across an object's attributes 
+	<li class=BulletCompact>Deleting an attribute 
+	<li class=BulletCompact>Closing attributes 
+        </ul>
+	<li class=BulletCompact>Special issues regarding attributes
+</ul>
+
+
+<p>In the following discussions, attributes are generally 
+ attached to datasets.  Attributes attached to other 
+ primary data objects, i.e., groups or named datatypes, 
+ are handled in exactly the same manner.
+ </p>
+
+<p></p>
+
+
+<!--(Flags Table)===================================================-->
+<!--
+<div align=center>
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				border-spacing: 0px;
+				left: 0px;
+				top: 330px;
+				height: 150px;
+				float: aligncenter;
+				width: 600px;"
+		width=600
+		height=145
+		cellspacing=0>
+<col style="width: 23.025%;">
+<col style="width: 76.975%;">
+
+<tr valign=top>
+<td style="border-left-width: 1px;
+			border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=23.025%>
+<p><span class=TableHead>Column 1</span></td>
+<td style="border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=76.975%>
+<p><span class=TableHead>Column 2 of &lsquo;flags&rsquo; table</span></td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;"
+	width=23.025%>
+<p>Text</td>
+<td style="padding-right: 10px; padding-left: 10px;"
+	width=76.975%>
+<p>Text</td>
+</tr>
+
+<tr valign=top>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=23.025%>
+<p>Text</td>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=76.975%>
+<p>Text</td>
+</tr>
+</table>
+</div>
+-->
+
+<!--
+<p class="runninghead">Purpose</p>
+
+<p class="runninghead">Relationship to other objects</p>
+-->
+
+<a name="Model">
+<p>&nbsp;</p><!-- NEW PAGE -->
+<h3 class=pagebefore>2. Programming Model</h3>
+</a>
+
+<!--( UML Model Box )===============================================-->
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------------->
+<table align=right class=greenframe1 width=270>
+    <tr><td height=310 valign=center align=center class=greenline1>
+        <img src="Images/UML_Attribute.jpg" 
+        alt="Image of UML model for an HDF5 attribute and its 
+        associated dataspace and datatype"></td></tr>
+    <tr><td class=figurecaption>
+        <font class=figurenumber>Figure 2:</font>
+        UML model for an HDF5 attribute and its associated dataspace 
+        and datatype.
+    </tr></td>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION --------------------------------->
+<!--( End UML Model )===============================================-->
+
+<h4>2.1 To create and write a new attribute</h4>
+
+<!--( UML Model Box )===============================================-->
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<table align=center class=greenframe1 width=250>
+    <tr><td height=250 valign=center align=center class=greenline1>
+        <img src="Images/UML_Attribute.jpg" 
+        alt="Image of UML model for an HDF5 attribute and its 
+        associated dataspace and datatype"></td></tr>
+    <tr><td class=figurecaption>
+        <font class=figurenumber>Figure 2:</font>
+        UML model for an HDF5 attribute and its associated dataspace 
+        and datatype.
+    </tr></td>
+</table>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+<!--( End UML Model )===============================================-->
+
+<br>
+<p>Creating an attribute is similar to creating a dataset. 
+ To create an attribute, the application must specify the object 
+ to which the attribute is attached, the datatype and dataspace 
+ of the attribute data, and the attribute creation property list. 
+ </p>
+
+<p>The following steps are required to create and write and 
+ an HDF5 attribute:
+ <ol>
+     <li> Obtain the object identifier for the attribute's primary 
+          data object.
+     <li> Define the characteristics of the attribute and specify the 
+          attribute creation property list.
+          <ul>
+          <li> Define the datatype.
+          <li> Define the dataspace.
+          <li> Specify the attribute creation property list.
+          </ul>
+     <li> Create the attribute.
+     <li> Write the attribute data (optional).
+     <li> Close the attribute (and datatype, dataspace, and 
+          attribute creation property list, if necessary).
+     <li> Close the primary data object (if appropriate).
+ </ol>
+ </p>
+
+<!-- NEW PAGE -->
+<h4>2.2 To open and read/write an existing attribute</h4>
+
+<p>The following steps are required to open and read/write
+ an existing attribute.  Since HDF5 attributes allow no partial I/O,
+ you need specify only the attribute and the attribute's memory datatype 
+ to read it:
+ <ol>
+     <li> Obtain the object identifier for the attribute's primary 
+          data object.
+     <li> Obtain the attribute's name or index.
+     <li> Open the attribute.
+          <ul>
+          <li> Get attribute dataspace and datatype (optional).
+          </ul>
+     <li> Specify the attribute's memory type.
+     <li> Read and/or write the attribute data.
+     <li> Close the attribute.
+     <li> Close the primary data object (if appropriate).
+ </ol>
+ </p>
+
+
+
+<!--
+<p>The programming model for element 1 
+ can be summarized as follows:</p>
+
+<ul>
+	<li class=BulletCompact>Step 1 (optional).
+	<li class=BulletCompact>Step 2.
+	<li class=BulletCompact>Step 3.
+</ul>
+
+<p>
+ First consider the simple case, text text, 
+ followed by program line:
+
+<dir><pre>
+return_var = H5Xfunction (param1, 
+&nbsp;&nbsp;&nbsp;&nbsp;param2, param3,
+&nbsp;&nbsp;&nbsp;&nbsp;param4)
+</dir></pre>
+
+ Text text text.  
+
+<p>Now consider the more generalized case, text text text.
+
+<dir><pre>
+return_var = H5Xfunction (param1, param2, param3)
+   &lt;...<em>text text text</em>...&gt;
+return_var = H5Xfunction (param1, param2, param3)
+   &lt;...<em>text text text</em>...&gt;
+return_var = H5Xfunction (param1, param2, param3)
+</pre></dir>
+
+<p>Notes: 
+ Text, text text.
+
+<div class=pagenever>
+
+<h4>2.2 Programming model element 2</h4>
+
+-->
+
+
+<!--
+<a name="h5dump">
+<p>&nbsp;</p>
+<h3 class=pagebefore>3 Using <code>h5dump</code></h3>
+</a>
+<dir>
+
+</dir>
+-->
+
+<a name="Functions">
+<p>&nbsp;</p><!-- NEW PAGE -->
+<h3 class=pagebefore>3. Attribute (H5A) Function Summaries</h3>
+</a>
+
+<!--
+<h4>3.1 Attribute functions</h4>
+-->
+
+<!--(Table)=========================================================-->
+<div align=center>
+<table x-use-null-cells
+		style="x-cell-content-align: top;
+				border-spacing: 0px;
+				float: aligncenter;
+				left: 63px;
+				top: 292px;
+				width: 600px;"
+		width=600
+		cellspacing=0>
+<col style="width: 15.871%;">
+<col style="width: 84.129%;">
+
+<tr valign=top>
+<td style="border-left-width: 1px;
+			border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=20.871%>
+<p><span class=TableHead>C Function
+                         <br>
+                         F90 Function</span></td>
+<td style="border-top-style: Solid;
+			border-top-color: #008000;
+			border-top-width: 3px;
+			border-right-width: 1px;
+			border-bottom-style: Solid;
+			border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			padding-right: 10px;
+			padding-left: 10px;"
+	width=79.129%>
+<p><span class=TableHead>Purpose
+<!--
+   <br>
+   Syntax
+-->
+   </span></td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;">
+<p><code>H5Acreate</code>
+   <br>
+   <code>h5acreate_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Creates a dataset as an attribute of another group, dataset, 
+   or named datatype. 
+<!--
+    <br>
+    <code>hid_t H5Fcreate (const char *<em>name</em>,
+          uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fcpl_id</em>, 
+    hid_t <em>fapl_id)</em></code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Awrite</code>
+   <br>
+   <code>H5awrite_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Writes an attribute.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aread</code>
+   <br>
+   <code>h5aread_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Reads an attribute.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aopen_name</code>
+   <br>
+   <code>h5aopen_name_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Opens an attribute specified by its name.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aopen_idx</code>
+   <br>
+   <code>h5aopen_idx_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Opens the attribute specified by its index.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aclose</code>
+   <br>
+   <code>h5aclose_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Closes the specified attribute.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aiterate</code>
+   <br>
+   (none)</td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Calls a user&rsquo;s function for each attribute 
+   attached to a data object.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Adelete</code>
+   <br>
+   <code>h5adelete_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Deletes an attribute.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aget_name</code>
+   <br>
+   <code>h5aget_name_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Gets an attribute name.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aget_space</code>
+   <br>
+   <code>h5aget_space_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Gets a copy of the dataspace for an attribute.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p><code>H5Aget_type</code>
+   <br>
+   <code>h5aget_type_f</code></td>
+<td style="padding-right: 10px; padding-left: 10px;
+                        border-bottom-width: 1px;
+                        border-bottom-color: #008000;
+                        border-bottom-style: Solid;">
+<p>Gets an attribute datatype.
+<!--
+    <br>
+    <code>hid_t H5Fopen (const char *<em>name</em>, uintn <em>flags</em>, 
+    <br>
+    hid_t <em>fapl_id</em>)</code>
+-->
+    </td></tr>
+
+<tr valign=top>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;">
+<p><code>H5Aget_num_attrs</code>
+   <br>
+   <code>h5aget_num_attrs_f</code></td>
+<td style="border-bottom-width: 3px;
+			border-bottom-color: #008000;
+			border-bottom-style: Solid;
+			padding-right: 10px;
+			padding-left: 10px;">
+<p>Determines the number of attributes attached to a data object.
+<!--
+    <br>
+    <code>herr_t H5Fflush (hid_t <em>object_id</em>, 
+          H5F_scope_t <em>scope</em>)</code>
+-->
+    </td></tr>
+</table>
+</div>
+
+
+<a name="Working1">
+<p>&nbsp;</p><!-- NEW PAGE -->
+<h3 class=pagebefore>4. Working with Attributes</h3>
+</a>
+
+
+<h4>4.1 The structure of an attribute</h4>
+
+<p>An attribute has two parts: 
+   <ul>
+   <li>name
+   <li>value(s) 
+   </ul>
+ HDF5 attributes are sometimes discussed as name/value pairs 
+ in the form <span class="codevar">name=value</span>.
+ </p>
+
+<p>An attribute's name is a null-terminated ASCII character string.
+ Each attribute attached to an object has a unique name.
+ </p>
+
+<p>The value portion of the attribute contains 
+ one or more data elements of the same datatype. 
+ </p>
+
+<p>HDF5 attributes have all the characteristics of HDF5 datasets
+ except that there is no partial I/O capability;
+ attributes can be written and read only in full, with no subsetting.
+ </p>
+
+
+<h4>4.2 Creating, writing, and reading attributes</h4>
+
+<p>If attributes are used at all in an HDF5 file, 
+ these three functions will be employed.
+ <code>H5Acreate</code> and <code>H5Awrite</code> are used together
+ to place the attribute in the file.
+ If an attribute is to be used and it is not currently in memory,
+ <code>H5Aread</code> generally comes into play, 
+ usually in concert with one each of the 
+ <code>H5Aget_*</code> and <code>H5Aopen_*</code> functions.
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To create an attribute</span>, 
+     call <code>H5Acreate</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>hid_t H5Acreate (hid_t <em>loc_id</em>, 
+          const char *<em>name</em>, 
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          hid_t <em>type_id</em>, 
+          hid_t <em>space_id</em>, 
+          hid_t <em>create_plist</em>)</code>
+</dl>
+ 
+<p><span class=codevar>loc_id</span> identifies the object to which
+ the attribute is to be attached, a dataset, group, or named datatype.  
+ This object, incidentally, is known as the 
+ <span class=termdefinition>primary data object</span>; 
+ the attribute is a <span class=termdefinition>meta data object</span>.
+ 
+ <span class=codevar>name</span>, 
+ <span class=codevar>type_id</span>,
+ <span class=codevar>space_id</span>, and 
+ <span class=codevar>create_plist</span>
+ convey, respectively, the attribute's name, datatype, dataspace, 
+ and attribute creation property list.
+ The attribute's name must be locally unique, 
+ i.e., it must be unique within the context of the object 
+ to which it is attached.
+
+<p><code>H5Acreate</code> creates the attribute in memory;
+ the attribute does not exist in the file until <code>H5Awrite</code> 
+ writes it there.
+ </p>
+
+<p>(Note that the attribute property list is currently unused.
+ The only accepted value for <span class=codevar>create_plist</span> 
+ is <span class=smallcaps>H5P_DEFAULT</span>.)
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To write or read an attribute</span>, 
+     call <code>H5Awrite</code> or <code>H5Aread</code>, respectively:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>herr_t H5Awrite (hid_t <em>attr_id</em>, 
+          hid_t <em>mem_type_id</em>, 
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          const void *<em>buf</em>)</code>
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>herr_t H5Aread (hid_t <em>attr_id</em>, 
+          hid_t <em>mem_type_id</em>, 
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          void *<em>buf</em>)</code>
+</dl>
+
+<p><span class=codevar>attri_id</span> identifies the attribute while
+ <span class=codevar>mem_type_id</span> identifies the in-memory datatype 
+ of the attribute data.
+ </p>
+
+<p><code>H5Awrite</code> writes the attribute data, i.e., the meta data, 
+ from the buffer <span class=codevar>buf</span> to the file; 
+ <code>H5Aread</code> reads attribute data from the file into
+ <span class=codevar>buf</span>.
+ </p>
+
+<p>The HDF5 library converts the meta data between the 
+ in-memory datatype, <span class=codevar>mem_type_id</span>, and 
+ the in-file datatype, defined when the attribute was created,
+ without user intervention.
+
+ 
+
+<h4>4.3 Accessing attributes by name or index</h4>
+
+<p>When accessing attributes, they can be identified by name or 
+ by an index value. 
+ The use of an index value makes it possible to iterate 
+ through all of the attributes associated with a given object. 
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To access an attribute by its name</span>, 
+     text text <code>H5Aopen_name</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>hid_t H5Aopen_name (hid_t <em>loc_id</em>, 
+          const char *<em>name</em>)</code> 
+</dl>
+
+<p><code>H5Aopen_name</code> returns an attribute identifier that
+ can then be used by any function that must access an attribute,
+ such as <code>H5Aread</code>.
+ </p>
+
+<p>Use the function <code>H5Aget_name</code>, described below, 
+ to determine an attribute's name.
+ The information required to establish an index 
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To access an attribute by its 
+     index value</span>, 
+     text text <code>H5Aopen_idx</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>hid_t H5Aopen_idx (hid_t <em>loc_id</em>, 
+          unsigned <em>index</em>)</code>
+</dl>
+
+<p>To determine an attribute index value when it is not already known, 
+ you must first use the function <code>H5Aget_num_attrs</code>, 
+ described below, to determine the number of attributes attached to 
+ the primary object.  The index values of the attributes attached to
+ that object range from 0 through 1 less than the value returned by
+ <code>H5Aget_num_attrs</code>.
+ </p>
+
+<p><code>H5Aopen_idx</code> is generally used in the course of 
+ opening several attributes for later access.  
+ Use <code>H5Aiterate</code>, described below, if the intent is to 
+ perform the same operation on every attribute attached to an object.
+ </p>
+
+
+<h4>4.4 Obtaining information regarding an object's attributes</h4>
+
+<p>In the course of working with HDF5 attributes, one may need to 
+ obtain any of several pieces of information:
+ <ul>
+	<li class=BulletCompact>An attribute name
+	<li class=BulletCompact>The dataspace of an attribute 
+	<li class=BulletCompact>The datatype of an attribute 
+	<li class=BulletCompact>The number of attributes attached to an object
+ </ul>
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To obtain an attribute's name</span>, 
+     call <span class=codetext>H5Aget_name</span> with an attribute identifier, 
+     <span class=codevar>attr_id</span>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>ssize_t H5Aget_name (hid_t <em>attr_id</em>, 
+          size_t <em>buf_size</em>, 
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          char *<em>buf</em>)</code>
+</dl>
+
+<p>As with other attribut functions, <span class=codevar>attri_id</span> 
+ identifies the attribute. 
+ <span class=codevar>buf</span> is the buffer to which the attribute's name 
+ will be read; 
+ <span class=codevar>buf_size</span> defines the size of that buffer.
+ </p>
+
+<p>If the length of the attribute name, and hence the value required for 
+ <span class=codevar>buf_size</span>, is unknown, a first call to 
+ <code>H5Aget_name</code> will return that size.  If the value of
+ <span class=codevar>buf_size</span> used in that first call is too small,
+ the name will simply be truncated in <span class=codevar>buf</span>.
+ A second <code>H5Aget_name</code> call can then be used to retrieve the 
+ name in an appropriately-sized buffer.
+ </p>
+
+<!-- NEW PAGE -->
+<dl>
+ <dt><span class="RunningHead">To determine the dataspace or datatype 
+     of an attribute</span>, call <code>H5Aget_space</code> or 
+     <code>H5Aget_type</code>, respectively:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>hid_t H5Aget_space (hid_t <em>attr_id</em>)</code>
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>hid_t H5Aget_type (hid_t <em>attr_id</em>)</code>
+</dl>
+
+<p><code>H5Aget_space</code> returns the dataspace identifier
+ for the attribute <span class="CodeVar">attr_id</span>.
+ </p>
+
+<p><code>H5Aget_type</code> returns the datatype identifier
+ for the attribute <span class="CodeVar">attr_id</span>.
+ </p>
+
+
+<dl>
+ <dt><span class="RunningHead">To determine the number or attributes 
+     attached to an object</span>, call <code>H5Aget_num_attrs</code>: 
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>int H5Aget_num_attrs (hid_t <em>loc_id</em>)</code>
+</dl>
+
+<p><code>H5Aget_num_attrs</code> returns the of number attributes 
+ attached to the object identified by the object identifier 
+ <span class="codevar">loc_id</span>.
+ </p>
+
+<p>A call to <code>H5Aget_num_attrs</code> is generally the preferred 
+ first step in determining attribute index values. 
+ If the call to <code>H5Aget_num_attrs</code> returns 
+ <span class="codevar">N</span>, the attributes attached to
+ the object <span class="codevar">loc_id</span> have index values
+ of <code>0</code> through <span class="codevar">N</span><code>-1</code>
+ </p>
+
+
+<h4>4.5 Iterating across an object's attributes</h4>
+
+<p>It is sometimes useful to be able to perform the identical operation
+ across all of the objects attached to an object.  
+ At the simplest level, you might just want to open each attribute;
+ at a higher level, you might wish to perform a rather complex operation 
+ on each attribute as you iterate across the set.
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To iterate an operation across the 
+     attributes attached to an object</span>, 
+     one must make a series of calls to <code>H5Aiterate</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>herr_t H5Aiterate (hid_t <em>loc_id</em>, 
+          unsigned *<em>index</em>, 
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          H5A_operator_t <em>op_func</em>, 
+          void *<em>op_data</em>)</code>
+</dl>
+
+<p><code>H5Aiterate</code> successively marches across all of the 
+ attributes attached to the object specified in 
+ <span class="Codevar">loc_id</span>, performing the operation(s) 
+ specified in <span class="Codevar">op_func</span> with the data
+ specified in <span class="Codevar">op_data</span> on each attribute.
+ </p>
+
+<p>When <code>H5Aiterate</code> is called, 
+ <span class="Codevar">index</span> contains the index of the attribute 
+ to be accessed in this call; 
+ when <code>H5Aiterate</code> returns, <span class="Codevar">index</span>
+ will contain the index of the next attribute.
+ If the returned <span class="Codevar">index</span> is the null pointer, 
+ then all attributes have been processed and the iterative process 
+ is complete. 
+ </p>
+
+<p><span class="Codevar">op_func</span> is a user-defined operation 
+ that adheres to the <code>H5A_operator_t</code> prototype.
+ This prototype and certain requirements imposed on the operator's 
+ behavior are  described in the <code>H5Aiterate</code> entry
+ in the <cite>HDF5 Reference Manual</cite>.
+ </p>
+
+<p><span class="Codevar">op_data</span> is also user-defined to meet
+ the requirements of <span class="Codevar">op_func</span>.
+ Beyond providing a parameter with which to pass this data, 
+ HDF5 provides no tools for its management and imposes no restrictions.
+ </p>
+
+
+<!-- editingComment
+  <p class=editingcommentlt>[ [ [ Need example? ] ] ]</p>
+-->
+
+<!-- NEW PAGE -->
+<h4>4.6 Deleting an attribute</h4>
+
+<p>Once an attribute has outlived its usefulness or, for whatever reason, 
+ is no longer appropriate, it may become necessary to delete it.
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To delete an attribute</span>, 
+     call <code>H5Adelete</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>herr_t H5Adelete (hid_t <em>loc_id</em>, 
+          const char *<em>name</em>)</code>
+</dl>
+
+<p><code>H5Adelete</code> removes the attribute 
+ <span class="Codevar">name</span> from the group, dataset, or 
+ named datatype specified in <span class="CodeVar">loc_id</span>.
+ </p>
+
+<p><code>H5Adelete</code> must not be called if there are 
+ any open attribute identifiers on the object 
+ <span class="CodeVar">loc_id</span>.  Such a call can cause 
+ the internal attribute indexes to change; future writes to 
+ an open attribute would then produce unintended results.
+ </p>
+
+
+
+<h4>4.7 Closing an attribute</h4>
+
+<p>As is the case with all HDF5 objects, once access to an attribute 
+ it is no longer needed, that attribute must be closed.
+ It is best practice to close it as soon as practicable;
+ it is mandatory that it be closed prior to the <code>H5close</code> 
+ call closing the HDF5 library.
+ </p>
+
+<dl>
+ <dt><span class="RunningHead">To close an attribute</span>, 
+     call <code>H5Aclose</code>:
+
+ <dd>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <code>herr_t H5Aclose (hid_t <em>attr_id</em>)</code>
+</dl>
+
+<p><code>H5Aclose</code> closes the specified attribute by terminating 
+ access to its identifier, <span class="CodeVar">attr_id</span>.
+ </p>
+
+<p>Further use of <span class="CodeVar">attr_id</span> is illegal;
+ any function employing it will fail.
+ </p>
+
+
+<a name="SpecIssues">
+<p>&nbsp;</p><!-- NEW PAGE -->
+<h3 class=pagebefore>5. Special Issues</h3>
+</a>
+
+
+<!--( Large or shared attribute )===================================-->
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------------->
+<table align=right class=greenframe1 width=250>
+    <tr><td height=310 valign=center align=center class=greenline1>
+        <img src="Images/Shared_Attribute.jpg" 
+        alt="Model for a large or shared HDF5 attribute"></td></tr>
+    <tr><td class=figurecaption>
+        <font class=figurenumber>Figure 3:</font>
+        A large or shared HDF5 attribute and its associated dataset(s). 
+        <span class=codetext>DatasetA</span> is an attribute of 
+        <span class=codetext>Dataset1</span> that may have been too large 
+        to store as an attribute.  
+        It is associated with <span class=codetext>Dataset1</span> 
+        by means of an object reference pointer attached as an 
+        attribute to <span class=codetext>Dataset1</span>.
+        Such an attribute can be shared among multiple datasets by 
+        means of addtional object reference pointers attached
+        to addtional datasets.
+    </tr></td>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION --------------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------------
+<table align=center class=greenframe1 width=350>
+    <tr><td height=310 valign=center align=center class=greenline1>
+        <img src="Images/Shared_Attribute.jpg" 
+        alt="Model for a large or shared HDF5 attribute"></td></tr>
+    <tr><td class=figurecaption>
+        <font class=figurenumber>Figure 3:</font>
+        A large or shared HDF5 attribute and its associated dataset(s). 
+        <span class=codetext>DatasetA</span> is an attribute of 
+        <span class=codetext>Dataset1</span> that may have been too large 
+        to store as an attribute.  
+        It is associated with <span class=codetext>Dataset1</span> 
+        by means of an object reference pointer attached as an 
+        attribute to <span class=codetext>Dataset1</span>.
+        Such an attribute can be shared among multiple datasets by 
+        means of addtional object reference pointers attached
+        to addtional datasets.
+    </tr></td>
+</table>
+<!-- FOR USE WITH PRINT VERSION -------------------------------------->
+<!--( End large or shared attribute )===============================-->
+
+
+<dl>
+ <dt><span class=TermDefList>Large attributes</span>
+ <dd>Attributes are intended to be small objects. 
+     A large dataset intended as meta data for another dataset 
+     can be stored as a supplemental dataset.
+     An attribute would then be attached to the original dataset indicating 
+     the relationship as an object reference pointer.
+     This approach is illustrated in Figure 3.
+     </p>
+        
+     <p>
+     How small is <i>small</i> and how large is <i>large</i> 
+     are not defined by the library;
+     it is left to the user's interpretation.
+     (In considering attributes and size, the HDF5 development team
+     has considered attributes to be up to 16K, but this has never been
+     set as a design or implementation limit.)
+<!-- editingComment
+  <span class="editingComment">[ [ [
+  Is this an appropirate comment?  (I think it is.)
+  ] ] ]</span>
+-->
+
+     </p>
+
+ <dt><span class=TermDefList>Shared attributes</span>
+ <dd>Attributes written and managed through the H5A interface 
+     cannot be shared.  
+     If shared attributes are required, they must be handled 
+     in the manner described above for large attributes 
+     and illustrated in Figure 3.
+     </p>
+
+ <dt><span class=TermDefList>Attribute names</span>
+ <dd>While an attribute name may include any valid ASCII characters, 
+     including blanks, it is generally wise to keep readability issues 
+     in mind.  
+     In C, the name must be terminated with a null character, 
+     <code>\0</code>.
+     </p>
+
+ <dt><span class=TermDefList>No special I/O or storage</span>
+ <dd>HDF5 attributes have all the characteristics of HDF5 datasets 
+     except the following:
+     <ul>
+     <li>Attributes are written and read only in full; 
+       there is no provision for partial I/O or subsetting.
+     <li>No special storage capability is provided for attributes; 
+       there is no compression or chunking and 
+       attributes are not extendable.
+	 </ul>
+     </p>
+        
+</dl>
+
+
+<!--
+<a name="Examples">
+<p>&nbsp;</p>
+<h3 class=pagebefore>13.00 Code Examples for Text Text Text</h3>
+</a>
+<dir>
+
+
+<p class=editingcomment>[ [ [ Comprehensive example set yet to be prepared. ] ] ]</p>
+
+
+<h4>13.00.1 Example using text text text</h4>
+
+
+<p>The following example ....:
+ </p>
+
+<dir><pre>
+code
+code
+code
+</pre></dir>
+
+<h4>13.00.2 Example using text text text</h4>
+
+<p>This example shows how ....:
+ </p>
+
+<dir><pre>
+code
+code
+code
+</pre></dir>
+
+</dir>
+-->
+
+ 
+
+</body>
+</html>

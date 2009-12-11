@@ -1,0 +1,58 @@
+<STYLE TYPE="text/css">
+
+P, p, UL, ul, OL, ol, LI, li, DL, dl, DT, dt, DD, dd    {
+        font-family: garamond, "times new roman", times, serif; 
+        font-size: 11pt;
+        }
+	
+A, a    {
+        color: black; 
+        text-decoration: none;
+        }
+
+H1, h1  {
+        font-family: garamond, "times new roman", times, serif;
+        font-size: 18pt;
+        font-weight: bold;
+        text-align: center	
+        }
+
+H2, h2  {
+        font-family: garamond, "times new roman", times, serif;
+        font-size: 16pt;
+        font-weight: bold;	
+        }
+
+H3, h3  {
+        font-family: garamond, "times new roman", times, serif;
+        font-size: 14pt;
+        font-weight: bold;	
+        }
+
+H4, h4  {
+        font-family: garamond, "times new roman", times, serif;
+        font-size: 12pt;
+        font-weight: bold;	
+        }
+
+H5, h5  {
+        font-family: garamond, "times new roman", times, serif;
+        font-size: 10pt;
+        font-weight: bold;	
+        }
+
+code, CODE        {
+        font-family: "Courier New", Courier, Monospace;
+        font-size: 9pt;
+        }
+
+pre, PRE          {
+        font-family: "Courier New", Courier, Monospace;
+        font-size: 8pt;
+        }
+
+.smallType        {
+        font-size: 9pt;
+        }
+
+</STYLE>

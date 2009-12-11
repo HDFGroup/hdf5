@@ -1,0 +1,180 @@
+
+================================================================================
+Process for Creating PDF Version of the HDF5 Reference Manual from Source Files
+================================================================================
+
+					              Last modified: 06 Oct 2004
+
+The PDF version of the HDF5 User's Guide is created from scratch at each 
+release from the primary version of the documentation which is maintained in
+HTML. (Assuming, of course, that we continue to produce PDF versions.)
+
+
+1.  Using Macromedia Dreamweaver, define a site that contains all the documents
+    that will be included/necessary for PDF generation.
+
+
+2.  Wherever necessary throughout the source code:
+
+      a) Switch between print and electronic versions of some elements by means
+         of switching which section is commented out. (For PDF generation make
+         sure the Print version of elements is uncommented)
+         NOTE: Look for:
+                 <!-- FOR USE WITH ELECTRONIC VERSION -->
+                 <!-- FOR USE WITH PRINT VERSION ------->
+ 
+
+3.  Using HTML DOC:  
+      
+      a) Open H5_newUG.book 
+      
+      b) The Input tab:
+           Document Type: Web Page
+           Input Files:
+             03_Model.html
+             08_TheFile.html
+             09_Groups.html
+             10_Datasets.hmtl
+             11_Datatypes.html
+             12_Dataspaces.hmtl
+             13_Attributes.html
+           Logo Image: none
+           Title File/Image: none
+
+      c) The Output tab:
+           Output To: File
+           Output Path: H5_newUG.pdf
+           Output Format: PDF
+           Output Options: JPEG Big Images
+           Compression (not critical, change at will): Slider right above 'Fast'
+           JPEG Quality (not critical, change at will): 60
+  
+      d) The Page tab:
+           Page Size: Letter, 2-Sided
+             Top: 0.50in, Left: 1.00in, Right: 0.50in, Bottom: 0.50in
+           Header: Blank, Blank, Blank
+           Footer: Blank, Blank, 1,2,3,...
+           Number Up: 1
+
+      e) The Colors tab:
+           Everything Blank
+           Link Style: Plain
+    
+      f) The Fonts tab:
+           Base Font Size: 11.0
+           Line Spacing: 1.2
+           Body Typeface: Times
+           Heading Typeface: Helvetica
+           Header/Footer Size: 10.0
+           Header/Footer Font: Helvetica
+           Character Set: iso-8859-1
+           Options: Do Not Check 'Embed Fonts'
+
+      g) The PDF tab:
+           PDF Version: 1.3
+           Page Mode: Document
+           Page Layout: Single
+           Page Effect: None
+           Options: Check 'Include Links'
+
+      h) The Security tab:
+           Encryption: No
+
+      i) The Options tab:
+           HTML Editor: Point to Dreamweaver (recommended)
+           Browser Width: 680
+           GUI Option: Check all 3
+
+      j) Save the book file.
+     
+      k) Verify that the output file (H5_newUG.pdf) is not open.
+
+      l) Generate the document.
+
+4.  Open H5_newUG.pdf
+    
+      a) Scan through the document page by page to verify that there are no 
+         elements that should have been eliminated via javascripts or swapped 
+         commentation.
+
+      b) Scan through again looking only for places where page breaks need 
+         to be added, removed, or relocated.  I have found that re-generating 
+         the document after every pagination correction actually saves time 
+         in the long run.  This is because some pagination corrections that 
+         must be made may create other problems further down in the document.  
+         Re-generating the document ensures that every problem you focus on 
+         won't have to be re-done.
+
+      c) When you are sure all the pagination is correct (don't forget to 
+         start each of the sections included in the Table of Contents on a 
+         recto) note page numbers for the beginning of each section in the TOC.
+
+5.  Open RM_TOC.html
+
+      a) Edit page numbers accordingly. 
+
+      b) Save.
+
+6.  Using HTML DOC:
+
+      a) Open H5_newUG_Front.book
+
+      b) The Input tab:
+           Document Type: Web Page
+           Input Files:
+             H5_newUG_Title.html
+             Copyright.html
+             H5_newUG_TOC.html
+           Logo Image: none
+           Title File/Image: none
+
+      c) The Output tab:
+           Output To: File
+           Output Path: H5_newUG_Front.pdf
+           Output Format: PDF
+           Output Options: JPEG Big Images
+           Compression (not critical, change at will): Slider right above 'Fast'
+           JPEG Quality (not critical, change at will): 60
+  
+      d) The Page tab:
+           Page Size: Letter, 2-Sided
+             Top: 0.50in, Left: 1.00in, Right: 0.50in, Bottom: 0.50in
+           Header: Blank, Blank, Blank
+           Footer: Blank, Blank, Blank
+           Number Up: 1
+
+      e) The Colors tab:
+           Everything Blank
+           Link Style: Plain
+    
+      f) The Fonts tab:
+           Base Font Size: 11.0
+           Line Spacing: 1.2
+           Body Typeface: Times
+           Heading Typeface: Helvetica
+           Header/Footer Size: 10.0
+           Header/Footer Font: Helvetica
+           Character Set: iso-8859-1
+           Options: Do Not Check 'Embed Fonts'
+
+      g) The PDF tab:
+           PDF Version: 1.3
+           Page Mode: Document
+           Page Layout: Single
+           Page Effect: None
+           Options: Check 'Include Links'
+
+      h) The Security tab:
+           Encryption: No
+
+      i) The Options tab:
+           HTML Editor: Point to Dreamweaver (recommended)
+           Browser Width: 680
+           GUI Options: Check all 3
+
+      j) Save the book file.
+     
+      k) Verify that the output file (H5_newUG_Front.pdf) is not open.
+
+      l) Generate the document.      
+

@@ -1,0 +1,58 @@
+<table x-use-null-cells
+		class="functTable"
+		width=600
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>LEFT COLUMN TITLE</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>RIGHT COLUMN TITLE</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	<code>(1)</code> 
+    </td>
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	(2)
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>(1)</code> 
+    </td>
+    <td class="functTableCell">
+	(2)
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>(1)</code> 
+    </td>
+    <td class="functTableCell">
+	(2)
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>(1)</code> 
+    </td>
+    <td class="functTableCell">
+	(2)
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>(1)</code> 
+    </td>
+    <td class="functTableBottom">
+	(2)
+    </td>
+  </tr>
+</table>

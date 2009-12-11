@@ -1,0 +1,15 @@
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+		<tr valign=top>
+<td class="fullImgTableImgCell">
+<img src="img scr" 
+     alt="alt">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure number:</span> 
+</td></tr>
+</table>
+

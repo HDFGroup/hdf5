@@ -1,0 +1,5 @@
+#HTMLDOC 1.8.23
+-t pdf13 -f H5_newUG_Front.pdf --webpage --no-title --linkstyle plain --size Letter --left 1.00in --right 0.50in --top 0.50in --bottom 0.50in --header ... --footer ... --nup 1 --tocheader .t. --tocfooter ..i --duplex --portrait --color --no-pscommands --no-xrxcomments --compression=1 --jpeg=60 --fontsize 11.0 --fontspacing 1.2 --headingfont Helvetica --bodyfont Times --headfootsize 10.0 --headfootfont Helvetica --charset iso-8859-1 --links --no-embedfonts --pagemode document --pagelayout single --firstpage p1 --pageeffect none --pageduration 10 --effectduration 1.0 --no-encryption --permissions all  --owner-password ""  --user-password "" --browserwidth 680
+H5_newUG_Title.html
+Copyright.html
+H5_newUG_TOC.html

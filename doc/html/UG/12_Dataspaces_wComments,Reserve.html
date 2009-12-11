@@ -1,0 +1,3219 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+<html>
+
+<title>H5UG_DSpace</title>
+
+<!--(Meta)==========================================================-->
+
+<!--(Links)=========================================================-->
+
+<!--( Begin styles definition )=====================================-->
+<link href="ed_styles/NewUGelect.css" rel="stylesheet" type="text/css">
+<!--( End styles definition )=======================================-->
+
+</head> 
+
+<body>
+
+<!-- HEADER LEFT "HDF5 User's Guide" -->
+<!-- HEADER RIGHT "HDF5 Dataspaces and Partial I/O" -->
+
+<!--( TOC )=========================================================-->
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<table x-use-null-cells
+                align=right
+		width=240
+		cellspacing=0
+		class="tocTable">
+  <tr valign=top> 
+    <td class="tocTableHeaderCell"> <span class=TableHead>Chapter Contents</span></td>
+  </tr>
+  <tr valign=top> 
+    <td class="tocTableContentCell"> 
+    <a href="#Intro">1. Introduction</a> 
+    <br> 
+    <a href="#DSpaceFunctSums">2. Dataspace Function</a><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DSpaceFunctSums">Summaries</a> 
+    <br>
+    <a href="#DefDataObjs">3. Dataspace Objects</a> and<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#ProgModel">Programming Model</a> 
+    <br> 
+    <a href="#DTransfer">4. Dataspaces and</a><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DTransfer">Data Transfer</a> 
+    <br> 
+    <a href="#DSelectTransfer">5. Selection Operations and</a><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DSelectTransfer">Data Transfer</a> 
+    <br> 
+    <a href="#DRegions">6. References to Dataset</a>
+    <br> 
+    &nbsp;&nbsp;&nbsp;&nbsp;<a href="#DRegions">Regions</a> 
+    <br> 
+    <a href="#Programs">7. Sample Programs</a>
+    <br> 
+    </td>
+  </tr>
+</table>
+")
+-->
+</SCRIPT>
+<!--(End TOC)=======================================================-->
+
+<div align="center">
+<a name="TOP">
+<h2>Chapter 6<br><font size="7">Dataspaces and Partial I/O</font></h2>
+</a>
+</div>
+
+<!--
+<dir>
+<h1 class=editingcomment align=center>- - - DRAFT - - -</h1>
+</dir>
+-->
+
+<a name="Intro">
+<h3>1. Introduction</h3>
+</a>
+
+<dir>
+
+  <p>The HDF5 <em>dataspace</em> is a required component of an HDF5 dataset
+  or attribute definition.  The dataspace defines the size and shape of the 
+  dataset or attribute raw data, 
+  i.e., the number of dimensions and the size of each dimension 
+  of the multideminesional array in which the raw data is represented.
+  The dataspace must be defined when the dataset or attribute is created.
+
+  <p>The <em>dataspace</em> is also used during dataset I/O operations,
+  defining the elements of the dataset that participate in the I/O operation.
+  
+  <p>This chapter explains the <em>dataspace</em> object and 
+  its use in dataset and attribute creation and data transfer.
+  It also describes selection operations on a dataspace used to
+  implement subsetting, subsampling, and scatter-gather access to datasets.
+  
+  <p>The rest of this chapter is structured as follows:
+  <ul>
+      <li>Section 2, "Dataspace Functions," 
+          provides a categorized list of dataspace functions, 
+	  also known as the H5S APIs.</li>
+      <li>Section 3,"Definition of Dataspace Objects and 
+          the Dataspace Programming Model," 
+          describes dataspace objects and the programming model, 
+          including the creation and use of dataspaces.</li>
+      <li>Section 4, "Dataspaces and Data Transfer," 
+          describes the use of dataspaces in data transfer.</li>
+      <li>Section 5, "Dataspace Selection Operations and Data Transfer," 
+          describes selection operations on dataspaces and their usage
+	  in data transfer.</li>
+      <li>Section 6, "References to Dataset Regions," 
+          briefly discusses references to dataset regions. 
+	  </li>
+       <li>Section 7, "Sample Programs," 
+          contains the full programs from which several of the code samples 
+	  in this chapter were derived. 
+	  </li>
+ </ul>
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DSpaceFunctSums">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+<h3 class=pagebefore>2. Dataspace Function Summaries</h3>
+
+<dir>
+
+  <p>This section provides a reference list of dataspace functions, 
+  the H5S APIs, with brief descriptions.
+  The functions are presented in several functional catagories:
+    <ul>
+      <li>dataspace management functions</li>
+      <li>dataspace query functions</li>
+      <li>dataspace selection functions</li>
+      <ul>
+        <li>hyperslab selections</li>
+        <li>point selections</li>
+      </ul>
+    </ul>
+
+  <p>Sections 3 through 6 will provide examples and explanations 
+  of how to use these functions.
+
+<h4>Dataspace management functions</h4>
+<table x-use-null-cells 
+		class="functTable"
+		width=100%
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	<code>H5Screate<br>h5screate_f</code> 
+    </td>
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	Creates a new dataspace of a specified type.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Scopy<br>h5scopy_f</code> 
+    </td>
+    <td class="functTableCell">
+	Creates an exact copy of a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sclose<br>h5sclose_f</code> 
+    </td>
+    <td class="functTableCell">
+	Releases and terminates access to a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Screate_simple<br>h5screate_simple_f</code> 
+    </td>
+    <td class="functTableCell">
+	Creates a new simple dataspace and opens it for access.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sis_simple<br>h5sis_simple_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines whether a dataspace is a simple dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sextent_copy<br>h5sextent_copy_f</code> 
+    </td>
+    <td class="functTableCell">
+	Copies the extent of a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sset_extent_simple<br>h5sset_extent_simple_f</code> 
+    </td>
+    <td class="functTableCell">
+	Sets or resets the size of an existing dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Sset_extent_none<br>h5sset_extent_none_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Removes the extent from a dataspace.
+    </td>
+  </tr>
+</table><br>
+
+<h4>Dataspace query functions</h4>
+<table x-use-null-cells 
+		class="functTable"
+		width=100%
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	<code>H5Sget_simple_extent_dims<br>h5sget_simple_extent_dims_f</code> 
+    </td>
+    <td colspan=1
+	rowspan=1
+	class="functTableCell">
+	Retrieves dataspace dimension size and maximum size.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_simple_extent_ndims<br>h5sget_simple_extent_ndims_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines the dimensionality of a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_simple_extent_npoints<br>h5sget_simple_extent_npoints_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines the number of elements in a dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Sget_simple_extent_type<br>h5sget_simple_extent_type_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Determine the current class of a dataspace.
+    </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->  
+<h4>Dataspace selection functions: Hyperslabs</h4>
+<table x-use-null-cells 
+		class="functTable"
+		width=100%
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Soffset_simple<br>h5soffset_simple_f</code> 
+    </td>
+    <td class="functTableCell">
+	Sets the offset of a simple dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_type<br>h5sget_select_type_f</code> 
+    </td>
+    <td class="functTableCell">
+	Determines the type of the dataspace selection.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_hyper_nblocks<br>h5sget_select_hyper_nblocks_f</code> 
+    </td>
+    <td class="functTableCell">
+	Get number of hyperslab blocks.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_hyper_blocklist<br>h5sget_select_hyper_blocklist_f</code> 
+    </td>
+    <td class="functTableCell">
+	Gets the list of hyperslab blocks currently selected.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_bounds<br>h5sget_select_bounds_f</code> 
+    </td>
+    <td class="functTableCell">
+	Gets the bounding box containing the current selection.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sselect_all<br>h5sselect_all_f</code> 
+    </td>
+    <td class="functTableCell">
+	Selects the entire dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sselect_none<br>h5sselect_none_f</code> 
+    </td>
+    <td class="functTableCell">
+	Resets the selection region to include no elements.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sselect_valid<br>h5sselect_valid_f</code> 
+    </td>
+    <td class="functTableCell">
+	Verifies that the selection is within the extent of the dataspace.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Sselect_hyperslab<br>h5sselect_hyperslab_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Selects a hyperslab region to add to the current selected region.
+    </td>
+  </tr>
+</table><br>
+
+<h4>Dataspace selection functions: Points</h4>
+<table x-use-null-cells 
+		class="functTable"
+		width=100%
+		cellspacing=0
+	        align="center">
+  <tr valign=top> 
+    <td class="functTableLeftHdr">
+        <span class=TableHead>C Function<br>F90 Function</span>
+    </td>
+    <td class="functTableRightHdr">
+        <span class=TableHead>Purpose</span>
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_npoints<br>h5sget_select_npoints_f</code>
+    </td>
+    <td class="functTableCell">
+	Determines the number of elements in a dataspace selection.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_elem_npoints<br>h5sget_select_elem_npoints_f</code> 
+    </td>
+    <td class="functTableCell">
+	Gets the number of element points in the current selection.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableCell">
+	<code>H5Sget_select_elem_pointlist<br>h5sget_select_elem_pointlist_f</code> 
+    </td>
+    <td class="functTableCell">
+	Gets the list of element points currently selected.
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="functTableBottom">
+	<code>H5Sselect_elements<br>h5sselect_elements_f</code> 
+    </td>
+    <td class="functTableBottom">
+	Selects array elements to be included in the selection for a dataspace.
+    </td>
+  </tr>
+</table>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DefDataObjs">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+<h3 class=pagebefore>3. Definition of Dataspace Objects and 
+    the Dataspace Programming Model</h3>
+
+<dir>
+
+  <p>This section introduces the notion of the HDF5 dataspace object 
+  and a programming model for creating and working with dataspaces.
+  
+<h4><em>Dataspace Objects</em></h4>
+ 
+  <p>An HDF5 dataspace is a required component of an HDF5 dataset or attribute. 
+  A dataspace defines the size and the shape of a dataset's or an attribute’s 
+  raw data. 
+  Currently HDF5 supports two types of the dataspaces: 
+  <ul>
+    <li>scalar dataspaces</li> 
+    <li>simple dataspaces</li>
+  </ul>
+  
+  <p>A <em>scalar dataspace</em> represents just one element, a scalar. 
+  Note that the datatype of this one element may be very complex, 
+  e.g., a compound structure with members being of 
+  any allowed HDF5 datatype, including 
+  multidimensional arrays, strings, and nested compound structures.
+  <span class="editingComment">[Retain? Note that by convention, a scalar dataspace has rank 0 (zero).]</span>
+
+  <p>A <i>simple dataspace</i> is a multidimensional array of elements. 
+  The dimensionality of the dataspace (or the rank of the array) 
+  is fixed and is defined at the creation time. 
+  The size of each dimension can grow during the life time of the dataspace 
+  from the <i>current size</i> up to the <i>maximum size</i>. 
+  Both the current size and the maximum size are specified at the 
+  creation time. 
+  The sizes of dimensions at any particular time of the datatype life are 
+  called the <i>current dimensions</i> or the <i>dataspace extent</i>. 
+  They can be queried along with the maximum sizes.
+
+  <p>As shown in the UML diagram in Figure 1, an HDF5 simple dataspace object 
+  has three attributes: 
+      the rank or number of dimensions;  
+      the current sizes, expressed as an array of length <span class="codeVar">rank</span> 
+        with each element of the array denoting the current size of the corresponding dimension; 
+      and the maximum sizes, expressed as an array of length <span class="codeVar">rank</span> 
+        with each element of the array denoting the maximum size of the corresponding dimension. 
+
+  <p>
+
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------
+<table x-use-null-cells
+		cellspacing=0
+		class"fullImgTable"
+		align="right"
+		width=50%>
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    &nbsp;
+    <table border=1>
+      <tr><td align=center>
+        <code>Simple dataspace</code>
+      </td></tr><tr><td align=left>
+        <code>
+        &nbsp;&nbsp;rank:int<br>
+        &nbsp;&nbsp;current_size:hsize_t[rank]&nbsp;&nbsp;<br>
+        &nbsp;&nbsp;maximum_size:hsize_t[rank]</code>
+      </td></tr><tr><td align=left>&nbsp;
+        
+      </td></tr>
+    </table>
+    &nbsp;
+</td></tr>
+  <tr> 
+    <td align=left class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 1:</span> 
+        A simple dataspace is defined by its rank, 
+        the current size of each dimension, and
+        the maximum size of each dimension.	
+    </td>
+  </tr>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+<table x-use-null-cells
+		cellspacing=0
+		class"fullImgTable"
+		align="center"
+		width=50%>
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    &nbsp;
+    <table border=1>
+      <tr><td align=center>
+        <code>Simple dataspace</code>
+      </td></tr><tr><td align=left>
+        <code>
+        &nbsp;&nbsp;rank:int<br>
+        &nbsp;&nbsp;current_size:hsize_t[rank]&nbsp;&nbsp;<br>
+        &nbsp;&nbsp;maximum_size:hsize_t[rank]</code>
+      </td></tr><tr><td align=left>&nbsp;
+        
+      </td></tr>
+    </table>
+    &nbsp;
+</td></tr>
+  <tr> 
+    <td align=left class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 1:</span> 
+        A simple dataspace is defined by its rank, 
+        the current size of each dimension, and
+        the maximum size of each dimension.	
+    </td>
+  </tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+
+  <p>The size of a current dimension cannot be greater than 
+  the maximum size, which can be unlimited, 
+  specified as <code>H5S_UNLIMITED</code>. 
+  Note that while the HDF5 file format and library impose no maximum size
+  on an unlimited dimension, practically speaking its size 
+  will always be limited to the biggest integer available on the 
+  particular system being used. 
+  <span class="editingComment">[ [ [ Prior excessively casual phrasing replaced (...the caveat that the value of infinity is limited to...). ] ] ]</span>) 
+  
+  <p>Dataspace rank is restricted to 32, 
+  the standard limit in C on the rank of an array, 
+  in the current implementation of the HDF5 library. 
+  The HDF5 file format, on the other hand, allows any rank up to the 
+  maximum integer value on the system, so the library restriction can be 
+  raised in the future if higher dimensionality is required.
+  (Note that most of the time Fortran applications calling HDF5 will 
+  work with dataspaces of rank less than or equal to seven,
+  since seven is  the maximum number of dimensions in a Fortran array.  
+  But dataspace rank is not limited to seven for Fortran applications.
+  <span class="editingComment">[ [ [ or "But with the use of XXX, Fortran applications can [easily?] work with dataspace rank of up to 32." ] ] ]</span>) 
+
+  <p>The current dimensions of a dataspace, also referred to as the 
+  dataspace extent, define the bounding box for dataset elements that 
+  can participate in I/O operations.
+
+
+
+<br>
+
+
+<a name="ProgModel"> 
+<h4><em>Programming Model</em></h4>
+</a> 
+
+  <p>
+  The programming model for creating and working with HDF5 dataspaces 
+  can be summarized as follows:
+
+  <ol><li>Create a dataspace.
+      <li>Use the dataspace to create a dataset in the file or 
+          to describe a data array in memory.
+      <li>Modify the dataspace to define dataset elements that will 
+          participate in I/O operations.
+      <li>Use the modified dataspace while reading/writing dataset raw 
+          data or to create a region reference.
+      <li>Close the dataspace when no longer needed.
+  </ol>
+
+  <p>The rest of this section will address 
+  steps 1, 2, and 5 of the programming model;
+  steps 3 and 4 will be discussed in later sections of this chapter.
+
+
+  <h4>Creating a dataspace</h4>
+
+  <p>Both scalar and simple dataspace can be created by calling the
+  <span class="codeText">H5Screate</span> 
+  (<span class="codeText">h5screate_f</span> in Fortran) function. 
+  Since definition of the simple dataspace requires the specification of 
+  dimensionality (or rank) and initial and maximum dimension sizes, 
+  the HDF5 Library provides a <i>convenience</i> API, 
+  <span class="codeText">H5Screate_simple</span> 
+  (<span class="codeText">h5screate_simple_f</span>) 
+  to create a simple dataspace in on step.
+  Examples below illustrate the usage of these APIs.
+
+  <h4>Creating a scalar dataspace</h4>
+  
+  <p>A scalar dataspace is created with the <code>H5Screate</code>
+  or the <code>h5screate_f</code> function:
+  
+  <p>In C:
+  <pre>
+          hid_t space_id;
+          . . .
+          space_id = H5Screate(H5S_SCALAR);
+  </pre>
+
+  <p>In Fortran:
+  <pre>
+          INTEGER(HID_T) :: space_id
+          . . .
+          CALL h5screate_f(H5S_SCALAR_F, space_id, error)
+  </pre>
+
+  As mentioned above, the dataspace will contain only one element.
+  Scalar dataspaces are used more often for describing attributes 
+  that have just one value, 
+  e.g. the attribute <span class="codeText">Temperature</span> with the 
+  value <span class="codeText">Celsius</span> is used to indicate that the 
+  dataset with this attribute stores temperature values using the Celsius scale.
+
+  
+
+<!-- NEW PAGE -->
+  <h4>Creating a simple dataspace</h4>
+  
+  <p>Let’s assume that an application wants to store a 
+  two-dimensional array of data A(20,100). 
+  During the life of the application the first dimension of the array 
+  can grow up to 30, and there is no restriction on the size of the 
+  second dimension. 
+  The following steps are used to declare a dataspace for the dataset 
+  in which the array data will be stored.
+  
+  <p>In C:
+  <pre>
+          hid_t space_id;
+          int rank = 2;
+          hsize_t current_dims[2] = {10, 100};
+          hsize_t max_dims[2] = {H5S_UNLIMITED, 200};
+          . . .
+          space_id = H5Screate(H5S_SIMPLE);
+          H5Sset_extent_simple(space_id,rank,current_dims,max_dims);
+  </pre>
+
+  <p>In Fortran:
+  <pre>
+          INTEGER(HID_T) :: space_id
+          INTEGER :: rank = 2
+          INTEGER(HSIZE_T) :: current dims = /( 10, 100)/
+          INTEGER(HSIZE_T) :: max_dims = /(H5S_UNLIMITED_F, 200)/
+          INTEGER error 
+          . . .
+          CALL h5screate_f(H5S_SIMPLE_F, space_id, error)
+          CALL h5sset_extent_simple_f(space_id, rank, current_dims, max_dims, error)
+  </pre>
+
+  <p>Alternatively, the convenience APIs 
+  <span class="codeText">H5Screate_simple</span>/<span class="codeText">h5screate_simple_f</span>
+  can replace the 
+  <span class="codeText">H5Screate</span>/<span class="codeText">h5screate_f</span> 
+  and 
+  <span class="codeText">H5Sset_extent_simple</span>/<span class="codeText">h5sset_extent_simple_f</span> 
+  calls.
+
+  <p>In C:
+  <pre>
+          space_id = H5Screate_simple( rank, current_dims, max_dims);
+  </pre>
+
+  <p>In Fortran:
+  <pre>
+          CALL h5screate_simple_f(space_id, rank, current_dims, error, max_dims)
+  </pre>
+
+<!-- NEW PAGE -->
+  <p>In this example (see Figure 2), a dataspace with current dimensions 
+  of 20 by 100 is created. 
+  The first dimension can be extended only up to 30.
+  The second dimension, however, is declared unlimited; 
+  it can be extended up to the largest available integer value on the system.
+  Recall that any dimension can be declared unlimited, 
+  and if a dataset uses a dataspace with any unlimited dimension, 
+  chunking has to be used (see section ??? in the "Datasets" chapter).
+
+
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig02.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 2:</span> 
+	Create a simple dataspace with a 10x100 array
+	<!--
+	<p align="left">
+	To create (conceptual): 
+        <code>id = H5Screate_simple(rank,curr_dims,maxdims)</code><br>
+        To create (concrete): 
+        <code>id = H5Screate_simple(2,[10,100],[H5S_UNLIMITED,200])</code>
+        -->
+    </td>
+  </tr>
+</table>
+
+  <p>Maximum dimensions can be the same as current dimensions. 
+  In such a case, the sizes of dimensions cannot be changed during the life 
+  of the dataspace object. 
+  In C, <span class="codeText">NULL</span> can be used to indicate to 
+  the <span class="codeText">H5Screate_simple</span> and 
+  <span class="codeText">H5Sset_extent_simple</span> functions that the 
+  maximum sizes of all dimensions are the same as the current sizes. 
+  In Fortran, the maximum size parameter is optional for 
+  <span class="codeText">h5screate_simple_f</span> and can be omitted 
+  when the sizes are the same.
+
+  <p>In C:
+  <pre>
+          space_id = H5Screate_simple(rank, current_dims, NULL);
+  </pre>
+
+  <p>In Fortran:
+  <pre>
+          CALL h5screate_f(space_id, rank, current_dims, error)
+  </pre>
+
+  The created dataspace will have current and maximum dimensions 
+  of 20 and 100 correspondingly, 
+  and the sizes of those dimensions cannot be changed.
+
+
+  <h4>C versus Fortran Dataspaces</h4>
+
+  <p>Dataspace dimensions are numbered from 1 to <span class="codeVar">rank</span>.  
+  HDF5 uses C storage conventions, assuming that the last listed dimension 
+  is the fastest-changing dimension 
+  and the first-listed dimension is the slowest changing.  
+  <span class="editingComment">[ [ [ Fortran, on the other hand, .... ? ] ] ]</span>
+  The HDF5 file format storage layout specification adheres to the C convention 
+  and the HDF5 Library adheres to the same convention 
+  when storing dataspace dimensions in the file. 
+  This affects how C programs and tools interpret data written 
+  from Fortran programs and vice versa. 
+  The example below illustrates the issue.
+
+  <p>When a Fortran application describes a dataspace to store an array 
+  as A(20,100), it specifies the value of the first dimension to be 20 
+  and the second to be 100.  
+  Since Fortran stores data by columns, 
+  the first-listed dimension with the value 20 is the fastest-changing
+  dimension and the last-listed dimension with the value 100 is the 
+  slowest-changing. 
+  In order to adhere to the HDF5 storage convention, 
+  the HDF5 Fortran wrapper transposes dimensions, 
+  so the first dimension becomes the last. 
+  The dataspace dimensions stored in the file will be 100,20 instead 
+  of 20,100 in order to correctly describe the fortran data that is 
+  stored in 100 columns, each containing 20 elements.
+
+  <p>When a Fortran application reads the data back, 
+  the HDF5 Fortran wrapper transposes the dimensions once more, 
+  returning the first dimension to be 20 and the second to be 100, 
+  describing correctly the sizes of the array that should be used 
+  to read data in the Fortran array A(20,100).
+
+  <p>When a C application reads data back, 
+  the dimensions will come out as 100 and 20, 
+  correctly describing the size of the array to read data into, 
+  since the data was written as 100 records of 20 elements each. 
+  Therefore C tools such as <span class="codeText">h5dump</span> 
+  and <span class="codeText">h5ls</span> always display 
+  transposed dimensions and values for the data written 
+  by a Fortran application.  
+
+  <p>Consider the following simple example of equivalent 
+  C 3x5 and Fortran 5x3 arrays.
+  As illustrated in Figure 3, a C applications will store 
+  a 3x5 2-dimensional array as three 5-element rows.
+  In order to store the same data in the same order, 
+  a Fortran application must view the array as as a 5x3 array with 
+  three 5-element columns.
+  The dataspace of this dataset, as written from Fortran, 
+  will therefore be described as 5x3 in the application 
+  but stored and described in the file according to the C convention 
+  as a 3x5 array.
+  This ensures that C and Fortran applications will always read 
+  the data in the order in which it was written.
+  The HDF5 Fortran interface handles this transposition automatically.
+
+  <p>In C (from <code>h5_write.c</code>):
+  <pre>
+          #define NX     3                      /* dataset dimensions */
+          #define NY     5
+          . . .
+          int         data[NX][NY];          /* data to write */
+          . . .
+          /*
+           * Data  and output buffer initialization.
+           */
+          for (j = 0; j < NX; j++) {
+             for (i = 0; i < NY; i++)
+                 data[j][i] = i + 1 + j*NY;
+          }
+          /*
+           *  1  2  3  4  5
+           *  6  7  8  9 10
+           * 11 12 13 14 15
+           */
+          . . .
+          dims[0] = NX;
+          dims[1] = NY;
+          dataspace = H5Screate_simple(RANK, dims, NULL);
+  </pre>
+
+  <p>In Fortran (from <code>h5_write.f90</code>):
+  <pre>
+          INTEGER, PARAMETER :: NX = 3
+          INTEGER, PARAMETER :: NY = 5
+          . . .
+          INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/3,5/) ! Dataset dimensions
+          ---
+          INTEGER     ::    data(NX,NY)
+          . . .
+          !
+          ! Initialize data
+          !
+            do i = 1, NX
+               do j = 1, NY
+                  data(i,j) = j + (i-1)*NY
+               enddo
+            enddo
+          !
+          ! Data
+          !
+          !  1  2  3  4  5
+          !  6  7  8  9 10
+          ! 11 12 13 14 15
+          . . .
+          CALL h5screate_simple_f(rank, dims, dspace_id, error)
+  </pre>
+
+  <p>In Fortran (from <code>h5_write_tr.f90</code>):
+  <pre>
+          INTEGER, PARAMETER :: NX = 3
+          INTEGER, PARAMETER :: NY = 5
+          . . .
+          INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NY, NX/) ! Dataset dimensions
+          . . .
+          !
+          ! Initialize data
+          !
+            do i = 1, NY
+               do j = 1, NX
+                  data(i,j) = i + (j-1)*NY
+               enddo
+            enddo
+          !
+          ! Data
+          !
+          !  1  6  11
+          !  2  7  12
+          !  3  8  13
+          !  4  9  14
+          !  5 10  15
+          . . .
+          CALL h5screate_simple_f(rank, dims, dspace_id, error)
+  </pre> 
+  
+<p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center"
+		border="0">
+  <tr valign="top">
+    <td align="left" class="fullImgTableImgCell">
+    <br>
+    <table border="0" width="95%">
+    <tr align="left" valign="top">
+      <td width="35%">
+        A dataset stored by a<br>C program in a 3x5 array:
+        <table border="1" width="100%">
+        <tr align="center">
+          <td width="20%">1</td>
+          <td width="20%">2</td>
+          <td width="20%">3</td>
+          <td width="20%">4</td>
+          <td width="20%">5</td>
+        </tr>
+        <tr align="center">
+          <td width="20%">6</td>
+          <td width="20%">7</td>
+          <td width="20%">8</td>
+          <td width="20%">9</td>
+          <td width="20%">10</td>
+        </tr>
+        <tr align="center">
+          <td width="20%">11</td>
+          <td width="20%">12</td>
+          <td width="20%">13</td>
+          <td width="20%">14</td>
+          <td width="20%">15</td>
+        </tr>
+        </table>
+      </td>
+      <td width="15%">&nbsp;</td>
+      <td width="45%">
+        The same dataset stored by a<br>Fortran program in a 5x3 array:
+        <table border="1" width="48%">
+        <tr align="center">
+          <td width="33%">1</td>
+          <td width="34%">6</td>
+          <td width="33%">11</td>
+        </tr>
+        <tr align="center">
+          <td width="33%">2</td>
+          <td width="34%">7</td>
+          <td width="33%">12</td>
+        </tr>
+        <tr align="center">
+          <td width="33%">3</td>
+          <td width="34%">8</td>
+          <td width="33%">13</td>
+        </tr>
+        <tr align="center">
+          <td width="33%">4</td>
+          <td width="34%">9</td>
+          <td width="33%">14</td>
+        </tr>
+        <tr align="center">
+          <td width="33%">5</td>
+          <td width="34%">10</td>
+          <td width="33%">15</td>
+        </tr>
+        </table>
+      </td>
+      <td width="5%">&nbsp;</td>
+    </tr>
+    </table>
+    <br>
+    The left-hand dataset above as written to an HDF5 file from C or 
+    the right-hand dataset as written from Fortran:
+    <table border="1" width="95%">
+    <tr>
+      <td align="center" width="6.5%">1</td>
+      <td align="center" width="6.5%">2</td>
+      <td align="center" width="6.5%">3</td>
+      <td align="center" width="6.5%">4</td>
+      <td align="center" width="6.5%">5</td>
+      <td align="center" width="6.5%">6</td>
+      <td align="center" width="6.5%">7</td>
+      <td align="center" width="6.5%">8</td>
+      <td align="center" width="6.5%">9</td>
+      <td align="center" width="6.5%">10</td>
+      <td align="center" width="6.5%">11</td>
+      <td align="center" width="6.5%">12</td>
+      <td align="center" width="6.5%">13</td>
+      <td align="center" width="6.5%">14</td>
+      <td align="center" width="6.5%">15</td>
+    </tr>
+    </table>
+    <br>
+    The left-hand dataset above as written to an HDF5 file from Fortran:
+    <table border="1" width="95%">
+    <tr>
+      <td align="center" width="6.5%">1</td>
+      <td align="center" width="6.5%">6</td>
+      <td align="center" width="6.5%">11</td>
+      <td align="center" width="6.5%">2</td>
+      <td align="center" width="6.5%">7</td>
+      <td align="center" width="6.5%">12</td>
+      <td align="center" width="6.5%">3</td>
+      <td align="center" width="6.5%">8</td>
+      <td align="center" width="6.5%">13</td>
+      <td align="center" width="6.5%">4</td>
+      <td align="center" width="6.5%">9</td>
+      <td align="center" width="6.5%">14</td>
+      <td align="center" width="6.5%">5</td>
+      <td align="center" width="6.5%">10</td>
+      <td align="center" width="6.5%">15</td>
+    </tr>
+    </table>
+    <br>
+</td></tr>
+  <tr> 
+    <td align=left class="fullImgTableCapCell">
+        <span class=figurenumber>Figure 3:</span>
+        The HDF5 library stores arrays along the fastest-changing dimension, 
+        an approach often referred to as being &ldquo;in C order.&rdquo;  
+        C, C++, and Java work with arrays in row-major order, 
+        i.e., the row, or the last dimension, is the fastest-changing 
+        dimension.  
+        Fortran, on the other hands, handles arrays in column-major order, 
+        making the column, or the first dimension, the fastest-changing 
+        dimension.  
+        Therefore, the C and Fortran arrays illustrated in the top portion
+        of this figure are stored identically in an HDF5 file.  
+        This ensures that data written by any language can be 
+        meaningfully read, interpreted, and manipulated by any other.
+    </td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <h4>Extending a dataspace</h4>
+
+  <p>
+  <span class="editingComment">[ [ [ Text here describing the extension of the dataset, per the following diagram. ] ]</span>
+
+  <p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig03.jpg">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 4:</span> 
+	Extend the simple dataspace array to 12x130
+	<!--
+	<p align="left">
+        To extend (conceptual): 
+	<br>    
+	&nbsp;&nbsp;&nbsp;&nbsp;    
+	<code>err = H5Sset_extent_simple(id,rank,new_dims,max_dims)</code>
+	<br>
+	To extend (concrete): 
+	<br>    
+	&nbsp;&nbsp;&nbsp;&nbsp;
+        <code>err = H5Sset_extent_simple(id,2,[12,130],[H5S_UNLIMITED,200])</code>
+	-->
+    </td>
+  </tr>
+</table>
+
+
+  <h4>Finding dataspace charateristics</h4>
+
+  <p>The HDF5 Library provides several APIs designed to query 
+  the characteristics of a dataspace.
+
+  <p>The function <span class="codeText">H5Sis_simple</span> 
+  (<span class="codeText">h5sis_simple_f</span>) 
+  returns information about the type of a dataspace. 
+  This function is rarely used and 
+  currently supports only simple and scalar dataspaces.
+  <span class="editingComment">[ [ [ Isn't that all of them?  What other types are there? ] ] ]</span>
+
+  <p>To find out the dimensionality, or rank, of a dataspace, 
+  use <span class="codeText">H5Sget_simple_extent_ndims</span> 
+  (<span class="codeText">h5sget_simple_extent_ndims_f</span>).  
+  <span class="codeText">H5Sget_simple_extent_dims</span> 
+  can also be used to find out the rank. 
+  See the example below. 
+  Both functions return <span class="codeText">0</span> for the 
+  value of <span class="codeVar">rank</span> the dataspace is scalar.
+
+  <p>To query the sizes of the current and maximum dimensions, 
+  use <span class="codeText">H5Sget_simple_extent_dims</span> 
+  (<span class="codeText">h5sget_simple_extent_dims_f)</span>. 
+  
+  <p>The following example illsutrates querying the rank and dimensions 
+  of a dataspace using these functions. 
+
+
+  <p>In C:
+  <pre>
+          hid_t space_id;
+          int rank;
+          hsize_t  *current_dims;
+          hsize_t  *max_dims;
+          ---------
+
+          rank=H5Sget_simple_extent_ndims(space_id); 
+              (or rank=H5Sget_simple_extent_dims(space_id, NULL, NULL);)
+          current_dims= (hsize_t)malloc(rank*sizeof(hsize_t));
+          max_dims=(hsize_t)malloc(rank*sizeof(hsize_t));
+          H5Sget_simple_extent_dims(space_id, current_dims, max_dims);
+          Print values here for the previous example
+  </pre>
+
+  <p>In Fortran:
+  <pre>
+          Example ??????????
+  </pre>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DTransfer">
+<div align=right> 
+<a href="#TOP"><font size=-1>(Top)</font></a> 
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+<h3 class=pagebefore>4. Dataspaces and Data Transfer</h3>
+
+<dir>  
+
+  <p>The <em>Dataspace</em> object is also used to control data transfer when data 
+  is read or written.  The <em>Dataspace</em> of the Dataset (Attribute) defines 
+  the stored form of the array data, the order of the elements as explained above.  
+  When reading from the file, the <em>Dataspace</em> of the Dataset defines the 
+  layout of the source data, a similar description is needed for the destination storage. 
+  A <em>Dataspace</em> object is used to define the organization of the data 
+  (rows, columns, etc.) in memory. If the program requests a different order for 
+  memory than the storage order, the data will be rearranged by the HDF5 library 
+  during the H5Dread operation. Similarly, when writing data, the memory 
+  <em>Dataspace</em> defines the source data, which is converted to the Dataset 
+  <em>Dataspace</em> when stored by the H5Dwrite call. 
+  
+  <p>Figure 12a shows a simple example of a read operation in which the data 
+  is stored as a 3 by 4 array in the file (Figure 12b), but the program wants 
+  it to be a 4 by 3 array in memory. This is accomplished by setting the memory 
+  <em>Dataspace</em> to describe the desired memory layout, as in Figure 12c. 
+  The HDF5 library will transform the data to the correct arrangement during the 
+  read operation.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig12.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 12</span></td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig13.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 13</span></td>
+  </tr>
+</table>
+
+  <p>Both the source and destination are stored as contiguous blocks of storage, 
+  with the elements in the order specified by the <em>Dataspace</em>. 
+  Figure 13 shows one way the elements might be organized. In Figure 13a, 
+  the elements are stored as 3 blocks of 4 elements.  The destination is an array 
+  of 12 elements in memory (Figure 13c).  As the figure suggests, the transfer 
+  reads the disk blocks into a memory buffer (Figure 13b), and then writes the 
+  elements to the correct locations in memory.  A similar process occurs in 
+  reverse when data is written to disk.</p>
+  
+<h4>Data selection</h4>
+
+  <p>In addition to rearranging data, the transfer may select the data elements 
+  from the source and destination.
+  
+  <p>Data selection is implemented by creating a <em>Dataspace</em> object that 
+  describes the selected elements (within the hyper rectangle) rather than the 
+  whole array. Two <em>Dataspace</em> objects with selections can be used in data 
+  transfers to read selected elements from the source and write selected elements 
+  to the destination.  When data is transferred using the Dataspace object, only 
+  the selected elements will be transferred.
+  
+  <p>This can be used to implement partial I/O, including:
+  
+<ul>
+    <li>Sub-setting - reading part of a large dataset
+    <li>Sampling - reading selected elements (e.g., every second element) of a 
+        dataset
+    <li>Scatter-gather - read non-contiguous elements into contiguous locations 
+        (gather) or read contiguous elements into non-contiguous locations 
+	(scatter) or both.
+</ul>
+
+  <p>To use selections, the following steps are followed:
+  
+<ol>
+    <li>get or define the Dataspace for the source and destination.
+    <li>specify one or more selections for source and destination Dataspaces. 
+    <li>transfer data using the Dataspaces with selections
+</ol>
+
+<!-- NEW PAGE -->
+  <p>A selection is created by applying one or more selections to a 
+  </em>Dataspace</em>.  A selection may override any other selections (H5T_SELECT_SET) 
+  or may be 'Ored' with previous selections on the same Dataspace (H5T_SELECT_OR). 
+  In the latter case, the resulting selection is the union of the selection and 
+  all previously selected selections. Arbitrary sets of points from a Dataspace 
+  can be selected by specifying an appropriate set of selections.
+  
+  <p>Two selections are used in data transfer, so the source and destination must 
+  be compatible, as described below.
+  
+  <p>There are two forms of selection, hyperslab and point.  A selection must 
+  be either a point selection or a set of hyperslab selections.  
+  Selections cannot be mixed.
+  
+<h4><em>Hyperslab selection</em></h4>
+
+  <p>A hyperslab is a selection of elements from a hyper rectangle.  
+  An HDF5 hyperslab is a rectangular pattern defined by four arrays (Table 1). 
+  The <em>start</em> defines the origin of the hyperslab in the original Dataspace.  
+  The stride is the number of elements to increment between selected elements.  
+  A stride of '1' is every element, a stride of '2' is every second element, etc.  
+  Note that there may be a different stride for each dimension of the Dataspace.  
+  The default stride is 1.
+  
+  <p>The count is the number of elements in the hyperslab selection.  
+  When the stride is 1, the selection is a hyper rectangle with a corner at start 
+  and size count[0] by count[1] by …. When stride is greater than one, the 
+  hyperslab bounded by start and the corners defined by stride[n] * count[n].</p>
+  
+<table x-use-null-cells
+		class="genTable"
+		width=600
+		height=145
+		cellspacing=0>
+  <col style="width: 23.025%;">
+  <col style="width: 76.975%;">
+  <tr valign=top> 
+    <td  align="center" colspan="2"><h4>Table 1</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="genTableLeftHdr"
+	width=23%> <p><span class=TableHead>Parameter</span></td>
+    <td class="genTableRightHdr"
+	width=76%> <p><span class=TableHead>Description</span></td>
+  </tr>
+  <tr valign=top> 
+    <td class="genTableCell"
+	width=23%> <p>start</td>
+    <td class="genTableCell"
+	width=76%> <p>Starting location for the hyperslab.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="genTableCell"
+	width=23%> <p>stride</td>
+    <td class="genTableCell"
+	width=76%> <p>The number of elements to separate each element or block 
+        to be selected.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="genTableCell"
+	width=23%> <p>count</td>
+    <td class="genTableCell"
+	width=76%> <p>The number of elements or blocks to select along each dimension. 
+    </td>
+  </tr>
+  <tr valign=top> 
+    <td class="genTableBottom"
+	width=23%> <p>block</td>
+    <td class="genTableBottom"
+	width=76%> <p>The size of the block selected from the dataspace.</td>
+  </tr>
+</table>
+
+  <p>The <em>block</em> is a count on the number of repetitions of the hyperslab. 
+  The default block size is '1', which is one hyperslab.  A block of 2 would be 
+  two hyperslabs in that dimension, with the second starting at start[n]+ 
+  (count[n] * stride[n]) + 1.
+  
+  <p>A hyperslab can be used to access a sub-set of a large Dataset. 
+  Figure 14 shows an example of a hyperslab that reads a rectangle from the 
+  middle of a larger two dimensional array. The destination is the same shape 
+  as the source.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig14.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 14</span></td>
+  </tr>
+</table>
+
+  <p>Hyperslabs can be combined to select complex regions of the source and 
+  destination. Figure 15 shows an example of a transfer from one non-rectangular 
+  region into another non-rectangular region. The source is defined as the union 
+  of two hyperslabs, and the destination is the union of three hyperslabs.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig15.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 15</span></td>
+  </tr>
+</table>
+
+  <p>Hyperslabs may also be used to collect or scatter data from regular patterns. 
+  Figure 16 shows an example where the source is a repeating pattern of blocks, 
+  and the destination is a single, one dimensional array.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig16.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 16</span></td>
+  </tr>
+</table>
+
+<h4><em>Select points</em></h4>
+
+  <p>The second type of selection is an array of points, i.e., coordinates.  
+  Essentially, this selection is a list of all the points to include. 
+  Figure 17 shows an example of a transfer of seven elements from a two 
+  dimensional Dataspace to a three dimensional Dataspace using a point selection 
+  to specify the points.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig17.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 17</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+<h4><em>Rules for Defining Selections</em></h4>
+
+  <p>A selection must have the same number of dimensions (rank) as the Dataspace 
+  it is applied to, although it may select from only a small region, e.g., a plane 
+  from a 3D Dataspace. Selections do not affect the extent of the 
+  <em>Dataspace</em>, the selection may be larger than the <em>Dataspace</em>. 
+  The boundaries of selections are reconciled with the extent at the time of 
+  the data transfer.
+  
+<h4>Data Transfer with Selections</h4>
+
+  <p>A data transfer (read or write) with selections is the same as any read or 
+  write, except the source and destination <em>Dataspace</em> have compatible 
+  selections. 
+  
+  <p>During the data transfer, the following steps are executed by the library.
+  
+  <p>1.  The source and destination <em>Dataspaces</em> are checked to assure 
+  that the selections are compatible.
+  
+<dir>  
+  <p>1. Each selection must be within the current extent of the <em>Dataspace</em>.  
+  A selection may be defined to extend outside the current extent of the 
+  <em>Dataspace</em>, but the <em>Dataspace</em> cannot be accessed if the 
+  selection is not valid at the time of the access.
+  <p>2. The total number of points selected in the source and destination must 
+  be the same.  Note that the dimensionality of the source and destination can 
+  be different (e.g., the source could be 2D, the destination 1D or 3D), and the 
+  shape can be different, but the number of elements selected must be the same.
+</dir>
+
+  <p>2.  The data is transferred, element by element.
+  
+  <p>Selections have an iteration order for the points selected, which can be 
+  any permutation of the dimensions involved (defaulting to 'C' array order) 
+  or a specific order for the selected points, for selections composed of single 
+  array elements with H5Sselect_elements.
+  
+  <p>The elements of the selections are transferred in row-major, or C order. 
+  That is, it is assumed that the first dimension varies slowest, the second 
+  next slowest, and so forth. For hyperslab selections, the order can be any 
+  permutation of the dimensions involved (defaulting to 'C' array order). 
+  When multiple hyperslabs are combined, the hyperslabs are coalesced into 
+  contiguous reads and writes
+  
+  <p>In the case of point selections, the points are read and written in the 
+  order specified.
+  
+<h4>Programming Model</h4>
+
+<h4><em>Selecting hyperslabs</em></h4>
+
+  <p>Suppose we want to read a 3x4 hyperslab from a dataset in a file beginning 
+  at the element &lt;1,2&gt; in the dataset, and read it into a 7x7x3 array in memory 
+  (Figure 18). In order to do this, we must create a dataspace that describes 
+  the overall rank and dimensions of the dataset in the file, as well as the 
+  position and size of the hyperslab that we are extracting from that dataset.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig18.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 18</span></td>
+  </tr>
+</table>
+
+  <p>The code in Figure 19 illustrates the selection of the hyperslab in the 
+  file dataspace. Figure 20 shows de definition of the destination Dataspace in 
+  memory. Since the in-memory Dataspace has three dimensions, the hyperslab is 
+  an array with three dimensions, with the last dimension being 1: &lt;3,4,1&gt;.  
+  Figure 21 shows the read using the source and destination <em>Dataspaces</em> 
+  with selections.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+/* 
+* get the file dataspace.
+*/
+dataspace = H5Dget_space(dataset);    /* dataspace identifier */
+
+/* 
+* Define hyperslab in the dataset. 
+*/
+offset[0] = 1;
+offset[1] = 2;
+count[0]  = 3;
+count[1]  = 4;
+status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, 
+     count, NULL);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 19</span></td>
+  </tr>
+</table>
+
+<br><!-- NEW PAGE -->
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+/*
+* Define memory dataspace.
+*/
+dimsm[0] = 7;
+dimsm[1] = 7;
+dimsm[2] = 3;
+memspace = H5Screate_simple(3,dimsm,NULL);   
+
+/* 
+* Define memory hyperslab. 
+*/
+offset_out[0] = 3;
+offset_out[1] = 0;
+offset_out[2] = 0;
+count_out[0]  = 3;
+count_out[1]  = 4;
+count_out[2]  = 1;
+status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+     count_out, NULL);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 20</span></td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+    ret = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace, H5P_DEFAULT,    
+          data);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 21</span></td>
+  </tr>
+</table>
+
+<h4><em>Example with strides and blocks.</em></h4>
+
+  <p>Consider an 8x12 dataspace, in which we want to write into eight 3x2 blocks 
+  from a source dataspace in memory that is a 50-element one dimensional array 
+  called (Figure 22).</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig22.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 22</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+  <p>Figure 23 shows example code to write 48 elements from the 1D array to the 
+  file dataset, starting with the second element in vector. The destination 
+  hyperslab has the following parameters: start=(0,1), stride=(4,3), count=(2,4), 
+  block=(3,2). The source has the parameters:  start=(1), stride=(1), count=(48), 
+  block=(1). After these operations, the file dataspace will have the values shown 
+  in Figure 22.  Notice that the values are inserted in the file dataset in 
+  row-major order.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+/* Select hyperslab for the dataset in the file, using 3x2 blocks, (4,3) stride
+ * (2,4) count starting at the position (0,1).
+ */
+start[0]  = 0; start[1]  = 1;
+stride[0] = 4; stride[1] = 3;
+count[0]  = 2; count[1]  = 4;    
+block[0]  = 3; block[1]  = 2;
+ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block);
+
+/*
+ * Create dataspace for the first dataset.
+ */
+mid1 = H5Screate_simple(MSPACE1_RANK, dim1, NULL);
+
+/*
+ * Select hyperslab. 
+ * We will use 48 elements of the vector buffer starting at the second element.
+ * Selected elements are 1 2 3 . . . 48
+ */
+start[0]  = 1;
+stride[0] = 1;
+count[0]  = 48;
+block[0]  = 1;
+ret = H5Sselect_hyperslab(mid1, H5S_SELECT_SET, start, stride, count, block);
+ 
+/*
+ * Write selection from the vector buffer to the dataset in the file.
+ *
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, midd1, fid, H5P_DEFAULT, vector)
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 23</span></td>
+  </tr>
+</table>
+
+<br>
+
+<!-- NEW PAGE -->
+<h4><em>Selecting a union of hyperslabs</em></h4>
+  
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------
+<table align=right class="greenframe1" width="270">
+  <tr>
+    <td height=310 valign=center align=center class="greenline1">
+      <img src="Images/Dspace_fig24.JPG">
+    </td>
+  </tr>
+  <tr>
+    <td class=figurecaption><span class=figurenumber>Figure 24</span></td>
+  </tr>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+<table align="center" class="greenframe1" width="270">
+  <tr>
+    <td height=310 valign=center align=center class="greenline1">
+      <img src="Images/Dspace_fig24.JPG">
+    </td>
+  </tr>
+  <tr>
+    <td class=figurecaption align="center"><span class=figurenumber>Figure 24</span></td>
+  </tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+<br>
+
+  <p>The HDF5 Library allows the user to select a union of hyperslabs and write 
+  or read the selection into another selection. The shapes of the two selections 
+  may differ, but the number of elements must be equal. 
+  
+  <p>Figure 24 shows a transfer of a selection that is two overlapping hyperslabs 
+  from the dataset into a union of hyperslabs in the memory dataset. Note that 
+  the destination dataset has a different shape from the source dataset. 
+  Similarly, the selection in the memory dataset could have a different shape 
+  than the selected union of hyperslabs in the original file. For simplicity, 
+  the selection is that same shape at the destination.
+  
+  <p>To implement this transfer, it is necessary to:
+  
+<ol>
+    <li>get the source Dataspace
+    <li>define one hyperslab selection for the source.
+    <li>define a second hyperslab selection, unioned with the first.
+    <li>get the destination Dataspace<!-- NEW PAGE -->
+    <li>define one hyperslab selection for the destination
+    <li>define a second hyperslab seletion, unioned with the first.
+    <li>execute the data transfer (H5Dread or H5Dwrite) using the source and 
+        destination Dataspaces.
+</ol><br>
+
+  <p>Figure 25 shows example code to create the selections for the source 
+  Dataspace (the file). The first hyperslab is size 3x4 and the left upper 
+  corner at the position (1,2).  The hyperslab is a simple rectangle, so the 
+  stride and block are 1. The second hyperslab is 6x5 at the position (2,4). 
+  The second selection is a union with the first hyperslab (H5S_SELECT_OR).</p>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+     fid = H5Dget_space(dataset);
+
+   /*
+     * Select first hyperslab for the dataset in the file. 
+     *   
+     */ 
+    start[0] = 1; start[1] = 2;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 3; count[1]  = 4;
+    ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block); 
+    /*
+     * Add second selected hyperslab to the selection.
+     */
+    start[0] = 2; start[1] = 4;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 6; count[1]  = 5;
+    ret = H5Sselect_hyperslab(fid, H5S_SELECT_OR, start, stride, count, block);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      25</span></td>
+  </tr>
+</table><br>
+
+  <p>Figure 26 shows example code to create the selection for the destination 
+  in memory. The steps are similar.  In this example, the hyperslabs are the 
+  same shape, but located in different positions in the Dataspace. The first 
+  hyperslab is 3x4 and starts at (0,0), and the second is 6x5 and starts at (1,2).
+  
+  <p>Finally the H5Dread call transfers the selected data from the file dataspace 
+  to the selection in memory.
+  
+  <p>In this example, the source and destination selections are two overlapping 
+  rectangles.  In general, any number of rectangles can be OR'ed, and they do 
+  not have to be contiguous.  The order of the selections does not matter, 
+  but the first should use H5S_SELECT_SET, subsequent selections are unioned 
+  using H5S_SELECT_OR.
+  
+<!-- NEW PAGE -->
+  <p>It is important to emphasize that the source and destination do not have to 
+  be the same shape (or number of rectangles). As long as the two selections 
+  have the same number of elements, the data can be transferred.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+    /*
+     * Create memory dataspace.
+     */
+    mid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
+     
+    /*
+     * Select two hyperslabs in memory. Hyperslabs has the same
+     * size and shape as the selected hyperslabs for the file dataspace.
+     */
+    start[0] = 0; start[1] = 0;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 3; count[1]  = 4;
+    ret = H5Sselect_hyperslab(mid, H5S_SELECT_SET, start, stride, count, block);     
+    start[0] = 1; start[1] = 2;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 6; count[1]  = 5;
+    ret = H5Sselect_hyperslab(mid, H5S_SELECT_OR, start, stride, count, block);
+
+ret = H5Dread(dataset, H5T_NATIVE_INT, mid, fid, H5P_DEFAULT, matrix_out);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 26</span></td>
+  </tr>
+</table>
+
+<h4><em>Selecting a list of independent points</em></h4>
+ 
+  <p>It is also possible to specify a list of elements to read or write using 
+  the function H5Sselect_elements. The procedure is similar to hyperslab 
+  selections.
+  
+<ol>
+    <li>get the source Dataspace
+    <li>set the selected points
+    <li>get the destination Dataspace
+    <li>set the selected points
+    <li>transfer the data using the source and destination Dataspaces
+</ol><br>
+
+  <p>Figure 27 shows an example where four values are to be written to four 
+  separate points in a two dimensional Dataspace. The source Dataspace is a one 
+  dimensional array with the values 53, 59, 61, 67. The destination Dataspace 
+  is an 8x12 array.  The elements are to be written to the points (0,0), (3,3), 
+  (3,5), and (5,6). In this example, the source does not require a selection. 
+  Figure 28 shows example code to implement this transfer.
+  
+  <p>A point selection lists the exact points to be transferred and the order 
+  they will be transferred. The source and destination are required to have 
+  the same number of elements. A point selection can be used with a hyperslab 
+  (e.g., the source could be a point selection and the destination a hyperslab, 
+  or vice versa), so long as the number of elements selected are the same.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig27.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 27</span></td>
+  </tr>
+</table>
+
+<br><br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+hsize_t dim2[] = {4};       
+int     values[] = {53, 59, 61, 67}; 
+
+hssize_t coord[4][2]; /* Array to store selected points 
+                                         from the file dataspace */ 
+
+/*
+ * Create dataspace for the second dataset.
+ */
+mid2 = H5Screate_simple(1, dim2, NULL);
+
+/*
+ * Select sequence of NPOINTS points in the file dataspace.
+ */
+coord[0][0] = 0; coord[0][1] = 0;
+coord[1][0] = 3; coord[1][1] = 3;
+coord[2][0] = 3; coord[2][1] = 5;
+coord[3][0] = 5; coord[3][1] = 6;
+
+ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
+                   (const hssize_t **)coord);
+
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);   
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      28</span></td>
+  </tr>
+</table>
+
+<h4><em>Combinations of selections</em></h4>
+
+  <p>Selections are a very flexible mechanism for reorganizing data during a 
+  data transfer. With different combinations of <em>Dataspaces</em> and selections, 
+  it is possible to implement many kinds of data transfers, including sub-setting, 
+  sampling, and reorganizing the data. Table 2 gives some example combinations of 
+  source and destination, and the operations they implement.</p>
+  
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0>
+  <tr valign="bottom">
+    <td colspan="3"><h4 align="center">Table 2</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"><p><span class=TableHead>Source</span></td>
+    <td class="ColumnHdr"><p><span class=TableHead>Destination</span></td>
+    <td class="ColumnRightHdr"><p><span class=TableHead>Operation</span></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>all</td>
+    <td class="ColumnCell"> <p>all</td>
+    <td class="ColumnRightCell"> <p>Copy whole array</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>all</td>
+    <td class="ColumnCell"> <p>All (different shape)</td>
+    <td class="ColumnRightCell"> <p>Copy and reorganize array</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>hyperslab</td>
+    <td class="ColumnCell"> <p>all</td>
+    <td class="ColumnRightCell"> <p>Sub-set</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>hyperslab</td>
+    <td class="ColumnCell"> <p>Hyperslab (same shape)</td>
+    <td class="ColumnRightCell"> <p>selection</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>hyperslab</p></td>
+    <td class="ColumnCell"> <p>Hyperslab (different shape)</td>
+    <td class="ColumnRightCell"> <p>Select and rearrange</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>Hyperslab with stride or block</td>
+    <td class="ColumnCell"> <p>All or hyperslab with stride 1</td>
+    <td class="ColumnRightCell"> <p>Sub-sample, scatter</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>hyperslab</td>
+    <td class="ColumnCell"> <p>points</td>
+    <td class="ColumnRightCell"> <p>scatter</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>points</td>
+    <td class="ColumnCell"> <p>Hyperslab or all</td>
+    <td class="ColumnRightCell"> <p>gather</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>points</td>
+    <td class="ColumnCell"> <p>Points (same)</td>
+    <td class="ColumnRightCell"> <p>selection</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>points</td>
+    <td class="ColumnBottom"> <p>Points (different)</td>
+    <td class="ColumnRightBottom"> <p>Reorder points</td>
+  </tr>    
+</table>
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DSelectTransfer">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+<h3 class=pagebefore>5. Dataspace Selection Operations and Data Transfer</h3>
+
+<dir>
+
+  <p><em>(With apologies to the reader, 
+  this section has yet to be written. -- The Editor)</em>
+
+  <span class="editingComment">
+  So write the section, already!
+  </span>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="DRegions">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+
+<h3 class=pagebefore>6. References to Dataset Regions</h3>
+
+<dir>
+
+  <p>Another use of selections is to store a reference to a region of a Dataset.  
+  An HDF5 Object Reference Object is a pointer to an object (Dataset, Group, 
+  or Named Datatype) in the file.  A selection can be used to 
+  create a pointer to a set of selected elements of a <em>Dataset</em>, 
+  called a Region Reference. The selection can be either a point selection or 
+  a hyperslab selection.  
+
+  <!-- editingComment
+  <span class="editingComment">
+  WORKING TOWARD AN IMPROVED PARAGRAPH:
+  In addition to the object reference, HDF5 also provides a regions reference.
+  An HDF5 Region Reference is a pointer to a selection within a dataset.
+  The selection can be either a point or hyperslab selection.  
+  </span>
+  -->
+  A more complete description of Region References can be found in the
+  chapter "<a href="11_Datatypes.html">HDF5 Datatypes</a>."
+  
+  <p>A Region Reference is an object maintained by the HDF5 library. 
+  The region reference can be stored in a Dataset or Attribute, and then read.  
+  The Dataset or Attribute is defined to have the special Datatype, 
+  H5T_STD_REF_DSETREG. 
+  
+  <p>To discover the elements and/or read the data, the Region Reference can 
+  be deferenced. The H5Rdefrerence call returns a handle for the 
+  <em>Dataset</em>, and then the selected dataspace can be retrieved with 
+  H5Rget_select call. The selected <em>Dataspace</em> can be used to read 
+  the selected data elements.
+
+<!-- MEDIA BOTTOM 0.4in -->
+  
+<h4>Example Uses for Region References</h4>
+  <p>Region References are used to implement stored pointers to data within a Dataset. 
+  For example, features in a large dataset might be indexed by a table (Figure 29). 
+  This table could be stored as an HDF5 Dataset  with a Compound Datatype, 
+  for example with a field for the name of the feature and a Region Reference 
+  to point to the feature in the Dataset (Figure 30).</p>
+ 
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig29.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 29</span></td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig30.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 30</span></td>
+  </tr>
+</table>
+
+<!-- MEDIA BOTTOM 0.5in -->
+
+<h4>Creating References to Regions</h4>
+
+  <p>To create a region reference:
+  
+<ol>
+    <li>Create or open the Dataset that contains the region.
+    <li>Get the Dataspace for the Dataset.
+    <li>Define a selection that specifies the region.
+    <li>Create a Region reference using the Dataset and Dataspace with selection.
+    <li>Write the Region Reference(s) to the desired Dataset or Attribute.
+</ol>
+
+  <p>Figure 31 shows a diagram of a file with three Datasets.  Dataset D1 and D2 
+  are two dimensional arrays of integers. Dataset R1 is a one dimensional array 
+  of references to regions in D1 and D2.  The regions can be any valid selection 
+  of the Dataspace of the target Dataset.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig31.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+        <span class=figurenumber>Figure 31</span></td>
+  </tr>
+</table>
+
+  <p>Figure 32 shows example code to create the array of region references. 
+  The references are created in an array of type hdset_reg_ref_t. Each region 
+  is defined as a selection on the Dataspace of the Dataset, and a reference is 
+  created using H5Rcreate(). The call to H5Rcreate() specifies the file, Dataset, 
+  and the Dataspace with selection.</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+ /* create an array of 4 region references */
+    hdset_reg_ref_t ref[4];
+    /*
+     * Create a reference to the first hyperslab in the first Dataset.
+     */
+    start[0] = 1; start[1] = 1; 
+    count[0] = 3; count[1] = 2;
+    status =  H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, 
+          count, NULL);
+    status = H5Rcreate(&amp;ref[0], file_id, "D1", H5R_DATASET_REGION, 
+             space_id);
+
+    /*
+     * The second reference is to a union of hyperslabs in the first
+ * Dataset
+/*
+
+    start[0] = 5;  start[1] = 3; 
+    count[0] = 1; count[1] = 4;
+    status = H5Sselect_none(space_id);
+    status = H5Sselect_hyperslab(space_id, H5S_SELECT_SET,start, 
+               NULL, count, NULL);
+    start[0] = 6;   start[1] = 5; 
+    count[0] = 1;  count[1] = 2;
+    status = H5Sselect_hyperslab(space_id, H5S_SELECT_OR, start, NULL, 
+          count, NULL);
+    status = H5Rcreate(&amp;ref[1], file_id, "D1", H5R_DATASET_REGION, 
+           space_id);
+
+    /*
+     * the fourth reference is to a selection of points in the first
+     * Dataset
+     */
+    status = H5Sselect_none(space_id);
+    coord[0][0] = 4; coord[0][1] = 4;
+    coord[1][0] = 2; coord[1][1] = 6;
+    coord[2][0] = 3; coord[2][1] = 7;
+    coord[3][0] = 1; coord[3][1] = 5;
+    coord[4][0] = 5; coord[4][1] = 8;
+    status = H5Sselect_elements(space_id, H5S_SELECT_SET,num_points,
+                                (const hssize_t **)coord);
+    status = H5Rcreate(&amp;ref[3], file_id, "D1", H5R_DATASET_REGION, 
+         space_id);
+   /*
+    * the third reference is to a hyperslab in the second Dataset
+     */
+    start[0] = 0;  start[1] = 0; 
+    count[0] = 4; count[1] = 6;
+    status = H5Sselect_hyperslab(space_id2, H5S_SELECT_SET, start, NULL, 
+            count, NULL);
+    status = H5Rcreate(&amp;ref[2], file_id, "D2", H5R_DATASET_REGION, 
+            space_id2);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 32</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+
+  <p>When all the references are created, the array of references is written to 
+  the Dataset R1. The Dataset is declared to have Datatype H5T_STD_REF_DSETREG  
+  (Figure 33).</p>
+  
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+    Hsize_t dimsr[1];
+    dimsr[0] = 4;
+    /* 
+     * Dataset with references.
+     */
+    spacer_id = H5Screate_simple(1, dimsr, NULL);
+    dsetr_id = H5Dcreate(file_id, "R1", H5T_STD_REF_DSETREG, 
+             spacer_id, H5P_DEFAULT);
+
+    /*
+     * Write dataset with the references.
+     */
+    status = H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, 
+            H5P_DEFAULT,ref);
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 33</span></td>
+  </tr>
+</table>
+
+  <p>When creating region references, the following rules are enforced.
+  
+<ul>
+    <li>The selection must be a valid selection for the target <em>Dataset</em>, 
+        just as when transferring data.
+    <li>The <em>Dataset</em> must exist in the file when the reference is 
+        created (H5Rcreate).
+    <li>The target <em>Dataset</em> must be in the same file as the stored reference. 
+</ul>
+
+<br>
+<h4>Reading References to Regions</h4>
+
+  <p>To retrieve data from a region reference, the reference must be read from 
+  the file, and then the data can be retrieved. The steps are:
+  
+<ol>
+    <li>Open the Dataset or Attribute containing the reference objects.
+    <li>Read the reference object(s).
+    <li>For each Region Reference, get the Dataset (H5R_dereference) and 
+        Dataspace (H5Rget_space)
+    <li>Use the Dataspace and Datatype to discover what space is needed to 
+        store the data, allocate the correct storage and create a Dataspace and 
+	Datatype to define the memory data layout.
+</ol>
+
+  <p>Figure 34 shows example code to read an array of region references from a 
+  Dataset, and then read the data from the first selected region. Note that the 
+  region reference has information that records the Dataset (within the file) 
+  and the selection on the <em>Dataspace</em> of the <em>Dataset</em>. 
+  After dereferencing the regions reference, the <em>Datatype</em>, 
+  number of points, and some aspects of the selection can be discovered.  
+  (For a union of hyperslabs, it may not be possible to determine the exact 
+  set of hyperslabs that has been combined.) Table 3 shows the inquiry functions.
+  
+  <p>When reading data from a region reference, the following rules are enforced:
+  
+<ul>
+    <li>The target <em>Dataset</em> must be present and accessible in the file.
+    <li>The selection must be a valid selection for the <em>Dataset</em>.
+</ul>
+
+<br>
+
+<!-- NEW PAGE -->
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+<pre><code>
+    dsetr_id = H5Dopen (file_id, "R1");
+
+    status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, 
+                   H5P_DEFAULT, ref_out);
+
+    /* 
+     * Dereference the first reference.
+     *   1) get the dataset (H5Rdereference)
+     *   2) get the selected dataspace (H5Rget_region)
+     */
+    dsetv_id = H5Rdereference(dsetr_id, H5R_DATASET_REGION, 
+           &amp;ref_out[0]);
+    space_id = H5Rget_region(dsetr_id, H5R_DATASET_REGION,&amp;ref_out[0]);
+
+
+    /*
+     *  Discover how many points and shape of the data
+     */
+    ndims = H5Sget_simple_extent_ndims(space_id);
+
+    H5Sget_simple_extent_dims(space_id,dimsx,NULL);
+
+    /* 
+     * Read and display hyperslab selection from the dataset.
+     */
+      dimsy[0] = H5Sget_select_npoints(space_id);
+      spacex_id = H5Screate_simple(1, dimsy, NULL);
+
+    status = H5Dread(dsetv_id, H5T_NATIVE_INT, H5S_ALL, space_id, 
+                   H5P_DEFAULT, data_out);
+    printf("Selected hyperslab: ");
+    for (i = 0; i < 8; i++)
+    {   
+        printf("\n");
+        for (j = 0; j < 10; j++)
+            printf("%d ", data_out[i][j]);
+    }
+    printf("\n");
+
+</code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 34</span></td>
+  </tr>
+</table>
+
+<br><br>
+
+<table x-use-null-cells
+		class="ColumnTable"
+		width=600
+		cellspacing=0>
+  <tr valign="top">
+    <td colspan="2" align="center"><h4>Table 3</h4></td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftHdr"> <p><span class=TableHead>Function</span></td>
+    <td class="ColumnRightHdr"> <p><span class=TableHead>Information</span></td>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Sget_select_npoints</td>
+    <td class="ColumnRightCell"> <p>The number of elements in the selection (hyperslab 
+        or point selection)</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Sget_select_bounds</td>
+    <td class="ColumnRightCell"> <p>The bounding box that encloses the selected 
+        points (hyperslab or point selection)</td>
+  </tr>
+    <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Sget_select_hyper_nblocks</td>
+    <td class="ColumnRightCell"> <p>The number of blocks in the selection.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Sget_select_hyper_blocklist</td>
+    <td class="ColumnRightCell"> <p>A list of the blocks in the selection</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftCell"> <p>H5Sget_select_elem_npoints</td>
+    <td class="ColumnRightCell"> <p>The number of points in the selection.</td>
+  </tr>
+  <tr valign=top> 
+    <td class="ColumnLeftBottom"> <p>H5Sget_select_elem_pointlist</td>
+    <td class="ColumnRightBottom"> <p>The points.</td>
+  </tr>
+</table>
+
+</dir>
+
+
+<SCRIPT language="JavaScript">
+<!--
+document.writeln ("
+<a name="Programs">
+<div align=right>
+<a href="#TOP"><font size=-1>(Top)</font></a>
+</div>
+</a>
+");
+-->
+</SCRIPT>
+
+</dir>
+<!-- NEW PAGE -->
+<h3 class=pagebefore>7. Sample Programs</h3>
+
+<dir>
+
+  This section contains the full programs from which several of the 
+  code examples in this chapter were derived.
+  The <code>h5dump</code> output from the program's output file 
+  immediately follows each program.
+
+  <pre>
+
+h5_write.c
+----------
+#include "hdf5.h"
+
+#define H5FILE_NAME        "SDS.h5"
+#define DATASETNAME "C Matrix"
+#define NX     3                      /* dataset dimensions */
+#define NY     5
+#define RANK   2
+
+int
+main (void)
+{
+     hid_t       file, dataset;         /* file and dataset handles */
+     hid_t       datatype, dataspace;   /* handles */
+     hsize_t     dims[2];              /* dataset dimensions */
+     herr_t      status;
+     int         data[NX][NY];          /* data to write */
+     int         i, j;
+
+     /*
+      * Data  and output buffer initialization.
+      */
+     for (j = 0; j < NX; j++) {
+        for (i = 0; i < NY; i++)
+            data[j][i] = i + 1 + j*NY;
+     }
+     /*
+      *  1  2  3  4  5
+      *  6  7  8  9 10
+      * 11 12 13 14 15
+      */
+
+     /*
+      * Create a new file using H5F_ACC_TRUNC access,
+      * default file creation properties, and default file
+      * access properties.
+      */
+     file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+     /*
+      * Describe the size of the array and create the data space for fixed
+      * size dataset.
+      */
+     dims[0] = NX;
+     dims[1] = NY;
+     dataspace = H5Screate_simple(RANK, dims, NULL);
+
+     /*
+      * Create a new dataset within the file using defined dataspace and
+      * datatype and default dataset creation properties.
+      */
+     dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
+                        H5P_DEFAULT);</pre>
+<!-- NEW PAGE -->
+<pre>
+     /*
+      * Write the data to the dataset using default transfer properties.
+      */
+     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                      H5P_DEFAULT, data);
+
+     /*
+      * Close/release resources.
+      */
+     H5Sclose(dataspace);
+     H5Dclose(dataset);
+     H5Fclose(file);
+
+     return 0;
+}
+
+
+
+SDS.out
+-------
+HDF5 "SDS.h5" {
+GROUP "/" {
+    DATASET "C Matrix" {
+       DATATYPE  H5T_STD_I32BE
+       DATASPACE  SIMPLE { ( 3, 5 ) / ( 3, 5 ) }
+       DATA {
+          1, 2, 3, 4, 5,
+          6, 7, 8, 9, 10,
+          11, 12, 13, 14, 15
+       }
+    }
+}
+}
+
+
+
+h5_write.f90
+------------
+      PROGRAM DSETEXAMPLE
+
+      USE HDF5 ! This module contains all necessary modules
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=7), PARAMETER :: filename = "SDSf.h5" ! File name
+      CHARACTER(LEN=14), PARAMETER :: dsetname = "Fortran Matrix" ! Dataset name
+      INTEGER, PARAMETER :: NX = 3
+      INTEGER, PARAMETER :: NY = 5
+
+      INTEGER(HID_T) :: file_id       ! File identifier
+      INTEGER(HID_T) :: dset_id       ! Dataset identifier
+      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
+
+
+      INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/3,5/) ! Dataset dimensions
+      INTEGER     ::    rank = 2                       ! Dataset rank
+      INTEGER     ::    data(NX,NY)
+
+      INTEGER     ::   error ! Error flag
+      INTEGER     :: i, j</pre>
+<!-- NEW PAGE -->
+<pre>
+      !
+      ! Initialize data
+      !
+        do i = 1, NX
+           do j = 1, NY
+              data(i,j) = j + (i-1)*NY
+           enddo
+        enddo
+      !
+      ! Data
+      !
+      !  1  2  3  4  5
+      !  6  7  8  9 10
+      ! 11 12 13 14 15
+
+      !
+      ! Initialize FORTRAN interface.
+      !
+      CALL h5open_f(error)
+
+      !
+      ! Create a new file using default properties.
+      !
+      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+
+      !
+      ! Create the dataspace.
+      !
+      CALL h5screate_simple_f(rank, dims, dspace_id, error)
+
+      !
+      ! Create and write dataset using default properties.
+      !
+      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &amp;
+                       dset_id, error)
+
+      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, dims, error)
+
+      !
+      ! End access to the dataset and release resources used by it.
+      !
+      CALL h5dclose_f(dset_id, error)
+
+      !
+      ! Terminate access to the data space.
+      !
+      CALL h5sclose_f(dspace_id, error)
+
+      !
+      ! Close the file.
+      !
+      CALL h5fclose_f(file_id, error)
+
+      !
+      ! Close FORTRAN interface.
+      !
+      CALL h5close_f(error)
+
+      END PROGRAM DSETEXAMPLE</pre>
+<!-- NEW PAGE -->
+<pre>
+SDSf.out
+--------
+HDF5 "SDSf.h5" {
+GROUP "/" {
+    DATASET "Fortran Matrix" {
+       DATATYPE  H5T_STD_I32BE
+       DATASPACE  SIMPLE { ( 5, 3 ) / ( 5, 3 ) }
+       DATA {
+          1, 6, 11,
+          2, 7, 12,
+          3, 8, 13,
+          4, 9, 14,
+          5, 10, 15
+       }
+    }
+}
+}
+
+
+
+
+h5_write_tr.f90
+---------------
+      PROGRAM DSETEXAMPLE
+
+      USE HDF5 ! This module contains all necessary modules
+
+      IMPLICIT NONE
+
+      CHARACTER(LEN=10), PARAMETER :: filename = "SDSf_tr.h5" ! File name
+      CHARACTER(LEN=24), PARAMETER :: dsetname = "Fortran Transpose Matrix"
+                                                  ! Dataset name
+      INTEGER, PARAMETER :: NX = 3
+      INTEGER, PARAMETER :: NY = 5
+
+      INTEGER(HID_T) :: file_id       ! File identifier
+      INTEGER(HID_T) :: dset_id       ! Dataset identifier
+      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
+
+
+      INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NY, NX/) ! Dataset dimensions
+      INTEGER     ::    rank = 2                       ! Dataset rank
+      INTEGER     ::    data(NY,NX)
+
+      INTEGER     ::   error ! Error flag
+      INTEGER     :: i, j
+
+      !
+      ! Initialize data
+      !
+        do i = 1, NY
+           do j = 1, NX
+              data(i,j) = i + (j-1)*NY
+           enddo
+        enddo
+      !
+      ! Data
+      !
+      !  1  6  11
+      !  2  7  12
+      !  3  8  13
+      !  4  9  14
+      !  5 10  15
+
+      !
+      ! Initialize FORTRAN interface.
+      !
+      CALL h5open_f(error)
+
+      !
+      ! Create a new file using default properties.
+      !
+      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+
+      !
+      ! Create the dataspace.
+      !
+      CALL h5screate_simple_f(rank, dims, dspace_id, error)
+
+      !
+      ! Create and write dataset using default properties.
+      !
+      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
+                       dset_id, error)
+
+      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, dims, error)
+
+      !
+      ! End access to the dataset and release resources used by it.
+      !
+      CALL h5dclose_f(dset_id, error)
+
+      !
+      ! Terminate access to the data space.
+      !
+      CALL h5sclose_f(dspace_id, error)
+
+      !
+      ! Close the file.
+      !
+      CALL h5fclose_f(file_id, error)
+
+      !
+      ! Close FORTRAN interface.
+      !
+      CALL h5close_f(error)
+
+      END PROGRAM DSETEXAMPLE</pre>
+<!-- NEW PAGE -->
+
+<pre>
+SDSf_tr.out
+-----------
+HDF5 "SDSf_tr.h5" {
+GROUP "/" {
+    DATASET "Fortran Transpose Matrix" {
+       DATATYPE  H5T_STD_I32LE
+       DATASPACE  SIMPLE { ( 3, 5 ) / ( 3, 5 ) }
+       DATA {
+          1, 2, 3, 4, 5,
+          6, 7, 8, 9, 10,
+          11, 12, 13, 14, 15
+       }
+    }
+}
+}</pre>
+</dir>
+
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------
+<hr>
+<!-- FOR USE WITH ELECTRONIC VERSION --------------------------->
+<!-- NEW PAGE -->
+<hr>
+
+<h1>Preserved to ensure that topics are included somewhere</h1>
+
+<h3>From ch intro:</h3>
+  <p>LATER: used to describe the layout of a 
+  memory buffer used in data transfer, and to define selections from a 
+  <em>Dataset</em>. In this role, there are two <em>Dataspace</em> objects, 
+  one for the source and one for the destination. 
+
+  <p>Selected data can be read from or written to a Dataset using selections. 
+  A selection is a set of elements from the <em>Dataspace</em>. A selection is 
+  specified by a set of <em>hyperslabs</em> which specify which elements of the 
+  <em>Dataspace</em> are selected. 
+
+
+  <p>ELSEWHERE: Selections can also be used to define a reference to a selected region 
+  of a dataset. An Object Reference is a pointer to a Named Object in the HDF5 file. 
+  A Region Reference is a pointer to a set of elements in a <em>Dataset</em> 
+  specified by a selection.
+
+
+<h3>From "Definition of Data Object" section:</h3>
+<br>
+
+  <p>OLD: Figure 4a shows an example of a two-dimensional array declared in C 
+  as a 5 by 3 array. 
+  The elements of this array would be stored with the second dimension 
+  as the fastest changing index, as shown in Figure 4c. 
+  Figure 5 shows C code that declares the Dataspace. 
+
+  <p>The <em>Dataspace</em> object is used to define a Dataset (or Attribute). The 
+
+
+  <em>Dataspace</em> object describes a hyper rectangle of one to 32 dimensions. 
+  (Figure 3) The number of dimensions is the <em>rank</em> of the array. Dimensions 
+  begin at the origin (element '0' in C), each dimension has a current and a maximum 
+  size. 
+  
+  <p>A special case is a <em>Dataspace</em> with one element. This is termed a "scalar" 
+  Dataspace, and conventionally has a rank of '0'. A scalar Dataspace is implemented 
+  as a one-dimensional array with one element. In other words, a scalar Dataspace 
+  is functionally equivalent to a regular Dataspace of rank 1, with current and 
+  maximum size of 1. 
+
+  <p>In defining a Dataspace, HDF5 uses the conventions of the C programming language 
+  [cite something]. The dimensions of the Dataspace are numbered from '0' to 'rank 
+  - 1', and stored with the fastest changing dimension last. Figure 4a shows an 
+  example of a two-dimensional array declared in C as a 5 by 3 array. The elements 
+  of this array would be stored with the second dimension as the fastest changing 
+  index, as shown in Figure 4c. Figure 5 shows C code that declares the Dataspace. 
+
+  <p>When accessed through the Fortran interface, dimensions are described using 
+  Fortran conventions [cite f90]: numbered from 1 to 'rank', with the fastest 
+  changing dimension first. Figure 4b shows a FORTRAN array declaration, and Figure 
+  4d shows the storage order of the elements. The HDF5 FORTRAN API rearranges 
+  the dimensions to assure that both the stored information is correct (i.e., 
+  in C order) and the arrays and dimensions are correct for the Fortran. Figure 
+  6 shows C code that declares the Dataspace. 
+  
+  <p>Note that the data elements are stored by HDF5 the same way for either C or 
+  FORTRAN. This assures that a file written by FORTRAN will work correctly when 
+  read by C, or vice versa. The C and FORTRAN API's assure that the indexing in 
+  memory is consistent with the programming language.</p>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="xx-Removed/Dspace_fig4.JPG">
+    <img src="Images/Dspace_fig4.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      4</span></td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+  hsize_t dims[2] = { 5, 3}; 
+  dataspace = H5Screate_simple(RANK, dims, maxdims); 
+  
+  for ( I = 0; I < 3; I++) {
+      for (j = 0; j < 5; j++) {
+         a[j][]I] = I + j*10;
+    }
+  }
+    </code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 5</span></td>
+  </tr>
+</table>
+
+<br>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/3,5/)
+     INTEGER(HSIZE_T), DIMENSION(2) :: maxdims = (/3,5/)
+     CALL h5screate_simple_f(RANK, dims, dataspace, error, maxdims)
+     do i = 1, 3
+        do j = 1, 5
+            a(i,j) = I*10 + j
+        end do
+     end do
+    </code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 6</span></td>
+  </tr>
+</table>
+
+<!-- NEW PAGE -->
+<h3>From "Definition of Data Object" section:</h3>
+<br>
+<b>These are really "Working with" items, not "Definitions..."</b>
+
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------
+<table align=right class="greenframe1" width="270">
+  <tr> 
+    <td height="310" valign=center align=center class="greenline1"> 
+    <img src="Images/Dspace_fig7.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td class=figurecaption><span class=figurenumber>Figure 7</span></td>
+  </tr>
+</table>
+<!-- FOR USE WITH ELECTRONIC VERSION ---------------------------->
+
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+<table align="center" class="greenframe1" width="270">
+  <tr> 
+    <td height="310" valign=center align=center class="greenline1"> 
+    <img src="Images/Dspace_fig7.JPG">
+    </td>
+  </tr>
+  <tr> 
+    <td class=figurecaption align="center"><span class=figurenumber>Figure 7</span></td>
+  </tr>
+</table>
+<!-- FOR USE WITH PRINT VERSION --------------------------------->
+
+<br>
+  <p>The <em>Dataspace</em> for a <em>Dataset</em> can be extended in any dimension, 
+  up to its maximum size (which may be unlimited). Any Dataset with one or more 
+  unlimited dimension must be chunked. Figure 7a shows a two-dimensional <em>Dataspace</em> 
+  which is declared to have a current size of 5 by 3, with a maximum of 6 by 5. 
+  In the figure, the shaded boxes are the currently allocated space. The <em>Dataspace</em> 
+  of the Dataset can be extended in either or both dimension with the H5Dextend 
+  call. Figure 7b shows the array extended by one column, to be 5 by 4. 
+  
+  <p>Unlike HDF5 and other formats, an HDF5 <em>Dataspace</em> can have no, some, 
+  or all of its dimensions extendible, and each can be extended independently. 
+  If any dimension is unlimited, then the <em>Dataset</em> must be chunked. This 
+  is necessary so that storage can be allocated as the <em>Dataspace</em> extends. 
+  
+  <p><em>{Explain Allocation and fill values when creating/extending - get someone 
+  to explain this…}</em> 
+  
+  <p>When the Dataset (Attribute) is created, space in the file is (conceptually) 
+  allocated for a rectangle of the current size of each dimension. The allocated 
+  space is filled with the fill value (specified by the fill value property when 
+  the Dataset is created), or else filled with zeroes. 
+  
+  <p>The array may be extended with the <em>H5Dextend</em> function. Each dimension 
+  may be extended up to its maximum size, which may be unlimited. Note that none, 
+  some, or all of the dimensions may be extendible. Note that any dataset with 
+  one or more unlimited dimension must be chunked. When the Dataset is extended, 
+  additional chunks are allocated and filled with the fill value. 
+  
+<!-- NEW PAGE -->
+  <p>See ?? for a detailed explanation of space allocation and fill values. 
+  
+  <p>Figure 8 shows an example of C code that creates a two dimensional Dataspace 
+  that is extendable. The initial size is 3 X 3, the maximum size is H5S_UNLIMITED. 
+  Note that the Dataset must be chunked (in this example, 2 X 5 chunks).</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell"> <pre><code>
+hsize_t dims[2] = { 3, 3}; /* dataset dimensions at the creation time */ 
+
+hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+/*
+ * Create the data space with unlimited dimensions. 
+ */
+dataspace = H5Screate_simple(RANK, dims, maxdims); 
+
+hid_t cparms; 
+hsize_t chunk_dims[2] ={2, 5};
+/* 
+ * Modify dataset creation properties to enable chunking.
+ */
+cparms = H5Pcreate (H5P_DATASET_CREATE);
+status = H5Pset_chunk( cparms, RANK, chunk_dims);
+
+/*
+ * Create a new dataset within the file using cparms
+ * creation properties.
+ */
+dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
+                 cparms);
+</code></pre> </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      8</span></td>
+  </tr>
+</table>
+  
+  <p>To extend the dataset, the new size of the dimensions is set, and H5Dextend 
+  is called. F9 shows code to extend the previous example to 10 X 3. Note that 
+  it is not possible to change the number of dimensions or to shrink the size 
+  of a dimension.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell"> <pre><code>
+/*
+ * Extend the dataset. Dataset becomes 10 x 3.
+ */
+dims[0] = dims[0] + 7;
+size[0] = dims[0]; 
+size[1] = dims[1]; 
+status = H5Dextend (dataset, size);
+</code></pre> </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      9</span></td>
+  </tr>
+</table>
+
+<br>
+<!-- NEW PAGE -->
+<h4><em>Dataset Chunking</em></h4>
+  
+  <p>The <em>Dataspace</em> defines the conceptual layout of the data as a hyper 
+  rectangle. The actual data elements are stored in one or more contiguous blocks 
+  in the file, depending on the Dataset storage properties. A <em>Dataset</em> 
+  may be stored in one of three strategies: 
+
+  <ol>
+    <li>continguous - a single block of data 
+    <li>chunked - a set of fixed-size blocks of data 
+    <li>compact - the metadata and data are stored in the header block. 
+  </ol>
+  
+  <p>The <em>Dataspace</em> of a <em>Dataset</em> is the same no matter which storage 
+  layout is used. 
+  
+  <br>When the Dataset uses the chunked storage, the chunk is defined as a hyper 
+  rectangle of the same dimensionality as the Dataspace. Storage is allocated 
+  in chunks, and the elements of the Dataspace are stored in the appropriate chunk. 
+  </p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig10.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      10</span></td>
+  </tr>
+</table>
+
+<br>
+  
+  <p>Figure 10 shows an example of data arranged as a two dimensional Dataspace, 
+  7 X 5. Figure 10b shows how the data would be stored for a chunked Dataset, 
+  with 3 X 3 chunks. Note that some space in the chunks is not used. Each chunk 
+  is stored as a single contiguous block of data, as shown in Figure 10c. The 
+  chunks are not necessarily stored contiguous with each other. 
+  
+  <p>A Dataset with the same Dataspace might be stored with many different chunk 
+  sizes. Figure 11 shows how the same Dataspace would be stored using 8 X 2 chunks. 
+  The Dataspace is identical in both cases, but the total storage used in the 
+  second example is less and the number of chunks is different.</p>
+
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig11.JPG">
+</td></tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> <span class=figurenumber>Figure 
+      11</span></td>
+  </tr>
+</table>
+  
+  <p>The chunks may be any size, chunks are allocated to store the data. If a chunk 
+  extends than the extent of the Dataspace, the extra space is stored but not 
+  used. In Figure 10 and Figure 11, the chunks did not fit precisely to the Dataspace, 
+  so some space was not used. 
+
+<h3>From the "Definitions" section:</h3>
+
+  <p><span class="editingComment">Do we wish to retain any of the remainder of this section?</span><br>
+  <span class="editingComment">Or does the remainder go to "Programming Model" or elsewhere?</span> 
+
+  
+  
+  <p>
+  The dimensions of the Dataspace are numbered from '1' to 'rank'.
+  The values of the dimension indices used to access raw data
+  are 0-based in the C, C++ and Java programming models 
+  and 1-based in Fortran.
+  For example, suppose we have a 3x5 2-dimensional dataspace.
+  To access the 3rd element in the 2nd row, 
+  a C application will describe the position of this element as (1,2) 
+  while a Fortran application will describe it as (2,3).
+
+  <p>HDF5 stores data along the the fastest changing dimension. 
+  In C, C++, and Java applications, the fastest-changing dimension
+  is the last-listed dimension and the first-listed dimension is 
+  the slowest-changing.
+  In Fortran applications, it is the reverse: 
+  the fastest-changing dimension is the first-listed dimension and 
+  the last-listed dimension is the slowest-changing.
+
+
+
+
+<p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <br>&nbsp;
+    <br>
+    New extensible dataset image goes here.
+    <br>&nbsp;
+    <br>
+    <!--
+    <img src="Images/Dspace_fig1.JPG">
+    -->
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 2:</span> 
+    Extensible dataset explanatory caption
+</td></tr>
+</table>
+
+
+<p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig1.JPG">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 3</span> 
+</td></tr>
+</table>
+
+
+<p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell" align="center">
+    <img src="Images/Dspace_fig02.JPG">
+</td></tr>
+<tr>
+<td align=center class="fullImgTableCapCell">
+    <span class=figurenumber>Figure 4</span> 
+</td></tr>
+</table>
+
+
+<p>- - - - - - - - - - - - - - - - - - - - - 
+
+
+
+  <p>
+  Figures 5 and 6 show the C and Fortran code, respectively, 
+  that define the required dataspace required for the above-described arrays.
+  These examples are designed specifically to create dataspaces and 
+  to store arrays that can later be read back and manipulated
+  by applications written in C, C++, Java, or Fortran 
+  without requiring any manipulation to make the data meaningful.
+
+  <p>
+  In the C example, the elements of the array will be stored with 
+  the second dimension as the fastest changing index;
+  this is commonly known as row-major order.
+  In the Fortran example, the elements of the array will be stored with 
+  the first dimension as the fastest changing index;
+  this is commonly known as column-major order.
+
+<p><!-- NEW PAGE -->
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+  hsize_t dims[2] = { 5, 3}; 
+  dataspace = H5Screate_simple(RANK, dims, maxdims); 
+  
+  for ( I = 0; I < 3; I++) {
+      for (j = 0; j < 5; j++) {
+         a[j][]I] = I + j*10;
+    }
+  }
+    </code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 5:</span>
+    C code to generate a 5x3 dataspace and array
+    </td>
+  </tr>
+</table>
+
+<p>
+<table x-use-null-cells
+		width=600
+		cellspacing=0
+                class="fullImgTable"
+		align="center">
+  <tr valign=top> 
+    <td class="fullImgTableImgCell">
+    <pre><code>
+     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/3,5/)
+     INTEGER(HSIZE_T), DIMENSION(2) :: maxdims = (/3,5/)
+     CALL h5screate_simple_f(RANK, dims, dataspace, error, maxdims)
+     do i = 1, 3
+        do j = 1, 5
+            a(i,j) = I*10 + j
+        end do
+     end do
+    </code></pre>
+    </td>
+  </tr>
+  <tr> 
+    <td align=center class="fullImgTableCapCell"> 
+    <span class=figurenumber>Figure 6:</span>
+    Fortran code to generate the corresponding 3x5 dataspace and array
+    </td>
+  </tr>
+</table>
+
+  <p>The <em>dataspace</em> object created above is then used to define 
+  a dataset or Attribute). The 
+
+
+  <em>Dataspace</em> object describes a hyper rectangle of one to 32 dimensions. 
+  (Figure 3) The number of dimensions is the <em>rank</em> of the array. Dimensions 
+  begin at the origin (element '0' in C), each dimension has a current and a maximum 
+  size. 
+  
+  <p>A special case is a <em>Dataspace</em> with one element. This is termed a "scalar" 
+  Dataspace, and conventionally has a rank of '0'. A scalar Dataspace is implemented 
+  as a one-dimensional array with one element. In other words, a scalar Dataspace 
+  is functionally equivalent to a regular Dataspace of rank 1, with current and 
+  maximum size of 1. 
+
+  <p>In defining a Dataspace, HDF5 uses the conventions of the C programming language 
+  [cite something]. The dimensions of the Dataspace are numbered from '0' to 'rank 
+  - 1', and stored with the fastest changing dimension last. Figure 4a shows an 
+  example of a two-dimensional array declared in C as a 5 by 3 array. The elements 
+  of this array would be stored with the second dimension as the fastest changing 
+  index, as shown in Figure 4c. Figure 5 shows C code that declares the Dataspace. 
+
+  <p>When accessed through the Fortran interface, dimensions are described using 
+  Fortran conventions [cite f90]: numbered from 1 to 'rank', with the fastest 
+  changing dimension first. Figure 4b shows a FORTRAN array declaration, and Figure 
+  4d shows the storage order of the elements. The HDF5 FORTRAN API rearranges 
+  the dimensions to assure that both the stored information is correct (i.e., 
+  in C order) and the arrays and dimensions are correct for the Fortran. Figure 
+  6 shows C code that declares the Dataspace. 
+  
+  <p>Note that the data elements are stored by HDF5 the same way for either C or 
+  FORTRAN. This assures that a file written by FORTRAN will work correctly when 
+  read by C, or vice versa. The C and FORTRAN API's assure that the indexing in 
+  memory is consistent with the programming language.</p>
+
+</body>
+</html>
