@@ -4512,6 +4512,7 @@ static int read_data( const char* fname,
     if ( *buf == NULL )
     {
         printf( "memory allocation failed\n" );
+        fclose(f);
         return -1;
     }
 
