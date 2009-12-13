@@ -1668,7 +1668,7 @@ print_enum(hid_t type, char* str, int indt)
     int              nmembs;        /*number of members              */
     char             tmp_str[256];
     int              nchars;        /*number of output characters    */
-    hid_t            super;         /*enum base integer type         */
+    hid_t            super = -1;    /*enum base integer type         */
     hid_t            native = -1;   /*native integer data type       */
     size_t           super_size;    /*enum base type size            */
     size_t           dst_size;      /*destination value type size    */
@@ -1742,21 +1742,35 @@ print_enum(hid_t type, char* str, int indt)
     }
 
     /* Release resources */
-    for (i = 0; i < nmembs; i++)
+    for(i = 0; i < nmembs; i++)
         free(name[i]);
 
     free(name);
     free(value);
     H5Tclose(super);
 
-    if (0 == nmembs) {
+    if(0 == nmembs) {
         sprintf(tmp_str, "\n%*s <empty>", indt + 4, "");
         strcat(str, tmp_str);
-    }
+    } /* end if */
 
     return ret;
 
 out:
+    /* Release resources */
+    if(name) {
+        for(i = 0; i < nmembs; i++)
+            if(name[i])
+                free(name[i]);
+        free(name);
+    } /* end if */
+
+    if(value)
+        free(value);
+
+    if(super >= 0)
+        H5Tclose(super);
+
     return FAIL;
 }
 

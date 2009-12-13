@@ -2710,11 +2710,12 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     int              i, next;
     unsigned         j;
 
-    storage_size=H5Dget_storage_size(obj_id);
+    storage_size = H5Dget_storage_size(obj_id);
     nfilters = H5Pget_nfilters(dcpl_id);
-    ioffset=H5Dget_offset(obj_id);
-    next=H5Pget_external_count(dcpl_id);
-    strcpy(f_name,"\0");
+    ioffset = H5Dget_offset(obj_id);
+    next = H5Pget_external_count(dcpl_id);
+    HDassert(next >= 0);
+    HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
     * STORAGE_LAYOUT
@@ -4525,14 +4526,16 @@ print_enum(hid_t type)
     unsigned char   *value = NULL;  /*value array                    */
     unsigned char   *copy = NULL;   /*a pointer to value array       */
     unsigned         nmembs;        /*number of members              */
+    int              snmembs;
     int              nchars;        /*number of output characters    */
     hid_t            super;         /*enum base integer type         */
     hid_t            native = -1;   /*native integer datatype        */
     size_t           dst_size;      /*destination value type size    */
     unsigned         i;
 
-    nmembs = H5Tget_nmembers(type);
-    assert(nmembs>0);
+    snmembs = H5Tget_nmembers(type);
+    HDassert(snmembs >= 0);
+    nmembs = (unsigned)snmembs;
     super = H5Tget_super(type);
 
     /*
@@ -4542,17 +4545,16 @@ print_enum(hid_t type)
      *    2. unsigned long long -- the largest native unsigned integer
      *    3. raw format
      */
-    if (H5Tget_size(type) <= sizeof(long long)) {
-    dst_size = sizeof(long long);
+    if(H5Tget_size(type) <= sizeof(long long)) {
+        dst_size = sizeof(long long);
 
-    if (H5T_SGN_NONE == H5Tget_sign(type)) {
-        native = H5T_NATIVE_ULLONG;
-    } else {
-        native = H5T_NATIVE_LLONG;
-    }
-    } else {
-    dst_size = H5Tget_size(type);
-    }
+        if(H5T_SGN_NONE == H5Tget_sign(type))
+            native = H5T_NATIVE_ULLONG;
+        else
+            native = H5T_NATIVE_LLONG;
+    } /* end if */
+    else
+        dst_size = H5Tget_size(type);
 
     /* Get the names and raw values of all members */
     name = calloc(nmembs, sizeof(char *));
@@ -6706,13 +6708,16 @@ xml_print_enum(hid_t type)
     char                  **name = NULL;    /*member names                   */
     unsigned char          *value = NULL;   /*value array                    */
     unsigned                nmembs;         /*number of members              */
+    int                     snmembs;
     hid_t                   super;          /*enum base integer type         */
     hid_t                   native = -1;    /*native integer datatype        */
     size_t                  dst_size;       /*destination value type size    */
     unsigned                i;              /*miscellaneous counters         */
     size_t                  j;
 
-    nmembs = H5Tget_nmembers(type);
+    snmembs = H5Tget_nmembers(type);
+    HDassert(snmembs >= 0);
+    nmembs = (unsigned)snmembs;
     super = H5Tget_super(type);
 
     indentation(indent);
