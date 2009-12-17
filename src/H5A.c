@@ -1044,9 +1044,9 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(tconv_buf && !tconv_owned)
-        H5FL_BLK_FREE(attr_buf, tconv_buf);
+        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-        H5FL_BLK_FREE(attr_buf, bkg_buf);
+        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_write() */
@@ -1188,9 +1188,9 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(tconv_buf)
-        H5FL_BLK_FREE(attr_buf, tconv_buf);
+        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-	H5FL_BLK_FREE(attr_buf, bkg_buf);
+	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_read() */

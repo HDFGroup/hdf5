@@ -170,8 +170,8 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
     unsigned	bt2_flags = H5AC2__NO_FLAGS_SET; /* Metadata cache flags for B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_insert, FAIL)
 
@@ -256,8 +256,8 @@ H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t root_ptr;           /* Node pointer info for root node */
     unsigned    depth;                  /* Current depth of the tree */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_iterate, FAIL)
 
@@ -345,9 +345,9 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5B2_leaf_cache_ud_t cache_leaf_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_find, FAIL)
 
@@ -516,9 +516,9 @@ H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
     unsigned    depth;                  /* Current depth of the tree */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5B2_leaf_cache_ud_t cache_leaf_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_index, FAIL)
 
@@ -699,8 +699,8 @@ H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
     unsigned    bt2_flags = H5AC2__NO_FLAGS_SET;
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_remove, FAIL)
 
@@ -786,8 +786,8 @@ H5B2_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
     unsigned    bt2_flags = H5AC2__NO_FLAGS_SET;
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_remove_by_idx, FAIL)
 
@@ -878,8 +878,8 @@ H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
            hsize_t *nrec)
 {
     H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_get_nrec, FAIL)
 
@@ -939,8 +939,8 @@ H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 {
     H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_neighbor, FAIL)
 
@@ -1012,8 +1012,8 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 {
     H5B2_t	*bt2 = NULL;              /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_delete, FAIL)
 
@@ -1083,9 +1083,9 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5B2_leaf_cache_ud_t cache_leaf_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_modify, FAIL)
 
@@ -1267,8 +1267,8 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     hbool_t     	incr_rc = FALSE;    /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t 	root_ptr;           /* Node pointer info for root node */
     unsigned    	depth;              /* Current depth of the tree */
-    herr_t      	ret_value = SUCCEED;
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5B2_iterate_size, FAIL)
 

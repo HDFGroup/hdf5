@@ -54,13 +54,15 @@
 
 /* Metadata cache (H5AC) callbacks */
 
-static void *H5SM_table_deserialize(haddr_t addr, size_t len, const void *image,    const void *udata, hbool_t *dirty);
+static void *H5SM_table_deserialize(haddr_t addr, size_t len, const void *image,
+    void *udata, hbool_t *dirty);
 static herr_t H5SM_table_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5SM_table_free_icr(haddr_t addr, size_t len, void *thing);
 
-static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,    const void *udata, hbool_t *dirty);
+static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,
+    void *udata, hbool_t *dirty);
 static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr, 
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -116,19 +118,14 @@ const H5AC2_class_t H5AC2_SOHM_LIST[1] = {{
  * Programmer:	James Laird
  *		November 6, 2006
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 26, 2008
- *              Converted from H5SM_table_load()
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
-    const void *image, const void *_udata, hbool_t UNUSED *dirty)
+    const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
     H5SM_master_table_t *table = NULL;
-    const H5F_t *f = (const H5F_t *)_udata; /* File pointer */
+    H5F_t *f = (H5F_t *)_udata;         /* File pointer */
     const uint8_t *p;                   /* Pointer into input buffer */
     uint32_t      stored_chksum;        /* Stored metadata checksum value */
     uint32_t      computed_chksum;      /* Computed metadata checksum value */
@@ -241,11 +238,6 @@ done:
  * Programmer:	James Laird
  *		November 6, 2006
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 27, 2008
- *              Converted from H5SM_table_flush()
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -254,12 +246,11 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_master_table_t *table = (H5SM_master_table_t *)_thing;
-    herr_t ret_value = SUCCEED;         /* Return value */
     uint8_t  *p;                 /* Pointer into raw data buffer */
     uint32_t computed_chksum;    /* Computed metadata checksum value */
     size_t   x;                  /* Counter variable */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_serialize)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_serialize)
 
     /* check arguments */
     HDassert(f);
@@ -310,9 +301,9 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
         H5F_addr_encode(f, &p, table->indexes[x].heap_addr);
     } /* end for */
 
-        /* Compute checksum on buffer */
-        computed_chksum = H5_checksum_metadata(image, (len - H5SM_SIZEOF_CHECKSUM), 0);
-        UINT32ENCODE(p, computed_chksum);
+    /* Compute checksum on buffer */
+    computed_chksum = H5_checksum_metadata(image, (len - H5SM_SIZEOF_CHECKSUM), 0);
+    UINT32ENCODE(p, computed_chksum);
 
     /* Reset the cache flags for this operation (metadata not resize or renamed) */
     *flags = 0;
@@ -320,8 +311,7 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
     /* Sanity check */
     HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_table_serialize() */
 
 
@@ -366,21 +356,16 @@ H5SM_table_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
  * Programmer:	James Laird
  *		November 6, 2006
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 27, 2008
- *              Converted from H5SM_list_load()
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5SM_list_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
-    const void *_udata, hbool_t UNUSED *dirty)
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5SM_list_t *list;          /* The SOHM list being read in */
-    const H5SM_list_cache_ud_t *udata = (const H5SM_list_cache_ud_t *)_udata; /* User data for callback */
+    H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata; /* User data for callback */
     size_t size;                /* Size of SOHM list on disk */
-    uint8_t *p;                 /* Pointer into input buffer */
+    const uint8_t *p;           /* Pointer into input buffer */
     uint32_t stored_chksum;     /* Stored metadata checksum value */
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     size_t x;                   /* Counter variable for messages in list */
@@ -424,6 +409,9 @@ H5SM_list_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
+
+    /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)image) == size);
 
     /* Compute checksum on entire header */
@@ -440,15 +428,12 @@ H5SM_list_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
     /* Set return value */
     ret_value = list;
 
-    /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
-
 done:
     /* Release resources */
     if(!ret_value && list) {
         if(list->messages)
-            H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-        H5FL_FREE(H5SM_list_t, list);
+            list->messages = H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
+        list = H5FL_FREE(H5SM_list_t, list);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -466,11 +451,6 @@ done:
  * Programmer:	James Laird
  *		November 6, 2006
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 27, 2008
- *              Converted from H5SM_list_flush()
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -479,12 +459,12 @@ H5SM_list_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_list_t *list = (H5SM_list_t *)_thing;
-    herr_t ret_value = SUCCEED;         /* Return value */
     uint8_t *p;                 /* Pointer into raw data buffer */
     size_t size;                /* Header size on disk */
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     size_t mesgs_written;       /* Number of messages written to list */
     size_t x;                   /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_list_serialize)
 

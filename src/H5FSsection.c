@@ -26,6 +26,8 @@
 /****************/
 
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+
+
 /***********/
 /* Headers */
 /***********/
@@ -34,6 +36,7 @@
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
+
 
 /****************/
 /* Local Macros */
@@ -183,8 +186,8 @@ static H5FS_sinfo_t *
 H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 {
     H5FS_sinfo_t *sinfo;        /* Section information struct created */
-    H5FS_sinfo_t *ret_value;    /* Return value */
     H5FS_sinfo_cache_ud_t cache_udata; /* User-data for cache callback */
+    H5FS_sinfo_t *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_sinfo_pin)
 #ifdef QAK
@@ -425,7 +428,7 @@ H5FS_size_node_decr(H5FS_sinfo_t *sinfo, unsigned bin, H5FS_node_t *fspace_node,
     sinfo->bins[bin].tot_sect_count--;
 #ifdef QAK
 HDfprintf(stderr, "%s: sinfo->bins[%u].sect_count = %Zu\n", FUNC, bin, sinfo->bins[bin].sect_count);
-#endif
+#endif /* QAK */
 
     /* Check for 'ghost' or 'serializable' section */
     if(cls->flags & H5FS_CLS_GHOST_OBJ) {
@@ -711,8 +714,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
      */
 #ifdef QAK
 HDfprintf(stderr, "%s: sinfo->bins[%u].sect_count = %Zu\n", FUNC, bin, sinfo->bins[bin].sect_count);
-#endif
-
+#endif /* QAK */
     sinfo->bins[bin].tot_sect_count++;
     if(cls->flags & H5FS_CLS_GHOST_OBJ) {
         sinfo->bins[bin].ghost_sect_count++;

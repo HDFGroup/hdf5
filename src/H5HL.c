@@ -48,6 +48,7 @@
 #include "H5HLpkg.h"		/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
@@ -60,7 +61,6 @@
  *      should be larger than the default local heap size to save the
  *      extra I/O operations) */
 #define H5HL_SPEC_READ_SIZE 512
-
 
 
 /******************/

@@ -21,13 +21,13 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,

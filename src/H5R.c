@@ -21,6 +21,7 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gprivate.h"		/* Groups				*/
@@ -29,7 +30,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Rpkg.h"		/* References				*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Local macro definitions */
 

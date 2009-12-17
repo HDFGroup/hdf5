@@ -377,8 +377,8 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     H5B2_shared_t *shared;              /* B-tree's shared info */
     unsigned mid_record;                /* Index of "middle" record in current node */
     unsigned old_node_nrec;             /* Number of records in internal node split */
-    herr_t ret_value = SUCCEED;         /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split1)
 
@@ -654,8 +654,8 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
     hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal redistrib */
-    herr_t ret_value=SUCCEED;           /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_redistribute2)
 
@@ -891,8 +891,8 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *middle_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
     hssize_t middle_moved_nrec=0;       /* Number of records moved, for internal split */
-    herr_t ret_value=SUCCEED;           /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_redistribute3)
 
@@ -1270,8 +1270,8 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     uint8_t *left_native, *right_native;    /* Pointers to left & right children's native records */
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
-    herr_t ret_value=SUCCEED;           /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_merge2)
 
@@ -1438,8 +1438,8 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_node_ptr_t *middle_node_ptrs=NULL;/* Pointer to child's node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
     hsize_t middle_moved_nrec;          /* Number of records moved, for internal split */
-    herr_t ret_value=SUCCEED;           /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_merge3)
 
@@ -1665,8 +1665,8 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
     void *child;                        /* Pointer to child node */
     uint8_t *child_native;              /* Pointer to child's native records */
     H5B2_shared_t *shared;              /* B-tree's shared info */
-    herr_t ret_value=SUCCEED;           /* Return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_swap_leaf)
 
@@ -1761,8 +1761,8 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_insert_leaf)
 
@@ -2136,8 +2136,8 @@ H5B2_protect_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, haddr_t addr,
     unsigned nrec, unsigned depth, H5AC2_protect_t rw)
 {
     H5B2_internal_cache_ud_t udata;          /* User data to pass through to cache 'deserialize' callback */
-    H5B2_internal_t *ret_value;         /* Return value */
     H5B2_shared_t *shared;              /* B-tree's shared info */
+    H5B2_internal_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_protect_internal)
 
@@ -2194,8 +2194,8 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     uint8_t *native = NULL;             /* Pointers to copy of node's native records */
     H5B2_node_ptr_t *node_ptrs = NULL;  /* Pointers to node's node pointers */
     unsigned u;                         /* Local index */
-    herr_t ret_value = H5_ITER_CONT;  /* Iterator return value */
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t ret_value = H5_ITER_CONT;  /* Iterator return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_iterate_node)
 
@@ -2313,8 +2313,8 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned    leaf_flags = H5AC2__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_remove_leaf)
 
@@ -2621,8 +2621,8 @@ H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     haddr_t     leaf_addr = HADDR_UNDEF;  /* Leaf address on disk */
     unsigned    leaf_flags = H5AC2__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_remove_leaf_by_idx)
 
@@ -2994,8 +2994,8 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned    idx;                    /* Location of record which matches key */
     int         cmp=0;                  /* Comparison value of records */
-    herr_t	ret_value = SUCCEED;
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_neighbor_leaf)
 
@@ -3169,8 +3169,8 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     const H5AC2_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
     void *node=NULL;                    /* Pointers to current node */
     uint8_t *native;                    /* Pointers to node's native records */
-    herr_t	ret_value = SUCCEED;
     H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_delete_node)
 

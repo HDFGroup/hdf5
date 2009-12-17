@@ -149,11 +149,6 @@ const H5AC2_class_t H5AC2_BT2_LEAF[1] = {{
  *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.prg
- *              June 18, 2008
- *              Converted from H5B2_cache_hdr_load
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -234,7 +229,7 @@ H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't create shared B-tree info")
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = bt2;
@@ -257,16 +252,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 18, 2008
- *              Converted from H5B2_cache_hdr_flush
  *
  *-------------------------------------------------------------------------
  */
@@ -340,7 +325,7 @@ H5B2_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     *flags = 0;
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_hdr_serialize() */
@@ -352,8 +337,7 @@ H5B2_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
  *
- * Return:	Success: SUCCEED
- *              Failure: FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
  *              mcgreevy@hdfgroup.org
@@ -388,11 +372,6 @@ H5B2_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
  *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 18, 2008
- *              Converted from H5B2_cache_internal_load
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -426,7 +405,7 @@ H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     H5RC_INC(internal->shared);
 
     /* Get the pointer to the shared B-tree info */
-    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     p = image;
@@ -490,7 +469,7 @@ H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check parsing */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -512,22 +491,11 @@ done:
  *
  * Purpose:	Serializes a B-tree internal node for writing to disk.
  *
- * Return:	Success:         SUCCEED
- *              Failure:         FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 3 2005
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 18, 2008
- *              Converted from H5B2_cache_internal_flush
  *
  *-------------------------------------------------------------------------
  */
@@ -569,7 +537,7 @@ H5B2_cache_internal_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
 
     /* B-tree type */
     *p++ = shared->type->id;
-    HDassert((size_t)(p - (const uint8_t *)image) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
+    HDassert((size_t)(p - (uint8_t *)image) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
     /* Serialize records for internal node */
     native = internal->int_native;
@@ -597,7 +565,7 @@ H5B2_cache_internal_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     } /* end for */
 
     /* Compute metadata checksum */
-    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (const uint8_t *)image), 0);
+    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32ENCODE(p, metadata_chksum);
@@ -606,7 +574,7 @@ H5B2_cache_internal_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     *flags = 0;
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -619,8 +587,7 @@ done:
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
  *
- * Return:	Success: SUCCEED
- *              Failure: FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
  *              mcgreevy@hdfgroup.org
@@ -654,11 +621,6 @@ H5B2_cache_internal_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
- *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 18, 2008
- *              Converted from H5B2_cache_leaf_load
  *
  *-------------------------------------------------------------------------
  */
@@ -742,7 +704,7 @@ H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = leaf;
@@ -760,23 +722,11 @@ done:
  *
  * Purpose:	Serializes a B-tree leaf node for writing to disk.
  *
- * Return:	Success:                SUCCEED
- *              Failure:                FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
- *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              June 18, 2008
- *              Converted from H5B2_cache_leaf_flush
  *
  *-------------------------------------------------------------------------
  */
@@ -841,7 +791,7 @@ H5B2_cache_leaf_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     *flags = 0;
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -854,8 +804,7 @@ done:
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
  *
- * Return:	Success: SUCCEED
- *              Failure: FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Mike McGreevy
  *              mcgreevy@hdfgroup.org

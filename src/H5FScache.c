@@ -34,11 +34,11 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /****************/
 /* Local Macros */
@@ -89,6 +89,7 @@ static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_sinfo_free_icr(haddr_t addr, size_t len, void *thing);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -117,6 +118,7 @@ const H5AC2_class_t H5AC2_FSPACE_SINFO[1] = {{
     NULL,
 }};
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -140,14 +142,8 @@ const H5AC2_class_t H5AC2_FSPACE_SINFO[1] = {{
  *              koziol@ncsa.uiuc.edu
  *              May  2 2006
  *
- * Changes:     Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              May 28 2008
- *              Converted from H5FS_cache_hdr_load
- *
  *-------------------------------------------------------------------------
  */
-
 static void *
 H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
     const void *image, void *_udata, hbool_t UNUSED *dirty)
@@ -162,9 +158,6 @@ H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     H5FS_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_deserialize)
-#ifdef QAK
-HDfprintf(stderr, "%s: Deserialize free space header, addr = %a\n", FUNC, addr);
-#endif
 
     /* Check arguments */
     HDassert(image);
@@ -236,7 +229,7 @@ HDfprintf(stderr, "%s: Deserialize free space header, addr = %a\n", FUNC, addr);
     H5F_DECODE_LENGTH(udata->f, p, fspace->alloc_sect_size);
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(image, (size_t)((const uint8_t *)p - (const uint8_t *)image), 0);
+    computed_chksum = H5_checksum_metadata(image, (size_t)(p - (const uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -246,7 +239,7 @@ HDfprintf(stderr, "%s: Deserialize free space header, addr = %a\n", FUNC, addr);
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = fspace;
@@ -265,23 +258,11 @@ done:
  *
  * Purpose:     Serializes the data structure for writing to disk.
  *
- * Return:      Success:         SUCCEED
- *              Failure:         FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              May  2 2006
- *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              May 28, 2008
- *              Converted from H5FS_cache_hdr_flush
  *
  *-------------------------------------------------------------------------
  */
@@ -297,9 +278,6 @@ H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     size_t	size;                     /* Header size on disk */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_serialize)
-#ifdef QAK
-HDfprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
-#endif
 
     /* check arguments */
     HDassert(f);
@@ -360,7 +338,7 @@ HDfprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
     H5F_ENCODE_LENGTH(f, p, fspace->alloc_sect_size);
 
     /* Compute checksum */
-    metadata_chksum = H5_checksum_metadata(image, (size_t)((const uint8_t *)p - (const uint8_t *)image), 0);
+    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32ENCODE(p, metadata_chksum);
@@ -369,7 +347,7 @@ HDfprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
     *flags = 0;
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_cache_hdr_serialize() */
@@ -380,8 +358,7 @@ HDfprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
  *
  * Purpose:     Destroy/release an "in core representation" of a data structure
  *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mike McGreevy
  *              mcgreevy@hdfgroup.org
@@ -409,17 +386,12 @@ H5FS_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
  *
  * Purpose:     Deserialize the data structure from disk.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Success:        Pointer to a new free space section info
+ *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              July 31 2006
- *
- * Modified:    Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              May 29, 2008
- *              Converted from H5FS_cache_sinfo_load
  *
  *-------------------------------------------------------------------------
  */
@@ -437,9 +409,6 @@ H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     H5FS_sinfo_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_deserialize)
-#ifdef QAK
-HDfprintf(stderr, "%s: Deserialize free space sections, addr = %a\n", FUNC, addr);
-#endif
 
     /* Check arguments */
     HDassert(image);
@@ -460,9 +429,6 @@ HDfprintf(stderr, "%s: Deserialize free space sections, addr = %a\n", FUNC, addr
 
     /* Allocate space for the buffer to serialize the sections into */
     H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
-#ifdef QAK
-HDfprintf(stderr, "%s: udata->fspace->sect_size = %Hu\n", FUNC, udata->fspace->sect_size);
-#endif /* QAK */
 
     /* Deserialize free sections from buffer available */
     p = image;
@@ -478,9 +444,6 @@ HDfprintf(stderr, "%s: udata->fspace->sect_size = %Hu\n", FUNC, udata->fspace->s
 
     /* Address of free space header for these sections */
     H5F_addr_decode(udata->f, &p, &fs_addr);
-#ifdef QAK
-HDfprintf(stderr, "%s: udata->fspace->addr = %a, fs_addr = %a\n", FUNC, udata->fspace->addr, fs_addr);
-#endif /* QAK */
     if(H5F_addr_ne(fs_addr, udata->fspace->addr))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
 
@@ -494,22 +457,12 @@ HDfprintf(stderr, "%s: udata->fspace->addr = %a, fs_addr = %a\n", FUNC, udata->f
 
         /* Compute the size of the section counts */
         sect_cnt_size = H5V_limit_enc_size((uint64_t)udata->fspace->serial_sect_count);
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_cnt_size = %u\n", FUNC, sect_cnt_size);
-HDfprintf(stderr, "%s: udata->fspace->sect_len_size = %u\n", FUNC, udata->fspace->sect_len_size);
-#endif /* QAK */
 
         /* Reset the section count, the "add" routine will update it */
         old_tot_sect_count = udata->fspace->tot_sect_count;
         old_serial_sect_count = udata->fspace->serial_sect_count;
         old_ghost_sect_count = udata->fspace->ghost_sect_count;
         old_tot_space = udata->fspace->tot_space;
-#ifdef QAK
-HDfprintf(stderr, "%s: udata->fspace->tot_sect_count = %Hu\n", FUNC, udata->fspace->tot_sect_count);
-HDfprintf(stderr, "%s: udata->fspace->serial_sect_count = %Hu\n", FUNC, udata->fspace->serial_sect_count);
-HDfprintf(stderr, "%s: udata->fspace->ghost_sect_count = %Hu\n", FUNC, udata->fspace->ghost_sect_count);
-HDfprintf(stderr, "%s: udata->fspace->tot_space = %Hu\n", FUNC, udata->fspace->tot_space);
-#endif /* QAK */
         udata->fspace->tot_sect_count = 0;
         udata->fspace->serial_sect_count = 0;
         udata->fspace->ghost_sect_count = 0;
@@ -523,16 +476,10 @@ HDfprintf(stderr, "%s: udata->fspace->tot_space = %Hu\n", FUNC, udata->fspace->t
 
             /* The number of sections of this node's size */
             UINT64DECODE_VAR(p, node_count, sect_cnt_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: node_count = %Zu\n", FUNC, node_count);
-#endif /* QAK */
             HDassert(node_count);
 
             /* The size of the sections for this node */
             UINT64DECODE_VAR(p, sect_size, sinfo->sect_len_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_size = %Hu\n", FUNC, sect_size);
-#endif /* QAK */
             HDassert(sect_size);
 
             /* Loop over nodes of this size */
@@ -544,15 +491,9 @@ HDfprintf(stderr, "%s: sect_size = %Hu\n", FUNC, sect_size);
 
                 /* The address of the section */
                 UINT64DECODE_VAR(p, sect_addr, sinfo->sect_off_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_addr = %a\n", FUNC, sect_addr);
-#endif /* QAK */
 
                 /* The type of this section */
                 sect_type = *p++;
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_type = %u\n", FUNC, sect_type);
-#endif /* QAK */
 
                 /* Call 'deserialize' callback for this section */
                 des_flags = 0;
@@ -562,9 +503,6 @@ HDfprintf(stderr, "%s: sect_type = %u\n", FUNC, sect_type);
 
                 /* Update offset in serialization buffer */
                 p += udata->fspace->sect_cls[sect_type].serial_size;
-#ifdef QAK
-HDfprintf(stderr, "%s: udata->fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, sect_type, udata->fspace->sect_cls[sect_type].serial_size);
-#endif /* QAK */
 
                 /* Insert section in free space manager, unless requested not to */
                 if(!(des_flags & H5FS_DESERIALIZE_NO_ADD))
@@ -583,7 +521,7 @@ HDfprintf(stderr, "%s: udata->fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, s
     } /* end if */
 
     /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(image, (size_t)((const uint8_t *)p - (const uint8_t *)image), 0);
+    computed_chksum = H5_checksum_metadata(image, (size_t)(p - (const uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
@@ -593,7 +531,7 @@ HDfprintf(stderr, "%s: udata->fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, s
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = sinfo;
@@ -612,8 +550,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              of a particular size
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006
@@ -642,15 +579,9 @@ H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *_udata)
     if(!(sect_cls->flags & H5FS_CLS_GHOST_OBJ)) {
         /* The address of the section */
         UINT64ENCODE_VAR(*udata->p, sect->addr, udata->sinfo->sect_off_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sect->addr = %a\n", FUNC, sect->addr);
-#endif /* QAK */
 
         /* The type of this section */
         *(*udata->p)++ = (uint8_t)sect->type;
-#ifdef QAK
-HDfprintf(stderr, "%s: sect->type = %u\n", FUNC, (unsigned)sect->type);
-#endif /* QAK */
 
         /* Call 'serialize' callback for this section */
         if(sect_cls->serialize) {
@@ -675,8 +606,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              in a bin
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006
@@ -701,15 +631,9 @@ H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata)
     if(fspace_node->serial_count > 0) {
         /* The number of serializable sections of this node's size */
         UINT64ENCODE_VAR(*udata->p, fspace_node->serial_count, udata->sect_cnt_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: fspace_node->serial_count = %Zu\n", FUNC, fspace_node->serial_count);
-#endif /* QAK */
 
         /* The size of the sections for this node */
         UINT64ENCODE_VAR(*udata->p, fspace_node->sect_size, udata->sinfo->sect_len_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sect_size = %Hu\n", FUNC, fspace_node->sect_size);
-#endif /* QAK */
 
         /* Iterate through all the sections of this size */
         HDassert(fspace_node->sect_list);
@@ -727,42 +651,27 @@ done:
  *
  * Purpose:     Serialize the data structure for writing to disk.
  *
- * Return:      Success: SUCCEED
- *              Failure: FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              July 31 2006
  *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              May 29, 2008
- *              Converted from H5FS_cache_sinfo_flush
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t UNUSED addr, 
+H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
     size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
     H5FS_sinfo_t * sinfo = (H5FS_sinfo_t *)_thing;
-        H5FS_iter_ud_t udata;       /* User data for callbacks */
-        uint8_t *p;                 /* Pointer into raw data buffer */
-        uint32_t metadata_chksum;   /* Computed metadata checksum value */
-        unsigned bin;               /* Current bin we are on */
+    H5FS_iter_ud_t udata;       /* User data for callbacks */
+    uint8_t *p;                 /* Pointer into raw data buffer */
+    uint32_t metadata_chksum;   /* Computed metadata checksum value */
+    unsigned bin;               /* Current bin we are on */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_serialize)
-#ifdef QAK
-HDFprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
-#endif
 
     /* check arguments */
     HDassert(f);
@@ -788,23 +697,14 @@ HDFprintf(stderr, "%s: Serialize free space header, addr = %a\n", FUNC, addr);
     *p++ = H5FS_SINFO_VERSION;
 
     /* Address of free space header for these sections */
-#ifdef QAK
-HDfprintf(stderr, "%s: sinfo->fspace->addr = %a\n", FUNC, sinfo->fspace->addr);
-#endif /* QAK */
     H5F_addr_encode(f, &p, sinfo->fspace->addr);
 
     /* Set up user data for iterator */
     udata.sinfo = sinfo;
     udata.p = &p;
     udata.sect_cnt_size = H5V_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
-#ifdef QAK
-HDfprintf(stderr, "%s: udata.sect_cnt_size = %u\n", FUNC, udata.sect_cnt_size);
-#endif /* QAK */
 
     /* Iterate over all the bins */
-#ifdef QAK
-HDfprintf(stderr, "%s: Serializing section bins\n", FUNC);
-#endif /* QAK */
     for(bin = 0; bin < sinfo->nbins; bin++) {
         /* Check if there are any sections in this bin */
         if(sinfo->bins[bin].bin_list) {
@@ -815,21 +715,17 @@ HDfprintf(stderr, "%s: Serializing section bins\n", FUNC);
     } /* end for */
 
     /* Compute checksum */
-    metadata_chksum = H5_checksum_metadata(image, (size_t)((const uint8_t *)p - (const uint8_t *)image), 0);
+    metadata_chksum = H5_checksum_metadata(image, (size_t)(p - (uint8_t *)image), 0);
 
     /* Metadata checksum */
     UINT32ENCODE(p, metadata_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)image) == sinfo->fspace->sect_size);
+    HDassert((size_t)(p - (uint8_t *)image) == sinfo->fspace->sect_size);
     HDassert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sinfo->fspace->sect_size = %Hu\n", FUNC, sinfo->fspace->sect_size);
-HDfprintf(stderr, "%s: sinfo->fspace->alloc_sect_size = %Hu\n", FUNC, sinfo->fspace->alloc_sect_size);
-#endif /* QAK */
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
     /* Reset the cache flags for this operation */
     *flags = 0;
@@ -844,8 +740,7 @@ done:
  *
  * Purpose:     Destroy/release an "in core representation" of a data structure
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mike McGreevy
  *              mcgreevy@hdfgroup.org

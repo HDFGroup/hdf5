@@ -94,8 +94,8 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_shared_t *shared;              /* Shared B-tree information */
     unsigned    u;                      /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_hdr_debug, FAIL)
 
@@ -208,8 +208,8 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
-    herr_t      ret_value=SUCCEED;      /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_int_debug, FAIL)
 
@@ -341,8 +341,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
-    herr_t      ret_value=SUCCEED;      /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_leaf_debug, FAIL)
 

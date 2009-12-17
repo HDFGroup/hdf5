@@ -457,13 +457,13 @@ H5G_node_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     /* entries */
     if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
-    HDmemset(p, 0, size - (size_t)((const uint8_t *)p - (const uint8_t *)image));
+    HDmemset(p, 0, size - (size_t)(p - (uint8_t *)image));
 
     /* Reset the cache flags for this operation (metadata not resized or renamed) */
     *flags = 0;
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+    HDassert((size_t)(p - (uint8_t *)image) <= len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1494,13 +1494,13 @@ int
 H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 		  const void UNUSED *_rt_key, void *_udata)
 {
-    H5G_bt_it_cpy_t       *udata = (H5G_bt_it_cpy_t *)_udata;
-    const H5O_loc_t       *src_oloc = udata->src_oloc;
-    H5O_copy_t            *cpy_info = udata->cpy_info;
-    H5HL_t           *heap = NULL;
-    H5G_node_t	          *sn = NULL;
-    unsigned int           i;                   /* Local index variable */
-    int                    ret_value = H5_ITER_CONT;
+    H5G_bt_it_cpy_t     *udata = (H5G_bt_it_cpy_t *)_udata;
+    const H5O_loc_t     *src_oloc = udata->src_oloc;
+    H5O_copy_t          *cpy_info = udata->cpy_info;
+    H5HL_t              *heap = NULL;
+    H5G_node_t	        *sn = NULL;
+    unsigned int        i;                   /* Local index variable */
+    int                 ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_NOAPI(H5G_node_copy, H5_ITER_ERROR)
 
@@ -1734,10 +1734,10 @@ herr_t
 H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     int fwidth, haddr_t heap_addr)
 {
-    H5G_node_t		   *sn = NULL;
-    H5HL_t            *heap = NULL;
-    unsigned		    u;
-    herr_t                  ret_value = SUCCEED;       /* Return value */
+    H5G_node_t		*sn = NULL;
+    H5HL_t              *heap = NULL;
+    unsigned		u;                      /* Local index variable */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_node_debug, FAIL)
 

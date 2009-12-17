@@ -258,8 +258,8 @@ H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, haddr_t *root_addr)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
-    herr_t	ret_value = SUCCEED;    /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_get_root_addr_test)
 
@@ -313,8 +313,8 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;    /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_get_node_info_test, FAIL)
 

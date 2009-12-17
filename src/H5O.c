@@ -98,7 +98,6 @@ static herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
 /* Header message ID to class mapping */
 
-
 /* Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new
  * message.
  */
@@ -134,8 +133,6 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_MDJ_CONF,		/*0x0017 Metadata journaling config     */
     H5O_MSG_UNKNOWN,		/*0x0018 Placeholder for unknown message */
 };
-
-/* HDassert(H5O_UNKNOWN_ID < H5O_MSG_TYPES); */
 
 /* Header object ID to class mapping */
 /*

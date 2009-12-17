@@ -41,12 +41,12 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 /****************/

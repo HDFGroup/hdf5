@@ -60,6 +60,12 @@
 hbool_t H5C2__check_for_journaling = TRUE;
 
 /**************************************************************************/
+/******************************* local macros *****************************/
+/**************************************************************************/
+#define H5C2__TRANS_NUM_SIZE 8
+#define H5C2__CHECKSUM_SIZE  4
+
+/**************************************************************************/
 /***************************** local prototypes ***************************/
 /**************************************************************************/
 
@@ -111,7 +117,6 @@ static herr_t H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
                                         uint64_t trans_num);
 
 static herr_t H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t * struct_ptr,
-                                             size_t sig_size,
                                              const char * sig_ptr,
                                              const uint8_t version,
                                              hbool_t keep_chksum,
@@ -665,7 +670,7 @@ done:
  */
 
 herr_t
-H5C2_journal_post_flush(const H5F_t * f,
+H5C2_journal_post_flush(H5F_t * f,
                         hid_t dxpl_id,
                         H5C2_t * cache_ptr,
 		        hbool_t cache_is_clean)
@@ -2202,21 +2207,16 @@ if ( H5C2_jb_bjf__write_offset((struct_ptr), (offset), (is_end_trans),    \
 }
 
 #define H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                        \
-                                       sig_size,                          \
                                        sig_ptr,                           \
                                        version,                           \
                                        keep_chksum,                       \
                                        is_end_trans,                      \
                                        trans_num,                         \
                                        fail_return)                       \
-if ( H5C2_jb_bjf__write_sig_and_ver((struct_ptr), (sig_size), (sig_ptr),  \
-                                    (version), (keep_chksum),             \
-                                    (is_end_trans), (trans_num))          \
-                                    != SUCCEED ) {                        \
-    HDfprintf(stdout, "%s: H5C2_jb_bjf__write_sig_and_ver() failed.\n",   \
-              FUNC);                                                      \
-    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_sig_and_ver() failed.");              \
+if(H5C2_jb_bjf__write_sig_and_ver((struct_ptr), (sig_ptr), (version),     \
+        (keep_chksum), (is_end_trans), (trans_num)) < 0) {                \
+    HDfprintf(stdout, "%s: H5C2_jb_bjf__write_sig_and_ver() failed.\n", FUNC); \
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return), "H5C2_jb_bjf__write_sig_and_ver() failed.") \
 }
 
 #define H5C2_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                          \
@@ -2329,7 +2329,6 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
 
     /* Write end transaction message */
     H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,               \
-                                   H5C2_BJNL__SIG_LEN,       \
                                    H5C2_BJNL__END_TRANS_SIG, \
                                    H5C2_BJNL__END_TRANS_VER, \
                                    /* keep_chksum */ FALSE,  \
@@ -2414,7 +2413,6 @@ H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
 
     /* Write EOA message */
     H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                    \
-                                   H5C2_BJNL__SIG_LEN,            \
                                    H5C2_BJNL__END_ADDR_SPACE_SIG, \
                                    H5C2_BJNL__END_ADDR_SPACE_VER, \
                                    /* keep_chksum */ FALSE,       \
@@ -2473,7 +2471,6 @@ H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                   \
-                                   H5C2_BJNL__SIG_LEN,           \
                                    H5C2_BJNL__JOURNAL_ENTRY_SIG, \
                                    H5C2_BJNL__JOURNAL_ENTRY_VER, \
                                    /* keep_chksum */ TRUE,       \
@@ -2585,7 +2582,6 @@ H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
 
     /* Write start transaction message */
     H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                 \
-                                   H5C2_BJNL__SIG_LEN,         \
                                    H5C2_BJNL__BEGIN_TRANS_SIG, \
                                    H5C2_BJNL__BEGIN_TRANS_VER, \
                                    /* keep_chksum */ FALSE,    \
@@ -2766,32 +2762,25 @@ done:
  * Returns:		SUCCEED on success.
  *			FAIL on failure.
  *
- * Changes:		None.
- *
  ******************************************************************************/
-
 static herr_t 
-H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
-                          hbool_t is_end_trans,
-                          uint64_t trans_num)
+H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
+    uint64_t trans_num)
 {
+    uint8_t *p;
     herr_t ret_value = SUCCEED;      /* Return value */
-    uint8_t * p;
-    const size_t chksum_size = 4;
 
     FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_chksum, FAIL)
 
-    HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
-    HDassert( trans_num > 0 ); 
+    /* Sanity check */
+    HDassert(struct_ptr != NULL);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(trans_num > 0); 
 
-    if ( ! (struct_ptr->chksum_cur_msg) ) {
+    if(!struct_ptr->chksum_cur_msg)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "struct_ptr->chksum_cur_msg is false?!?!.")
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "struct_ptr->chksum_cur_msg is false?!?!.")
-    }
-
-    if ( chksum_size < struct_ptr->cur_buf_free_space ) {
+    if(H5C2__CHECKSUM_SIZE < struct_ptr->cur_buf_free_space) {
 
         /* If the checksum will fit in the current buffer with space
          * left over, just write it directly into the buffer, and 
@@ -2808,34 +2797,32 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
 
         UINT32ENCODE(p, struct_ptr->msg_chksum);
 
-        HDassert( p == ((uint8_t *)(struct_ptr->head + chksum_size)) );
+        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C2__CHECKSUM_SIZE)) );
 
         /* increment bufs_in_use as necessary */
-        if ( ( struct_ptr->bufs_in_use == 0 ) ) {
-
+        if(struct_ptr->bufs_in_use == 0 )
             struct_ptr->bufs_in_use++;
-        }
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[chksum_size]);
+        struct_ptr->head = &(struct_ptr->head[H5C2__CHECKSUM_SIZE]);
 
         /* update rb_free_space */
-        struct_ptr->rb_free_space -= chksum_size;
+        struct_ptr->rb_free_space -= H5C2__CHECKSUM_SIZE;
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= chksum_size;
+        struct_ptr->cur_buf_free_space -= H5C2__CHECKSUM_SIZE;
 
         /* update end of buffer space */
-        struct_ptr->rb_space_to_rollover -= chksum_size;
+        struct_ptr->rb_space_to_rollover -= H5C2__CHECKSUM_SIZE;
 
-        if ( is_end_trans == TRUE ) {
-
+        if(is_end_trans)
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
-        } 
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
 
-    } else {
+    } /* end if */
+    else {
+        uint8_t buf[H5C2__CHECKSUM_SIZE + 1];
 
         /* Here, handle the case where the write will reach the edge
          * of a buffer.  This gets a bit more complex, so for now at 
@@ -2844,32 +2831,21 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
          * H5C2_jb__write_to_buffer().  If this proves too costly, 
          * further optimizations will be necessary.
          */
-
-        uint8_t buf[chksum_size + 1];
-
         p = buf;
-
         UINT32ENCODE(p, struct_ptr->msg_chksum);
+        HDassert( p == &(buf[H5C2__CHECKSUM_SIZE]) );
 
-        HDassert( p == &(buf[chksum_size]) );
-
-        if ( H5C2_jb__write_to_buffer(struct_ptr, chksum_size, 
-                                      (const char *)buf,
-                                      is_end_trans, trans_num) != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
-        }
-    }
+        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2__CHECKSUM_SIZE, 
+                (const char *)buf, is_end_trans, trans_num) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
+    } /* end else */
 
     /* re-set the checksum computation fields */
     struct_ptr->chksum_cur_msg = FALSE;
     struct_ptr->msg_chksum = 0;
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_jb_bjf__write_chksum() */
  
 
@@ -3020,14 +2996,11 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
          * further optimizations will be necessary.
          */
 
-        uint8_t buf[17]; // should be big enough for a long time.
+        uint8_t buf[17]; /* should be big enough for a long time. */
 
-        HDassert( length_width < 17 ) ;
-
+        HDassert(length_width < sizeof(buf));
         p = buf;
-
-        switch ( length_width )
-        {
+        switch(length_width) {
 	    case 2:
                 UINT16ENCODE(p, length);
                 break;
@@ -3041,34 +3014,25 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
                 break;
 
             default:
-               HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                           "length_width out of range (2).")
+               HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "length_width out of range (2).")
                break;
-        }
+        } /* end switch */
 
         HDassert( p == &(buf[length_width]) );
-
-        if ( H5C2_jb__write_to_buffer(struct_ptr, length_width, 
+        if(H5C2_jb__write_to_buffer(struct_ptr, length_width, 
                                       (const char *)buf,
-                                      is_end_trans, trans_num) != SUCCEED ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
-        }
+                                      is_end_trans, trans_num) != SUCCEED)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
 
         /* Update the check sum if required */
-        if ( struct_ptr->chksum_cur_msg ) {
-
+        if(struct_ptr->chksum_cur_msg)
             struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf), 
                                                         length_width, 
                                                         struct_ptr->msg_chksum);
-        }
-    }
+    } /* end else */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_jb_bjf__write_length() */
  
 
@@ -3224,7 +3188,7 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
          * further optimizations will be necessary.
          */
 
-        uint8_t buf[17]; // should be big enough for a long time.
+        uint8_t buf[17]; /* should be big enough for a long time. */
 
         HDassert( offset_width < 17 ) ;
 
@@ -3311,39 +3275,30 @@ done:
  * Returns:		SUCCEED on success.
  *			FAIL on failure.
  *
- * Changes:		None.
- *
  ******************************************************************************/
-
 static herr_t 
-H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t * struct_ptr,
-                               size_t sig_size,
-                               const char * sig_ptr,
-                               const uint8_t version,
-                               hbool_t keep_chksum,
-                               hbool_t is_end_trans,
-                               uint64_t trans_num)
+H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
+    const uint8_t version, hbool_t keep_chksum, hbool_t is_end_trans,
+    uint64_t trans_num)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_sig_and_ver, FAIL)
 
-    HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
-    HDassert( sig_size > 0 );
-    HDassert( sig_ptr != NULL );
-    HDassert( sig_size == HDstrlen(sig_ptr) );
-    HDassert( ! is_end_trans );
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(sig_ptr);
+    HDassert(H5C2_BJNL__SIG_LEN == HDstrlen(sig_ptr));
+    HDassert(!is_end_trans);
     /* eoa messages can occur outside of transactions -- and thus it is 
      * possible that we will have to process one before any transaction 
      * has started -- in which case trans_num will be 0.  Since the trans_num
      * isn't used unless is_end_trans is TRUE, we carve a small exception 
      * for the eoa message.
      */
-    HDassert( ( ! is_end_trans ) || ( trans_num > 0 ) );
+    HDassert((!is_end_trans) || (trans_num > 0));
 
-    if ( sig_size + 1 < struct_ptr->cur_buf_free_space ) {
-
+    if((H5C2_BJNL__SIG_LEN + 1) < struct_ptr->cur_buf_free_space) {
         /* If the signature and version will fit in the current buffer 
          * with space left over, just memcpy()/write it in and touch up 
          * the ring bufferfields accordingly.  
@@ -3354,78 +3309,61 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t * struct_ptr,
          */
 
 	/* write the signature into journal buffer */
-        HDmemcpy(struct_ptr->head, (const void *)sig_ptr, sig_size);
+        HDmemcpy(struct_ptr->head, (const void *)sig_ptr, H5C2_BJNL__SIG_LEN);
 
-        struct_ptr->head[sig_size] = (char)version;
+        struct_ptr->head[H5C2_BJNL__SIG_LEN] = (char)version;
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[sig_size + 1]);
+        struct_ptr->head = &(struct_ptr->head[H5C2_BJNL__SIG_LEN + 1]);
 
         /* increment bufs_in_use as necessary */
-        if ( ( struct_ptr->bufs_in_use == 0 ) ) {
-
+        if(struct_ptr->bufs_in_use == 0)
             struct_ptr->bufs_in_use++;
-        }
 
         /* update rb_free_space */
-        struct_ptr->rb_free_space -= sig_size + 1;
+        struct_ptr->rb_free_space -= H5C2_BJNL__SIG_LEN + 1;
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= sig_size + 1;
+        struct_ptr->cur_buf_free_space -= H5C2_BJNL__SIG_LEN + 1;
 
         /* update end of buffer space */
-        struct_ptr->rb_space_to_rollover -= sig_size + 1;
+        struct_ptr->rb_space_to_rollover -= H5C2_BJNL__SIG_LEN + 1;
 
         /* is_end_trans must be false in this call, so just throw an 
          * error if it is TRUE.
          */
-
-        if ( is_end_trans ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "is_end_trans TRUE when writing signiture.")
-        }
+        if(is_end_trans)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "is_end_trans TRUE when writing signiture.")
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
-
-    } else {
+    } /* end if */
+    else {
+        uint8_t buf[H5C2_BJNL__SIG_LEN + 2];
 
         /* Here, handle the case where the write will reach the edge
          * of a buffer.  This gets a bit more complex, so for now at 
          * least, we will call H5C2_jb__write_to_buffer().  If this 
          * proves too costly, further optimizations will be necessary.
          */
+        HDmemcpy(buf, (const void *)sig_ptr, H5C2_BJNL__SIG_LEN);
+        buf[H5C2_BJNL__SIG_LEN] = version;
 
-        uint8_t buf[sig_size + 2];
+        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2_BJNL__SIG_LEN + 1, 
+                (const char *)buf, is_end_trans, trans_num) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
+    } /* end else */
 
-        HDmemcpy(buf, (const void *)sig_ptr, sig_size);
-        buf[sig_size] = version;
+    if(struct_ptr->chksum_cur_msg)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "struct_ptr->chksum_cur_msg is already TRUE")
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, sig_size + 1, 
-                                      (const char *)buf,
-                                      is_end_trans, trans_num) != SUCCEED ) {
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
-        }
-    }
-
-    if ( struct_ptr->chksum_cur_msg ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "struct_ptr->chksum_cur_msg is already TRUE")
-    }
-
-    if ( keep_chksum ) {
-
+    if(keep_chksum) {
         struct_ptr->chksum_cur_msg = TRUE;
         struct_ptr->msg_chksum = 0;
-    }
+    } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C2_jb_bjf__write_sig_and_ver() */
+} /* end H5C2_jb_bjf__write_sig_and_ver() */
  
 
 /******************************************************************************
@@ -3467,7 +3405,6 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
                              hbool_t is_end_trans,
                              uint64_t trans_num)
 {
-    const size_t trans_num_size = 8;
     herr_t ret_value = SUCCEED;      /* Return value */
     uint8_t * p;
 
@@ -3487,7 +3424,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
                    "is_end_trans and struct_ptr->chksum_cur_msg both true.")
     }
 
-    if ( trans_num_size < struct_ptr->cur_buf_free_space ) {
+    if ( H5C2__TRANS_NUM_SIZE < struct_ptr->cur_buf_free_space ) {
 
         /* If the transaction number will fit in the current buffer with space
          * left over, just write it directly into the buffer, and touch up the 
@@ -3502,7 +3439,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         p = (uint8_t *)(struct_ptr->head);
         UINT64ENCODE(p, trans_num);
 
-        HDassert( p == ((uint8_t *)(struct_ptr->head + trans_num_size)) );
+        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C2__TRANS_NUM_SIZE)) );
 
         /* increment bufs_in_use as necessary */
         if ( ( struct_ptr->bufs_in_use == 0 ) ) {
@@ -3515,21 +3452,21 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
 
             struct_ptr->msg_chksum = 
 		H5_checksum_metadata((const void *)(struct_ptr->head), 
-                                     trans_num_size, 
+                                     H5C2__TRANS_NUM_SIZE, 
                                      struct_ptr->msg_chksum);
         }
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[trans_num_size]);
+        struct_ptr->head = &(struct_ptr->head[H5C2__TRANS_NUM_SIZE]);
 
         /* update rb_free_space */
-        struct_ptr->rb_free_space -= trans_num_size;
+        struct_ptr->rb_free_space -= H5C2__TRANS_NUM_SIZE;
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= trans_num_size;
+        struct_ptr->cur_buf_free_space -= H5C2__TRANS_NUM_SIZE;
 
         /* update end of buffer space */
-        struct_ptr->rb_space_to_rollover -= trans_num_size;
+        struct_ptr->rb_space_to_rollover -= H5C2__TRANS_NUM_SIZE;
 
         if ( is_end_trans == TRUE ) {
 
@@ -3547,15 +3484,15 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
          * If this proves too costly, further optimizations will be necessary.
          */
 
-        uint8_t buf[trans_num_size + 1];
+        uint8_t buf[H5C2__TRANS_NUM_SIZE + 1];
 
         p = buf;
 
         UINT64ENCODE(p, trans_num);
 
-        HDassert( p == &(buf[trans_num_size]) );
+        HDassert( p == &(buf[H5C2__TRANS_NUM_SIZE]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, trans_num_size, 
+        if ( H5C2_jb__write_to_buffer(struct_ptr, H5C2__TRANS_NUM_SIZE, 
                                       (const char *)buf,
                                       is_end_trans, trans_num) != SUCCEED ) {
 
@@ -3567,7 +3504,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         if ( struct_ptr->chksum_cur_msg ) {
 
             struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf), 
-                                                         trans_num_size, 
+                                                         H5C2__TRANS_NUM_SIZE, 
                                                          struct_ptr->msg_chksum);
         }
 
@@ -4719,12 +4656,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			size_t length,
 			const uint8_t * body)
 {
-
-    char * temp = NULL;
-    char * hexdata = NULL;
-    size_t hexlength;
     herr_t ret_value = SUCCEED;
-    uint8_t * bodydata;
 
     FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
 

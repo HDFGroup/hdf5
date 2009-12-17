@@ -2120,13 +2120,13 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
             /* Convert the fill value */
             if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
                 if(bkg_buf)
-                    H5FL_BLK_FREE(type_conv, bkg_buf);
+                    bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
 
             /* Release the background buffer */
             if(bkg_buf)
-                H5FL_BLK_FREE(type_conv, bkg_buf);
+                bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
     }  /* end if */
     else

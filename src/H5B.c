@@ -1994,11 +1994,11 @@ H5B_copy(const H5B_t *old_bt)
     ret_value=new_node;
 
 done:
-    if(ret_value==NULL) {
+    if(ret_value == NULL) {
         if(new_node) {
-	    H5FL_BLK_FREE (native_block,new_node->native);
-	    H5FL_SEQ_FREE (haddr_t,new_node->child);
-	    H5FL_FREE (H5B_t,new_node);
+	    new_node->native = H5FL_BLK_FREE(native_block, new_node->native);
+	    new_node->child = H5FL_SEQ_FREE(haddr_t, new_node->child);
+	    new_node = H5FL_FREE(H5B_t, new_node);
         } /* end if */
     } /* end if */
 
@@ -2189,9 +2189,9 @@ H5B_dest(H5B_t *bt)
     HDassert(bt->rc_shared);
 
     H5FL_SEQ_FREE(haddr_t, bt->child);
-    H5FL_BLK_FREE(native_block, bt->native);
+    bt->native = H5FL_BLK_FREE(native_block, bt->native);
     H5RC_DEC(bt->rc_shared);
-    H5FL_FREE(H5B_t, bt);
+    bt = H5FL_FREE(H5B_t, bt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B_dest() */

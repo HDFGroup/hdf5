@@ -2252,7 +2252,7 @@ H5D_vlen_get_buf_size_alloc(size_t size, void *info)
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
     void *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_vlen_get_buf_size_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_vlen_get_buf_size_alloc)
 
     /* Get a temporary pointer to space for the VL data */
     if((vlen_bufsize->vl_tbuf = H5FL_BLK_REALLOC(vlen_vl_buf, vlen_bufsize->vl_tbuf, size)) != NULL)

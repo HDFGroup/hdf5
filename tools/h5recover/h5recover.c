@@ -3055,7 +3055,7 @@ get_jnl_header_info(char * file_path_ptr,
                       indent1, file_path_ptr);
         }
 
-        // In the following call, the mode should be ignored.
+        /* In the following call, the mode should be ignored. */
         file_ptr = HDfopen(file_path_ptr, "r");
 
         if ( file_ptr == NULL ) {

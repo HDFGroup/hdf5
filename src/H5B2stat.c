@@ -88,8 +88,8 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
-    herr_t	ret_value = SUCCEED;    /* Return value */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
 

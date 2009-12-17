@@ -20,6 +20,7 @@
 #define H5_INTERFACE_INIT_FUNC	H5L_init_extern_interface
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Gpkg.h"             /* Groups                               */
 #include "H5Iprivate.h"		/* IDs					*/
@@ -27,7 +28,6 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     const void *udata, size_t UNUSED udata_size, hid_t lapl_id);

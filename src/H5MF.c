@@ -60,7 +60,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static hbool_t H5MF_alloc_overflow(const H5F_t *f, hsize_t size);
 
 
 /*********************/
@@ -98,8 +97,7 @@ static hbool_t H5MF_alloc_overflow(const H5F_t *f, hsize_t size);
 haddr_t
 H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    haddr_t	ret_value, new_eoa;
-    herr_t      result;
+    haddr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF)
 
@@ -114,19 +112,18 @@ H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* Allocate space from the virtual file layer */
     if(HADDR_UNDEF == (ret_value = H5FD_alloc(f->shared->lf, type, dxpl_id, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
-   
+
     /* Check for journaling in progress */
-    if (f->shared->cache2->mdj_enabled == 1) {
-    
+    if(f->shared->cache2->mdj_enabled) {
+        haddr_t	new_eoa;
+
         /* get updated EOA value */
-        if (HADDR_UNDEF ==(new_eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, \
-                               "file get eoa request failed")
+        if(HADDR_UNDEF == (new_eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed")
 
         /* journal the updated EOA value */
-        if(SUCCEED != H5C2_jb__eoa(&(f->shared->cache2->mdj_jbrb), new_eoa))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                         "H5C2_jb__eoa() failed.")
+        if(H5C2_jb__eoa(&(f->shared->cache2->mdj_jbrb), new_eoa) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTJOURNAL, HADDR_UNDEF, "H5C2_jb__eoa() failed.")
     } /* end if */
 
     /* Convert absolute file address to relative file address */
@@ -235,51 +232,6 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_realloc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5MF_alloc_overflow
- *
- * Purpose:	Checks if an allocation of file space would cause an overflow.
- *          F is the file whose space is being allocated, SIZE is the amount
- *          of space needed.
- *
- * Return:	FALSE if no overflow would result
- *          TRUE if overflow would result (the allocation should not be allowed)
- *
- * Programmer:	James Laird
- *		Nat Furrer
- *              Tuesday, June 1, 2004
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-H5MF_alloc_overflow(const H5F_t *f, hsize_t size)
-{
-    haddr_t eoa;                /* End-of-allocation in the file */
-    haddr_t space_avail;        /* Unallocated space still available in file */
-    hbool_t ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_alloc_overflow)
-
-    /* Start with the current end of the file's address. */
-    eoa = H5F_get_eoa(f);
-    HDassert(H5F_addr_defined(eoa));
-
-    /* Subtract EOA from the file's maximum address to get the actual amount of
-     * addressable space left in the file.
-     */
-    HDassert(f->shared->maxaddr >= eoa);
-    space_avail = (hsize_t)(f->shared->maxaddr - eoa);
-
-    /* Ensure that there's enough room left in the file for something of this size */
-    if(size > space_avail)
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_alloc_overflow() */
 
 
 /*-------------------------------------------------------------------------

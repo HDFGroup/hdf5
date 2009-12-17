@@ -92,8 +92,8 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
 {
     H5FS_t	*fspace = NULL;         /* Free space header info */
     H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_debug, FAIL)
 
@@ -232,8 +232,8 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     H5FS_t	*fspace = NULL;         /* Free space header info */
     H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     H5FS_client_t client;               /* The client of the free space */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_sects_debug, FAIL)
 

@@ -86,35 +86,16 @@ H5FL_BLK_DEFINE(heap_chunk);
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer 5/26/04
- *		Modified function to return the disk address of the new
- *		global heap collection, or HADDR_UNDEF on failure.  This
- *		is necessary, as in some cases (i.e. flexible parallel)
- *		H5AC2_set() will imediately flush and destroy the in memory
- *		version of the new collection.  For the same reason, I
- *		moved the code which places the new collection on the cwfs
- *		list to just before the call to H5AC2_set().
- *
- *		John Mainzer 6/8/05
- *		Removed code setting the is_dirty field of the cache info.
- *		This is no longer pemitted, as the cache code is now
- *		manageing this field.  Since this function uses a call to
- *		H5AC2_set() (which marks the entry dirty automaticly), no
- *		other change is required.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
 H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
-    haddr_t	ret_value = HADDR_UNDEF;
     uint8_t	*p = NULL;
     haddr_t	addr;
     size_t	n;
-    int i;
+    haddr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HG_create)
 
@@ -200,88 +181,18 @@ HDmemset(heap->chunk, 0, size);
     }
 
     /* Add the heap to the cache */
-    if (H5AC2_set (f, dxpl_id, H5AC2_GHEAP, addr, (size_t)size, heap, H5AC2__NO_FLAGS_SET)<0)
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, \
-                     "unable to cache global heap collection");
+    if(H5AC2_set(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)size, heap, H5AC2__NO_FLAGS_SET)<0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to cache global heap collection")
 
     ret_value = addr;
 
 done:
-    if ( ! ( H5F_addr_defined(addr) ) && heap) {
-        if ( H5HG_dest(heap) < 0 )
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, \
-                        "unable to destroy global heap collection");
-    }
+    if(!(H5F_addr_defined(addr)) && heap)
+        if(H5HG_dest(heap) < 0)
+	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_clear
- *
- * Purpose:	Mark a global heap in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_clear);
-
-    /* Check arguments */
-    assert (heap);
-
-    /* Mark heap as clean */
-    heap->cache_info.is_dirty = FALSE;
-
-    if (destroy)
-        if (H5HG_dest(heap) < 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* H5HG_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_compute_size
- *
- * Purpose:	Compute the size in bytes of the specified instance of
- *              H5HG_heap_t on disk, and return it in *len_ptr.  On failure,
- *              the value of *len_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *              5/13/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HG_compute_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_compute_size);
-
-    /* Check arguments */
-    HDassert(heap);
-    HDassert(size_ptr);
-
-    *size_ptr = heap->size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
-} /* H5HG_compute_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -299,16 +210,6 @@ H5HG_compute_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_p
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
- *
- * Modifications:
- *
- *		John Mainzer, 6/8/05
- *		Modified the function to use the new dirtied parameter of
- *		of H5AC2_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
- *		In this case, that required adding the new heap_dirtied_ptr
- *		parameter to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -531,30 +432,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer -- 5/24/04
- *		The function used to modify the heap without protecting
- *		the relevant collection first.  I did a half assed job
- *		of fixing the problem, which should hold until we try to
- *		support multi-threading.  At that point it will have to
- *		be done right.
- *
- *		See in line comment of this date for more details.
- *
- *		John Mainzer - 5/26/04
- *		Modified H5HG_create() to return the disk address of the
- *		new collection, instead of the address of its
- *		representation in core.  This was necessary as in FP
- *		mode, the cache will immediately flush and destroy any
- *		entry inserted in it via H5AC2_set().  I then modified
- *		this function to account for the change in H5HG_create().
- *
- *		John Mainzer - 6/8/05
- *		Modified function to use the dirtied parameter of
- *		H5AC2_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -662,11 +539,10 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
             --cwfsno;
         } /* end if */
     } /* end else */
-
     HDassert(H5F_addr_defined(addr));
-    if ( NULL == (heap = H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)) )
-        HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
-    
+
+    if(NULL == (heap = H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
     HDassert(heap->obj[0].size);
 
     /* Split the free space to make room for the new object */
@@ -688,8 +564,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     hobj->idx = idx;
 
 done:
-    if ( heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, heap->addr, (size_t)0, heap, heap_flags) < 0 )
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.");
+    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, heap->addr, (size_t)0, heap, heap_flags) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.")
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_insert() */
@@ -820,7 +696,6 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
     if(adjust!=0) {
-
         /* Load the heap */
         if (NULL == (heap = H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
@@ -839,7 +714,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if (heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)0, heap, heap_flags)<0)
+    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)0, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -906,10 +781,8 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     } else {
         heap->obj[0].size += need;
     }
-
     HDmemmove (obj_start, obj_start+need,
 	       heap->size-((obj_start+need)-heap->chunk));
-
     if (heap->obj[0].size>=H5HG_SIZEOF_OBJHDR (f)) {
         p = heap->obj[0].begin;
         UINT16ENCODE(p, 0); /*id*/

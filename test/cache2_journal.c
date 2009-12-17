@@ -176,7 +176,7 @@ static void check_superblock_extensions(void);
 
 static void check_mdjsc_callbacks(void);
 
-static herr_t test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+static herr_t test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
                                 hid_t dxpl_id,
                                 void * data_ptr);
 
@@ -1972,7 +1972,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
                "Bad param(s) on entry to open_existing_file_for_journaling().\n";
 	    pass2 = FALSE;
         }
-	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+	else if ( HDstrlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             failure_mssg2 = "journal file name too long.\n";
 	    pass2 = FALSE;
@@ -2030,7 +2030,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 	/* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_file_name);
+        HDstrcpy(jnl_config.journal_file_path, journal_file_name);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -2397,14 +2397,14 @@ setup_cache_for_journaling(const char * hdf_file_name,
                 "Bad param(s) on entry to setup_cache_for_journaling().\n";
 	    pass2 = FALSE;
         }
-	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN )
+	else if ( HDstrlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN )
 	{
             failure_mssg2 = "journal file name too long.\n";
 	    pass2 = FALSE;
 
         } else {
 
-	    strcpy(jnl_config.journal_file_path, journal_file_name);
+	    HDstrcpy(jnl_config.journal_file_path, journal_file_name);
 
             if ( verbose ) {
 
@@ -3263,7 +3263,7 @@ mdj_smoke_check_00(hbool_t human_readable)
         "testfiles/cache2_journal_bsc00_018.jnl",
 	NULL
     };
-    char * ((* testfiles)[]);
+    const char **testfiles;
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
@@ -3279,14 +3279,14 @@ mdj_smoke_check_00(hbool_t human_readable)
     
     if ( human_readable ) {
 
-        testfiles = &human_readable_testfiles;
+        testfiles = human_readable_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = FALSE;
         TESTING("human readable mdj smoke check 00 -- general coverage");
 
     } else {
 
-        testfiles = &binary_testfiles;
+        testfiles = binary_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = TRUE;
         TESTING("binary mdj smoke check 00 -- general coverage");
@@ -3325,7 +3325,7 @@ mdj_smoke_check_00(hbool_t human_readable)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-	else if ( strlen(journal_filename) >= 
+	else if ( HDstrlen(journal_filename) >= 
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -3373,13 +3373,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[0]);
+        copy_file(journal_filename, testfiles[0]);
     }
 
-    if ( file_exists((*testfiles)[0]) ) {
+    if ( file_exists(testfiles[0]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[0], 
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[0], human_readable);
 
     } else {
 
@@ -3454,13 +3453,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[1]);
+        copy_file(journal_filename, testfiles[1]);
     }
     
-    if ( file_exists((*testfiles)[1]) ) {
+    if ( file_exists(testfiles[1]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[1],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[1], human_readable);
 
     } else {
 
@@ -3503,13 +3501,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[2]);
+        copy_file(journal_filename, testfiles[2]);
     }
     
-    if ( file_exists((*testfiles)[2]) ) {
+    if ( file_exists(testfiles[2]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[2],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[2], human_readable);
 
     } else {
 
@@ -3542,13 +3539,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[3]);
+        copy_file(journal_filename, testfiles[3]);
     }
     
-    if ( file_exists((*testfiles)[3]) ) {
+    if ( file_exists(testfiles[3]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[3],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[3], human_readable);
 
     } else {
 
@@ -3591,13 +3587,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[4]);
+        copy_file(journal_filename, testfiles[4]);
     }
     
-    if ( file_exists((*testfiles)[4]) ) {
+    if ( file_exists(testfiles[4]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[4],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[4], human_readable);
 
     } else {
 
@@ -3645,13 +3640,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[5]);
+        copy_file(journal_filename, testfiles[5]);
     }
     
-    if ( file_exists((*testfiles)[5]) ) {
+    if ( file_exists(testfiles[5]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[5],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[5], human_readable);
 
     } else {
 
@@ -3685,13 +3679,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[6]);
+        copy_file(journal_filename, testfiles[6]);
     }
     
-    if ( file_exists((*testfiles)[6]) ) {
+    if ( file_exists(testfiles[6]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[6],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[6], human_readable);
 
     } else {
 
@@ -3737,13 +3730,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[7]);
+        copy_file(journal_filename, testfiles[7]);
     }
     
-    if ( file_exists((*testfiles)[7]) ) {
+    if ( file_exists(testfiles[7]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[7],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[7], human_readable);
 
     } else {
 
@@ -3801,13 +3793,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[8]);
+        copy_file(journal_filename, testfiles[8]);
     }
     
-    if ( file_exists((*testfiles)[8]) ) {
+    if ( file_exists(testfiles[8]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[8],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[8], human_readable);
 
     } else {
 
@@ -3868,13 +3859,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[9]);
+        copy_file(journal_filename, testfiles[9]);
     }
     
-    if ( file_exists((*testfiles)[9]) ) {
+    if ( file_exists(testfiles[9]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[9],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[9], human_readable);
 
     } else {
 
@@ -3939,13 +3929,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[10]);
+        copy_file(journal_filename, testfiles[10]);
     }
     
-    if ( file_exists((*testfiles)[10]) ) {
+    if ( file_exists(testfiles[10]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[10],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[10], human_readable);
 
     } else {
 
@@ -3995,13 +3984,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[11]);
+        copy_file(journal_filename, testfiles[11]);
     }
     
-    if ( file_exists((*testfiles)[11]) ) {
+    if ( file_exists(testfiles[11]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[11],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[11], human_readable);
 
     } else {
 
@@ -4097,13 +4085,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[12]);
+        copy_file(journal_filename, testfiles[12]);
     }
     
-    if ( file_exists((*testfiles)[12]) ) {
+    if ( file_exists(testfiles[12]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[12],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[12], human_readable);
 
     } else {
 
@@ -4127,13 +4114,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[13]);
+        copy_file(journal_filename, testfiles[13]);
     }
     
-    if ( file_exists((*testfiles)[13]) ) {
+    if ( file_exists(testfiles[13]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[13],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[13], human_readable);
 
     } else {
 
@@ -4159,13 +4145,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[14]);
+        copy_file(journal_filename, testfiles[14]);
     }
     
-    if ( file_exists((*testfiles)[14]) ) {
+    if ( file_exists(testfiles[14]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[14],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[14], human_readable);
 
     } else {
 
@@ -4214,13 +4199,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[15]);
+        copy_file(journal_filename, testfiles[15]);
     }
     
-    if ( file_exists((*testfiles)[15]) ) {
+    if ( file_exists(testfiles[15]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[15],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[15], human_readable);
 
     } else {
 
@@ -4246,13 +4230,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[16]);
+        copy_file(journal_filename, testfiles[16]);
     }
     
-    if ( file_exists((*testfiles)[16]) ) {
+    if ( file_exists(testfiles[16]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[16],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[16], human_readable);
 
     } else {
 
@@ -4318,13 +4301,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[17]);
+        copy_file(journal_filename, testfiles[17]);
     }
     
-    if ( file_exists((*testfiles)[17]) ) {
+    if ( file_exists(testfiles[17]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[17],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[17], human_readable);
 
     } else {
 
@@ -4440,7 +4422,7 @@ mdj_smoke_check_00(hbool_t human_readable)
         /* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config.journal_file_path, journal_filename);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -4480,13 +4462,12 @@ mdj_smoke_check_00(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[18]);
+        copy_file(journal_filename, testfiles[18]);
     }
     
-    if ( file_exists((*testfiles)[18]) ) {
+    if ( file_exists(testfiles[18]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[18],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[18], human_readable);
 
     } else {
 
@@ -4615,7 +4596,7 @@ mdj_smoke_check_01(hbool_t human_readable)
         "testfiles/cache2_journal_bsc01_004.jnl",
 	NULL
     };
-    char * ((* testfiles)[]);
+    const char **testfiles;
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
@@ -4636,14 +4617,14 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( human_readable ) {
 
-        testfiles = &human_readable_testfiles;
+        testfiles = human_readable_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = FALSE;
         TESTING("hr mdj smoke check 01 -- jnl clean ins, prot, unprot, del, ren");
 
     } else {
 
-        testfiles = &binary_testfiles;
+        testfiles = binary_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = FALSE;
         TESTING("b mdj smoke check 01 -- jnl clean ins, prot, unprot, del, ren");
@@ -4682,7 +4663,7 @@ mdj_smoke_check_01(hbool_t human_readable)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-	else if ( strlen(journal_filename) >= 
+	else if ( HDstrlen(journal_filename) >= 
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -4749,13 +4730,12 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[0]);
+        copy_file(journal_filename, testfiles[0]);
     }
     
-    if ( file_exists((*testfiles)[0]) ) {
+    if ( file_exists(testfiles[0]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[0],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[0], human_readable);
 
     } else {
 
@@ -4795,13 +4775,12 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[1]);
+        copy_file(journal_filename, testfiles[1]);
     }
     
-    if ( file_exists((*testfiles)[1]) ) {
+    if ( file_exists(testfiles[1]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[1],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[1], human_readable);
 
     } else {
 
@@ -4841,13 +4820,12 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[2]);
+        copy_file(journal_filename, testfiles[2]);
     }
     
-    if ( file_exists((*testfiles)[2]) ) {
+    if ( file_exists(testfiles[2]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[2],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[2], human_readable);
 
     } else {
 
@@ -4882,13 +4860,12 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[3]);
+        copy_file(journal_filename, testfiles[3]);
     }
     
-    if ( file_exists((*testfiles)[3]) ) {
+    if ( file_exists(testfiles[3]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[3],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[3], human_readable);
 
     } else {
 
@@ -4923,13 +4900,12 @@ mdj_smoke_check_01(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[4]);
+        copy_file(journal_filename, testfiles[4]);
     }
     
-    if ( file_exists((*testfiles)[4]) ) {
+    if ( file_exists(testfiles[4]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[4],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[4], human_readable);
 
     } else {
 
@@ -5023,7 +4999,7 @@ mdj_smoke_check_02(hbool_t human_readable)
         "testfiles/cache2_journal_bsc02_004.jnl",
 	NULL
     };
-    char * ((* testfiles)[]);
+    const char **testfiles;
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
@@ -5044,14 +5020,14 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( human_readable ) {
 
-        testfiles = &human_readable_testfiles;
+        testfiles = human_readable_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = FALSE;
         TESTING("hr mdj smoke check 02 -- jnl dirty ins, prot, unprot, del, ren");
 
     } else {
 
-        testfiles = &binary_testfiles;
+        testfiles = binary_testfiles;
         /* set update_architypes to TRUE to generate new architype files */
         update_architypes = FALSE;
         TESTING("b mdj smoke check 02 -- jnl dirty ins, prot, unprot, del, ren");
@@ -5066,8 +5042,7 @@ mdj_smoke_check_02(hbool_t human_readable)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
-				            == NULL ) {
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (1).\n";
@@ -5084,14 +5059,12 @@ mdj_smoke_check_02(hbool_t human_readable)
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
-                        sizeof(journal_filename)) == NULL ) {
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-	else if ( strlen(journal_filename) >= 
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+	else if ( HDstrlen(journal_filename) >= H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
             failure_mssg2 = "journal file name too long.\n";
@@ -5157,13 +5130,12 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[0]);
+        copy_file(journal_filename, testfiles[0]);
     }
     
-    if ( file_exists((*testfiles)[0]) ) {
+    if ( file_exists(testfiles[0]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[0],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[0], human_readable);
 
     } else {
 
@@ -5203,13 +5175,12 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[1]);
+        copy_file(journal_filename, testfiles[1]);
     }
     
-    if ( file_exists((*testfiles)[1]) ) {
+    if ( file_exists(testfiles[1]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[1],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[1], human_readable);
 
     } else {
 
@@ -5249,13 +5220,12 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[2]);
+        copy_file(journal_filename, testfiles[2]);
     }
     
-    if ( file_exists((*testfiles)[2]) ) {
+    if ( file_exists(testfiles[2]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[2],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[2], human_readable);
 
     } else {
 
@@ -5290,13 +5260,12 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[3]);
+        copy_file(journal_filename, testfiles[3]);
     }
     
-    if ( file_exists((*testfiles)[3]) ) {
+    if ( file_exists(testfiles[3]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[3],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[3], human_readable);
 
     } else {
 
@@ -5331,13 +5300,12 @@ mdj_smoke_check_02(hbool_t human_readable)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, (*testfiles)[4]);
+        copy_file(journal_filename, testfiles[4]);
     }
     
-    if ( file_exists((*testfiles)[4]) ) {
+    if ( file_exists(testfiles[4]) ) {
 
-        verify_journal_contents(journal_filename, (*testfiles)[4],
-                                human_readable);
+        verify_journal_contents(journal_filename, testfiles[4], human_readable);
 
     } else {
 
@@ -5582,7 +5550,7 @@ mdj_api_example_test(hbool_t human_readable)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >=
+        else if ( HDstrlen(journal_filename) >=
                   H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -5681,7 +5649,7 @@ mdj_api_example_test(hbool_t human_readable)
 
         jnl_config_0.enable_journaling = TRUE;
 
-        strcpy(jnl_config_0.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config_0.journal_file_path, journal_filename);
 
         /* jnl_config_0.journal_recovered should always be FALSE unless
          * you are writing a new journal recovery tool, and need to 
@@ -5966,8 +5934,8 @@ mdj_api_example_test(hbool_t human_readable)
                 }
 
                 /* select on disk hyperslab */
-                offset[0] = i; /*offset of hyperslab in file*/
-                offset[1] = j;
+                offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+                offset[1] = (hsize_t)j;
                 a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
                 a_size[1] = CHUNK_SIZE;
                 status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -6053,8 +6021,8 @@ mdj_api_example_test(hbool_t human_readable)
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
-        offset[0] = i; /*offset of hyperslab in file*/
-        offset[1] = j;
+        offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+        offset[1] = (hsize_t)j;
         a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
         a_size[1] = CHUNK_SIZE;
         status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -6183,8 +6151,8 @@ mdj_api_example_test(hbool_t human_readable)
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
-        offset[0] = i; /*offset of hyperslab in file*/
-        offset[1] = j;
+        offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+        offset[1] = (hsize_t)j;
         a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
         a_size[1] = CHUNK_SIZE;
         status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -6621,7 +6589,7 @@ check_superblock_extensions(void)
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 123;
-        file_ptr->shared->mdc_jnl_file_name_len = strlen("abc");
+        file_ptr->shared->mdc_jnl_file_name_len = HDstrlen("abc");
         HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
                   "abc",
                   file_ptr->shared->mdc_jnl_file_name_len + 1);
@@ -6709,12 +6677,12 @@ check_superblock_extensions(void)
 	    failure_mssg2 = "unexpected mdc_jnl_magic(1).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
-		    (size_t)strlen("abc") ) {
+		    (size_t)HDstrlen("abc") ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (1).\n";
 
-	} else if ( strcmp(file_ptr->shared->mdc_jnl_file_name, "abc") != 0 ) {
+	} else if ( HDstrcmp(file_ptr->shared->mdc_jnl_file_name, "abc") != 0 ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "unexpected mdc_jnl_file_name (1).\n";
@@ -6806,7 +6774,7 @@ check_superblock_extensions(void)
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 456;
-        file_ptr->shared->mdc_jnl_file_name_len = strlen("qrst");
+        file_ptr->shared->mdc_jnl_file_name_len = HDstrlen("qrst");
         HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
                   "qrst",
                   file_ptr->shared->mdc_jnl_file_name_len + 1);
@@ -6824,7 +6792,7 @@ check_superblock_extensions(void)
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 789;
-        file_ptr->shared->mdc_jnl_file_name_len = strlen("z");
+        file_ptr->shared->mdc_jnl_file_name_len = HDstrlen("z");
         HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
                   "z",
                   file_ptr->shared->mdc_jnl_file_name_len + 1);
@@ -6900,12 +6868,12 @@ check_superblock_extensions(void)
 	    failure_mssg2 = "unexpected mdc_jnl_magic(2).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
-		    (size_t)strlen("z") ) {
+		    (size_t)HDstrlen("z") ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (2).\n";
 
-	} else if ( strcmp(file_ptr->shared->mdc_jnl_file_name, "z") != 0 ) {
+	} else if ( HDstrcmp(file_ptr->shared->mdc_jnl_file_name, "z") != 0 ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "unexpected mdc_jnl_file_name (2).\n";
@@ -7091,8 +7059,8 @@ static hbool_t callback_test_cache_is_dirty    = FALSE;
 static int callback_test_null_data_ptr_count   = 0;
 
 static herr_t 
-test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
-                    hid_t dxpl_id,
+test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
+                    hid_t UNUSED dxpl_id,
                     void * data_ptr)
 {
     if ( config_ptr == NULL )
@@ -7688,7 +7656,7 @@ verify_mdjsc_callback_error_rejection(void)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >=
+        else if ( HDstrlen(journal_filename) >=
                         H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -8082,7 +8050,7 @@ verify_mdjsc_callback_execution(void)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >=
+        else if ( HDstrlen(journal_filename) >=
                         H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -8237,7 +8205,7 @@ verify_mdjsc_callback_execution(void)
         /* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config.journal_file_path, journal_filename);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -8533,7 +8501,7 @@ verify_mdjsc_callback_execution(void)
         /* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config.journal_file_path, journal_filename);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -8684,7 +8652,7 @@ verify_mdjsc_callback_execution(void)
         /* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config.journal_file_path, journal_filename);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -9053,7 +9021,7 @@ verify_mdjsc_callback_execution(void)
         /* set journaling config fields to taste */
         jnl_config.enable_journaling       = TRUE;
 
-        strcpy(jnl_config.journal_file_path, journal_filename);
+        HDstrcpy(jnl_config.journal_file_path, journal_filename);
 
         jnl_config.journal_recovered       = FALSE;
         jnl_config.jbrb_buf_size           = (8 * 1024);
@@ -9400,7 +9368,7 @@ verify_mdjsc_callback_registration_deregistration(void)
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >=
+        else if ( HDstrlen(journal_filename) >=
                         H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -11471,15 +11439,12 @@ check_binary_message_format(void)
     const char * fcn_name = "check_binary_message_format()";
     char filename[512];
     char time_buf[32];
-    char verify[9][500];
-    char from_journal[9][500];
     char * p;
     hbool_t show_progress = FALSE;
     int32_t checkpoint = 1;
     int i;
     int fd;
     herr_t result;
-    FILE * readback;
     H5C2_jbrb_t jbrb_struct;
     time_t current_date;
 
@@ -11910,10 +11875,10 @@ check_binary_message_format(void)
 
             verify_journal_msg(
 		/* fd                   */ fd, 
-                /* expected_msg         */ expected_header, 
+                /* expected_msg         */ (uint8_t *)expected_header, 
                 /* expected msg len     */ expected_header_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual headers differ.",
+                /* mismatch failure msg */ "expected and actual headers differ.",
                 /* read failure msg     */ "error reading header.",
                 /* eof failure msg      */ "encountered eof in header msg.",
                 /* not last msg failure */ NULL);
@@ -11923,7 +11888,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_1, 
                 /* expected msg len     */ expected_msg_1_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 1 differ.",
+                /* mismatch failure msg */ "expected and actual msg 1 differ.",
                 /* read failure msg     */ "error reading msg 1.",
                 /* eof failure msg      */ "encountered eof in msg 1.",
                 /* not last msg failure */ NULL);
@@ -11933,7 +11898,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_2, 
                 /* expected msg len     */ expected_msg_2_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 2 differ.",
+                /* mismatch failure msg */ "expected and actual msg 2 differ.",
                 /* read failure msg     */ "error reading msg 2.",
                 /* eof failure msg      */ "encountered eof in msg 2",
                 /* not last msg failure */ NULL);
@@ -11943,7 +11908,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_3, 
                 /* expected msg len     */ expected_msg_3_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 3 differ.",
+                /* mismatch failure msg */ "expected and actual msg 3 differ.",
                 /* read failure msg     */ "error reading msg 3.",
                 /* eof failure msg      */ "encountered eof in msg 3",
                 /* not last msg failure */ NULL);
@@ -11953,7 +11918,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_4, 
                 /* expected msg len     */ expected_msg_4_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 4 differ.",
+                /* mismatch failure msg */ "expected and actual msg 4 differ.",
                 /* read failure msg     */ "error reading msg 4.",
                 /* eof failure msg      */ "encountered eof in msg 4",
                 /* not last msg failure */ NULL);
@@ -11963,7 +11928,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_5, 
                 /* expected msg len     */ expected_msg_5_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 5 differ.",
+                /* mismatch failure msg */ "expected and actual msg 5 differ.",
                 /* read failure msg     */ "error reading msg 5.",
                 /* eof failure msg      */ "encountered eof in msg 5",
                 /* not last msg failure */ NULL);
@@ -11973,7 +11938,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_6, 
                 /* expected msg len     */ expected_msg_6_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 6 differ.",
+                /* mismatch failure msg */ "expected and actual msg 6 differ.",
                 /* read failure msg     */ "error reading msg 6.",
                 /* eof failure msg      */ "encountered eof in msg 6",
                 /* not last msg failure */ NULL);
@@ -11983,7 +11948,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_7, 
                 /* expected msg len     */ expected_msg_7_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg7 differ.",
+                /* mismatch failure msg */ "expected and actual msg7 differ.",
                 /* read failure msg     */ "error reading msg 7.",
                 /* eof failure msg      */ "encountered eof in msg 7",
                 /* not last msg failure */ NULL);
@@ -11993,7 +11958,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_8, 
                 /* expected msg len     */ expected_msg_8_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 8 differ.",
+                /* mismatch failure msg */ "expected and actual msg 8 differ.",
                 /* read failure msg     */ "error reading msg 8.",
                 /* eof failure msg      */ "encountered eof in msg 8",
                 /* not last msg failure */ NULL);
@@ -12003,7 +11968,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_9, 
                 /* expected msg len     */ expected_msg_9_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 9 differ.",
+                /* mismatch failure msg */ "expected and actual msg 9 differ.",
                 /* read failure msg     */ "error reading msg 9.",
                 /* eof failure msg      */ "encountered eof in msg 9",
                 /* not last msg failure */ NULL);
@@ -12013,7 +11978,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_10, 
                 /* expected msg len     */ expected_msg_10_len,
                 /* last_msg             */ TRUE,
-                /* mismatch failuer msg */ "expected and actual msg 10 differ.",
+                /* mismatch failure msg */ "expected and actual msg 10 differ.",
                 /* read failure msg     */ "error reading msg 10.",
                 /* eof failure msg      */ "encountered eof in msg 10",
                 /* not last msg failure */ "msg 10 does not end file");
@@ -12270,10 +12235,10 @@ check_binary_message_format(void)
 
             verify_journal_msg(
 		/* fd                   */ fd, 
-                /* expected_msg         */ expected_header, 
+                /* expected_msg         */ (uint8_t *)expected_header, 
                 /* expected msg len     */ expected_header_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual headers differ.",
+                /* mismatch failure msg */ "expected and actual headers differ.",
                 /* read failure msg     */ "error reading header.",
                 /* eof failure msg      */ "encountered eof in header msg.",
                 /* not last msg failure */ NULL);
@@ -12283,7 +12248,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_11, 
                 /* expected msg len     */ expected_msg_11_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 11 differ.",
+                /* mismatch failure msg */ "expected and actual msg 11 differ.",
                 /* read failure msg     */ "error reading msg 11.",
                 /* eof failure msg      */ "encountered eof in msg 11.",
                 /* not last msg failure */ NULL);
@@ -12293,7 +12258,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_12, 
                 /* expected msg len     */ expected_msg_12_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 12 differ.",
+                /* mismatch failure msg */ "expected and actual msg 12 differ.",
                 /* read failure msg     */ "error reading msg 12.",
                 /* eof failure msg      */ "encountered eof in msg 12",
                 /* not last msg failure */ NULL);
@@ -12303,7 +12268,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_13, 
                 /* expected msg len     */ expected_msg_13_len,
                 /* last_msg             */ FALSE,
-                /* mismatch failuer msg */ "expected and actual msg 13 differ.",
+                /* mismatch failure msg */ "expected and actual msg 13 differ.",
                 /* read failure msg     */ "error reading msg 13.",
                 /* eof failure msg      */ "encountered eof in msg 13",
                 /* not last msg failure */ NULL);
@@ -12313,7 +12278,7 @@ check_binary_message_format(void)
                 /* expected_msg         */ expected_msg_14, 
                 /* expected msg len     */ expected_msg_14_len,
                 /* last_msg             */ TRUE,
-                /* mismatch failuer msg */ "expected and actual msg 14 differ.",
+                /* mismatch failure msg */ "expected and actual msg 14 differ.",
                 /* read failure msg     */ "error reading msg 14.",
                 /* eof failure msg      */ "encountered eof in msg 14",
                 /* not last msg failure */ "msg 14 does not end file");

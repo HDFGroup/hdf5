@@ -575,7 +575,6 @@ H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_HDR[1];
 H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_IBLOCK[1];
 
 /* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
 H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_DBLOCK[1];
 
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */

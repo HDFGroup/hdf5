@@ -80,8 +80,8 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     size_t *mesg_count)
 {    
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
-    herr_t ret_value = SUCCEED;         /* Return value */
     hsize_t table_size;                 /* Size of SOHM master table in file */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_get_mesg_count_test)
 

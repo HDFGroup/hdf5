@@ -1434,9 +1434,7 @@ H5_DLL herr_t H5C2_expunge_entry(H5F_t *              f,
                                  const H5C2_class_t * type,
                                  haddr_t              addr);
 
-H5_DLL herr_t H5C2_flush_cache(const H5F_t *f,
-		               hid_t dxpl_id,
-                               unsigned flags);
+H5_DLL herr_t H5C2_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 
 
 H5_DLL herr_t H5C2_flush_to_min_clean(H5F_t * f,
@@ -1570,7 +1568,7 @@ H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
 H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
 		                      H5C2_mdj_config_t * config_ptr);
 
-H5_DLL herr_t H5C2_journal_post_flush(const H5F_t * f,
+H5_DLL herr_t H5C2_journal_post_flush(H5F_t * f,
                                       hid_t dxpl_id,
 				      H5C2_t * cache_ptr,
                                       hbool_t cache_is_clean);

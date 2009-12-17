@@ -21,9 +21,9 @@
 
 /* Public header files needed by this file */
 #include "H5public.h"
-#include "H5Cpublic.h"
 #include "H5ACpublic.h"
 #include "H5AC2public.h"
+#include "H5Cpublic.h"
 #include "H5Ipublic.h"
 
 /* When this header is included from a private header, don't make calls to H5check() */

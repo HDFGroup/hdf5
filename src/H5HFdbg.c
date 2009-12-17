@@ -188,8 +188,8 @@ herr_t
 H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     H5HF_hdr_t	*hdr = NULL;             /* Fractal heap header info */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_hdr_debug, FAIL)
 
@@ -202,6 +202,7 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
+    /* Set up user data for protect call */
     cache_udata.f = f;
     cache_udata.dxpl_id = dxpl_id;
 
@@ -398,11 +399,11 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_direct_t *dblock = NULL;       /* Fractal heap direct block info */
+    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     size_t	blk_prefix_size;        /* Size of prefix for block */
     size_t	amount_free;            /* Amount of free space in block */
     uint8_t	*marker = NULL;         /* Track free space for block */
     herr_t      ret_value = SUCCEED;    /* Return value */
-    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_dblock_debug, FAIL)
 
@@ -417,6 +418,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     HDassert(H5F_addr_defined(hdr_addr));
     HDassert(block_size > 0);
 
+    /* Set up user data for protect call */
     cache_udata.f = f;
     cache_udata.dxpl_id = dxpl_id;
 
@@ -505,7 +507,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     H5_buffer_dump(stream, indent, dblock->blk, marker, (size_t)0, dblock->size);
 
 done:
-    if(dblock && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_DBLOCK, addr, (size_t)0, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_DBLOCK, addr, (size_t)0, dblock, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
     if(hdr && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_HDR, hdr_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
@@ -534,11 +536,11 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_indirect_t *iblock = NULL;     /* Fractal heap direct block info */
+    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     char temp_str[64];                  /* Temporary string, for formatting */
     size_t	u, v;                   /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
-    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_iblock_debug, FAIL)
 
@@ -553,6 +555,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     HDassert(H5F_addr_defined(hdr_addr));
     HDassert(nrows > 0);
 
+    /* Set up user data for protect call */
     cache_udata.f = f;
     cache_udata.dxpl_id = dxpl_id;
 
@@ -727,8 +730,8 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     FILE *stream, int indent, int fwidth)
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_sects_debug, FAIL)
 
@@ -741,6 +744,7 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
+    /* Set up user data for protect call */
     cache_udata.f = f;
     cache_udata.dxpl_id = dxpl_id;
 

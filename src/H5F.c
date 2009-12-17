@@ -944,9 +944,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 * version.  For now, this is just for testing.  Once we get it 
 	 * fully in use, we will delete the old version.
 	 */
-	if(H5AC2_create(f, 
-		(H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
-
+	if(H5AC2_create(f, (H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache2")
 
         /* Create the file's "open object" information */
@@ -1021,11 +1019,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
 	    /* shut down metadata journaling if it is enabled. */
-	    if ( H5C2_end_journaling(f, dxpl_id, f->shared->cache2) != SUCCEED ) {
+	    if(H5C2_end_journaling(f, dxpl_id, f->shared->cache2) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to shutdown metadata journaling")
-	    }
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to shutdown metadata journaling")
 
             /* Flush and invalidate all caches */
             if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
@@ -1055,11 +1051,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             f->shared->root_grp = NULL;
         } /* end if */
 
-        if(H5AC_dest(f, dxpl_id))
+        if(H5AC_dest(f, dxpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         /* also destroy the new cache */
-        if(H5AC2_dest(f, dxpl_id))
+        if(H5AC2_dest(f, dxpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1191,14 +1187,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		Vailin Choi, 2008-04-02
  *		To formulate path for later searching of target file for 
  *		external link via H5_build_extpath().
- *
- *		John Mainzer, 2008-07-07
- *		Added calls to H5AC2_check_for_journaling() and 
- *		H5AC2_set_cache_journaling_config() at the end of 
- *		H5F_open().  For now at least, both of these operations
- *		must be done just before H5F_open() returns, as the 
- *		required information is not available when the metadata
- *		cache is created.
  *
  *-------------------------------------------------------------------------
  */
@@ -1405,18 +1393,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 
 	config_ptr = &(file->shared->initJnlCfg);
 
-        if ( H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2, 
-                                        config_ptr->journal_recovered) < 0 ) {
+        if(H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2, 
+                config_ptr->journal_recovered) < 0 )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "H5AC2_check_for_journaling() reports failure.")
 
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
-                        "H5AC2_check_for_journaling() reports failure.")
-        }
-
-	if ( H5AC2_set_jnl_config(file, dxpl_id, config_ptr, TRUE) < 0 ) {
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
-                        "H5AC2_set_jnl_config() failed.")
-	}
+	if(H5AC2_set_jnl_config(file, dxpl_id, config_ptr, TRUE) < 0 )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "H5AC2_set_jnl_config() failed.")
     }
 
     /* Success */
@@ -1773,10 +1755,8 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
                 nerrors++;
 
     /* Flush any cached dataset storage raw data */
-
     if(H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
-
 
     /* flush (and invalidate, if requested) the entire metadata cache */
     H5AC_flags = 0;
@@ -1801,7 +1781,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end if */
 
     /* Write the superblock to disk */
-
     if(H5F_super_write(f, dxpl_id) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 
@@ -3344,8 +3323,7 @@ H5F_is_journaling_enabled(const H5F_t *f)
     /* Retrieve the current cache information */
     config.version = H5AC2__CURR_JNL_CONFIG_VER;
     if(H5AC2_get_jnl_config(f->shared->cache2, &config) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
-		    "can't retrieve journaling configuration")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve journaling configuration")
 
     /* Set return value */
     ret_value = config.enable_journaling;
@@ -3450,51 +3428,29 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		Reworked for the addition of the config_ptr parameter.
- *							JRM -- 4/7/05
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_config(hid_t file_id,
-		  H5AC_cache_config_t *config_ptr)
+H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
+    H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
 
     FUNC_ENTER_API(H5Fget_mdc_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
-
-    if ( ( NULL == config_ptr ) ||
-         ( ! H5AC2_validate_cache_config_ver(config_ptr->version) ) ) {
-
+    if((NULL == config_ptr) || !H5AC2_validate_cache_config_ver(config_ptr->version))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
-    }
 
     /* Go get the resize configuration */
-    result = H5AC2_get_cache_auto_resize_config(file->shared->cache2, 
-		                                config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC2_get_cache_auto_resize_config() failed.");
-    }
+    if(H5AC2_get_cache_auto_resize_config(file->shared->cache2, (H5AC2_cache_config_t *)config_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC2_get_cache_auto_resize_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_config() */
 
 
@@ -3511,53 +3467,31 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fset_mdc_config(hid_t file_id,
-		  H5AC_cache_config_t *config_ptr)
+H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fset_mdc_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
 
     /* set the resize configuration  */
-    result = H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "H5AC_set_cache_auto_resize_config() failed.");
-    }
+    if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
 
     /* pass the resize configuration to the modified cache as well. */
-    result = H5AC2_set_cache_auto_resize_config(file, 
-		                            (H5AC2_cache_config_t *)config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "H5AC2_set_cache_auto_resize_config() failed.");
-    }
+    if(H5AC2_set_cache_auto_resize_config(file, (H5AC2_cache_config_t *)config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC2_set_cache_auto_resize_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fset_mdc_config() */
 
 
@@ -3575,46 +3509,29 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_hit_rate(hid_t file_id,
-                    double *hit_rate_ptr)
+H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_mdc_hit_rate, FAIL)
     H5TRACE2("e", "i*d", file_id, hit_rate_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
-
-    if ( NULL == hit_rate_ptr ) {
-
+    if(NULL == hit_rate_ptr)
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
-    }
 
     /* Go get the current hit rate */
-    result = H5AC2_get_cache_hit_rate(file->shared->cache2, hit_rate_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC2_get_cache_hit_rate() failed.");
-    }
+    if(H5AC2_get_cache_hit_rate(file->shared->cache2, hit_rate_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC2_get_cache_hit_rate() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_hit_rate() */
 
 
@@ -3633,56 +3550,34 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_size(hid_t file_id,
-                size_t *max_size_ptr,
-                size_t *min_clean_size_ptr,
-                size_t *cur_size_ptr,
-                int *cur_num_entries_ptr)
+H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+    size_t *cur_size_ptr, int *cur_num_entries_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
     int32_t    cur_num_entries;
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_mdc_size, FAIL)
     H5TRACE5("e", "i*z*z*z*Is", file_id, max_size_ptr, min_clean_size_ptr,
              cur_size_ptr, cur_num_entries_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
 
     /* Go get the size data */
-    result = H5AC2_get_cache_size(file->shared->cache2,
-                                 max_size_ptr,
-                                 min_clean_size_ptr,
-                                 cur_size_ptr,
-                                 &cur_num_entries);
+    if(H5AC2_get_cache_size(file->shared->cache2, max_size_ptr,
+            min_clean_size_ptr, cur_size_ptr, &cur_num_entries) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC2_get_cache_size() failed.")
 
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC2_get_cache_size() failed.");
-
-    } else if ( cur_num_entries_ptr != NULL ) {
-
+    if(cur_num_entries_ptr != NULL)
 	*cur_num_entries_ptr = (int)cur_num_entries;
-    }
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_size() */
 
 
@@ -3703,10 +3598,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/24/05
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */

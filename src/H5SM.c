@@ -208,6 +208,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t) (table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
     if(HADDR_UNDEF == (table_addr = H5MF_alloc(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for SOHM table")
+
     /* Cache the new table */
     if(H5AC2_set(f, dxpl_id, H5AC2_SOHM_TABLE, table_addr, (size_t)table_size, table, H5AC2__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "can't add SOHM table to cache")
@@ -342,10 +343,10 @@ htri_t
 H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
     unsigned type_flag;                 /* Flag corresponding to message type */
     size_t u;                           /* Local index variable */
     htri_t ret_value = FALSE;           /* Return value */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_type_shared)
 
@@ -356,18 +357,14 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
     /* Determine size of table in file */
     table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t)(f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
 
-
     /* Look up the master SOHM table */
     if(H5F_addr_defined(f->shared->sohm_addr)) {
         if(NULL == (table = (H5SM_master_table_t *)H5AC2_protect(f, dxpl_id, H5AC2_SOHM_TABLE, f->shared->sohm_addr, (size_t)table_size, f, H5AC2_READ)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
-
     } /* end if */
     else
         /* No shared messages of any type */
         HGOTO_DONE(FALSE)
-
-
 
     /* Search the indexes until we find one that matches this flag or we've
      * searched them all.
@@ -402,9 +399,9 @@ herr_t
 H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_addr)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
     ssize_t index_num;                  /* Which index */
     herr_t ret_value = SUCCEED;         /* Return value */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_get_fheap_addr, FAIL)
 
@@ -780,9 +777,9 @@ static herr_t
 H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_id)
 {
     H5SM_list_t     *list = NULL;
+    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
     haddr_t          btree_addr;
     herr_t           ret_value = SUCCEED;
-    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_convert_btree_to_list)
 
@@ -802,6 +799,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
     cache_udata.f = f;
     cache_udata.header = header;
 
+    /* Protect the SOHM list */
     if(NULL == (list = (H5SM_list_t *)H5AC2_protect(f, dxpl_id, H5AC2_SOHM_LIST, header->index_addr, H5SM_LIST_SIZE(f, header->list_max), &cache_udata, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM list index")
 
@@ -888,10 +886,10 @@ H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table,
 {
     size_t              mesg_size;
     H5SM_master_table_t *my_table = NULL;
+    hsize_t             table_size;   /* Size of SOHM master table in file */
     ssize_t             index_num;
     htri_t              tri_ret;
     htri_t              ret_value = TRUE;
-    hsize_t             table_size;   /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_can_share, FAIL)
 
@@ -999,11 +997,11 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     void *mesg, unsigned *mesg_flags)
 {
     H5SM_master_table_t *table = NULL;
+    hsize_t             table_size;     /* Size of SOHM master table in file */
     unsigned            cache_flags = H5AC2__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
     htri_t              ret_value = TRUE;
-    hsize_t             table_size;     /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_try_share, FAIL)
 
@@ -1154,6 +1152,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 {
     H5SM_list_t           *list = NULL;     /* List index */
     H5SM_mesg_key_t       key;              /* Key used to search the index */
+    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
     H5O_shared_t          shared;           /* Shared H5O message */
     hbool_t               found = FALSE;    /* Was the message in the index? */
     H5HF_t                *fheap = NULL;    /* Fractal heap handle */
@@ -1161,7 +1160,6 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *                encoding_buf = NULL; /* Buffer for encoded message */
     size_t                empty_pos = UFAIL; /* Empty entry in list */
     herr_t                ret_value = SUCCEED;
-    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_write_mesg)
 
@@ -1381,13 +1379,13 @@ herr_t
 H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
 {
     H5SM_master_table_t  *table = NULL;
+    hsize_t               table_size;   /* Size of SOHM master table in file */
     unsigned              cache_flags = H5AC2__NO_FLAGS_SET;
     ssize_t               index_num;
     void                 *mesg_buf = NULL;
     void                 *native_mesg = NULL;
     unsigned              type_id;              /* Message type ID to operate on */
     herr_t                ret_value = SUCCEED;
-    hsize_t               table_size;   /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_delete, FAIL)
 
@@ -1611,12 +1609,12 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_mesg_key_t key;
     H5SM_sohm_t     message;            /* Deleted message returned from index */
     H5SM_sohm_t    *message_ptr;        /* Pointer to deleted message returned from index */
+    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
     size_t          buf_size;           /* Size of the encoded message (out) */
     void            *encoding_buf = NULL; /* The encoded message (out) */
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
-    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_delete_from_index)
 
@@ -1788,8 +1786,8 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     H5F_file_t *shared = f->shared;     /* Shared file info (convenience variable) */
     H5O_shmesg_table_t sohm_table;      /* SOHM message from superblock extension */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
-    herr_t ret_value = SUCCEED;         /* Return value */
     hsize_t table_size;                 /* Size of SOHM master table in file */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
 
@@ -2047,12 +2045,12 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
     H5SM_sohm_t message;                /* Shared message returned from callback */
+    H5SM_list_cache_ud_t cache_udata;  /* User-data for metadata cache callback */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
     ssize_t index_num;                  /* Table index for message type */
     size_t buf_size;                    /* Size of the encoded message */
     void * encoding_buf = NULL;         /* Buffer for encoded message */
     herr_t ret_value = SUCCEED;         /* Return value */
-    H5SM_list_cache_ud_t cache_udata;  /* User-data for metadata cache callback */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_get_refcount)
 
@@ -2418,9 +2416,9 @@ H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
                          unsigned table_vers, unsigned num_indexes)
 {
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
     unsigned x;                         /* Counter variable */
     herr_t ret_value = SUCCEED;         /* Return value */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_table_debug, FAIL)
 
@@ -2509,9 +2507,9 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
 
     H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
     H5SM_index_header_t header;         /* A "false" header used to read the list */
+    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
     unsigned x;                         /* Counter variable */
     herr_t ret_value = SUCCEED;         /* Return value */
-    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
 
     FUNC_ENTER_NOAPI(H5SM_list_debug, FAIL)
 
@@ -2598,9 +2596,9 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 {
     H5SM_master_table_t *table = NULL;          /* SOHM master table */
     H5HF_t              *fheap = NULL;          /* Fractal heap handle */
+    hsize_t             table_size;    /* Size of SOHM master table in file */
     unsigned    	u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
-    hsize_t             table_size;    /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI(H5SM_ih_size, FAIL)
 

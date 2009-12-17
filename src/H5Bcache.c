@@ -89,8 +89,7 @@ const H5AC2_class_t H5AC2_BT[1] = {{
  *
  * Purpose:     Deserialize the data structure from disk.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -194,8 +193,7 @@ done:
  *
  * Purpose:     Serialize the data structure for writing to disk.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -278,8 +276,7 @@ done:
  *
  * Purpose:     Destroy/release an "in core representation" of a data structure
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org

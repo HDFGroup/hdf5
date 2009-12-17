@@ -33,10 +33,10 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /****************/
 /* Local Macros */
@@ -171,8 +171,8 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses,
     H5FS_t *fspace = NULL;      /* New free space structure */
     H5FS_prot_t fs_prot;        /* Information for protecting free space manager */
     unsigned fspace_status = 0; /* Free space header's status in the metadata cache */
-    H5FS_t *ret_value;          /* Return value */
     H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
+    H5FS_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_open, NULL)
 #ifdef QAK
@@ -244,8 +244,8 @@ H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr)
 {
     H5FS_t *fspace = NULL;              /* Free space header loaded from file */
     H5FS_prot_t fs_prot;                /* Temporary information for protecting free space header */
-    herr_t ret_value = SUCCEED;         /* Return value */
     H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_delete, FAIL)
 #ifdef QAK

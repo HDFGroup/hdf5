@@ -28,6 +28,7 @@
 
 #include "H5private.h"		/*generic functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/* Files				*/
@@ -38,7 +39,6 @@
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Check for header needed for SGI floating-point code */
 #ifdef H5_HAVE_SYS_FPU_H

@@ -27,14 +27,13 @@
 /****************/
 /* Module Setup */
 /****************/
-
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5HG_PACKAGE		/*suppress error about including H5HGpkg  */
+
 
 /***********/
 /* Headers */
 /***********/
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
@@ -42,17 +41,21 @@
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Package Typedefs */
 /********************/
+
 
 /********************/
 /* Local Prototypes */
@@ -66,6 +69,7 @@ static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5HG_free_icr(haddr_t addr, size_t len, void *thing);
+
 
 /*********************/
 /* Package Variables */
@@ -85,13 +89,16 @@ const H5AC2_class_t H5AC2_GHEAP[1] = {{
     NULL,
 }};
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
+
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -105,42 +112,27 @@ const H5AC2_class_t H5AC2_GHEAP[1] = {{
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
- *
- *              Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              July 28, 2008
- *              Converted from H5HG_load 
- * 
  *-------------------------------------------------------------------------
  */
 static void *
 H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
     void *_udata, hbool_t UNUSED *dirty)
 {
-
     H5HG_heap_t	*heap = NULL;
     H5F_t *f = (H5F_t *)_udata;
     uint8_t	*p;
     size_t	nalloc, need;
-    size_t      max_idx=0;              /* The maximum index seen */
-    int	i;
+    size_t      max_idx = 0;            /* The maximum index seen */
     H5HG_heap_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_deserialize, NULL);
+    FUNC_ENTER_NOAPI(H5HG_deserialize, NULL)
 
     /* check arguments */
     HDassert(image);
 
     /* Allocate space for heap */
-    if(NULL == (heap = H5FL_CALLOC (H5HG_heap_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     heap->addr = addr;
     heap->shared = f->shared;
 
@@ -148,26 +140,25 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
 
     /* Magic number */
     if(HDmemcmp(p, H5HG_MAGIC, (size_t)H5HG_SIZEOF_MAGIC))
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "bad global heap collection signature");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad global heap collection signature")
     p += H5HG_SIZEOF_MAGIC;
 
     /* Version */
-    if (H5HG_VERSION!=*p++)
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap");
+    if(H5HG_VERSION != *p++)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap")
 
     /* Reserved */
     p += 3;
 
     /* Size */
-    H5F_DECODE_LENGTH (f, p, heap->size);
-    assert (heap->size>=H5HG_MINSIZE);
+    H5F_DECODE_LENGTH(f, p, heap->size);
+    HDassert(heap->size>=H5HG_MINSIZE);
 
     /* if heap->size is more than the allocated image size, then we need to do nothing and wait for correctly sized image to come in */
-    if (heap->size <= len) {
-
+    if(heap->size <= len) {
         /* Allocate space for the heap->chunk */
         if(NULL == (heap->chunk = H5FL_BLK_MALLOC(heap_chunk, (size_t)heap->size)))
-    	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
         
         /* Copy image into chunk */
         HDmemcpy(heap->chunk, image, heap->size);
@@ -175,47 +166,48 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
         /* Decode each object */
         p = heap->chunk + H5HG_SIZEOF_HDR(f);
         nalloc = H5HG_NOBJS (f, heap->size);
-        if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,nalloc)))
-    	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        heap->obj[0].size=heap->obj[0].nrefs=0;
-        heap->obj[0].begin=NULL;
+        if(NULL == (heap->obj = H5FL_SEQ_MALLOC(H5HG_obj_t,nalloc)))
+    	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+        heap->obj[0].size = heap->obj[0].nrefs = 0;
+        heap->obj[0].begin = NULL;
         heap->nalloc = nalloc;
-        while (p<heap->chunk+heap->size) {
-	    if (p+H5HG_SIZEOF_OBJHDR(f)>heap->chunk+heap->size) {
+        while(p < (heap->chunk + heap->size)) {
+	    if((p + H5HG_SIZEOF_OBJHDR(f)) > (heap->chunk + heap->size)) {
 	        /*
 	         * The last bit of space is too tiny for an object header, so we
 	         * assume that it's free space.
 	         */
-	        assert (NULL==heap->obj[0].begin);
-	        heap->obj[0].size = ((const uint8_t *)heap->chunk+heap->size) - p;
+	        HDassert(NULL == heap->obj[0].begin);
+	        heap->obj[0].size = ((const uint8_t *)heap->chunk + heap->size) - p;
 	        heap->obj[0].begin = p;
 	        p += heap->obj[0].size;
-	    } else {
+	    } /* end if */
+            else {
 	        unsigned idx;
 	        uint8_t *begin = p;
 
 	        UINT16DECODE (p, idx);
 
                 /* Check if we need more room to store heap objects */
-                if(idx>=heap->nalloc) {
+                if(idx >= heap->nalloc) {
                     size_t new_alloc;       /* New allocation number */
                     H5HG_obj_t *new_obj;	/* New array of object descriptions */
 
                     /* Determine the new number of objects to index */
-                    new_alloc=MAX(heap->nalloc*2,(idx+1));
+                    new_alloc = MAX(heap->nalloc * 2, (idx + 1));
 
                     /* Reallocate array of objects */
-                    if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
-                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                    if(NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
                     /* Update heap information */
-                    heap->nalloc=new_alloc;
-                    heap->obj=new_obj;
+                    heap->nalloc = new_alloc;
+                    heap->obj = new_obj;
                 } /* end if */
 
-	        UINT16DECODE (p, heap->obj[idx].nrefs);
+	        UINT16DECODE(p, heap->obj[idx].nrefs);
 	        p += 4; /*reserved*/
-	        H5F_DECODE_LENGTH (f, p, heap->obj[idx].size);
+	        H5F_DECODE_LENGTH(f, p, heap->obj[idx].size);
 	        heap->obj[idx].begin = begin;
 	        /*
 	         * The total storage size includes the size of the object header
@@ -223,68 +215,68 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
 	         * aligned. The last bit of space is the free space object whose
 	         * size is never padded and already includes the object header.
 	         */
-	        if (idx>0) {
+	        if(idx > 0) {
 		    need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
 
                     /* Check for "gap" in index numbers (caused by deletions) and fill in heap object values */
-                    if(idx>(max_idx+1))
-                        HDmemset(&heap->obj[max_idx+1],0,sizeof(H5HG_obj_t)*(idx-(max_idx+1)));
-                    max_idx=idx;
-	        } else {
+                    if(idx > (max_idx + 1))
+                        HDmemset(&heap->obj[max_idx + 1], 0, sizeof(H5HG_obj_t) * (idx - (max_idx + 1)));
+                    max_idx = idx;
+	        } /* end if */
+                else
 		    need = heap->obj[idx].size;
-	        }
 	        p = begin + need;
-	    }
-        }
-        assert(p==heap->chunk+heap->size);
-        assert(H5HG_ISALIGNED(heap->obj[0].size));
-
+	    } /* end else */
+        } /* end while */
+        HDassert(p == heap->chunk + heap->size);
+        HDassert(H5HG_ISALIGNED(heap->obj[0].size));
 
         /* Set the next index value to use */
-        if(max_idx>0)
-            heap->nused=max_idx+1;
+        if(max_idx > 0)
+            heap->nused = max_idx + 1;
         else
-            heap->nused=1;
+            heap->nused = 1;
 
         /*
          * Add the new heap to the CWFS list, removing some other entry if
          * necessary to make room. We remove the right-most entry that has less
          * free space than this heap.
          */
-        if (!f->shared->cwfs) {
-            f->shared->cwfs = H5MM_malloc (H5HG_NCWFS*sizeof(H5HG_heap_t*));
-            if (NULL==f->shared->cwfs)
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        if(!f->shared->cwfs) {
+            if(NULL == (f->shared->cwfs = H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t*))))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
             f->shared->ncwfs = 1;
             f->shared->cwfs[0] = heap;
-        } else if (H5HG_NCWFS==f->shared->ncwfs) {
-            for (i=H5HG_NCWFS-1; i>=0; --i) {
-                if (f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
-                    HDmemmove (f->shared->cwfs+1, f->shared->cwfs, i * sizeof(H5HG_heap_t*));
+        } else if(H5HG_NCWFS == f->shared->ncwfs) {
+            int	i;      /* Local index variable */
+
+            for(i = H5HG_NCWFS - 1; i >= 0; --i) {
+                if(f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
+                    HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, i * sizeof(H5HG_heap_t *));
                     f->shared->cwfs[0] = heap;
                     break;
-                }
-            }
+                } /* end if */
+            } /* end for */
         } else {
-            HDmemmove (f->shared->cwfs+1, f->shared->cwfs, f->shared->ncwfs*sizeof(H5HG_heap_t*));
+            HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
             f->shared->ncwfs += 1;
             f->shared->cwfs[0] = heap;
-        }
+        } /* end else */
 
         /* Sanity check */    
         HDassert((size_t)((const uint8_t *)p - (const uint8_t *)heap->chunk) <= len);
-
     } /* end if heap->size <= len */
 
     ret_value = heap;
 
 done:
-    if (!ret_value && heap) {
-        if(H5HG_dest(heap)<0)
+    if(!ret_value && heap) {
+        if(H5HG_dest(heap) < 0)
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection");
-    }
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HG_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -298,53 +290,32 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
- *
- *      JRM -- 8/21/06
- *      Added the flags_ptr parameter.  This parameter exists to
- *      allow the flush routine to report to the cache if the
- *      entry is resized or renamed as a result of the flush.
- *      *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *      Mike McGreevy
- *      mcgreevy@hdfgroup.org
- *      July 28, 2008
- *      Converted from H5HG_flush
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_serialize (const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, size_t UNUSED len,
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
     H5HG_heap_t *heap = (H5HG_heap_t *)_thing;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_serialize, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_serialize)
 
     /* Check arguments */
-    assert (f);
-    assert (H5F_addr_defined (addr));
-    assert (H5F_addr_eq (addr, heap->addr));
-    assert (heap);
-
+    HDassert(f);
+    HDassert(H5F_addr_defined (addr));
+    HDassert(H5F_addr_eq (addr, heap->addr));
+    HDassert(heap);
 
     /* Need to increase image size if we need to copy a bigger thing into it */
-    if (heap->size > len) {
+    if(heap->size > len) {
         /* free old image buffer */
         H5MM_free(image);
     
         /* allocate new image buffer */
-        *new_image = H5MM_malloc(heap->size);
-        if (*new_image == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "new image null after H5MM_realloc()\n");
+        if(NULL == (*new_image = H5MM_malloc(heap->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "new image null after H5MM_realloc()\n")
 
         /* copy the heap->chunk into the new image buffer */
         HDmemcpy(*new_image, heap->chunk, heap->size);
@@ -354,20 +325,18 @@ H5HG_serialize (const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, size_t UNUSE
 
         /* specify in flags that image has been resized */
         *flags = H5C2__SERIALIZE_RESIZED_FLAG;
-
-    } else {
-
+    } /* end if */
+    else {
         /* copy the heap->chunk into the image buffer */
         HDmemcpy(image, heap->chunk, heap->size);
 
         /* Reset the cache flags for this operation */
         *flags = 0;
-
-    }
+    } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HG_serialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -387,7 +356,6 @@ done:
 static herr_t
 H5HG_image_len(const void *thing, size_t *image_len_ptr)
 {
-
     const H5HG_heap_t    *heap = (const H5HG_heap_t *)thing;    /* Global heap */
     
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_image_len)
@@ -400,7 +368,6 @@ H5HG_image_len(const void *thing, size_t *image_len_ptr)
     *image_len_ptr = heap->size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* end H5HG_image_len() */
 
 
@@ -431,7 +398,4 @@ H5HG_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HG_free_icr() */
-
-
-
 

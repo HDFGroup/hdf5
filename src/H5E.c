@@ -334,7 +334,7 @@ H5E_get_stack(void)
 {
     H5E_t *estack;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_get_stack)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
     estack = pthread_getspecific(H5TS_errstk_key_g);
 

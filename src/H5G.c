@@ -83,6 +83,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
@@ -90,7 +91,6 @@
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Local macros */
 #define H5G_RESERVED_ATOMS	0

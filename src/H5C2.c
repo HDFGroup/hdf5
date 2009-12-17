@@ -1362,9 +1362,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_flush_cache(const H5F_t *f,
-		 hid_t    dxpl_id,
-                 unsigned flags)
+H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 {
     H5C2_t *            cache_ptr;
     herr_t              status;

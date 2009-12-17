@@ -42,11 +42,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS

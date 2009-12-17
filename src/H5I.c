@@ -42,13 +42,12 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Ipkg.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
@@ -1253,8 +1252,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Dec  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1262,19 +1259,19 @@ H5Idec_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Idec_ref, id, H5AC_dxpl_id, FAIL);
+    FUNC_ENTER_API_META(H5Idec_ref, id, H5AC2_dxpl_id, FAIL)
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
-    if (id<0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+    if(id < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
     /* Do actual decrement operation */
-    if((ret_value = H5I_dec_ref(id))<0)
-        HGOTO_ERROR (H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count");
+    if((ret_value = H5I_dec_ref(id)) < 0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
 
 done:
-    FUNC_LEAVE_API_META(ret_value);
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Idec_ref() */
 
 
@@ -1387,19 +1384,19 @@ H5Iinc_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Iinc_ref, id, H5AC_dxpl_id, FAIL);
+    FUNC_ENTER_API_META(H5Iinc_ref, id, H5AC2_dxpl_id, FAIL)
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
-    if (id<0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
+    if(id < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
     /* Do actual increment operation */
-    if((ret_value = H5I_inc_ref(id))<0)
+    if((ret_value = H5I_inc_ref(id)) < 0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");
 
 done:
-    FUNC_LEAVE_API_META(ret_value);
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Iinc_ref() */
 
 
@@ -1999,13 +1996,13 @@ H5I_find_id(hid_t id)
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    ssize_t       ret_value;
+    ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(H5Iget_name, FAIL)
     H5TRACE3("Zs", "ixz", id, name, size);
 
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(id, name, size, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(id, name, size, H5P_DEFAULT, H5AC2_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
