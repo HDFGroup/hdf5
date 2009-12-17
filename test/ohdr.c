@@ -343,6 +343,8 @@ main(void)
             /* Open the dataset with the "mark if unknown" message */
             if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
+
+            /* Close the dataset */
             if(H5Dclose(dset) < 0)
                 TEST_ERROR
 

@@ -3086,13 +3086,13 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 done:
     /* If the conversion buffer doesn't need to be freed, reset its pointer */
     if(write_to_file && noop_conv)
-        conv_buf=NULL;
+        conv_buf = NULL;
     /* Release the conversion buffer (always allocated, except on errors) */
-    if(conv_buf!=NULL)
-        H5FL_BLK_FREE(vlen_seq,conv_buf);
+    if(conv_buf)
+        conv_buf = H5FL_BLK_FREE(vlen_seq, conv_buf);
     /* Release the background buffer, if we have one */
-    if(tmp_buf!=NULL)
-        H5FL_BLK_FREE(vlen_seq,tmp_buf);
+    if(tmp_buf)
+        tmp_buf = H5FL_BLK_FREE(vlen_seq, tmp_buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -3238,7 +3238,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 done:
     /* Release the background buffer, if we have one */
     if(bkg_buf)
-        H5FL_BLK_FREE(array_seq, bkg_buf);
+        bkg_buf = H5FL_BLK_FREE(array_seq, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_conv_array() */

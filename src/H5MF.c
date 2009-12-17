@@ -58,7 +58,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static hbool_t H5MF_alloc_overflow(H5F_t *f, hsize_t size);
 
 
 /*********************/
@@ -94,9 +93,9 @@ static hbool_t H5MF_alloc_overflow(H5F_t *f, hsize_t size);
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    haddr_t	ret_value;
+    haddr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF)
 
@@ -138,7 +137,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
+H5MF_xfree(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -218,51 +217,6 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_realloc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5MF_alloc_overflow
- *
- * Purpose:	Checks if an allocation of file space would cause an overflow.
- *          F is the file whose space is being allocated, SIZE is the amount
- *          of space needed.
- *
- * Return:	FALSE if no overflow would result
- *          TRUE if overflow would result (the allocation should not be allowed)
- *
- * Programmer:	James Laird
- *		Nat Furrer
- *              Tuesday, June 1, 2004
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-H5MF_alloc_overflow(H5F_t *f, hsize_t size)
-{
-    haddr_t eoa;                /* End-of-allocation in the file */
-    haddr_t space_avail;        /* Unallocated space still available in file */
-    hbool_t ret_value;          /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_alloc_overflow)
-
-    /* Start with the current end of the file's address. */
-    eoa = H5F_get_eoa(f);
-    HDassert(H5F_addr_defined(eoa));
-
-    /* Subtract EOA from the file's maximum address to get the actual amount of
-     * addressable space left in the file.
-     */
-    HDassert(f->shared->maxaddr >= eoa);
-    space_avail = (hsize_t)(f->shared->maxaddr - eoa);
-
-    /* Ensure that there's enough room left in the file for something of this size */
-    if(size > space_avail)
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_alloc_overflow() */
 
 
 /*-------------------------------------------------------------------------

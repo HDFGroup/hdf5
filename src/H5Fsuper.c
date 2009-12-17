@@ -124,6 +124,7 @@
 /* Local Variables */
 /*******************/
 
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -743,7 +744,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Create the superblock extension for "extra" superblock data, if necessary. */
     if(need_ext) {
-        H5O_loc_t       ext_loc;            /* Superblock extension object location */
+        H5O_loc_t       ext_loc;    /* Superblock extension object location */
 
         /* The superblock extension isn't actually a group, but the
          * default group creation list should work fine.
@@ -975,6 +976,7 @@ done:
  *
  * Programmer:  Vailin Choi
  *              July 11, 2007
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

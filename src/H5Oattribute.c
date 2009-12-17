@@ -235,7 +235,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check if this object already has attribute information */
     if(oh->version > H5O_VERSION_1) {
@@ -400,7 +400,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_create() */
@@ -487,7 +487,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -532,7 +532,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_open_by_name() */
@@ -618,7 +618,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -645,9 +645,8 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     }
 
 done:
-    if(oh && H5AC_unprotect(loc->file, H5AC_ind_dxpl_id, H5AC_OHDR, loc->addr, oh, 
-        H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, H5AC_ind_dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_open_by_idx() */
@@ -830,7 +829,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name) == 0) {
+    if(0 == HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
         /* Update the shared attribute in the SOHM storage */
         if(mesg->flags & H5O_MSG_FLAG_SHARED)
             if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, udata->attr, (H5O_shared_t *)mesg->native) < 0)
@@ -882,7 +881,7 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -926,7 +925,7 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_write */
@@ -1018,7 +1017,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         if(H5A_set_version(udata->f, ((H5A_t *)mesg->native)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5_ITER_ERROR, "unable to update attribute version")
 
-        /* Mark message as dirty */
+        /* Mark the message as modified */
         mesg->dirty = TRUE;
 
         /* Check for shared message */
@@ -1114,7 +1113,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1169,7 +1168,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_rename */
@@ -1207,7 +1206,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1223,7 +1222,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
         /* Release the object header */
         if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
         /* Iterate over attributes in dense storage */
@@ -1238,7 +1237,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
         /* Release the object header */
         if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
         /* Check for skipping too many attributes */
@@ -1253,7 +1252,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 done:
     /* Release resources */
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
@@ -1381,9 +1380,8 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
                 /* Insert attribute message into object header (Will increment 
                    reference count on shared attributes) */
                 /* Find out whether the attribute has been opened */
-                if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, 
-                    (atable.attrs[u])->shared->name)) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+                if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, (atable.attrs[u])->shared->name)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "failed in finding opened attribute")
 
                 /* If found the attribute is already opened, use the opened message to insert.
                    If not, still use the message in the attribute table. */ 
@@ -1502,7 +1500,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1551,7 +1549,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_remove() */
@@ -1588,7 +1586,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1645,7 +1643,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
@@ -1770,7 +1768,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1806,7 +1804,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_exists */
@@ -1908,14 +1906,14 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve # of attributes on object */
     ret_value = (int)H5O_attr_count_real(loc->file, dxpl_id, oh);
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_count */

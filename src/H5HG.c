@@ -195,10 +195,10 @@ static haddr_t
 H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
-    haddr_t	ret_value = HADDR_UNDEF;
     uint8_t	*p = NULL;
     haddr_t	addr;
     size_t	n;
+    haddr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HG_create)
 
@@ -283,18 +283,15 @@ HDmemset(heap->chunk, 0, size);
     }
 
     /* Add the heap to the cache */
-    if (H5AC_set (f, dxpl_id, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET)<0)
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, \
-                     "unable to cache global heap collection");
+    if(H5AC_set(f, dxpl_id, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET)<0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to cache global heap collection")
 
     ret_value = addr;
 
 done:
-    if ( ! ( H5F_addr_defined(addr) ) && heap) {
-        if ( H5HG_dest(f,heap) < 0 )
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, \
-                        "unable to destroy global heap collection");
-    }
+    if(!(H5F_addr_defined(addr)) && heap)
+        if(H5HG_dest(f, heap) < 0)
+	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_create() */
@@ -1036,8 +1033,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
 
     HDassert(H5F_addr_defined(addr));
 
-    if ( NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)) )
-        HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     /* Split the free space to make room for the new object */
     idx = H5HG_alloc (f, heap, size, &heap_flags);
@@ -1058,8 +1055,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     hobj->idx = idx;
 
 done:
-    if ( heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0 )
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.");
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.")
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_insert() */
@@ -1208,7 +1205,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags)<0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

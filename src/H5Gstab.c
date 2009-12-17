@@ -35,7 +35,7 @@ typedef struct {
     /* downward */
     H5F_t      *file;           /* Pointer to file for query */
     const char *name;           /* Name to search for */
-    H5HL_t     *heap;           /* Local heap for group */
+    H5HL_t *heap;               /* Local heap for group */
 
     /* upward */
     H5O_link_t *lnk;            /* Caller's link location */
@@ -45,7 +45,7 @@ typedef struct {
 typedef struct H5G_bt_it_gnbi_t {
     /* downward */
     H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
-    H5HL_t      *heap;          /*symbol table heap 			     */
+    H5HL_t *heap;               /*symbol table heap 			     */
 
     /* upward */
     char         *name;         /*member name to be returned                 */
@@ -67,7 +67,7 @@ typedef struct H5G_bt_it_gtbi_t {
 typedef struct H5G_bt_it_lbi_t {
     /* downward */
     H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
-    H5HL_t      *heap;          /*symbol table heap 			     */
+    H5HL_t *heap;               /*symbol table heap 			     */
 
     /* upward */
     H5O_link_t *lnk;            /*link to be returned                        */
@@ -99,9 +99,9 @@ typedef struct H5G_bt_it_lbi_t {
 herr_t
 H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t dxpl_id)
 {
-    H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    size_t	name_offset;	        /* Offset of "" name	*/
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5HL_t *heap = NULL;            /* Pointer to local heap */
+    size_t name_offset;	            /* Offset of "" name */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_create_components, FAIL)
 
@@ -223,9 +223,9 @@ herr_t
 H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
     H5O_link_t *obj_lnk, hid_t dxpl_id)
 {
-    H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    H5G_bt_ins_t	udata;		/* Data to pass through B-tree	*/
-    herr_t              ret_value = SUCCEED;       /* Return value */
+    H5HL_t       *heap = NULL;          /* Pointer to local heap */
+    H5G_bt_ins_t udata;		        /* Data to pass through B-tree	*/
+    herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_insert_real, FAIL)
 
@@ -315,9 +315,9 @@ H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
     const char *name)
 {
     H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    H5O_stab_t		stab;		/*symbol table message		*/
-    H5G_bt_rm_t		udata;		/*data to pass through B-tree	*/
-    herr_t              ret_value = SUCCEED;       /* Return value */
+    H5O_stab_t	stab;		        /*symbol table message		*/
+    H5G_bt_rm_t	udata;		        /*data to pass through B-tree	*/
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_remove, FAIL)
 
@@ -367,11 +367,11 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
     H5_iter_order_t order, hsize_t n)
 {
     H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    H5O_stab_t		stab;		/* Symbol table message		*/
-    H5G_bt_rm_t	udata;		/* Data to pass through B-tree	*/
-    H5O_link_t          obj_lnk;        /* Object's link within group */
-    hbool_t             lnk_copied = FALSE;         /* Whether the link was copied */
-    herr_t              ret_value = SUCCEED;       /* Return value */
+    H5O_stab_t	stab;		        /* Symbol table message		*/
+    H5G_bt_rm_t udata;		        /* Data to pass through B-tree	*/
+    H5O_link_t  obj_lnk;                /* Object's link within group */
+    hbool_t     lnk_copied = FALSE;     /* Whether the link was copied */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_remove_by_idx, FAIL)
 
@@ -429,9 +429,9 @@ done:
 herr_t
 H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab)
 {
-    H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    H5G_bt_rm_t	udata;		/*data to pass through B-tree	*/
-    herr_t  ret_value = SUCCEED;
+    H5HL_t *heap = NULL;                /* Pointer to local heap */
+    H5G_bt_rm_t	udata;		        /*data to pass through B-tree	*/
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_delete, FAIL)
 
@@ -486,10 +486,10 @@ herr_t
 H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data)
 {
-    H5HL_t              *heap = NULL;           /* Local heap for group */
-    H5O_stab_t		stab;		        /* Info about symbol table */
+    H5HL_t *heap = NULL;                        /* Local heap for group */
+    H5O_stab_t stab;		                /* Info about symbol table */
     H5G_link_table_t ltable = {0, NULL};        /* Link table */
-    herr_t		ret_value;
+    herr_t ret_value;                           /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_iterate, FAIL)
 
@@ -703,10 +703,10 @@ ssize_t
 H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     char* name, size_t size, hid_t dxpl_id)
 {
-    H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    H5O_stab_t		stab;	        /* Info about local heap & B-tree */
-    H5G_bt_it_gnbi_t	udata;          /* Iteration information */
-    ssize_t		ret_value;      /* Return value */
+    H5HL_t *heap = NULL;        /* Pointer to local heap */
+    H5O_stab_t	stab;	        /* Info about local heap & B-tree */
+    H5G_bt_it_gnbi_t udata;     /* Iteration information */
+    ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_get_name_by_idx, FAIL)
 
@@ -822,10 +822,10 @@ herr_t
 H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
-    H5HL_t      *heap = NULL;   /* Pointer to local heap */
-    H5G_bt_lkp_t bt_udata;      /* Data to pass through B-tree	*/
-    H5G_stab_fnd_ud_t udata;    /* 'User data' to give to callback */
-    H5O_stab_t stab;		/* Symbol table message		*/
+    H5HL_t *heap = NULL;                /* Pointer to local heap */
+    H5G_bt_lkp_t bt_udata;              /* Data to pass through B-tree	*/
+    H5G_stab_fnd_ud_t udata;            /* 'User data' to give to callback */
+    H5O_stab_t stab;		        /* Symbol table message		*/
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_lookup, FAIL)
@@ -926,10 +926,10 @@ herr_t
 H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
     H5O_link_t *lnk, hid_t dxpl_id)
 {
-    H5HL_t      *heap = NULL;   /* Pointer to local heap */
-    H5G_bt_it_lbi_t udata;             /* Iteration information */
+    H5HL_t *heap = NULL;                /* Pointer to local heap */
+    H5G_bt_it_lbi_t udata;              /* Iteration information */
     H5O_stab_t stab;		        /* Symbol table message */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_lookup_by_idx, FAIL)
 

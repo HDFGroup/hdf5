@@ -1719,7 +1719,7 @@ done:
     /* Unprotect & close the object header if we opened one */
     if(oh && oh != open_oh) {
         if(H5AC_unprotect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
         if(H5O_close(&oloc) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object header")
@@ -2258,7 +2258,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 
             /* Load the object header from the cache */
             if(NULL == (oh = H5AC_protect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, NULL, NULL, H5AC_READ)))
-	        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
         } /* end if */
         else
             oh = open_oh;
@@ -2287,7 +2287,7 @@ done:
     /* Close the object header if we opened one and had an error */
     if(oh && oh != open_oh) {
         if(H5AC_unprotect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
         if(H5O_close(&oloc) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object header")

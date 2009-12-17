@@ -25,7 +25,7 @@
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Opublic.h"         /* File objects                         */
+#include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,

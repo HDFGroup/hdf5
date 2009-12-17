@@ -586,7 +586,7 @@ H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_offset(const H5S_t *space, hsize_t *offset)
+H5S_none_offset(const H5S_t UNUSED *space, hsize_t UNUSED *offset)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5S_none_offset)
 
@@ -775,23 +775,24 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Sselect_none (hid_t spaceid)
+herr_t
+H5Sselect_none(hid_t spaceid)
 {
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    herr_t ret_value;  /* return value */
+    H5S_t *space;       /* Dataspace to modify selection of */
+    herr_t ret_value;   /* return value */
 
-    FUNC_ENTER_API(H5Sselect_none, FAIL);
+    FUNC_ENTER_API(H5Sselect_none, FAIL)
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Change to "none" selection */
-    if((ret_value=H5S_select_none(space))<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    if((ret_value = H5S_select_none(space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sselect_none() */
 
 

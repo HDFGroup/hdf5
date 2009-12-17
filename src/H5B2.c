@@ -1053,6 +1053,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
     bt2_shared = bt2->shared;
+    HDassert(bt2_shared);
     H5RC_INC(bt2_shared);
     incr_rc = TRUE;
 

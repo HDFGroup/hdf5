@@ -2735,7 +2735,7 @@ H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "path doesn't exist")
 
     /* Set return value */
-    ret_value = exists;
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

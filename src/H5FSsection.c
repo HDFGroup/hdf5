@@ -27,6 +27,7 @@
 
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -35,6 +36,7 @@
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
+
 
 /****************/
 /* Local Macros */

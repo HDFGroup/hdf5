@@ -154,10 +154,10 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
     uint8_t             hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     uint8_t		*hdr;           /* Pointer to header buffer */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     H5B2_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_load)
 
     /* Check arguments */
     HDassert(f);
@@ -222,7 +222,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(p - hdr) == size);
+    HDassert((size_t)(p - (const uint8_t *)hdr) == size);
 
     /* Compute checksum on entire header */
     computed_chksum = H5_checksum_metadata(hdr, (size - H5B2_SIZEOF_CHKSUM), 0);
@@ -259,11 +259,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 1 2005
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *
  *-------------------------------------------------------------------------
  */
@@ -274,7 +269,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_flush)
 
     /* check arguments */
     HDassert(f);
@@ -472,8 +467,7 @@ H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t UNUSED *bt2, size_t *size_ptr)
  * Purpose:	Loads a B-tree internal node from the disk.
  *
  * Return:	Success:	Pointer to a new B-tree internal node.
- *
- *		Failure:	NULL
+ *              Failure:        NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -487,7 +481,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     const H5B2_int_load_ud1_t *udata = (const H5B2_int_load_ud1_t *)_udata;     /* Pointer to user data */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     H5B2_internal_t	*internal = NULL;       /* Internal node read */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -495,7 +489,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_load)
 
     /* Check arguments */
     HDassert(f);
@@ -574,13 +568,13 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - (const uint8_t *)shared->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - shared->page) <= shared->node_size);
+    HDassert((size_t)(p - (const uint8_t *)shared->page) <= shared->node_size);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -592,6 +586,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
 done:
     if(!ret_value && internal)
         (void)H5B2_cache_internal_dest(f, internal);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_load() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -606,11 +601,6 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Feb 3 2005
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *
  *-------------------------------------------------------------------------
  */
@@ -619,7 +609,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_flush)
 
     /* check arguments */
     HDassert(f);
@@ -828,7 +818,6 @@ H5B2_cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal,
  * Purpose:	Loads a B-tree leaf from the disk.
  *
  * Return:	Success:	Pointer to a new B-tree leaf node.
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -844,14 +833,14 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     H5RC_t 		*bt2_shared = (H5RC_t *)_bt2_shared;        /* Shared B-tree information */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_load)
 
     /* Check arguments */
     HDassert(f);
@@ -909,13 +898,13 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - shared->page), 0);
+    computed_chksum = H5_checksum_metadata(shared->page, (size_t)(p - (const uint8_t *)shared->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - shared->page) <= shared->node_size);
+    HDassert((size_t)(p - (const uint8_t *)shared->page) <= shared->node_size);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -927,6 +916,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
 done:
     if(!ret_value && leaf)
         (void)H5B2_cache_leaf_dest(f,leaf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -942,13 +932,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Feb 2 2005
  *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -956,7 +939,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_flush)
 
     /* check arguments */
     HDassert(f);
