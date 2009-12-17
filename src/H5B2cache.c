@@ -157,10 +157,10 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
     uint8_t             hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     uint8_t		*buf;           /* Pointer to header buffer */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     H5B2_hdr_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_load)
 
     /* Check arguments */
     HDassert(f);
@@ -224,7 +224,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(p - buf) == size);
+    HDassert((size_t)(p - (const uint8_t *)buf) == size);
 
     /* Compute checksum on entire header */
     computed_chksum = H5_checksum_metadata(buf, (size - H5B2_SIZEOF_CHKSUM), 0);
@@ -277,7 +277,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_flush)
 
     /* check arguments */
     HDassert(f);
@@ -484,7 +484,7 @@ H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_p
  * Purpose:	Loads a B-tree internal node from the disk.
  *
  * Return:	Success:	Pointer to a new B-tree internal node.
- *		Failure:	NULL
+ *              Failure:        NULL
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -497,7 +497,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
 {
     const H5B2_int_load_ud1_t *udata = (const H5B2_int_load_ud1_t *)_udata;     /* Pointer to user data */
     H5B2_internal_t	*internal = NULL;       /* Internal node read */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -505,7 +505,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_load)
 
     /* Check arguments */
     HDassert(f);
@@ -586,13 +586,13 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(udata->hdr->page, (size_t)(p - udata->hdr->page), 0);
+    computed_chksum = H5_checksum_metadata(udata->hdr->page, (size_t)(p - (const uint8_t *)udata->hdr->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - udata->hdr->page) <= udata->hdr->node_size);
+    HDassert((size_t)(p - (const uint8_t *)udata->hdr->page) <= udata->hdr->node_size);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -604,6 +604,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
 done:
     if(!ret_value && internal)
         (void)H5B2_cache_internal_dest(f, internal);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_load() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -626,7 +627,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_flush)
 
     /* check arguments */
     HDassert(f);
@@ -855,14 +856,14 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     const uint16_t      *nrec = (const uint16_t *)_nrec;
     H5B2_hdr_t 	        *hdr = (H5B2_hdr_t *)_hdr;  /* B-tree header information */
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_load)
 
     /* Check arguments */
     HDassert(f);
@@ -923,13 +924,13 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     } /* end for */
 
     /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(hdr->page, (size_t)(p - hdr->page), 0);
+    computed_chksum = H5_checksum_metadata(hdr->page, (size_t)(p - (const uint8_t *)hdr->page), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check parsing */
-    HDassert((size_t)(p - hdr->page) <= hdr->node_size);
+    HDassert((size_t)(p - (const uint8_t *)hdr->page) <= hdr->node_size);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -941,6 +942,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
 done:
     if(!ret_value && leaf)
         (void)H5B2_cache_leaf_dest(f, leaf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -963,7 +965,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_flush)
 
     /* check arguments */
     HDassert(f);

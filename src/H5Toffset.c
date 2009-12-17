@@ -94,7 +94,7 @@ H5Tget_offset(hid_t type_id)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
-    if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
 
     /* Get offset */
@@ -198,14 +198,14 @@ done:
 herr_t
 H5Tset_offset(hid_t type_id, size_t offset)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_offset, FAIL)
     H5TRACE2("e", "iz", type_id, offset);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
     if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")

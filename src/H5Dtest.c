@@ -35,25 +35,31 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*--------------------------------------------------------------------------
@@ -78,8 +84,8 @@
 herr_t
 H5D_layout_version_test(hid_t did, unsigned *version)
 {
-    H5D_t	*dset;          /* Pointer to dataset to query */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5D_t	*dset;              /* Pointer to dataset to query */
+    herr_t ret_value = SUCCEED;     /* return value */
 
     FUNC_ENTER_NOAPI(H5D_layout_version_test, FAIL)
 
@@ -118,7 +124,7 @@ herr_t
 H5D_layout_contig_size_test(hid_t did, hsize_t *size)
 {
     H5D_t	*dset;          /* Pointer to dataset to query */
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI(H5D_layout_contig_size_test, FAIL)
 

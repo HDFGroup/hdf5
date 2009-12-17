@@ -770,12 +770,12 @@ done:
     if(ret_value == NULL) {
         if(dt) {
             if(shared_fo == NULL)   /* Need to free shared fo */
-                H5FL_FREE(H5T_shared_t, dt->shared);
+                dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
 
             H5O_loc_free(&(dt->oloc));
             H5G_name_free(&(dt->path));
 
-            H5FL_FREE(H5T_t, dt);
+            dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
 
         if(shared_fo)

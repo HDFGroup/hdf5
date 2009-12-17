@@ -320,7 +320,7 @@ H5FO_marked(const H5F_t *f, haddr_t addr)
 
     /* Get the object node from the container */
     if(NULL != (open_obj = (H5FO_open_obj_t *)H5SL_search(f->shared->open_objs, &addr)))
-        ret_value = (htri_t)open_obj->deleted;
+        ret_value = open_obj->deleted;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_marked() */

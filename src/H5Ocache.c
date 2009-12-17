@@ -134,9 +134,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     haddr_t     eoa;		/* Relative end of file address	*/
     H5O_t	*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_load)
 
-    /* check args */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(!_udata1);
@@ -154,7 +154,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header")
     p = read_buf;
 
-    /* allocate ohdr and init chunk list */
+    /* Allocate space for the object header data structure */
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -162,7 +162,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
-    /* Check for magic number */
+    /* Check for presence of magic number */
     /* (indicates version 2 or later) */
     if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /* Magic number */
@@ -267,12 +267,12 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 (nmesgs == 0 && chunk_size > 0))
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header chunk size")
 
-        /* Reserved, in version 1 */
+        /* Reserved, in version 1 (for 8-byte alignment padding) */
         p += 4;
     } /* end else */
 
     /* Determine object header prefix length */
-    prefix_size = (size_t)(p - read_buf);
+    prefix_size = (size_t)(p - (const uint8_t *)read_buf);
     HDassert((size_t)prefix_size == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Compute first chunk address */
@@ -281,7 +281,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Allocate the message array */
     oh->alloc_nmesgs = (nmesgs > 0) ? nmesgs : 1;
     if(NULL == (oh->mesg = H5FL_SEQ_MALLOC(H5O_mesg_t, oh->alloc_nmesgs)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Read each chunk from disk */
     while(H5F_addr_defined(chunk_addr)) {
@@ -297,7 +297,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    H5O_chunk_t *x = H5FL_SEQ_REALLOC(H5O_chunk_t, oh->chunk, (size_t)na);
 
 	    if(!x)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 	    oh->alloc_nchunks = na;
 	    oh->chunk = x;
 	} /* end if */
@@ -316,7 +316,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             oh->chunk[chunkno].size = chunk_size;
         } /* end else */
 	if(NULL == (oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, oh->chunk[chunkno].size)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
         /* Handle chunk 0 as special case */
         if(chunkno == 0) {
@@ -400,7 +400,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             if(oh->version == H5O_VERSION_1)
                 p += 3; /*reserved*/
             else {
-                /* Only encode creation index if they are being tracked */
+                /* Only decode creation index if they are being tracked */
                 if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
                     UINT16DECODE(p, crt_idx);
             } /* end else */
@@ -433,7 +433,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 /* Check if we need to extend message table to hold the new message */
                 if(oh->nmesgs >= oh->alloc_nmesgs)
                     if(H5O_alloc_msgs(oh, (size_t)1) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate more space for messages")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate more space for messages")
 
                 /* Get index for message */
                 mesgno = oh->nmesgs++;
@@ -454,12 +454,12 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
                     /* Allocate "unknown" message info */
                     if(NULL == (unknown = H5FL_MALLOC(H5O_unknown_t)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
                     /* Save the original message type ID */
                     *unknown = id;
 
-                    /* Save 'native' form of continuation message */
+                    /* Save 'native' form of unknown message */
                     oh->mesg[mesgno].native = unknown;
 
                     /* Set message to "unknown" class */
@@ -645,22 +645,16 @@ done:
  *		matzke@llnl.gov
  *		Aug  5 1997
  *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *oh, unsigned UNUSED * flags_ptr)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_flush)
 
-    /* check args */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(oh);

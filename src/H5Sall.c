@@ -630,7 +630,7 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_offset(const H5S_t *space, hsize_t *offset)
+H5S_all_offset(const H5S_t UNUSED *space, hsize_t *offset)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5S_all_offset)
 

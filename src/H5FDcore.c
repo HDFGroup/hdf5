@@ -752,7 +752,7 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 
             /* Get property */
             if(H5P_get(plist, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of retrieving file descriptor")
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get property of retrieving file descriptor")
 
             /* If property is set, pass back the file descriptor instead of the memory address */
             if(want_posix_fd)

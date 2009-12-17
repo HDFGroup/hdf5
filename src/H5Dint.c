@@ -58,7 +58,8 @@ typedef struct {
 /* General stuff */
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
-static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating,
+    hbool_t vl_type);
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
@@ -522,8 +523,8 @@ done:
 static H5D_shared_t *
 H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 {
-    H5P_genplist_t  *plist;             /* Property list created */
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
+    H5P_genplist_t  *plist;             /* Property list created */
     H5D_shared_t    *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_new)
@@ -540,7 +541,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
      */
     if(!vl_type && creating && dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
         if(H5I_inc_ref(dcpl_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "Can't increment default DCPL ID")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment default DCPL ID")
         new_dset->dcpl_id = dcpl_id;
     } /* end if */
     else {

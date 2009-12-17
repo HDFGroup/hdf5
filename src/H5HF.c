@@ -785,7 +785,7 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
 {
     hbool_t pending_delete = FALSE;     /* Whether the heap is pending deletion */
     haddr_t heap_addr = HADDR_UNDEF;    /* Address of heap (for deletion) */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_close, FAIL)
 

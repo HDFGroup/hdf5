@@ -2508,21 +2508,13 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		Reworked for the addition of the config_ptr parameter.
- *							JRM -- 4/7/05
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_config(hid_t file_id,
-		  H5AC_cache_config_t *config_ptr)
+H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    herr_t     result;
-    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_mdc_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
@@ -2534,18 +2526,11 @@ H5Fget_mdc_config(hid_t file_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
     /* Go get the resize configuration */
-    result = H5AC_get_cache_auto_resize_config(file->shared->cache, config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_auto_resize_config() failed.");
-    }
+    if(H5AC_get_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_auto_resize_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_config() */
 
 
@@ -2562,20 +2547,13 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fset_mdc_config(hid_t file_id,
-		  H5AC_cache_config_t *config_ptr)
+H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    herr_t     result;
-    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fset_mdc_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
@@ -2585,18 +2563,11 @@ H5Fset_mdc_config(hid_t file_id,
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* set the resize configuration  */
-    result = H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "H5AC_set_cache_auto_resize_config() failed.");
-    }
+    if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fset_mdc_config() */
 
 
@@ -2614,20 +2585,13 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_hit_rate(hid_t file_id,
-                    double *hit_rate_ptr)
+H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    herr_t     result;
-    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_mdc_hit_rate, FAIL)
     H5TRACE2("e", "i*d", file_id, hit_rate_ptr);
@@ -2640,18 +2604,11 @@ H5Fget_mdc_hit_rate(hid_t file_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
 
     /* Go get the current hit rate */
-    result = H5AC_get_cache_hit_rate(file->shared->cache, hit_rate_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_hit_rate() failed.");
-    }
+    if(H5AC_get_cache_hit_rate(file->shared->cache, hit_rate_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_hit_rate() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_hit_rate() */
 
 
@@ -2670,24 +2627,15 @@ done:
  * Programmer:  John Mainzer
  *              3/24/05
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_mdc_size(hid_t file_id,
-                size_t *max_size_ptr,
-                size_t *min_clean_size_ptr,
-                size_t *cur_size_ptr,
-                int *cur_num_entries_ptr)
+H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+    size_t *cur_size_ptr, int *cur_num_entries_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
     int32_t    cur_num_entries;
-    herr_t     result;
-    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_mdc_size, FAIL)
     H5TRACE5("e", "i*z*z*z*Is", file_id, max_size_ptr, min_clean_size_ptr,
@@ -2698,26 +2646,15 @@ H5Fget_mdc_size(hid_t file_id,
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the size data */
-    result = H5AC_get_cache_size(file->shared->cache,
-                                 max_size_ptr,
-                                 min_clean_size_ptr,
-                                 cur_size_ptr,
-                                 &cur_num_entries);
+    if(H5AC_get_cache_size(file->shared->cache, max_size_ptr,
+            min_clean_size_ptr, cur_size_ptr, &cur_num_entries) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_size() failed.");
-
-    } else if ( cur_num_entries_ptr != NULL ) {
-
+    if(cur_num_entries_ptr != NULL)
 	*cur_num_entries_ptr = (int)cur_num_entries;
-    }
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_mdc_size() */
 
 
@@ -2738,10 +2675,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/24/05
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */

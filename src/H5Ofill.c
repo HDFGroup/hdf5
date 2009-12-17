@@ -556,7 +556,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                     H5I_dec_ref(src_id, FALSE);
                     H5I_dec_ref(dst_id, FALSE);
                     if(bkg_buf)
-                        (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                        bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "datatype conversion failed")
                 } /* end if */
 
@@ -564,7 +564,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                 H5I_dec_ref(src_id, FALSE);
                 H5I_dec_ref(dst_id, FALSE);
                 if(bkg_buf)
-                    (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                    bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
         } /* end if */
     } /* end if */

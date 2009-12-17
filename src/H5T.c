@@ -2367,7 +2367,7 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             } /* end if */
             H5T_close(old_path->src);
             H5T_close(old_path->dst);
-            H5FL_FREE(H5T_path_t,old_path);
+            old_path = H5FL_FREE(H5T_path_t, old_path);
 
             /* Release temporary atoms */
             H5I_dec_ref(tmp_sid, FALSE);
@@ -2380,17 +2380,17 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     } /* end else */
 
 done:
-    if (ret_value<0) {
-	if (new_path) {
-	    if (new_path->src)
+    if(ret_value < 0) {
+	if(new_path) {
+	    if(new_path->src)
                 H5T_close(new_path->src);
-	    if (new_path->dst)
+	    if(new_path->dst)
                 H5T_close(new_path->dst);
-            H5FL_FREE(H5T_path_t,new_path);
+            new_path = H5FL_FREE(H5T_path_t, new_path);
 	} /* end if */
-	if (tmp_sid>=0)
+	if(tmp_sid >= 0)
             H5I_dec_ref(tmp_sid, FALSE);
-	if (tmp_did>=0)
+	if(tmp_did >= 0)
             H5I_dec_ref(tmp_did, FALSE);
     } /* end if */
 
@@ -2541,7 +2541,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             }
             H5T_close(path->src);
             H5T_close(path->dst);
-            H5FL_FREE(H5T_path_t,path);
+            path = H5FL_FREE(H5T_path_t, path);
             H5E_clear_stack(NULL); /*ignore all shutdown errors*/
         } /* end else */
     } /* end for */
@@ -2862,7 +2862,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
     FUNC_ENTER_NOAPI_NOINIT(H5T_encode)
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc((size_t)0)))
+    if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate fake file struct")
 
     /* Find out the size of buffer needed */
@@ -2918,7 +2918,7 @@ H5T_decode(const unsigned char *buf)
     FUNC_ENTER_NOAPI_NOINIT(H5T_decode)
 
     /* Allocate "fake" file structure */
-    if(NULL == (f = H5F_fake_alloc((size_t)0)))
+    if(NULL == (f = H5F_fake_alloc((uint8_t)0)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode the type of the information */
@@ -3041,8 +3041,8 @@ H5T_create(H5T_class_t type, size_t size)
 done:
     if(NULL == ret_value) {
         if(dt) {
-            H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t,dt);
+            dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
     } /* end if */
 
@@ -3331,8 +3331,8 @@ done:
     if(ret_value == NULL) {
         if(new_dt) {
             if(new_dt->shared)
-                H5FL_FREE(H5T_shared_t, new_dt->shared);
-            H5FL_FREE(H5T_t, new_dt);
+                new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
+            new_dt = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
     } /* end if */
 
@@ -3425,8 +3425,8 @@ done:
     if(ret_value == NULL)
         if(dt) {
             if(dt->shared)
-                H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t, dt);
+                dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3562,7 +3562,7 @@ H5T_close(H5T_t *dt)
         if(H5T_free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
-        H5FL_FREE(H5T_shared_t, dt->shared);
+        dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
     } else {
         /*
          * If a named type is being closed then close the object header and
@@ -3588,7 +3588,7 @@ H5T_close(H5T_t *dt)
     } /* end else */
 
     /* Free the datatype struct */
-    H5FL_FREE(H5T_t,dt);
+    dt = H5FL_FREE(H5T_t, dt);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4482,7 +4482,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
             H5T_close(table->src);
 	if(table->dst)
             H5T_close(table->dst);
-        H5FL_FREE(H5T_path_t, table);
+        table = H5FL_FREE(H5T_path_t, table);
 	table = path;
 	H5T_g.path[md] = path;
     } else if(path != table) {
@@ -4518,7 +4518,7 @@ done:
             H5T_close(path->src);
 	if(path->dst)
             H5T_close(path->dst);
-        H5FL_FREE(H5T_path_t, path);
+        path = H5FL_FREE(H5T_path_t, path);
     } /* end if */
     if(src_id >= 0)
         H5I_dec_ref(src_id, FALSE);

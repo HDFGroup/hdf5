@@ -59,19 +59,19 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     H5HL_free_t		*freelist = NULL;
     uint8_t		*marker = NULL;
     size_t		amount_free = 0;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t              ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HL_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_debug, FAIL)
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
     if (NULL == (h = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     fprintf(stream, "%*sLocal Heap...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
@@ -91,40 +91,38 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
      * Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
      * the heap.  */
-    if (NULL==(marker = (uint8_t *)H5MM_calloc(h->heap_alloc)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if(NULL == (marker = (uint8_t *)H5MM_calloc(h->heap_alloc)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
     fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
 
-    for (free_block=0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
+    for(free_block = 0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
         char temp_str[32];
 
         sprintf(temp_str,"Block #%d:",free_block);
 	HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent+3, "", MAX(0,fwidth-9),
 		temp_str,
 		freelist->offset, freelist->size);
-	if (freelist->offset + freelist->size > h->heap_alloc) {
+	if(freelist->offset + freelist->size > h->heap_alloc)
 	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
-	} else {
-	    for (i=overlap=0; i<(int)(freelist->size); i++) {
-		if (marker[freelist->offset + i])
+	else {
+	    for(i = overlap = 0; i < (int)(freelist->size); i++) {
+		if(marker[freelist->offset + i])
 		    overlap++;
 		marker[freelist->offset + i] = 1;
-	    }
-	    if (overlap) {
+	    } /* end for */
+	    if(overlap)
 		fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS "
 			"ONE!\n");
-	    } else {
+	    else
 		amount_free += freelist->size;
-	    }
-	}
-    }
+	} /* end for */
+    } /* end for */
 
-    if (h->heap_alloc) {
+    if(h->heap_alloc)
 	fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
 		"Percent of heap used:",
 		(100.0 * (double)(h->heap_alloc - amount_free) / (double)h->heap_alloc));
-    }
 
     /*
      * Print the data in a VMS-style octal dump.
@@ -132,9 +130,10 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     H5_buffer_dump(stream, indent, h->chunk, marker, H5HL_SIZEOF_HDR(f), h->heap_alloc);
 
 done:
-    if (h && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, FALSE) != SUCCEED)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+    if(h && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, FALSE) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
     H5MM_xfree(marker);
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_debug() */
+

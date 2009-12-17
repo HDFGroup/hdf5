@@ -2248,7 +2248,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 
             /* Load the object header from the cache */
             if(NULL == (oh = (H5O_t *)H5AC_protect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, NULL, NULL, H5AC_READ)))
-	        HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, FAIL, "unable to load object header")
+	        HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load object header")
         } /* end if */
         else
             oh = open_oh;
