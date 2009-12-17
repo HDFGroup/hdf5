@@ -256,8 +256,8 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 		tail = tmp;
 
 		/* Check that the keys are monotonically increasing */
-		cmp = (type->cmp2) (f, dxpl_id, H5B_NKEY(bt,shared,i), udata,
-				    H5B_NKEY(bt,shared,i+1));
+		cmp = (type->cmp2)(f, dxpl_id, H5B_NKEY(bt, shared, i), udata,
+				    H5B_NKEY(bt, shared, i + 1));
 		assert(cmp < 0);
 	    }
 	}

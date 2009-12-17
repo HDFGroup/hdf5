@@ -2920,7 +2920,6 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 {
     const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
-    H5D_rdcc_ent_t	*ent = NULL;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_unlock)
@@ -2954,6 +2953,8 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         } /* end else */
     } /* end if */
     else {
+        H5D_rdcc_ent_t	*ent;   /* Chunk's entry in the cache */
+
         /* Sanity check */
 	HDassert(idx_hint < rdcc->nslots);
 	HDassert(rdcc->slot[idx_hint]);

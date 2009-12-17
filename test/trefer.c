@@ -30,18 +30,15 @@
 #define FILE3	"trefer3.h5"
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
 #define SPACE1_RANK	1
 #define SPACE1_DIM1	4
 
 /* 2-D dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
 #define SPACE2_RANK	2
 #define SPACE2_DIM1	10
 #define SPACE2_DIM2	10
 
 /* Larger 1-D dataset with fixed dimensions */
-#define SPACE3_NAME  "Space3"
 #define SPACE3_RANK	1
 #define SPACE3_DIM1	100
 

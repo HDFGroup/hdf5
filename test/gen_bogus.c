@@ -25,7 +25,9 @@
 #include "hdf5.h"
 #include "H5Oprivate.h"
 
+#ifdef H5O_ENABLE_BOGUS
 #define FILENAME "tbogus.h5"
+#endif /* H5O_ENABLE_BOGUS */
 
 #ifndef TRUE
 #define TRUE 1

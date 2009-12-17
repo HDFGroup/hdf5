@@ -44,6 +44,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5SMprivate.h"        /* Shared object header messages        */
 
 
 /****************/

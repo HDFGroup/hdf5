@@ -79,5 +79,7 @@ main(void)
     H5Dclose(dset_id);
     H5Sclose(space_id);
     H5Fclose(file_id);
+
+    return(0);
 }
 

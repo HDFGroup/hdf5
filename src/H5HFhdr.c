@@ -271,12 +271,6 @@ H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr)
         else
             if(H5HF_hdr_compute_free_space(hdr, u) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize direct block free space for indirect block")
-#ifdef QAK
-HDfprintf(stderr, "%s: row_block_size[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_block_size[u]);
-HDfprintf(stderr, "%s: row_block_off[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_block_off[u]);
-HDfprintf(stderr, "%s: row_tot_dblock_free[%Zu] = %Hu\n", FUNC, u, hdr->man_dtable.row_tot_dblock_free[u]);
-HDfprintf(stderr, "%s: row_max_dblock_free[%Zu] = %Zu\n", FUNC, u, hdr->man_dtable.row_max_dblock_free[u]);
-#endif /* QAK */
     } /* end for */
 
     /* Initialize the block iterator for searching for free space */
@@ -444,9 +438,6 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         /* Compute the I/O filters' encoded size */
         if(0 == (hdr->filter_len = H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, HADDR_UNDEF, "can't get I/O filter pipeline size")
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
-#endif /* QAK */
 
         /* Compute size of header on disk */
         hdr->heap_size = H5HF_HEADER_SIZE(hdr)  /* Base header size */
@@ -496,9 +487,6 @@ HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
             hdr->id_len = cparam->id_len;
             break;
     } /* end switch */
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
-#endif /* QAK */
 
     /* Second phase of header final initialization */
     /* (needs ID and filter lengths set up) */
@@ -682,9 +670,6 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_dirty)
-#ifdef QAK
-HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -717,9 +702,6 @@ H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_adj_free)
-#ifdef QAK
-HDfprintf(stderr, "%s: amt = %Zd\n", FUNC, amt);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -729,9 +711,6 @@ HDfprintf(stderr, "%s: amt = %Zd\n", FUNC, amt);
     /* Update heap header */
     HDassert(amt > 0 || hdr->total_man_free >= (hsize_t)-amt);
     hdr->total_man_free += amt;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
-#endif /* QAK */
 
     /* Mark heap header as modified */
     if(H5HF_hdr_dirty(hdr) < 0)
@@ -766,12 +745,6 @@ H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
      * Check arguments.
      */
     HDassert(hdr);
-#ifdef QAK
-HDfprintf(stderr, "%s; new_size = %Hu, extra_free = %Hd\n", FUNC, new_size, extra_free);
-HDfprintf(stderr, "%s; hdr->total_size = %Hu\n", FUNC, hdr->total_size);
-HDfprintf(stderr, "%s; hdr->man_size = %Hu\n", FUNC, hdr->man_size);
-HDfprintf(stderr, "%s; hdr->total_man_free = %Hu\n", FUNC, hdr->total_man_free);
-#endif /* QAK */
 
     /* Set the total managed space in heap */
     hdr->man_size = new_size;
@@ -814,9 +787,6 @@ H5HF_hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
 
     /* Update the "allocated" size within the heap */
     hdr->man_alloc_size += alloc_size;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_alloc_size = %Hu\n", "H5HF_hdr_inc_alloc", hdr->man_alloc_size);
-#endif /* QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_hdr_inc_alloc() */
@@ -890,9 +860,6 @@ H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
     /* Set the offset of the iterator in the heap */
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu, curr_off = %Hu\n", FUNC, hdr->man_iter_off, curr_off);
-#endif /* QAK */
     hdr->man_iter_off = curr_off;
 
 done:
@@ -922,9 +889,6 @@ H5HF_hdr_skip_blocks(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *iblock,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_skip_blocks)
-#ifdef QAK
-HDfprintf(stderr, "%s: start_entry = %u, nentries = %u\n", FUNC, start_entry, nentries);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -937,17 +901,11 @@ HDfprintf(stderr, "%s: start_entry = %u, nentries = %u\n", FUNC, start_entry, ne
     row = start_entry / hdr->man_dtable.cparam.width;
     col = start_entry % hdr->man_dtable.cparam.width;
     sect_size = H5HF_dtable_span_size(&hdr->man_dtable, row, col, nentries);
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 1.0 - hdr->man_iter_off = %Hu, sect_size = %Hu\n", FUNC, hdr->man_iter_off, sect_size);
-#endif /* QAK */
     HDassert(sect_size > 0);
 
     /* Advance the new block iterator */
     if(H5HF_hdr_inc_iter(hdr, sect_size, nentries) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't increase allocated heap size")
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 2.0 - hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
-#endif /* QAK */
 
     /* Add 'indirect' section for blocks skipped in this row */
     if(H5HF_sect_indirect_add(hdr, dxpl_id, iblock, start_entry, nentries) < 0)
@@ -980,9 +938,6 @@ H5HF_hdr_update_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_size)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_update_iter)
-#ifdef QAK
-HDfprintf(stderr, "%s: min_dblock_size = %Zu\n", FUNC, min_dblock_size);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -992,9 +947,6 @@ HDfprintf(stderr, "%s: min_dblock_size = %Zu\n", FUNC, min_dblock_size);
 
     /* Check for creating first indirect block */
     if(hdr->man_dtable.curr_root_rows == 0) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Creating root direct block\n", FUNC);
-#endif /* QAK */
         if(H5HF_man_iblock_root_create(hdr, dxpl_id, min_dblock_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "unable to create root indirect block")
     } /* end if */
@@ -1005,21 +957,11 @@ HDfprintf(stderr, "%s: Creating root direct block\n", FUNC);
         unsigned next_entry;            /* Iterator's next block entry */
         unsigned min_dblock_row;        /* Minimum row for direct block size request */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: searching root indirect block\n", FUNC);
-#endif /* QAK */
         /* Compute min. row for direct block requested */
         min_dblock_row = H5HF_dtable_size_to_row(&hdr->man_dtable, min_dblock_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: min_dblock_size = %Zu, min_dblock_row = %u\n", FUNC, min_dblock_size, min_dblock_row);
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
-#endif /* QAK */
 
         /* Initialize block iterator, if necessary */
         if(!H5HF_man_iter_ready(&hdr->next_block)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
-#endif /* QAK */
             /* Start iterator with previous offset of iterator */
             if(H5HF_man_iter_start_offset(hdr, dxpl_id, &hdr->next_block, hdr->man_iter_off) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to set block iterator location")
@@ -1029,14 +971,6 @@ HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
         if(H5HF_man_iter_curr(&hdr->next_block, &next_row, NULL, &next_entry, &iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator location")
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 1.0\n", FUNC);
-HDfprintf(stderr, "%s: iblock = %p\n", FUNC, iblock);
-HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
-HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
-HDfprintf(stderr, "%s: next_row = %u\n", FUNC, next_row);
-HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
-#endif /* QAK */
         /* Check for skipping over blocks in the current block */
         if(min_dblock_row > next_row && next_row < iblock->nrows) {
             unsigned min_entry;         /* Min entry for direct block requested */
@@ -1048,9 +982,6 @@ HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
                 skip_entries = (iblock->nrows * hdr->man_dtable.cparam.width) - next_entry;
             else
                 skip_entries = min_entry - next_entry;
-#ifdef QAK
-HDfprintf(stderr, "%s: min_entry = %u, skip_entries = %u\n", FUNC, min_entry, skip_entries);
-#endif /* QAK */
 
             /* Add skipped direct blocks to heap's free space */
             if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, skip_entries) < 0)
@@ -1065,33 +996,15 @@ HDfprintf(stderr, "%s: min_entry = %u, skip_entries = %u\n", FUNC, min_entry, sk
             /* Reset conditions for leaving loop */
             walked_up = walked_down = FALSE;
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
-HDfprintf(stderr, "%s: iblock = %p\n", FUNC, iblock);
-HDfprintf(stderr, "%s: iblock->block_off = %Hu\n", FUNC, iblock->block_off);
-HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
-HDfprintf(stderr, "%s: next_row = %u\n", FUNC, next_row);
-HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
-#endif /* QAK */
-
             /* Check for walking off end of indirect block */
             /* (walk up iterator) */
             while(next_row >= iblock->nrows) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Off the end of a block, next_row = %u, iblock->nrows = %u\n", FUNC, next_row, iblock->nrows);
-#endif /* QAK */
                 /* Check for needing to expand root indirect block */
                 if(iblock->parent == NULL) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Doubling root block\n", FUNC);
-#endif /* QAK */
                     if(H5HF_man_iblock_root_double(hdr, dxpl_id, min_dblock_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "unable to double root indirect block")
                 } /* end if */
                 else {
-#ifdef QAK
-HDfprintf(stderr, "%s: Walking up a level\n", FUNC);
-#endif /* QAK */
                     /* Move iterator up one level */
                     if(H5HF_man_iter_up(&hdr->next_block) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL, "unable to advance current block iterator location")
@@ -1108,36 +1021,16 @@ HDfprintf(stderr, "%s: Walking up a level\n", FUNC);
                 /* Indicate that we walked up */
                 walked_up = TRUE;
             } /* end while */
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 3.0\n", FUNC);
-HDfprintf(stderr, "%s: iblock = %p\n", FUNC, iblock);
-HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
-HDfprintf(stderr, "%s: next_row = %u\n", FUNC, next_row);
-HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
-#endif /* QAK */
 
             /* Check for walking into child indirect block */
             /* (walk down iterator) */
             if(next_row >= hdr->man_dtable.max_direct_rows) {
                 unsigned child_nrows;   /* Number of rows in new indirect block */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Walking down into child indirect block\n", FUNC);
-#endif /* QAK */
-#ifdef QAK
-HDfprintf(stderr, "%s: Check 3.1\n", FUNC);
-HDfprintf(stderr, "%s: iblock = %p\n", FUNC, iblock);
-HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
-HDfprintf(stderr, "%s: next_row = %u\n", FUNC, next_row);
-HDfprintf(stderr, "%s: next_entry = %u\n", FUNC, next_entry);
-#endif /* QAK */
                 HDassert(!H5F_addr_defined(iblock->ents[next_entry].addr));
 
                 /* Compute # of rows in next child indirect block to use */
                 child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[next_row]);
-#ifdef QAK
-HDfprintf(stderr, "%s: child_nrows = %u\n", FUNC, child_nrows);
-#endif /* QAK */
 
                 /* Check for skipping over indirect blocks */
                 /* (that don't have direct blocks large enough to hold direct block size requested) */
@@ -1145,19 +1038,12 @@ HDfprintf(stderr, "%s: child_nrows = %u\n", FUNC, child_nrows);
                     unsigned child_rows_needed;     /* Number of rows needed to hold direct block */
                     unsigned child_entry;           /* Entry of child indirect block */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Skipping indirect block row that is too small\n", FUNC);
-#endif /* QAK */
                     /* Compute # of rows needed in child indirect block */
                     child_rows_needed = (H5V_log2_of2((uint32_t)min_dblock_size) - H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size)) + 2;
                     HDassert(child_rows_needed > child_nrows);
                     child_entry = (next_row + (child_rows_needed - child_nrows)) * hdr->man_dtable.cparam.width;
                     if(child_entry > (iblock->nrows * hdr->man_dtable.cparam.width))
                         child_entry = iblock->nrows * hdr->man_dtable.cparam.width;
-#ifdef QAK
-HDfprintf(stderr, "%s: child_rows_needed = %u\n", FUNC, child_rows_needed);
-HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
-#endif /* QAK */
 
                     /* Add skipped indirect blocks to heap's free space */
                     if(H5HF_hdr_skip_blocks(hdr, dxpl_id, iblock, next_entry, (child_entry - next_entry)) < 0)
@@ -1168,9 +1054,6 @@ HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
                     hbool_t did_protect;            /* Whether we protected the indirect block or not */
                     haddr_t new_iblock_addr;        /* New indirect block's address */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Allocating new child indirect block\n", FUNC);
-#endif /* QAK */
                     /* Allocate new indirect block */
                     if(H5HF_man_iblock_create(hdr, dxpl_id, iblock, next_entry, child_nrows, child_nrows, &new_iblock_addr) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
@@ -1189,9 +1072,6 @@ HDfprintf(stderr, "%s: Allocating new child indirect block\n", FUNC);
 
                         /* Compute entry for direct block size requested */
                         new_entry = hdr->man_dtable.cparam.width * min_dblock_row;
-#ifdef QAK
-HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %u\n", FUNC, new_entry);
-#endif /* QAK */
 
                         /* Add skipped blocks to heap's free space */
                         if(H5HF_hdr_skip_blocks(hdr, dxpl_id, new_iblock, 0, new_entry) < 0)
@@ -1243,9 +1123,6 @@ H5HF_hdr_inc_iter(H5HF_hdr_t *hdr, hsize_t adv_size, unsigned nentries)
      */
     HDassert(hdr);
     HDassert(nentries);
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu, adv_size = %Hu\n", FUNC, hdr->man_iter_off, adv_size);
-#endif /* QAK */
 
     /* Advance the iterator for the current location within the indirect block */
     if(hdr->next_block.curr)
@@ -1301,11 +1178,6 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
     /* Get information about current iterator location */
     if(H5HF_man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator information")
-#ifdef QAK
-HDfprintf(stderr, "%s: iblock->nchildren = %u\n", FUNC, iblock->nchildren);
-HDfprintf(stderr, "%s: iblock->parent = %p\n", FUNC, iblock->parent);
-HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
-#endif /* QAK */
 
     /* Move current iterator position backwards once */
     curr_entry--;
@@ -1321,23 +1193,14 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
         /* Walk backwards through entries, until we find one that has a child */
         /* (Skip direct block that will be deleted, if we find it) */
         tmp_entry = curr_entry;
-#ifdef QAK
-HDfprintf(stderr, "%s: tmp_entry = %d\n", FUNC, tmp_entry);
-#endif /* QAK */
         while(tmp_entry >= 0 &&
                 (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
                     !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
             tmp_entry--;
-#ifdef QAK
-HDfprintf(stderr, "%s: check 2.0 - tmp_entry = %d\n", FUNC, tmp_entry);
-#endif /* QAK */
         /* Check for no earlier blocks in this indirect block */
         if(tmp_entry < 0) {
             /* Check for parent of current indirect block */
             if(iblock->parent) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Walking up a block\n", FUNC);
-#endif /* QAK */
                 /* Move iterator to parent of current block */
                 if(H5HF_man_iter_up(&hdr->next_block) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTNEXT, FAIL, "unable to move current block iterator location up")
@@ -1345,11 +1208,6 @@ HDfprintf(stderr, "%s: Walking up a block\n", FUNC);
                 /* Get information about current iterator location */
                 if(H5HF_man_iter_curr(&hdr->next_block, NULL, NULL, &curr_entry, &iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to retrieve current block iterator information")
-#ifdef QAK
-HDfprintf(stderr, "%s: iblock->nchildren = %u\n", FUNC, iblock->nchildren);
-HDfprintf(stderr, "%s: iblock->parent = %p\n", FUNC, iblock->parent);
-HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
-#endif /* QAK */
 
                 /* Move current iterator position backwards once */
                 curr_entry--;
@@ -1358,9 +1216,6 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
                 walked_up = TRUE;
             } /* end if */
             else {
-#ifdef QAK
-HDfprintf(stderr, "%s: Heap empty\n", FUNC);
-#endif /* QAK */
                 /* Reset iterator offset */
                 hdr->man_iter_off = 0;
 
@@ -1376,14 +1231,7 @@ HDfprintf(stderr, "%s: Heap empty\n", FUNC);
 
             /* Check if entry is for a direct block */
             row = curr_entry / hdr->man_dtable.cparam.width;
-#ifdef QAK
-HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
-HDfprintf(stderr, "%s: row = %u\n", FUNC, row);
-#endif /* QAK */
             if(row < hdr->man_dtable.max_direct_rows) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Found direct block\n", FUNC);
-#endif /* QAK */
                 /* Increment entry to empty location */
                 curr_entry++;
 
@@ -1395,19 +1243,12 @@ HDfprintf(stderr, "%s: Found direct block\n", FUNC);
                 hdr->man_iter_off = iblock->block_off;
                 hdr->man_iter_off += hdr->man_dtable.row_block_off[curr_entry / hdr->man_dtable.cparam.width];
                 hdr->man_iter_off += hdr->man_dtable.row_block_size[curr_entry / hdr->man_dtable.cparam.width] * (curr_entry % hdr->man_dtable.cparam.width);
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_iter_off = %Hu\n", FUNC, hdr->man_iter_off);
-HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
-#endif /* QAK */
             } /* end if */
             else {
                 H5HF_indirect_t *child_iblock;  /* Pointer to child indirect block */
                 hbool_t did_protect;            /* Whether we protected the indirect block or not */
                 unsigned child_nrows;           /* # of rows in child block */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Walking down into child block\n", FUNC);
-#endif /* QAK */
                 /* Compute # of rows in next child indirect block to use */
                 child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
 
@@ -1426,11 +1267,6 @@ HDfprintf(stderr, "%s: Walking down into child block\n", FUNC);
                 /* Update iterator location */
                 iblock = child_iblock;
                 curr_entry = (child_iblock->nrows * hdr->man_dtable.cparam.width) - 1;
-#ifdef QAK
-HDfprintf(stderr, "%s: iblock->nchildren = %u\n", FUNC, iblock->nchildren);
-HDfprintf(stderr, "%s: iblock->parent = %p\n", FUNC, iblock->parent);
-HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
-#endif /* QAK */
 
                 /* Unprotect child indirect block */
                 if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
@@ -1466,18 +1302,12 @@ H5HF_hdr_empty(H5HF_hdr_t *hdr)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_empty)
-#ifdef QAK
-HDfprintf(stderr, "%s: Resetting heap header to empty\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
 
     /* Reset block iterator, if necessary */
     if(H5HF_man_iter_ready(&hdr->next_block)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: 'next block' iterator is ready\n", FUNC);
-#endif /* QAK */
         if(H5HF_man_iter_reset(&hdr->next_block) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
     } /* end if */
@@ -1584,9 +1414,6 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
      *  will get unpinned)
      */
     if(H5F_addr_defined(hdr->fs_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);
-#endif /* QAK */
         /* Delete free space manager for heap */
         if(H5HF_space_delete(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap free space manager")
@@ -1594,18 +1421,12 @@ HDfprintf(stderr, "%s: hdr->fs_addr = %a\n", FUNC, hdr->fs_addr);
 
     /* Check for root direct/indirect block */
     if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable.table_addr);
-#endif /* QAK */
         if(hdr->man_dtable.curr_root_rows == 0) {
             hsize_t dblock_size;        /* Size of direct block */
 
             /* Check for I/O filters on this heap */
             if(hdr->filter_len > 0) {
                 dblock_size = (hsize_t)hdr->pline_root_direct_size;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_root_direct_size);
-#endif /* QAK */
 
                 /* Reset the header's pipeline information */
                 hdr->pline_root_direct_size = 0;
@@ -1627,9 +1448,6 @@ HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_ro
 
     /* Check for 'huge' objects in heap */
     if(H5F_addr_defined(hdr->huge_bt2_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
-#endif /* QAK */
         /* Delete huge objects in heap and their tracker */
         if(H5HF_huge_delete(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")

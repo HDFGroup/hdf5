@@ -732,7 +732,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node 	*factor=NULL;
     H5Z_node 	*new_node;
-    void*        ret_value;
+    H5Z_node    *ret_value;
 
     FUNC_ENTER_NOAPI(H5Z_parse_factor, NULL);
 
@@ -871,17 +871,17 @@ done:
 static H5Z_node *
 H5Z_new_node(H5Z_token_type type)
 {
-    H5Z_node* ret_value = NULL;
+    H5Z_node *ret_value;
 
-    FUNC_ENTER_NOAPI(H5Z_new_node, NULL);
+    FUNC_ENTER_NOAPI(H5Z_new_node, NULL)
 
-    ret_value = H5MM_calloc(sizeof(H5Z_node));
-    if(ret_value == NULL)
+    if(NULL == (ret_value = (H5Z_node *)H5MM_calloc(sizeof(H5Z_node))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to allocate space for nodes in the parse tree")
 
     ret_value->type = type;
+
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1108,65 +1108,51 @@ H5Z_xform_find_type(const H5T_t* type)
     HDassert(type);
 
     /* Check for SHORT type */
-    if((H5T_cmp(type, H5I_object_verify(H5T_NATIVE_SHORT,H5I_DATATYPE), FALSE)) == 0)
+    if((H5T_cmp(type, (const H5T_t *)H5I_object_verify(H5T_NATIVE_SHORT, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_SHORT)
-
-	    /* Check for INT type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_INT,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for INT type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_INT, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_INT)
-
-	    /* Check for LONG type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LONG,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for LONG type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_LONG, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_LONG)
-
-	    /* Check for LONGLONG type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LLONG,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for LONGLONG type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_LLONG, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_LLONG)
-
-	    /* Check for UCHAR type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UCHAR,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for UCHAR type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_UCHAR, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_UCHAR)
-
-	    /* Check for CHAR type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_CHAR,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for CHAR type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_CHAR, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_CHAR)
-
-	    /* Check for SCHAR type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_SCHAR,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for SCHAR type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_SCHAR, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_SCHAR)
-
-	    /* Check for USHORT type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_USHORT,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for USHORT type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_USHORT, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_USHORT)
-
-	    /* Check for UINT type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_UINT,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for UINT type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_UINT, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_UINT)
-
-	    /* Check for ULONG type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULONG,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for ULONG type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_ULONG, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_ULONG)
-
-	    /* Check for ULONGLONG type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_ULLONG,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for ULONGLONG type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_ULLONG, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_ULLONG)
-
-	    /* Check for FLOAT type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_FLOAT,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for FLOAT type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_FLOAT, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_FLOAT)
-
-	    /* Check for DOUBLE type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_DOUBLE,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for DOUBLE type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_DOUBLE, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_DOUBLE)
-
 #if H5_SIZEOF_LONG_DOUBLE !=0
-	    /* Check for LONGDOUBLE type */
-    else if((H5T_cmp(type,  H5I_object_verify(H5T_NATIVE_LDOUBLE,H5I_DATATYPE), FALSE)) == 0)
+    /* Check for LONGDOUBLE type */
+    else if((H5T_cmp(type,  (const H5T_t *)H5I_object_verify(H5T_NATIVE_LDOUBLE, H5I_DATATYPE), FALSE)) == 0)
 	HGOTO_DONE(H5T_NATIVE_LDOUBLE)
 #endif
     else
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "could not find matching type")
-
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1356,22 +1342,20 @@ H5Z_xform_create(const char *expr)
     assert(expr);
 
     /* Allocate space for the data transform information */
-    if((data_xform_prop = H5MM_calloc(sizeof(H5Z_data_xform_t)))==NULL)
+    if(NULL == (data_xform_prop = (H5Z_data_xform_t *)H5MM_calloc(sizeof(H5Z_data_xform_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform info")
 
-    if((data_xform_prop->dat_val_pointers = H5MM_malloc(sizeof(H5Z_datval_ptrs))) == NULL)
+    if(NULL == (data_xform_prop->dat_val_pointers = (H5Z_datval_ptrs *)H5MM_malloc(sizeof(H5Z_datval_ptrs))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform array storage")
 
     /* copy the user's string into the property */
-    if((data_xform_prop->xform_exp = H5MM_xstrdup(expr))==NULL)
+    if(NULL == (data_xform_prop->xform_exp = (char *)H5MM_xstrdup(expr)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform expression")
 
     /* Find the number of times "x" is used in this equation, and allocate room for storing that many points */
-    for(i=0; i<strlen(expr); i++)
-    {
-	if(isalpha(expr[i]))
+    for(i = 0; i < HDstrlen(expr); i++)
+	if(HDisalpha(expr[i]))
 	    count++;
-    }
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be
@@ -1496,22 +1480,20 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 
     if(*data_xform_prop) {
         /* Allocate new node */
-        if((new_data_xform_prop = H5MM_calloc(sizeof(H5Z_data_xform_t)))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform info")
+        if(NULL == (new_data_xform_prop = (H5Z_data_xform_t *)H5MM_calloc(sizeof(H5Z_data_xform_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform info")
 
         /* Copy string */
-        if((new_data_xform_prop->xform_exp = H5MM_xstrdup((*data_xform_prop)->xform_exp))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform expression")
+        if(NULL == (new_data_xform_prop->xform_exp = (char *)H5MM_xstrdup((*data_xform_prop)->xform_exp)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform expression")
 
-	if((new_data_xform_prop->dat_val_pointers = H5MM_malloc(sizeof(H5Z_datval_ptrs))) == NULL)
+	if(NULL == (new_data_xform_prop->dat_val_pointers = (H5Z_datval_ptrs *)H5MM_malloc(sizeof(H5Z_datval_ptrs))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for data transform array storage")
 
 	/* Find the number of times "x" is used in this equation, and allocate room for storing that many points */
-	for(i=0; i<strlen(new_data_xform_prop->xform_exp); i++)
-	{
-	    if(isalpha(new_data_xform_prop->xform_exp[i]))
+	for(i = 0; i < HDstrlen(new_data_xform_prop->xform_exp); i++)
+	    if(HDisalpha(new_data_xform_prop->xform_exp[i]))
 		count++;
-	}
 
 	if(count > 0)
 	    if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void**) H5MM_calloc(count * sizeof(void**))) == NULL)
@@ -1519,7 +1501,6 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */
 	new_data_xform_prop->dat_val_pointers->num_ptrs = 0;
-
 
         /* Copy parse tree */
         if((new_data_xform_prop->parse_root = (H5Z_node*)H5Z_xform_copy_tree((*data_xform_prop)->parse_root, (*data_xform_prop)->dat_val_pointers, new_data_xform_prop->dat_val_pointers)) == NULL)

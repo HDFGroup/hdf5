@@ -39,14 +39,12 @@
 #define NULLATTR   "null_attribute"
 
 /* 3-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
 #define SPACE1_RANK	3
 #define SPACE1_DIM1	3
 #define SPACE1_DIM2	15
 #define SPACE1_DIM3	13
 
 /* 4-D dataset with one unlimited dimension */
-#define SPACE2_NAME  "Space2"
 #define SPACE2_RANK	4
 #define SPACE2_DIM1	0
 #define SPACE2_DIM2	15
@@ -58,13 +56,10 @@
 #define SPACE2_MAX4	23
 
 /* Scalar dataset with simple datatype */
-#define SPACE3_NAME  "Scalar1"
 #define SPACE3_RANK	0
 unsigned space3_data=65;
 
 /* Scalar dataset with compound datatype */
-#define SPACE4_NAME  "Scalar2"
-#define SPACE4_RANK	0
 #define SPACE4_FIELDNAME1	"c1"
 #define SPACE4_FIELDNAME2	"u"
 #define SPACE4_FIELDNAME3	"f"

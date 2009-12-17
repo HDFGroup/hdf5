@@ -139,9 +139,6 @@ H5HF_man_iter_start_offset(H5HF_hdr_t *hdr, hid_t dxpl_id,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iter_start_offset)
-#ifdef QAK
-HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -185,19 +182,11 @@ HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
         /* Compute column */
         H5_CHECK_OVERFLOW((curr_offset / hdr->man_dtable.row_block_size[row]), hsize_t, unsigned);
         col = (unsigned)(curr_offset / hdr->man_dtable.row_block_size[row]);
-#ifdef QAK
-HDfprintf(stderr, "%s: row = %u, col = %u\n", FUNC, row, col);
-HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
-HDfprintf(stderr, "%s: curr_offset = %Hu\n", FUNC, curr_offset);
-#endif /* QAK */
 
         /* Set the current level's context */
         biter->curr->row = row;
         biter->curr->col = col;
         biter->curr->entry = (row * hdr->man_dtable.cparam.width) + col;
-#ifdef QAK
-HDfprintf(stderr, "%s: biter->curr->entry = %u\n", FUNC, biter->curr->entry);
-#endif /* QAK */
 
         /* Get the context indirect block's information */
         if(root_block) {
@@ -457,11 +446,6 @@ H5HF_man_iter_next(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, unsigned nentries)
     biter->curr->row = biter->curr->entry / hdr->man_dtable.cparam.width;
     biter->curr->col = biter->curr->entry % hdr->man_dtable.cparam.width;
 /*    HDassert(biter->curr->row <= biter->curr->context->nrows); */
-#ifdef QAK
-HDfprintf(stderr, "%s: biter->curr->entry = %u\n", "H5HF_man_iter_next", biter->curr->entry);
-HDfprintf(stderr, "%s: biter->curr->row = %u\n", "H5HF_man_iter_next", biter->curr->row);
-HDfprintf(stderr, "%s: biter->curr->col = %u\n", "H5HF_man_iter_next", biter->curr->col);
-#endif /* QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_man_iter_next() */

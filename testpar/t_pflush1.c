@@ -157,12 +157,11 @@ main(int argc, char* argv[])
 	    PASSED();
 	fflush(stdout);
 	fflush(stderr);
-    }
-    else
-    {
+    } /* end if */
+    else {
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
-    }
+    } /* end else */
 
     /*
      * Some systems like Linux with mpich, if you just _exit without MPI_Finalize
@@ -176,23 +175,23 @@ main(int argc, char* argv[])
      */
 
     /* close file1 */
-    if(H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p) < 0){
+    if(H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p) < 0) {
 	printf("H5Fget_vfd_handle for file1 failed\n");
 	goto error;
-    }
-    if(MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+    } /* end if */
+    if(MPI_File_close(mpifh_p) != MPI_SUCCESS) {
 	printf("MPI_File_close for file1 failed\n");
 	goto error;
-    }
+    } /* end if */
     /* close file2 */
-    if(H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p) < 0){
+    if(H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p) < 0) {
 	printf("H5Fget_vfd_handle for file2 failed\n");
 	goto error;
-    }
-    if(MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+    } /* end if */
+    if(MPI_File_close(mpifh_p) != MPI_SUCCESS) {
 	printf("MPI_File_close for file2 failed\n");
 	goto error;
-    }
+    } /* end if */
 
     fflush(stdout);
     fflush(stderr);

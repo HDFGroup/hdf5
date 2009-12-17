@@ -67,7 +67,7 @@ H5F_init_fake_interface(void)
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_fake_alloc(size_t sizeof_size)
+H5F_fake_alloc(uint8_t sizeof_size)
 {
     H5F_t *f = NULL;            /* Pointer to fake file struct */
     H5F_t *ret_value;           /* Return value */
