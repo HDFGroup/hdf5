@@ -99,6 +99,15 @@ static haddr_t H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size);
 /* Package Variables */
 /*********************/
 
+/* Declare a free list to manage the H5HG_t struct */
+H5FL_DEFINE(H5HG_heap_t);
+
+/* Declare a free list to manage sequences of H5HG_obj_t's */
+H5FL_SEQ_DEFINE(H5HG_obj_t);
+
+/* Declare a PQ free list to manage heap chunks */
+H5FL_BLK_DEFINE(gheap_chunk);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -108,15 +117,6 @@ static haddr_t H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5HG_t struct */
-H5FL_DEFINE(H5HG_heap_t);
-
-/* Declare a free list to manage sequences of H5HG_obj_t's */
-H5FL_SEQ_DEFINE(H5HG_obj_t);
-
-/* Declare a PQ free list to manage heap chunks */
-H5FL_BLK_DEFINE(gheap_chunk);
 
 
 
@@ -829,7 +829,6 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
          * The collection is empty. Remove it from the CWFS list and return it
          * to the file free list.
          */
-        H5_CHECK_OVERFLOW(heap->size, size_t, hsize_t);
         flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } /* end if */
     else {

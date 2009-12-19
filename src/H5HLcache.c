@@ -76,16 +76,6 @@ static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
 /* Package Variables */
 /*********************/
 
-
-/*****************************/
-/* Library Private Variables */
-/*****************************/
-
-
-/*******************/
-/* Local Variables */
-/*******************/
-
 /* H5HL inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_LHEAP[1] = {{
     H5AC_LHEAP_ID,
@@ -96,6 +86,17 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5HL_size,
 }};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -404,9 +405,9 @@ H5HL_dest(H5F_t *f, H5HL_t *heap)
     while(heap->freelist) {
         fl = heap->freelist;
         heap->freelist = fl->next;
-        (void)H5FL_FREE(H5HL_free_t, fl);
+        fl = H5FL_FREE(H5HL_free_t, fl);
     } /* end while */
-    (void)H5FL_FREE(H5HL_t, heap);
+    heap = H5FL_FREE(H5HL_t, heap);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
