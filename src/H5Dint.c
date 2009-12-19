@@ -2233,7 +2233,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to dataset's object header */

@@ -71,7 +71,7 @@ static unsigned H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 static htri_t H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u, hid_t dxpl_id);
 static htri_t H5O_move_msgs_forward(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 static htri_t H5O_merge_null(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
-static htri_t H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
+static htri_t H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 static herr_t H5O_alloc_shrink_chunk(H5F_t *f, H5O_t *oh, hid_t dxpl_id, unsigned chunkno);
 
 
@@ -598,7 +598,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         if(oh->mesg[u].chunkno == chunkno) {
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
 
-            /* Flag message as dirty */
+            /* Flag message as dirty directly */
             oh->mesg[u].dirty = TRUE;
         } /* endif */
 
@@ -607,7 +607,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
          * it's size is directly encoded in the object header) */
         if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
                 (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
-            /* Adjust size of continuation message */
+            /* Adjust size in continuation message */
             HDassert(((H5O_cont_t *)(oh->mesg[u].native))->size == old_size);
             ((H5O_cont_t *)(oh->mesg[u].native))->size = oh->chunk[chunkno].size;
 
@@ -1638,7 +1638,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
+H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t deleted_chunk;              /* Whether to a chunk was deleted */
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
@@ -1813,7 +1813,7 @@ H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
             rescan_header = TRUE;
 
         /* Scan for empty chunks to remove */
-        result = H5O_remove_empty_chunks(f, oh, dxpl_id);
+        result = H5O_remove_empty_chunks(f, dxpl_id, oh);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't remove empty chunk")
         if(result > 0)

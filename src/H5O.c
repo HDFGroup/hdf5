@@ -1193,7 +1193,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Cache object header */
     if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+    oh = NULL;
 
     /* Set up object location */
     loc->file = f;
@@ -1421,7 +1422,7 @@ int
 H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
 {
     haddr_t addr = H5O_OH_GET_ADDR(oh);     /* Object header address */
-    int	ret_value;                          /* Return value */
+    int	ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_link_oh, FAIL)
 
@@ -1431,7 +1432,11 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
             /* Check for too large of an adjustment */
             if((unsigned)(-adjust) > oh->nlink)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
+
+            /* Adjust the link count for the object header */
             oh->nlink += adjust;
+
+            /* Mark object header as dirty in cache */
             *oh_flags |= H5AC__DIRTIED_FLAG;
 
             /* Check if the object should be deleted */
@@ -1466,7 +1471,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
             /* Adjust the link count for the object header */
             oh->nlink += adjust;
 
-            /* Mark the object header for deletion */
+            /* Mark object header as dirty in cache */
             *oh_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
 
@@ -1577,8 +1582,8 @@ done:
 H5O_t *
 H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t       *oh = NULL;      /* Object header */
-    H5O_t       *ret_value;      /* Return value */
+    H5O_t       *oh = NULL;     /* Object header */
+    H5O_t       *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_pin, NULL)
 
@@ -1759,7 +1764,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
+H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;             /* Object header to modify */
     unsigned 	oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */

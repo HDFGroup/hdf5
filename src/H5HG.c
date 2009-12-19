@@ -137,24 +137,6 @@ H5FL_BLK_DEFINE(gheap_chunk);
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer 5/26/04
- *		Modified function to return the disk address of the new
- *		global heap collection, or HADDR_UNDEF on failure.  This
- *		is necessary, as in some cases (i.e. flexible parallel)
- *		H5AC_set() will imediately flush and destroy the in memory
- *		version of the new collection.  For the same reason, I
- *		moved the code which places the new collection on the cwfs
- *		list to just before the call to H5AC_set().
- *
- *		John Mainzer 6/8/05
- *		Removed code setting the is_dirty field of the cache info.
- *		This is no longer pemitted, as the cache code is now
- *		manageing this field.  Since this function uses a call to
- *		H5AC_set() (which marks the entry dirty automaticly), no
- *		other change is required.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -276,16 +258,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
- *
- * Modifications:
- *
- *		John Mainzer, 6/8/05
- *		Modified the function to use the new dirtied parameter of
- *		of H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
- *		In this case, that required adding the new heap_dirtied_ptr
- *		parameter to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -499,30 +471,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer -- 5/24/04
- *		The function used to modify the heap without protecting
- *		the relevant collection first.  I did a half assed job
- *		of fixing the problem, which should hold until we try to
- *		support multi-threading.  At that point it will have to
- *		be done right.
- *
- *		See in line comment of this date for more details.
- *
- *		John Mainzer - 5/26/04
- *		Modified H5HG_create() to return the disk address of the
- *		new collection, instead of the address of its
- *		representation in core.  This was necessary as in FP
- *		mode, the cache will immediately flush and destroy any
- *		entry inserted in it via H5AC_set().  I then modified
- *		this function to account for the change in H5HG_create().
- *
- *		John Mainzer - 6/8/05
- *		Modified function to use the dirtied parameter of
- *		H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -633,7 +581,6 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
             --cwfsno;
         } /* end if */
     } /* end else */
-
     HDassert(H5F_addr_defined(addr));
     if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
