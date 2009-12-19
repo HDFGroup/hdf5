@@ -76,6 +76,16 @@ static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
 /* Package Variables */
 /*********************/
 
+/* H5HL inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_LHEAP[1] = {{
+    H5AC_LHEAP_ID,
+    (H5AC_load_func_t)H5HL_load,
+    (H5AC_flush_func_t)H5HL_flush,
+    (H5AC_dest_func_t)H5HL_dest,
+    (H5AC_clear_func_t)H5HL_clear,
+    (H5AC_size_func_t)H5HL_size,
+}};
+
 
 /*****************************/
 /* Library Private Variables */
@@ -86,15 +96,6 @@ static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
 /* Local Variables */
 /*******************/
 
-/* H5HL inherits cache-like properties from H5AC */
-const H5AC_class_t H5AC_LHEAP[1] = {{
-    H5AC_LHEAP_ID,
-    (H5AC_load_func_t)H5HL_load,
-    (H5AC_flush_func_t)H5HL_flush,
-    (H5AC_dest_func_t)H5HL_dest,
-    (H5AC_clear_func_t)H5HL_clear,
-    (H5AC_size_func_t)H5HL_size,
-}};
 
 
 /*-------------------------------------------------------------------------
@@ -403,9 +404,9 @@ H5HL_dest(H5F_t *f, H5HL_t *heap)
     while(heap->freelist) {
         fl = heap->freelist;
         heap->freelist = fl->next;
-        (void)H5FL_FREE(H5HL_free_t, fl);
+        fl = H5FL_FREE(H5HL_free_t, fl);
     } /* end while */
-    (void)H5FL_FREE(H5HL_t, heap);
+    heap = H5FL_FREE(H5HL_t, heap);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

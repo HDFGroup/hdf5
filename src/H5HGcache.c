@@ -75,16 +75,6 @@ static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_pt
 /* Package Variables */
 /*********************/
 
-
-/*****************************/
-/* Library Private Variables */
-/*****************************/
-
-
-/*******************/
-/* Local Variables */
-/*******************/
-
 /* H5HG inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
@@ -94,6 +84,16 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     (H5AC_clear_func_t)H5HG_clear,
     (H5AC_size_func_t)H5HG_size,
 }};
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 
@@ -380,7 +380,7 @@ H5HG_dest(H5F_t *f, H5HG_heap_t *heap)
         heap->chunk = H5FL_BLK_FREE(gheap_chunk, heap->chunk);
     if(heap->obj)
         heap->obj = H5FL_SEQ_FREE(H5HG_obj_t, heap->obj);
-    (void)H5FL_FREE(H5HG_heap_t, heap);
+    heap = H5FL_FREE(H5HG_heap_t, heap);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

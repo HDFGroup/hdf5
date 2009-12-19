@@ -72,6 +72,15 @@ static herr_t H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap);
 /* Package Variables */
 /*********************/
 
+/* Declare a free list to manage the H5HL_free_t struct */
+H5FL_DEFINE(H5HL_free_t);
+
+/* Declare a free list to manage the H5HL_t struct */
+H5FL_DEFINE(H5HL_t);
+
+/* Declare a PQ free list to manage the heap chunk information */
+H5FL_BLK_DEFINE(lheap_chunk);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -81,15 +90,6 @@ static herr_t H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5HL_free_t struct */
-H5FL_DEFINE(H5HL_free_t);
-
-/* Declare a free list to manage the H5HL_t struct */
-H5FL_DEFINE(H5HL_t);
-
-/* Declare a PQ free list to manage the heap chunk information */
-H5FL_BLK_DEFINE(lheap_chunk);
 
 
 
@@ -359,7 +359,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     HDassert(H5F_addr_defined(addr));
 
     if(NULL == (ret_value = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, rw)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load heap")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -891,7 +891,7 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
 
     /* Get heap pointer */
     if(NULL == (heap = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap")
 
     /* Set the size to return */
     *size = heap->heap_alloc;
