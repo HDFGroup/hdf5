@@ -247,7 +247,6 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  * Purpose:	Loads a fractal heap header from the disk.
  *
  * Return:	Success:	Pointer to a new fractal heap
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol

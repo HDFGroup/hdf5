@@ -264,7 +264,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr)
     /* Twiddle the number of open objects to avoid closing the file. */
     f->nopen_objs++;
     if(H5O_close(ext_ptr) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
     f->nopen_objs--;
 
 done:
@@ -528,7 +528,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * extension.
          */
 	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to start file's superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.

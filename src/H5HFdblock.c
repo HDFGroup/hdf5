@@ -435,9 +435,9 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     size_t dblock_size, H5HF_indirect_t *par_iblock, unsigned par_entry,
     H5AC_protect_t rw)
 {
-    H5HF_parent_t par_info;         /* Parent info for loading block */
-    H5HF_direct_t *dblock;          /* Direct block from cache */
-    H5HF_direct_t *ret_value;       /* Return value */
+    H5HF_parent_t par_info;     /* Parent info for loading block */
+    H5HF_direct_t *dblock;      /* Direct block from cache */
+    H5HF_direct_t *ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_protect)
 

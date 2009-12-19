@@ -979,8 +979,6 @@
 ./tools/h5import/testfiles/in16.txt
 
 
-
-
 # h5diff sources
 ./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in

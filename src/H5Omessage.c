@@ -493,7 +493,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to release object header")
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_read() */

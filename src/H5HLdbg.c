@@ -70,7 +70,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if (NULL == (h = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (h = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     fprintf(stream, "%*sLocal Heap...\n", indent, "");

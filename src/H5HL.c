@@ -424,8 +424,8 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr)
     HDassert(heap);
     HDassert(H5F_addr_defined(addr));
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
+    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -741,7 +741,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->heap_alloc ) &&
                              ((2 * fl->size) > heap->heap_alloc )) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
@@ -750,7 +750,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
                      ((2 * fl->size) > heap->heap_alloc)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 	} else if(fl->offset + fl->size == offset) {
@@ -765,7 +765,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->heap_alloc) &&
                             ((2 * fl->size) > heap->heap_alloc)) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     } /* end if */
 		    HGOTO_DONE(SUCCEED);
 		} /* end if */
@@ -774,7 +774,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
                     ((2 * fl->size) > heap->heap_alloc)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             } /* end if */
 	    HGOTO_DONE(SUCCEED);
 	} /* end if */
@@ -800,7 +800,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
      * Add an entry to the free list.
      */
     if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
     fl->offset = offset;
     fl->size = size;
     HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -814,7 +814,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
     if(((fl->offset + fl->size) == heap->heap_alloc) &&
             ((2 * fl->size) > heap->heap_alloc)) {
         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
     } /* end if */
 
 done:
@@ -933,11 +933,11 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 
     /* Get heap pointer */
     if(NULL == (heap = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap")
 
     /* Get the total size of the local heap */
     if(H5HL_size(f, heap, &local_heap_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to compute size of local heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to compute size of local heap")
 
     /* Accumulate the size of the local heap */
     *heap_size += (hsize_t)local_heap_size;

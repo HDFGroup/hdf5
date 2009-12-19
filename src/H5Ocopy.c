@@ -730,17 +730,12 @@ done:
         HDfree(deleted);
 
     /* Release pointer to source object header and its derived objects */
-    if(oh_src != NULL) {
-        /* Unprotect the source object header */
-        if(H5AC_unprotect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, oh_src, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-    } /* end if */
+    if(oh_src && H5AC_unprotect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, oh_src, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Release pointer to destination object header */
-    if(ret_value < 0 && oh_dst) {
-        if(H5O_dest(oloc_dst->file, oh_dst) < 0)
-	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-    } /* end if */
+    if(ret_value < 0 && oh_dst && H5O_dest(oloc_dst->file, oh_dst) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     /* Release user data for particular type of object to copy */
     if(udata) {
