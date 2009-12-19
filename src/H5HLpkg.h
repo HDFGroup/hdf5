@@ -32,6 +32,9 @@
 #include "H5HLprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5FLprivate.h"	/* Free lists                           */
+
 
 /*****************************/
 /* Package Private Variables */
@@ -39,6 +42,16 @@
 
 /* The cache subclass */
 H5_DLLVAR const H5AC_class_t H5AC_LHEAP[1];
+
+/* Declare extern the free list to manage the H5HL_free_t struct */
+H5FL_EXTERN(H5HL_free_t);
+
+/* Declare extern the free list to manage the H5HL_t struct */
+H5FL_EXTERN(H5HL_t);
+
+/* Declare extern the PQ free list to manage the heap chunk information */
+H5FL_BLK_EXTERN(lheap_chunk);
+
 
 /**************************/
 /* Package Private Macros */
@@ -50,6 +63,7 @@ H5_DLLVAR const H5AC_class_t H5AC_LHEAP[1];
 	       H5F_SIZEOF_SIZE (F) +	/*data size			*/    \
 	       H5F_SIZEOF_SIZE (F) +	/*free list head		*/    \
 	       H5F_SIZEOF_ADDR (F))	/*data address			*/
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -71,10 +85,13 @@ struct H5HL_t {
     H5HL_free_t		   *freelist;	/*the free list			*/
 };
 
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
-#endif
+H5_DLL herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
+H5_DLL herr_t H5HL_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
 
+#endif /* _H5HLpkg_H */
 

@@ -580,11 +580,13 @@
 ./src/H5HFtest.c
 ./src/H5HFtiny.c
 ./src/H5HG.c
+./src/H5HGcache.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
 ./src/H5HGpublic.h
 ./src/H5HL.c
+./src/H5HLcache.c
 ./src/H5HLdbg.c
 ./src/H5HLpkg.h
 ./src/H5HLprivate.h

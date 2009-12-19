@@ -73,7 +73,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if (NULL == (h = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_READ)))
+    if (NULL == (h = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
 
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
@@ -93,7 +93,10 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     fprintf (stream, "%*s%-*s %u/%lu/", indent, "", fwidth,
 	     "Objects defined/allocated/max:",
 	     nused, (unsigned long)h->nalloc);
-    fprintf (stream, nused ? "%u\n": "NA\n", maxobj);
+    if(nused)
+        fprintf(stream, "%u\n", maxobj);
+    else
+        fprintf(stream, "NA\n");
 
     fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	     "Free space:",
@@ -113,7 +116,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 		     (unsigned long)H5HG_ALIGN(h->obj[u].size));
 	    p = h->obj[u].begin + H5HG_SIZEOF_OBJHDR (f);
 	    for (j=0; j<h->obj[u].size; j+=16) {
-		fprintf (stream, "%*s%04d: ", indent+6, "", j);
+		fprintf (stream, "%*s%04u: ", indent+6, "", j);
 		for (k=0; k<16; k++) {
 		    if (8==k) fprintf (stream, " ");
 		    if (j+k<h->obj[u].size) {
