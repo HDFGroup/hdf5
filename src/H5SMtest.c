@@ -80,7 +80,6 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     size_t *mesg_count)
 {    
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_get_mesg_count_test)
@@ -92,6 +91,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     /* Check for shared messages being enabled */
     if(H5F_addr_defined(f->shared->sohm_addr)) {
         H5SM_index_header_t *header;        /* Index header for message type */
+        hsize_t table_size;                 /* Size of SOHM master table in file */
         ssize_t index_num;                  /* Table index for message type */
 
         /* Determine size of table in file */

@@ -154,7 +154,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
     /* Allocate file space */
     total_size = heap->prfx_size + size_hint;
     if(HADDR_UNDEF == (heap->prfx_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, total_size)))
-	HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "unable to allocate file memory")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "unable to allocate file memory")
 
     /* Initialize info */
     heap->single_cache_obj = TRUE;
@@ -488,7 +488,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC2_protect_t rw)
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_PRFX, addr, H5HL_SPEC_READ_SIZE, &prfx_udata, rw)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load heap prefix")
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
@@ -513,7 +513,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC2_protect_t rw)
 
             /* Protect the local heap data block */
             if(NULL == (dblk = (H5HL_dblk_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_DBLK, heap->dblk_addr, heap->dblk_size, &dblk_udata, rw)))
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap data block")
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load heap data block")
 
             /* Pin the prefix, if the data block was loaded from file */
             if(dblk_udata.loaded)
@@ -810,13 +810,13 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
         /* Check if current heap is extendible */
 	can_extend = H5MF_can_extend(f, H5FD_MEM_LHEAP, heap->dblk_addr, (hsize_t)(heap->dblk_size), (hsize_t)need_more);
         if(can_extend < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to check whether heap can be extended")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, UFAIL, "unable to check whether heap can be extended")
 
 	/* Check if we can extend heap in file */
 	if(can_extend == TRUE) {
             /* Extend file space allocation */
             if(H5MF_extend(f, H5FD_MEM_LHEAP, heap->dblk_addr, (hsize_t)(heap->dblk_size), (hsize_t)need_more) < 0)
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "can't extend heap on disk")
+		HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, UFAIL, "can't extend heap on disk")
 
             /* Check for prefix & data block contiguous */
             if(heap->single_cache_obj) {
@@ -868,7 +868,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	    offset = old_dblk_size;
 	    if(need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
 		if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed")
+		    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed")
 		fl->offset = old_dblk_size + need_size;
 		fl->size = need_more - need_size;
 		HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -991,7 +991,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->dblk_size) &&
                              ((2 * fl->size) > heap->dblk_size)) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
@@ -1000,7 +1000,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->dblk_size) &&
                      ((2 * fl->size) > heap->dblk_size)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 	} else if(fl->offset + fl->size == offset) {
@@ -1015,7 +1015,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->dblk_size) &&
                             ((2 * fl->size) > heap->dblk_size)) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     } /* end if */
 		    HGOTO_DONE(SUCCEED);
 		} /* end if */
@@ -1024,7 +1024,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->dblk_size) &&
                     ((2 * fl->size) > heap->dblk_size)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             } /* end if */
 	    HGOTO_DONE(SUCCEED);
 	} /* end if */
@@ -1050,7 +1050,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
      * Add an entry to the free list.
      */
     if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
     fl->offset = offset;
     fl->size = size;
     HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -1064,7 +1064,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
     if(((fl->offset + fl->size) == heap->dblk_size) &&
             ((2 * fl->size) > heap->dblk_size)) {
         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
     } /* end if */
 
 done:
@@ -1109,7 +1109,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_PRFX, addr, H5HL_SPEC_READ_SIZE, &prfx_udata, H5AC2_WRITE)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap prefix")
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
@@ -1127,7 +1127,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
         /* Protect the local heap data block */
         if(NULL == (dblk = (H5HL_dblk_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_DBLK, heap->dblk_addr, heap->dblk_size, &dblk_udata, H5AC2_WRITE)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap data block")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap data block")
 
         /* Pin the prefix, if the data block was loaded from file */
         if(dblk_udata.loaded) {
@@ -1207,7 +1207,7 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_PRFX, addr, H5HL_SPEC_READ_SIZE, &prfx_udata, H5AC2_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap prefix")
 
     /* Get the pointer to the heap */
     heap = prfx->heap;
@@ -1259,7 +1259,7 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 
     /* Protect the local heap prefix */
     if(NULL == (prfx = (H5HL_prfx_t *)H5AC2_protect(f, dxpl_id, H5AC2_LHEAP_PRFX, addr, H5HL_SPEC_READ_SIZE, &prfx_udata, H5AC2_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap prefix")
 
     /* Get the pointer to the heap */
     heap = prfx->heap;

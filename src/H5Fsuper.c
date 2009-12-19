@@ -110,9 +110,7 @@
 /* Local Prototypes */
 /********************/
 
-herr_t H5F_super_create_extension(H5F_t *f, 
-		                  hid_t dxpl_id,
-		                  H5O_loc_t * ext_loc_ptr);
+static herr_t H5F_super_create_extension(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_loc_ptr);
 
 
 /*********************/
@@ -239,15 +237,10 @@ done:
  * Programmer:  John Mainzer
  *              2/29/08
  *
- * Changes:	None.
- *
  *-------------------------------------------------------------------------
  */
-
-herr_t
-H5F_super_create_extension(H5F_t *f, 
-		           hid_t dxpl_id,
-			   H5O_loc_t * ext_loc_ptr)
+static herr_t
+H5F_super_create_extension(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_loc_ptr)
 {
     H5O_loc_t       ext_loc;        /* Superblock extension object location */
     H5O_loc_t       *elp;
@@ -255,31 +248,19 @@ H5F_super_create_extension(H5F_t *f,
 
     FUNC_ENTER_NOAPI(H5F_super_create_extension, FAIL)
 
-    HDassert( f != NULL );
-    HDassert( f->shared != NULL );
+    HDassert(f != NULL);
+    HDassert(f->shared != NULL);
 
-    if ( ext_loc_ptr != NULL ) {
-
+    if(ext_loc_ptr != NULL)
 	elp = ext_loc_ptr;
-
-    } else {
-
+    else
 	elp = &ext_loc;
-    }
 
-
-    if ( ! f->shared->extension_ok ) {
-
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, 
-		    "superblock extension not permitted?!?!")
-
-    } else if ( f->shared->extension_addr != HADDR_UNDEF ) {
-
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, 
-		    "superblock extension already exists?!?!")
-
-    } else {
-
+    if(!f->shared->extension_ok)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension not permitted?!?!")
+    else if(f->shared->extension_addr != HADDR_UNDEF)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension already exists?!?!")
+    else {
         /* The superblock extension isn't actually a group, but the
          * default group creation list should work fine.
          * If we don't supply a size for the object header, HDF5 will
@@ -289,20 +270,15 @@ H5F_super_create_extension(H5F_t *f,
          * extension.
          */
         H5O_loc_reset(elp);
-        if( H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, elp) < 0 )
-        {
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, \
-			"unable to create superblock extension")
-        }
+        if(H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, elp) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Record the address of the superblock extension */
         f->shared->extension_addr = elp->addr;
-    }
+    } /* end else */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5F_super_create_extension() */
 
 
@@ -673,7 +649,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
         /* Open the superblock extension */
         if(H5O_open(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
 
         /* Read in the shared OH message information if there is any */
         if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
@@ -766,7 +742,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          */
         f->nopen_objs++;
         if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
         f->nopen_objs--;
     } /* end if */
 
@@ -904,7 +880,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * extension.
          */
         if(H5F_super_create_extension(f, dxpl_id, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.
@@ -980,7 +956,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          */
         f->nopen_objs++;
         if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close superblock extension")
         f->nopen_objs--;
     } /* end if */
 
@@ -1180,7 +1156,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
     /* Open the superblock extension, or create it if it doesn't exist */
     if(!H5F_addr_defined(f->shared->extension_addr)) {
 	if(H5F_super_create_extension(f, dxpl_id, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "unable to create superblock extension?!?!")
+            HGOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "unable to create superblock extension?!?!")
     } /* end if */
     else {
         /* Set up "fake" object location for superblock extension */
@@ -1190,7 +1166,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
 
         /* Open the superblock extension */
         if(H5O_open(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "unable to open superblock extension?!?!")
+            HGOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "unable to open superblock extension?!?!")
     } /* end else */
 
     /* The metadata journaling message is a variable length message.
@@ -1250,7 +1226,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
 
         /* Store the metadata journaling message in the superblock extension */
         if(H5O_msg_create(&ext_loc, H5O_MDJ_MSG_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &mdj_msg, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "unable to add mdj_msg to superblock extension?!?!")
+            HGOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "unable to add mdj_msg to superblock extension?!?!")
     }  /* end if */
 
     /* Close the extension.  Twiddle the number of open objects to avoid
@@ -1258,7 +1234,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
      */
     f->nopen_objs++;
     if(H5O_close(&ext_loc) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
     f->nopen_objs--;
 
 done:

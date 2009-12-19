@@ -343,7 +343,6 @@ htri_t
 H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
     unsigned type_flag;                 /* Flag corresponding to message type */
     size_t u;                           /* Local index variable */
     htri_t ret_value = FALSE;           /* Return value */
@@ -354,11 +353,13 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
     if(H5SM_type_to_flag(type_id, &type_flag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't map message type to flag")
 
-    /* Determine size of table in file */
-    table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t)(f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
-
     /* Look up the master SOHM table */
     if(H5F_addr_defined(f->shared->sohm_addr)) {
+        hsize_t table_size;                 /* Size of SOHM master table in file */
+
+        /* Determine size of table in file */
+        table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t)(f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
         if(NULL == (table = (H5SM_master_table_t *)H5AC2_protect(f, dxpl_id, H5AC2_SOHM_TABLE, f->shared->sohm_addr, (size_t)table_size, f, H5AC2_READ)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
     } /* end if */
@@ -1609,7 +1610,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_mesg_key_t key;
     H5SM_sohm_t     message;            /* Deleted message returned from index */
     H5SM_sohm_t    *message_ptr;        /* Pointer to deleted message returned from index */
-    H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
     size_t          buf_size;           /* Size of the encoded message (out) */
     void            *encoding_buf = NULL; /* The encoded message (out) */
@@ -1661,6 +1661,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {
+        H5SM_list_cache_ud_t cache_udata;   /* User-data for metadata cache callback */
         size_t list_pos;        /* Position of the message in the list */
 
         /* Set up user data for metadata cache callback */
@@ -1786,7 +1787,6 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     H5F_file_t *shared = f->shared;     /* Shared file info (convenience variable) */
     H5O_shmesg_table_t sohm_table;      /* SOHM message from superblock extension */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
-    hsize_t table_size;                 /* Size of SOHM master table in file */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
@@ -1811,6 +1811,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
     } /* end if */
     else {
+        hsize_t table_size;          /* Size of SOHM master table in file */
         unsigned index_flags[H5O_SHMESG_MAX_NINDEXES];  /* Message flags for each index */
         unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];     /* Minimum message size for each index */
         unsigned sohm_l2b;           /* SOHM list-to-btree cutoff */
@@ -2045,7 +2046,6 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
     H5SM_sohm_t message;                /* Shared message returned from callback */
-    H5SM_list_cache_ud_t cache_udata;  /* User-data for metadata cache callback */
     hsize_t table_size;                 /* Size of SOHM master table in file */
     ssize_t index_num;                  /* Table index for message type */
     size_t buf_size;                    /* Size of the encoded message */
@@ -2071,10 +2071,6 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 	HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
     header = &(table->indexes[index_num]);
 
-    /* Set up user data for metadata cache callback */
-    cache_udata.f = f;
-    cache_udata.header = header;
-
     /* Open the heap for this message type */
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
@@ -2098,7 +2094,12 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {
+        H5SM_list_cache_ud_t cache_udata;  /* User-data for metadata cache callback */
         size_t list_pos;        /* Position of the message in the list */
+
+        /* Set up user data for metadata cache callback */
+        cache_udata.f = f;
+        cache_udata.header = header;
 
         /* If the index is stored as a list, get it from the cache */
         if(NULL == (list = (H5SM_list_t *)H5AC2_protect(f, dxpl_id, H5AC2_SOHM_LIST, header->index_addr, H5SM_LIST_SIZE(f, header->list_max), &cache_udata, H5AC2_READ)))
