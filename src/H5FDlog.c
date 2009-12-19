@@ -425,7 +425,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
 
     FUNC_ENTER_NOAPI(H5FD_log_fapl_copy, NULL)
 
-    HDassert(new_fa);
+    HDassert(old_fa);
 
     /* Allocate the new FAPL info */
     if(NULL == (new_fa = (H5FD_log_fapl_t *)H5MM_calloc(sizeof(H5FD_log_fapl_t))))
@@ -471,17 +471,15 @@ static herr_t
 H5FD_log_fapl_free(void *_fa)
 {
     H5FD_log_fapl_t	*fa = (H5FD_log_fapl_t*)_fa;
-    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_log_fapl_free, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_fapl_free)
 
     /* Free the fapl information */
     if(fa->logfile)
         H5MM_xfree(fa->logfile);
     H5MM_xfree(fa);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_log_fapl_free() */
 
 
