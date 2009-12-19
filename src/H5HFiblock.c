@@ -1032,7 +1032,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_man_iblock_protect
  *
- * Purpose:	Convenience wrapper around H5AC_protect on a indirect block
+ * Purpose:	Convenience wrapper around H5AC_protect on an indirect block
  *
  * Return:	Pointer to indirect block on success, NULL on failure
  *
@@ -1123,7 +1123,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HF_man_iblock_unprotect
  *
- * Purpose:	Convenience wrapper around H5AC_unprotect on a indirect block
+ * Purpose:	Convenience wrapper around H5AC_unprotect on an indirect block
  *
  * Return:	SUCCEED/FAIL
  *

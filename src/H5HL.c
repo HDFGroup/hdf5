@@ -22,11 +22,6 @@
  * Purpose:		Heap functions for the local heaps used by symbol
  *			tables to store names (among other things).
  *
- * Modifications:
- *
- *	Robb Matzke, 5 Aug 1997
- *	Added calls to H5E.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -335,22 +330,6 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept. 16, 2003
  *
- * Modifications:
- *
- *		John Mainzer, 8/10/05
- *		Reworked this function for a different role.
- *
- *		It used to be called during cache eviction, where it
- *		attempted to size the disk space allocation for the
- *		actual size of the heap.  However, this causes problems
- *		in the parallel case, as the reuslting disk allocations
- *		may not be synchronized.
- *
- *		It is now called from H5HL_remove(), where it is used to
- *		reduce heap size in response to an entry deletion.  This
- *		means that the function should either do nothing, or
- *		reduce the size of the disk allocation.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -491,8 +470,6 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept. 16, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -550,32 +527,6 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Jul 17 1997
- *
- * Modifications:
- *      rky, 1998-08-28
- *      Only p0 writes metadata to disk.
- *
- *      Robb Matzke, 1999-07-28
- *      The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
- *
- *      Bill Wendling, 2003-09-16
- *      Separated out the bit that serializes the heap.
- *
- *	John Mainzer, 2005-08-10
- *	Removed call to H5HL_minimize_heap_space().  It does disk space
- *	allocation, which can cause problems if done at flush time.
- *	Instead, disk space allocation/deallocation is now done at
- *	insert/remove time.
- *
- *	John Mainzer, 2006-08-21
- *	Added the flags_ptr parameter.  This parameter exists to
- *	allow the flush routine to report to the cache if the
- *	entry is resized or renamed as a result of the flush.
- *	*flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
  *
  *-------------------------------------------------------------------------
  */
@@ -641,8 +592,6 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Jan 15 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -682,8 +631,6 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
  *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -720,7 +667,6 @@ done:
  * Programmer:	John Mainzer
  *		5/13/04
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -846,8 +792,8 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr)
     HDassert(heap);
     HDassert(H5F_addr_defined(addr));
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
+    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1130,7 +1076,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
     H5HL_free_t		*fl = NULL;
     herr_t      	ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HL_remove, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_remove, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -1177,7 +1123,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->heap_alloc ) &&
                              ((2 * fl->size) > heap->heap_alloc )) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     }
 		    HGOTO_DONE(SUCCEED);
 		}
@@ -1186,7 +1132,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
                      ((2 * fl->size) > heap->heap_alloc)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             }
 	    HGOTO_DONE(SUCCEED);
 	} else if(fl->offset + fl->size == offset) {
@@ -1201,7 +1147,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	            if(((fl->offset + fl->size) == heap->heap_alloc) &&
                             ((2 * fl->size) > heap->heap_alloc)) {
                         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	                    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
                     } /* end if */
 		    HGOTO_DONE(SUCCEED);
 		} /* end if */
@@ -1210,7 +1156,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 	    if(((fl->offset + fl->size) == heap->heap_alloc) &&
                     ((2 * fl->size) > heap->heap_alloc)) {
                 if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-	            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+	            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
             } /* end if */
 	    HGOTO_DONE(SUCCEED);
 	} /* end if */
@@ -1236,7 +1182,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
      * Add an entry to the free list.
      */
     if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
     fl->offset = offset;
     fl->size = size;
     HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -1250,7 +1196,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
     if(((fl->offset + fl->size) == heap->heap_alloc) &&
             ((2 * fl->size) > heap->heap_alloc)) {
         if(H5HL_minimize_heap_space(f, dxpl_id, heap) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "heap size minimization failed")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "heap size minimization failed")
     } /* end if */
 
 done:
@@ -1320,7 +1266,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
 done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap")
+	HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_delete() */
@@ -1396,11 +1342,11 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 
     /* Get heap pointer */
     if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap")
 
     /* Get the total size of the local heap */
     if(H5HL_size(f, heap, &local_heap_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to compute size of local heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to compute size of local heap")
 
     /* Accumulate the size of the local heap */
     *heap_size += (hsize_t)local_heap_size;

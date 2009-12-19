@@ -531,9 +531,6 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *
     H5FS_sinfo_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_load)
-#ifdef QAK
-HDfprintf(stderr, "%s: Load free space sections, addr = %a\n", FUNC, addr);
-#endif /* QAK */
 
     /* Check arguments */
     HDassert(f);

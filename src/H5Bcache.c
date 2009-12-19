@@ -224,8 +224,8 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     UINT16DECODE(p, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->left));
-    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->right));
+    H5F_addr_decode(f, (const uint8_t **)&p, &(bt->left));
+    H5F_addr_decode(f, (const uint8_t **)&p, &(bt->right));
 
     /* the child/key pairs */
     native = bt->native;
@@ -237,7 +237,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
         native += type->sizeof_nkey;
 
         /* Decode address value */
-        H5F_addr_decode(f, (const uint8_t **) &p, bt->child + u);
+        H5F_addr_decode(f, (const uint8_t **)&p, bt->child + u);
     } /* end for */
 
     /* Decode final key */
@@ -274,7 +274,7 @@ done:
 static herr_t
 H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, unsigned UNUSED * flags_ptr)
 {
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    H5B_shared_t *shared;       /* Pointer to shared B-tree info */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B_flush)
@@ -408,7 +408,7 @@ H5B_compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
     HDassert(f);
     HDassert(bt);
     HDassert(bt->rc_shared);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(shared->type);
     HDassert(size_ptr);
@@ -418,3 +418,4 @@ H5B_compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B_compute_size() */
+

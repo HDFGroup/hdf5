@@ -108,7 +108,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
  */
 static herr_t
 H5D_efl_new(H5F_t *f, hid_t UNUSED dxpl_id, H5D_t *dset,
-    const H5P_genplist_t UNUSED *dc_plist)
+    const H5P_genplist_t *dc_plist)
 {
     const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */

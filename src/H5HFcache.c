@@ -244,7 +244,6 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  * Purpose:	Loads a fractal heap header from the disk.
  *
  * Return:	Success:	Pointer to a new fractal heap
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -392,7 +391,7 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
         /* Release the space allocated for the I/O pipeline filters */
         H5O_msg_free(H5O_PLINE_ID, pline);
     } /* end if */
-    else 
+    else
         /* Set the heap header's size */
         hdr->heap_size = size;
 

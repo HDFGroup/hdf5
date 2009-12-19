@@ -778,8 +778,8 @@ done:
 herr_t
 H5Sselect_none(hid_t spaceid)
 {
-    H5S_t *space;       /* Dataspace to modify selection of */
-    herr_t ret_value;   /* return value */
+    H5S_t *space;               /* Dataspace to modify selection of */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Sselect_none, FAIL)
 
@@ -788,7 +788,7 @@ H5Sselect_none(hid_t spaceid)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Change to "none" selection */
-    if((ret_value = H5S_select_none(space)) < 0)
+    if(H5S_select_none(space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:

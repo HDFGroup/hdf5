@@ -1974,7 +1974,7 @@ HDmemset(leaf->leaf_native, 0, shared->type->nrec_size * shared->node_info[0].ma
 done:
     if(ret_value < 0) {
 	if(leaf)
-            (void)H5B2_cache_leaf_dest(f,leaf);
+            (void)H5B2_cache_leaf_dest(f, leaf);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2055,7 +2055,7 @@ HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (shared->node_info[de
 done:
     if(ret_value < 0) {
 	if(internal)
-            (void)H5B2_cache_internal_dest(f,internal);
+            (void)H5B2_cache_internal_dest(f, internal);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

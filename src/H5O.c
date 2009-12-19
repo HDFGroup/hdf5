@@ -1181,7 +1181,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Cache object header */
     if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+    oh = NULL;
 
     /* Set up object location */
     loc->file = f;
@@ -1408,10 +1409,10 @@ done:
 int
 H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 {
-    H5O_t	*oh = NULL;
+    H5O_t	*oh = NULL;             /* Object header to query/modify */
     H5AC_protect_t oh_acc;              /* Access mode for protecting object header */
     unsigned oh_flags = H5AC__NO_FLAGS_SET; /* Whether the object was deleted  */
-    int	ret_value;                          /* Return value */
+    int	ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_link, FAIL)
 
@@ -1431,7 +1432,11 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
             /* Check for too large of an adjustment */
             if((unsigned)(-adjust) > oh->nlink)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
+
+            /* Adjust the link count for the object header */
             oh->nlink += adjust;
+
+            /* Mark object header as dirty in cache */
             oh_flags |= H5AC__DIRTIED_FLAG;
 
             /* Check if the object should be deleted */
@@ -1464,7 +1469,8 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 
             /* Adjust the link count for the object header */
             oh->nlink += adjust;
-            /* Mark the object header for deletion */
+
+            /* Mark object header as dirty in cache */
             oh_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
 
@@ -1531,7 +1537,7 @@ done:
 H5O_t *
 H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t	       *ret_value;      /* Return value */
+    H5O_t *ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_protect, NULL)
 
@@ -1558,7 +1564,7 @@ H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Release the object header from the cache */
     if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_protect() */
@@ -1701,7 +1707,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
+H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;             /* Object header to modify */
     unsigned 	oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
@@ -2482,7 +2488,7 @@ H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks)
 
     /* Get the object header */
     if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve the # of link messages seen when the object header was loaded */
     *nlinks = oh->link_msgs_seen;

@@ -506,7 +506,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     H5RC_INC(internal->shared);
 
     /* Get the pointer to the shared B-tree info */
-    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Read header from disk */
@@ -915,7 +915,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
 
 done:
     if(!ret_value && leaf)
-        (void)H5B2_cache_leaf_dest(f,leaf);
+        (void)H5B2_cache_leaf_dest(f, leaf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_load() */ /*lint !e818 Can't make udata a pointer to const */

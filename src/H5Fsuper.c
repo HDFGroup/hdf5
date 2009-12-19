@@ -567,7 +567,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
         /* Open the superblock extension */
         if(H5O_open(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
 
         /* Read in the shared OH message information if there is any */
         if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
@@ -623,7 +623,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          */
         f->nopen_objs++;
         if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
         f->nopen_objs--;
     } /* end if */
 
@@ -756,7 +756,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          */
         H5O_loc_reset(&ext_loc);
         if(H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Record the address of the superblock extension */
         f->shared->extension_addr = ext_loc.addr;
@@ -808,7 +808,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          */
         f->nopen_objs++;
         if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close superblock extension")
         f->nopen_objs--;
     } /* end if */
 
