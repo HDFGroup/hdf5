@@ -470,7 +470,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *
  * Return:	Success:	Offset of new item within heap.
  *
- *		Failure:	(size_t)(-1)
+ *		Failure:	UFAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -549,9 +549,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
      * free chunk.  If the heap must expand, we double its size.
      */
     if(found == FALSE) {
-        size_t	need_more;              /* How much more space we need */
-        size_t	new_heap_alloc;         /* Final size of space allocated for heap */
-        htri_t	can_extend;             /* Whether the local heap's data segment on disk can be extended */
+        size_t	need_more;      /* How much more space we need */
+        size_t	new_heap_alloc; /* Final size of space allocated for heap */
+        htri_t	can_extend;       /* Whether the local heap's data segment on disk can be extended */
 
         /* At least double the heap's size, making certain there's enough room
          * for the new object */
@@ -584,22 +584,13 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 		HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, UFAIL, "can't extend heap on disk")
 	} /* end if */
         else { /* ...if we can't, allocate a new chunk & release the old */
-	    haddr_t new_addr;
-
-	    /* The new allocation may fail -- to avoid the possiblity of
-	     * file corruption, allocate the new heap first, and then
-	     * deallocate the old.
-	     */
+            /* Release old space on disk */
+            if(H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->addr, (hsize_t)heap->heap_alloc) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, UFAIL, "unable to free local heap")
 
 	    /* allocate new disk space for the heap */
-	    if((new_addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, (hsize_t)new_heap_alloc)) == HADDR_UNDEF)
+	    if((heap->addr = H5MF_alloc(f, H5FD_MEM_LHEAP, dxpl_id, (hsize_t)new_heap_alloc)) == HADDR_UNDEF)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "unable to allocate file space for heap")
-
-            /* Release old space on disk */
-            H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->addr, (hsize_t)heap->heap_alloc);
-            H5E_clear_stack(NULL);    /* don't really care if the free failed */
-
-	    heap->addr = new_addr;
 	} /* end else */
 
         /* If the last free list in the heap is at the end of the heap, extend it */
@@ -631,7 +622,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	    offset = heap->heap_alloc;
 	    if(need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
 		if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed")
+		    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed")
 		fl->offset = heap->heap_alloc + need_size;
 		fl->size = need_more - need_size;
 		HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -660,7 +651,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 #endif
         heap->heap_alloc = new_heap_alloc;
 	if(NULL == (heap->chunk = H5FL_BLK_REALLOC(lheap_chunk, heap->chunk, (sizeof_hdr + heap->heap_alloc))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed")
 
 	/* Clear new section so junk doesn't appear in the file */
         /* (Avoid clearing section which will be overwritten with newly inserted data) */
@@ -852,7 +843,8 @@ done:
 herr_t
 H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    H5HL_t	*heap = NULL;
+    H5HL_t	*heap = NULL;   /* Local heap to delete */
+    unsigned    cache_flags = H5AC__NO_FLAGS_SET;       /* Flags for unprotecting heap */
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -870,7 +862,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load heap")
 
     /* Check if the heap is contiguous on disk */
-    assert(!H5F_addr_overflow(addr,sizeof_hdr));
+    HDassert(!H5F_addr_overflow(addr,sizeof_hdr));
     if(H5F_addr_eq(heap->addr,addr+sizeof_hdr)) {
         /* Free the contiguous local heap in one call */
         H5_CHECK_OVERFLOW(sizeof_hdr+heap->heap_alloc,size_t,hsize_t);
@@ -889,15 +881,11 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data")
     } /* end else */
 
-    /* Release the local heap metadata from the cache */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
-        heap = NULL;
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap")
-    } /* end if */
-    heap = NULL;
+    /* Set the cache flags to delete the heap & free its file space */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, cache_flags) < 0)
 	HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap")
 
     FUNC_LEAVE_NOAPI(ret_value)

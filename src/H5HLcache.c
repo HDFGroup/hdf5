@@ -208,19 +208,19 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
     /* Check magic number */
     if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap signature")
     p += H5HL_SIZEOF_MAGIC;
 
     /* Version */
     if(H5HL_VERSION != *p++)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong version number in global heap")
 
     /* Reserved */
     p += 3;
 
     /* Allocate space in memory for the heap */
     if(NULL == (heap = H5FL_CALLOC(H5HL_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* heap data size */
     H5F_DECODE_LENGTH(f, p, heap->heap_alloc);
@@ -228,22 +228,22 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* free list head */
     H5F_DECODE_LENGTH(f, p, free_block);
     if(free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
     if(NULL == (heap->chunk = H5FL_BLK_CALLOC(lheap_chunk, (sizeof_hdr + heap->heap_alloc))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     if(heap->heap_alloc &&
             H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->heap_alloc, dxpl_id, heap->chunk + sizeof_hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data")
+	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap data")
 
     /* Build free list */
     while(H5HL_FREE_NULL != free_block) {
 	if(free_block >= heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, NULL, "bad heap free list")
 	if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 	fl->offset = free_block;
 	fl->prev = tail;
 	fl->next = NULL;
@@ -257,11 +257,11 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
 	H5F_DECODE_LENGTH(f, p, free_block);
 	if(free_block == 0)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "free block size is zero?")
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "free block size is zero?")
 
 	H5F_DECODE_LENGTH(f, p, fl->size);
 	if(fl->offset + fl->size > heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, NULL, "bad heap free list")
     } /* end while */
 
     /* Set return value */

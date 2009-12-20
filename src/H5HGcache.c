@@ -120,7 +120,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     uint8_t	*p = NULL;
     size_t	nalloc, need;
     size_t      max_idx = 0;            /* The maximum index seen */
-    H5HG_heap_t	*ret_value = NULL;      /* Return value */
+    H5HG_heap_t	*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5HG_load, NULL)
 
@@ -130,12 +130,12 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     HDassert(!udata1);
     HDassert(!udata2);
 
-    /* Read the initial 4k page */
+    /* Allocate space for heap */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     heap->addr = addr;
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)H5HG_MINSIZE)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     if(H5F_block_read(f, H5FD_MEM_GHEAP, addr, (size_t)H5HG_MINSIZE, dxpl_id, heap->chunk) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection")
 
@@ -163,7 +163,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	haddr_t next_addr = addr + (hsize_t)H5HG_MINSIZE;
 
 	if(NULL == (heap->chunk = H5FL_BLK_REALLOC(gheap_chunk, heap->chunk, heap->size)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 	if(H5F_block_read(f, H5FD_MEM_GHEAP, next_addr, (heap->size - H5HG_MINSIZE), dxpl_id, heap->chunk + H5HG_MINSIZE) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection")
     } /* end if */
@@ -176,7 +176,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
      * about the order of the objects, and unused slots must be set to zero.
      */
     if(NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     heap->nalloc = nalloc;
     while(p < (heap->chunk + heap->size)) {
@@ -207,7 +207,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
                 /* Reallocate array of objects */
                 if(NULL == (new_obj = H5FL_SEQ_REALLOC(H5HG_obj_t, heap->obj, new_alloc)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
                 /* Clear newly allocated space */
                 HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
@@ -261,7 +261,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     if(!f->shared->cwfs) {
         f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *));
         if(NULL == f->shared->cwfs)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
         f->shared->ncwfs = 1;
         f->shared->cwfs[0] = heap;
     } else if(H5HG_NCWFS == f->shared->ncwfs) {
