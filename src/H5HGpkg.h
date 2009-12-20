@@ -33,6 +33,7 @@
 
 /* Other private headers needed by this file */
 #include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5FLprivate.h"	/* Free lists                           */
 
 #define H5F_PACKAGE
 #include "H5Fpkg.h"	       
@@ -44,40 +45,19 @@
 /* The cache subclass */
 H5_DLLVAR const H5AC2_class_t H5AC2_GHEAP[1];
 
-/* Declare a free list to manage the H5HG_t struct */
+/* Declare extern the free list to manage the H5HG_t struct */
 H5FL_EXTERN(H5HG_heap_t);
 
-/* Declare a free list to manage sequences of H5HG_obj_t's */
+/* Declare extern the free list to manage sequences of H5HG_obj_t's */
 H5FL_SEQ_EXTERN(H5HG_obj_t);
 
-/* Declare a PQ free list to manage heap chunks */
-H5FL_BLK_EXTERN(heap_chunk);
+/* Declare extern the PQ free list to manage heap chunks */
+H5FL_BLK_EXTERN(gheap_chunk);
 
 
 /**************************/
 /* Package Private Macros */
 /**************************/
-
-/*
- * Pad all global heap messages to a multiple of eight bytes so we can load
- * the entire collection into memory and operate on it there.  Eight should
- * be sufficient for machines that have alignment constraints because our
- * largest data type is eight bytes.
- */
-#define H5HG_ALIGNMENT	8
-#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/	      \
-					 H5HG_ALIGNMENT))
-#define H5HG_ISALIGNED(X) ((X)==H5HG_ALIGN(X))
-
-/*
- * The overhead associated with each object in the heap, always a multiple of
- * the alignment so that the stuff that follows the header is aligned.
- */
-#define H5HG_SIZEOF_OBJHDR(f)						      \
-    H5HG_ALIGN(2 +			/*object id number	*/	      \
-	       2 +			/*reference count	*/	      \
-	       4 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
 
 /*
  * Global heap collection version.
@@ -93,27 +73,21 @@ H5FL_BLK_EXTERN(heap_chunk);
 #define H5HG_MINSIZE	4096
 
 /*
- * Limit global heap collections to the some reasonable size.  This is
- * fairly arbitrary, but needs to be small enough that no more than H5HG_MAXIDX
- * objects will be allocated from a single heap.
- */
-#define H5HG_MAXSIZE	65536
-
-/*
  * Maximum length of the CWFS list, the list of remembered collections that
  * have free space.
  */
 #define H5HG_NCWFS	16
 
 /*
- * The maximum number of links allowed to a global heap object.
+ * Pad all global heap messages to a multiple of eight bytes so we can load
+ * the entire collection into memory and operate on it there.  Eight should
+ * be sufficient for machines that have alignment constraints because our
+ * largest data type is eight bytes.
  */
-#define H5HG_MAXLINK	65535
-
-/*
- * The maximum number of indices allowed in a global heap object.
- */
-#define H5HG_MAXIDX	65535
+#define H5HG_ALIGNMENT	8
+#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/	      \
+					 H5HG_ALIGNMENT))
+#define H5HG_ISALIGNED(X) ((X)==H5HG_ALIGN(X))
 
 /*
  * The size of the collection header, always a multiple of the alignment so
@@ -126,6 +100,16 @@ H5FL_BLK_EXTERN(heap_chunk);
 	       H5F_SIZEOF_SIZE(f))	/*collection size	*/
 
 /*
+ * The overhead associated with each object in the heap, always a multiple of
+ * the alignment so that the stuff that follows the header is aligned.
+ */
+#define H5HG_SIZEOF_OBJHDR(f)						      \
+    H5HG_ALIGN(2 +			/*object id number	*/	      \
+	       2 +			/*reference count	*/	      \
+	       4 +			/*reserved		*/	      \
+	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
+
+/*
  * The initial guess for the number of messages in a collection.  We assume
  * that all objects in that collection are zero length, giving the maximum
  * possible number of objects in the collection.  The collection itself has
@@ -134,13 +118,6 @@ H5FL_BLK_EXTERN(heap_chunk);
  */
 #define H5HG_NOBJS(f,z) (int)((((z)-H5HG_SIZEOF_HDR(f))/		      \
 			       H5HG_SIZEOF_OBJHDR(f)+2))
-
-/*
- * Makes a global heap object pointer undefined, or checks whether one is
- * defined.
- */
-#define H5HG_undef(HGP)	((HGP)->idx=0)
-#define H5HG_defined(HGP) ((HGP)->idx!=0)
 
 #define H5HG_SPEC_READ_SIZE 4096
 
@@ -174,5 +151,5 @@ struct H5HG_heap_t {
 /******************************/
 H5_DLL herr_t H5HG_dest(H5HG_heap_t *heap);
 
-#endif
+#endif /* _H5HGpkg_H */
 

@@ -32,6 +32,8 @@
 #include "H5HLprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5FLprivate.h"	/* Free lists                           */
+
 
 /*****************************/
 /* Package Private Variables */
@@ -42,6 +44,15 @@ H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_PRFX[1];
 
 /* The local heap data block cache subclass */
 H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_DBLK[1];
+
+/* Declare extern the free list to manage the H5HL_free_t struct */
+H5FL_EXTERN(H5HL_free_t);
+
+/* Declare extern the free list to manage the H5HL_t struct */
+H5FL_EXTERN(H5HL_t);
+
+/* Declare extern the PQ free list to manage the heap chunk information */
+H5FL_BLK_EXTERN(lheap_chunk);
 
 
 /**************************/

@@ -22,7 +22,6 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5HLpkg.h"		/* Local heaps				*/
 #include "H5Iprivate.h"		/* ID Functions		                */
@@ -70,7 +69,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if(NULL == (h = H5HL_protect(f, dxpl_id, addr, H5AC2_READ)))
+    if(NULL == (h = (H5HL_t *)H5HL_protect(f, dxpl_id, addr, H5AC2_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     fprintf(stream, "%*sLocal Heap...\n", indent, "");
@@ -89,7 +88,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
      * the heap and that no two free blocks point to the same region of
      * the heap.  */
     if(NULL == (marker = (uint8_t *)H5MM_calloc(h->dblk_size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
     fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
 

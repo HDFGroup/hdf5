@@ -36,7 +36,6 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5HLpkg.h"		/* Local Heaps				*/
 
 
@@ -114,15 +113,6 @@ const H5AC2_class_t H5AC2_LHEAP_DBLK[1] = {{
     NULL,
 }};
 
-/* Declare a free list to manage the H5HL_free_t struct */
-H5FL_EXTERN(H5HL_free_t);
-
-/* Declare a free list to manage the H5HL_t struct */
-H5FL_EXTERN(H5HL_t);
-
-/* Declare a PQ free list to manage the heap chunk information */
-H5FL_BLK_EXTERN(lheap_chunk);
-
 
 /*****************************/
 /* Library Private Variables */
@@ -140,8 +130,7 @@ H5FL_BLK_EXTERN(lheap_chunk);
  *
  * Purpose:	Deserialize the free list for a heap data block
  *
- * Return:	Success:	SUCCESS
- *		Failure:	FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -278,14 +267,14 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     /* Point to beginning of image buffer */
     p = (const uint8_t *)image;
 
-    /* Magic number */
+    /* Check magic number */
     if(HDmemcmp(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad local heap signature")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad local heap signature")
     p += H5HL_SIZEOF_MAGIC;
 
     /* Version */
     if(H5HL_VERSION != *p++)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in local heap")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong version number in local heap")
 
     /* Reserved */
     p += 3;
@@ -308,7 +297,7 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     /* Free list head */
     H5F_DECODE_LENGTH(udata->f, p, udata->free_block);
     if(udata->free_block != H5HL_FREE_NULL && udata->free_block >= heap->dblk_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* Heap data address */
     H5F_addr_decode(udata->f, &p, &(heap->dblk_addr));

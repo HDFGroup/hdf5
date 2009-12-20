@@ -36,8 +36,8 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5HLpkg.h"		/* Local Heaps				*/
+
 
 /****************/
 /* Local Macros */

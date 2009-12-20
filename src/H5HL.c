@@ -22,17 +22,13 @@
  * Purpose:		Heap functions for the local heaps used by symbol
  *			tables to store names (among other things).
  *
- * Modifications:
- *
- *	Robb Matzke, 5 Aug 1997
- *	Added calls to H5E.
- *
  *-------------------------------------------------------------------------
  */
 
 /****************/
 /* Module Setup */
 /****************/
+
 #define H5F_PACKAGE		/* Suppress error about including H5Fpkg  */
 #define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
 
@@ -41,10 +37,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5HLpkg.h"		/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 
@@ -53,8 +47,7 @@
 /* Local Macros */
 /****************/
 
-/* Minimum size to reduce heap buffer to */
-#define H5HL_MIN_HEAP   128
+#define H5HL_MIN_HEAP   128             /* Minimum size to reduce heap buffer to */
 
 /* Set the local heap size to speculatively read in */
 /* (needs to be more than the local heap prefix size to work at all and
@@ -324,22 +317,6 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept. 16, 2003
  *
- * Modifications:
- *
- *		John Mainzer, 8/10/05
- *		Reworked this function for a different role.
- *
- *		It used to be called during cache eviction, where it
- *		attempted to size the disk space allocation for the
- *		actual size of the heap.  However, this causes problems
- *		in the parallel case, as the reuslting disk allocations
- *		may not be synchronized.
- *
- *		It is now called from H5HL_remove(), where it is used to
- *		reduce heap size in response to an entry deletion.  This
- *		means that the function should either do nothing, or
- *		reduce the size of the disk allocation.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -592,7 +569,7 @@ H5HL_offset_into(const H5HL_t *heap, size_t offset)
 herr_t
 H5HL_unprotect(H5HL_t *heap)
 {
-    herr_t  ret_value = SUCCEED;        /* Return value */
+    herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HL_unprotect, FAIL)
 
@@ -653,7 +630,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
     if(!fl->prev)
         heap->freelist = fl->next;
 
-    FUNC_LEAVE_NOAPI(H5FL_FREE(H5HL_free_t, fl))
+    FUNC_LEAVE_NOAPI((H5HL_free_t *)H5FL_FREE(H5HL_free_t, fl))
 } /* end H5HL_remove_free() */
 
 
