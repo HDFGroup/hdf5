@@ -470,7 +470,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *
  * Return:	Success:	Offset of new item within heap.
  *
- *		Failure:	(size_t)(-1)
+ *		Failure:	UFAIL
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -617,7 +617,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	    offset = heap->heap_alloc;
 	    if(need_more - need_size >= H5HL_SIZEOF_FREE(f)) {
 		if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "memory allocation failed")
+		    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed")
 		fl->offset = heap->heap_alloc + need_size;
 		fl->size = need_more - need_size;
 		HDassert(fl->offset == H5HL_ALIGN(fl->offset));
@@ -646,7 +646,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 #endif
         heap->heap_alloc = new_heap_alloc;
 	if(NULL == (heap->chunk = H5FL_BLK_REALLOC(lheap_chunk, heap->chunk, (sizeof_hdr + heap->heap_alloc))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed")
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, UFAIL, "memory allocation failed")
 
 	/* Clear new section so junk doesn't appear in the file */
         /* (Avoid clearing section which will be overwritten with newly inserted data) */
