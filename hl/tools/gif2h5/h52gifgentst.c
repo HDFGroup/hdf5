@@ -58,7 +58,7 @@ int main(void)
 
     /* create a file  */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
-        return 1;
+        return EXIT_FAILURE;
 
     /* create an image */
     space = WIDTH*HEIGHT / PAL_ENTRIES;
@@ -75,7 +75,7 @@ int main(void)
 
     /* make the image */
     if (H5IMmake_image_8bit( fid, IMAGE1_NAME, width, height, buf )<0)
-        return 1;
+        return EXIT_FAILURE;
 
    /*-------------------------------------------------------------------------
     * define a palette, blue to red tones
@@ -90,15 +90,15 @@ int main(void)
 
     /* make a palette */
     if (H5IMmake_palette( fid, PAL_NAME, pal_dims, pal )<0)
-        return 1;
+        return EXIT_FAILURE;
 
     /* attach the palette to the image */
     if (H5IMlink_palette( fid, IMAGE1_NAME, PAL_NAME )<0)
-        return 1;
+        return EXIT_FAILURE;
 
     if(H5Fclose(fid)<0)
-        return 1;
+        return EXIT_FAILURE;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 

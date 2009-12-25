@@ -82,7 +82,7 @@ int main(int argc , char **argv)
     {
         /* they didn't supply at least one image -- bail */
         usage();
-        return 1;
+        return EXIT_FAILURE;
     }
 
     HDFName = argv[1];
@@ -313,7 +313,7 @@ int main(int argc , char **argv)
     if (image_name != NULL)
         free(image_name);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 
 out:
@@ -323,5 +323,5 @@ out:
     if (image_name != NULL)
         free(image_name);
 
-    return 1;
+    return EXIT_FAILURE;
 }
