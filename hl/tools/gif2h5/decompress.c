@@ -222,7 +222,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 
     if (!(Image = (BYTE *)malloc((size_t)IWidth*(size_t)IHeight))) {
         printf("Out of memory");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     BytesPerScanline = IWidth;
