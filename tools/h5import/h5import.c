@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
       case 6:    /* -h found; help, then exit */
         help(argv[0]);
-        exit(0);
+        exit(EXIT_SUCCESS);
       break;
 
       case 7:    /* -d found; look for dimensions */
