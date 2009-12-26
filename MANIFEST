@@ -1649,10 +1649,8 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh
-# testfiles
-./hl/tools/testfiles/image1.gif
-./hl/tools/testfiles/h52giftst.h5
-
+./hl/tools/gif2h5/testfiles/image1.gif
+./hl/tools/gif2h5/testfiles/h52giftst.h5
 
 # hl fortran
 ./hl/fortran/COPYING
