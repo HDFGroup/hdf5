@@ -238,7 +238,7 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "-V")) {
 	    printf("This is %s version %u.%u release %u\n",
 		   prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
         } else if (!strcmp (argv[argno], "-family_to_sec2")) {
 	    family_to_sec2 = TRUE;
 	    argno++;

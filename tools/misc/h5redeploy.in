@@ -18,6 +18,10 @@
 ## in a new location.
 ## For help page, use "h5redeploy -help"
 
+# Constants definitions
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 # Function definitions
 
 # show help page
@@ -34,7 +38,7 @@ usage() {
   echo "                   directory and writable. [default: $h5tools]"
   echo "    -show        Show the commands without executing them"
   echo " "
-  exit 1
+  exit $EXIT_FAILURE
 }
 
 # display variable values
@@ -96,7 +100,7 @@ for arg in $@ ; do
     *)
       ERROR "Unknown Option($arg)"
       usage
-      exit 1
+      exit $EXIT_FAILURE
       ;;
   esac
 done
@@ -104,7 +108,7 @@ done
 # Sanity checks
 if [ ! -d $prefix ]; then
     ERROR "prefix($prefix) is not an existing directory"
-    exit 1
+    exit $EXIT_FAILURE
 fi
 
 for x in $h5tools; do
@@ -112,14 +116,14 @@ for x in $h5tools; do
 	foundtools="$foundtools $x"
 	if [ ! -w $x ]; then
 	    ERROR "h5tool($x) is not writable"
-	    exit 1
+	    exit $EXIT_FAILURE
 	fi
     fi
 done
 
 if [ -z "$foundtools" ]; then
     ERROR "found no tools to modify"
-    exit 1
+    exit $EXIT_FAILURE
 fi
 
 # Show actions to be taken and get consent
@@ -131,7 +135,7 @@ if [ x-$fmode = x- ]; then
     ans=`echo $ansx | tr "[A-Z]" "[a-z]"`
     if [ x-$ans != x-yes ]; then
 	echo ABORT.  No tools changed.
-	exit 1
+	exit $EXIT_FAILURE
     fi
 fi
 
@@ -166,7 +170,7 @@ done
 
 # Cleanup
 rm -f $CMDFILE
-exit 0
+exit $EXIT_SUCCESS
 
 # Some possible future features to add
 # CCBASE - Name of the alternative C compiler
