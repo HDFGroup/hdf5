@@ -36,6 +36,10 @@ HL="@HL@"
 ##                                                                        ##
 ############################################################################
 
+# Constants definitions
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 host_os="@host_os@"
 
 prog_name="`basename $0`"
@@ -91,7 +95,7 @@ usage() {
   echo "   HDF5_CXX                 -  use a different C++ compiler"
   echo "   HDF5_CXXLINKER           -  use a different linker"
   echo " "
-  exit 1
+  exit $EXIT_FAILURE
 }
 
 # Show the configuration summary of the library recorded in the
@@ -103,7 +107,7 @@ showconfigure()
 }
 
 # Main
-status=0
+status=$EXIT_SUCCESS
 
 if test "$#" = "0"; then
   # No parameters specified, issue usage statement and exit.
