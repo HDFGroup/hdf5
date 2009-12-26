@@ -56,6 +56,10 @@ FILE10="$INDIR/$SRCFILE10"
 FILE11="$INDIR/$SRCFILE11"
 
 
+TESTNAME=h5diff
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 H5DIFF=h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 
@@ -80,6 +84,7 @@ test -d ./testfiles || mkdir ./testfiles
 while [ $# -gt 0 ]; do
     case "$1" in
     -p)	# reset the tool name and bin to run ph5diff tests
+	TESTNAME=ph5diff
 	H5DIFF=ph5diff               # The tool name
 	H5DIFF_BIN=`pwd`/$H5DIFF
 	pmode=yes
@@ -616,7 +621,9 @@ TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
 # ##############################################################################
 
 if test $nerrors -eq 0 ; then
-   echo "All $H5DIFF tests passed."
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
 fi
-
-exit $nerrors

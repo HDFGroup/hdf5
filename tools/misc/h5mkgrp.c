@@ -319,6 +319,6 @@ main(int argc, const char *argv[])
     /* Shut down h5tools lib */
     h5tools_close();
 
-    return 0;
+    return EXIT_SUCCESS;
 } /* end main() */
 
