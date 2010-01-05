@@ -1,4 +1,4 @@
-HDF5 version 1.8.4 released on Mon Nov  9 11:33:59 CST 2009
+HDF5 version 1.8.4 released on Tue Jan  5 17:15:13 CST 2010
 ================================================================================
 
 INTRODUCTION
@@ -308,6 +308,9 @@ The following platforms and compilers have been tested for this release.
                                   GNU Fortran (GCC) 4.3.0 20070810
                                   G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
                                   Intel C, C++ and Fortran compilers 10.1
+    OpenVMS V8.3                  HP C V7.3-009 on OpenVMS Alpha V8.3
+                                  HP Fortran V8.0-1-104669-48GBT
+                                  HP C++ V7.3-009 for OpenVMS Alpha V8.3
 
 
 Supported Configuration Features Summary

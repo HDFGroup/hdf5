@@ -1,4 +1,4 @@
-HDF5 version 1.8.4 released on Mon Nov  9 11:33:59 CST 2009
+HDF5 version 1.8.4 released on Tue Jan  5 17:15:13 CST 2010
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
