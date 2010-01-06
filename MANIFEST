@@ -88,6 +88,7 @@
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
+./config/ibm-aix
 ./config/intel-fflags
 ./config/intel-flags
 ./config/irix6.x
