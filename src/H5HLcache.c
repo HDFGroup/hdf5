@@ -139,7 +139,7 @@ const H5AC2_class_t H5AC2_LHEAP_DBLK[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_fl_deserialize(const H5F_t *f, H5HL_t *heap, hsize_t free_block)
+H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
 {
     H5HL_free_t *fl, *tail = NULL;      /* Heap free block nodes */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -155,7 +155,7 @@ H5HL_fl_deserialize(const H5F_t *f, H5HL_t *heap, hsize_t free_block)
 
         /* Sanity check */
         if(free_block >= heap->dblk_size)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "bad heap free list")
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
 
         /* Allocate & initialize free list node */
         if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
@@ -172,15 +172,15 @@ H5HL_fl_deserialize(const H5F_t *f, H5HL_t *heap, hsize_t free_block)
             heap->freelist = fl;
 
         /* Decode offset of next free block */
-        p = heap->image + free_block;
-        H5F_DECODE_LENGTH(f, p, free_block);
+        p = heap->dblk_image + free_block;
+        H5F_DECODE_LENGTH_LEN(p, free_block, heap->sizeof_size);
         if(free_block == 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "free block size is zero?")
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "free block size is zero?")
 
         /* Decode length of this free block */
-        H5F_DECODE_LENGTH(f, p, fl->size);
-        if(fl->offset + fl->size > heap->dblk_size)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "bad heap free list")
+        H5F_DECODE_LENGTH_LEN(p, fl->size, heap->sizeof_size);
+        if((fl->offset + fl->size) > heap->dblk_size)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
     } /* end while */
 
 done:
@@ -203,7 +203,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5HL_fl_serialize(const H5F_t *f, H5HL_t *heap)
+H5HL_fl_serialize(const H5HL_t *heap)
 {
     H5HL_free_t	*fl;                    /* Pointer to heap free list node */
 
@@ -217,14 +217,14 @@ H5HL_fl_serialize(const H5F_t *f, H5HL_t *heap)
         uint8_t     *p;                     /* Pointer into raw data buffer */
 
         HDassert(fl->offset == H5HL_ALIGN(fl->offset));
-        p = heap->image + fl->offset;
+        p = heap->dblk_image + fl->offset;
 
         if(fl->next)
-            H5F_ENCODE_LENGTH(f, p, fl->next->offset)
+            H5F_ENCODE_LENGTH_LEN(p, fl->next->offset, heap->sizeof_size)
         else
-            H5F_ENCODE_LENGTH(f, p, H5HL_FREE_NULL)
+            H5F_ENCODE_LENGTH_LEN(p, H5HL_FREE_NULL, heap->sizeof_size)
 
-        H5F_ENCODE_LENGTH(f, p, fl->size);
+        H5F_ENCODE_LENGTH_LEN(p, fl->size, heap->sizeof_size)
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -262,7 +262,9 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     HDassert(len > 0);
     HDassert(image);
     HDassert(udata);
-    HDassert(udata->f);
+    HDassert(udata->sizeof_size > 0);
+    HDassert(udata->sizeof_addr > 0);
+    HDassert(udata->sizeof_prfx > 0);
 
     /* Point to beginning of image buffer */
     p = (const uint8_t *)image;
@@ -280,7 +282,7 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     p += 3;
 
     /* Allocate space in memory for the heap */
-    if(NULL == (heap = H5FL_CALLOC(H5HL_t)))
+    if(NULL == (heap = H5HL_new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Allocate the heap prefix */
@@ -289,18 +291,18 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
 
     /* Store the prefix's address & length */
     heap->prfx_addr = addr;
-    heap->prfx_size = H5HL_SIZEOF_HDR(udata->f);
+    heap->prfx_size = udata->sizeof_prfx;
 
     /* Heap data size */
-    H5F_DECODE_LENGTH(udata->f, p, heap->dblk_size);
+    H5F_DECODE_LENGTH_LEN(p, heap->dblk_size, udata->sizeof_size);
 
     /* Free list head */
-    H5F_DECODE_LENGTH(udata->f, p, udata->free_block);
+    H5F_DECODE_LENGTH_LEN(p, udata->free_block, udata->sizeof_size);
     if(udata->free_block != H5HL_FREE_NULL && udata->free_block >= heap->dblk_size)
 	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* Heap data address */
-    H5F_addr_decode(udata->f, &p, &(heap->dblk_addr));
+    H5F_addr_decode_len(udata->sizeof_addr, &p, &(heap->dblk_addr));
 
     /* Check if heap block exists */
     if(heap->dblk_size) {
@@ -312,14 +314,14 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
             /* Check if the current image from the cache is big enough to hold the heap data */
             if(len >= (heap->prfx_size + heap->dblk_size)) {
                 /* Allocate space for the heap data image */
-                if(NULL == (heap->image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
+                if(NULL == (heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, heap->dblk_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
                 /* Copy the heap data from the image */
-                HDmemcpy(heap->image, p, heap->dblk_size);
+                HDmemcpy(heap->dblk_image, p, heap->dblk_size);
 
                 /* Build free list */
-                if(H5HL_fl_deserialize(udata->f, heap, udata->free_block) < 0)
+                if(H5HL_fl_deserialize(heap, udata->free_block) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
             } /* end if */
             else
@@ -407,7 +409,7 @@ H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prfx_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
+H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
     size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
@@ -418,7 +420,6 @@ H5HL_prfx_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_serialize)
 
     /* check arguments */
-    HDassert(f);
     HDassert(image);
     HDassert(prfx);
     HDassert(prfx->heap);
@@ -437,17 +438,17 @@ H5HL_prfx_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     *p++ = 0;	/*reserved*/
     *p++ = 0;	/*reserved*/
     *p++ = 0;	/*reserved*/
-    H5F_ENCODE_LENGTH(f, p, heap->dblk_size);
-    H5F_ENCODE_LENGTH(f, p, heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL);
-    H5F_addr_encode(f, &p, heap->dblk_addr);
+    H5F_ENCODE_LENGTH_LEN(p, heap->dblk_size, heap->sizeof_size);
+    H5F_ENCODE_LENGTH_LEN(p, heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL, heap->sizeof_size);
+    H5F_addr_encode_len(heap->sizeof_addr, &p, heap->dblk_addr);
 
     /* Check if the local heap is a single object in cache */
     if(heap->single_cache_obj) {
         /* Serialize the free list into the heap data's image */
-        H5HL_fl_serialize(f, heap);
+        H5HL_fl_serialize(heap);
 
         /* Copy the heap data block into the cache image */
-        HDmemcpy(p, heap->image, heap->dblk_size);
+        HDmemcpy(p, heap->dblk_image, heap->dblk_size);
     } /* end if */
 
     /* Reset the cache flags for this operation */
@@ -519,7 +520,6 @@ H5HL_dblk_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
     /* check arguments */
     HDassert(image);
     HDassert(udata);
-    HDassert(udata->f);
     HDassert(udata->heap);
     HDassert(!udata->heap->single_cache_obj);
     HDassert(NULL == udata->heap->dblk);
@@ -529,16 +529,16 @@ H5HL_dblk_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Check for heap still retaining image */
-    if(NULL == udata->heap->image) {
+    if(NULL == udata->heap->dblk_image) {
         /* Allocate space for the heap data image */
-        if(NULL == (udata->heap->image = H5FL_BLK_MALLOC(lheap_chunk, udata->heap->dblk_size)))
+        if(NULL == (udata->heap->dblk_image = H5FL_BLK_MALLOC(lheap_chunk, udata->heap->dblk_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
         /* Copy the cache image into the heap's data image */
-        HDmemcpy(udata->heap->image, image, udata->heap->dblk_size);
+        HDmemcpy(udata->heap->dblk_image, image, udata->heap->dblk_size);
 
         /* Build free list */
-        if(H5HL_fl_deserialize(udata->f, udata->heap, udata->free_block) < 0)
+        if(H5HL_fl_deserialize(udata->heap, udata->free_block) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
     } /* end if */
 
@@ -572,28 +572,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_dblk_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
+H5HL_dblk_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
     size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
-    H5HL_t      *heap;                  /* Pointer to the local heap */
+    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */
+    H5HL_t      *heap = dblk->heap;             /* Pointer to the local heap */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_serialize)
 
     /* check arguments */
     HDassert(image);
     HDassert(dblk);
+    HDassert(dblk->heap);
     HDassert(flags);
 
-    /* Get the pointer to the heap */
-    heap = dblk->heap;
-
     /* Serialize the free list into the heap data's image */
-    H5HL_fl_serialize(f, heap);
+    H5HL_fl_serialize(heap);
 
     /* Copy the heap's data block into the cache's image */
-    HDmemcpy(image, heap->image, heap->dblk_size);
+    HDmemcpy(image, heap->dblk_image, heap->dblk_size);
 
     /* Reset the cache flags for this operation */
     *flags = 0;

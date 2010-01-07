@@ -73,12 +73,59 @@
 /* Local Variables */
 /*******************/
 
+/* Declare a free list to manage the H5HL_t struct */
+H5FL_DEFINE_STATIC(H5HL_t);
+
 /* Declare a free list to manage the H5HL_dblk_t struct */
-H5FL_DEFINE(H5HL_dblk_t);
+H5FL_DEFINE_STATIC(H5HL_dblk_t);
 
 /* Declare a free list to manage the H5HL_prfx_t struct */
-H5FL_DEFINE(H5HL_prfx_t);
+H5FL_DEFINE_STATIC(H5HL_prfx_t);
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_new
+ *
+ * Purpose:	Create a new local heap object
+ *
+ * Return:	Success:	non-NULL pointer to new local heap
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jan  5 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+H5HL_t *
+H5HL_new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size)
+{
+    H5HL_t *heap = NULL;        /* New local heap */
+    H5HL_t *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HL_new, NULL)
+
+    /* check arguments */
+    HDassert(sizeof_size > 0);
+    HDassert(sizeof_addr > 0);
+    HDassert(prfx_size > 0);
+
+    /* Allocate new local heap structure */
+    if(NULL == (heap = H5FL_CALLOC(H5HL_t)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+
+    /* Initialize non-zero fields */
+    heap->sizeof_size = sizeof_size;
+    heap->sizeof_addr = sizeof_addr;
+    heap->prfx_size = prfx_size;
+
+    /* Set the return value */
+    ret_value = heap;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -141,6 +188,48 @@ H5HL_dec_rc(H5HL_t *heap)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL_dec_rc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_dest
+ *
+ * Purpose:	Destroys a heap in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HL_dest(H5HL_t *heap)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5HL_dest)
+
+    /* check arguments */
+    HDassert(heap);
+
+    /* Verify that node is unused */
+    HDassert(heap->prots == 0);
+    HDassert(heap->rc == 0);
+    HDassert(heap->prfx == NULL);
+    HDassert(heap->dblk == NULL);
+
+    if(heap->dblk_image)
+        heap->dblk_image = H5FL_BLK_FREE(lheap_chunk, heap->dblk_image);
+    while(heap->freelist) {
+        H5HL_free_t	*fl;
+
+        fl = heap->freelist;
+        heap->freelist = fl->next;
+        fl = H5FL_FREE(H5HL_free_t, fl);
+    } /* end while */
+    heap = H5FL_FREE(H5HL_t, heap);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_dest() */
 
 
 /*-------------------------------------------------------------------------
@@ -212,18 +301,21 @@ H5HL_prfx_dest(H5HL_prfx_t *prfx)
     /* check arguments */
     HDassert(prfx);
 
-    /* Unlink prefix from heap */
-    prfx->heap->prfx = NULL;
+    /* Check if prefix was initialized */
+    if(prfx->heap) {
+        /* Unlink prefix from heap */
+        prfx->heap->prfx = NULL;
 
-    /* Decrement ref. count on heap data structure */
-    if(H5HL_dec_rc(prfx->heap) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
+        /* Decrement ref. count on heap data structure */
+        if(H5HL_dec_rc(prfx->heap) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
 
-    /* Unlink heap from prefix */
-    prfx->heap = NULL;
+        /* Unlink heap from prefix */
+        prfx->heap = NULL;
+    } /* end if */
 
     /* Free local heap prefix */
-    H5FL_FREE(H5HL_prfx_t, prfx);
+    prfx = H5FL_FREE(H5HL_prfx_t, prfx);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -317,7 +409,7 @@ H5HL_dblk_dest(H5HL_dblk_t *dblk)
     } /* end if */
 
     /* Free local heap data block */
-    H5FL_FREE(H5HL_dblk_t, dblk);
+    dblk = H5FL_FREE(H5HL_dblk_t, dblk);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

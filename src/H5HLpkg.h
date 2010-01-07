@@ -48,9 +48,6 @@ H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_DBLK[1];
 /* Declare extern the free list to manage the H5HL_free_t struct */
 H5FL_EXTERN(H5HL_free_t);
 
-/* Declare extern the free list to manage the H5HL_t struct */
-H5FL_EXTERN(H5HL_t);
-
 /* Declare extern the PQ free list to manage the heap chunk information */
 H5FL_BLK_EXTERN(lheap_chunk);
 
@@ -87,16 +84,23 @@ typedef struct H5HL_dblk_t H5HL_dblk_t;
 typedef struct H5HL_prfx_t H5HL_prfx_t;
 
 struct H5HL_t {
+    /* General heap-management fields */
     size_t                  rc;         /* Ref. count for prefix & data block using this struct */
     size_t                  prots;      /* # of times the heap has been protected */
+    size_t                  sizeof_size; /* Size of file sizes */
+    size_t                  sizeof_addr; /* Size of file addresses */
+    hbool_t                 single_cache_obj;   /* Indicate if the heap is a single object in the cache */
+
+    /* Prefix-specific fields */
     H5HL_prfx_t            *prfx;       /* The prefix object for the heap */
     haddr_t                 prfx_addr;  /* address of heap prefix */
     size_t                  prfx_size;  /* size of heap prefix */
+
+    /* Data block-specific fields */
     H5HL_dblk_t            *dblk;       /* The data block object for the heap */
     haddr_t		    dblk_addr;	/* address of data block	*/
     size_t		    dblk_size;	/* size of heap data block on disk and in mem */
-    hbool_t                 single_cache_obj;   /* Indicate if the heap is a single object in the cache */
-    uint8_t		   *image;	/*the heap image, including header */
+    uint8_t		   *dblk_image;	/* The data block image */
     H5HL_free_t		   *freelist;	/*the free list			*/
 };
 
@@ -118,7 +122,9 @@ struct H5HL_prfx_t {
 typedef struct H5HL_cache_prfx_ud_t {
     /* Downwards */
     hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
-    H5F_t *f;                           /* File pointer */
+    size_t sizeof_size;                 /* Size of file sizes */
+    size_t sizeof_addr;                 /* Size of file addresses */
+    size_t sizeof_prfx;                 /* Size of heap prefix */
 
     /* Upwards */
     hbool_t loaded;                     /* Whether prefix was loaded from file */
@@ -128,7 +134,6 @@ typedef struct H5HL_cache_prfx_ud_t {
 /* Callback information for loading local heap data block from disk */
 typedef struct H5HL_cache_dblk_ud_t {
     /* Downwards */
-    H5F_t *f;                           /* File pointer */
     H5HL_t *heap;                       /* Local heap */
     hsize_t free_block;                 /* First free block in heap */
 
@@ -142,6 +147,7 @@ typedef struct H5HL_cache_dblk_ud_t {
 /******************************/
 
 /* Heap routines */
+H5_DLL H5HL_t *H5HL_new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size);
 H5_DLL herr_t H5HL_dest(H5HL_t *heap);
 
 /* Heap prefix routines */
@@ -152,6 +158,5 @@ H5_DLL herr_t H5HL_prfx_dest(H5HL_prfx_t *prfx);
 H5_DLL H5HL_dblk_t *H5HL_dblk_new(H5HL_t *heap);
 H5_DLL herr_t H5HL_dblk_dest(H5HL_dblk_t *dblk);
 
-#endif
-
+#endif /* _H5HLpkg_H */
 

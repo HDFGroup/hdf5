@@ -108,8 +108,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 		marker[freelist->offset + i] = 1;
 	    } /* end for */
 	    if(overlap)
-		fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS "
-			"ONE!\n");
+		fprintf(stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
 	    else
 		amount_free += freelist->size;
 	} /* end for */
@@ -123,7 +122,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     /*
      * Print the data in a VMS-style octal dump.
      */
-    H5_buffer_dump(stream, indent, h->image, marker, (size_t)0, h->dblk_size);
+    H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);
 
 done:
     if(h && H5HL_unprotect(h) < 0)
