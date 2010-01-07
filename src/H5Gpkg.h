@@ -244,7 +244,6 @@ typedef struct H5G_bt_it_cpy_t {
 /* Common information for "by index" lookups in symbol tables */
 typedef struct H5G_bt_it_idx_common_t {
     /* downward */
-    H5F_t       *f;             /* Pointer to file that symbol table is in */
     hsize_t     idx;            /* Index of group member to be queried */
     hsize_t     num_objs;       /* The number of objects having been traversed */
     H5G_bt_find_op_t op;        /* Operator to call when correct entry is found */
@@ -456,10 +455,8 @@ H5_DLL int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
-H5_DLL herr_t H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
+H5_DLL herr_t H5G_ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
     const H5G_entry_t *ent, const char *name);
-H5_DLL herr_t H5G_ent_to_info(H5F_t *f, H5L_info_t *info, const H5HL_t *heap,
-    const H5G_entry_t *ent);
 H5_DLL herr_t H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *linfo);
 H5_DLL herr_t H5G_link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc);
