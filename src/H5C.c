@@ -11477,9 +11477,9 @@ H5C_load_entry(H5F_t *             f,
      *
      * with:
      *
-     * 	HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
+     * 	HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
      *
-     * Note that type id 4 is associated with object headers in the metadata
+     * Note that type id 5 is associated with object headers in the metadata
      * cache.
      *
      * When we get to using H5C for other purposes, we may wish to
@@ -11487,7 +11487,7 @@ H5C_load_entry(H5F_t *             f,
      * metadata cache.
      */
 
-    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
+    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
 #ifndef NDEBUG
     entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
