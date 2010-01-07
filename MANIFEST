@@ -588,6 +588,7 @@
 ./src/H5HL.c
 ./src/H5HLcache.c
 ./src/H5HLdbg.c
+./src/H5HLint.c
 ./src/H5HLpkg.h
 ./src/H5HLprivate.h
 ./src/H5HLpublic.h

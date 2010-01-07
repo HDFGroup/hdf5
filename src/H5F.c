@@ -3080,6 +3080,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_addr_encode_len
+ *
+ * Purpose:	Encodes an address into the buffer pointed to by *PP and
+ *		then increments the pointer to the first byte after the
+ *		address.  An undefined value is stored as all 1's.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_addr_encode_len(size_t addr_len, uint8_t **pp/*in,out*/, haddr_t addr)
+{
+    unsigned    u;              /* Local index variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_encode_len)
+
+    HDassert(addr_len);
+    HDassert(pp && *pp);
+
+    if(H5F_addr_defined(addr)) {
+	for(u = 0; u < addr_len; u++) {
+	    *(*pp)++ = (uint8_t)(addr & 0xff);
+	    addr >>= 8;
+	} /* end for */
+	HDassert("overflow" && 0 == addr);
+    } /* end if */
+    else {
+	for(u = 0; u < addr_len; u++)
+	    *(*pp)++ = 0xff;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_addr_encode_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_addr_encode
  *
  * Purpose:	Encodes an address into the buffer pointed to by *PP and
@@ -3091,31 +3132,88 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, November  7, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 void
 H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 {
-    unsigned u;         /* Local index variable */
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_encode)
 
     HDassert(f);
-    HDassert(pp && *pp);
 
-    if(H5F_addr_defined(addr)) {
-	for(u = 0; u < H5F_SIZEOF_ADDR(f); u++) {
-	    *(*pp)++ = (uint8_t)(addr & 0xff);
-	    addr >>= 8;
-	} /* end for */
-	assert("overflow" && 0 == addr);
-    } /* end if */
-    else {
-	for(u = 0; u < H5F_SIZEOF_ADDR(f); u++)
-	    *(*pp)++ = 0xff;
-    } /* end else */
+    H5F_addr_encode_len(H5F_SIZEOF_ADDR(f), pp, addr);
+
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_encode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_decode_len
+ *
+ * Purpose:	Decodes an address from the buffer pointed to by *PP and
+ *		updates the pointer to point to the next byte after the
+ *		address.
+ *
+ *		If the value read is all 1's then the address is returned
+ *		with an undefined value.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, November  7, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_addr_decode_len(size_t addr_len, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
+{
+    hbool_t	    all_zero = TRUE;    /* True if address was all zeroes */
+    unsigned	    u;          /* Local index variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_decode_len)
+
+    HDassert(addr_len);
+    HDassert(pp && *pp);
+    HDassert(addr_p);
+
+    /* Reset value in destination */
+    *addr_p = 0;
+
+    /* Decode bytes from address */
+    for(u = 0; u < addr_len; u++) {
+        uint8_t	    c;          /* Local decoded byte */
+
+        /* Get decoded byte (and advance pointer) */
+	c = *(*pp)++;
+
+        /* Check for non-undefined address byte value */
+	if(c != 0xff)
+            all_zero = FALSE;
+
+	if(u < sizeof(*addr_p)) {
+            haddr_t	    tmp = c;    /* Local copy of address, for casting */
+
+            /* Shift decoded byte to correct position */
+	    tmp <<= (u * 8);	/*use tmp to get casting right */
+
+            /* Merge into already decoded bytes */
+	    *addr_p |= tmp;
+	} /* end if */
+        else
+            if(!all_zero)
+                HDassert(0 == **pp);	/*overflow */
+    } /* end for */
+
+    /* If 'all_zero' is still TRUE, the address was entirely composed of '0xff'
+     *  bytes, which is the encoded form of 'HADDR_UNDEF', so set the destination
+     *  to that value */
+    if(all_zero)
+        *addr_p = HADDR_UNDEF;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_addr_decode_len() */
 
 
 /*-------------------------------------------------------------------------
@@ -3133,40 +3231,20 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
  * Programmer:	Robb Matzke
  *		Friday, November  7, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
 {
-    unsigned		    i;
-    haddr_t		    tmp;
-    uint8_t		    c;
-    hbool_t		    all_zero = TRUE;
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_addr_decode)
 
-    assert(f);
-    assert(pp && *pp);
-    assert(addr_p);
+    HDassert(f);
 
-    *addr_p = 0;
+    H5F_addr_decode_len(H5F_SIZEOF_ADDR(f), pp, addr_p);
 
-    for (i=0; i<H5F_SIZEOF_ADDR(f); i++) {
-	c = *(*pp)++;
-	if (c != 0xff)
-            all_zero = FALSE;
-
-	if (i<sizeof(*addr_p)) {
-	    tmp = c;
-	    tmp <<= (i * 8);	/*use tmp to get casting right */
-	    *addr_p |= tmp;
-	} else if (!all_zero) {
-	    assert(0 == **pp);	/*overflow */
-	}
-    }
-    if (all_zero)
-        *addr_p = HADDR_UNDEF;
-}
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_addr_decode() */
 
 
 /*-------------------------------------------------------------------------

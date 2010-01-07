@@ -104,7 +104,7 @@ main(void)
 	    goto error;
 	}
     }
-    if(H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
+    if(H5HL_unprotect(f, heap) < 0) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -137,7 +137,7 @@ main(void)
             goto error;
         }
 
-        if (NULL == (s = (const char *)H5HL_offset_into(f, heap, obj[i]))) {
+        if (NULL == (s = (const char *)H5HL_offset_into(heap, obj[i]))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -151,7 +151,7 @@ main(void)
             goto error;
         }
 
-        if(H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
+        if(H5HL_unprotect(f, heap) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;

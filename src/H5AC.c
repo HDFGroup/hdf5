@@ -478,7 +478,8 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 {
     "B-tree nodes",
     "symbol table nodes",
-    "local heaps",
+    "local heap prefixes",
+    "local heap data blocks",
     "global heaps",
     "object headers",
     "v2 B-tree headers",
@@ -510,11 +511,11 @@ H5AC_create(const H5F_t *f,
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
 
-    HDassert ( f );
-    HDassert ( NULL == f->shared->cache );
-    HDassert ( config_ptr != NULL ) ;
-    HDassert ( NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
-    HDassert ( H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
+    HDassert(f);
+    HDassert(NULL == f->shared->cache);
+    HDassert(config_ptr != NULL) ;
+    HDcompile_assert(NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
+    HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
     result = H5AC_validate_config(config_ptr);
 

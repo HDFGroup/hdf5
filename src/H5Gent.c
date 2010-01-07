@@ -495,7 +495,7 @@ H5G_ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
             if(heap) {
-                lval = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
+                lval = H5HL_offset_into(heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);
