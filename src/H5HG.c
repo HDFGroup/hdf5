@@ -800,7 +800,8 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     } /* end if */
 
     /* Set return value */
-    ret_value=heap->obj[hobj->idx].nrefs;
+    if (heap)
+        ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
     if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags)<0)
