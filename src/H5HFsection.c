@@ -490,7 +490,6 @@ H5HF_sect_single_new(hsize_t sect_off, size_t sect_size,
     H5HF_indirect_t *parent, unsigned par_entry)
 {
     H5HF_free_section_t *sect = NULL;   /* 'Single' free space section to add */
-    hbool_t par_incr = FALSE;           /* Indicate that parent iblock has been incremented */
     H5HF_free_section_t *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_single_new)
@@ -509,7 +508,6 @@ H5HF_sect_single_new(hsize_t sect_off, size_t sect_size,
     if(sect->u.single.parent) {
         if(H5HF_iblock_incr(sect->u.single.parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
-        par_incr = TRUE;
     } /* end if */
     sect->u.single.par_entry = par_entry;
 
@@ -518,13 +516,6 @@ H5HF_sect_single_new(hsize_t sect_off, size_t sect_size,
 
 done:
     if(!ret_value && sect) {
-        /* Check if we should decrement parent ref. count */
-        if(par_incr) {
-            HDassert(sect->u.single.parent);
-            if(H5HF_iblock_decr(sect->u.single.parent) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTDEC, NULL, "can't decrement reference count on parent indirect block")
-        } /* end if */
-
         /* Release the section */
         (void)H5FL_FREE(H5HF_free_section_t, sect);
     } /* end if */
