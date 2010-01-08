@@ -705,7 +705,6 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
     hid_t UNUSED dxpl_id)
 {
     H5O_link_t  *link_src = (H5O_link_t *)native_src;
-    H5O_link_t  *link_dst = NULL;
     void        *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_link_copy_file)
@@ -721,17 +720,10 @@ H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_
 
     /* Allocate "blank" link for destination */
     /* (values will be filled in during 'post copy' operation) */
-    if(NULL == (link_dst = H5FL_CALLOC(H5O_link_t)))
+    if(NULL == (ret_value = H5FL_CALLOC(H5O_link_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Set return value */
-    ret_value = link_dst;
-
 done:
-    if(!ret_value)
-        if(link_dst)
-            H5O_link_free(link_dst);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_link_copy_file() */
 

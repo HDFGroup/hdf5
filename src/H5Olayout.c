@@ -646,7 +646,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 done:
     if(!ret_value)
 	if(layout_dst)
-	    (void)H5FL_FREE(H5O_layout_t, layout_dst);
+	    layout_dst = H5FL_FREE(H5O_layout_t, layout_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_copy_file() */
