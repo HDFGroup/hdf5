@@ -4519,7 +4519,8 @@ print_enum(hid_t type)
     unsigned         i;
 
     snmembs = H5Tget_nmembers(type);
-    HDassert(snmembs >= 0);
+    if(snmembs < 0)
+        return;
     nmembs = (unsigned)snmembs;
     super = H5Tget_super(type);
 
@@ -6701,7 +6702,8 @@ xml_print_enum(hid_t type)
     size_t                  j;
 
     snmembs = H5Tget_nmembers(type);
-    HDassert(snmembs >= 0);
+    if(snmembs < 0)
+        return;
     nmembs = (unsigned)snmembs;
     super = H5Tget_super(type);
 
