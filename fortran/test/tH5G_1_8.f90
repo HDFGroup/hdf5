@@ -646,10 +646,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER :: corder ! Specifies the link’s creation order position.
      LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
      INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_LINK_HARD_F      - Hard link
-     	                              !  H5L_LINK_SOFT_F      - Soft link
-     	                              !  H5L_LINK_EXTERNAL_F  - External link
-     	                              !  H5L_LINK_ERROR _F    - Error
+     	                              !  H5L_TYPE_HARD_F      - Hard link
+     	                              !  H5L_TYPE_SOFT_F      - Soft link
+     	                              !  H5L_TYPE_EXTERNAL_F  - External link
+     	                              !  H5L_TYPE_ERROR _F    - Error
      INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
      INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
@@ -689,7 +689,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
 !     CALL VerifyLogical("H5Lget_info_by_idx_f11", f_corder_valid, .TRUE., total_error)
 
-     CALL VERIFY("H5Lget_info_by_idx_f", H5L_LINK_SOFT_F, link_type, total_error)
+     CALL VERIFY("H5Lget_info_by_idx_f", H5L_TYPE_SOFT_F, link_type, total_error)
      CALL VERIFY("H5Lget_info_by_idx_f", cset, H5T_CSET_ASCII_F, total_error)
      ! should be '/d1' + NULL character = 4
      CALL VERIFY("H5Lget_info_by_idx_f", INT(val_size), 4, total_error)
@@ -753,10 +753,10 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     INTEGER :: corder ! Specifies the link’s creation order position.
     LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
     INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_LINK_HARD_F      - Hard link
-     	                              !  H5L_LINK_SOFT_F      - Soft link
-     	                              !  H5L_LINK_EXTERNAL_F  - External link
-     	                              !  H5L_LINK_ERROR _F    - Error
+     	                              !  H5L_TYPE_HARD_F      - Hard link
+     	                              !  H5L_TYPE_SOFT_F      - Soft link
+     	                              !  H5L_TYPE_EXTERNAL_F  - External link
+     	                              !  H5L_TYPE_ERROR _F    - Error
     INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
     INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
@@ -1318,7 +1318,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
               CALL VerifyLogical("H5Lget_info_by_idx_f", f_corder_valid, .TRUE., total_error)
 
-              CALL VERIFY("H5Lget_info_by_idx_f", H5L_LINK_HARD_F, link_type, total_error)
+              CALL VERIFY("H5Lget_info_by_idx_f", H5L_TYPE_HARD_F, link_type, total_error)
               IF(iorder.EQ.H5_ITER_INC_F)THEN
                  CALL VERIFY("H5Lget_info_by_idx_f", corder, u+1, total_error)
               ELSE
@@ -1511,10 +1511,10 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   INTEGER :: corder ! Specifies the link’s creation order position.
   LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
   INTEGER :: link_type ! Specifies the link class:
-     	                              !  H5L_LINK_HARD_F      - Hard link
-     	                              !  H5L_LINK_SOFT_F      - Soft link
-     	                              !  H5L_LINK_EXTERNAL_F  - External link
-     	                              !  H5L_LINK_ERROR _F    - Error
+     	                              !  H5L_TYPE_HARD_F      - Hard link
+     	                              !  H5L_TYPE_SOFT_F      - Soft link
+     	                              !  H5L_TYPE_EXTERNAL_F  - External link
+     	                              !  H5L_TYPE_ERROR _F    - Error
   INTEGER(HADDR_T) :: address  ! If the link is a hard link, address specifies the file address that the link points to
   INTEGER(SIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
 
