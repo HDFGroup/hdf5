@@ -576,10 +576,10 @@ CONTAINS
 !      corder - specifies the link’s creation order position.
 !f_corder_valid - indicates whether the value in corder is valid.
 !         link_type -  specifies the link class:
-!     	                H5L_LINK_HARD_F      - Hard link
-!     	                H5L_LINK_SOFT_F      - Soft link
-!     	                H5L_LINK_EXTERNAL_F  - External link
-!     	                H5L_LINK_ERROR_ F    - Error
+!     	                H5L_TYPE_HARD_F      - Hard link
+!     	                H5L_TYPE_SOFT_F      - Soft link
+!     	                H5L_TYPE_EXTERNAL_F  - External link
+!     	                H5L_TYPE_ERROR_F    - Error
 !           address - If the link is a hard link, address specifies the file address that the link points to
 !          val_size - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
 !                     the length of the name of the pointed-to object with a null terminator. 
@@ -592,7 +592,12 @@ CONTAINS
 ! Programmer:	M. S. Breitenfeld
 !		February 29, 2008	
 !
-! Modifications:  N/A
+! Modifications:  
+!   Changed the link_type names to match those in C (bug 1720) from,
+!   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F 
+!   to
+!   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
+!   MSB January 8, 2010.
 !
 !----------------------------------------------------------------------
 
@@ -609,10 +614,10 @@ CONTAINS
     INTEGER, INTENT(OUT) :: corder ! Specifies the link’s creation order position.
     LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the value in corder is valid.
     INTEGER, INTENT(OUT) :: link_type ! Specifies the link class:
-     	                              !  H5L_LINK_HARD_F      - Hard link
-     	                              !  H5L_LINK_SOFT_F      - Soft link
-     	                              !  H5L_LINK_EXTERNAL_F  - External link
-     	                              !  H5L_LINK_ERROR _F    - Error
+     	                              !  H5L_TYPE_HARD_F      - Hard link
+     	                              !  H5L_TYPE_SOFT_F      - Soft link
+     	                              !  H5L_TYPE_EXTERNAL_F  - External link
+     	                              !  H5L_TYPE_ERROR _F    - Error
     INTEGER(HADDR_T), INTENT(OUT) :: address  ! If the link is a hard link, address specifies the file address that the link points to
     INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
                                              ! the length of the name of the pointed-to object with a null terminator. 
@@ -691,7 +696,12 @@ CONTAINS
 ! Programmer: M.S. Breitenfeld
 !	      February 29, 2008	
 !
-! Modifications:  N/A
+! Modifications:    
+!   Changed the link_type names to match those in C (bug 1720) from,
+!   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F 
+!   to
+!   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
+!   MSB January 8, 2010.
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
@@ -711,10 +721,10 @@ CONTAINS
                                         !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
     INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
     INTEGER, INTENT(OUT) :: link_type ! Specifies the link class:
-     	                              !  H5L_LINK_HARD_F      - Hard link
-     	                              !  H5L_LINK_SOFT_F      - Soft link
-     	                              !  H5L_LINK_EXTERNAL_F  - External link
-     	                              !  H5L_LINK_ERROR _F    - Error
+     	                              !  H5L_TYPE_HARD_F      - Hard link
+     	                              !  H5L_TYPE_SOFT_F      - Soft link
+     	                              !  H5L_TYPE_EXTERNAL_F  - External link
+     	                              !  H5L_TYPE_ERROR _F    - Error
     LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
     INTEGER, INTENT(OUT) :: corder ! Is a positive integer containing the creation order of the attribute
     INTEGER, INTENT(OUT) :: cset ! Indicates the character set used for the attribute’s name

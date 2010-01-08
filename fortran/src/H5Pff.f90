@@ -7056,10 +7056,10 @@
 !	     other chunks.
 !
 ! Inputs:  
-!		dapl_id            - Link creation property list identifier
-!               rdcc_nslots        - 
-!               rdcc_nbytes        -
-!               rdcc_w0            -
+!		dapl_id            - Dataset access property list identifier.
+!               rdcc_nslots        - The number of chunk slots in the raw data chunk cache for this dataset.
+!               rdcc_nbytes        - The total size of the raw data chunk cache for this dataset.
+!               rdcc_w0            - The chunk preemption policy for this dataset.
 ! Outputs:
 !		hdferr:		   - error code		
 !				 	Success:  0
@@ -7075,11 +7075,14 @@
 
   SUBROUTINE h5pset_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dapl_id
-    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nslots
-    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes
-    REAL, INTENT(IN) :: rdcc_w0 
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN) :: dapl_id      ! Dataset access property list identifier.
+    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nslots ! The number of chunk slots in the raw data 
+                                               ! chunk cache for this dataset.
+    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes ! The total size of the raw data chunk cache 
+                                               ! for this dataset.
+    REAL, INTENT(IN) :: rdcc_w0                ! The chunk preemption policy for this dataset.
+    INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                               ! 0 on success and -1 on failure
     
 
     INTERFACE
@@ -7111,11 +7114,11 @@
 !          file access property list are returned.
 !
 ! Inputs:  
-!		dapl_id            - Link creation property list identifier
-!               rdcc_nslots        - 
-!               rdcc_nbytes        -
-!               rdcc_w0            -
-! Outputs:
+!		dapl_id            - Dataset access property list identifier.
+! Outputs: 
+!               rdcc_nslots        - Number of chunk slots in the raw data chunk cache hash table. 
+!               rdcc_nbytes        - Total size of the raw data chunk cache, in bytes. 
+!               rdcc_w0            - Preemption policy. 
 !		hdferr:		   - error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -7130,11 +7133,11 @@
 
   SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dapl_id
-    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nslots
-    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
-    REAL, INTENT(OUT) :: rdcc_w0 
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN) :: dapl_id ! Dataset access property list identifier.
+    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nslots ! Number of chunk slots in the raw data chunk cache hash table.
+    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes ! Total size of the raw data chunk cache, in bytes. 
+    REAL, INTENT(OUT) :: rdcc_w0 ! Preemption policy.
+    INTEGER, INTENT(OUT) :: hdferr ! error code
     
     INTERFACE
        INTEGER FUNCTION h5pget_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
