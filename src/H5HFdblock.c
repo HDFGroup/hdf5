@@ -324,8 +324,11 @@ HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
 #endif /* 0 */
 
         /* Detach from parent indirect block */
-        if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
+
+        if(dblock->parent) {
+            if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block");
+        }
         dblock->parent = NULL;
         dblock->par_entry = 0;
     } /* end else */
