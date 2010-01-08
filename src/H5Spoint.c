@@ -584,7 +584,7 @@ done:
 static herr_t
 H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
 {
-    H5S_pnt_node_t *curr, *new_node, *new_head;    /* Point information nodes */
+    H5S_pnt_node_t *curr, *new_node, *new_tail;    /* Point information nodes */
     herr_t ret_value=SUCCEED;  /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_point_copy);
@@ -597,28 +597,47 @@ H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
 
     curr=src->select.sel_info.pnt_lst->head;
-    new_head=NULL;
+    new_tail=NULL;
     while(curr!=NULL) {
         /* Create each point */
         if(NULL == (new_node = H5FL_MALLOC(H5S_pnt_node_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
-        if((new_node->pnt = (hsize_t *)H5MM_malloc(src->extent.rank*sizeof(hsize_t)))==NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
-        HDmemcpy(new_node->pnt, curr->pnt, (src->extent.rank * sizeof(hsize_t)));
         new_node->next = NULL;
+        if((new_node->pnt = (hsize_t *)H5MM_malloc(src->extent.rank*sizeof(hsize_t)))==NULL) {
+            (void)H5FL_FREE(H5S_pnt_node_t, new_node);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
+        } /* end if */
+        HDmemcpy(new_node->pnt, curr->pnt, (src->extent.rank * sizeof(hsize_t)));
 
         /* Keep the order the same when copying */
-        if(new_head==NULL)
-            new_head=dst->select.sel_info.pnt_lst->head=new_node;
+        if(new_tail==NULL)
+            new_tail=dst->select.sel_info.pnt_lst->head=new_node;
         else {
-            new_head->next=new_node;
-            new_head=new_node;
+            new_tail->next=new_node;
+            new_tail=new_node;
         } /* end else */
 
         curr=curr->next;
     } /* end while */
 
 done:
+    if(ret_value < 0) {
+        H5S_pnt_node_t *tmp_node;
+
+        /* Traverse the (incomplete?) dst list, freeing all memory */
+        curr = dst->select.sel_info.pnt_lst->head;
+
+        while(curr) {
+            (void)H5MM_xfree(curr->pnt);
+            tmp_node = curr;
+            curr = curr->next;
+            (void)H5FL_FREE(H5S_pnt_node_t, tmp_node);
+        } /* end while */
+
+        dst->select.sel_info.pnt_lst = H5FL_FREE(H5S_pnt_list_t,
+                dst->select.sel_info.pnt_lst);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_point_copy() */
 
