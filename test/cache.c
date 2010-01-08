@@ -9227,7 +9227,6 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     hbool_t	   show_progress = FALSE;
     hbool_t	   verbose = FALSE;
     herr_t	   result;
-    int		   target_test = -1;
     int            i;
     int            j;
     test_entry_t * base_addr;
@@ -9237,11 +9236,6 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
 	      test_num);
 #endif
-
-    if ( ( target_test > 0 ) && ( test_num != target_test ) ) {
-
-	show_progress = FALSE;
-    }
 
     if ( show_progress ) {
 
