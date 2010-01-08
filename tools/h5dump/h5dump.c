@@ -2714,7 +2714,8 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     nfilters = H5Pget_nfilters(dcpl_id);
     ioffset = H5Dget_offset(obj_id);
     next = H5Pget_external_count(dcpl_id);
-    HDassert(next >= 0);
+    if(next < 0)
+        return;
     HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
