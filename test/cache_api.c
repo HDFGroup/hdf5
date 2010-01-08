@@ -1381,7 +1381,6 @@ mdc_api_call_smoke_check(int express_test)
     const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
     hbool_t valid_chunk;
-    hbool_t report_progress = FALSE;
     hbool_t dump_hit_rate = FALSE;
     int64_t min_accesses = 1000;
     double min_hit_rate = 0.90;
@@ -1524,13 +1523,6 @@ mdc_api_call_smoke_check(int express_test)
      */
 
     /* setup the file name */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"\nSetting up file ... ");
-        HDfflush(stdout);
-    }
-
     if ( pass ) {
 
         if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
@@ -1569,21 +1561,7 @@ mdc_api_call_smoke_check(int express_test)
     /* verify that the cache is now set to the alternate config */
     validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n"); /* setting up file */
-        HDfflush(stdout);
-    }
-
-
     /* create the datasets */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Creating datasets ... ");
-        HDfflush(stdout);
-    }
-
     if ( pass ) {
 
         i = 0;
@@ -1688,21 +1666,9 @@ mdc_api_call_smoke_check(int express_test)
         }
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n");
-        HDfflush(stdout);
-    }
-
     /* initialize all datasets on a round robin basis */
     i = 0;
     progress_counter = 0;
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Initializing datasets ");
-        HDfflush(stdout);
-    }
 
     while ( ( pass ) && ( i < DSET_SIZE ) )
     {
@@ -1770,23 +1736,6 @@ mdc_api_call_smoke_check(int express_test)
 
         i += CHUNK_SIZE;
 
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter += CHUNK_SIZE;
-
-	    if ( progress_counter >= DSET_SIZE / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
-    }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout," Done.\n"); /* initializing data sets */
-        HDfflush(stdout);
     }
 
     /* set alternate config 2 */
@@ -1803,13 +1752,6 @@ mdc_api_call_smoke_check(int express_test)
     validate_mdc_config(file_id, &mod_config_2, TRUE, 3);
 
     /* do random reads on all datasets */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Doing random reads on all datasets ");
-        HDfflush(stdout);
-    }
-
     n = 0;
     progress_counter = 0;
     while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
@@ -1895,25 +1837,7 @@ mdc_api_call_smoke_check(int express_test)
 
         n++;
 
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter++;
-
-	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
     }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, " Done.\n"); /* random reads on all data sets */
-        HDfflush(stdout);
-    }
-
 
     /* close the file spaces we are done with */
     i = 1;
@@ -1954,13 +1878,6 @@ mdc_api_call_smoke_check(int express_test)
     validate_mdc_config(file_id, &mod_config_3, TRUE, 4);
 
     /* do random reads on data set 0 only */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Doing random reads on dataset 0 ");
-        HDfflush(stdout);
-    }
-
     m = 0;
     n = 0;
     progress_counter = 0;
@@ -2042,32 +1959,7 @@ mdc_api_call_smoke_check(int express_test)
 
         n++;
 
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter++;
-
-	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
     }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, " Done.\n"); /* random reads data set 0 */
-        HDfflush(stdout);
-    }
-
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Shutting down ... ");
-        HDfflush(stdout);
-    }
-
 
     /* close file space 0 */
     if ( pass ) {
@@ -2124,13 +2016,6 @@ mdc_api_call_smoke_check(int express_test)
 	    failure_mssg = "HDremove() failed.\n";
         }
     }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n"); /* shutting down */
-        HDfflush(stdout);
-    }
-
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
