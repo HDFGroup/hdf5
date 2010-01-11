@@ -854,6 +854,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5HLint.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5HP.c"
 				>
 			</File>
