@@ -55,6 +55,7 @@ typedef struct H5G_bt_it_gnbi_t {
 typedef struct H5G_bt_it_gtbi_t {
     /* downward */
     H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
+    H5F_t       *f;             /* Pointer to file that symbol table is in */
     hid_t       dxpl_id;        /* DXPL for operation */
 
     /* upward */
@@ -733,7 +734,6 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     } /* end if */
 
     /* Set iteration information */
-    udata.common.f = oloc->file;
     udata.common.idx = n;
     udata.common.num_objs = 0;
     udata.common.op = H5G_stab_get_name_by_idx_cb;
@@ -956,7 +956,6 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
     } /* end if */
 
     /* Set iteration information */
-    udata.common.f = grp_oloc->file;
     udata.common.idx = n;
     udata.common.num_objs = 0;
     udata.common.op = H5G_stab_lookup_by_idx_cb;
@@ -1020,7 +1019,7 @@ H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
                 H5O_type_t obj_type;            /* Type of object at location */
 
                 /* Build temporary object location */
-                tmp_oloc.file = udata->common.f;
+                tmp_oloc.file = udata->f;
                 HDassert(H5F_addr_defined(ent->header));
                 tmp_oloc.addr = ent->header;
 
@@ -1069,10 +1068,10 @@ H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "unable to determine local heap address")
 
     /* Set iteration information */
-    udata.common.f = oloc->file;
     udata.common.idx = idx;
     udata.common.num_objs = 0;
     udata.common.op = H5G_stab_get_type_by_idx_cb;
+    udata.f = oloc->file;
     udata.dxpl_id = dxpl_id;
     udata.type = H5G_UNKNOWN;
 

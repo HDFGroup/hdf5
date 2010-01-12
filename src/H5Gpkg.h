@@ -227,7 +227,6 @@ typedef struct H5G_bt_it_cpy_t {
 /* Common information for "by index" lookups in symbol tables */
 typedef struct H5G_bt_it_idx_common_t {
     /* downward */
-    H5F_t       *f;             /* Pointer to file that symbol table is in */
     hsize_t     idx;            /* Index of group member to be queried */
     hsize_t     num_objs;       /* The number of objects having been traversed */
     H5G_bt_find_op_t op;        /* Operator to call when correct entry is found */
