@@ -513,7 +513,7 @@ H5AC_create(const H5F_t *f,
 
     HDassert(f);
     HDassert(NULL == f->shared->cache);
-    HDassert(config_ptr != NULL) ;
+    HDassert(config_ptr != NULL);
     HDcompile_assert(NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
     HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
