@@ -90,7 +90,7 @@ timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \
 	   if test $$timing != dummy; then                                    \
 	      echo "Running $$timing $(TEST_FLAGS)";                          \
-	      $(RUNTEST) ./$$timing $(TEST_FLAGS) || exit 1;                  \
+	      $(RUNEXEC) ./$$timing $(TEST_FLAGS) || exit 1;                  \
 	   fi;                                                                \
 	done;
 
