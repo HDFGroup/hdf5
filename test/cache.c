@@ -9231,7 +9231,6 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     hbool_t	   show_progress = FALSE;
     hbool_t	   verbose = FALSE;
     herr_t	   result;
-    int		   target_test = -1;
     int            i;
     int            j;
     test_entry_t * base_addr;
@@ -9241,11 +9240,6 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
 	      test_num);
 #endif
-
-    if ( ( target_test > 0 ) && ( test_num != target_test ) ) {
-
-	show_progress = FALSE;
-    }
 
     if ( show_progress ) {
 
@@ -28700,9 +28694,6 @@ check_auto_cache_resize_aux_fcns(void)
     if ( pass ) {
 
         max_size        = 0;
-        min_clean_size  = 0;
-        cur_size        = 0;
-        cur_num_entries = 0;
 
         result = H5C_get_cache_size(cache_ptr, &max_size, NULL, NULL, NULL);
 
@@ -28717,22 +28708,12 @@ check_auto_cache_resize_aux_fcns(void)
             failure_mssg =
                 "H5C_get_cache_size reports unexpected max_size 3.\n";
 
-        } else if ( ( min_clean_size != 0 ) ||
-                    ( cur_size != 0 ) ||
-                    ( cur_num_entries != 0 ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Phantom returns from H5C_get_cache_size?\n";
-
         }
     }
 
     if ( pass ) {
 
-        max_size        = 0;
         min_clean_size  = 0;
-        cur_size        = 0;
-        cur_num_entries = 0;
 
         result = H5C_get_cache_size(cache_ptr, NULL, &min_clean_size,
                                     NULL, NULL);
@@ -28748,22 +28729,12 @@ check_auto_cache_resize_aux_fcns(void)
             failure_mssg =
                 "H5C_get_cache_size reports unexpected min_clean_size 4.\n";
 
-        } else if ( ( max_size != 0 ) ||
-                    ( cur_size != 0 ) ||
-                    ( cur_num_entries != 0 ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Phantom returns from H5C_get_cache_size?\n";
-
         }
     }
 
     if ( pass ) {
 
-        max_size        = 0;
-        min_clean_size  = 0;
         cur_size        = 0;
-        cur_num_entries = 0;
 
         result = H5C_get_cache_size(cache_ptr, NULL, NULL, &cur_size, NULL);
 
@@ -28779,21 +28750,11 @@ check_auto_cache_resize_aux_fcns(void)
             failure_mssg =
                 "H5C_get_cache_size reports unexpected cur_size 5.\n";
 
-        } else if ( ( max_size != 0 ) ||
-                    ( min_clean_size != 0 ) ||
-                    ( cur_num_entries != 0 ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Phantom returns from H5C_get_cache_size?\n";
-
-        }
+        } 
     }
 
     if ( pass ) {
 
-        max_size        = 0;
-        min_clean_size  = 0;
-        cur_size        = 0;
         cur_num_entries = 0;
 
         result = H5C_get_cache_size(cache_ptr, NULL, NULL, NULL,
@@ -28809,13 +28770,6 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg =
                 "H5C_get_cache_size reports unexpected cur_num_entries 2.\n";
-
-        } else if ( ( max_size != 0 ) ||
-                    ( min_clean_size != 0 ) ||
-                    ( cur_size != 0 ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Phantom returns from H5C_get_cache_size?\n";
 
         }
     }

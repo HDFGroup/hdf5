@@ -3634,7 +3634,6 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
     hbool_t pin_flag_set;
     hbool_t unpin_flag_set;
     hbool_t size_changed_flag_set;
-    hbool_t verbose = FALSE;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -3685,39 +3684,25 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
-	    if ( verbose ) {
+            if ( result < 0 )
+                HDfprintf(stdout, "%s: H5C_unprotect() failed.\n", fcn_name);
 
-	        if ( result < 0 ) {
-                    HDfprintf(stdout, "%s: H5C_unprotect() failed.\n", fcn_name);
-		}
+            if ( entry_ptr->header.is_protected ) 
+                HDfprintf(stdout, "%s: entry still protected?!?.\n", fcn_name);
 
-	        if ( entry_ptr->header.is_protected )  {
-                    HDfprintf(stdout, "%s: entry still protected?!?.\n", 
-			      fcn_name);
-		}
+            if ( entry_ptr->header.type != &(types[type]) )
+                HDfprintf(stdout, "%s: entry has bad type after unprotect.\n", fcn_name);
 
-	        if ( entry_ptr->header.type != &(types[type]) )  {
-                    HDfprintf(stdout, 
-			      "%s: entry has bad type after unprotect.\n", 
-			      fcn_name);
-		}
+            if ( entry_ptr->size != entry_ptr->header.size )
+                HDfprintf(stdout, "%s: bad entry size after unprotect. e/a = %d/%d\n", fcn_name,
+                       (int)(entry_ptr->size),
+                       (int)(entry_ptr->header.size));
 
-	        if ( entry_ptr->size != entry_ptr->header.size )  {
-                    HDfprintf(stdout, 
-			   "%s: bad entry size after unprotect. e/a = %d/%d\n", 
-			   fcn_name,
-			   (int)(entry_ptr->size),
-			   (int)(entry_ptr->header.size));
-		}
+            if ( entry_ptr->addr != entry_ptr->header.addr )
+                HDfprintf(stdout, "%s: bad entry addr after unprotect. e/a = 0x%llx/0x%llx\n", fcn_name,
+                 (long long)(entry_ptr->addr),
+                 (long long)(entry_ptr->header.addr));
 
-	        if ( entry_ptr->addr != entry_ptr->header.addr )  {
-                    HDfprintf(stdout, 
-		     "%s: bad entry addr after unprotect. e/a = 0x%llx/0x%llx\n",
-		     fcn_name,
-		     (long long)(entry_ptr->addr),
-		     (long long)(entry_ptr->header.addr));
-		}
-	    }
             pass = FALSE;
             failure_mssg = "error in H5C_unprotect().";
 

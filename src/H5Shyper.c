@@ -7546,6 +7546,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
         /* Check if we are done */
         if(io_bytes_left==0 || curr_seq>=maxseq) {
+            HDassert(curr_span);
             abs_arr[fast_dim]=curr_span->low+(span_size/elem_size);
 
             /* Check if we are still within the span */

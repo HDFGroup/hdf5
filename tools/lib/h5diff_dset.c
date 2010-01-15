@@ -545,11 +545,6 @@ hsize_t diff_datasetid( hid_t did1,
             } /* elmtno */
             
             H5Sclose(sm_space);
-            /* free */
-	    HDfree(sm_buf1);
-	    sm_buf1 = NULL;
-	    HDfree(sm_buf2);
-	    sm_buf2 = NULL;
      } /* hyperslab read */
  }/*can_compare*/
  

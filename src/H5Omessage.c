@@ -1859,7 +1859,6 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
 {
-    void        *native_mesg = NULL;
     void        *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_msg_copy_file)
@@ -1876,16 +1875,10 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     /* The copy_file callback will return an H5O_shared_t only if the message
      * to be copied is a committed datatype.
      */
-    if(NULL == (native_mesg = (type->copy_file)(file_src, native_src, file_dst, recompute_size, cpy_info, udata, dxpl_id)))
+    if(NULL == (ret_value = (type->copy_file)(file_src, native_src, file_dst, recompute_size, cpy_info, udata, dxpl_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object header message to file")
 
-    /* Set return value */
-    ret_value = native_mesg;
-
 done:
-    if(NULL == ret_value && native_mesg)
-        H5O_msg_free(type->id, native_mesg);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_copy_file() */
 

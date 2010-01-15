@@ -156,7 +156,7 @@ extern	int	H5E_mpi_error_str_len;
 /* Macro for "catching" flow of control when an error occurs.  Note that the
  *      H5_LEAVE macro won't jump back here once it's past this point.
  */
-#define CATCH past_catch = TRUE; catch_except:;
+#define CATCH catch_except:; past_catch = TRUE;
 
 
 /* Library-private functions defined in H5E package */
