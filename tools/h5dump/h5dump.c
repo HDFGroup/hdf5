@@ -2707,14 +2707,12 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     H5D_fill_time_t  ft;
     hsize_t          storage_size;
     haddr_t          ioffset;
-    int              i, next;
+    int              i;
     unsigned         j;
 
     storage_size = H5Dget_storage_size(obj_id);
     nfilters = H5Pget_nfilters(dcpl_id);
     ioffset = H5Dget_offset(obj_id);
-    next = H5Pget_external_count(dcpl_id);
-    HDassert(next >= 0);
     HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
@@ -2820,6 +2818,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
         printf("%s\n",END);
     }
     else if (H5D_CONTIGUOUS == H5Pget_layout(dcpl_id)) {
+        int              next;
+
+        next = H5Pget_external_count(dcpl_id);
+
         /*-------------------------------------------------------------------------
         * EXTERNAL_FILE
         *-------------------------------------------------------------------------
@@ -4511,16 +4513,13 @@ print_enum(hid_t type)
     unsigned char   *value = NULL;  /*value array                    */
     unsigned char   *copy = NULL;   /*a pointer to value array       */
     unsigned         nmembs;        /*number of members              */
-    int              snmembs;
     int              nchars;        /*number of output characters    */
     hid_t            super;         /*enum base integer type         */
     hid_t            native = -1;   /*native integer datatype        */
     size_t           dst_size;      /*destination value type size    */
     unsigned         i;
 
-    snmembs = H5Tget_nmembers(type);
-    HDassert(snmembs >= 0);
-    nmembs = (unsigned)snmembs;
+    nmembs = (unsigned)H5Tget_nmembers(type);
     super = H5Tget_super(type);
 
     /*
@@ -6693,16 +6692,13 @@ xml_print_enum(hid_t type)
     char                  **name = NULL;    /*member names                   */
     unsigned char          *value = NULL;   /*value array                    */
     unsigned                nmembs;         /*number of members              */
-    int                     snmembs;
     hid_t                   super;          /*enum base integer type         */
     hid_t                   native = -1;    /*native integer datatype        */
     size_t                  dst_size;       /*destination value type size    */
     unsigned                i;              /*miscellaneous counters         */
     size_t                  j;
 
-    snmembs = H5Tget_nmembers(type);
-    HDassert(snmembs >= 0);
-    nmembs = (unsigned)snmembs;
+    nmembs = (unsigned)H5Tget_nmembers(type);
     super = H5Tget_super(type);
 
     indentation(indent);

@@ -299,10 +299,12 @@ H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
 #endif /* 0 */
 
         /* Detach from parent indirect block */
-        if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
-        dblock->parent = NULL;
-        dblock->par_entry = 0;
+        if(dblock->parent) {
+            if(H5HF_man_iblock_detach(dblock->parent, dxpl_id, dblock->par_entry) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block");
+            dblock->parent = NULL;
+            dblock->par_entry = 0;
+        } /* end if */
     } /* end else */
 
     /* Indicate that the indirect block should be deleted & file space freed */

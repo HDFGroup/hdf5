@@ -2070,6 +2070,7 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
                 H5E_THROW(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
             if(sm_buf)
                 HDfree(sm_buf);
+            sm_buf = NULL;
         }
         else
             H5E_THROW(SUCCEED, H5E_tools_min_id_g, "nothing to print");
@@ -2081,6 +2082,9 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
     } /* hyperslab_count loop */
 
 CATCH
+    if(sm_buf)
+        HDfree(sm_buf);
+
     return ret_value;
 }
 
@@ -3286,7 +3290,7 @@ h5tools_print_enum(h5tools_str_t *buffer, hid_t type)
     char         **name = NULL;  /*member names                   */
     unsigned char *value = NULL; /*value array                    */
     unsigned char *copy = NULL;  /*a pointer to value array       */
-    unsigned       nmembs;       /*number of members              */
+    unsigned       nmembs = 0;   /*number of members              */
     int            nchars;       /*number of output characters    */
     hid_t          super = -1;   /*enum base integer type         */
     hid_t          native = -1;  /*native integer datatype        */
@@ -3380,10 +3384,9 @@ h5tools_print_enum(h5tools_str_t *buffer, hid_t type)
     }
 
 CATCH
-
     if(name) {
         /* Release resources */
-        for (i = 0; i < nmembs; i++)
+        for(i = 0; i < nmembs; i++)
             if(name[i])
                 free(name[i]);
         free(name);
@@ -3395,7 +3398,7 @@ CATCH
     if(super >= 0 && H5Tclose(super) < 0)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "Could not close datatype's super class");
 
-    if (0 == nmembs)
+    if(0 == nmembs)
         h5tools_str_append(buffer, "\n<empty>");
 
     return ret_value;

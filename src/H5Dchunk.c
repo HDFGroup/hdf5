@@ -2431,7 +2431,6 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
     if(buf != ent->chunk)
-        /* coverity["double_free"] */
         H5MM_xfree(buf);
 
     /*

@@ -132,10 +132,6 @@ H5HF_hdr_alloc(H5F_t *f)
     ret_value = hdr;
 
 done:
-    if(!ret_value && hdr)
-        if(H5HF_hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
 
