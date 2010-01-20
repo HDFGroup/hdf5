@@ -52,14 +52,15 @@ int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 #define DSET_VLSTR_NAME         "vlstr_type"
 #define DSET_STR_NAME           "str_type"
 #define DSET_OPAQUE_NAME        "opaque_type"
-#define DSET_BITFIELD_NAME      "bitfield_type"
+#define DSET1_BITFIELD_NAME     "bitfield_type_1"
+#define DSET2_BITFIELD_NAME     "bitfield_type_2"
 
 #define SPACE1_DIM1             4
 #define SPACE1_RANK             1
 #define SPACE2_RANK	        2
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
-
+#define BITFIELD_ENUMB          8
 
 
 /*-------------------------------------------------------------------------
@@ -2519,53 +2520,106 @@ error:
  *		October 15, 2002
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              1 December 2009
+ *              I added the support for bitfield and changed the test to
+ *              compare the data being read back.
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_bitfield_dtype(hid_t file)
 {
-    hid_t	type = -1, space = -1, dset = -1;
-    hid_t       dataset = -1, dtype = -1, native_type = -1;
-    size_t	i;
-    unsigned char wbuf[32];
-    hsize_t	nelmts;
+    hid_t		type=-1, space=-1, dset1=-1, dset2=-1;
+    hid_t               dataset1=-1, dataset2=-1, dtype=-1, native_type=-1;
+    size_t		ntype_size, i;
+    unsigned char  	wbuf[BITFIELD_ENUMB*sizeof(int)];
+    unsigned char       *p=NULL;
+    void                *rbuf = NULL;
+    unsigned int        intw[BITFIELD_ENUMB], intr[BITFIELD_ENUMB];
+    hsize_t		nelmts;
 
     TESTING("bitfield datatype");
 
-    /* opaque_1 */
-    nelmts = sizeof(wbuf);
-    if((type = H5Tcopy(H5T_STD_B8LE)) < 0) TEST_ERROR;
+    nelmts = BITFIELD_ENUMB;
+    if((type = H5Tcopy(H5T_STD_B32BE)) < 0) TEST_ERROR;
+
     if((space = H5Screate_simple(1, &nelmts, NULL)) < 0) TEST_ERROR;
-    if((dset = H5Dcreate2(file, DSET_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
 
-    for(i = 0; i < sizeof(wbuf); i++)
-        wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
+    /* Create and write to dataset1 with a unsigned char buffer */
+    if((dset1 = H5Dcreate2(file, DSET1_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, 
+        H5P_DEFAULT)) < 0) TEST_ERROR;
 
-    if(H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
+    for(i = 0; i < BITFIELD_ENUMB*sizeof(int); i++)
+        wbuf[i] = (unsigned int)0xff ^ (unsigned int)i;
+
+    if(H5Dwrite(dset1, H5T_NATIVE_B32, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
+    if(H5Dclose(dset1) < 0) TEST_ERROR;
+
+    /* Create and write to dataset2 with a unsigned int buffer */
+    if((dset2 = H5Dcreate2(file, DSET2_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, 
+        H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    for(i = 0; i < BITFIELD_ENUMB; i++)
+        intw[i] = (unsigned int)0xff << (unsigned int)((i*8)%32);
+
+    if(H5Dwrite(dset2, H5T_NATIVE_B32, H5S_ALL, H5S_ALL, H5P_DEFAULT, intw) < 0) TEST_ERROR;
+    if(H5Dclose(dset2) < 0) TEST_ERROR;
     if(H5Sclose(space) < 0) TEST_ERROR;
-    if(H5Dclose(dset) < 0) TEST_ERROR;
-
-
-    /* Open dataset again to check H5Tget_native_type */
-    if((dataset = H5Dopen2(file, DSET_BITFIELD_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
-
-    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
-
-    H5E_BEGIN_TRY {
-        native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
-    } H5E_END_TRY;
-    if(native_type > 0) {
-        H5_FAILED();
-        puts("  Bit field isn't supported.  Should have failed.");
-        TEST_ERROR;
-    } /* end if */
-
     if(H5Tclose(type) < 0) TEST_ERROR;
-    if(H5Tclose(dtype) < 0) TEST_ERROR;
-    if(H5Dclose(dataset) < 0) TEST_ERROR;
 
+    /* Open dataset1 again to check H5Tget_native_type */
+    if((dataset1 = H5Dopen2(file, DSET1_BITFIELD_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    if((dtype = H5Dget_type(dataset1)) < 0) TEST_ERROR;
+
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0) TEST_ERROR;
+
+    if((ntype_size = H5Tget_size(native_type)) == 0) TEST_ERROR;
+
+    rbuf = malloc((size_t)nelmts*ntype_size);
+
+    /* Read the data and compare them */
+    if(H5Dread(dataset1, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
+
+    p = (unsigned int*)rbuf;
+    for(i = 0; i < BITFIELD_ENUMB*4; i++) {
+        if(*p != wbuf[i]) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
+            TEST_ERROR;  
+        }
+        p++;
+    }
+
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Dclose(dataset1) < 0) TEST_ERROR;
+    if(rbuf) free(rbuf);
+
+    /* Open dataset2 again to check H5Tget_native_type */
+    if((dataset2 = H5Dopen2(file, DSET2_BITFIELD_NAME, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+    if((dtype = H5Dget_type(dataset2)) < 0) TEST_ERROR;
+
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0) TEST_ERROR;
+
+    /* Read the data and compare them */
+    if(H5Dread(dataset2, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, intr) < 0) TEST_ERROR;
+
+    for(i = 0; i < BITFIELD_ENUMB; i++) {
+        if(intr[i] != intw[i]) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
+            TEST_ERROR;  
+        }
+    }
+
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Dclose(dataset2) < 0) TEST_ERROR;
+ 
     PASSED();
     return 0;
 
@@ -2575,8 +2629,10 @@ error:
         H5Tclose(type);
         H5Tclose(dtype);
         H5Tclose(native_type);
-        H5Dclose(dset);
-        H5Dclose(dataset);
+        H5Dclose(dset1);
+        H5Dclose(dset2);
+        H5Dclose(dataset1);
+        H5Dclose(dataset2);
     } H5E_END_TRY;
 
     return -1;
