@@ -4496,7 +4496,7 @@ test_conv_bitfield(void)
 static int
 test_bitfield_funcs(void)
 {
-    hid_t		type=-1, super=-1;
+    hid_t		type=-1, ntype=-1, super=-1;
     int                 size;
     char*               tag;
     H5T_pad_t           inpad;
@@ -4521,6 +4521,7 @@ test_bitfield_funcs(void)
     if(H5Tset_pad(type, H5T_PAD_ONE, H5T_PAD_ONE)) goto error;
     if((size=H5Tget_size(type))==0) goto error;
     if(H5Tset_order(type, H5T_ORDER_BE) < 0) goto error;
+    if((ntype = H5Tget_native_type(type, H5T_DIR_ASCEND)) < 0) goto error;
 
     H5E_BEGIN_TRY {
         size=H5Tget_ebias(type);
@@ -4585,16 +4586,8 @@ test_bitfield_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY {
-        super = H5Tget_native_type(type, H5T_DIR_ASCEND);
-    } H5E_END_TRY;
-    if (super>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
-
     H5Tclose(type);
+    H5Tclose(ntype);
     PASSED();
     reset_hdf5();
     return 0;
