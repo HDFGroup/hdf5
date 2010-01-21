@@ -220,7 +220,7 @@ document.writeln ("
   <p>
   The one <span class=termemphasis>very important difference</span> 
   between the HDF5 file structure and 
-  the above-mentioned file system anologs 
+  the above-mentioned file system analogs 
   is that HDF5 groups are linked as a directed graph, 
   allowing circular references;  
   the file systems are strictly hierarchical, 
@@ -1352,10 +1352,10 @@ document.writeln ("
   With the soft links defined in Figure 16, the dataset <code>CData</code> 
   in the group <code>/Data</code> can now be opened with any of the names 
   <code>/Data/CData</code>, <code>/Soft2/CData</code>, or 
-  <code>/Soft2/CData</code>.
+  <code>/Soft3/CData</code>.
 
   <p>
-  <strong>Not regarding hard links versus soft links</strong><br>
+  <strong>Note regarding hard links versus soft links</strong><br>
   Note that an object's existence in a file is governed by the presence
   of at least one hard link to that object.
   If the last hard link to an object is removed, the object is removed 
@@ -2111,8 +2111,8 @@ document.writeln ("
   each other and the dataset is a member of both groups. 
   In this case, there are an infinite number of paths to the dataset 
   because <code>GXX</code> and <code>GYY</code> can be traversed 
-  any number of times on the om the root group, <code>/</code>, 
-  way frto the dataset.
+  any number of times on the way from the root group, <code>/</code>, 
+  to the dataset.
   This can yield a path name such as 
   <code>/group1/GXX/GYY/GXX/GYY/GXX/dset2</code>.
 
