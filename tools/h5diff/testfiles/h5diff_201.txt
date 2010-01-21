@@ -1,2 +1,1 @@
-dataset: </g2/dset1> and </g2/dset2>
 Not comparable: </g2/dset1> or </g2/dset2> is an empty dataset

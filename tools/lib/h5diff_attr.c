@@ -242,7 +242,6 @@ hsize_t diff_attr(hid_t loc1_id,
         /* the rest (-c, none, ...) */
         else
         {
-            do_print_objname ("attribute", np1, np2);
             nfound = diff_array(buf1,
                 buf2,
                 nelmts1,
@@ -257,8 +256,11 @@ hsize_t diff_attr(hid_t loc1_id,
                 attr2_id);
 
                 /* not comparable, no display the different number */
-                if (!options->not_cmp)
+                if (!options->not_cmp && nfound)
+                {
+                    do_print_objname ("attribute", np1, np2);
                     print_found(nfound);
+                }
         }
 
 
