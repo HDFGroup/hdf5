@@ -931,11 +931,13 @@ hsize_t diff(hid_t file1_id,
 			/* the rest (-c, none, ...) */
             else
             {
-                do_print_objname("dataset", path1, path2);
                 nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
                 /* not comparable, no display the different number */
-                if (!options->not_cmp)
+                if (!options->not_cmp && nfound)
+                {
+                    do_print_objname("dataset", path1, path2);
                     print_found(nfound);	
+                }
             }
             break;
 
