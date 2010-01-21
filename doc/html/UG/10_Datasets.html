@@ -1429,7 +1429,11 @@ document.writeln ("
 
   <p>Filters are selected by dataset creation properties, and some behavior may 
   be controlled by data transfer properties. The library determines what 
-  filters must be applied and in what order.
+  filters must be applied and applies them in the order in which they were
+  set by the application. That is, if an application calls
+  <code>H5Pset_shuffle</code> then <code>H5Pset_deflate</code> when creating
+  a dataset&rsquo;s creation property list, the library will apply the 
+  shuffle filter first then the deflate filter.
   
   <p>See The HDF Group website for 
   <a href="http://www.hdfgroup.org/doc_resource/SZIP/" target="Ext1">further 
