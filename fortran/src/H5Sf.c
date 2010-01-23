@@ -14,6 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5f90.h"
+#include "H5Eprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5screate_simple_c
@@ -31,36 +32,29 @@
 int_f
 nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
 {
-  int ret_value = -1;
-  hsize_t *c_dims;
-  hsize_t *c_maxdims;
-  hid_t c_space_id;
-  int i;
+    hsize_t c_dims[H5S_MAX_RANK];
+    hsize_t c_maxdims[H5S_MAX_RANK];
+    hid_t c_space_id;
+    int i;
+    int_f ret_value = 0;
+  
+    /*
+     * Transpose dimension arrays because of C-FORTRAN storage order
+     */
+    for(i = 0; i < *rank ; i++) {
+         c_dims[i] =  dims[*rank - i - 1];
+         c_maxdims[i] = maxdims[*rank - i - 1];
+    } /* end for */
+  
+    c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
+    if(c_space_id < 0) 
+        HGOTO_DONE(FAIL)
+  
+    *space_id = (hid_t_f)c_space_id;
 
-  c_dims =  malloc(sizeof(hsize_t) * (*rank ));
-  if (!c_dims) return ret_value;
-  c_maxdims =  malloc(sizeof(hsize_t) * (*rank ));
-  if (!c_maxdims) return ret_value;
-
-  /*
-   * Transpose dimension arrays because of C-FORTRAN storage order
-   */
-  for (i = 0; i < *rank ; i++) {
-       c_dims[i] =  dims[*rank - i - 1];
-       c_maxdims[i] = maxdims[*rank - i - 1];
-  }
-
-  c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
-  if (c_space_id < 0) return ret_value;
-
-  *space_id = (hid_t_f)c_space_id;
-  ret_value = 0;
-  HDfree (c_dims);
-  HDfree (c_maxdims);
-  return ret_value;
+done:
+    return ret_value;
 }
-
-
 
 /*----------------------------------------------------------------------------
  * Name:        h5sclose_c
@@ -282,33 +276,27 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
 int_f
 nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
 {
-  int ret_value = -1;
-  hid_t c_space_id;
-  hsize_t* c_start, *c_end;
-  int i, rank;
+    hid_t c_space_id;
+    hsize_t c_start[H5S_MAX_RANK];
+    hsize_t c_end[H5S_MAX_RANK];
+    int i, rank;
+    int_f ret_value = 0;
+   
+    c_space_id = *space_id;
+    rank = H5Sget_simple_extent_ndims(c_space_id);
+    if(rank < 0 )
+        HGOTO_DONE(FAIL)
+   
+    if(H5Sget_select_bounds(c_space_id, c_start, c_end) < 0)
+        HGOTO_DONE(FAIL)
 
-  c_space_id = *space_id;
-  rank = H5Sget_simple_extent_ndims(c_space_id);
-  if (rank < 0 ) return ret_value;
+    for(i = 0; i < rank; i++) {
+        start[i] = (hsize_t_f)(c_start[rank - i - 1] + 1);
+        end[i] = (hsize_t_f)(c_end[rank - i - 1] + 1);
+    } /* end for */
 
-  c_start =(hsize_t*) malloc(sizeof(hsize_t)*rank);
-  if (!c_start) return ret_value;
-
-  c_end = (hsize_t*)malloc(sizeof(hsize_t)*rank);
-  if(!c_end) return ret_value;
-
-  ret_value = H5Sget_select_bounds(c_space_id, c_start, c_end);
-  for(i = 0; i < rank; i++)
-  {
-    start[i] = (hsize_t_f)(c_start[rank-i-1]+1);
-    end[i] = (hsize_t_f)(c_end[rank-i-1]+1);
-  }
-  if (ret_value  >= 0  ) ret_value = 0;
-
-  HDfree(c_start);
-  HDfree(c_end);
-
-  return ret_value;
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -574,29 +562,28 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 int_f
 nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
 {
-  int ret_value = -1;
-  hid_t c_space_id;
-  int rank;
-  hssize_t *c_offset;
-  herr_t  status;
-  int i;
+    hid_t c_space_id;
+    int rank;
+    hssize_t c_offset[H5S_MAX_RANK];
+    int i;
+    int_f ret_value = 0;
 
-  c_space_id = *space_id;
-  rank = H5Sget_simple_extent_ndims(c_space_id);
-  if (rank < 0) return ret_value;
+    c_space_id = *space_id;
+    rank = H5Sget_simple_extent_ndims(c_space_id);
+    if(rank < 0)
+        HGOTO_DONE(FAIL)
 
-  c_offset = malloc(sizeof(hssize_t)*rank);
-  if (!c_offset) return ret_value;
+    /*
+     * Reverse dimensions due to C-FORTRAN storage order.
+     */
+    for(i = 0; i < rank; i++)
+        c_offset[i] = offset[rank - i - 1];
 
-  /*
-   * Reverse dimensions due to C-FORTRAN storage order.
-   */
-  for (i=0; i < rank; i++) c_offset[i] = offset[rank - i - 1];
+    if(H5Soffset_simple(c_space_id, c_offset) < 0)
+        HGOTO_DONE(FAIL)
 
-  status = H5Soffset_simple(c_space_id, c_offset);
-  if ( status >= 0  ) ret_value = 0;
-  HDfree(c_offset);
-  return ret_value;
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -616,35 +603,24 @@ nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
 int_f
 nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
 {
-  int ret_value = -1;
-  hid_t c_space_id;
-  int c_rank;
-  hsize_t *c_current_size;
-  hsize_t *c_maximum_size;
-  herr_t  status;
-  int i;
+    hsize_t c_current_size[H5S_MAX_RANK];
+    hsize_t c_maximum_size[H5S_MAX_RANK];
+    int i;
+    int_f ret_value = 0;
 
-  c_current_size = malloc(sizeof(hsize_t)*(*rank));
-  if (!c_current_size) return ret_value;
+    /*
+     * Reverse dimensions due to C-FORTRAN storage order.
+     */
+    for(i = 0; i < *rank; i++) {
+        c_current_size[i] = (hsize_t)current_size[*rank - i - 1];
+        c_maximum_size[i] = (hsize_t)maximum_size[*rank - i - 1];
+    } /* end for */
 
-  c_maximum_size = malloc(sizeof(hsize_t)*(*rank));
-  if (!c_maximum_size) return ret_value;
+    if(H5Sset_extent_simple((hid_t)*space_id, (int)*rank, c_current_size, c_maximum_size) < 0)
+        HGOTO_DONE(FAIL)
 
-  /*
-   * Reverse dimensions due to C-FORTRAN storage order.
-   */
-  for (i=0; i < *rank; i++) {
-      c_current_size[i] = (hsize_t)current_size[*rank - i - 1];
-      c_maximum_size[i] = (hsize_t)maximum_size[*rank - i - 1];
-  }
-
-  c_space_id = *space_id;
-  c_rank = *rank;
-  status = H5Sset_extent_simple(c_space_id, c_rank, c_current_size, c_maximum_size);
-  if ( status >= 0  ) ret_value = 0;
-  HDfree(c_current_size);
-  HDfree(c_maximum_size);
-  return ret_value;
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -663,37 +639,33 @@ nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_si
 int_f
 nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
 {
-  int ret_value = -1;
-  hid_t c_space_id;
-  hsize_t *c_dims;
-  hsize_t *c_maxdims;
-  int status;
-  int rank;
-  int i;
+    hid_t c_space_id;
+    hsize_t c_dims[H5S_MAX_RANK];
+    hsize_t c_maxdims[H5S_MAX_RANK];
+    int rank;
+    int i;
+    int_f ret_value;
 
-  c_space_id = *space_id;
-  rank = H5Sget_simple_extent_ndims(c_space_id);
-  if (rank < 0) return ret_value;
+    c_space_id = *space_id;
+    rank = H5Sget_simple_extent_ndims(c_space_id);
+    if(rank < 0)
+        HGOTO_DONE(FAIL)
 
-  c_dims = malloc(sizeof(hsize_t)*rank);
-  if (!c_dims) return ret_value;
+    if(H5Sget_simple_extent_dims(c_space_id, c_dims, c_maxdims) < 0)
+        HGOTO_DONE(FAIL)
 
-  c_maxdims = malloc(sizeof(hsize_t)*rank);
-  if (!c_maxdims) return ret_value;
+    /*
+     * Reverse dimensions due to C-FORTRAN storage order.
+     */
+    for(i = 0; i < rank; i++) {
+        dims[rank - i - 1] = (hsize_t_f)c_dims[i];
+        maxdims[rank - i - 1] = (hsize_t_f)c_maxdims[i];
+    } /* end for */
 
-  status = H5Sget_simple_extent_dims(c_space_id, c_dims, c_maxdims);
-  /*
-   * Reverse dimensions due to C-FORTRAN storage order.
-   */
-  for (i=0; i < rank; i++) {
-      dims[rank - i - 1] = (hsize_t_f)c_dims[i];
-      maxdims[rank - i - 1] = (hsize_t_f)c_maxdims[i];
-  }
+    ret_value = rank;
 
-  if ( status >= 0  ) ret_value = rank;
-  HDfree(c_dims);
-  HDfree(c_maxdims);
-  return ret_value;
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -792,61 +764,37 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
 int_f
 nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
 {
-  int ret_value = -1;
-  hid_t c_space_id;
-  hsize_t *c_start = NULL;
-  hsize_t *c_count = NULL;
-  hsize_t *c_stride = NULL;
-  hsize_t *c_block = NULL;
+    hsize_t c_start[H5S_MAX_RANK];
+    hsize_t c_count[H5S_MAX_RANK];
+    hsize_t c_stride[H5S_MAX_RANK];
+    hsize_t c_block[H5S_MAX_RANK];
+    int rank;
+    int i;
+    int_f ret_value = 0;
 
-  H5S_seloper_t c_op;
-  herr_t  status;
-  int rank;
-  int i;
+    rank = H5Sget_simple_extent_ndims((hid_t)*space_id);
+    if(rank < 0 )
+        HGOTO_DONE(FAIL)
 
-  rank = H5Sget_simple_extent_ndims(*space_id);
-  if (rank < 0 ) return ret_value;
-  c_start = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (c_start == NULL) goto DONE;
+    /*
+     * Reverse dimensions due to C-FORTRAN storage order.
+     */
+    for(i = 0; i < rank; i++) {
+        int t = (rank - i) - 1;
 
-  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (c_count == NULL) goto DONE;
+        c_start[i] = (hsize_t)start[t];
+        c_count[i] = (hsize_t)count[t];
+        c_stride[i] = (hsize_t)stride[t];
+        c_block[i] = (hsize_t)block[t];
+    } /* end for */
 
-  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (c_stride == NULL) goto DONE;
+    if(H5Sselect_hyperslab((hid_t)*space_id, (H5S_seloper_t)*op, c_start, c_stride, c_count, c_block) < 0)
+        HGOTO_DONE(FAIL)
 
-  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
-  if (c_block == NULL) goto DONE;
-
-
-  /*
-   * Reverse dimensions due to C-FORTRAN storage order.
-   */
-
-  for (i=0; i < rank; i++) {
-      int t= (rank - i) - 1;
-      c_start[i] = (hsize_t)start[t];
-      c_count[i] = (hsize_t)count[t];
-      c_stride[i] = (hsize_t)stride[t];
-      c_block[i] = (hsize_t)block[t];
-  }
-
-   c_op = (H5S_seloper_t)*op;
-/*
-  if (*op == H5S_SELECT_SET_F) c_op = H5S_SELECT_SET;
-  if (*op == H5S_SELECT_OR_F)  c_op = H5S_SELECT_OR;
-*/
-
-  c_space_id = *space_id;
-  status = H5Sselect_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
-  if ( status >= 0  ) ret_value = 0;
-DONE:
-  if(c_start != NULL) HDfree(c_start);
-  if(c_count != NULL) HDfree(c_count);
-  if(c_stride!= NULL) HDfree(c_stride);
-  if(c_block != NULL) HDfree(c_block);
-  return ret_value;
+done:
+    return ret_value;
 }
+
 #ifdef NEW_HYPERSLAB_API
 /*----------------------------------------------------------------------------
  * Name:        h5scombine_hyperslab_c

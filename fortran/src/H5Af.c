@@ -1196,32 +1196,27 @@ nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		     int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
-    H5_index_t c_idx_type;
-    H5_iter_order_t c_order;
     int_f ret_value = 0;          /* Return value */
 
      /*
       * Convert FORTRAN name to C name
       */
-    if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
-
-    c_idx_type = (H5_index_t)*idx_type;
-    c_order = (H5_iter_order_t)*order;
+    if(NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
+        HGOTO_DONE(FAIL)
 
      /*
       * Call H5Adelete_by_name function.
       */
-
-    if(H5Adelete_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
-
+    if(H5Adelete_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order, (hsize_t)*n, (hid_t)*lapl_id) < 0)
+        HGOTO_DONE(FAIL)
 
 done:
     if(c_obj_name)
         HDfree(c_obj_name);
+
     return ret_value;
 }
+
 /*----------------------------------------------------------------------------
  * Name:        h5aget_name_by_idx_c
  * Purpose:     Call h5aget_name_by_idx
@@ -1264,45 +1259,43 @@ nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		       size_t_f *size, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
-    H5_index_t c_idx_type;
-    H5_iter_order_t c_order;
-    int_f ret_value = -1;          /* Return value */
     ssize_t c_size;
     size_t c_buf_size;
-    char *c_buf =NULL;
-     /*
-      * Convert FORTRAN name to C name
-      */
-    if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    char *c_buf = NULL;
+    int_f ret_value = 0;          /* Return value */
 
-    c_idx_type = (H5_index_t)*idx_type;
-    c_order = (H5_iter_order_t)*order;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
+        HGOTO_DONE(FAIL)
 
     /*
      * Allocate buffer to hold name of an attribute
      */
     c_buf_size = (size_t)*size + 1;
-    c_buf = (char *)HDmalloc(c_buf_size);
-    if (c_buf == NULL) return ret_value;
+    if(NULL == (c_buf = (char *)HDmalloc(c_buf_size)))
+        HGOTO_DONE(FAIL)
+
      /*
       * Call H5Aget_name_by_idx function.
       */
-     c_size = H5Aget_name_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n, c_buf, c_buf_size,(hid_t)*lapl_id);
+     c_size = H5Aget_name_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order, (hsize_t)*n, c_buf, c_buf_size,(hid_t)*lapl_id);
+     if(c_size < 0)
+        HGOTO_DONE(FAIL)
 
-     if (c_size < 0) goto done;
 
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-     HD5packFstring(c_buf, _fcdtocp(name), c_buf_size-1);
+     HD5packFstring(c_buf, _fcdtocp(name), c_buf_size - 1);
      *size = (size_t_f)c_size;
-     ret_value = 0;
 
 done:
    if(c_obj_name)
-      HDfree(c_obj_name);
-   HDfree(c_buf);
+       HDfree(c_obj_name);
+   if(c_buf)
+       HDfree(c_buf);
     return ret_value;
 }
 
@@ -1339,27 +1332,24 @@ nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		   int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
-    H5_index_t c_idx_type;
-    H5_iter_order_t c_order;
     int_f ret_value = 0;          /* Return value */
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-    if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
-
-    c_idx_type = (H5_index_t)*idx_type;
-    c_order = (H5_iter_order_t)*order;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
+        HGOTO_DONE(FAIL)
 
      /*
       * Call H5Aopen_by_idx function.
       */
-    if((*attr_id = (hid_t_f)H5Aopen_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n, (hid_t)*aapl_id, (hid_t)*lapl_id)) < 0)
-      HGOTO_DONE(FAIL);
+    if((*attr_id = (hid_t_f)H5Aopen_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order, (hsize_t)*n, (hid_t)*aapl_id, (hid_t)*lapl_id)) < 0)
+        HGOTO_DONE(FAIL)
+
 done:
     if(c_obj_name)
         HDfree(c_obj_name);
+
     return ret_value;
 }
 
@@ -1445,36 +1435,34 @@ nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		int_f *cset, hsize_t_f *data_size )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
-    H5_index_t c_idx_type;
-    H5_iter_order_t c_order;
-    int_f ret_value = 0;          /* Return value */
     H5A_info_t ainfo;
+    int_f ret_value = 0;          /* Return value */
 
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
+        HGOTO_DONE(FAIL)
 
-    c_idx_type = (H5_index_t)*idx_type;
-    c_order = (H5_iter_order_t)*order;
      /*
       * Call H5Ainfo_by_idx function.
       */
-    if(H5Aget_info_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n,
-		   &ainfo, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
+    if(H5Aget_info_by_idx((hid_t)*loc_id, c_obj_name, (H5_index_t)*idx_type, (H5_iter_order_t)*order, (hsize_t)*n,
+            &ainfo, (hid_t)*lapl_id) < 0)
+      HGOTO_DONE(FAIL)
 
     /* Unpack the structure */
-
     *corder_valid = 0;
-    if(ainfo.corder_valid > 0) *corder_valid = 1;
-
+    if(ainfo.corder_valid > 0)
+        *corder_valid = 1;
     *corder = (int_f)ainfo.corder;
     *cset = (int_f)ainfo.cset;
     *data_size = (hsize_t)ainfo.data_size;
 
 done:
+    if(c_obj_name)
+        HDfree(c_obj_name);
+
     return ret_value;
 }
 
@@ -1506,34 +1494,37 @@ nh5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
     char *c_attr_name = NULL;          /* Buffer to hold C string */
-    int_f ret_value = 0;          /* Return value */
     H5A_info_t ainfo;
+    int_f ret_value = 0;          /* Return value */
 
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
-    if((c_attr_name = HD5f2cstring(attr_name, (size_t)*attr_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)))
+        HGOTO_DONE(FAIL)
+    if(NULL == (c_attr_name = HD5f2cstring(attr_name, (size_t)*attr_namelen)))
+        HGOTO_DONE(FAIL)
 
      /*
       * Call H5Ainfo_by_name function.
       */
-    if(H5Aget_info_by_name((hid_t)*loc_id, c_obj_name, c_attr_name,
-		   &ainfo, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
+    if(H5Aget_info_by_name((hid_t)*loc_id, c_obj_name, c_attr_name, &ainfo, (hid_t)*lapl_id) < 0)
+        HGOTO_DONE(FAIL)
 
     /* Unpack the structure */
-
     *corder_valid = 0;
-    if(ainfo.corder_valid > 0) *corder_valid = 1;
-
+    if(ainfo.corder_valid > 0)
+        *corder_valid = 1;
     *corder = (int_f)ainfo.corder;
     *cset = (int_f)ainfo.cset;
     *data_size = (hsize_t)ainfo.data_size;
 
 done:
+    if(c_obj_name)
+        HDfree(c_obj_name);
+    if(c_attr_name)
+        HDfree(c_attr_name);
+
     return ret_value;
 }
 

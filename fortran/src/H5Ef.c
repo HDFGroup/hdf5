@@ -16,7 +16,7 @@
 /* This files contains C stubs for H5E Fortran APIs */
 
 #include "H5f90.h"
-
+#include "H5Eprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5eclear_c
@@ -30,18 +30,18 @@
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5eclear_c( )
+nh5eclear_c(void)
 {
-  int ret_val = -1;
-  herr_t status;
+    int_f ret_value = 0;
 
-  /*
-   * Call H5Eclear function.
-   */
-  status = H5Eclear2(H5E_DEFAULT);
-  if(status < 0) return ret_val;
-  ret_val = 0;
-  return ret_val;
+    /*
+     * Call H5Eclear function.
+     */
+    if(H5Eclear2(H5E_DEFAULT) < 0)
+        HGOTO_DONE(FAIL)
+
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -59,26 +59,28 @@ nh5eclear_c( )
 int_f
 nh5eprint_c1(_fcd name, int_f* namelen)
 {
-  int ret_val = -1;
-  herr_t status;
-  FILE * file;
-  char* c_name;
-  size_t c_namelen;
-  c_namelen = *namelen;
-  c_name = (char*)HD5f2cstring(name, c_namelen);
-  if(c_name == NULL) return ret_val;
-  file = fopen(c_name, "a");
-       if(!file) goto DONE;
-  /*
-   * Call H5Eprint2 function.
-   */
-  status = H5Eprint2(H5E_DEFAULT, file);
-  if (status >=0 ) ret_val = 0;
-  fclose(file);
+    FILE *file = NULL;
+    char *c_name = NULL;
+    int_f ret_value = 0;
+    
+    if(NULL == (c_name = (char*)HD5f2cstring(name, (size_t)*namelen)))
+        HGOTO_DONE(FAIL)
+    if(NULL == (file = HDfopen(c_name, "a")))
+        HGOTO_DONE(FAIL)
 
-DONE:
-  HDfree(c_name);
-  return ret_val;
+    /*
+     * Call H5Eprint2 function.
+     */
+    if(H5Eprint2(H5E_DEFAULT, file) < 0)
+        HGOTO_DONE(FAIL)
+
+done:
+    if(file)
+        HDfclose(file);
+    if(c_name)
+        HDfree(c_name);
+
+    return ret_value;
 }
 
 
@@ -94,17 +96,18 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5eprint_c2()
+nh5eprint_c2(void)
 {
-  int ret_val = -1;
-  herr_t status;
+    int_f ret_value = 0;
 
-  /*
-   * Call H5Eprint2 function.
-   */
-  status = H5Eprint2(H5E_DEFAULT, NULL);
-  if(status >= 0) ret_val = 0;
-  return ret_val;
+    /*
+     * Call H5Eprint2 function.
+     */
+    if(H5Eprint2(H5E_DEFAULT, NULL) < 0)
+        HGOTO_DONE(FAIL)
+
+done:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -121,24 +124,28 @@ nh5eprint_c2()
 int_f
 nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
-  int ret_val = -1;
-  char *c_name = NULL;
-  size_t c_namelen;
-  hid_t c_error_no;
-  c_error_no = (hid_t)*error_no;
+    char *c_name = NULL;
+    size_t c_namelen = (size_t)*namelen;
+    int_f ret_value = 0;
 
-  c_namelen = (size_t)*namelen;
-  if(c_namelen) c_name = (char*) HDmalloc(c_namelen + 1);
+    if(c_namelen) {
+        if(NULL == (c_name = (char *)HDmalloc(c_namelen + 1)))
+            HGOTO_DONE(FAIL)
+    } /* end if */
 
-  /*
-   * Call H5Eget_major function.
-   */
-  H5Eget_msg(c_error_no, NULL, c_name, c_namelen);
-  HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen);
+    /*
+     * Call H5Eget_major function.
+     */
+    H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
+    HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen);
+    if(!HDstrcmp(c_name, "Invalid major error number")) 
+        HGOTO_DONE(FAIL)
+    
+done:
+    if(c_name)
+        HDfree(c_name);
 
-  if(!strcmp(c_name, "Invalid major error number")) return ret_val;
-  ret_val = 0;
-  return ret_val;
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -155,24 +162,28 @@ nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 int_f
 nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
-  int ret_val = -1;
-  char *c_name = NULL;
-  size_t c_namelen;
-  hid_t c_error_no;
-  c_error_no = (hid_t)*error_no;
+    char *c_name = NULL;
+    size_t c_namelen = (size_t)*namelen;
+    int_f ret_value = 0;
 
-  c_namelen = (size_t)*namelen;
-  if(c_namelen) c_name = (char*) HDmalloc(c_namelen + 1);
+    if(c_namelen) {
+        if(NULL == (c_name = (char *)HDmalloc(c_namelen + 1)))
+            HGOTO_DONE(FAIL)
+    } /* end if */
 
-  /*
-   * Call H5Eget_minor function.
-   */
-  H5Eget_msg(c_error_no, NULL, c_name, c_namelen);
-  HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen);
-
-  if(!strcmp(c_name, "Invalid minor error number")) return ret_val;
-  ret_val = 0;
-  return ret_val;
+    /*
+     * Call H5Eget_minor function.
+     */
+    H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
+    HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
+    if(!HDstrcmp(c_name, "Invalid minor error number")) 
+        HGOTO_DONE(FAIL)
+    
+done:
+    if(c_name)
+        HDfree(c_name);
+        
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -188,13 +199,17 @@ nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 int_f
 nh5eset_auto_c(int_f* printflag)
 {
-  int ret_val = -1;
-  herr_t status = -1;
+    herr_t status = -1;
+    int_f ret_value = 0;
 
-  if (*printflag == 1)
-    status = H5Eset_auto2(H5E_DEFAULT, H5Eprint2, stderr);
-  else if (*printflag == 0)
-    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  if (status >= 0) ret_val = 0;
-  return ret_val;
+    if(*printflag == 1)
+        status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, stderr);
+    else if(*printflag == 0)
+        status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    if(status < 0)
+        HGOTO_DONE(FAIL)
+
+done:
+    return ret_value;
 }
+
