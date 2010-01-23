@@ -13769,45 +13769,53 @@ check_expunge_entry(void)
      * it without marking it dirty.
      */
 
-    protect_entry(cache_ptr, 0, 0);
+    if ( pass ) {
 
-    unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        protect_entry(cache_ptr, 0, 0);
+
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128,
+                           "H5AC_get_entry_status() reports failure 2.");
+                failure_mssg = msg;
 
-	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
+        } else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+                failure_mssg = msg;
 
-        } else if ( ( ! entry_ptr->loaded ) ||
-                    ( entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( entry_ptr->destroyed ) ) {
+            } else if ( ( ! entry_ptr->loaded ) ||
+                        ( entry_ptr->cleared ) ||
+                ( entry_ptr->flushed ) ||
+                ( entry_ptr->destroyed ) ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
+                failure_mssg = msg;
 
-	}
+        }
     }
 
     /* Expunge the entry and then verify that it is no longer in the cache.
      * Also verify that the entry was loaded, cleared, and destroyed, but
      * not flushed.
      */
-    expunge_entry(cache_ptr, 0, 0);
+    if ( pass ) {
+
+        expunge_entry(cache_ptr, 0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -13818,29 +13826,29 @@ check_expunge_entry(void)
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                 &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128,
+                           "H5AC_get_entry_status() reports failure 3.");
+                failure_mssg = msg;
 
-	} else if ( in_cache ) {
+        } else if ( in_cache ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+                failure_mssg = msg;
 
-        } else if ( ( ! entry_ptr->loaded ) ||
-                    ( ! entry_ptr->cleared ) ||
-		    ( entry_ptr->flushed ) ||
-		    ( ! entry_ptr->destroyed ) ) {
+            } else if ( ( ! entry_ptr->loaded ) ||
+                        ( ! entry_ptr->cleared ) ||
+                ( entry_ptr->flushed ) ||
+                ( ! entry_ptr->destroyed ) ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
+                failure_mssg = msg;
 
-	}
+        }
     }
 
     /* now repeat the process with a different entry.  On unprotect
@@ -13860,14 +13868,14 @@ check_expunge_entry(void)
                                       &in_cache, &is_dirty, &is_protected,
 				      &is_pinned, NULL, NULL);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
-            failure_mssg = msg;
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128,
+                           "H5AC_get_entry_status() reports failure 4.");
+                failure_mssg = msg;
 
-	} else if ( in_cache ) {
+        } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
@@ -13882,16 +13890,20 @@ check_expunge_entry(void)
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
             failure_mssg = msg;
 
-	}
+        }
     }
 
     /* protect the entry to force the cache to load it, and then unprotect
      * it with the dirty flag set.
      */
 
-    protect_entry(cache_ptr, 0, 1);
+    if ( pass ) {
 
-    unprotect_entry(cache_ptr, 0, 1, TRUE, H5C__NO_FLAGS_SET);
+        protect_entry(cache_ptr, 0, 1);
+
+        unprotect_entry(cache_ptr, 0, 1, TRUE, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( pass ) {
 
@@ -13899,14 +13911,14 @@ check_expunge_entry(void)
                                       &in_cache, &is_dirty, &is_protected,
 				      &is_pinned, NULL, NULL);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5AC_get_entry_status() reports failure 5.");
             failure_mssg = msg;
 
-	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
+        } else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
@@ -13921,14 +13933,18 @@ check_expunge_entry(void)
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
             failure_mssg = msg;
 
-	}
+        }
     }
 
     /* Expunge the entry and then verify that it is no longer in the cache.
      * Also verify that the entry was loaded, cleared and destroyed, but not
      * flushed.
      */
-    expunge_entry(cache_ptr, 0, 1);
+    if ( pass ) {
+
+        expunge_entry(cache_ptr, 0, 1);
+
+    }
 
     if ( pass ) {
 
@@ -13940,14 +13956,14 @@ check_expunge_entry(void)
                                       &in_cache, &is_dirty, &is_protected,
 				      &is_pinned, NULL, NULL);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5AC_get_entry_status() reports failure 6.");
             failure_mssg = msg;
 
-	} else if ( in_cache ) {
+        } else if ( in_cache ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected status 6.");
@@ -13962,7 +13978,7 @@ check_expunge_entry(void)
             HDsnprintf(msg, (size_t)128, "Unexpected entry history 6.");
             failure_mssg = msg;
 
-	}
+        }
     }
 
     if ( pass ) {

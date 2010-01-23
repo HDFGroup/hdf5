@@ -122,10 +122,10 @@ char *
 H5Eget_major(H5E_major_t maj)
 {
     H5E_msg_t   *msg;           /* Pointer to error message */
-    ssize_t     size = 0;       /* Return value */
+    ssize_t      size;
     H5E_type_t  type;
-    char        *msg_str;
-    char        *ret_value = NULL;
+    char        *msg_str = NULL;
+    char        *ret_value;     /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(H5Eget_major, NULL)
 
@@ -133,22 +133,26 @@ H5Eget_major(H5E_major_t maj)
     if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
-    /* Get the message's text */
+    /* Get the size & type of the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
-
     if(type != H5E_MAJOR)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a major one")
 
-    /* Don't know who is going to free it */
-    msg_str = (char *)H5MM_malloc((size_t)(++size) * sizeof(char));
+    /* Application will free this */
+    size++;
+    msg_str = (char *)H5MM_malloc((size_t)size);
 
+    /* Get the text for the message */
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
 
 done:
+    if(!ret_value)
+        msg_str = (char *)H5MM_xfree(msg_str);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_major() */
 
@@ -170,10 +174,10 @@ char *
 H5Eget_minor(H5E_minor_t min)
 {
     H5E_msg_t   *msg;           /* Pointer to error message */
-    ssize_t      size = 0;       /* Return value */
+    ssize_t      size;
     H5E_type_t  type;
-    char        *msg_str;
-    char        *ret_value = NULL;
+    char        *msg_str = NULL;
+    char        *ret_value;     /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(H5Eget_minor, NULL)
 
@@ -181,22 +185,26 @@ H5Eget_minor(H5E_minor_t min)
     if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
-    /* Get the message's text */
+    /* Get the size & type of the message's text */
     if((size = H5E_get_msg(msg, &type, NULL, (size_t)0)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
-
     if(type != H5E_MINOR)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "Error message isn't a minor one")
 
-    /* Don't know who is going to free it */
-    msg_str = (char *)H5MM_malloc((size_t)(++size) * sizeof(char));
+    /* Application will free this */
+    size++;
+    msg_str = (char *)H5MM_malloc((size_t)size);
 
+    /* Get the text for the message */
     if(H5E_get_msg(msg, NULL, msg_str, (size_t)size) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
 
 done:
+    if(!ret_value)
+        msg_str = (char *)H5MM_xfree(msg_str);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eget_minor() */
 

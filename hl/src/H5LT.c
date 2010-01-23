@@ -1749,14 +1749,15 @@ print_enum(hid_t type, char* str, int indt)
     free(value);
     H5Tclose(super);
 
+    return ret;
+
+out:
+
     if(0 == nmembs) {
         sprintf(tmp_str, "\n%*s <empty>", indt + 4, "");
         strcat(str, tmp_str);
     } /* end if */
-
-    return ret;
-
-out:
+    
     /* Release resources */
     if(name) {
         for(i = 0; i < nmembs; i++)

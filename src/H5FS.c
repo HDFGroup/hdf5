@@ -508,7 +508,7 @@ H5FS_t *
 H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata)
 {
-    H5FS_t *fspace;             /* Free space manager */
+    H5FS_t *fspace = NULL;      /* Free space manager */
     size_t u;                   /* Local index variable */
     H5FS_t *ret_value;          /* Return value */
 
@@ -556,6 +556,16 @@ H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
     ret_value = fspace;
 
 done:
+    if(!ret_value)
+        if(fspace) {
+            /* Should probably call the class 'term' callback for all classes
+             *  that have had their 'init' callback called... -QAK
+             */
+            if(fspace->sect_cls)
+                fspace->sect_cls = (H5FS_section_class_t *)H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
+            fspace = H5FL_FREE(H5FS_t, fspace);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_new() */
 
