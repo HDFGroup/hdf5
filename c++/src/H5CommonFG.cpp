@@ -249,7 +249,7 @@ DataSet CommonFG::openDataSet( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* new_name ) const
 {
-    herr_t ret_value;
+    herr_t ret_value = -1;
 
     switch(link_type) {
         case H5L_TYPE_HARD:
@@ -265,8 +265,7 @@ void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* ne
             break;
     } /* end switch */
 
-   if( ret_value < 0 )
-   {
+   if( ret_value < 0 ) {
       throwException("link", "creating link failed");
    }
 }

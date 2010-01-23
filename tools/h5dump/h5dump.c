@@ -5824,19 +5824,19 @@ xml_dump_group(hid_t gid, const char *name)
                             t_objname, parentxid, par_name);
                     free(t_objname);
                     free(par_name);
-                }
 
-                indentation(indent + COL);
-                t_objname = xml_escape_the_name(found_obj->objname);/* point to the NDT by name */
-                par_name = xml_escape_the_name(par);
-                xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
-                xml_name_to_XID(par, parentxid, 100, 1);
-                printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
-                            "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-                            xmlnsprefix,
-                            ptrstr, t_objname, parentxid, par_name);
-                free(t_objname);
-                free(par_name);
+                    indentation(indent + COL);
+                    t_objname = xml_escape_the_name(found_obj->objname);/* point to the NDT by name */
+                    par_name = xml_escape_the_name(par);
+                    xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
+                    xml_name_to_XID(par, parentxid, 100, 1);
+                    printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
+                                "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                xmlnsprefix,
+                                ptrstr, t_objname, parentxid, par_name);
+                    free(t_objname);
+                    free(par_name);
+                }
                 free(ptrstr);
             } else {
 

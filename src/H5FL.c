@@ -380,7 +380,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Make certain the list is initialized first */
     if(!head->init)
         if(H5FL_reg_init(head)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'regular' blocks")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'regular' blocks")
 
     /* Check for nodes available on the free list first */
     if(head->list!=NULL) {
@@ -399,7 +399,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Otherwise allocate a node */
     else {
         if (NULL==(ret_value = H5FL_malloc(head->size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
@@ -456,7 +456,7 @@ H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL==(ret_value = H5FL_reg_malloc(head H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear to zeros */
     /* (Accomodate tracking information, if present) */
@@ -864,7 +864,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
     /* Make certain the list is initialized first */
     if(!head->init)
         if(H5FL_blk_init(head)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'block' list")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'block' list")
 
     /* check if there is a free list for blocks of this size */
     /* and if there are any blocks available on the list */
@@ -953,7 +953,7 @@ H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL==(ret_value = H5FL_blk_malloc(head,size H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear the block to zeros */
     HDmemset(ret_value,0,size);
@@ -1335,7 +1335,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
 
     /* Allocate a new garbage collection node */
     if(NULL == (new_node = (H5FL_gc_arr_node_t *)H5MM_malloc(sizeof(H5FL_gc_arr_node_t))))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the new garbage collection node */
     new_node->list = head;
@@ -1346,7 +1346,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
 
     /* Allocate room for the free lists */
     if(NULL == (head->list_arr = (H5FL_arr_node_t *)H5MM_calloc((size_t)head->maxelem*sizeof(H5FL_arr_node_t))))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the size of each array */
     for(u = 0; u < (size_t)head->maxelem; u++)
@@ -1469,7 +1469,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
     /* Make certain the list is initialized first */
     if(!head->init)
         if(H5FL_arr_init(head)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'array' blocks")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't initialize 'array' blocks")
 
     /* Sanity check that the number of elements is supported */
     HDassert(elem<=(unsigned) head->maxelem);
@@ -1496,7 +1496,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
     /* Otherwise allocate a node */
     else {
         if(NULL == (new_obj = (H5FL_arr_list_t *)H5FL_malloc(sizeof(H5FL_arr_list_t)+mem_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
@@ -1540,11 +1540,11 @@ H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem)
     HDassert(elem);
 
     /* Allocate the array */
-    if (NULL==(ret_value = H5FL_arr_malloc(head,elem)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (ret_value = H5FL_arr_malloc(head, elem)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear to zeros */
-    HDmemset(ret_value,0,head->list_arr[elem].size);
+    HDmemset(ret_value, 0, head->list_arr[elem].size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1938,21 +1938,21 @@ done:
 H5FL_fac_head_t *
 H5FL_fac_init(size_t size)
 {
-    H5FL_fac_gc_node_t  *new_node;      /* Pointer to the node for the new list to garbage collect */
-    H5FL_fac_head_t     *factory;       /* Pointer to new block factory */
+    H5FL_fac_gc_node_t  *new_node = NULL; /* Pointer to the node for the new list to garbage collect */
+    H5FL_fac_head_t     *factory = NULL; /* Pointer to new block factory */
     H5FL_fac_head_t     *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FL_fac_init, NULL)
 
     /* Sanity check */
-    HDassert(size>0);
+    HDassert(size > 0);
 
     /* Allocate room for the new factory */
     if(NULL == (factory = (H5FL_fac_head_t *)H5FL_CALLOC(H5FL_fac_head_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for factory object")
 
     /* Set size of blocks for factory */
-    factory->size=size;
+    factory->size = size;
 
     /* Allocate a new garbage collection node */
     if(NULL == (new_node = (H5FL_fac_gc_node_t *)H5FL_MALLOC(H5FL_fac_gc_node_t)))
@@ -1962,15 +1962,15 @@ H5FL_fac_init(size_t size)
     new_node->list = factory;
 
     /* Link in to the garbage collection list */
-    new_node->next=H5FL_fac_gc_head.first;
-    H5FL_fac_gc_head.first=new_node;
+    new_node->next = H5FL_fac_gc_head.first;
+    H5FL_fac_gc_head.first = new_node;
     if(new_node->next)
         new_node->next->list->prev_gc=new_node;
     /* The new factory's prev_gc field will be set to NULL */
 
     /* Make certain that the space allocated is large enough to store a free list pointer (eventually) */
-    if(factory->size<sizeof(H5FL_fac_node_t))
-        factory->size=sizeof(H5FL_fac_node_t);
+    if(factory->size < sizeof(H5FL_fac_node_t))
+        factory->size = sizeof(H5FL_fac_node_t);
 
     /* Make certain there's room for tracking information, if any */
 #ifdef H5FL_TRACK
@@ -1978,12 +1978,19 @@ H5FL_fac_init(size_t size)
 #endif /* H5FL_TRACK */
 
     /* Indicate that the free list is initialized */
-    factory->init=1;
+    factory->init = 1;
 
     /* Set return value */
-    ret_value=factory;
+    ret_value = factory;
 
 done:
+    if(!ret_value) {
+        if(factory)
+            factory = H5FL_FREE(H5FL_fac_head_t, factory);
+        if(new_node)
+            new_node = H5FL_FREE(H5FL_fac_gc_node_t, new_node);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5FL_fac_init() */
 
@@ -2123,7 +2130,7 @@ H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
     /* Otherwise allocate a node */
     else {
         if (NULL==(ret_value = H5FL_malloc(head->size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
@@ -2184,7 +2191,7 @@ H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
 
     /* Allocate the block */
     if (NULL==(ret_value = H5FL_fac_malloc(head H5FL_TRACK_INFO_INT)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear to zeros */
     /* (Accomodate tracking information, if present) */

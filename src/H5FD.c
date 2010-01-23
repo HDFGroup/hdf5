@@ -730,8 +730,8 @@ done:
 herr_t
 H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
-    void *copied_driver_info;           /* Temporary VFL driver info */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    void *copied_driver_info = NULL;           /* Temporary VFL driver info */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_fapl_open, FAIL)
 
@@ -739,15 +739,20 @@ H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
     if(H5I_inc_ref(driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5FD_fapl_copy(driver_id, driver_info, &copied_driver_info) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
 
     /* Set the driver properties for the list */
     if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set driver ID")
     if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &copied_driver_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set driver info")
+    copied_driver_info = NULL;
 
 done:
+    if(ret_value < 0)
+        if(copied_driver_info && H5FD_fapl_close(driver_id, copied_driver_info) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_fapl_open() */
 
@@ -847,24 +852,28 @@ done:
 herr_t
 H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
-    void *copied_driver_info;           /* Temporary VFL driver info */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    void *copied_driver_info = NULL;           /* Temporary VFL driver info */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_dxpl_open, FAIL)
 
     /* Increment the reference count on the driver and copy the driver info */
     if(H5I_inc_ref(driver_id, FALSE) < 0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
     if(H5FD_dxpl_copy(driver_id, driver_info, &copied_driver_info) < 0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
 
     /* Set the driver information for the new property list */
     if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFL driver ID")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VFL driver ID")
     if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &copied_driver_info) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFL driver info")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VFL driver info")
 
 done:
+    if(ret_value < 0)
+        if(copied_driver_info && H5FD_dxpl_close(driver_id, copied_driver_info) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_dxpl_open() */
 
@@ -1060,7 +1069,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Get file access property list */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
     /* Get the VFD to open the file with */
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)

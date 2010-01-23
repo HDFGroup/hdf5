@@ -1334,7 +1334,6 @@ test_derived_integer(void)
     char        filename[1024];
     size_t      src_size, dst_size;
     unsigned char        *buf=NULL, *saved_buf=NULL;
-    int         *aligned=NULL;
     int		endian;			/*endianess	        */
     size_t      nelmts = NTESTELEM;
     unsigned int        fails_this_test = 0;
@@ -1597,7 +1596,6 @@ test_derived_integer(void)
  error:
     if (buf) free(buf);
     if (saved_buf) free(saved_buf);
-    if (aligned) free(aligned);
     HDfflush(stdout);
     H5E_BEGIN_TRY {
         H5Tclose (tid1);

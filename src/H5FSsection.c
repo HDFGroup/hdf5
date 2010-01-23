@@ -939,7 +939,8 @@ static herr_t
 H5FS_sect_link_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls,
     H5FS_section_info_t *sect)
 {
-    H5FS_node_t *fspace_node = NULL;     /* Pointer to free space node of the correct size */
+    H5FS_node_t *fspace_node = NULL;    /* Pointer to free space node of the correct size */
+    hbool_t fspace_node_alloc = FALSE;  /* Whether the free space node was allocated */
     unsigned bin;                       /* Bin to put the free space section in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -971,6 +972,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
         /* Allocate new free list size node */
         if(NULL == (fspace_node = H5FL_MALLOC(H5FS_node_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for free space node")
+        fspace_node_alloc = TRUE;
 
         /* Initialize the free list size node */
         fspace_node->sect_size = sect->size;
@@ -981,6 +983,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
         /* Insert new free space size node into bin's list */
         if(H5SL_insert(sinfo->bins[bin].bin_list, fspace_node, &fspace_node->sect_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space node into skip list")
+        fspace_node_alloc = FALSE; /* (owned by the bin skip list now, don't need to free on error) */
 
         /* Increment number of section sizes */
         sinfo->tot_size_count++;
@@ -1016,6 +1019,13 @@ HDfprintf(stderr, "%s: sinfo->bins[%u].sect_count = %Zu\n", FUNC, bin, sinfo->bi
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space node into skip list")
 
 done:
+    if(ret_value < 0)
+        if(fspace_node && fspace_node_alloc) {
+            if(fspace_node->sect_list && H5SL_close(fspace_node->sect_list) < 0)
+                HDONE_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy size free space node's skip list")
+            fspace_node = H5FL_FREE(H5FS_node_t, fspace_node);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_link_size() */
 
