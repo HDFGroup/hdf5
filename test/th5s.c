@@ -699,11 +699,11 @@ test_h5s_scalar_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;	    /* Dataspace ID			*/
+    hid_t		sid1;	        /* Dataspace ID			*/
     int		        rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     hssize_t		n;	 	/* Number of dataspace elements */
-    H5S_class_t ext_type;   /* Extent type */
+    H5S_class_t         ext_type;       /* Extent type */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -712,6 +712,12 @@ test_h5s_scalar_write(void)
     /* Create file */
     fid1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Verify a non-zero rank fails with a NULL dimension. */
+    H5E_BEGIN_TRY {
+        sid1 = H5Screate_simple(SPACE1_RANK, NULL, NULL);
+    } H5E_END_TRY
+    VERIFY(sid1, FAIL, "H5Screate_simple");
 
     /* Create scalar dataspace */
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);

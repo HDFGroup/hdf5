@@ -14543,23 +14543,8 @@ check_rename_entry__run_test(H5C_t * cache_ptr,
     test_entry_t * entry_ptr = NULL;
     H5C_cache_entry_t * test_ptr = NULL;
 
-    if ( cache_ptr == NULL ) {
-
-        pass = FALSE;
-        HDsnprintf(msg, (size_t)128,
-                   "cache_ptr NULL on entry to rename test #%d.",
-                   test_num);
-        failure_mssg = msg;
-
-    } else if ( spec_ptr == NULL ) {
-
-        pass = FALSE;
-        HDsnprintf(msg, (size_t)128,
-                   "spec_ptr NULL on entry to rename test #%d.",
-                   test_num);
-        failure_mssg = msg;
-
-    }
+    assert( cache_ptr );
+    assert( spec_ptr );
 
     if ( pass ) {
 
@@ -14584,12 +14569,16 @@ check_rename_entry__run_test(H5C_t * cache_ptr,
         }
     }
 
-    protect_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
+    if ( pass ) {
 
-    unprotect_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index,
-                    (int)(spec_ptr->is_dirty), flags);
+        protect_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
 
-    rename_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+        unprotect_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index,
+                        (int)(spec_ptr->is_dirty), flags);
+
+        rename_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+
+    }
 
     if ( pass ) {
 
@@ -17928,7 +17917,7 @@ check_check_evictions_enabled_err(void)
     }
 
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
@@ -28199,7 +28188,7 @@ check_auto_cache_resize_input_errs(void)
         }
     }
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
@@ -28741,7 +28730,7 @@ check_auto_cache_resize_aux_fcns(void)
         }
     }
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
