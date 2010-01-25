@@ -31,7 +31,7 @@ const char  *progname = "h5diff";
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:Nc";
+static const char *s_opts = "hVrvqn:d:p:Ncl";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -44,6 +44,7 @@ static struct long_options l_opts[] = {
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
+    { "link-follow", no_arg, 'l' },
     { NULL, 0, '\0' }
 };
 
@@ -99,6 +100,9 @@ void parse_command_line(int argc,
             break;
         case 'r':
             options->m_report = 1;
+            break;
+        case 'l':
+            options->linkfollow = 1;
             break;
         case 'd':
             options->d=1;
@@ -360,6 +364,7 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
+ printf("   -l, --link-follow       Follow link(s)\n");
  printf("   -c, --compare           List objects that are not comparable\n");
  printf("   -N, --nan               Avoid NaNs detection\n");
  printf("   -n C, --count=C         Print differences up to C number, C is a positive integer.\n");
