@@ -1,0 +1,2 @@
+error: <no_file.h5>: unable to open file
+error: unable to get external link info from "/ext_link_noexist2"

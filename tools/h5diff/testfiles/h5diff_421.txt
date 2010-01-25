@@ -1,0 +1,2 @@
+error: "/no_obj" doesn't exist 
+error: unable to get external link info from "/ext_link_noexist1"

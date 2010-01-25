@@ -1,0 +1,2 @@
+group  : </target_group> and <softlink3_to_slink1>
+1 differences found
