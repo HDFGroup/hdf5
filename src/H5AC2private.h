@@ -345,7 +345,7 @@ H5_DLL herr_t H5AC2_set_write_done_callback(H5C2_t * cache_ptr,
                                            void (* write_done)(void));
 H5_DLL herr_t H5AC2_stats(const H5F_t *f);
 
-H5_DLL herr_t H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
+H5_DLL herr_t H5AC2_get_cache_auto_resize_config(const H5AC2_t * cache_ptr,
                                               H5AC2_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC2_get_cache_size(H5AC2_t * cache_ptr,
@@ -368,7 +368,7 @@ H5_DLL herr_t H5AC2_register_mdjsc_callback(const H5F_t * file_ptr,
 
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
-H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
+H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5C2_t * cache_ptr,
                                              H5AC2_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC2_set_jnl_config(H5F_t * f,

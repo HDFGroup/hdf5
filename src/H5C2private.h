@@ -1440,7 +1440,7 @@ H5_DLL herr_t H5C2_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C2_flush_to_min_clean(H5F_t * f,
 		                      hid_t    dxpl_id);
 
-H5_DLL herr_t H5C2_get_cache_auto_resize_config(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_get_cache_auto_resize_config(const H5C2_t * cache_ptr,
                                                H5C2_auto_size_ctl_t *config_ptr);
 
 H5_DLL herr_t H5C2_get_cache_size(H5C2_t * cache_ptr,
@@ -1452,7 +1452,7 @@ H5_DLL herr_t H5C2_get_cache_size(H5C2_t * cache_ptr,
 H5_DLL herr_t H5C2_get_cache_hit_rate(H5C2_t * cache_ptr,
                                      double * hit_rate_ptr);
 
-H5_DLL herr_t H5C2_get_entry_status(H5F_t *   f,
+H5_DLL herr_t H5C2_get_entry_status(const H5F_t *   f,
                                     haddr_t   addr,
                                     size_t *  size_ptr,
                                     hbool_t * in_cache_ptr,
@@ -1460,13 +1460,13 @@ H5_DLL herr_t H5C2_get_entry_status(H5F_t *   f,
                                     hbool_t * is_protected_ptr,
                                     hbool_t * is_pinned_ptr);
 
-H5_DLL herr_t H5C2_get_evictions_enabled(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_get_evictions_enabled(const H5C2_t * cache_ptr,
                                          hbool_t * evictions_enabled_ptr);
 
-H5_DLL herr_t H5C2_get_trace_file_ptr(const H5C2_t * cache_ptr,
-		                     FILE ** trace_file_ptr_ptr);
+H5_DLL herr_t H5C2_get_trace_file_ptr(const H5C2_t *cache_ptr,
+    FILE **trace_file_ptr_ptr);
 H5_DLL herr_t H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
-                        FILE ** trace_file_ptr_ptr);
+    FILE ** trace_file_ptr_ptr);
 
 H5_DLL herr_t H5C2_insert_entry(H5F_t *              f,
                                 hid_t                dxpl_id,
@@ -1507,10 +1507,10 @@ H5_DLL herr_t H5C2_reset_cache_hit_rate_stats(H5C2_t * cache_ptr);
 H5_DLL herr_t H5C2_resize_pinned_entry(void *  thing,
                                       size_t  new_size);
 
-H5_DLL herr_t H5C2_set_cache_auto_resize_config(const H5F_t * f,
+H5_DLL herr_t H5C2_set_cache_auto_resize_config(H5C2_t * cache_ptr,
                                              H5C2_auto_size_ctl_t *config_ptr);
 
-H5_DLL herr_t H5C2_set_evictions_enabled(const H5F_t * f,
+H5_DLL herr_t H5C2_set_evictions_enabled(H5C2_t * cache_ptr,
                                          hbool_t evictions_enabled);
 
 H5_DLL herr_t H5C2_set_prefix(H5C2_t * cache_ptr, char * prefix);

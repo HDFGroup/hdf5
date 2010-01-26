@@ -51557,15 +51557,16 @@ echo "$as_me: error: Removing old public API symbols not allowed when using them
    { (exit 1); exit 1; }; }
 fi
 
-{ echo "$as_me:$LINENO: checking for and unzipping large test files" >&5
-echo $ECHO_N "checking for and unzipping large test files... $ECHO_C" >&6; }
-for f in $srcdir/test/testfiles/*.gz; do
-    if test -f $f; then
-        gunzip -f $f
-    fi
-done
-{ echo "$as_me:$LINENO: result: done" >&5
-echo "${ECHO_T}done" >&6; }
+#{ echo "$as_me:$LINENO: checking for and unzipping large test files" >&5
+#echo $ECHO_N "checking for and unzipping large test files... $ECHO_C" >&6; }
+#test -d ./test/testfiles || mkdir ./test/testfiles
+#for f in $srcdir/test/testfiles/*.gz; do
+#    if test -f $f; then
+#        gunzip -c $f > ./test/testfiles/`basename -s .gz $f`
+#    fi
+#done
+#{ echo "$as_me:$LINENO: result: done" >&5
+#echo "${ECHO_T}done" >&6; }
 
 
 { echo "$as_me:$LINENO: checking Whether to perform strict file format checks" >&5
@@ -53631,6 +53632,13 @@ echo "$as_me: executing $ac_file commands" >&6;}
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
   cp libhdf5.settings.TMP src/libhdf5.settings
   rm -f libhdf5.settings.TMP
+  echo "Unzip large test files"
+  test -d ./test/testfiles || mkdir ./test/testfiles
+  for f in $srcdir/test/testfiles/*.gz; do
+      if test -f $f; then
+          gunzip -c $f > ./test/testfiles/`basename -s .gz $f`
+      fi
+  done
  ;;
     "depfiles":C) test x"$AMDEP_TRUE" != x"" || for mf in $CONFIG_FILES; do
   # Strip MF so we end up with the name of the file.

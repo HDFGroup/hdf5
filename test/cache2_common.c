@@ -33,9 +33,9 @@
 /* global variable declarations: */
 
 const char *FILENAME[] = {
-	"cache2_test",
-	"cache2_api_test",
-	NULL
+    "cache2_test",
+    "cache2_api_test",
+    NULL
 };
 
 hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between 
@@ -54,6 +54,10 @@ H5C2_t * saved_cache2 = NULL; /* store the pointer to the instance of
 			       * here between test cache setup and 
 			       * shutdown.
 			       */
+
+haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
+                            space allocated for cache items in the file between
+                            cache setup & takedown */
 
 hbool_t write_permitted2 = TRUE;
 hbool_t pass2 = TRUE; /* set to false on error */
@@ -2279,7 +2283,7 @@ resize_pinned_entry2(H5F_t * file_ptr,
         HDassert( cache_ptr );
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
-        HDassert( type = VARIABLE_ENTRY_TYPE ) ;
+        HDassert( type == VARIABLE_ENTRY_TYPE ) ;
         HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes2[type] ) );
 
         if ( ! entry_in_cache2(cache_ptr, type, idx) ) {
@@ -2723,14 +2727,6 @@ verify_unprotected2(void)
  *
  * Programmer:  JRM -- 9/13/07
  *
- * Modifications:
- *
- *              Updated for changes in the parameter list of H5C2_create().
- *              These changes are needed for journaling.  We do nothing
- *              with these parameters here -- will write another version 
- *              of this routine for journaling tests.
- *              					JRM -- 3/27/08
- *
  *****************************************************************************/
 
 H5F_t *
@@ -2998,6 +2994,8 @@ setup_cache2(size_t max_cache_size,
 			  fcn_name);
             }
         }
+
+        saved_actual_base_addr = actual_base_addr;
     }
 
     if ( show_progress ) /* 8 */
@@ -3062,6 +3060,13 @@ takedown_cache2(H5F_t * file_ptr,
 	    file_ptr->shared->cache2 = saved_cache2;
 	    saved_cache2 = NULL;
 	}
+
+        if ( H5F_addr_defined(saved_actual_base_addr) ) {
+
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
+                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+            saved_actual_base_addr = HADDR_UNDEF;
+        }
     }
 
     if ( saved_fapl_id != H5P_DEFAULT ) {
@@ -3130,20 +3135,17 @@ expunge_entry2(H5F_t * file_ptr,
               int32_t idx)
 {
     /* const char * fcn_name = "expunge_entry2()"; */
-#ifndef NDEBUG
-    H5C2_t * cache_ptr;
-#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
     if ( pass2 ) {
-
 #ifndef NDEBUG
-        cache_ptr = file_ptr->shared->cache2;
-#endif /* NDEBUG */
+        H5C2_t * cache_ptr = file_ptr->shared->cache2;
 
         HDassert( cache_ptr );
+#endif /* NDEBUG */
+
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
 
@@ -3724,17 +3726,13 @@ pin_protected_entry2(H5F_t * file_ptr,
                      int32_t idx)
 {
     /* const char * fcn_name = "pin_protected_entry2()"; */
-#ifndef NDEBUG
-    H5C2_t * cache_ptr;
-#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
     if ( pass2 ) {
-
 #ifndef NDEBUG
-        cache_ptr = file_ptr->shared->cache2;
+        H5C2_t * cache_ptr = file_ptr->shared->cache2;
 #endif /* NDEBUG */
 
         HDassert( cache_ptr );
@@ -4476,7 +4474,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
         local_max_index = MIN(max_index, max_indices2[type]);
 
-        /*while ( ( pass2 ) && ( idx <= (max_indices2[type] + lag) ) ) */
         while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) )
         {
 	    if ( verbose ) {
@@ -4485,7 +4482,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 	    }
 
             if ( ( pass2 ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 /*( (idx + lag) <= max_indices2[type] ) && */
                  ( (idx + lag) <= local_max_index ) &&
                  ( ((idx + lag) % 2) == 0 ) &&
                  ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
@@ -4499,7 +4495,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx + lag - 1) >= 0 ) &&
-                 /*( (idx + lag - 1) <= max_indices2[type] ) && */
                  ( (idx + lag - 1) <= local_max_index ) &&
                  ( ( (idx + lag - 1) % 3 ) == 0 ) ) {
 
@@ -4510,7 +4505,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
-                 /*( (idx + lag - 2) <= max_indices2[type] ) && */
                  ( (idx + lag - 2) <= local_max_index ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
@@ -4523,7 +4517,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( do_renames ) && ( (idx + lag - 2) >= 0 ) &&
-                 /*( (idx + lag - 2) <= max_indices2[type] ) && */
                  ( (idx + lag - 2) <= local_max_index ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
@@ -4537,7 +4530,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx + lag - 3) >= 0 ) &&
-                 /*( (idx + lag - 3) <= max_indices2[type] ) && */
                  ( (idx + lag - 3) <= local_max_index ) &&
                  ( ( (idx + lag - 3) % 5 ) == 0 ) ) {
 
@@ -4548,7 +4540,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-                 /*( (idx + lag - 5) <= max_indices2[type] ) && */
                  ( (idx + lag - 5) <= local_max_index ) &&
                  ( ( (idx + lag - 5) % 5 ) == 0 ) ) {
 
@@ -4562,7 +4553,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 	    if ( do_mult_ro_protects )
 	    {
 		if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-		     /*( (idx + lag - 5) < max_indices2[type] ) && */
 		     ( (idx + lag - 5) < local_max_index ) &&
 		     ( (idx + lag - 5) % 9 == 0 ) ) {
 
@@ -4574,7 +4564,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 6) >= 0 ) &&
-		     /*( (idx + lag - 6) < max_indices2[type] ) && */
 		     ( (idx + lag - 6) < local_max_index ) &&
 		     ( (idx + lag - 6) % 11 == 0 ) ) {
 
@@ -4586,7 +4575,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     /* ( (idx + lag - 7) < max_indices2[type] ) && */
 		     ( (idx + lag - 7) < local_max_index ) &&
 		     ( (idx + lag - 7) % 13 == 0 ) ) {
 
@@ -4598,7 +4586,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     /* ( (idx + lag - 7) < max_indices2[type] ) && */
 		     ( (idx + lag - 7) < local_max_index ) &&
 		     ( (idx + lag - 7) % 9 == 0 ) ) {
 
@@ -4611,7 +4598,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 8) >= 0 ) &&
-		     /* ( (idx + lag - 8) < max_indices2[type] ) && */
 		     ( (idx + lag - 8) < local_max_index ) &&
 		     ( (idx + lag - 8) % 11 == 0 ) ) {
 
@@ -4624,7 +4610,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 9) >= 0 ) &&
-		     /*( (idx + lag - 9) < max_indices2[type] ) && */
 		     ( (idx + lag - 9) < local_max_index ) &&
 		     ( (idx + lag - 9) % 13 == 0 ) ) {
 
@@ -4637,7 +4622,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 	    } /* if ( do_mult_ro_protects ) */
 
-            /*if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) { */
             if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
 
                 if ( verbose )
@@ -4647,7 +4631,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
-                 /*( (idx - lag + 2) <= max_indices2[type] ) && */
                  ( (idx - lag + 2) <= local_max_index ) &&
                  ( ( (idx - lag + 2) % 7 ) == 0 ) ) {
 
@@ -4659,7 +4642,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 1) >= 0 ) &&
-                 /*( (idx - lag + 1) <= max_indices2[type] ) && */
                  ( (idx - lag + 1) <= local_max_index ) &&
                  ( ( (idx - lag + 1) % 7 ) == 0 ) ) {
 
@@ -4673,7 +4655,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             if ( do_destroys ) {
 
                 if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     /* ( ( idx - lag) <= max_indices2[type] ) ) { */
                      ( ( idx - lag) <= local_max_index ) ) {
 
                     switch ( (idx - lag) %4 ) {
@@ -4751,7 +4732,6 @@ row_major_scan_forward2(H5F_t * file_ptr,
             } else {
 
                 if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     /* ( ( idx - lag) <= max_indices2[type] ) ) { */
                      ( ( idx - lag) <= local_max_index ) ) {
 
                     if ( verbose )
@@ -5509,7 +5489,7 @@ hl_col_major_scan_forward2(H5F_t * file_ptr,
                           int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_forward2()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int32_t type = 0;
     int32_t idx;
     int32_t lag = 200;
@@ -5636,7 +5616,7 @@ col_major_scan_backward2(H5F_t * file_ptr,
                          int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_backward2()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int i;
     int mile_stone = 1;
     int32_t type;
@@ -5772,7 +5752,7 @@ hl_col_major_scan_backward2(H5F_t * file_ptr,
                             int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_backward2()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int32_t type = 0;
     int32_t idx;
     int32_t lag = 50;
@@ -5793,7 +5773,7 @@ hl_col_major_scan_backward2(H5F_t * file_ptr,
 
         local_max_index = MIN(max_index, MAX_ENTRIES);
 
-        if ( ( pass2 ) && ( reset_stats ) ) {
+        if ( reset_stats ) {
 
             H5C2_stats__reset(cache_ptr);
         }

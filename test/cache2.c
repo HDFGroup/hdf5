@@ -1045,6 +1045,7 @@ smoke_check_5(void)
     int32_t max_index = 1024;
     int mile_stone = 1;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
     H5C2_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
@@ -1133,10 +1134,11 @@ smoke_check_5(void)
 
     file_ptr = setup_cache2((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -1301,6 +1303,7 @@ smoke_check_6(void)
     int mile_stone = 1;
     int32_t max_index = 1024;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
     H5C2_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
@@ -1389,10 +1392,11 @@ smoke_check_6(void)
 
     file_ptr = setup_cache2((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -1557,6 +1561,7 @@ smoke_check_7(void)
     int mile_stone = 1;
     int32_t max_index = 1024;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
     H5C2_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
@@ -1646,10 +1651,11 @@ smoke_check_7(void)
 
     file_ptr = setup_cache2((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -1814,6 +1820,7 @@ smoke_check_8(void)
     int mile_stone = 1;
     int32_t max_index = 1024;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
     H5C2_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
@@ -1903,10 +1910,11 @@ smoke_check_8(void)
 
     file_ptr = setup_cache2((size_t)(2 * 1024),
                             (size_t)(1 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -2075,6 +2083,7 @@ smoke_check_9(void)
     int32_t lag = 10;
     int mile_stone = 1;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
 
@@ -2115,6 +2124,7 @@ smoke_check_9(void)
 
     file_ptr = setup_cache2((size_t)(4 * 1024 * 1024),
                             (size_t)(2 * 1024 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     /* disable evictions */
 
@@ -2124,7 +2134,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2161,7 +2171,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2196,7 +2206,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2231,7 +2241,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2257,7 +2267,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2298,7 +2308,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2328,7 +2338,7 @@ smoke_check_9(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2409,6 +2419,7 @@ smoke_check_10(void)
     int32_t lag = 10;
     int mile_stone = 1;
     H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
 
@@ -2449,6 +2460,7 @@ smoke_check_10(void)
 
     file_ptr = setup_cache2((size_t)(4 * 1024 * 1024),
                             (size_t)(2 * 1024 * 1024));
+    cache_ptr = file_ptr->shared->cache2;
 
     if ( show_progress ) /* 3 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d -- evictions enabled\n",
@@ -2476,7 +2488,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2511,7 +2523,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2546,7 +2558,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2572,7 +2584,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2602,7 +2614,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2628,7 +2640,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
         if ( result < 0 ) {
 
@@ -2658,7 +2670,7 @@ smoke_check_10(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
         if ( result < 0 ) {
 
@@ -2731,7 +2743,7 @@ write_permitted_check(void)
     int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
-    H5C2_t * cache_ptr = NULL;
+    H5F_t * file_ptr = NULL;
 
 #endif /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -2774,14 +2786,14 @@ write_permitted_check(void)
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    cache_ptr = setup_cache2((size_t)(1 * 1024 * 1024),
+    file_ptr = setup_cache2((size_t)(1 * 1024 * 1024),
                             (size_t)(0));
 
     if ( show_progress ) /* 3 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+    row_major_scan_forward2(/* file_ptr              */ file_ptr,
 		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
@@ -2803,7 +2815,7 @@ write_permitted_check(void)
 
     write_permitted2 = FALSE;
 
-    row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+    row_major_scan_backward2(/* file_ptr              */ file_ptr,
                              /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
@@ -2825,7 +2837,7 @@ write_permitted_check(void)
 
     write_permitted2 = TRUE;
 
-    row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+    row_major_scan_forward2(/* file_ptr              */ file_ptr,
 		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
@@ -2847,7 +2859,7 @@ write_permitted_check(void)
 
     /* flush and destroy all entries in the cache: */
 
-    flush_cache2(/* cache_ptr           */ cache_ptr,
+    flush_cache2(/* file_ptr           */ file_ptr,
                 /* destroy_entries     */ TRUE,
                 /* dump_stats          */ FALSE,
                 /* dump_detailed_stats */ FALSE);
@@ -2856,7 +2868,7 @@ write_permitted_check(void)
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+    col_major_scan_forward2(/* file_ptr              */ file_ptr,
 		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
@@ -2873,7 +2885,7 @@ write_permitted_check(void)
 
     write_permitted2 = FALSE;
 
-    col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+    col_major_scan_backward2(/* file_ptr              */ file_ptr,
 		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
@@ -2890,7 +2902,7 @@ write_permitted_check(void)
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    takedown_cache2(cache_ptr, display_stats, TRUE);
+    takedown_cache2(file_ptr, display_stats, TRUE);
 
     if ( show_progress ) /* 10 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -14060,8 +14072,6 @@ check_multiple_read_protect(void)
 
     core_file_driver_failed = FALSE;
 
-    core_file_driver_failed = FALSE;
-
     pass2 = TRUE;
 
     /* allocate a cache.  Should succeed.
@@ -16096,7 +16106,7 @@ check_evictions_enabled(void)
     /* disable evictions */
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
 	if ( result != SUCCEED ) {
 
@@ -16189,7 +16199,7 @@ check_evictions_enabled(void)
     /* re-enable evictions */
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
 	if ( result != SUCCEED ) {
 
@@ -16339,7 +16349,7 @@ check_evictions_enabled(void)
     /* disable evictions again */
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
 	if ( result != SUCCEED ) {
 
@@ -16388,7 +16398,7 @@ check_evictions_enabled(void)
     /* re-enable evictions again */
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+        result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
 	if ( result != SUCCEED ) {
 
@@ -16468,7 +16478,7 @@ check_evictions_enabled(void)
     /* disable evictions one last time before we shut down */
     if ( pass2 ) {
 
-        result = H5C2_set_evictions_enabled(file_ptr, FALSE);
+        result = H5C2_set_evictions_enabled(cache_ptr, FALSE);
 
 	if ( result != SUCCEED ) {
 
@@ -18210,7 +18220,7 @@ check_check_evictions_enabled_err(void)
 
     if ( pass2 ) {
 
-	result = H5C2_set_evictions_enabled(file_ptr, TRUE);
+	result = H5C2_set_evictions_enabled(cache_ptr, TRUE);
 
 	if ( result != SUCCEED ) {
 
@@ -18397,7 +18407,7 @@ check_auto_cache_resize(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -18768,7 +18778,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -19121,7 +19131,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -19313,7 +19323,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -19740,7 +19750,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -20284,7 +20294,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.5; /* for ease of testing */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -20712,7 +20722,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -20982,7 +20992,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.5; /* for ease of testing */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -21570,7 +21580,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.5; /* for ease of testing */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -21708,7 +21718,7 @@ check_auto_cache_resize(void)
 
         if ( pass2 ) {
 
-            result = H5C2_set_cache_auto_resize_config(file_ptr, 
+            result = H5C2_set_cache_auto_resize_config(cache_ptr, 
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
@@ -21867,7 +21877,7 @@ check_auto_cache_resize(void)
         if ( pass2 ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C2_set_cache_auto_resize_config(file_ptr, 
+            result = H5C2_set_cache_auto_resize_config(cache_ptr, 
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
@@ -22041,7 +22051,7 @@ check_auto_cache_resize(void)
         if ( pass2 ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C2_set_cache_auto_resize_config(file_ptr, 
+            result = H5C2_set_cache_auto_resize_config(cache_ptr, 
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
@@ -22199,7 +22209,7 @@ check_auto_cache_resize(void)
         if ( pass2 ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C2_set_cache_auto_resize_config(file_ptr, 
+            result = H5C2_set_cache_auto_resize_config(cache_ptr, 
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
@@ -22404,7 +22414,7 @@ check_auto_cache_resize(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.5; /* for ease of testing */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -22724,7 +22734,7 @@ check_auto_cache_resize_disable(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -22797,7 +22807,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -22957,7 +22967,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23118,7 +23128,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23278,7 +23288,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23438,7 +23448,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23597,7 +23607,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23758,7 +23768,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -23986,7 +23996,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 1.0; /* disable decrement */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24221,7 +24231,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24460,7 +24470,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24589,7 +24599,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24718,7 +24728,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24847,7 +24857,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.apply_empty_reserve    = TRUE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -24977,7 +24987,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.empty_reserve          = 0.05;
 
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25107,7 +25117,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.empty_reserve          = 0.05;
 
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25265,7 +25275,7 @@ check_auto_cache_resize_disable(void)
         auto_size_ctl.empty_reserve          = 0.05;
 
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25480,7 +25490,7 @@ check_auto_cache_resize_epoch_markers(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25549,7 +25559,7 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25726,7 +25736,7 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25848,7 +25858,7 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -25927,7 +25937,7 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -26041,7 +26051,7 @@ check_auto_cache_resize_epoch_markers(void)
         auto_size_ctl.apply_empty_reserve    = FALSE;
         auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr, &auto_size_ctl);
+        result = H5C2_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
         if ( result != SUCCEED ) {
 
@@ -26235,7 +26245,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &ref_auto_size_ctl);
 
         if ( result != SUCCEED ) {
@@ -26317,20 +26327,14 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        /* Reset file's cache pointer */
-        file_ptr->shared->cache2 = NULL;
-
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(NULL,
                                                   &invalid_auto_size_ctl);
-
-        /* Return file's cache pointer */
-        file_ptr->shared->cache2 = cache_ptr;
 
         if ( result != FAIL ) {
 
             pass2 = FALSE;
             failure_mssg2 =
-                "H5C2_set_cache_auto_resize_config accepted NULL file_ptr.\n";
+                "H5C2_set_cache_auto_resize_config accepted NULL cache_ptr.\n";
         }
     }
 
@@ -26399,7 +26403,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26476,7 +26480,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26550,7 +26554,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26626,7 +26630,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26699,7 +26703,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26776,7 +26780,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26849,7 +26853,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26922,7 +26926,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -26998,7 +27002,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27071,7 +27075,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27148,7 +27152,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27222,7 +27226,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27298,7 +27302,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27371,7 +27375,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27444,7 +27448,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27521,7 +27525,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27597,7 +27601,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27673,7 +27677,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27747,7 +27751,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27823,7 +27827,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27897,7 +27901,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -27974,7 +27978,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28048,7 +28052,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28124,7 +28128,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28197,7 +28201,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28273,7 +28277,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28346,7 +28350,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28421,7 +28425,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = -0.0000001; /* INVALID */
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28494,7 +28498,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_empty_reserve    = TRUE;
         invalid_auto_size_ctl.empty_reserve          = 0.05;
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &invalid_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28541,7 +28545,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        result = H5C2_get_cache_auto_resize_config((H5C2_t *)&test_auto_size_ctl,
+        result = H5C2_get_cache_auto_resize_config((const H5C2_t *)&test_auto_size_ctl,
                                                   &test_auto_size_ctl);
 
         if ( result != FAIL ) {
@@ -28693,7 +28697,7 @@ check_auto_cache_resize_aux_fcns(void)
 
     if ( pass2 ) {
 
-        result = H5C2_set_cache_auto_resize_config(file_ptr,
+        result = H5C2_set_cache_auto_resize_config(cache_ptr,
                                                   &auto_size_ctl);
 
         if ( result != SUCCEED ) {

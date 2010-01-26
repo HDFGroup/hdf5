@@ -3565,7 +3565,7 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
 
     /* pass the resize configuration to the modified cache as well. */
-    if(H5AC2_set_cache_auto_resize_config(file, (H5AC2_cache_config_t *)config_ptr) < 0)
+    if(H5AC2_set_cache_auto_resize_config(file->shared->cache2, (H5AC2_cache_config_t *)config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC2_set_cache_auto_resize_config() failed.")
 
 done:

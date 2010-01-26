@@ -1021,7 +1021,7 @@ H5C2_dest(H5F_t * f,
 
     cache_ptr->magic = 0;
 
-    H5FL_FREE(H5C2_t, cache_ptr);
+    cache_ptr = H5FL_FREE(H5C2_t, cache_ptr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1987,7 +1987,7 @@ done:
  */
 
 herr_t
-H5C2_get_cache_auto_resize_config(H5C2_t * cache_ptr,
+H5C2_get_cache_auto_resize_config(const H5C2_t * cache_ptr,
                                   H5C2_auto_size_ctl_t *config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -2169,7 +2169,7 @@ done:
  */
 
 herr_t
-H5C2_get_entry_status(H5F_t *  f,
+H5C2_get_entry_status(const H5F_t *  f,
                       haddr_t   addr,
                       size_t *  size_ptr,
                       hbool_t * in_cache_ptr,
@@ -2262,7 +2262,7 @@ done:
  */
 
 herr_t
-H5C2_get_evictions_enabled(H5C2_t *  cache_ptr,
+H5C2_get_evictions_enabled(const H5C2_t *  cache_ptr,
                            hbool_t * evictions_enabled_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -2304,25 +2304,20 @@ done:
  * Programmer:  John Mainzer
  *              1/20/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5C2_get_trace_file_ptr(const H5C2_t * cache_ptr,
-                        FILE ** trace_file_ptr_ptr)
+H5C2_get_trace_file_ptr(const H5C2_t *cache_ptr, FILE **trace_file_ptr_ptr)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr)
 
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( trace_file_ptr_ptr );
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
+    HDassert(trace_file_ptr_ptr);
 
     *trace_file_ptr_ptr = cache_ptr->trace_file_ptr;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* H5C2_get_trace_file_ptr() */
 
 
@@ -2340,29 +2335,21 @@ H5C2_get_trace_file_ptr(const H5C2_t * cache_ptr,
  * Programmer:  Quincey Koziol
  *              6/9/08
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
-                        FILE ** trace_file_ptr_ptr)
+    FILE ** trace_file_ptr_ptr)
 {
-    const H5C2_t        *cache_ptr;             /* Cache pointer, from entry */
-
     FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr_from_entry)
 
     /* Sanity checks */
-    HDassert( entry_ptr );
-    HDassert( entry_ptr->cache_ptr );
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->cache_ptr);
 
-    cache_ptr = entry_ptr->cache_ptr;
-
-    H5C2_get_trace_file_ptr(cache_ptr, trace_file_ptr_ptr);
+    H5C2_get_trace_file_ptr(entry_ptr->cache_ptr, trace_file_ptr_ptr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* H5C2_get_trace_file_ptr_from_entry() */
 
 
@@ -3083,28 +3070,10 @@ done:
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Modifications:
- *
- * 		Added code to do a flash cache size increase if
- *              appropriate.
- *                                              JRM -- 1/11/08
- *
- *		Added code to either insert the entry at the head of 
- *		the transaction list (if it isn't in the list already), or 
- *		move it to the head of the transaction list (if it is
- *		on the transaction list) if journaling is enabled.  In this
- *		case, set the entry's last_trans field to the current 
- *		transaction number if it isn't set to this value already.
- *
- *						JRM -- 3/31/08
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5C2_mark_pinned_entry_dirty(void *  thing,
-			     hbool_t size_changed,
-                             size_t  new_size)
+H5C2_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
 {
     H5C2_t *            cache_ptr;
     H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
@@ -3114,42 +3083,27 @@ H5C2_mark_pinned_entry_dirty(void *  thing,
 
     FUNC_ENTER_NOAPI(H5C2_mark_pinned_entry_dirty, FAIL)
 
-    HDassert( entry_ptr );
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
-
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    HDassert(H5F_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( ( ! ( cache_ptr->mdj_enabled ) ) || 
-              ( cache_ptr->trans_in_progress ) );
-    HDassert( thing );
-    HDassert( ( size_changed == TRUE ) || ( size_changed == FALSE ) );
-
-    entry_ptr = (H5C2_cache_entry_t *)thing;
-
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
+    HDassert((!cache_ptr->mdj_enabled) || cache_ptr->trans_in_progress);
 
 #if H5C2_PRINT_ENTRY_POINTS 
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
-    {
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
         HDfprintf(stdout, 
                   "%s: addr = 0x%lX, size_changed = %d, new_size = %d.\n", 
 	          FUNC, (unsigned long)(entry_ptr->addr), (int)size_changed, 
 	          (int)new_size);
-    }
 #endif /* JRM */
 
-    if ( ! ( entry_ptr->is_pinned ) ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
-                        "Entry isn't pinned??")
-    }
-
-    if ( entry_ptr->is_protected ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
-                        "Entry is protected??")
-    }
+    /* Check for usage errors */
+    if(!entry_ptr->is_pinned)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry isn't pinned??")
+    if(entry_ptr->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is protected??")
 
     /* mark the entry as dirty if it isn't already */
     entry_ptr->is_dirty = TRUE;
@@ -3170,17 +3124,9 @@ H5C2_mark_pinned_entry_dirty(void *  thing,
                 size_increase = new_size - entry_ptr->size;
 
                 if ( size_increase >=
-                     cache_ptr->flash_size_increase_threshold ) {
-
-                    result = H5C2__flash_increase_cache_size(cache_ptr,
-                                                             entry_ptr->size,
-                                                             new_size);
-
-                    if ( result < 0 ) {
-
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                                    "H5C2__flash_increase_cache_size failed.")
-                    }
+                        cache_ptr->flash_size_increase_threshold ) {
+                    if(H5C2__flash_increase_cache_size(cache_ptr, entry_ptr->size, new_size) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "flash cache increase failed")
                 }
             }
         }
@@ -3229,16 +3175,12 @@ H5C2_mark_pinned_entry_dirty(void *  thing,
     H5C2__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
 
 done:
-
 #if H5C2_PRINT_EXIT_POINTS
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
-                  FUNC, (int)ret_value);
-    }
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_mark_pinned_entry_dirty() */
 
 
@@ -3263,28 +3205,10 @@ done:
  * Programmer:  John Mainzer
  *              5/15/06
  *
- * Modifications:
- *
- * 		JRM -- 3/29/07
- * 		Added sanity check to verify that the pinned entry
- * 		is not protected read only.
- *
- * 		This sanity check is commented out for now -- uncomment
- * 		it once we deal with the problem of entries being protected
- * 		read only, and then dirtied.
- *
- * 		JRM -- 3/31/08 
- * 		Updated function to maintain the transaction list when
- * 		journaling is enabled.
- *
- * 		QAK -- 7/13/08
- *		Dropped file pointer parameter and retrieve cache pointer from
- *		entry.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
+H5C2_mark_pinned_or_protected_entry_dirty(void *thing)
 {
     H5C2_t *            cache_ptr;
     H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
@@ -3292,23 +3216,17 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
 
     FUNC_ENTER_NOAPI(H5C2_mark_pinned_or_protected_entry_dirty, FAIL)
 
-    HDassert( entry_ptr );
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
-
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    HDassert(H5F_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( thing );
-
-    entry_ptr = (H5C2_cache_entry_t *)thing;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
 #if H5C2_PRINT_ENTRY_POINTS 
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
-    {
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
         HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
 	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
-    }
 #endif /* JRM */
 
     if ( entry_ptr->is_protected ) {
@@ -3348,16 +3266,12 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
     }
 
 done:
-
 #if H5C2_PRINT_EXIT_POINTS
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
-                  FUNC, (int)ret_value);
-    }
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_mark_pinned_or_protected_entry_dirty() */
 
 
@@ -3633,21 +3547,10 @@ done:
  * Programmer:  John Mainzer
  *              7/5/06
  *
- * Modifications:
- *
- *              Added code to apply a flash cache size increment if
- *              appropriate.
- *                                              JRM -- 1/11/08
- *
- * 		QAK -- 7/13/08
- *		Dropped file pointer parameter and retrieve cache pointer from
- *		entry.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_resize_pinned_entry(void *  thing,
-                         size_t  new_size)
+H5C2_resize_pinned_entry(void *thing, size_t new_size)
 {
     H5C2_t *            cache_ptr;
     H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
@@ -3657,43 +3560,27 @@ H5C2_resize_pinned_entry(void *  thing,
 
     FUNC_ENTER_NOAPI(H5C2_resize_pinned_entry, FAIL)
 
-    HDassert( entry_ptr );
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    HDassert(H5F_addr_defined(entry_ptr->addr));
+    cache_ptr = entry_ptr->cache_ptr;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
 #if H5C2_PRINT_ENTRY_POINTS 
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
-    {
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
         HDfprintf(stdout, "%s: type = %s, addr = 0x%lX, new_size = %d.\n", 
 	          FUNC, entry_ptr->type->name, (unsigned long)(entry_ptr->addr), 
 		  (int)new_size);
-    }
 #endif /* JRM */
 
-    cache_ptr = entry_ptr->cache_ptr;
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( thing );
-
-    entry_ptr = (H5C2_cache_entry_t *)thing;
-
-    if ( new_size <= 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
-                    "New size is non-positive.")
-    }
-
-    if ( ! ( entry_ptr->is_pinned ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
-                    "Entry isn't pinned??")
-    }
-
-    if ( entry_ptr->is_protected ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
-                    "Entry is protected??")
-    }
+    /* Check for usage errors */
+    if(new_size <= 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "New size is non-positive.")
+    if(!entry_ptr->is_pinned)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned??")
+    if(entry_ptr->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry is protected??")
 
     /* resizing dirties entries -- mark the entry as dirty if it 
      * isn't already 
@@ -3776,16 +3663,12 @@ H5C2_resize_pinned_entry(void *  thing,
     H5C2__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
 
 done:
-
 #if H5C2_PRINT_EXIT_POINTS
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
-                  FUNC, (int)ret_value);
-    }
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_resize_pinned_entry() */
 
 
@@ -3800,34 +3683,10 @@ done:
  * Programmer:  John Mainzer
  *              4/26/06
  *
- * Modifications:
- *
- * 		JRM -- 4/26/06
- *		Modified routine to allow it to operate on protected
- *		entries.
- *
- *		JRM -- 2/16/07
- *		Added conditional compile to avoid unused parameter 
- *		warning in production compile.
- *
- *		JRM -- 4/4/07
- *		Fixed typo -- canged macro call to 
- *		H5C2__UPDATE_STATS_FOR_UNPIN to call to 
- *		H5C2__UPDATE_STATS_FOR_PIN.
- *
- *		JRM -- 5/16/08
- *		Undid change of 2/16/08, as we can use the f parameter
- *		in production mode.  
- *
- * 		QAK -- 7/13/08
- *		Dropped file pointer parameter and retrieve cache pointer from
- *		entry.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5C2_pin_protected_entry(void *	  thing)
+H5C2_pin_protected_entry(void *thing)
 {
     H5C2_t *             cache_ptr;
     H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
@@ -3836,46 +3695,37 @@ H5C2_pin_protected_entry(void *	  thing)
     FUNC_ENTER_NOAPI(H5C2_pin_protected_entry, FAIL)
 
 #if H5C2_PRINT_ENTRY_POINTS 
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
-    {
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
         HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
 	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
-    }
 #endif /* JRM */
 
-    HDassert( entry_ptr );
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
-
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    HDassert(H5F_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-
-    if ( ! ( entry_ptr->is_protected ) ) {
-
+    /* Check for usage errors */
+    if(!entry_ptr->is_protected)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry isn't protected")
-    }
-
-    if ( entry_ptr->is_pinned ) {
-
+    if(entry_ptr->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry is already pinned")
-    }
 
+    /* Pin entry */
     entry_ptr->is_pinned = TRUE;
 
+    /* Update statistics for entry */
     H5C2__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
 done:
-
 #if H5C2_PRINT_EXIT_POINTS
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
-                  FUNC, (int)ret_value);
-    }
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_pin_protected_entry() */
 
 
@@ -4409,22 +4259,15 @@ done:
  */
 
 herr_t
-H5C2_set_cache_auto_resize_config(const H5F_t * f,
+H5C2_set_cache_auto_resize_config(H5C2_t * cache_ptr,
                                  H5C2_auto_size_ctl_t *config_ptr)
 {
-    /* const char *fcn_name = "H5C2_set_cache_auto_resize_config()"; */
-    H5C2_t *    cache_ptr;
-    herr_t	ret_value = SUCCEED;      /* Return value */
     herr_t	result;
     size_t      new_max_cache_size;
     size_t      new_min_clean_size;
+    herr_t	ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_set_cache_auto_resize_config, FAIL)
-
-    HDassert( f );
-    HDassert( f->shared );
-
-    cache_ptr = f->shared->cache2;
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
 
@@ -4699,18 +4542,12 @@ done:
  */
 
 herr_t
-H5C2_set_evictions_enabled(const H5F_t * f,
+H5C2_set_evictions_enabled(H5C2_t * cache_ptr,
                            hbool_t evictions_enabled)
 {
-    H5C2_t * cache_ptr;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_set_evictions_enabled, FAIL)
-
-    HDassert( f );
-    HDassert( f->shared );
-
-    cache_ptr = f->shared->cache2;
 
     if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
 
@@ -5443,16 +5280,6 @@ H5C2_stats__reset(H5C2_t UNUSED * cache_ptr)
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Modifications:
- *
- * 		JRM -- 4/26/06
- *		Modified routine to allow it to operate on protected
- *		entries.
- *
- * 		QAK -- 6/9/08
- *		Dropped file pointer parameter and retrieve cache pointer from
- *		entry.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5464,46 +5291,38 @@ H5C2_unpin_entry(void *_entry_ptr)
 
     FUNC_ENTER_NOAPI(H5C2_unpin_entry, FAIL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
-    {
-        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
-	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
-    }
-#endif /* JRM */
-
-    HDassert( entry_ptr );
-
+    /* Sanity check */
+    HDassert(entry_ptr);
     cache_ptr = entry_ptr->cache_ptr;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+#if H5C2_PRINT_ENTRY_POINTS
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
+#endif /* H5C2_PRINT_ENTRY_POINTS */
 
-    if ( ! ( entry_ptr->is_pinned ) ) {
-
+    /* Error checking */
+    if(!entry_ptr->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry isn't pinned")
-    }
 
-    if ( ! ( entry_ptr->is_protected ) ) {
-
+    /* Update unprotected entry */
+    if(!entry_ptr->is_protected)
         H5C2__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
-    }
 
+    /* Mark entry unpinned */
     entry_ptr->is_pinned = FALSE;
 
+    /* Update statistics for unpin operation */
     H5C2__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
 
 done:
-
 #if H5C2_PRINT_EXIT_POINTS
-    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
-                  FUNC, (int)ret_value);
-    }
+    if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C2_unpin_entry() */
 
 
