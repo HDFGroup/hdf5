@@ -27,10 +27,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {
-    "cache_api",
-    NULL
-};
+extern const char *FILENAME[];
 
 /* macro definitions */
 
@@ -331,7 +328,7 @@ check_fapl_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -480,7 +477,7 @@ check_fapl_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -919,7 +916,7 @@ check_file_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1533,7 +1530,7 @@ mdc_api_call_smoke_check(int express_test)
 
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -3724,7 +3721,7 @@ check_file_mdc_api_errs(void)
 	    HDfprintf(stdout, "%s: calling h5_fixname().\n", fcn_name);
 	}
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;

@@ -129,7 +129,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 
     HDassert(s && !*s);
 
-    if(H5HL_unprotect(f, heap) < 0)
+    if(H5HL_unprotect(heap) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
     heap = NULL;
 #endif
@@ -158,7 +158,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 	HDassert(mesg->slot[u].size > 0);
     } /* end for */
 
-    if(H5HL_unprotect(f, heap) < 0)
+    if(H5HL_unprotect(heap) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
     heap = NULL;
 
@@ -481,7 +481,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(file_dst, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap")
     if(!ret_value)
         if(efl_dst)

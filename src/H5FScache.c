@@ -954,7 +954,7 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
  */
 /* ARGSUSED */
 herr_t
-H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
+H5FS_cache_sinfo_dest(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -987,7 +987,7 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
     /* (make certain this is last action with section info, to allow for header
      *  disappearing immediately)
      */
-    if(H5AC_unpin_entry(f, sinfo->fspace) < 0)
+    if(H5AC_unpin_entry(sinfo->fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
 
     /* Release free space section info */

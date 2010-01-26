@@ -1018,7 +1018,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, UFAIL, "can't split null message")
 
     /* Mark object header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, UFAIL, "unable to mark object header as dirty")
 
     /* Set return value */

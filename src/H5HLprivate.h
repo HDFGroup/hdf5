@@ -68,7 +68,7 @@ H5_DLL H5HL_t *H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_
 H5_DLL void *H5HL_offset_into(const H5HL_t *heap, size_t offset);
 H5_DLL herr_t H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset,
     size_t size);
-H5_DLL herr_t H5HL_unprotect(H5F_t *f, H5HL_t *heap);
+H5_DLL herr_t H5HL_unprotect(H5HL_t *heap);
 H5_DLL size_t H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t size,
     const void *buf);
 H5_DLL herr_t H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
