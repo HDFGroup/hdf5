@@ -278,8 +278,7 @@ static int H5tools_get_softlink_target_info(hid_t file_id, const char * linkpath
     }
     else
     {
-        parallel_print("error: \"%s\" doesn't exist \n", s_trg_info->path);
-        goto out;
+        parallel_print("warn: link target \"%s\" doesn't exist \n", s_trg_info->path);
     }
 
     /* set target obj type to return */

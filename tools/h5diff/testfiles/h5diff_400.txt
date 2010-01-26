@@ -35,8 +35,11 @@ link   : </softlink_group2> and </softlink_group2>
 group  : </target_group> and </target_group>
 0 differences found
 0 differences found
-error: "/no_obj" doesn't exist 
-error: unable to get softlink info from "/softlink_noexist"
+warn: link target "/no_obj" doesn't exist 
+warn: link target "/no_obj" doesn't exist 
+link   : </softlink_noexist> and </softlink_noexist>
+Comparison not supported: </no_obj> and </no_obj> are of type unknown type
+0 differences found
 dataset: </target_dset1> and </target_dset1>
 0 differences found
 dataset: </target_dset2> and </target_dset2>
@@ -45,3 +48,7 @@ group  : </target_group> and </target_group>
 0 differences found
 dataset: </target_group/dset> and </target_group/dset>
 0 differences found
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects.
