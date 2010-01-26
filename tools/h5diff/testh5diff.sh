@@ -560,7 +560,13 @@ TOOLTEST h5diff_403.txt -l -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
 
 
 # extlink vs extlink (FILE)"
-TOOLTEST h5diff_404.txt -l -v $FILE15 $FILE15
+if test -n "$pmode"; then
+    # TODO: Skip below test due to hang in prarllel mode
+    echo  "Skip below test due to hang in prarllel mode"
+    SKIP -l -v $FILE15 $FILE15
+else
+    TOOLTEST h5diff_404.txt -l -v $FILE15 $FILE15
+fi
 
 
 # extlink vs dset"
@@ -620,11 +626,23 @@ TOOLTEST h5diff_418.txt -l -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
 
 
 # non-exist-extlink_file vs extlink"
-TOOLTEST h5diff_419.txt -l -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
+if test -n "$pmode"; then
+    # TODO: Skip below test due to hang in prarllel mode
+    echo  "Skip below test due to hang in prarllel mode"
+    SKIP -l -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
+else
+    TOOLTEST h5diff_419.txt -l -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
+fi
 
 
 # exlink vs non-exist-extlink_file"
-TOOLTEST h5diff_420.txt -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
+if test -n "$pmode"; then
+    # TODO: Skip below test due to hang in prarllel mode
+    echo  "Skip below test due to hang in prarllel mode"
+    SKIP -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
+else
+    TOOLTEST h5diff_420.txt -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
+fi
 
 
 # extlink vs non-exist-extlink_obj"
