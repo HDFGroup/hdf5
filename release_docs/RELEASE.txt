@@ -142,6 +142,9 @@ New Features
 
     Tools:
     ------
+     - h5diff: Add new flag -l (--link-follow),for comparing through links 
+               (soft and external links along with hard link).
+               (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
 	   (JKM - 2009/11/20)
      - h5dump subsetting now allows default for count. Also trailing ; in short form
