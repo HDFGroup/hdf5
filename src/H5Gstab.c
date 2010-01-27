@@ -136,7 +136,7 @@ H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t d
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(f, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -250,7 +250,7 @@ H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(f, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -343,7 +343,7 @@ H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(loc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -401,7 +401,7 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(grp_oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     /* Reset the link information, if we have a copy */
@@ -453,7 +453,7 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete symbol table B-tree")
 
     /* Release resources */
-    if(H5HL_unprotect(f, heap) < 0)
+    if(H5HL_unprotect(heap) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
     heap = NULL;
 
@@ -463,7 +463,7 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab)
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(f, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -553,7 +553,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
     if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
@@ -760,7 +760,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     /* Free the duplicated name */
@@ -859,7 +859,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(grp_oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -973,7 +973,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(grp_oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1048,7 +1048,7 @@ H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(grp_oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)

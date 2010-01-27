@@ -27,11 +27,6 @@
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {
-    "cache_api",
-    NULL
-};
-
 /* macro definitions */
 
 #define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
@@ -331,7 +326,7 @@ check_fapl_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -354,7 +349,7 @@ check_fapl_mdc_api_calls(void)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -480,7 +475,7 @@ check_fapl_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -503,7 +498,7 @@ check_fapl_mdc_api_calls(void)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -651,7 +646,7 @@ validate_mdc_config(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -919,7 +914,7 @@ check_file_mdc_api_calls(void)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -1123,7 +1118,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -1262,7 +1257,7 @@ check_and_validate_cache_size(hid_t file_id,
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -1525,7 +1520,7 @@ mdc_api_call_smoke_check(int express_test)
     /* setup the file name */
     if ( pass ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;
@@ -3609,7 +3604,7 @@ check_file_mdc_api_errs(void)
 	    HDfprintf(stdout, "%s: calling h5_fixname().\n", fcn_name);
 	}
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
             pass = FALSE;

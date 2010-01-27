@@ -650,7 +650,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1,
 done:
     /* Release the [possibly partially initialized] local heap on errors */
     if(!ret_value && dblk)
-        if(H5HL_dblk_dest(f, dblk) < 0)
+        if(H5HL_dblk_dest(dblk) < 0)
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -702,7 +702,7 @@ H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
     /* Should we destroy the memory version? */
     if(destroy)
-        if(H5HL_dblk_dest(f, dblk) < 0)
+        if(H5HL_dblk_dest(dblk) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
 
 done:
@@ -724,7 +724,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_datablock_dest(H5F_t *f, void *_thing)
+H5HL_datablock_dest(H5F_t UNUSED *f, void *_thing)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -732,7 +732,6 @@ H5HL_datablock_dest(H5F_t *f, void *_thing)
     FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_dest)
 
     /* check arguments */
-    HDassert(f);
     HDassert(dblk);
     HDassert(dblk->heap);
     HDassert(!dblk->heap->single_cache_obj);
@@ -753,7 +752,7 @@ H5HL_datablock_dest(H5F_t *f, void *_thing)
     } /* end if */
 
     /* Destroy local heap data block */
-    if(H5HL_dblk_dest(f, dblk) < 0)
+    if(H5HL_dblk_dest(dblk) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't destroy local heap data block")
 
 done:
@@ -775,7 +774,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
+H5HL_datablock_clear(H5F_t UNUSED *f, void *_thing, hbool_t destroy)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -783,14 +782,13 @@ H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
     FUNC_ENTER_NOAPI_NOINIT(H5HL_datablock_clear)
 
     /* check arguments */
-    HDassert(f);
     HDassert(dblk);
 
     /* Mark local heap data block as clean */
     dblk->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5HL_dblk_dest(f, dblk) < 0)
+        if(H5HL_dblk_dest(dblk) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
 
 done:

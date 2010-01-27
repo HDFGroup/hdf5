@@ -238,7 +238,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             HDassert(heap->prfx);
 
             /* Resize the heap prefix in the cache */
-            if(H5AC_resize_pinned_entry(f, heap->prfx, (size_t)(heap->prfx_size + new_heap_size)) < 0)
+            if(H5AC_resize_pinned_entry(heap->prfx, (size_t)(heap->prfx_size + new_heap_size)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap in cache")
         } /* end if */
         else {
@@ -247,7 +247,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             HDassert(heap->dblk);
 
             /* Resize the heap data block in the cache */
-            if(H5AC_resize_pinned_entry(f, heap->dblk, (size_t)new_heap_size) < 0)
+            if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_heap_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap in cache")
         } /* end else */
     } /* end if */
@@ -260,7 +260,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
 
             /* Resize current heap prefix */
             heap->prfx_size = H5HL_SIZEOF_HDR(f);
-            if(H5AC_resize_pinned_entry(f, heap->prfx, (size_t)heap->prfx_size) < 0)
+            if(H5AC_resize_pinned_entry(heap->prfx, (size_t)heap->prfx_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap prefix in cache")
 
             /* Insert data block into cache (pinned) */
@@ -276,7 +276,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             /* (ignore [unlikely] case where heap data block ends up
              *      contiguous w/heap prefix again.
              */
-            if(H5AC_resize_pinned_entry(f, heap->dblk, (size_t)new_heap_size) < 0)
+            if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_heap_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap data block in cache")
 
             /* Relocate the heap data block in the cache */
@@ -557,14 +557,13 @@ H5HL_offset_into(const H5HL_t *heap, size_t offset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_unprotect(H5F_t *f, H5HL_t *heap)
+H5HL_unprotect(H5HL_t *heap)
 {
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HL_unprotect, FAIL)
 
     /* check arguments */
-    HDassert(f);
     HDassert(heap);
 
     /* Decrement # of times heap is protected */
@@ -575,7 +574,7 @@ H5HL_unprotect(H5F_t *f, H5HL_t *heap)
         /* Check for separate heap data block */
         if(heap->single_cache_obj) {
             /* Mark local heap prefix as evictable again */
-            if(H5AC_unpin_entry(f, heap->prfx) < 0)
+            if(H5AC_unpin_entry(heap->prfx) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block")
         } /* end if */
         else {
@@ -584,7 +583,7 @@ H5HL_unprotect(H5F_t *f, H5HL_t *heap)
 
             /* Mark local heap data block as evictable again */
             /* (data block still pins prefix) */
-            if(H5AC_unpin_entry(f, heap->dblk) < 0)
+            if(H5AC_unpin_entry(heap->dblk) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin local heap data block")
         } /* end else */
     } /* end if */
@@ -640,14 +639,13 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_dirty(H5F_t *f, H5HL_t *heap)
+H5HL_dirty(H5HL_t *heap)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HL_dirty)
 
     /* check arguments */
-    HDassert(f);
     HDassert(heap);
     HDassert(heap->prfx);
 
@@ -656,12 +654,12 @@ H5HL_dirty(H5F_t *f, H5HL_t *heap)
         /* Sanity check */
         HDassert(heap->dblk);
 
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f, heap->dblk) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(heap->dblk) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap data block as dirty")
     } /* end if */
 
     /* Mark heap prefix as dirty */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f, heap->prfx) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(heap->prfx) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap prefix as dirty")
 
 done:
@@ -706,7 +704,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
      *  so we just accept that an extra flush of the heap info could occur
      *  if an error occurs -QAK)
      */
-    if(H5HL_dirty(f, heap) < 0)
+    if(H5HL_dirty(heap) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, UFAIL, "unable to mark heap as dirty")
 
     /*
@@ -785,12 +783,12 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
             /* Check for prefix & data block contiguous */
             if(heap->single_cache_obj) {
                 /* Resize prefix+data block */
-                if(H5AC_resize_pinned_entry(f, heap->prfx, (size_t)(heap->prfx_size + new_dblk_size)) < 0)
+                if(H5AC_resize_pinned_entry(heap->prfx, (size_t)(heap->prfx_size + new_dblk_size)) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap prefix in cache")
             } /* end if */
             else {
                 /* Resize 'standalone' data block */
-                if(H5AC_resize_pinned_entry(f, heap->dblk, (size_t)new_dblk_size) < 0)
+                if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_dblk_size) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap data block in cache")
             } /* end else */
 
@@ -927,7 +925,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
      *  so we just accept that an extra flush of the heap info could occur
      *  if an error occurs -QAK)
      */
-    if(H5HL_dirty(f, heap) < 0)
+    if(H5HL_dirty(heap) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap as dirty")
 
     /*
@@ -1095,7 +1093,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
         /* Pin the prefix, if the data block was loaded from file */
         if(dblk_udata.loaded) {
-            if(H5AC_pin_protected_entry(f, prfx) < 0)
+            if(H5AC_pin_protected_entry(prfx) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin local heap prefix")
         } /* end if */
     } /* end if */

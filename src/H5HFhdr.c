@@ -540,7 +540,7 @@ H5HF_hdr_incr(H5HF_hdr_t *hdr)
 
     /* Mark header as un-evictable when a block is depending on it */
     if(hdr->rc == 0)
-        if(H5AC_pin_protected_entry(hdr->f, hdr) < 0)
+        if(H5AC_pin_protected_entry(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin fractal heap header")
 
     /* Increment reference count on shared header */
@@ -581,7 +581,7 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
     /* Mark header as evictable again when no child blocks depend on it */
     if(hdr->rc == 0) {
         HDassert(hdr->file_rc == 0);
-        if(H5AC_unpin_entry(hdr->f, hdr) < 0)
+        if(H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
     } /* end if */
 
@@ -671,7 +671,7 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* Mark header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
 
 done:

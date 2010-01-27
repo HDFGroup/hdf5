@@ -616,7 +616,7 @@ H5G_verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(grp_oloc->file, heap) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)

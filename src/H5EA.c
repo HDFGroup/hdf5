@@ -821,7 +821,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     hdr->f = ea->f;
 
     /* Set up flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__create_flush_depend(hdr, parent_entry, (H5AC_info_t *)hdr) < 0)
+    if(H5EA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
         H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
 
 CATCH
@@ -864,7 +864,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     hdr->f = ea->f;
 
     /* Remove flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__destroy_flush_depend(hdr, parent_entry, (H5AC_info_t *)hdr) < 0)
+    if(H5EA__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
         H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
 
 CATCH
@@ -891,7 +891,6 @@ herr_t, SUCCEED, FAIL,
 H5EA_support(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
 
     /* Local variables */
-    H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
     void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
     uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
     hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
@@ -906,10 +905,6 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
      * Check arguments.
      */
     HDassert(ea);
-    HDassert(hdr);
-
-    /* Set the shared array header's file context for this operation */
-    hdr->f = ea->f;
 
     /* Look up the array metadata containing the element we want to set */
     if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_WRITE, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
@@ -921,7 +916,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     HDassert(thing_unprot_func);
 
     /* Set up flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__create_flush_depend(hdr, (H5AC_info_t *)thing, child_entry) < 0)
+    if(H5EA__create_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
         H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on array metadata")
 
 CATCH
@@ -951,7 +946,6 @@ herr_t, SUCCEED, FAIL,
 H5EA_unsupport(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
 
     /* Local variables */
-    H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
     void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
     uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
     hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
@@ -966,10 +960,6 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
      * Check arguments.
      */
     HDassert(ea);
-    HDassert(hdr);
-
-    /* Set the shared array header's file context for this operation */
-    hdr->f = ea->f;
 
     /* Look up the array metadata containing the element we want to set */
     if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_READ, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
@@ -981,7 +971,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     HDassert(thing_unprot_func);
 
     /* Remove flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__destroy_flush_depend(hdr, (H5AC_info_t *)thing, child_entry) < 0)
+    if(H5EA__destroy_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
         H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on array metadata")
 
 CATCH

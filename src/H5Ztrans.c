@@ -62,7 +62,7 @@ typedef struct H5Z_node {
 
 struct H5Z_data_xform_t {
     char*       xform_exp;
-    struct H5Z_node*       parse_root;
+    H5Z_node*       parse_root;
     H5Z_datval_ptrs*	dat_val_pointers;
 };
 
@@ -354,7 +354,7 @@ H5Z_unget_token(H5Z_token *current)
 static H5Z_token *
 H5Z_get_token(H5Z_token *current)
 {
-    void *ret_value = current;
+    H5Z_token *ret_value = current;
 
     FUNC_ENTER_NOAPI(H5Z_get_token, NULL)
 
@@ -464,7 +464,7 @@ H5Z_get_token(H5Z_token *current)
         current->tok_type = H5Z_XFORM_END;
 
     /* Set return value */
-    ret_value = (void *)current;
+    ret_value = current;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1369,7 +1369,7 @@ H5Z_xform_create(const char *expr)
     data_xform_prop->dat_val_pointers->num_ptrs = 0;
 
      /* we generate the parse tree right here and store a poitner to its root in the property. */
-    if((data_xform_prop->parse_root = H5Z_xform_parse(expr, data_xform_prop->dat_val_pointers))==NULL)
+    if((data_xform_prop->parse_root = (H5Z_node *)H5Z_xform_parse(expr, data_xform_prop->dat_val_pointers))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression")
 
     /* Sanity check

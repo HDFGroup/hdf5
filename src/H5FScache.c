@@ -1012,7 +1012,7 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
+H5FS_cache_sinfo_dest(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */

@@ -104,7 +104,7 @@ main(void)
 	    goto error;
 	}
     }
-    if(H5HL_unprotect(f, heap) < 0) {
+    if(H5HL_unprotect(heap) < 0) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -151,7 +151,7 @@ main(void)
             goto error;
         }
 
-        if(H5HL_unprotect(f, heap) < 0) {
+        if(H5HL_unprotect(heap) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
