@@ -125,7 +125,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);
 
 done:
-    if(h && H5HL_unprotect(f, h) < 0)
+    if(h && H5HL_unprotect(h) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
     H5MM_xfree(marker);
 

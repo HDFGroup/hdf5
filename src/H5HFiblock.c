@@ -116,7 +116,7 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
     HDassert(iblock);
 
     /* Mark block as un-evictable */
-    if(H5AC_pin_protected_entry(iblock->hdr->f, iblock) < 0)
+    if(H5AC_pin_protected_entry(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin fractal heap indirect block")
 
     /* If this indirect block has a parent, update it's child iblock pointer */
@@ -200,7 +200,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
     } /* end if */
 
     /* Mark block as evictable again */
-    if(H5AC_unpin_entry(iblock->hdr->f, iblock) < 0)
+    if(H5AC_unpin_entry(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap indirect block")
 
 done:
@@ -332,7 +332,7 @@ H5HF_iblock_dirty(H5HF_indirect_t *iblock)
     HDassert(iblock);
 
     /* Mark indirect block as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(iblock->hdr->f, iblock) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap indirect block as dirty")
 
 done:

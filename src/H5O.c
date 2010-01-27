@@ -1598,7 +1598,7 @@ H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
     /* Check if the object header needs to be pinned */
     if(0 == oh->npins) {
         /* Mark object header as un-evictable */
-        if(H5AC_pin_protected_entry(loc->file, oh) < 0)
+        if(H5AC_pin_protected_entry(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
     } /* end if */
 
@@ -1633,22 +1633,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_unpin(H5O_loc_t *loc, H5O_t *oh)
+H5O_unpin(H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_unpin, FAIL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
     HDassert(oh);
 
     /* Check if this is the last unpin operation */
     if(1 == oh->npins) {
         /* Mark object header as evictable again */
-        if(H5AC_unpin_entry(loc->file, oh) < 0)
+        if(H5AC_unpin_entry(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
     } /* end if */
 
@@ -1734,7 +1731,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
         } /* end else */
 
         /* Mark object header as dirty in cache */
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 

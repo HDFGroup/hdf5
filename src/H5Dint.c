@@ -862,8 +862,8 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
 
 done:
     /* Release pointer to object header itself */
-    if(oloc != NULL && oh != NULL)
-        if(H5O_unpin(oloc, oh) < 0)
+    if(oh != NULL)
+        if(H5O_unpin(oh) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     /* Error cleanup */
@@ -2284,7 +2284,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
 done:
     /* Release pointer to object header */
     if(oh != NULL)
-        if(H5O_unpin(&(dataset->oloc), oh) < 0)
+        if(H5O_unpin(oh) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -327,7 +327,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
         sblock_flags |= H5AC__DIRTIED_FLAG;
 
     /* Pin the superblock in the cache */
-    if(H5AC_pin_protected_entry(f, sblock) < 0)
+    if(H5AC_pin_protected_entry(sblock) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin superblock")
 
     /* Set the pointer to the pinned superblock */
@@ -585,7 +585,7 @@ done:
             /* Check if we've cached it already */
             if(sblock_in_cache) {
                 /* Unpin superblock in cache */
-                if(H5AC_unpin_entry(f, sblock) < 0)
+                if(H5AC_unpin_entry(sblock) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
 
                 /* Evict the superblock from the cache */
@@ -631,7 +631,7 @@ H5F_super_dirty(H5F_t *f)
     HDassert(f->shared->sblock);
 
     /* Mark superblock dirty in cache, so change to EOA will get encoded */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f, f->shared->sblock) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
@@ -764,7 +764,7 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_
 done:
     /* Mark superblock dirty in cache, if necessary */
     if(sblock_dirty)
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f, f->shared->sblock) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
     FUNC_LEAVE_NOAPI(ret_value)
