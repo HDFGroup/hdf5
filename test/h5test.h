@@ -61,11 +61,16 @@
  * Verbose queries
  * Only None needs an exact match.  The rest are at least as much.
  */
-#define VERBOSE_NONE	(GetTestVerbosity()==VERBO_NONE)
-#define VERBOSE_DEF	(GetTestVerbosity()>=VERBO_DEF)
-#define VERBOSE_LO	(GetTestVerbosity()>=VERBO_LO)
-#define VERBOSE_MED	(GetTestVerbosity()>=VERBO_MED)
-#define VERBOSE_HI	(GetTestVerbosity()>=VERBO_HI)
+
+/* A macro version of HDGetTestVerbosity(). */
+/* Should be used internally by the libtest.a only. */
+#define HDGetTestVerbosity() (TestVerbosity)
+
+#define VERBOSE_NONE	(HDGetTestVerbosity()==VERBO_NONE)
+#define VERBOSE_DEF	(HDGetTestVerbosity()>=VERBO_DEF)
+#define VERBOSE_LO	(HDGetTestVerbosity()>=VERBO_LO)
+#define VERBOSE_MED	(HDGetTestVerbosity()>=VERBO_MED)
+#define VERBOSE_HI	(HDGetTestVerbosity()>=VERBO_HI)
 
 /*
  * Test controls definitions.
@@ -188,6 +193,9 @@ H5TEST_DLL int h5_set_info_object(void);
 H5TEST_DLL void h5_dump_info_object(MPI_Info info);
 H5TEST_DLL char* getenv_all(MPI_Comm comm, int root, const char* name);
 #endif
+
+/* Extern global variables */
+H5TEST_DLLVAR int TestVerbosity;
 
 #ifdef __cplusplus
 }
