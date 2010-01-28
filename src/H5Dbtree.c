@@ -337,7 +337,7 @@ done:
 /* ARGSUSED */
 static int
 H5D_btree_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-		void *_rt_key)
+    void *_rt_key)
 {
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
     H5D_btree_key_t	*rt_key = (H5D_btree_key_t *) _rt_key;
@@ -388,7 +388,7 @@ H5D_btree_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udat
 /* ARGSUSED */
 static int
 H5D_btree_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-		void *_rt_key)
+    void *_rt_key)
 {
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
     H5D_btree_key_t	*rt_key = (H5D_btree_key_t *) _rt_key;
@@ -761,8 +761,8 @@ H5D_btree_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void 
  */
 /* ARGSUSED */
 static herr_t
-H5D_btree_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
-		      const void *_key, const void *_udata)
+H5D_btree_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent,
+    int fwidth, const void *_key, const void *_udata)
 {
     const H5D_btree_key_t	*key = (const H5D_btree_key_t *)_key;
     const unsigned	*ndims = (const unsigned *)_udata;

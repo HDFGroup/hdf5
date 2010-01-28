@@ -1276,8 +1276,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Dec  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2096,7 +2094,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 {
-    ssize_t       ret_value;
+    ssize_t       ret_value;    /* Return value */
 
     FUNC_ENTER_API(H5Iget_name, FAIL)
     H5TRACE3("Zs", "ixz", id, name, size);

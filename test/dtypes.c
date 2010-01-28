@@ -515,39 +515,37 @@ test_compound_1(void)
     H5T_str_t           strpad;
     H5T_order_t         order;
     H5T_sign_t          sign;
-    char*               tag;
+    char               *tag = NULL;
     int                 offset;
     herr_t ret;
+    int                 retval = 1;
 
     TESTING("compound datatypes");
 
     /* Create the empty type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0) goto error;
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0) 
+        goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
     H5E_BEGIN_TRY {
         ret=H5Tinsert(complex_id, "compound", 0, complex_id);
     } H5E_END_TRY;
     if (ret>=0) {
-        H5_FAILED();
-        printf("Inserted compound datatype into itself?\n");
-        goto error;
+        FAIL_PUTS_ERROR("Inserted compound datatype into itself?");
     } /* end if */
 
     /* Add a couple fields */
-    if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
-		  H5T_NATIVE_DOUBLE) < 0) goto error;
-    if (H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im),
-		  H5T_NATIVE_DOUBLE) < 0) goto error;
+    if(H5Tinsert(complex_id, "real", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE) < 0)
+        goto error;
+    if(H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE) < 0)
+        goto error;
 
     /* Test some functions that aren't supposed to work for compound type */
     H5E_BEGIN_TRY {
         size=H5Tget_precision(complex_id);
     } H5E_END_TRY;
     if (size>0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     size = 128;
@@ -555,108 +553,89 @@ test_compound_1(void)
         ret = H5Tset_precision(complex_id, size);
     } H5E_END_TRY;
     if (ret>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         ret = H5Tget_pad(complex_id, &lsb, &msb);
     } H5E_END_TRY;
     if (ret>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         size = H5Tget_ebias(complex_id);
     } H5E_END_TRY;
     if (size>0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         lsb = H5Tget_inpad(complex_id);
     } H5E_END_TRY;
     if (lsb>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         cset = H5Tget_cset(complex_id);
     } H5E_END_TRY;
     if (cset>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         strpad = H5Tget_strpad(complex_id);
     } H5E_END_TRY;
     if (strpad>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         offset = H5Tget_offset(complex_id);
     } H5E_END_TRY;
     if (offset>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         order = H5Tget_order(complex_id);
     } H5E_END_TRY;
     if (order>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         sign = H5Tget_sign(complex_id);
     } H5E_END_TRY;
     if (sign>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         tag = H5Tget_tag(complex_id);
     } H5E_END_TRY;
     if (tag) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         super = H5Tget_super(complex_id);
     } H5E_END_TRY;
     if (super>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
-    if (H5Tclose (complex_id) < 0) goto error;
+    if (H5Tclose (complex_id) < 0) 
+        goto error;
 
     PASSED();
-    return 0;
+    retval = 0;
 
-  error:
-    return 1;
+error:
+    if(tag)
+        HDfree(tag);
+    return retval;
 }
 
 
@@ -1068,6 +1047,7 @@ test_compound_5(void)
     dst_type_t  *dst;
     void        *buf = calloc(2, sizeof(dst_type_t));
     void        *bkg = calloc(2, sizeof(dst_type_t));
+    int          retval = 1;
 
 #if 1
     TESTING("optimized struct converter");
@@ -1124,14 +1104,17 @@ test_compound_5(void)
         src[1].coll_ids[2]!=dst[1].coll_ids[2] ||
         src[1].coll_ids[3]!=dst[1].coll_ids[3]) {
         H5_FAILED();
-        return 1;
+    } else {
+        PASSED();
+        retval = 0;
     }
 
     /* Free memory buffers */
-    free(buf);
-    free(bkg);
-    PASSED();
-    return 0;
+    if(buf)
+        HDfree(buf);
+    if(bkg)
+        HDfree(bkg);
+    return retval;
 }
 
 
@@ -2054,10 +2037,11 @@ test_compound_11(void)
     hid_t big_tid, little_tid;  /* Datatype IDs for type conversion */
     hid_t big_tid2, little_tid2;  /* Datatype IDs for type conversion */
     hid_t opaq_src_tid, opaq_dst_tid;  /* Datatype IDs for type conversion */
-    void *buf,          /* Conversion buffer */
-        *buf_orig,      /* Copy of original conversion buffer */
-        *bkg;           /* Background buffer */
+    void *buf = NULL;          /* Conversion buffer */
+    void *buf_orig = NULL;      /* Copy of original conversion buffer */
+    void *bkg = NULL;           /* Background buffer */
     size_t u;           /* Local index variable */
+    int retval = 1;
 
     TESTING("registering type conversion routine with compound conversions");
 
@@ -2216,18 +2200,21 @@ test_compound_11(void)
     if(H5Tclose(opaq_src_tid) < 0) TEST_ERROR
     if(H5Tclose(little_tid2) < 0) TEST_ERROR
     if(H5Tclose(big_tid2) < 0) TEST_ERROR
-    HDfree(bkg);
-    HDfree(buf_orig);
-    HDfree(buf);
     if(H5Tclose(little_tid) < 0) TEST_ERROR
     if(H5Tclose(big_tid) < 0) TEST_ERROR
     if(H5Tclose(var_string_tid) < 0) TEST_ERROR
 
     PASSED();
-    return 0;
+    retval = 0;
 
- error:
-    return 1;
+error:
+    if(buf)
+        HDfree(buf);
+    if(buf_orig)
+        HDfree(buf_orig);
+    if(bkg)
+        HDfree(bkg);
+    return retval;
 }
 
 
@@ -4133,7 +4120,7 @@ test_conv_str_3(void)
     int                 size;
     H5T_pad_t           inpad;
     H5T_sign_t          sign;
-    char*               tag;
+    char               *tag = NULL;
     herr_t              ret;
 
     TESTING("some type functions for string");
@@ -4163,63 +4150,54 @@ test_conv_str_3(void)
         ret=H5Tset_precision(type, nelmts);
     } H5E_END_TRY;
     if (ret>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         size = H5Tget_ebias(type);
     } H5E_END_TRY;
     if (size>0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         inpad=H5Tget_inpad(type);
     } H5E_END_TRY;
     if (inpad>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         sign=H5Tget_sign(type);
     } H5E_END_TRY;
     if (sign>-1) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         tag = H5Tget_tag(type);
     } H5E_END_TRY;
     if (tag) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     H5E_BEGIN_TRY {
         super = H5Tget_super(type);
     } H5E_END_TRY;
     if (super>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
+        FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
     PASSED();
     ret_value = 0;
 
- error:
-    if (buf) HDfree(buf);
+error:
+    if(buf) 
+        HDfree(buf);
+    if(tag) 
+        HDfree(tag);
     reset_hdf5();
-    return ret_value;
+    return ret_value;  /* Number of errors */
 }
 
 
@@ -4496,7 +4474,7 @@ test_conv_bitfield(void)
 static int
 test_bitfield_funcs(void)
 {
-    hid_t		type=-1, super=-1;
+    hid_t		type=-1, ntype=-1, super=-1;
     int                 size;
     char*               tag;
     H5T_pad_t           inpad;
@@ -4521,6 +4499,7 @@ test_bitfield_funcs(void)
     if(H5Tset_pad(type, H5T_PAD_ONE, H5T_PAD_ONE)) goto error;
     if((size=H5Tget_size(type))==0) goto error;
     if(H5Tset_order(type, H5T_ORDER_BE) < 0) goto error;
+    if((ntype = H5Tget_native_type(type, H5T_DIR_ASCEND)) < 0) goto error;
 
     H5E_BEGIN_TRY {
         size=H5Tget_ebias(type);
@@ -4585,16 +4564,8 @@ test_bitfield_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY {
-        super = H5Tget_native_type(type, H5T_DIR_ASCEND);
-    } H5E_END_TRY;
-    if (super>=0) {
-        H5_FAILED();
-        printf("Operation not allowed for this type.\n");
-        goto error;
-    } /* end if */
-
     H5Tclose(type);
+    H5Tclose(ntype);
     PASSED();
     reset_hdf5();
     return 0;

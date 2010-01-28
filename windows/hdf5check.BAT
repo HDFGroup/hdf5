@@ -20,7 +20,7 @@ rem    1. hdf5check                -- HDF5 tools and c library tests
 rem    2. hdf5check enablecpp      -- HDF5 tools and c/c++ library tests
 rem    3. hdf5check enablefortran  -- HDF5 tools and c/fortran library tests
 rem    4. hdf5check enableall      -- HDF5 tools and c/c++/fortran library tests
-rem    disabledebug                -- can be added to any of the above to not test debug versions
+rem    nodebug                     -- can be added to any of the above to not test debug versions
 
 setlocal enabledelayedexpansion
 pushd %~dp0
@@ -50,10 +50,10 @@ if /i "%1" equ "enablecpp" (
 ) else if /i "%1" equ "enableall" (
     set build_cpp_conditional=true
     set build_fortran_conditional=true
-) else if /i "%1" equ "disabledebug" (
+) else if /i "%1" equ "nodebug" (
     set chkdebug=
 )
-if /i "%2" equ "disabledebug" (
+if /i "%2" equ "nodebug" (
     set chkdebug=
 )
 

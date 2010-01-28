@@ -44,30 +44,30 @@ nh5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *d
 	     _fcd dest_name, size_t_f *dest_namelen,
 	     hid_t_f *lcpl_id, hid_t_f *lapl_id)
 {
-  char *c_src_name = NULL;
-  char *c_dest_name = NULL;
-  int ret_value = 0;
+    char *c_src_name = NULL;
+    char *c_dest_name = NULL;
+    int_f ret_value = 0;
 
-  /*
-   * Convert FORTRAN name to C name
-   */
-  if((c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)) == NULL)
-    HGOTO_DONE(FAIL);
-  if((c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)) == NULL)
-    HGOTO_DONE(FAIL);
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)))
+        HGOTO_DONE(FAIL)
+    if(NULL == (c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)))
+        HGOTO_DONE(FAIL)
 
-  /*
-   * Call H5Lcopy function.
-   */
-  if( H5Lcopy( (hid_t)*src_loc_id, c_src_name, (hid_t) *dest_loc_id,
-	       c_dest_name, (hid_t)*lcpl_id, (hid_t)*lapl_id ) < 0)
-    HGOTO_DONE(FAIL);
+    /*
+     * Call H5Lcopy function.
+     */
+    if(H5Lcopy((hid_t)*src_loc_id, c_src_name, (hid_t) *dest_loc_id,
+  	       c_dest_name, (hid_t)*lcpl_id, (hid_t)*lapl_id ) < 0)
+        HGOTO_DONE(FAIL)
 
 done:
-  if(c_src_name)
-    HDfree(c_src_name);
-  if(c_dest_name)
-    HDfree(c_dest_name);
+    if(c_src_name)
+        HDfree(c_src_name);
+    if(c_dest_name)
+        HDfree(c_dest_name);
 
   return ret_value;
 }
@@ -99,7 +99,7 @@ nh5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, siz
   char *c_file_name = NULL;
   char *c_obj_name = NULL;
   char *c_link_name = NULL;
-  int ret_value = 0;
+  int_f ret_value = 0;
 
   /*
    * Convert FORTRAN name to C name
@@ -149,7 +149,7 @@ int_f
 nh5ldelete_c ( hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id )
 {
   char *c_name = NULL;
-  int ret_value = 0;
+  int_f ret_value = 0;
 
   /*
    * Convert FORTRAN name to C name
@@ -195,7 +195,7 @@ nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
 {
   char *c_target_path = NULL;
   char *c_link_name = NULL;
-  int ret_value = 0;
+  int_f ret_value = 0;
 
   /*
    * Convert FORTRAN name to C name
@@ -247,7 +247,7 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
 {
   char *c_obj_name = NULL;
   char *c_link_name = NULL;
-  int ret_value = 0;
+  int_f ret_value = 0;
 
   /*
    * Convert FORTRAN name to C name
@@ -400,8 +400,8 @@ nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		hid_t_f *lapl_id)
 {
     char *c_link_name = NULL;          /* Buffer to hold C string */
-    int_f ret_value = 0;          /* Return value */
     H5L_info_t link_buff;
+    int_f ret_value = 0;          /* Return value */
 
     /*
      * Convert FORTRAN name to C name
@@ -456,31 +456,26 @@ nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *link_type, int_f *corder_valid, int_f *corder, int_f *cset,  haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id)
 {
     char *c_group_name = NULL;          /* Buffer to hold C string */
-    H5_index_t c_index_field;
-    H5_iter_order_t c_order;
-    int_f ret_value = 0;          /* Return value */
     H5L_info_t link_buff;
+    int_f ret_value = 0;          /* Return value */
 
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)))
+        HGOTO_DONE(FAIL)
 
-    c_index_field = (H5_index_t)*index_field;
-    c_order = (H5_iter_order_t)*order;
      /*
       * Call H5Linfo_by_idx function.
       */
-    if(H5Lget_info_by_idx((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n,
+    if(H5Lget_info_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field, (H5_iter_order_t)*order, (hsize_t)*n,
 			  &link_buff, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL)
 
     /* Unpack the structure */
-
     *corder_valid = 0;
-    if(link_buff.corder_valid > 0) *corder_valid = 1;
-
+    if(link_buff.corder_valid > 0)
+        *corder_valid = 1;
     *corder = (int_f)link_buff.corder;
     *cset = (int_f)link_buff.cset;
     *link_type = (int_f)link_buff.type;
@@ -488,6 +483,9 @@ nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     *val_size = (size_t_f)link_buff.u.val_size;
 
 done:
+    if(c_group_name)
+        HDfree(c_group_name);
+
     return ret_value;
 }
 
@@ -507,20 +505,14 @@ done:
 int_f
 nh5lis_registered_c(int_f *link_cls_id)
 {
-  int_f ret_value = 0;      /* Return value */
-  H5L_type_t c_link_cls_id; /* User-defined link class identifier */
-  htri_t registered; /* registration status */
+    int_f ret_value;      /* Return value */
 
+    /*
+     * Call H5Lis_registered
+     */
+    ret_value = (int_f)H5Lis_registered((H5L_type_t)*link_cls_id);
 
-  c_link_cls_id = (H5L_type_t)*link_cls_id;
-  /*
-   * Call H5Lis_registered
-   */
-  registered = H5Lis_registered(c_link_cls_id);
-
-  ret_value = (int_f)registered;
-
-  return ret_value;
+    return ret_value;
 }
 
 
@@ -553,18 +545,24 @@ nh5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *d
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
-    if((c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_src_name = HD5f2cstring(src_name, (size_t)*src_namelen)))
+        HGOTO_DONE(FAIL)
+    if(NULL == (c_dest_name = HD5f2cstring(dest_name, (size_t)*dest_namelen)))
+        HGOTO_DONE(FAIL)
 
      /*
       * Call H5Lmove function.
       */
     if(H5Lmove((hid_t)*src_loc_id, c_src_name, (hid_t)*dest_loc_id,
 	       c_dest_name, (hid_t)*lcpl_id, (hid_t)*lapl_id) < 0)
-      HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL)
+
 done:
+    if(c_src_name)
+        HDfree(c_src_name);
+    if(c_dest_name)
+        HDfree(c_dest_name);
+
     return ret_value;
 }
 
@@ -594,83 +592,41 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 {
     char *c_group_name = NULL;          /* Buffer to hold C string */
     char *c_name = NULL;          /* Buffer to hold C string */
-    int_f ret_value = 0;          /* Return value */
     size_t c_size;
+    int_f ret_value = 0;          /* Return value */
 
     /*
      * Convert FORTRAN name to C name
      */
-    if((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
-      HGOTO_DONE(FAIL);
+    if(NULL == (c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)))
+        HGOTO_DONE(FAIL)
 
     c_size = (size_t)*size + 1;
-  /*
-   * Allocate buffer to hold name of an attribute
-   */
+
+    /*
+     * Allocate buffer to hold name of an attribute
+     */
     if ((c_name = HDmalloc(c_size)) == NULL)
-      HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL)
 
     if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
-						     (H5_iter_order_t)*order, (hsize_t)*n,c_name, c_size, (hid_t)*lapl_id)) < 0)
-      HGOTO_DONE(FAIL);
+            (H5_iter_order_t)*order, (hsize_t)*n,c_name, c_size, (hid_t)*lapl_id)) < 0)
+        HGOTO_DONE(FAIL)
 
     /*
      * Convert C name to FORTRAN and place it in the given buffer
      */
-    if(c_name != NULL)
-      HD5packFstring(c_name, _fcdtocp(name), c_size-1);
+    if(c_name)
+        HD5packFstring(c_name, _fcdtocp(name), c_size - 1);
+
 done:
-    if(c_group_name) HDfree(c_group_name);
-    if(c_name) HDfree(c_name);
+    if(c_group_name)
+        HDfree(c_group_name);
+    if(c_name)
+        HDfree(c_name);
+
     return ret_value;
 }
-
-/*----------------------------------------------------------------------------
- * Name:        h5lget_val_c
- * Purpose:     Call  H5Lget_val
- * Inputs:
- *		link_loc_id - File or group identifier.
- *                link_name - Name of the link for which valrmation is being sought
- *             link_namelen - Name length
- *                     size - Maximum number of characters of link value to be returned.
- *                  lapl_id - Link access property list
- * Outputs:
- *             linkval_buff - The buffer to hold the returned link value.
- *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              March 3, 2008
- * Modifications: N/A
- *---------------------------------------------------------------------------*/
-/* int_f */
-/* nh5lget_val_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, */
-/* 	       size_t_f *size, _fcd linkval_buff, */
-/* 	       hid_t_f *lapl_id) */
-/* { */
-/*     char *c_link_name = NULL;   /\* Buffer to hold C string *\/ */
-/*     int_f ret_value = 0;        /\* Return value *\/ */
-/*     void *c_linkval_buff = NULL; */
-
-/*     /\* */
-/*      * Convert FORTRAN name to C name */
-/*      *\/ */
-/*     if((c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)) == NULL) */
-/*       HGOTO_DONE(FAIL); */
-/*     /\* */
-/*      * Call H5Lval function. */
-/*      *\/ */
-/*     if(H5Lget_val((hid_t)*link_loc_id, c_link_name, &linkval_buff, (size_t)*size, (hid_t)*lapl_id) < 0) */
-/*       HGOTO_DONE(FAIL); */
-/*   /\* */
-/*    * Convert C name to FORTRAN  */
-/*    *\/ */
-/*     HD5packFstring(c_buf, _fcdtocp(buf), c_bufsize-1); */
-
-
-/* done: */
-/*     return ret_value; */
-/* } */
-
 
 /*----------------------------------------------------------------------------
  * Name:        H5Lregistered_c
@@ -796,24 +752,25 @@ int_f
 nh5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
 	      void *linkval_buff, hid_t_f *lapl_id)
 {
-  int_f ret_value = 0;       /* Return value */
-  char *c_link_name = NULL; /* Buffer to hold C string */
+    char *c_link_name = NULL; /* Buffer to hold C string */
+    int_f ret_value = 0;       /* Return value */
 
-  /*
-   * Convert FORTRAN name to C name
-   */
-  if((c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)) == NULL)
-    HGOTO_DONE(FAIL);
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_link_name = HD5f2cstring(link_name, (size_t)*link_namelen)))
+        HGOTO_DONE(FAIL)
 
-  /*
-   * Call H5Lget_val
-   */
-
-  if(H5Lget_val( (hid_t)*link_loc_id, c_link_name, &linkval_buff, (size_t)*size, (hid_t)*lapl_id )< 0)
-    HGOTO_DONE(FAIL);
+    /*
+     * Call H5Lget_val
+     */
+    if(H5Lget_val((hid_t)*link_loc_id, c_link_name, &linkval_buff, (size_t)*size, (hid_t)*lapl_id )< 0)
+        HGOTO_DONE(FAIL)
 
 done:
+   if(c_link_name)
+        HDfree(c_link_name);
+
     return ret_value;
 }
-
 

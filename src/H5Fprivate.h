@@ -526,12 +526,10 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
 
 /* Address-related functions */
-H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);
-H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t** /*in,out*/, haddr_t);
-H5_DLL void H5F_addr_decode(const H5F_t *, const uint8_t** /*in,out*/,
-    haddr_t* /*out*/);
-H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t** /*in,out*/,
-    haddr_t* /*out*/);
+H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);
+H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t **pp, haddr_t addr);
+H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp, haddr_t *addr_p);
+H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *addr_p);
 
 /* File access property list callbacks */
 H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
@@ -540,7 +538,7 @@ H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
 
 /* Routines for creating & destroying "fake" file structures */
-H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
+H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Superblock related routines */

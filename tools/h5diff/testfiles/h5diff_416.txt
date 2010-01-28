@@ -1,0 +1,2 @@
+group  : <softlink3_to_slink1> and <softlink4_to_slink1>
+1 differences found

@@ -23,6 +23,10 @@ USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 USE_FILTER_NBIT="@USE_FILTER_NBIT@"
 USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
+TESTNAME=h5dump
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
 TESTDIR=`pwd`/../testfiles
@@ -512,8 +516,9 @@ TOOLTEST textlinkfar.ddl textlinkfar.h5
 TOOLTEST tdset_idx.ddl -p -H tdset_idx.h5
 
 if test $nerrors -eq 0 ; then
-   echo "All $DUMPER tests passed."
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
 fi
-
-exit $nerrors
-

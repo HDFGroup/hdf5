@@ -74,6 +74,7 @@ H5FL_DEFINE(H5F_super_t);
 /* Local Variables */
 /*******************/
 
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -263,7 +264,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr)
     /* Twiddle the number of open objects to avoid closing the file. */
     f->nopen_objs++;
     if(H5O_close(ext_ptr) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
     f->nopen_objs--;
 
 done:
@@ -326,7 +327,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
         sblock_flags |= H5AC__DIRTIED_FLAG;
 
     /* Pin the superblock in the cache */
-    if(H5AC_pin_protected_entry(f, sblock) < 0)
+    if(H5AC_pin_protected_entry(sblock) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin superblock")
 
     /* Set the pointer to the pinned superblock */
@@ -528,7 +529,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Create the superblock extension for "extra" superblock data, if necessary. */
     if(need_ext) {
-        H5O_loc_t       ext_loc;            /* Superblock extension object location */
+        H5O_loc_t       ext_loc;    /* Superblock extension object location */
 
         /* The superblock extension isn't actually a group, but the
          * default group creation list should work fine.
@@ -539,7 +540,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * extension.
          */
 	if(H5F_super_ext_create(f, dxpl_id, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to start file's superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.
@@ -608,7 +609,7 @@ done:
             /* Check if we've cached it already */
             if(sblock_in_cache) {
                 /* Unpin superblock in cache */
-                if(H5AC_unpin_entry(f, sblock) < 0)
+                if(H5AC_unpin_entry(sblock) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
 
                 /* Evict the superblock from the cache */
@@ -654,7 +655,7 @@ H5F_super_dirty(H5F_t *f)
     HDassert(f->shared->sblock);
 
     /* Mark superblock dirty in cache, so change to EOA will get encoded */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f, f->shared->sblock) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
@@ -787,7 +788,7 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_
 done:
     /* Mark superblock dirty in cache, if necessary */
     if(sblock_dirty)
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f, f->shared->sblock) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -802,6 +803,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi; Feb 2009
+ *
  *
  *-------------------------------------------------------------------------
  */

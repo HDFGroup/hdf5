@@ -28,10 +28,12 @@
 #include "H5private.h"
 #include "H5Oprivate.h"
 
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
 #define FILENAME "tbad_msg_count.h5"
 #define GROUPNAME "Group"
 #define ATTRNAME1 "Attribute #1"
 #define ATTRNAME2 "Attribute #2"
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
 #ifndef TRUE
 #define TRUE 1

@@ -472,14 +472,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_mark(const H5D_t *dset, const H5D_rdcc_ent_t *ent,
-    hbool_t dirty)
+H5D_chunk_proxy_mark(const H5D_rdcc_ent_t *ent, hbool_t dirty)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_proxy_mark)
 
-    HDassert(dset);
     HDassert(ent);
 #ifdef QAK
 HDfprintf(stderr, "%s: ent->proxy_addr = %a, dirty = %t\n", FUNC, ent->proxy_addr, dirty);
@@ -487,7 +485,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a, dirty = %t\n", FUNC, ent->proxy_add
 
     /* Check whether to mark the proxy as dirty */
     if(dirty) {
-        if(H5AC_mark_pinned_or_protected_entry_dirty(dset->oloc.file, ent->proxy) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(ent->proxy) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark chunk proxy entry in metadata cache as dirty")
     } /* end if */
 

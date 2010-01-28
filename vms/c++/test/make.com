@@ -33,13 +33,14 @@ $ ccc testhdf5
 $ ccc tfile
 $ ccc tfilter
 $ ccc th5s
+$ ccc tlinks
 $ ccc trefer
 $ ccc ttypes
 $ ccc tvlstr
 $ type sys$input
        Creating testhdf5
 $ cxxlink  testhdf5, h5cpputil, tattr, tcompound, tfile, tfilter, th5s, -
-           trefer, ttypes, tvlstr, -
+           tlinks, trefer, ttypes, tvlstr, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!

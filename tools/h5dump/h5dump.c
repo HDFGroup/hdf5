@@ -2707,14 +2707,13 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     H5D_fill_time_t  ft;
     hsize_t          storage_size;
     haddr_t          ioffset;
-    int              i, next;
+    int              i;
     unsigned         j;
 
-    storage_size=H5Dget_storage_size(obj_id);
+    storage_size = H5Dget_storage_size(obj_id);
     nfilters = H5Pget_nfilters(dcpl_id);
-    ioffset=H5Dget_offset(obj_id);
-    next=H5Pget_external_count(dcpl_id);
-    strcpy(f_name,"\0");
+    ioffset = H5Dget_offset(obj_id);
+    HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
     * STORAGE_LAYOUT
@@ -2819,6 +2818,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
         printf("%s\n",END);
     }
     else if (H5D_CONTIGUOUS == H5Pget_layout(dcpl_id)) {
+        int              next;
+
+        next = H5Pget_external_count(dcpl_id);
+
         /*-------------------------------------------------------------------------
         * EXTERNAL_FILE
         *-------------------------------------------------------------------------
@@ -4531,8 +4534,7 @@ print_enum(hid_t type)
     size_t           dst_size;      /*destination value type size    */
     unsigned         i;
 
-    nmembs = H5Tget_nmembers(type);
-    assert(nmembs>0);
+    nmembs = (unsigned)H5Tget_nmembers(type);
     super = H5Tget_super(type);
 
     /*
@@ -4542,17 +4544,16 @@ print_enum(hid_t type)
      *    2. unsigned long long -- the largest native unsigned integer
      *    3. raw format
      */
-    if (H5Tget_size(type) <= sizeof(long long)) {
-    dst_size = sizeof(long long);
+    if(H5Tget_size(type) <= sizeof(long long)) {
+        dst_size = sizeof(long long);
 
-    if (H5T_SGN_NONE == H5Tget_sign(type)) {
-        native = H5T_NATIVE_ULLONG;
-    } else {
-        native = H5T_NATIVE_LLONG;
-    }
-    } else {
-    dst_size = H5Tget_size(type);
-    }
+        if(H5T_SGN_NONE == H5Tget_sign(type))
+            native = H5T_NATIVE_ULLONG;
+        else
+            native = H5T_NATIVE_LLONG;
+    } /* end if */
+    else
+        dst_size = H5Tget_size(type);
 
     /* Get the names and raw values of all members */
     name = calloc(nmembs, sizeof(char *));
@@ -5838,19 +5839,19 @@ xml_dump_group(hid_t gid, const char *name)
                             t_objname, parentxid, par_name);
                     free(t_objname);
                     free(par_name);
-                }
 
-                indentation(indent + COL);
-                t_objname = xml_escape_the_name(found_obj->objname);/* point to the NDT by name */
-                par_name = xml_escape_the_name(par);
-                xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
-                xml_name_to_XID(par, parentxid, 100, 1);
-                printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
-                            "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-                            xmlnsprefix,
-                            ptrstr, t_objname, parentxid, par_name);
-                free(t_objname);
-                free(par_name);
+                    indentation(indent + COL);
+                    t_objname = xml_escape_the_name(found_obj->objname);/* point to the NDT by name */
+                    par_name = xml_escape_the_name(par);
+                    xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
+                    xml_name_to_XID(par, parentxid, 100, 1);
+                    printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
+                                "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                xmlnsprefix,
+                                ptrstr, t_objname, parentxid, par_name);
+                    free(t_objname);
+                    free(par_name);
+                }
                 free(ptrstr);
             } else {
 
@@ -6712,7 +6713,7 @@ xml_print_enum(hid_t type)
     unsigned                i;              /*miscellaneous counters         */
     size_t                  j;
 
-    nmembs = H5Tget_nmembers(type);
+    nmembs = (unsigned)H5Tget_nmembers(type);
     super = H5Tget_super(type);
 
     indentation(indent);

@@ -46,13 +46,10 @@
  * Purpose:	Test trivial creating & closing memory pool
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -74,18 +71,18 @@ test_create(void)
 
     /* Check free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != 0)
         TEST_ERROR
 
     /* Check first page */
-    if (H5MP_get_pool_first_page(mp, &page) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_first_page(mp, &page) < 0)
+        TEST_ERROR
     if(page != NULL)
         TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -94,7 +91,10 @@ test_create(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_create() */
 
@@ -105,13 +105,10 @@ error:
  * Purpose:	Tests closing pool with one block allocated
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Friday, May 6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -143,7 +140,10 @@ test_close_one(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_close_one() */
 
@@ -154,13 +154,10 @@ error:
  * Purpose:	Tests allocating first block in pool
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -187,29 +184,29 @@ test_allocate_first(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Get first page */
-    if (H5MP_get_pool_first_page(mp, &page) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_first_page(mp, &page) < 0)
+        TEST_ERROR
     if(page == NULL)
         TEST_ERROR
 
     /* Check page's free space */
-    if (H5MP_get_page_free_size(page, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_page_free_size(page, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Check next page */
-    if (H5MP_get_page_next_page(page, &page) < 0)
-        TEST_ERROR;
+    if(H5MP_get_page_next_page(page, &page) < 0)
+        TEST_ERROR
     if(page != NULL)
         TEST_ERROR
 
@@ -217,17 +214,17 @@ test_allocate_first(void)
     H5MP_free(mp, spc);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t)))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -244,29 +241,29 @@ test_allocate_first(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != 0)
         TEST_ERROR
 
     /* Get first page */
-    if (H5MP_get_pool_first_page(mp, &page) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_first_page(mp, &page) < 0)
+        TEST_ERROR
     if(page == NULL)
         TEST_ERROR
 
     /* Check page's free space */
-    if (H5MP_get_page_free_size(page, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_page_free_size(page, &free_size) < 0)
+        TEST_ERROR
     if(free_size != 0)
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Check next page */
-    if (H5MP_get_page_next_page(page, &page) < 0)
-        TEST_ERROR;
+    if(H5MP_get_page_next_page(page, &page) < 0)
+        TEST_ERROR
     if(page != NULL)
         TEST_ERROR
 
@@ -274,17 +271,17 @@ test_allocate_first(void)
     H5MP_free(mp, spc);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_LARGE_BLOCK + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -293,7 +290,10 @@ test_allocate_first(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_allocate_first() */
 
@@ -305,13 +305,10 @@ error:
  *              existing block
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -338,13 +335,13 @@ test_allocate_split(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Allocate more space in pool */
     if(NULL == (spc2 = H5MP_malloc(mp, (size_t)MPOOL_NORMAL_BLOCK)))
@@ -352,42 +349,42 @@ test_allocate_split(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (((H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * 2) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Free first block in pool */
     H5MP_free(mp, spc1);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Free second block in pool (should merge with first block) */
     H5MP_free(mp, spc2);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t)))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -396,7 +393,10 @@ test_allocate_split(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_allocate_split() */
 
@@ -407,13 +407,10 @@ error:
  * Purpose:	Tests allocating many small blocks in a pool
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -441,13 +438,13 @@ test_allocate_many_small(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (((H5MP_BLOCK_ALIGN(MPOOL_SMALL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * MPOOL_NUM_SMALL_BLOCKS) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Free blocks in pool */
     /* (Tests free block merging with block after it */
@@ -455,17 +452,17 @@ test_allocate_many_small(void)
         H5MP_free(mp, spc[i]);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t)))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -474,7 +471,10 @@ test_allocate_many_small(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_allocate_many_small() */
 
@@ -486,13 +486,10 @@ error:
  *              new page
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Friday, May 6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -522,13 +519,13 @@ test_allocate_new_page(void)
 
     /* Check pool's free space */
     if(H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+        TEST_ERROR
     if(free_size != (MPOOL_PAGE_SIZE * 3) - (((H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))) * MPOOL_NUM_NORMAL_BLOCKS) + (H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t)) * 3)))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Free blocks in pool */
     /* (Free alternating blocks, in two passes, which tests block merging w/both neighbors) */
@@ -538,17 +535,17 @@ test_allocate_new_page(void)
         H5MP_free(mp, spc[u]);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != ((MPOOL_PAGE_SIZE - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))) * 3))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -568,32 +565,32 @@ test_allocate_new_page(void)
         TEST_ERROR
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != MPOOL_PAGE_SIZE - (H5MP_BLOCK_ALIGN(MPOOL_NORMAL_BLOCK) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t)) + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Free blocks in pool */
     H5MP_free(mp, spc1);
     H5MP_free(mp, spc2);
 
     /* Check pool's free space */
-    if (H5MP_get_pool_free_size(mp, &free_size) < 0)
-        TEST_ERROR;
+    if(H5MP_get_pool_free_size(mp, &free_size) < 0)
+        TEST_ERROR
     if(free_size != ((MPOOL_PAGE_SIZE - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t))) +
             MPOOL_LARGE_BLOCK + H5MP_BLOCK_ALIGN(sizeof(H5MP_page_blk_t))))
         TEST_ERROR
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     PASSED();
@@ -602,7 +599,10 @@ test_allocate_new_page(void)
 
 error:
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_allocate_new_page() */
 
@@ -613,13 +613,10 @@ error:
  * Purpose:	Tests allocating random sized blocks in pool
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
  *              Friday, May 6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -640,7 +637,7 @@ test_allocate_random(void)
     TESTING("allocate many random sized blocks");
 
     /* Initialize random number seed */
-    curr_time=HDtime(NULL);
+    curr_time = HDtime(NULL);
 #ifdef QAK
 curr_time=1115412944;
 HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
@@ -670,7 +667,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Check that free space totals match */
     if(H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Shuffle pointers to free */
     for(u = 0; u < MPOOL_NUM_RANDOM; u++) {
@@ -685,8 +682,8 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         H5MP_free(mp, spc[u]);
 
     /* Check that free space totals match */
-    if (H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+    if(H5MP_pool_is_free_size_correct(mp) <= 0)
+        TEST_ERROR
 
     /* Initialize the block sizes with random values */
     for(u = 0; u < MPOOL_NUM_RANDOM; u++)
@@ -700,10 +697,10 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Check that free space totals match */
     if(H5MP_pool_is_free_size_correct(mp) <= 0)
-        TEST_ERROR;
+        TEST_ERROR
 
     /* Close the memory pool */
-    if (H5MP_close(mp) < 0)
+    if(H5MP_close(mp) < 0)
         TEST_ERROR
 
     /* Free memory for block sizes & pointers */
@@ -720,7 +717,10 @@ error:
     if(spc)
         HDfree(spc);
     H5E_BEGIN_TRY {
+        if(mp)
+            H5MP_close(mp);
     } H5E_END_TRY;
+
     return 1;
 } /* test_allocate_random() */
 
@@ -731,20 +731,17 @@ error:
  * Purpose:	Test the memory pool code
  *
  * Return:	Success:
- *
  *		Failure:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May 3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    int		nerrors=0;
+    int nerrors = 0;
 
     /* Reset library */
     h5_reset();
@@ -762,14 +759,14 @@ main(void)
     nerrors += test_allocate_new_page();
     nerrors += test_allocate_random();
 
-    if (nerrors) goto error;
+    if(nerrors)
+        goto error;
     puts("All memory pool tests passed.");
+
     return 0;
 
 error:
     puts("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY {
-    } H5E_END_TRY;
     return 1;
 }
 

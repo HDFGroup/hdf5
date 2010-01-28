@@ -1935,14 +1935,6 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *
  * Programmer:	Quincey Koziol
  *
- * Modifications:
- *
- *	Robb Matzke, 4 Aug 1997
- *	The pablo mask comes from the constant PABLO_MASK defined on a
- *	per-file basis.	 The pablo_func_id comes from an auto variable
- *	defined by FUNC_ENTER.
- *      PABLO was deleted on January 21, 2005 EIP
- *
  *-------------------------------------------------------------------------
  */
 /* Threadsafety termination code for API routines */
@@ -1961,6 +1953,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     } /*end scope from end of FUNC_ENTER*/                                    \
 }} /*end scope from beginning of FUNC_ENTER*/
 
+/* Use this macro to match the FUNC_ENTER_API_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \

@@ -363,9 +363,9 @@ extern const H5EA_class_t *const H5EA_client_class_g[];
 /******************************/
 
 /* Generic routines */
-H5_DLL herr_t H5EA__create_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+H5_DLL herr_t H5EA__create_flush_depend(H5AC_info_t *parent_entry,
     H5AC_info_t *child_entry);
-H5_DLL herr_t H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+H5_DLL herr_t H5EA__destroy_flush_depend(H5AC_info_t *parent_entry,
     H5AC_info_t *child_entry);
 
 /* Header routines */

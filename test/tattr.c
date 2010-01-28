@@ -57,7 +57,6 @@
 #define CORDER_ITER_STOP            3
 
 /* 3-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
 #define SPACE1_RANK	3
 #define SPACE1_DIM1	3
 #define SPACE1_DIM2	15

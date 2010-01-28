@@ -350,11 +350,10 @@ H5B2_hdr_incr(H5B2_hdr_t *hdr)
 
     /* Sanity checks */
     HDassert(hdr);
-    HDassert(hdr->f);
 
     /* Mark header as un-evictable when a B-tree node is depending on it */
     if(hdr->rc == 0)
-        if(H5AC_pin_protected_entry(hdr->f, hdr) < 0)
+        if(H5AC_pin_protected_entry(hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPIN, FAIL, "unable to pin v2 B-tree header")
 
     /* Increment reference count on B-tree header */
@@ -387,7 +386,6 @@ H5B2_hdr_decr(H5B2_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(hdr->f);
     HDassert(hdr->rc > 0);
 
     /* Decrement reference count on B-tree header */
@@ -395,7 +393,7 @@ H5B2_hdr_decr(H5B2_hdr_t *hdr)
 
     /* Mark header as evictable again when no nodes depend on it */
     if(hdr->rc == 0)
-        if(H5AC_unpin_entry(hdr->f, hdr) < 0)
+        if(H5AC_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin v2 B-tree header")
 
 done:
@@ -482,10 +480,9 @@ H5B2_hdr_dirty(H5B2_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(hdr->f);
 
     /* Mark B-tree header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark v2 B-tree header as dirty")
 
 done:

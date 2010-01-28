@@ -25,7 +25,7 @@
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Opublic.h"         /* File objects                         */
+#include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
@@ -594,8 +594,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-    if(norm_obj_name)
-        H5MM_free(ext_link_buf);
+    H5MM_xfree(ext_link_buf);
+    H5MM_xfree(norm_obj_name);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_external() */

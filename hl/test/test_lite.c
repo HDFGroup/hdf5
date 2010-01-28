@@ -1534,17 +1534,16 @@ static int test_complicated_compound(void)
     hid_t   dtype;
     int     nmembs;
     H5T_class_t type_class;
-    char*   line=NULL;
-    FILE    *fp;
+    char   *line = NULL;
+    FILE   *fp = NULL;
     size_t  size = 1024;
-    char    *srcdir = getenv("srcdir"); /* the source directory */
+    char   *srcdir = getenv("srcdir"); /* the source directory */
     char    filename[1024]="";
 
     TESTING3("        text for complicated compound types");
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    if(srcdir)
-    {
+    if(srcdir) {
         strcpy(filename, srcdir);
         strcat(filename, "/");
     }
@@ -1552,8 +1551,7 @@ static int test_complicated_compound(void)
 
     /* Open input file */
     fp = fopen(filename, "r");
-    if(fp == NULL)
-    {
+    if(fp == NULL) {
         printf( "Could not find file %s. Try set $srcdir \n", filename);
         goto out;
     }
@@ -1579,6 +1577,7 @@ static int test_complicated_compound(void)
     }
 
     fclose(fp);
+    fp = NULL;
 
     if((dtype = H5LTtext_to_dtype(line, H5LT_DDL))<0)
         goto out;
@@ -1601,6 +1600,12 @@ static int test_complicated_compound(void)
     return 0;
 
 out:
+
+    if(line)
+        free(line);
+    if(fp)
+        fclose(fp);
+    
     H5_FAILED();
     return -1;
 }

@@ -431,17 +431,17 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
 
-        if ( (H5A_dense_copy_file_all(file_src, ainfo_src, file_dst, ainfo_dst, recompute_size, cpy_info, dxpl_id)) <0)
+        if((H5A_dense_copy_file_all(file_src, ainfo_src, file_dst, ainfo_dst, recompute_size, cpy_info, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
-    }
+    } /* end if */
 
     /* Set return value */
     ret_value = ainfo_dst;
 
 done:
     /* Release destination attribute information on failure */
-    if(ret_value == NULL && ainfo_dst != NULL)
-        (void)H5FL_FREE(H5O_ainfo_t, ainfo_dst);
+    if(!ret_value && ainfo_dst)
+        ainfo_dst = H5FL_FREE(H5O_ainfo_t, ainfo_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_ainfo_copy_file() */

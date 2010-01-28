@@ -30,6 +30,7 @@
 
 #define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -37,6 +38,7 @@
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
+
 
 
 /*-------------------------------------------------------------------------
@@ -50,9 +52,6 @@
  *		matzke@llnl.gov
  *		Aug  4 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -60,28 +59,28 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	  const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    H5B_shared_t *shared;               /* Pointer to shared B-tree info */
     unsigned	u;                      /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_debug, FAIL)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
-    assert(type);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+    HDassert(type);
 
     /*
      * Load the tree node.
      */
-    if (NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
 
     /*
@@ -89,8 +88,8 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
      */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      ((shared->type->id)==H5B_SNODE_ID ? "H5B_SNODE_ID" :
-            ((shared->type->id)==H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
+	      ((shared->type->id) == H5B_SNODE_ID ? "H5B_SNODE_ID" :
+            ((shared->type->id) == H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->sizeof_rnode);
@@ -103,15 +102,12 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Level:",
 	      bt->level);
-
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of left sibling:",
 	      bt->left);
-
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of right sibling:",
 	      bt->right);
-
     HDfprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth,
 	      "Number of children (max):",
 	      bt->nchildren, shared->two_k);
@@ -119,35 +115,35 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     /*
      * Print the child addresses
      */
-    for (u = 0; u < bt->nchildren; u++) {
+    for(u = 0; u < bt->nchildren; u++) {
 	HDfprintf(stream, "%*sChild %d...\n", indent, "", u);
 	HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Address:", bt->child[u]);
 
         /* If there is a key debugging routine, use it to display the left & right keys */
-	if (type->debug_key) {
+	if(type->debug_key) {
             /* Decode the 'left' key & print it */
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Left Key:");
-            assert(H5B_NKEY(bt,shared,u));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
-			      H5B_NKEY(bt,shared,u), udata);
+            HDassert(H5B_NKEY(bt,shared,u));
+	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX(0, fwidth - 6),
+			      H5B_NKEY(bt, shared, u), udata);
 
             /* Decode the 'right' key & print it */
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Right Key:");
-            assert(H5B_NKEY(bt,shared,u+1));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
-			      H5B_NKEY(bt,shared,u+1), udata);
-	}
-    }
+            HDassert(H5B_NKEY(bt, shared, u + 1));
+	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth - 6),
+			      H5B_NKEY(bt, shared, u + 1), udata);
+	} /* end if */
+    } /* end for */
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5B_debug() */
 
 
 /*-------------------------------------------------------------------------
@@ -162,15 +158,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, November  4, 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *              John Mainzer, 6/8/05
- *              Modified the function to use the new dirtied parameter of
- *              of H5AC_unprotect() instead of modifying the is_dirty
- *              field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5B_DEBUG
@@ -178,11 +165,11 @@ herr_t
 H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    H5B_shared_t *shared;               /* Pointer to shared B-tree info */
     int	i, ncell, cmp;
     static int	ncalls = 0;
     herr_t	status;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     /* A queue of child data */
     struct child_t {
@@ -193,25 +180,25 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 
     FUNC_ENTER_NOAPI_NOFUNC(H5B_assert)
 
-    if (0==ncalls++) {
-	if (H5DEBUG(B)) {
+    if(0 == ncalls++) {
+	if(H5DEBUG(B))
 	    fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
-	}
-    }
+    } /* end if */
+
     /* Initialize the queue */
     bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ);
-    assert(bt);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(bt);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     cur = H5MM_calloc(sizeof(struct child_t));
-    assert (cur);
+    HDassert(cur);
     cur->addr = addr;
     cur->level = bt->level;
     head = tail = cur;
 
     status = H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
-    assert(status >= 0);
-    bt=NULL;    /* Make certain future references will be caught */
+    HDassert(status >= 0);
+    bt = NULL;    /* Make certain future references will be caught */
 
     /*
      * Do a breadth-first search of the tree.  New nodes are added to the end
@@ -219,66 +206,63 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
      * remove any nodes from the queue because we need them in the uniqueness
      * test.
      */
-    for (ncell = 0; cur; ncell++) {
+    for(ncell = 0; cur; ncell++) {
 	bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, cur->addr, type, udata, H5AC_READ);
-	assert(bt);
+	HDassert(bt);
 
 	/* Check node header */
-	assert(bt->level == cur->level);
-	if (cur->next && cur->next->level == bt->level) {
-	    assert(H5F_addr_eq(bt->right, cur->next->addr));
-	} else {
-	    assert(!H5F_addr_defined(bt->right));
-	}
-	if (prev && prev->level == bt->level) {
-	    assert(H5F_addr_eq(bt->left, prev->addr));
-	} else {
-	    assert(!H5F_addr_defined(bt->left));
-	}
+	HDassert(bt->level == cur->level);
+	if(cur->next && cur->next->level == bt->level)
+	    HDassert(H5F_addr_eq(bt->right, cur->next->addr));
+	else
+	    HDassert(!H5F_addr_defined(bt->right));
+	if(prev && prev->level == bt->level)
+	    HDassert(H5F_addr_eq(bt->left, prev->addr));
+	else
+	    HDassert(!H5F_addr_defined(bt->left));
 
-	if (cur->level > 0) {
-	    for (i = 0; i < bt->nchildren; i++) {
-
+	if(cur->level > 0) {
+	    for(i = 0; i < bt->nchildren; i++) {
 		/*
 		 * Check that child nodes haven't already been seen.  If they
 		 * have then the tree has a cycle.
 		 */
-		for (tmp = head; tmp; tmp = tmp->next) {
-		    assert(H5F_addr_ne(tmp->addr, bt->child[i]));
-		}
+		for(tmp = head; tmp; tmp = tmp->next)
+		    HDassert(H5F_addr_ne(tmp->addr, bt->child[i]));
 
 		/* Add the child node to the end of the queue */
 		tmp = H5MM_calloc(sizeof(struct child_t));
-		assert (tmp);
+		HDassert(tmp);
 		tmp->addr = bt->child[i];
 		tmp->level = bt->level - 1;
 		tail->next = tmp;
 		tail = tmp;
 
 		/* Check that the keys are monotonically increasing */
-		cmp = (type->cmp2) (f, dxpl_id, H5B_NKEY(bt,shared,i), udata,
-				    H5B_NKEY(bt,shared,i+1));
-		assert(cmp < 0);
-	    }
-	}
+		cmp = (type->cmp2)(f, dxpl_id, H5B_NKEY(bt, shared, i), udata,
+				    H5B_NKEY(bt, shared, i + 1));
+		HDassert(cmp < 0);
+	    } /* end for */
+	} /* end if */
+
 	/* Release node */
 	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
-	assert(status >= 0);
-        bt=NULL;    /* Make certain future references will be caught */
+	HDassert(status >= 0);
+        bt = NULL;    /* Make certain future references will be caught */
 
 	/* Advance current location in queue */
 	prev = cur;
 	cur = cur->next;
-    }
+    } /* end for */
 
     /* Free all entries from queue */
-    while (head) {
+    while(head) {
 	tmp = head->next;
 	H5MM_xfree(head);
 	head = tmp;
-    }
+    } /* end while */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5B_assert() */
 #endif /* H5B_DEBUG */
 

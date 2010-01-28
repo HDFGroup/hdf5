@@ -222,8 +222,8 @@ struct H5O_msg_class_t {
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
     unsigned    share_flags;			/* Message sharing settings */
-    void	*(*decode)(H5F_t*, hid_t, H5O_t *, unsigned, unsigned *, const uint8_t *);
-    herr_t	(*encode)(H5F_t*, hbool_t, uint8_t*, const void *);
+    void	*(*decode)(H5F_t *, hid_t, H5O_t *, unsigned, unsigned *, const uint8_t *);
+    herr_t	(*encode)(H5F_t *, hbool_t, uint8_t *, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t *, hbool_t, const void *);/*sizeof encoded message	*/
     herr_t	(*reset)(void *);		/*free nested data structs  */
@@ -260,7 +260,7 @@ typedef struct H5O_chunk_t {
 } H5O_chunk_t;
 
 struct H5O_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+    H5AC_info_t cache_info; /* Information for metadata cache functions, _must_ be */
                             /* first field in structure */
 
     /* File-specific information (not stored) */

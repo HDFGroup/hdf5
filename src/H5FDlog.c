@@ -412,13 +412,10 @@ done:
  * Purpose:	Copies the log-specific file access properties.
  *
  * Return:	Success:	Ptr to a new property list
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, April 20, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -426,25 +423,36 @@ static void *
 H5FD_log_fapl_copy(const void *_old_fa)
 {
     const H5FD_log_fapl_t *old_fa = (const H5FD_log_fapl_t*)_old_fa;
-    H5FD_log_fapl_t *new_fa = (H5FD_log_fapl_t *)H5MM_malloc(sizeof(H5FD_log_fapl_t));
+    H5FD_log_fapl_t *new_fa = NULL;    /* New FAPL info */
     void *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_log_fapl_copy, NULL)
 
-    HDassert(new_fa);
+    HDassert(old_fa);
+
+    /* Allocate the new FAPL info */
+    if(NULL == (new_fa = (H5FD_log_fapl_t *)H5MM_calloc(sizeof(H5FD_log_fapl_t))))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
     /* Copy the general information */
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_log_fapl_t));
 
     /* Deep copy the log file name */
-    if(old_fa->logfile!=NULL)
-        if (NULL==(new_fa->logfile=H5MM_xstrdup(old_fa->logfile)))
+    if(old_fa->logfile != NULL)
+        if(NULL == (new_fa->logfile = H5MM_xstrdup(old_fa->logfile)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate log file name")
 
     /* Set return value */
-    ret_value=new_fa;
+    ret_value = new_fa;
 
 done:
+    if(NULL == ret_value)
+        if(new_fa) {
+            if(new_fa->logfile)
+                H5MM_free(new_fa->logfile);
+            H5MM_free(new_fa);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_fapl_copy() */
 
@@ -455,13 +463,10 @@ done:
  * Purpose:	Frees the log-specific file access properties.
  *
  * Return:	Success:	0
- *
  *		Failure:	-1
  *
  * Programmer:	Quincey Koziol
  *              Thursday, April 20, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -469,17 +474,15 @@ static herr_t
 H5FD_log_fapl_free(void *_fa)
 {
     H5FD_log_fapl_t	*fa = (H5FD_log_fapl_t*)_fa;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_log_fapl_free, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_fapl_free)
 
     /* Free the fapl information */
     if(fa->logfile)
         H5MM_xfree(fa->logfile);
     H5MM_xfree(fa);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_log_fapl_free() */
 
 
@@ -491,13 +494,10 @@ done:
  * Return:	Success:	A pointer to a new file data structure. The
  *				public fields will be initialized by the
  *				caller, which is always H5FD_open().
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -505,38 +505,41 @@ static H5FD_t *
 H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 	       haddr_t maxaddr)
 {
-    int	    o_flags;
-    int		fd=(-1);
-    H5FD_log_t	*file=NULL;
+    int	        o_flags;
+    int		fd = (-1);
+    H5FD_log_t	*file = NULL;
     H5FD_log_fapl_t	*fa;     /* File access property list information */
 #ifdef _WIN32
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
-    h5_stat_t sb;
+    h5_stat_t   sb;
     H5P_genplist_t *plist;      /* Property list */
     H5FD_t	*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_log_open, NULL)
 
     /* Check arguments */
-    if (!name || !*name)
+    if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
-    if (0==maxaddr || HADDR_UNDEF==maxaddr)
+    if(0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
-    if (ADDR_OVERFLOW(maxaddr))
+    if(ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
-    if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
-    if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
-    if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
+    if(H5F_ACC_TRUNC & flags)
+        o_flags |= O_TRUNC;
+    if(H5F_ACC_CREAT & flags)
+        o_flags |= O_CREAT;
+    if(H5F_ACC_EXCL & flags)
+        o_flags |= O_EXCL;
 
     /* Open the file */
-    if ((fd=HDopen(name, o_flags, 0666))<0)
+    if((fd = HDopen(name, o_flags, 0666)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-    if (HDfstat(fd, &sb)<0)
+    if(HDfstat(fd, &sb) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
 
     /* Create the new file struct */
@@ -544,7 +547,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     /* Get the driver specific information */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     fa = (H5FD_log_fapl_t *)H5P_get_driver_info(plist);
     HDassert(fa);
@@ -564,7 +567,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /* Get the flags for logging */
-    file->fa.flags=fa->flags;
+    file->fa.flags = fa->flags;
 
     /* Check if we are doing any logging at all */
     if(file->fa.flags != 0) {
@@ -598,6 +601,7 @@ done:
     if(NULL == ret_value) {
         if(fd >= 0)
             HDclose(fd);
+        file = (H5FD_log_t *)H5MM_xfree(file);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -610,13 +614,10 @@ done:
  * Purpose:	Closes a Unix file.
  *
  * Return:	Success:	0
- *
  *		Failure:	-1, file not closed.
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -628,7 +629,7 @@ H5FD_log_close(H5FD_t *_file)
     struct timeval timeval_start,timeval_stop;
     struct timeval timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_log_close, FAIL)
 
@@ -636,7 +637,7 @@ H5FD_log_close(H5FD_t *_file)
     if(file->fa.flags&H5FD_LOG_TIME_CLOSE)
         HDgettimeofday(&timeval_start,NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
-    if (HDclose(file->fd)<0)
+    if(HDclose(file->fd) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 #ifdef H5_HAVE_GETTIMEOFDAY
     if(file->fa.flags&H5FD_LOG_TIME_CLOSE)
@@ -644,73 +645,73 @@ H5FD_log_close(H5FD_t *_file)
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     /* Dump I/O information */
-    if(file->fa.flags!=0) {
+    if(file->fa.flags != 0) {
         haddr_t addr;
         haddr_t last_addr;
         unsigned char last_val;
 
 #ifdef H5_HAVE_GETTIMEOFDAY
-        if(file->fa.flags&H5FD_LOG_TIME_CLOSE) {
+        if(file->fa.flags & H5FD_LOG_TIME_CLOSE) {
              /* Calculate the elapsed gettimeofday time */
-             timeval_diff.tv_usec=timeval_stop.tv_usec-timeval_start.tv_usec;
-             timeval_diff.tv_sec=timeval_stop.tv_sec-timeval_start.tv_sec;
-             if(timeval_diff.tv_usec<0) {
-                 timeval_diff.tv_usec+=1000000;
+             timeval_diff.tv_usec = timeval_stop.tv_usec - timeval_start.tv_usec;
+             timeval_diff.tv_sec = timeval_stop.tv_sec - timeval_start.tv_sec;
+             if(timeval_diff.tv_usec < 0) {
+                 timeval_diff.tv_usec += 1000000;
                  timeval_diff.tv_sec--;
              } /* end if */
-            HDfprintf(file->logfp,"Close took: (%f s)\n",(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
+            HDfprintf(file->logfp, "Close took: (%f s)\n", (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0));
         } /* end if */
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
         /* Dump the write I/O information */
-        if(file->fa.flags&H5FD_LOG_FILE_WRITE) {
-            HDfprintf(file->logfp,"Dumping write I/O information:\n");
-            last_val=file->nwrite[0];
-            last_addr=0;
-            addr=1;
-            while(addr<file->eoa) {
-                if(file->nwrite[addr]!=last_val) {
-                    HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) written to %3d times\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),(int)last_val);
-                    last_val=file->nwrite[addr];
-                    last_addr=addr;
+        if(file->fa.flags & H5FD_LOG_FILE_WRITE) {
+            HDfprintf(file->logfp, "Dumping write I/O information:\n");
+            last_val = file->nwrite[0];
+            last_addr = 0;
+            addr = 1;
+            while(addr < file->eoa) {
+                if(file->nwrite[addr] != last_val) {
+                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    last_val = file->nwrite[addr];
+                    last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) written to %3d times\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),(int)last_val);
+            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the read I/O information */
-        if(file->fa.flags&H5FD_LOG_FILE_READ) {
-            HDfprintf(file->logfp,"Dumping read I/O information:\n");
-            last_val=file->nread[0];
-            last_addr=0;
-            addr=1;
-            while(addr<file->eoa) {
-                if(file->nread[addr]!=last_val) {
-                    HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) read from %3d times\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),(int)last_val);
-                    last_val=file->nread[addr];
-                    last_addr=addr;
+        if(file->fa.flags & H5FD_LOG_FILE_READ) {
+            HDfprintf(file->logfp, "Dumping read I/O information:\n");
+            last_val = file->nread[0];
+            last_addr = 0;
+            addr = 1;
+            while(addr < file->eoa) {
+                if(file->nread[addr] != last_val) {
+                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    last_val = file->nread[addr];
+                    last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) read from %3d times\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),(int)last_val);
+            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the I/O flavor information */
-        if(file->fa.flags&H5FD_LOG_FLAVOR) {
-            HDfprintf(file->logfp,"Dumping I/O flavor information:\n");
-            last_val=file->flavor[0];
-            last_addr=0;
-            addr=1;
-            while(addr<file->eoa) {
-                if(file->flavor[addr]!=last_val) {
-                    HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) flavor is %s\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),flavors[last_val]);
-                    last_val=file->flavor[addr];
-                    last_addr=addr;
+        if(file->fa.flags & H5FD_LOG_FLAVOR) {
+            HDfprintf(file->logfp, "Dumping I/O flavor information:\n");
+            last_val = file->flavor[0];
+            last_addr = 0;
+            addr = 1;
+            while(addr < file->eoa) {
+                if(file->flavor[addr] != last_val) {
+                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+                    last_val = file->flavor[addr];
+                    last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp,"\tAddr %10a-%10a (%10lu bytes) flavor is %s\n",last_addr,(addr-1),(unsigned long)(addr-last_addr),flavors[last_val]);
+            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
         } /* end if */
 
         /* Free the logging information */
@@ -728,7 +729,7 @@ H5FD_log_close(H5FD_t *_file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_log_close() */
 
 
 /*-------------------------------------------------------------------------

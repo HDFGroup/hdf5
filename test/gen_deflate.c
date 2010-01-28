@@ -66,7 +66,7 @@ main(void)
     /* (Try for something easily compressible) */
     for(i=0; i<SPACE_DIM1; i++)
         for(j=0; j<SPACE_DIM2; j++)
-            data[i][j]=j%5;
+            data[i][j] = (int)(j % 5);
 
     /* Create the file */
     file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

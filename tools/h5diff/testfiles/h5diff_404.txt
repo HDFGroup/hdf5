@@ -1,0 +1,36 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /ext_link_dset1
+    x      x    /ext_link_dset2
+    x      x    /ext_link_grp1 
+    x      x    /ext_link_grp2 
+    x      x    /ext_link_noexist1
+    x      x    /ext_link_noexist2
+
+group  : </> and </>
+0 differences found
+external link: </ext_link_dset1> and </ext_link_dset1>
+dataset: </target_group/x_dset> and </target_group/x_dset>
+0 differences found
+0 differences found
+external link: </ext_link_dset2> and </ext_link_dset2>
+dataset: </target_group2/x_dset> and </target_group2/x_dset>
+0 differences found
+0 differences found
+external link: </ext_link_grp1> and </ext_link_grp1>
+group  : </target_group> and </target_group>
+0 differences found
+0 differences found
+external link: </ext_link_grp2> and </ext_link_grp2>
+group  : </target_group2> and </target_group2>
+0 differences found
+0 differences found
+external link: </ext_link_noexist1> and </ext_link_noexist1>
+Object </no_obj> could not be found in <h5diff_extlink_trg.h5>
+Object </no_obj> could not be found in <h5diff_extlink_trg.h5>
+0 differences found
+external link: </ext_link_noexist2> and </ext_link_noexist2>
+h5diff: <no_file.h5>: unable to open file
+0 differences found

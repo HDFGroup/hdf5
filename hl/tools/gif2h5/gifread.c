@@ -68,7 +68,7 @@ ReadGifHeader(GIFHEAD *GifHead, /* Pointer to GIF header structure  */
 
     if (strncmp((const char *)GifHead->HeaderDump , "GIF" , (size_t)3)) {
         printf("The file does not appear to be a valid GIF file.\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     for (i = 0 ; i < 7 ; i++) {
@@ -192,7 +192,7 @@ ReadGifImageDesc(
  /*GifImageDesc->GIFImage = ReadDataSubBlocks(FpGif);*/
  if (!(GifImageDesc->GIFImage = (BYTE *)malloc((GifImageDesc->ImageWidth) * (GifImageDesc->ImageHeight)))) {
   printf("Out of memory");
-  exit(-1);
+  exit(EXIT_FAILURE);
  }
 
 

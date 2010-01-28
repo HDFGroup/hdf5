@@ -692,8 +692,7 @@ H5_DLL herr_t H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id,
     H5D_chunk_common_ud_t *udata, H5D_rdcc_ent_t *ent);
 H5_DLL herr_t H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_it,
     H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D_chunk_proxy_mark(const H5D_t *dset, const H5D_rdcc_ent_t *ent,
-    hbool_t dirty);
+H5_DLL herr_t H5D_chunk_proxy_mark(const H5D_rdcc_ent_t *ent, hbool_t dirty);
 
 #ifdef H5_HAVE_PARALLEL
 

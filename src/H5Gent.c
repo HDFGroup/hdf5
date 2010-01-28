@@ -55,7 +55,7 @@ H5FL_BLK_EXTERN(str_buf);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
+H5G_ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -94,7 +94,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
+H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
@@ -161,7 +161,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n)
+H5G_ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -422,8 +422,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE *stream,
-    int indent, int fwidth, H5HL_t *heap)
+H5G_ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
+    H5HL_t *heap)
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
@@ -471,7 +471,7 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE *stream,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
             if(heap) {
-                lval = (const char *)H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
+                lval = (const char *)H5HL_offset_into(heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);

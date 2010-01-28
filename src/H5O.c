@@ -367,7 +367,6 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hid_t       lapl_id = H5P_LINK_ACCESS_DEFAULT; /* lapl to use to open this object */
     hid_t       ret_value = FAIL;
 
@@ -393,9 +392,6 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0 && loc_found)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
@@ -1194,7 +1190,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Cache object header */
     if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+    oh = NULL;
 
     /* Set up object location */
     loc->file = f;
@@ -1422,7 +1419,7 @@ int
 H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
 {
     haddr_t addr = H5O_OH_GET_ADDR(oh);     /* Object header address */
-    int	ret_value;                          /* Return value */
+    int	ret_value;                      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_link_oh, FAIL)
 
@@ -1432,7 +1429,11 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
             /* Check for too large of an adjustment */
             if((unsigned)(-adjust) > oh->nlink)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
+
+            /* Adjust the link count for the object header */
             oh->nlink += adjust;
+
+            /* Mark object header as dirty in cache */
             *oh_flags |= H5AC__DIRTIED_FLAG;
 
             /* Check if the object should be deleted */
@@ -1448,7 +1449,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
                     if(H5O_delete_oh(f, dxpl_id, oh) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
 
-                    /* Mark the object header as deleted */
+                    /* Mark the object header for deletion */
                     *oh_flags = H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
                 } /* end else */
             } /* end if */
@@ -1464,7 +1465,10 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, unsigned *oh_flags)
                 } /* end if */
             } /* end if */
 
+            /* Adjust the link count for the object header */
             oh->nlink += adjust;
+
+            /* Mark object header as dirty in cache */
             *oh_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
 
@@ -1538,10 +1542,10 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
 
-    /* get header */
+    /* Get header */
     oh_acc = adjust ? H5AC_WRITE : H5AC_READ;
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, oh_acc)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Call the "real" link routine */
     if((ret_value = H5O_link_oh(loc->file, adjust, dxpl_id, oh, &oh_flags)) < 0)
@@ -1549,7 +1553,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_link() */
@@ -1575,8 +1579,8 @@ done:
 H5O_t *
 H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t       *oh = NULL;      /* Object header */
-    H5O_t       *ret_value;      /* Return value */
+    H5O_t       *oh = NULL;     /* Object header */
+    H5O_t       *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_pin, NULL)
 
@@ -1587,7 +1591,7 @@ H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Check for write access on the file */
     if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "no write intent on file")
+	HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "no write intent on file")
 
     /* Lock the object header into the cache */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
@@ -1596,7 +1600,7 @@ H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
     /* Check if the object header needs to be pinned */
     if(0 == oh->npins) {
         /* Mark object header as un-evictable */
-        if(H5AC_pin_protected_entry(loc->file, oh) < 0)
+        if(H5AC_pin_protected_entry(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
     } /* end if */
 
@@ -1631,22 +1635,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_unpin(H5O_loc_t *loc, H5O_t *oh)
+H5O_unpin(H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_unpin, FAIL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
     HDassert(oh);
 
     /* Check if this is the last unpin operation */
     if(1 == oh->npins) {
         /* Mark object header as evictable again */
-        if(H5AC_unpin_entry(loc->file, oh) < 0)
+        if(H5AC_unpin_entry(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
     } /* end if */
 
@@ -1732,7 +1733,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
         } /* end else */
 
         /* Mark object header as dirty in cache */
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 
@@ -1757,11 +1758,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
+H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 {
-    H5O_t	*oh = NULL;
-    unsigned 	oh_flags = H5AC__NO_FLAGS_SET;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5O_t	*oh = NULL;             /* Object header to modify */
+    unsigned 	oh_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_touch, FAIL)
 
@@ -1774,18 +1775,18 @@ H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 
     /* Get the object header */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Create/Update the modification time message */
     if(H5O_touch_oh(loc->file, dxpl_id, oh, force) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object modificaton time")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to update object modificaton time")
 
     /* Mark object header as changed */
     oh_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_touch() */
@@ -1875,7 +1876,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     H5O_t *oh = NULL;           /* Object header information */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_delete,FAIL)
+    FUNC_ENTER_NOAPI(H5O_delete, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -1883,7 +1884,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
     /* Get the object header information */
     if(NULL == (oh = (H5O_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Delete object */
     if(H5O_delete_oh(f, dxpl_id, oh) < 0)
@@ -1964,15 +1965,15 @@ H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id)
 
     /* Load the object header */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve the type of the object */
     if(H5O_obj_type_real(oh, obj_type) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_obj_type() */
@@ -2042,15 +2043,15 @@ H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Load the object header */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Test whether entry qualifies as a particular type of object */
     if(NULL == (ret_value = H5O_obj_class_real(oh)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to determine object type")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine object type")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_obj_class() */
@@ -2437,7 +2438,7 @@ H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
+H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info,
     H5O_info_t *oinfo)
 {
     const H5O_obj_class_t *obj_class;   /* Class of object for header */
@@ -2447,21 +2448,21 @@ H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
     FUNC_ENTER_NOAPI(H5O_get_info, FAIL)
 
     /* Check args */
-    HDassert(oloc);
+    HDassert(loc);
     HDassert(oinfo);
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Reset the object info structure */
     HDmemset(oinfo, 0, sizeof(*oinfo));
 
     /* Retrieve the file's fileno */
-    H5F_GET_FILENO(oloc->file, oinfo->fileno);
+    H5F_GET_FILENO(loc->file, oinfo->fileno);
 
     /* Set the object's address */
-    oinfo->addr = oloc->addr;
+    oinfo->addr = loc->addr;
 
     /* Get class for object */
     if(NULL == (obj_class = H5O_obj_class_real(oh)))
@@ -2497,7 +2498,7 @@ H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
             HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME message")
         if(exists > 0) {
             /* Get "old style" modification time info */
-            if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime))
+            if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME message")
         } /* end if */
         else {
@@ -2506,7 +2507,7 @@ H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
                 HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME_NEW message")
             if(exists > 0) {
                 /* Get "new style" modification time info */
-                if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime))
+                if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME_NEW message")
             } /* end if */
             else
@@ -2519,7 +2520,7 @@ H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object header info")
 
     /* Retrieve # of attributes */
-    if(H5O_attr_count_real(oloc->file, dxpl_id, oh, &oinfo->num_attrs) < 0)
+    if(H5O_attr_count_real(loc->file, dxpl_id, oh, &oinfo->num_attrs) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve attribute count")
 
     /* Get B-tree & heap metadata storage size, if requested */
@@ -2527,20 +2528,20 @@ H5O_get_info(const H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
         /* Check for 'bh_info' callback for this type of object */
         if(obj_class->bh_info) {
             /* Call the object's class 'bh_info' routine */
-            if((obj_class->bh_info)(oloc->file, dxpl_id, oh, &(oinfo->meta_size.obj) /* out */) < 0)
+            if((obj_class->bh_info)(loc->file, dxpl_id, oh, &oinfo->meta_size.obj) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object's btree & heap info")
         } /* end if */
 
         /* Get B-tree & heap info for any attributes */
         if(oinfo->num_attrs > 0) {
-            if(H5O_attr_bh_info(oloc->file, dxpl_id, oh, &oinfo->meta_size.attr/*out*/) < 0)
+            if(H5O_attr_bh_info(loc->file, dxpl_id, oh, &oinfo->meta_size.attr) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve attribute btree & heap info")
         } /* end if */
     } /* end if */
 
 done:
-    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_info() */
@@ -2560,7 +2561,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_plist)
+H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, H5P_genplist_t *oc_plist)
 {
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2568,12 +2569,12 @@ H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_pl
     FUNC_ENTER_NOAPI(H5O_get_create_plist, FAIL)
 
     /* Check args */
-    HDassert(oloc);
+    HDassert(loc);
     HDassert(oc_plist);
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Set property values, if they were used for the object */
     if(oh->version > H5O_VERSION_1) {
@@ -2594,8 +2595,8 @@ H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_pl
     } /* end if */
 
 done:
-    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_create_plist() */
@@ -2615,7 +2616,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_nlinks(const H5O_loc_t *oloc, hid_t dxpl_id, hsize_t *nlinks)
+H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks)
 {
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2623,19 +2624,19 @@ H5O_get_nlinks(const H5O_loc_t *oloc, hid_t dxpl_id, hsize_t *nlinks)
     FUNC_ENTER_NOAPI(H5O_get_nlinks, FAIL)
 
     /* Check args */
-    HDassert(oloc);
+    HDassert(loc);
     HDassert(nlinks);
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve the # of link messages seen when the object header was loaded */
     *nlinks = oh->link_msgs_seen;
 
 done:
-    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_nlinks() */
@@ -2733,7 +2734,7 @@ H5O_get_oh_addr(const H5O_t *oh)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype)
+H5O_get_rc_and_type(const H5O_loc_t *loc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype)
 {
     H5O_t *oh = NULL;                   /* Object header */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2741,13 +2742,13 @@ H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type
     FUNC_ENTER_NOAPI(H5O_get_rc_and_type, FAIL)
 
     /* Check args */
-    HDassert(oloc);
+    HDassert(loc);
     HDassert(rc);
     HDassert(otype);
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Set the object's reference count */
     *rc = oh->nlink;
@@ -2757,8 +2758,8 @@ H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
 done:
-    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_rc_and_type() */

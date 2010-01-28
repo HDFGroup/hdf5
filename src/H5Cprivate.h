@@ -535,6 +535,7 @@ typedef struct H5C_cache_entry_t
 #ifndef NDEBUG
     uint32_t		magic;
 #endif /* NDEBUG */
+    H5C_t *             cache_ptr;
     haddr_t		addr;
     size_t		size;
     const H5C_class_t *	type;
@@ -1023,13 +1024,11 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 
 H5_DLL herr_t H5C_dest(H5F_t * f,
                        hid_t   primary_dxpl_id,
-                       hid_t   secondary_dxpl_id,
-                       H5C_t * cache_ptr);
+                       hid_t   secondary_dxpl_id);
 
 H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
 		                hid_t               primary_dxpl_id,
                                 hid_t               secondary_dxpl_id,
-                                H5C_t *             cache_ptr,
                                 const H5C_class_t * type,
                                 haddr_t             addr,
                                 unsigned            flags);
@@ -1037,7 +1036,6 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
 H5_DLL herr_t H5C_flush_cache(H5F_t *  f,
                               hid_t    primary_dxpl_id,
                               hid_t    secondary_dxpl_id,
-                              H5C_t *  cache_ptr,
                               unsigned flags);
 
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t * f,
@@ -1045,7 +1043,7 @@ H5_DLL herr_t H5C_flush_to_min_clean(H5F_t * f,
                                      hid_t   secondary_dxpl_id,
                                      H5C_t * cache_ptr);
 
-H5_DLL herr_t H5C_get_cache_auto_resize_config(H5C_t * cache_ptr,
+H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t * cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);
 
 H5_DLL herr_t H5C_get_cache_size(H5C_t * cache_ptr,
@@ -1057,7 +1055,7 @@ H5_DLL herr_t H5C_get_cache_size(H5C_t * cache_ptr,
 H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t * cache_ptr,
                                      double * hit_rate_ptr);
 
-H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
+H5_DLL herr_t H5C_get_entry_status(const H5F_t *f,
                                    haddr_t   addr,
                                    size_t *  size_ptr,
                                    hbool_t * in_cache_ptr,
@@ -1067,16 +1065,17 @@ H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
 				   hbool_t * is_flush_dep_parent_ptr,
 				   hbool_t * is_flush_dep_child_ptr);
 
-H5_DLL herr_t H5C_get_evictions_enabled(H5C_t * cache_ptr,
+H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t * cache_ptr,
                                         hbool_t * evictions_enabled_ptr);
 
-H5_DLL herr_t H5C_get_trace_file_ptr(H5C_t * cache_ptr,
-		                     FILE ** trace_file_ptr_ptr);
+H5_DLL herr_t H5C_get_trace_file_ptr(const H5C_t *cache_ptr,
+    FILE **trace_file_ptr_ptr);
+H5_DLL herr_t H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
+    FILE **trace_file_ptr_ptr);
 
 H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               primary_dxpl_id,
                                hid_t               secondary_dxpl_id,
-                               H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             addr,
                                void *              thing,
@@ -1089,29 +1088,24 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t   * f,
                                         int32_t   ce_array_len,
                                         haddr_t * ce_array_ptr);
 
-H5_DLL herr_t H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
-	                                  void *  thing,
+H5_DLL herr_t H5C_mark_pinned_entry_dirty(void *  thing,
 					  hbool_t size_changed,
 					  size_t  new_size);
 
-H5_DLL herr_t H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
-                                                       void *  thing);
+H5_DLL herr_t H5C_mark_pinned_or_protected_entry_dirty(void *thing);
 
 H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);
 
-H5_DLL herr_t H5C_pin_protected_entry(H5C_t * cache_ptr,
-                                      void *  thing);
+H5_DLL herr_t H5C_pin_protected_entry(void *thing);
 
-H5_DLL herr_t H5C_create_flush_dependency(H5C_t *cache_ptr, void *parent_thing,
-    void *child_thing);
+H5_DLL herr_t H5C_create_flush_dependency(void *parent_thing, void *child_thing);
 
 H5_DLL void * H5C_protect(H5F_t *             f,
                           hid_t               primary_dxpl_id,
                           hid_t               secondary_dxpl_id,
-                          H5C_t *             cache_ptr,
                           const H5C_class_t * type,
                           haddr_t             addr,
                           const void *        udata1,
@@ -1120,14 +1114,12 @@ H5_DLL void * H5C_protect(H5F_t *             f,
 
 H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr);
 
-H5_DLL herr_t H5C_resize_pinned_entry(H5C_t * cache_ptr,
-                                      void *  thing,
-                                      size_t  new_size);
+H5_DLL herr_t H5C_resize_pinned_entry(void *thing, size_t new_size);
 
-H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
+H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);
 
-H5_DLL herr_t H5C_set_evictions_enabled(H5C_t * cache_ptr,
+H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr,
                                         hbool_t evictions_enabled);
 
 H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
@@ -1145,15 +1137,13 @@ H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
 
 H5_DLL void H5C_stats__reset(H5C_t * cache_ptr);
 
-H5_DLL herr_t H5C_unpin_entry(H5C_t * cache_ptr, void * thing);
+H5_DLL herr_t H5C_unpin_entry(void *thing);
 
-H5_DLL herr_t H5C_destroy_flush_dependency(H5C_t *cache_ptr, void *parent_thing,
-    void *child_thing);
+H5_DLL herr_t H5C_destroy_flush_dependency(void *parent_thing, void *child_thing);
 
 H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             hid_t               primary_dxpl_id,
                             hid_t               secondary_dxpl_id,
-                            H5C_t *             cache_ptr,
                             const H5C_class_t * type,
                             haddr_t             addr,
                             void *              thing,

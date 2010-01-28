@@ -2460,7 +2460,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         /* Check for SWMR writes to the file */
         if(dset->shared->layout.storage.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
             /* Mark the proxy entry in the cache as clean */
-            if(H5D_chunk_proxy_mark(dset, ent, FALSE) < 0)
+            if(H5D_chunk_proxy_mark(ent, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as clean")
         } /* end if */
 
@@ -2480,7 +2480,6 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
     if(buf != ent->chunk)
-        /* coverity["double_free"] */
         H5MM_xfree(buf);
 
     /*
@@ -2989,7 +2988,6 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 {
     const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
-    H5D_rdcc_ent_t	*ent = NULL;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_unlock)
@@ -3023,6 +3021,8 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         } /* end else */
     } /* end if */
     else {
+        H5D_rdcc_ent_t	*ent;   /* Chunk's entry in the cache */
+
         /* Sanity check */
 	HDassert(idx_hint < rdcc->nslots);
 	HDassert(rdcc->slot[idx_hint]);
@@ -3041,7 +3041,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
             if(io_info->dset->shared->layout.storage.u.chunk.ops->can_swim
                     && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
                 /* Mark the proxy entry in the cache as dirty */
-                if(H5D_chunk_proxy_mark(io_info->dset, ent, TRUE) < 0)
+                if(H5D_chunk_proxy_mark(ent, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as dirty")
             } /* end if */
         } /* end if */

@@ -680,9 +680,6 @@ read_old(void)
     /* Open copied file */
     if((fid = H5Fopen(FILE_OLD_GROUPS_COPY, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* Open copied file */
-    if((fid = H5Fopen(FILE_OLD_GROUPS_COPY, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
-
     /* Attempt to open "old" group */
     if((gid = H5Gopen2(fid, "old", H5P_DEFAULT)) < 0) TEST_ERROR
 

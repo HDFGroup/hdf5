@@ -642,7 +642,7 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 
 done:
     /* Unpin the dataset's object header */
-    if(oh && H5O_unpin(&oloc, oh) < 0)
+    if(oh && H5O_unpin(oh) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -699,7 +699,7 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
 
 done:
     /* Unpin the dataset's object header */
-    if(oh && H5O_unpin(&oloc, oh) < 0)
+    if(oh && H5O_unpin(oh) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -35,25 +35,31 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*--------------------------------------------------------------------------
@@ -79,13 +85,13 @@ herr_t
 H5D_layout_version_test(hid_t did, unsigned *version)
 {
     H5D_t	*dset;          /* Pointer to dataset to query */
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI(H5D_layout_version_test, FAIL)
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(version)
         *version = dset->shared->layout.version;
@@ -118,13 +124,13 @@ herr_t
 H5D_layout_contig_size_test(hid_t did, hsize_t *size)
 {
     H5D_t	*dset;          /* Pointer to dataset to query */
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI(H5D_layout_contig_size_test, FAIL)
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(size) {
         HDassert(dset->shared->layout.type == H5D_CONTIGUOUS);

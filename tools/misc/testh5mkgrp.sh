@@ -19,6 +19,10 @@
 # Tuesday, February 13, 2007
 #
 
+TESTNAME=h5mkgrp
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 H5MKGRP=h5mkgrp             # The tool name
 H5MKGRP_BIN=`pwd`/$H5MKGRP  # The path of the tool binary
 H5LS=h5ls                   # The h5ls tool name 
@@ -182,8 +186,9 @@ RUNTEST h5mkgrp_nested_mult_latest.h5 "-lp" /one/two /three/four
 
 
 if test $nerrors -eq 0 ; then
-    echo "All h5mkgrp tests passed."
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
 fi
-
-exit $nerrors
-

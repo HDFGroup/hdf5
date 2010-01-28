@@ -99,6 +99,15 @@ static haddr_t H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size);
 /* Package Variables */
 /*********************/
 
+/* Declare a free list to manage the H5HG_t struct */
+H5FL_DEFINE(H5HG_heap_t);
+
+/* Declare a free list to manage sequences of H5HG_obj_t's */
+H5FL_SEQ_DEFINE(H5HG_obj_t);
+
+/* Declare a PQ free list to manage heap chunks */
+H5FL_BLK_DEFINE(gheap_chunk);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -108,15 +117,6 @@ static haddr_t H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5HG_t struct */
-H5FL_DEFINE(H5HG_heap_t);
-
-/* Declare a free list to manage sequences of H5HG_obj_t's */
-H5FL_SEQ_DEFINE(H5HG_obj_t);
-
-/* Declare a PQ free list to manage heap chunks */
-H5FL_BLK_DEFINE(gheap_chunk);
 
 
 
@@ -137,52 +137,31 @@ H5FL_BLK_DEFINE(gheap_chunk);
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer 5/26/04
- *		Modified function to return the disk address of the new
- *		global heap collection, or HADDR_UNDEF on failure.  This
- *		is necessary, as in some cases (i.e. flexible parallel)
- *		H5AC_set() will imediately flush and destroy the in memory
- *		version of the new collection.  For the same reason, I
- *		moved the code which places the new collection on the cwfs
- *		list to just before the call to H5AC_set().
- *
- *		John Mainzer 6/8/05
- *		Removed code setting the is_dirty field of the cache info.
- *		This is no longer pemitted, as the cache code is now
- *		manageing this field.  Since this function uses a call to
- *		H5AC_set() (which marks the entry dirty automaticly), no
- *		other change is required.
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
+H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
-    haddr_t	ret_value = HADDR_UNDEF;
     uint8_t	*p = NULL;
     haddr_t	addr;
     size_t	n;
+    haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HG_create)
 
     /* Check args */
-    assert (f);
-    if (size<H5HG_MINSIZE)
+    HDassert(f);
+    if(size < H5HG_MINSIZE)
         size = H5HG_MINSIZE;
     size = H5HG_ALIGN(size);
 
     /* Create it */
-    H5_CHECK_OVERFLOW(size,size_t,hsize_t);
-    if ( HADDR_UNDEF==
-         (addr=H5MF_alloc(f, H5FD_MEM_GHEAP, dxpl_id, (hsize_t)size)))
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, \
-                     "unable to allocate file space for global heap");
-    if (NULL==(heap = H5FL_MALLOC (H5HG_heap_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, \
-                     "memory allocation failed");
+    H5_CHECK_OVERFLOW(size, size_t, hsize_t);
+    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_GHEAP, dxpl_id, (hsize_t)size)))
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file space for global heap")
+    if(NULL == (heap = H5FL_MALLOC(H5HG_heap_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;
 
@@ -203,14 +182,14 @@ HDmemset(heap->chunk, 0, size);
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
-    H5F_ENCODE_LENGTH (f, p, size);
+    H5F_ENCODE_LENGTH(f, p, size);
 
     /*
      * Padding so free space object is aligned. If malloc returned memory
      * which was always at least H5HG_ALIGNMENT aligned then we could just
      * align the pointer, but this might not be the case.
      */
-    n = H5HG_ALIGN(p-heap->chunk) - (p-heap->chunk);
+    n = H5HG_ALIGN(p - heap->chunk) - (p - heap->chunk);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset(p, 0, n);
@@ -225,7 +204,7 @@ HDmemset(heap->chunk, 0, size);
     UINT16ENCODE(p, 0);	/*object ID*/
     UINT16ENCODE(p, 0);	/*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
-    H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
+    H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset (p, 0, (size_t)((heap->chunk+heap->size) - p));
@@ -244,7 +223,7 @@ HDmemset(heap->chunk, 0, size);
                    MIN(f->shared->ncwfs, H5HG_NCWFS - 1) * sizeof(H5HG_heap_t *));
 	f->shared->cwfs[0] = heap;
 	f->shared->ncwfs = MIN(H5HG_NCWFS, f->shared->ncwfs+1);
-    }
+    } /* end else */
 
     /* Add the heap to the cache */
     if(H5AC_set(f, dxpl_id, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
@@ -253,11 +232,20 @@ HDmemset(heap->chunk, 0, size);
     ret_value = addr;
 
 done:
-    if ( ! ( H5F_addr_defined(addr) ) && heap) {
-        if ( H5HG_dest(f,heap) < 0 )
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, \
-                        "unable to destroy global heap collection");
-    }
+    /* Cleanup on error */
+    if(!H5F_addr_defined(ret_value)) {
+        if(H5F_addr_defined(addr)) {
+            /* Release the space on disk */
+            if(H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, addr, (hsize_t)size) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free global heap")
+
+            /* Check if the heap object was allocated */
+            if(heap)
+                /* Destroy the heap object */
+                if(H5HG_dest(f, heap) < 0)
+                    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy global heap collection")
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5HG_create() */
@@ -278,16 +266,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
- *
- * Modifications:
- *
- *		John Mainzer, 6/8/05
- *		Modified the function to use the new dirtied parameter of
- *		of H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
- *		In this case, that required adding the new heap_dirtied_ptr
- *		parameter to the function's argument list.
  *
  *-------------------------------------------------------------------------
  */
@@ -501,30 +479,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, March 27, 1998
  *
- * Modifications:
- *
- *		John Mainzer -- 5/24/04
- *		The function used to modify the heap without protecting
- *		the relevant collection first.  I did a half assed job
- *		of fixing the problem, which should hold until we try to
- *		support multi-threading.  At that point it will have to
- *		be done right.
- *
- *		See in line comment of this date for more details.
- *
- *		John Mainzer - 5/26/04
- *		Modified H5HG_create() to return the disk address of the
- *		new collection, instead of the address of its
- *		representation in core.  This was necessary as in FP
- *		mode, the cache will immediately flush and destroy any
- *		entry inserted in it via H5AC_set().  I then modified
- *		this function to account for the change in H5HG_create().
- *
- *		John Mainzer - 6/8/05
- *		Modified function to use the dirtied parameter of
- *		H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -635,7 +589,6 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
             --cwfsno;
         } /* end if */
     } /* end else */
-
     HDassert(H5F_addr_defined(addr));
     if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
@@ -759,54 +712,47 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, March 30, 1998
  *
- * Modifications:
- *
- *		John Mainzer - 6/8/05
- *		Modified function to use the dirtied parameter of
- *		H5AC_unprotect() instead of modifying the is_dirty
- *		field of the cache info.
- *
  *-------------------------------------------------------------------------
  */
 int
-H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
+H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
     unsigned heap_flags = H5AC__NO_FLAGS_SET;
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_link, FAIL);
+    FUNC_ENTER_NOAPI(H5HG_link, FAIL)
 
     /* Check args */
-    assert (f);
-    assert (hobj);
-    if (0==(f->intent & H5F_ACC_RDWR))
+    HDassert(f);
+    HDassert(hobj);
+    if(0 == (f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
-    if(adjust!=0) {
-        /* Load the heap */
-        if (NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+    /* Load the heap */
+    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
-        assert (hobj->idx<heap->nused);
-        assert (heap->obj[hobj->idx].begin);
-        if (heap->obj[hobj->idx].nrefs+adjust<0)
-            HGOTO_ERROR (H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range")
-        if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
-            HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range")
+    if(adjust != 0) {
+        HDassert(hobj->idx < heap->nused);
+        HDassert(heap->obj[hobj->idx].begin);
+        if((heap->obj[hobj->idx].nrefs + adjust) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range")
+        if((heap->obj[hobj->idx].nrefs + adjust) > H5HG_MAXLINK)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range")
         heap->obj[hobj->idx].nrefs += adjust;
         heap_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
 
     /* Set return value */
-    ret_value=heap->obj[hobj->idx].nrefs;
+    ret_value = heap->obj[hobj->idx].nrefs;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags)<0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HG_link() */
 
 
 /*-------------------------------------------------------------------------
@@ -884,7 +830,6 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
          * The collection is empty. Remove it from the CWFS list and return it
          * to the file free list.
          */
-        H5_CHECK_OVERFLOW(heap->size, size_t, hsize_t);
         flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } /* end if */
     else {

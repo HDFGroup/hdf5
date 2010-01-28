@@ -71,7 +71,7 @@ extern hid_t H5E_tools_min_id_g;
 /* Macro for "catching" flow of control when an error occurs.  Note that the
  *      H5_LEAVE macro won't jump back here once it's past this point.
  */
-#define CATCH past_catch = TRUE; catch_except:;
+#define CATCH catch_except:; past_catch = TRUE;
 
 /*
  * H5_LEAVE macro, used to facilitate control flow between a
@@ -116,3 +116,4 @@ extern hid_t H5E_tools_min_id_g;
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
 
 #endif /* H5TOOLS_ERROR_H_ */
+
