@@ -47,6 +47,7 @@ const char *FILENAME[] = {
     "chunk_cache",
     "big_chunk",
     "chunk_expand",
+    "copy_dcpl_newfile",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -97,6 +98,9 @@ const char *FILENAME[] = {
 #define DSET_SCALEOFFSET_DOUBLE_NAME_2 "scaleoffset_double_2"
 #define DSET_COMPARE_DCPL_NAME		"compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
+#define DSET_COPY_DCPL_NAME_1		"copy_dcpl_1"
+#define DSET_COPY_DCPL_NAME_2		"copy_dcpl_2"
+#define COPY_DCPL_EXTFILE_NAME          "ext_file"
 #define DSET_DEPREC_NAME		"deprecated"
 #define DSET_DEPREC_NAME_CHUNKED	"deprecated_chunked"
 #define DSET_DEPREC_NAME_COMPACT	"deprecated_compact"
@@ -5560,6 +5564,138 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_copy_dcpl
+ *
+ * Purpose:	Verifies whether the copy of dataset creation property 
+ *              list works.  It tests the DCPL for chunked layout with
+ *              filter and for contiguous layout with external storage. 
+ *              (Please see #1608 in Bugzilla)
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              28 January 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_copy_dcpl(hid_t file, hid_t fapl)
+{
+    hid_t       dsid1=(-1), dsid2=(-1);         /* Dataset ID */
+    hid_t       new_dsid1=(-1), new_dsid2=(-1); /* Dataset ID */
+    hid_t       sid=(-1);                       /* Dataspace ID */
+    hid_t       dcpl=(-1);                      /* Dataset creation property list ID */
+    hid_t       dcpl1=(-1),dcpl2=(-1);          /* Copies of creation property list IDs */
+    hid_t       dcpl1_copy=(-1),dcpl2_copy=(-1);/* Copies of creation property list IDs */
+    const hsize_t dims[2] = {500, 4096};        /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
+    char	filename[FILENAME_BUF_SIZE];
+    hid_t       new_file=(-1);
+
+    TESTING("copying dataset creation property lists");
+
+    /* Create the data space */
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
+
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) TEST_ERROR
+    if(H5Pset_fletcher32(dcpl) < 0) TEST_ERROR
+
+    /* Create first dataset of chunking with filter */
+    if((dsid1 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, 
+        H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid1) < 0) TEST_ERROR
+
+    /* Reopen the first dataset */
+    if((dsid1 = H5Dopen2(file, DSET_COPY_DCPL_NAME_1, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Get the copy of dataset's creation property list */
+    if((dcpl1=H5Dget_create_plist(dsid1)) < 0) TEST_ERROR
+    if((dcpl1_copy = H5Pcopy(dcpl1)) < 0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid1) < 0) TEST_ERROR
+
+    /* Change the DCPL for contiguous layout with external storage.  The size of the reserved
+     * space in the external file is the size of the dataset - 500*4096*sizeof(int).
+     * There's no need to clean up the external file since the library doesn't create it
+     * until the data is written to it. */
+    if(H5Pset_layout(dcpl, H5D_CONTIGUOUS) < 0) TEST_ERROR
+    if(H5Premove_filter(dcpl, H5Z_FILTER_FLETCHER32) < 0) TEST_ERROR
+    if(H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, 0, 500*4096*sizeof(int)) < 0) TEST_ERROR
+
+    /* Create second dataset of contiguous layout with external storage */
+    if((dsid2 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, 
+        H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid2) < 0) TEST_ERROR
+
+    /* Reopen the second dataset */
+    if((dsid2 = H5Dopen2(file, DSET_COPY_DCPL_NAME_2, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Get copy of dataset's dataset creation property list */
+    if((dcpl2=H5Dget_create_plist(dsid2)) < 0) TEST_ERROR
+    if((dcpl2_copy = H5Pcopy(dcpl2)) < 0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid2) < 0) TEST_ERROR
+
+    /* Create a second file and create 2 datasets with the copies of the DCPLs in the first
+     * file.  Test whether the copies of DCPLs work. */ 
+    h5_fixname(FILENAME[11], fapl, filename, sizeof filename);
+    if((new_file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    if((new_dsid1 = H5Dcreate2(new_file, DSET_COPY_DCPL_NAME_1, H5T_NATIVE_INT, sid,
+			H5P_DEFAULT, dcpl1_copy, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    if((new_dsid2 = H5Dcreate2(new_file, DSET_COPY_DCPL_NAME_2, H5T_NATIVE_INT, sid,
+			H5P_DEFAULT, dcpl2_copy, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* Close datasets */
+    if(H5Dclose (new_dsid1) < 0) TEST_ERROR
+    if(H5Dclose (new_dsid2) < 0) TEST_ERROR 
+
+    /* Close the second file */
+    if(H5Fclose (new_file) < 0) TEST_ERROR 
+
+    /* Close dataset creation property lists */
+    if(H5Pclose(dcpl) < 0) TEST_ERROR
+    if(H5Pclose(dcpl1) < 0) TEST_ERROR
+    if(H5Pclose(dcpl2) < 0) TEST_ERROR
+    if(H5Pclose(dcpl1_copy) < 0) TEST_ERROR
+    if(H5Pclose(dcpl2_copy) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dsid1);
+        H5Dclose(dsid2);
+        H5Dclose(new_dsid1);
+        H5Dclose(new_dsid2);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dcpl1);
+        H5Pclose(dcpl2);
+        H5Pclose(dcpl1_copy);
+        H5Pclose(dcpl2_copy);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_copy_dcpl() */
+
+
+/*-------------------------------------------------------------------------
  * Function: test_filter_delete
  *
  * Purpose: Tests deletion of filters from a dataset creation property list
@@ -7446,6 +7582,7 @@ main(void)
         nerrors += (test_set_local(my_fapl) < 0		? 1 : 0);
         nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
         nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
+        nerrors += (test_copy_dcpl(file, my_fapl) < 0	? 1 : 0);
         nerrors += (test_filter_delete(file) < 0		? 1 : 0);
         nerrors += (test_filters_endianess() < 0	? 1 : 0);
         nerrors += (test_zero_dims(file) < 0		? 1 : 0);
