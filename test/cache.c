@@ -3011,7 +3011,7 @@ check_flush_cache(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling check_flush_cache__empty_cache().\n", 
+	    HDfprintf(stdout, "%s: calling check_flush_cache__empty_cache().\n",
 		      fcn_name);
 	}
 
@@ -9263,7 +9263,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(1).\n", 
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(1).\n",
 	          fcn_name, test_num, (int)pass);
     }
 
@@ -9296,7 +9296,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(2).\n", 
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(2).\n",
 	          fcn_name, test_num, (int)pass);
     }
 
@@ -9324,7 +9324,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(3).\n", 
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(3).\n",
 	          fcn_name, test_num, (int)pass);
     }
 
@@ -9367,7 +9367,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Setting up the test.\n", 
+	HDfprintf(stdout, "%s:%d:%d: Setting up the test.\n",
 	          fcn_name, test_num, (int)pass);
     }
 
@@ -9378,7 +9378,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
 	    if ( show_progress ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 			  "%s:%d: Inserting entry(%d,%d) with flags 0x%x.\n",
 			  fcn_name, test_num,
 			  (int)(spec[i].entry_type),
@@ -9393,7 +9393,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
 	    if ( show_progress ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 			  "%s:%d: Protecting entry(%d,%d).\n",
 			  fcn_name, test_num,
 			  (int)(spec[i].entry_type),
@@ -9404,7 +9404,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
 	    if ( show_progress ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 		    "%s:%d: Unprotecting entry(%d,%d) with flags 0x%x ns = %d.\n",
 		    fcn_name, test_num,
 		    (int)(spec[i].entry_type),
@@ -9457,7 +9457,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Running the test.\n", 
+	HDfprintf(stdout, "%s:%d:%d: Running the test.\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9478,7 +9478,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(1).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(1).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9521,7 +9521,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(2).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(2).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9645,7 +9645,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Checking test results(3).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(3).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9680,7 +9680,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(1).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(1).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9723,7 +9723,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(2).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(2).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9745,7 +9745,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( show_progress ) {
 
-	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(3).\n", 
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(3).\n",
 		  fcn_name, test_num, (int)pass);
     }
 
@@ -9886,7 +9886,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
                   ( cache_ptr->min_clean_size != (1 * 1024 * 1024 ) ) ) {
 
 	    pass = FALSE;
-	    failure_mssg = 
+	    failure_mssg =
 	        "unexpected cache config at start of flush op eviction test.";
 
         } else {
@@ -9922,39 +9922,39 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 */
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 4,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 5,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 6, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 7, 
+	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 8 ) ||
@@ -10057,14 +10057,14 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 1; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10132,7 +10132,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 2;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 1, 
+	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 1,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
@@ -10198,7 +10198,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 3;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 2, 
+	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 2,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
@@ -10271,11 +10271,11 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 5;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 3, 
+	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 3,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 4, 
+	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 4,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
         /* verify cache size */
@@ -10312,14 +10312,14 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 5; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10379,7 +10379,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 5; i < 8; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10441,7 +10441,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 8; i < 9; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10507,7 +10507,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 9; i < 10; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10543,14 +10543,14 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 10; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10654,7 +10654,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 10; i < 12; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10687,14 +10687,14 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < num_monster_entries; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < num_large_entries; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10781,7 +10781,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 12; i < 14; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -14902,8 +14902,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -14935,7 +14935,7 @@ check_resize_entry(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr, 
+                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
                 H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG, (LARGE_ENTRY_SIZE / 2));
 
 	if ( result < 0 ) {
@@ -14971,8 +14971,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15007,7 +15007,7 @@ check_resize_entry(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr, 
+                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
                 (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG), LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
@@ -15043,8 +15043,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15108,8 +15108,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15169,8 +15169,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15202,7 +15202,7 @@ check_resize_entry(void)
 
     protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE, 
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE,
 		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     if ( pass ) {
@@ -15313,8 +15313,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15346,7 +15346,7 @@ check_resize_entry(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr, 
+                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
                 H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG, (LARGE_ENTRY_SIZE / 2));
 
 	if ( result < 0 ) {
@@ -15384,8 +15384,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15420,7 +15420,7 @@ check_resize_entry(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr, 
+                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
                 (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG), LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
@@ -15456,8 +15456,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15523,8 +15523,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15584,8 +15584,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned,
                                       NULL, NULL);
 
@@ -15617,7 +15617,7 @@ check_resize_entry(void)
 
     protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, FALSE, 
+    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, FALSE,
 		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     if ( pass ) {
@@ -15841,7 +15841,7 @@ check_evictions_enabled(void)
     for ( i = 0; i < 16 ; i++ )
     {
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, 
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
 			FALSE, H5C__NO_FLAGS_SET);
     }
 
@@ -15872,7 +15872,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect another entry */
     protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16, 
+    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 7 */
@@ -15903,7 +15903,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[0]);
 
-        result = H5C_get_entry_status(file_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(file_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL,
                                       NULL, NULL);
 
@@ -16038,7 +16038,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect another entry */
     protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18, 
+    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 15 */
@@ -16111,7 +16111,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect an entry that is in the cache */
     protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, 
+    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 20 */
@@ -16140,7 +16140,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect an entry that isn't in the cache */
     protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20, 
+    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 22 */
@@ -16263,7 +16263,7 @@ check_evictions_enabled(void)
      * the cache to grow.
      */
     protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21, 
+    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21,
 		    FALSE, H5C__NO_FLAGS_SET);
 
 
@@ -21635,11 +21635,11 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
@@ -21808,7 +21808,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
@@ -21847,7 +21847,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
@@ -21868,7 +21868,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
@@ -21892,15 +21892,15 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
@@ -21960,7 +21960,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024);
 
@@ -21999,7 +21999,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024);
 
@@ -22020,7 +22020,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024);
 
@@ -22044,15 +22044,15 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
@@ -22173,7 +22173,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -22200,7 +22200,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, NO_CHANGE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -22226,10 +22226,10 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, NO_CHANGE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, NO_CHANGE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -22283,7 +22283,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -28786,7 +28786,7 @@ check_auto_cache_resize_aux_fcns(void)
             failure_mssg =
                 "H5C_get_cache_size reports unexpected cur_size 5.\n";
 
-        } 
+        }
     }
 
     if ( pass ) {
@@ -28836,13 +28836,13 @@ check_auto_cache_resize_aux_fcns(void)
  *
  *              A 'metadata blizzard' in this context occurs when the cache
  *              gets completely filled with all dirty entries. Upon needing
- *              to make space in the cache, the cache then has no clean 
+ *              to make space in the cache, the cache then has no clean
  *              entries ready to evict, and must clean every dirty entry
  *              in the cache first, due to the second chance replacement
  *              policy. (i.e. after cleaning an entry, it is bumped to the
  *              top of the LRU to make a second pass before eviction).
- *              The massive amount of sequential writes to disk while 
- *              flushing the entire cache is what constitutes a 'metadata 
+ *              The massive amount of sequential writes to disk while
+ *              flushing the entire cache is what constitutes a 'metadata
  *              blizzard'.
  *
  * Return:	void
@@ -28865,11 +28865,11 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
     hbool_t show_progress = FALSE;
-    int32_t checkpoint = 0;   
+    int32_t checkpoint = 0;
     int32_t entry_idx = 0;
     int32_t i;
 
-    /* Expected loaded status of entries depends on how they get into 
+    /* Expected loaded status of entries depends on how they get into
      * the cache. Insertions = not loaded, protect/unprotect = loaded.
      */
     hbool_t loaded = (hbool_t)!(fill_via_insertion);
@@ -29045,19 +29045,19 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 0 */
-         HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "\n%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
-    
+
         /* Set up the cache.
          *
-         * The max_cache_size should have room for 50 entries. 
-         * The min_clean_size is half of that, or 25 entries.   
+         * The max_cache_size should have room for 50 entries.
+         * The min_clean_size is half of that, or 25 entries.
          */
         file_ptr = setup_cache((size_t)(50 * entry_size), /* max_cache_size */
                                 (size_t)(25 * entry_size)); /* min_clean_size */
- 
+
         if ( file_ptr == NULL) {
 
             pass = FALSE;
@@ -29066,37 +29066,37 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         }
         else
             cache_ptr = file_ptr->shared->cache;
-    }        
+    }
 
     if ( show_progress) /* 1 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
      *  Phase 1:
-     * 
-     *    Inserting dirty entries into an empty cache, until the cache 
+     *
+     *    Inserting dirty entries into an empty cache, until the cache
      *    violates the min_clean_size requirement. The expected result is
      *    that none of the inserted entries during this phase will get
      *    flushed or evicted.
-     * 
+     *
      *    This verifies that while maintaining min_clean_size, we don't go
      *    overboard and flush entries that we don't need to flush.
-     *  
+     *
      * ========================================================================
      * ========================================================================
      */
 
     if ( pass ) {
 
-        /* Insert 26 entries (indexes 0 through 25) into the cache.  
+        /* Insert 26 entries (indexes 0 through 25) into the cache.
          *
-         * Note that we are inserting 26 entries, and not 25, because the cache 
-         * will only try to adhere to the min_clean_size if it's currently 
-         * being violated. Thus, on insertion of the 26th entry, since the 
-         * min_clean_size will not be violated, it will accept the insertion 
-         * without having to make clean space. 
+         * Note that we are inserting 26 entries, and not 25, because the cache
+         * will only try to adhere to the min_clean_size if it's currently
+         * being violated. Thus, on insertion of the 26th entry, since the
+         * min_clean_size will not be violated, it will accept the insertion
+         * without having to make clean space.
          */
 
         for (entry_idx = 0; entry_idx < 26; entry_idx++) {
@@ -29120,8 +29120,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                                 H5C__NO_FLAGS_SET); /* unsigned int flags */
             }
 
-            /* Change expected values, and verify the status of the entries 
-             * after each insertion 
+            /* Change expected values, and verify the status of the entries
+             * after each insertion
              */
             expected[entry_idx].in_cache = TRUE;
             expected[entry_idx].is_dirty = TRUE;
@@ -29135,30 +29135,30 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 2 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
      *  Phase 2:
-     * 
+     *
      *    Inserting entries into a cache that violates the min_clean_size,
      *    until the cache is full. The expected result is that each insertion
-     *    will result in the flushing of a dirty entry in the cache.    
+     *    will result in the flushing of a dirty entry in the cache.
      *
      *    This verifies that we maintain the min_clean_size. By doing so, we
      *    prevent building the situation in which a 'metadata blizzard' would
      *    occur (i.e., the cache being completely filled with dirty entries).
-     *  
+     *
      * ========================================================================
      * ========================================================================
      */
-   
+
     if ( pass ) {
 
         /* Insert the 27th entry (index = 26) into the cache.
-         * 
-         * This should cause the cache to flush its least recently used entry 
+         *
+         * This should cause the cache to flush its least recently used entry
          * before the insertion because it doesn't satisfy the min_clean_size
          * constraint.
          */
@@ -29181,15 +29181,15 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         }
 
         /* Verify the status of the entries.
-         * 
+         *
          * Expected status is that there are 27 entries in the cache, and
          * entry number 0 has been cleaned.
-         * 
+         *
          * Changes from last entry verification:
          *   - entry w/ index 0 has now been flushed and is now clean.
          *   - entry w/ index 26 is now in the cache and dirty.
          */
-          
+
         /* entry w/ index 0 has now been flushed and is now clean. */
 	expected[0].flushed   = TRUE;
 	expected[0].is_dirty  = FALSE;
@@ -29207,7 +29207,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 3 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
@@ -29237,10 +29237,10 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         }
 
         /* Verify the status of the entries.
-         * 
+         *
          * Expected status is that there are 28 entries in the cache, and
          * entry numbers 0 and 1 have been cleaned.
-         * 
+         *
          * Changes from last entry verification:
          *   - entry w/ index 1 has now been flushed and is now clean.
          *   - entry w/ index 27 is now in the cache and dirty.
@@ -29263,7 +29263,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 4 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
@@ -29291,7 +29291,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             }
 
             /* Expected staus is that after each insertion, the entry
-             * inserted 26 insertions ago has been flushed, and the 
+             * inserted 26 insertions ago has been flushed, and the
              * entry currently getting inserted is now in the cache and
              * dirty.
              */
@@ -29301,7 +29301,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 	    expected[entry_idx].in_cache = TRUE;
     	    expected[entry_idx].is_dirty = TRUE;
 	    expected[entry_idx].loaded   = (unsigned char)loaded;
-    
+
             /* verify the status */
             verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
                                 entry_idx, /* int tag */
@@ -29318,23 +29318,23 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 5 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
      *  Phase 3:
-     * 
-     *    Inserting entries into a cache that is completely full. Insertions 
+     *
+     *    Inserting entries into a cache that is completely full. Insertions
      *    of new entries will force evictions of old entries, but since the
-     *    min_clean_size has been maintained, doing so will not result in 
+     *    min_clean_size has been maintained, doing so will not result in
      *    the entire cache getting flushed in order to evict a single entry,
      *    as a clean entry will be available to flush reasonably close to
      *    the bottom of the LRU.
-     * 
+     *
      *    This verifies that with a maintained min_clean_size, a metadata
      *    blizzard does not occur on insertion.
-     * 
+     *
      * ========================================================================
      * ========================================================================
      */
@@ -29342,7 +29342,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     if ( pass ) {
 
         /* Insert the 51st entry (index = 50) into the cache.
-         * 
+         *
          * The cache is full prior to the insertion, so it will
          * have to evict in order to make room for the new entry.
          */
@@ -29365,13 +29365,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         }
 
         /* Verify the status of the entries.
-         * 
+         *
          * Changes from last entry verification:
          *   - entry w/ index 0 has been evicted.
          *   - entries w/ indices 24,25 have now been flushed and are clean.
          *   - entry w/ index 50 is now in the cache and dirty.
          */
-    
+
         /* entry w/ index 0 has been evicted. */
 	expected[0].in_cache  = FALSE;
 	expected[0].destroyed = TRUE;
@@ -29395,16 +29395,16 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 6 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
 
     if ( pass ) {
 
         /* Insert 49 more entries (indices 51-99) into the cache.
-         * 
-         * The cache will be flushing an entry on each insertion, and 
-         * evicting an entry on each insertion. 
+         *
+         * The cache will be flushing an entry on each insertion, and
+         * evicting an entry on each insertion.
          *
          * After each insertion, verify the expected status of the
          * entries in the cache.
@@ -29421,7 +29421,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 protect_entry(file_ptr,   /* H5F_t * file_ptr */
                               entry_type,  /* int32_t type */
                               entry_idx);   /* int32-t idx */
-    
+
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,        /* int32_t idx */
@@ -29438,21 +29438,21 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 	    expected[entry_idx - 50].in_cache  = FALSE;
 	    expected[entry_idx - 50].destroyed = TRUE;
 
-            /* If the newly inserted entry is among the first 24 
+            /* If the newly inserted entry is among the first 24
              * insertions in this loop, then the insertion will
              * have resulted in a flush of the entry inserted
              * 25 insertions ago. */
             if (entry_idx < 75) {
-                
+
                 expected[entry_idx - 25].flushed = TRUE;
                 expected[entry_idx - 25].is_dirty = FALSE;
             }
             /* If the newly inserted entry is among the last
              * 25 insertions in this loop, then the insertion will
              * have resulted in a flush of the entry inserted 26
-             * insertions ago. This switch is because there was two 
+             * insertions ago. This switch is because there was two
              * consecutive clean entries in the cache (due to 51/49
-             * dirty/clean ratio when full), so instead of 
+             * dirty/clean ratio when full), so instead of
              * flush-then-evict, it switches to evict-then-flush. */
             else {
 
@@ -29469,13 +29469,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 7 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
      *  Phase 4:
-     * 
+     *
      *    Flushing the entire cache, and then inserting entries into a cache
      *    that is completely full, but all clean.
      *
@@ -29483,18 +29483,18 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
      *    into an empty cache, we're inserting into a full cache that's all
      *    clean, thus an eviction occurs before each insertion.
      *
-     *    When the cache finally hits the point of violating the 
+     *    When the cache finally hits the point of violating the
      *    min_clean_size, the bottom half of the LRU will be filled with
      *    clean entries and the top half will be filled with recently inserted
      *    dirty entries. We'll then verify that an insertion will only evict
      *    one entry and flush one entry, and no more.
-     *    
+     *
      * ========================================================================
      * ========================================================================
      */
 
     if ( pass ) {
-    
+
         /* Flush the cache.
          *
          * We're doing this so we can repeat the above insertions, but
@@ -29506,12 +29506,12 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                     FALSE,     /* hbool_t destory_entries */
                     FALSE,     /* hbool_t dump_stats */
                     FALSE);    /* hbool_t dump_detailed_stats */
-    
+
         /* Verify that the cache is clean */
         verify_clean();
 
         /* Verify the status of the entries.
-         * 
+         *
          * Changes from last entry verification:
          *   - entries w/ indices 74-99 have been flushed.
          */
@@ -29529,7 +29529,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 8 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
@@ -29580,7 +29580,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 9 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
@@ -29605,7 +29605,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         }
 
         /* Verify the status of the entries.
-         * 
+         *
          * Changes from last entry verification:
          *   - entry w/ index 76 is evicted.
          *   - entry w/ index 100 is cleaned.
@@ -29615,7 +29615,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
         /* entry w/ index 76 has been evicted. */
 	expected[76].in_cache  = FALSE;
 	expected[76].destroyed = TRUE;
-          
+
         /* entry w/ index 100 has now been flushed and is now clean. */
 	expected[100].flushed   = TRUE;
 	expected[100].is_dirty  = FALSE;
@@ -29633,7 +29633,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 10 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
@@ -29683,18 +29683,18 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if ( show_progress) /* 11 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) {
-        
+
         /* We're done with testing. We can take down the cache. */
         takedown_cache(file_ptr, FALSE, FALSE);
         reset_entries();
     }
 
     if ( show_progress) /* 12 */
-         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n",
                    fcn_name, checkpoint++, pass);
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
@@ -29756,8 +29756,8 @@ check_flush_deps(void)
         insert_entry(file_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
         if ( !pass ) CACHE_ERROR("insert_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = TRUE;
         expected[u].is_dirty = TRUE;
@@ -29779,7 +29779,7 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         /* Check the parent's entry status */
 	entry_ptr = &(base_addr[1]);
 	if(H5C_get_entry_status(file_ptr, entry_ptr->addr, NULL, &in_cache,
@@ -29815,7 +29815,7 @@ check_flush_deps(void)
         if(!in_cache || is_flush_dep_parent || !is_flush_dep_child)
             CACHE_ERROR("invalid entry status")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -29845,7 +29845,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -29869,14 +29869,14 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -29911,7 +29911,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -29939,11 +29939,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -29962,11 +29962,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -29985,11 +29985,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 3);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[2].flush_dep_par_type = entry_type;
@@ -30019,7 +30019,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[2].flush_dep_par_type = -1;
@@ -30046,7 +30046,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -30073,7 +30073,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -30099,11 +30099,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -30122,11 +30122,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -30145,11 +30145,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 3);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[2].flush_dep_par_type = entry_type;
@@ -30179,7 +30179,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -30212,7 +30212,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -30242,7 +30242,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[2].flush_dep_par_type = -1;
@@ -30268,11 +30268,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 3);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[2].flush_dep_par_type = entry_type;
@@ -30291,11 +30291,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -30317,11 +30317,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -30357,7 +30357,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[2].flush_dep_par_type = -1;
@@ -30384,7 +30384,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -30411,7 +30411,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -30437,11 +30437,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 3);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[2].flush_dep_par_type = entry_type;
@@ -30460,11 +30460,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -30486,11 +30486,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -30526,7 +30526,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -30559,7 +30559,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -30589,7 +30589,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[2].flush_dep_par_type = -1;
@@ -30613,12 +30613,12 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         for(u = 0; u < 4; u++) {
             create_flush_dependency(entry_type, 4, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after creating flush dependency
              */
             expected[u].flush_dep_par_type = entry_type;
@@ -30643,7 +30643,7 @@ check_flush_deps(void)
             destroy_flush_dependency(entry_type, 4, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after destroying flush dependency
              */
             expected[u].flush_dep_par_type = -1;
@@ -30659,7 +30659,7 @@ check_flush_deps(void)
                                 H5C__NO_FLAGS_SET); /* unsigned int flags */
                 if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-                /* Change expected values, and verify the status of the entries 
+                /* Change expected values, and verify the status of the entries
                  * after destroying flush dependency
                  */
                 expected[4].is_protected = FALSE;
@@ -30686,11 +30686,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -30709,11 +30709,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -30732,11 +30732,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 0, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -30770,7 +30770,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -30800,7 +30800,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -30827,7 +30827,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -30855,11 +30855,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -30878,11 +30878,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -30901,11 +30901,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -30925,7 +30925,7 @@ check_flush_deps(void)
         create_flush_dependency(entry_type, 1, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -30950,7 +30950,7 @@ check_flush_deps(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 4);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -30978,7 +30978,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -31005,7 +31005,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -31032,7 +31032,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -31060,11 +31060,11 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -31083,11 +31083,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -31106,11 +31106,11 @@ check_flush_deps(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -31130,7 +31130,7 @@ check_flush_deps(void)
         create_flush_dependency(entry_type, 2, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -31151,7 +31151,7 @@ check_flush_deps(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 4);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -31175,7 +31175,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -31202,7 +31202,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -31229,7 +31229,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -31255,14 +31255,14 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         pin_entry(entry_type, 1);
         if ( !pass ) CACHE_ERROR("pin_entry failed")
 
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -31295,7 +31295,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -31321,14 +31321,14 @@ check_flush_deps(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         pin_entry(entry_type, 1);
         if ( !pass ) CACHE_ERROR("pin_entry failed")
 
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -31368,7 +31368,7 @@ check_flush_deps(void)
                         H5C__NO_FLAGS_SET); /* unsigned int flags */
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -31388,7 +31388,7 @@ check_flush_deps(void)
 
 
 done:
-    if(file_ptr) 
+    if(file_ptr)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if ( pass )
@@ -31456,7 +31456,7 @@ check_flush_deps_err(void)
             case 1:
                 protect_entry(file_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 result = H5C_create_flush_dependency(&((entries[entry_type])[0]), &((entries[entry_type])[0]));
                 if( result != FAIL ) CACHE_ERROR("Creating flush dependency with parent == child")
 
@@ -31472,13 +31472,13 @@ check_flush_deps_err(void)
             case 2:
                 protect_entry(file_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 0, entry_type, 2);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 1);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 result = H5C_create_flush_dependency(&((entries[entry_type])[1]), &((entries[entry_type])[2]));
                 if( result != FAIL ) CACHE_ERROR("Creating second flush dependency for child")
 
@@ -31504,43 +31504,43 @@ check_flush_deps_err(void)
             case 3:
                 protect_entry(file_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 0, entry_type, 1);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 1);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 1, entry_type, 2);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 2);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 2, entry_type, 3);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 3);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 3, entry_type, 4);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 4);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 4, entry_type, 5);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 5);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 create_flush_dependency(entry_type, 5, entry_type, 6);
                 if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
                 protect_entry(file_ptr, entry_type, 6);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 result = H5C_create_flush_dependency(&((entries[entry_type])[6]), &((entries[entry_type])[7]));
                 if( result != FAIL ) CACHE_ERROR("Creating flush dependency that's too tall")
 
@@ -31553,7 +31553,7 @@ check_flush_deps_err(void)
 
                 protect_entry(file_ptr, entry_type, 7);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
                 result = H5C_create_flush_dependency(&((entries[entry_type])[7]), &((entries[entry_type])[0]));
                 if( result != FAIL ) CACHE_ERROR("Creating flush dependency that's too tall")
 
@@ -31630,7 +31630,7 @@ check_flush_deps_err(void)
                 result = H5C_destroy_flush_dependency(&((entries[entry_type])[0]), &((entries[entry_type])[1]));
                 if( result != FAIL ) CACHE_ERROR("Destroying [non-existant] dependency when parent isn't protected")
                 break;
-        
+
             /* Verify that parent entry has flush dependency */
             case 5:
                 protect_entry(file_ptr, entry_type, 0);
@@ -31646,7 +31646,7 @@ check_flush_deps_err(void)
                                 H5C__NO_FLAGS_SET); /* unsigned int flags */
                 if ( !pass ) CACHE_ERROR("unprotect_entry failed")
                 break;
-        
+
             /* Verify that child entry is in flush dependency relationship */
             case 6:
                 protect_entry(file_ptr, entry_type, 0);
@@ -31773,7 +31773,7 @@ check_flush_deps_err(void)
 
 
 done:
-    if(file_ptr) 
+    if(file_ptr)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if ( pass )
@@ -31839,8 +31839,8 @@ check_flush_deps_order(void)
         insert_entry(file_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
         if ( !pass ) CACHE_ERROR("insert_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = TRUE;
         expected[u].is_dirty = TRUE;
@@ -31859,11 +31859,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -31903,7 +31903,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -31933,7 +31933,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -31956,11 +31956,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 0, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].is_protected = TRUE;
@@ -32011,7 +32011,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32035,7 +32035,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 0, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_pinned = FALSE;
@@ -32060,14 +32060,14 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -32125,7 +32125,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32155,7 +32155,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -32182,14 +32182,14 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 0, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
         create_flush_dependency(entry_type, 0, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].is_protected = TRUE;
@@ -32247,7 +32247,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32277,7 +32277,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 0, entry_type, 2);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_pinned = FALSE;
@@ -32304,11 +32304,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -32327,11 +32327,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -32350,11 +32350,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 3);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[2].flush_dep_par_type = entry_type;
@@ -32429,7 +32429,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32460,7 +32460,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 3, entry_type, 2);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[2].flush_dep_par_type = -1;
@@ -32479,7 +32479,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -32498,7 +32498,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -32523,11 +32523,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 0, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].is_protected = TRUE;
@@ -32546,11 +32546,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 2);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].child_flush_dep_height_rc[0] = 0;
@@ -32572,11 +32572,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].child_flush_dep_height_rc[1] = 0;
@@ -32657,7 +32657,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32689,7 +32689,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 3);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].child_flush_dep_height_rc[2] = 0;
@@ -32714,7 +32714,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 2);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].child_flush_dep_height_rc[1] = 0;
@@ -32736,7 +32736,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 0, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].is_pinned = FALSE;
@@ -32759,12 +32759,12 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         for(u = 0; u < 4; u++) {
             create_flush_dependency(entry_type, 4, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after creating flush dependency
              */
             expected[u].flush_dep_par_type = entry_type;
@@ -32831,7 +32831,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -32865,7 +32865,7 @@ check_flush_deps_order(void)
             destroy_flush_dependency(entry_type, 4, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after destroying flush dependency
              */
             expected[u].flush_dep_par_type = -1;
@@ -32874,7 +32874,7 @@ check_flush_deps_order(void)
 
             /* Check for destroying flush dependency on last entry */
             if(3 == u) {
-                /* Change expected values, and verify the status of the entries 
+                /* Change expected values, and verify the status of the entries
                  * after destroying flush dependency
                  */
                 expected[4].is_pinned = FALSE;
@@ -32896,12 +32896,12 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         for(u = 1; u < 5; u++) {
             create_flush_dependency(entry_type, 0, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after creating flush dependency
              */
             expected[u].flush_dep_par_type = entry_type;
@@ -32968,7 +32968,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -33002,7 +33002,7 @@ check_flush_deps_order(void)
             destroy_flush_dependency(entry_type, 0, entry_type, (int32_t)u);
             if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-            /* Change expected values, and verify the status of the entries 
+            /* Change expected values, and verify the status of the entries
              * after destroying flush dependency
              */
             expected[u].flush_dep_par_type = -1;
@@ -33011,7 +33011,7 @@ check_flush_deps_order(void)
 
             /* Check for destroying flush dependency on last entry */
             if(4 == u) {
-                /* Change expected values, and verify the status of the entries 
+                /* Change expected values, and verify the status of the entries
                  * after destroying flush dependency
                  */
                 expected[0].is_pinned = FALSE;
@@ -33037,11 +33037,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -33060,11 +33060,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -33083,11 +33083,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 0);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 0, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -33169,7 +33169,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -33203,7 +33203,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 0, entry_type, 4);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -33225,7 +33225,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -33244,7 +33244,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -33271,11 +33271,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -33294,11 +33294,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -33317,11 +33317,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -33341,7 +33341,7 @@ check_flush_deps_order(void)
         create_flush_dependency(entry_type, 1, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -33423,7 +33423,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -33459,7 +33459,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 4);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -33480,7 +33480,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -33499,7 +33499,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -33518,7 +33518,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -33545,11 +33545,11 @@ check_flush_deps_order(void)
     {
         protect_entry(file_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[0].flush_dep_par_type = entry_type;
@@ -33568,11 +33568,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 2);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[1].flush_dep_par_type = entry_type;
@@ -33591,11 +33591,11 @@ check_flush_deps_order(void)
 
         protect_entry(file_ptr, entry_type, 4);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
-        
+
         create_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[3].flush_dep_par_type = entry_type;
@@ -33615,7 +33615,7 @@ check_flush_deps_order(void)
         create_flush_dependency(entry_type, 2, entry_type, 4);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after creating flush dependency
          */
         expected[4].flush_dep_par_type = entry_type;
@@ -33693,7 +33693,7 @@ check_flush_deps_order(void)
         result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroy flush dependency
          */
         expected[0].is_dirty = FALSE;
@@ -33729,7 +33729,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 4);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[4].flush_dep_par_type = -1;
@@ -33746,7 +33746,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 4, entry_type, 3);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[3].flush_dep_par_type = -1;
@@ -33765,7 +33765,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 2, entry_type, 1);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[1].flush_dep_par_type = -1;
@@ -33784,7 +33784,7 @@ check_flush_deps_order(void)
         destroy_flush_dependency(entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
 
-        /* Change expected values, and verify the status of the entries 
+        /* Change expected values, and verify the status of the entries
          * after destroying flush dependency
          */
         expected[0].flush_dep_par_type = -1;
@@ -33803,7 +33803,7 @@ check_flush_deps_order(void)
 
 
 done:
-    if(file_ptr) 
+    if(file_ptr)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if ( pass )
@@ -33870,8 +33870,8 @@ check_notify_cb(void)
         insert_entry(file_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
         if ( !pass ) CACHE_ERROR("insert_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = TRUE;
         expected[u].is_dirty = TRUE;
@@ -33896,8 +33896,8 @@ check_notify_cb(void)
         expunge_entry(file_ptr, entry_type, (int32_t)u);
         if ( !pass ) CACHE_ERROR("expunge_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = FALSE;
         expected[u].is_dirty = FALSE;
@@ -33924,8 +33924,8 @@ check_notify_cb(void)
         protect_entry(file_ptr, entry_type, (int32_t)u);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = TRUE;
         expected[u].is_dirty = FALSE;
@@ -33952,8 +33952,8 @@ check_notify_cb(void)
         unprotect_entry(file_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
         if ( !pass ) CACHE_ERROR("unprotect_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = TRUE;
         expected[u].is_dirty = TRUE;
@@ -33979,8 +33979,8 @@ check_notify_cb(void)
         expunge_entry(file_ptr, entry_type, (int32_t)u);
         if ( !pass ) CACHE_ERROR("expunge_entry failed")
 
-        /* Change expected values, and verify the status of the entries 
-         * after each insertion 
+        /* Change expected values, and verify the status of the entries
+         * after each insertion
          */
         expected[u].in_cache = FALSE;
         expected[u].is_dirty = FALSE;
@@ -34003,7 +34003,7 @@ check_notify_cb(void)
     } /* end for */
 
 done:
-    if(file_ptr) 
+    if(file_ptr)
         takedown_cache(file_ptr, FALSE, FALSE);
 
     if ( pass )
@@ -34091,8 +34091,8 @@ main(void)
     nerrs += check_auto_cache_resize_epoch_markers();
     nerrs += check_auto_cache_resize_input_errs();
     nerrs += check_auto_cache_resize_aux_fcns();
-    nerrs += check_metadata_blizzard_absence(TRUE);   
-    nerrs += check_metadata_blizzard_absence(FALSE);  
+    nerrs += check_metadata_blizzard_absence(TRUE);
+    nerrs += check_metadata_blizzard_absence(FALSE);
     nerrs += check_flush_deps();
     nerrs += check_flush_deps_err();
     nerrs += check_flush_deps_order();

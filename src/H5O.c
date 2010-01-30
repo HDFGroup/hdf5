@@ -1133,7 +1133,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if(size_hint > 4294967295)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else 
+        else
 #endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
         if(size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;

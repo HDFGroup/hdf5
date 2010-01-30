@@ -2401,7 +2401,7 @@ test_refer_dtype2(hid_t file)
     PASSED();
     return 0;
 
-error: 
+error:
     /* Free memory buffers */
     if(dwbuf)
         HDfree(dwbuf);
@@ -2546,7 +2546,7 @@ test_bitfield_dtype(hid_t file)
     if((space = H5Screate_simple(1, &nelmts, NULL)) < 0) TEST_ERROR;
 
     /* Create and write to dataset1 with a unsigned char buffer */
-    if((dset1 = H5Dcreate2(file, DSET1_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, 
+    if((dset1 = H5Dcreate2(file, DSET1_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT)) < 0) TEST_ERROR;
 
     for(i = 0; i < BITFIELD_ENUMB*sizeof(int); i++)
@@ -2556,7 +2556,7 @@ test_bitfield_dtype(hid_t file)
     if(H5Dclose(dset1) < 0) TEST_ERROR;
 
     /* Create and write to dataset2 with a unsigned int buffer */
-    if((dset2 = H5Dcreate2(file, DSET2_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, 
+    if((dset2 = H5Dcreate2(file, DSET2_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT)) < 0) TEST_ERROR;
 
     for(i = 0; i < BITFIELD_ENUMB; i++)
@@ -2587,7 +2587,7 @@ test_bitfield_dtype(hid_t file)
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %d\n", i);
-            TEST_ERROR;  
+            TEST_ERROR;
         }
         p++;
     }
@@ -2612,14 +2612,14 @@ test_bitfield_dtype(hid_t file)
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %d\n", i);
-            TEST_ERROR;  
+            TEST_ERROR;
         }
     }
 
     if(H5Tclose(dtype) < 0) TEST_ERROR;
     if(H5Tclose(native_type) < 0) TEST_ERROR;
     if(H5Dclose(dataset2) < 0) TEST_ERROR;
- 
+
     PASSED();
     return 0;
 

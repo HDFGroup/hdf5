@@ -240,7 +240,7 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:   H5F_super_ext_close
- *              
+ *
  * Purpose:    Close superblock extension
  *
  * Return:     Success:        non-negative on success
@@ -250,7 +250,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -321,7 +321,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
     /* Look up the superblock */
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, NULL, &dirtied, rw)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
-    
+
     /* Mark the superblock dirty if it was modified during loading or VFD indicated to do so */
     if((H5AC_WRITE == rw) && (dirtied || H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_SBLK_LOAD)))
         sblock_flags |= H5AC__DIRTIED_FLAG;
@@ -401,8 +401,8 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     /* Bump superblock version to create superblock extension for SOHM info */
     else if(f->shared->sohm_nindexes > 0)
         super_vers = HDF5_SUPERBLOCK_VERSION_2;
-    /* Bump superblock version to create superblock extension for 
-     * non-default file space strategy or non-default free-space threshold 
+    /* Bump superblock version to create superblock extension for
+     * non-default file space strategy or non-default free-space threshold
      */
     else if(f->shared->fs_strategy != H5F_FILE_SPACE_STRATEGY_DEF ||
             f->shared->fs_threshold != H5F_FREE_SPACE_THRESHOLD_DEF)

@@ -540,9 +540,9 @@ main(int argc, char *argv[])
         HDassert(cls);
 
 	/* Check for enough valid parameters */
-        if(extra == 0) {            
+        if(extra == 0) {
 	    fprintf(stderr, "ERROR: Need object header address containing the layout messagein order to dump header\n");
-            fprintf(stderr, "Fixed array header block usage:\n");            
+            fprintf(stderr, "Fixed array header block usage:\n");
 	    fprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
             HDexit(4);
         } /* end if */

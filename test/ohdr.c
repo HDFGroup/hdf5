@@ -48,7 +48,7 @@ const char *FILENAME[] = {
  *	Create an object header with several continuation chunks
  *	Remove a message in the last chunk
  *	The remaining message(s) in the last chunk should be moved forward into the continuation message
- *	The process will repeat when the continuation message is big enough to hold all the 
+ *	The process will repeat when the continuation message is big enough to hold all the
  *		messages in the last chunk.
  *	Result: the number of chunks should be reduced
  */
@@ -57,7 +57,7 @@ test_cont(char *filename, hid_t fapl)
 {
     hid_t	file=-1;
     H5F_t	*f = NULL;
-    H5O_hdr_info_t hdr_info;               
+    H5O_hdr_info_t hdr_info;
     H5O_loc_t	oh_locA, oh_locB;
     time_t	time_new;
     const char	*short_name = "T";
@@ -181,7 +181,7 @@ main(void)
         /* Display info about testing */
         if(b)
             HDputs("Using new file format:");
-        else	
+        else
             HDputs("Using default file format:");
 
         /* Set the format to use for the file */

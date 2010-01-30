@@ -3793,7 +3793,7 @@ test_sohm_extend_dset(void)
  * Function:    test_sohm_external_dtype
  *
  * Purpose:     When a datatype is a SOHM type in one file, test that the
- *              second file using the same datatype actually save it in 
+ *              second file using the same datatype actually save it in
  *              the file, too.
  *
  * Programmer:  Raymond Lu
@@ -3814,9 +3814,9 @@ test_sohm_external_dtype(void)
     hid_t fcpl, file1, file2;
     hid_t dataset1, dataset2;
     hid_t s1_tid, dset1_tid, dset2_tid, space;
-    hsize_t dims[2] = {NX, NY};    
+    hsize_t dims[2] = {NX, NY};
     H5T_class_t dtype_class;
-    size_t dmsg_count; 
+    size_t dmsg_count;
     unsigned x, i;
     herr_t ret;
 
@@ -3843,7 +3843,7 @@ test_sohm_external_dtype(void)
     /* Create a data type for s1_t */
     s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
     CHECK_I(s1_tid, "H5Tcreate");
-    
+
     ret = H5Tinsert(s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
     CHECK_I(ret, "H5Tinsert");
 
@@ -3860,7 +3860,7 @@ test_sohm_external_dtype(void)
     VERIFY(dmsg_count, 0, "H5F_get_sohm_mesg_count_test");
 
     /* Create data set */
-    dataset1 = H5Dcreate2(file1, "dataset_1", s1_tid, space, H5P_DEFAULT, H5P_DEFAULT, 
+    dataset1 = H5Dcreate2(file1, "dataset_1", s1_tid, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT);
     CHECK_I(dataset1, "H5Dcreate2");
 
@@ -3880,7 +3880,7 @@ test_sohm_external_dtype(void)
         s_ptr->a = i*3 + 1;
         s_ptr->b = i*3 + 2;
     }
-    
+
     /* Write the data to the dataset1 */
     ret = H5Dwrite(dataset1, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig);
     CHECK_I(ret, "H5Dwrite");
@@ -3898,7 +3898,7 @@ test_sohm_external_dtype(void)
     VERIFY(dmsg_count, 0, "H5F_get_sohm_mesg_count_test");
 
     /* Create a data set using the datatype of the dataset in the first file. */
-    dataset2 = H5Dcreate2(file2, "dataset_2", dset1_tid, space, H5P_DEFAULT, H5P_DEFAULT, 
+    dataset2 = H5Dcreate2(file2, "dataset_2", dset1_tid, space, H5P_DEFAULT, H5P_DEFAULT,
         H5P_DEFAULT);
     CHECK_I(dataset2, "H5Dcreate2");
 
@@ -3914,7 +3914,7 @@ test_sohm_external_dtype(void)
     ret = H5Dclose(dataset2);
     CHECK_I(ret, "H5Dclose");
 
-    /* Close file 1 and the dataset's datatype in file 1.  Verify that the datatype in 
+    /* Close file 1 and the dataset's datatype in file 1.  Verify that the datatype in
      * file 2 is still accessible. */
     ret = H5Tclose(dset1_tid);
     CHECK_I(ret, "H5Tclose");

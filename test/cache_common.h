@@ -81,10 +81,10 @@
 
 #define MAX_ENTRIES		(10 * 1024)
 
-/* The choice of the BASE_ADDR below is arbitrary -- it just has to be 
+/* The choice of the BASE_ADDR below is arbitrary -- it just has to be
  * larger than the superblock.
  */
-#define BASE_ADDR		(haddr_t)1024 
+#define BASE_ADDR		(haddr_t)1024
 #define PICO_BASE_ADDR		BASE_ADDR
 #define NANO_BASE_ADDR		(haddr_t)(PICO_BASE_ADDR + \
                                       (PICO_ENTRY_SIZE * NUM_PICO_ENTRIES))

@@ -37,7 +37,7 @@ nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f 
     hid_t c_space_id;
     int i;
     int_f ret_value = 0;
-  
+
     /*
      * Transpose dimension arrays because of C-FORTRAN storage order
      */
@@ -45,11 +45,11 @@ nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f 
          c_dims[i] =  dims[*rank - i - 1];
          c_maxdims[i] = maxdims[*rank - i - 1];
     } /* end for */
-  
+
     c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
-    if(c_space_id < 0) 
+    if(c_space_id < 0)
         HGOTO_DONE(FAIL)
-  
+
     *space_id = (hid_t_f)c_space_id;
 
 done:
@@ -204,7 +204,7 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Monday, November 15, 1999
- * Modifications: 
+ * Modifications:
  *              Transpose dimension arrays because of C-FORTRAN storage order
  *              M.S. Breitenfeld
  *---------------------------------------------------------------------------*/
@@ -281,12 +281,12 @@ nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
     hsize_t c_end[H5S_MAX_RANK];
     int i, rank;
     int_f ret_value = 0;
-   
+
     c_space_id = *space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0 )
         HGOTO_DONE(FAIL)
-   
+
     if(H5Sget_select_bounds(c_space_id, c_start, c_end) < 0)
         HGOTO_DONE(FAIL)
 

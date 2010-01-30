@@ -766,7 +766,7 @@ readFloatData(FILE **strm, struct Input *in)
 
         /* same as TEXTFP */
         case 2: /*TEXTFPE */
-            
+
             for (i = 0; i < len; i++, fp32++)
             {
                 if (fscanf(*strm, "%f", fp32) != 1)
@@ -775,7 +775,7 @@ readFloatData(FILE **strm, struct Input *in)
                     return (-1);
                 }
             }
-            
+
             fp32 = (H5DT_FLOAT32 *) in->data;
             break;
 
@@ -815,7 +815,7 @@ readFloatData(FILE **strm, struct Input *in)
 
         /* same as TEXTFP */
         case 2: /*TEXTFPE */
-            
+
             for (i = 0; i < len; i++, fp64++)
             {
                 if (fscanf(*strm, "%lf", fp64) != 1)
@@ -824,7 +824,7 @@ readFloatData(FILE **strm, struct Input *in)
                     return (-1);
                 }
             }
-            
+
             fp64 = (H5DT_FLOAT64 *) in->data;
             break;
 
@@ -1437,7 +1437,7 @@ processConfigurationFile(char *infile, struct Input *in, FILE **strm)
         if (in->configOptionVector[COMPRESS] == 0)
           in->compressionType = 0;
 
-       
+
       break;
 
       case 12: /* EXTERNAL-STORAGE */
@@ -1587,16 +1587,16 @@ static int
 parsePathInfo(struct path_info *path, char *temp)
 {
   const char delimiter[] = "/";
-  char *token; 
+  char *token;
   int i=0;
   const char *err1 = "Path string larger than MAX_PATH_NAME_LENGTH.\n";
 
   token = HDstrtok (temp, delimiter);
-  if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) 
+  if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH)
   {
     (void) fprintf(stderr, err1);
     return (-1);
-  } 
+  }
    HDstrcpy(path->group[i++],token);
 
 
@@ -1609,7 +1609,7 @@ parsePathInfo(struct path_info *path, char *temp)
     {
       (void) fprintf(stderr, err1);
       return (-1);
-    } 
+    }
     HDstrcpy(path->group[i++],token);
   }
   path->count = i;
@@ -1621,7 +1621,7 @@ parseDimensions(struct Input *in, char *strm)
 {
   const char delimiter[] = ",";
   char temp[255];
-  char *token; 
+  char *token;
   int i=0;
   const char *err1 = "Unable to allocate dynamic memory.\n";
 

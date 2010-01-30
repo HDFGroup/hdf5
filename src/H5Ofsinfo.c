@@ -84,7 +84,7 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fsinfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh, 
+H5O_fsinfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fsinfo_t	*fsinfo = NULL; /* free-space manager info */

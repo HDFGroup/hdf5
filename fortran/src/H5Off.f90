@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,30 +11,30 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This file contains Fortran90 interfaces for H5O functions.
 !
 MODULE H5O
-       
+
   USE H5GLOBAL
-     
+
 CONTAINS
 
 !----------------------------------------------------------------------
-! Name:		h5olink_f 
+! Name:		h5olink_f
 !
 ! Purpose:  	Creates a hard link to an object in an HDF5 file.
 !
-! Inputs:  
+! Inputs:
 !      object_id     - Object to be linked.
 !      new_loc_id    - File or group identifier specifying location at which object is to be linked.
 !      new_link_name - Name of link to be created, relative to new_loc_id.
-! Outputs: 
-!      hdferr:       - error code		
+! Outputs:
+!      hdferr:       - error code
 !	                Success:  0
-!			Failure: -1   
+!			Failure: -1
 ! Optional parameters:
 !      lcpl_id       - Link creation property list identifier.
 !      lapl_id       - Link access property list identifier.
@@ -42,20 +42,20 @@ CONTAINS
 ! Programmer:	M.S. Breitenfeld
 !		April 21, 2008
 !
-! Modifications: N/A 
+! Modifications: N/A
 !
 !----------------------------------------------------------------------
 
   SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id  ! Object to be linked
-    INTEGER(HID_T), INTENT(IN) :: new_loc_id ! File or group identifier specifying 
+    INTEGER(HID_T), INTENT(IN) :: new_loc_id ! File or group identifier specifying
                                              ! location at which object is to be linked.
     CHARACTER(LEN=*), INTENT(IN) :: new_link_name ! Name of link to be created, relative to new_loc_id.
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code 		
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           !   Success:  0
-                                          !   Failure: -1  
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier.  
+                                          !   Failure: -1
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier.
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link creation property list identifier.
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(HID_T) :: lcpl_id_default
@@ -92,25 +92,25 @@ CONTAINS
   END SUBROUTINE h5olink_f
 
 !----------------------------------------------------------------------
-! Name:		h5oopen_f 
+! Name:		h5oopen_f
 !
 ! Purpose:  	Opens an object in an HDF5 file by location identifier and path name.O
 !
-! Inputs:  
+! Inputs:
 !           loc_id - File or group identifier
 !             name - Path to the object, relative to loc_id.
-! Outputs: 
-!           obj_id - Object identifier for the opened object 
-!      hdferr:     - error code		
+! Outputs:
+!           obj_id - Object identifier for the opened object
+!      hdferr:     - error code
 !	                Success:  0
-!			Failure: -1   
+!			Failure: -1
 ! Optional parameters:
 !          lapl_id - Access property list identifier for the link pointing to the object
 !
 ! Programmer:	M.S. Breitenfeld
 !		April 18, 2008
 !
-! Modifications: N/A 
+! Modifications: N/A
 !
 !----------------------------------------------------------------------
 
@@ -119,9 +119,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Path to the object, relative to loc_id
     INTEGER(HID_T), INTENT(OUT) :: obj_id ! Object identifier for the opened object
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code 		
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           !   Success:  0
-                                          !   Failure: -1  
+                                          !   Failure: -1
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Attribute access property list
     INTEGER(HID_T) :: lapl_id_default
 
@@ -154,23 +154,23 @@ CONTAINS
   END SUBROUTINE h5oopen_f
 
 !----------------------------------------------------------------------
-! Name:		h5oopen_by_addr_f 
+! Name:		h5oopen_by_addr_f
 !
-! Purpose:  	Opens an object using its address within an HDF5 file. 
+! Purpose:  	Opens an object using its address within an HDF5 file.
 !
-! Inputs:  
+! Inputs:
 !           loc_id - File or group identifier
 !             addr - Object’s address in the file
-! Outputs: 
-!           obj_id - Object identifier for the opened object 
-!      hdferr:     - error code		
+! Outputs:
+!           obj_id - Object identifier for the opened object
+!      hdferr:     - error code
 !	                Success:  0
 !			Failure: -1
 !
 ! Programmer:	M. Scot Breitenfeld
 !		September 14, 2009
 !
-! Modifications: N/A 
+! Modifications: N/A
 !
 !----------------------------------------------------------------------
 
@@ -179,7 +179,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier
     INTEGER(HADDR_T), INTENT(IN) :: addr  ! Object’s address in the file
     INTEGER(HID_T), INTENT(OUT) :: obj_id ! Object identifier for the opened object
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code 		
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           !   Success:  0
                                           !   Failure: -1
     INTERFACE

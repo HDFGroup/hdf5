@@ -283,7 +283,7 @@ H5_DLL H5A_t *H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t
     H5O_copy_t *cpy_info, hid_t dxpl_id);
 H5_DLL herr_t H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *mesg_src,
     H5O_loc_t *dst_oloc, const H5A_t *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
-H5_DLL herr_t H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst, 
+H5_DLL herr_t H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst,
     const H5O_ainfo_t *ainfo_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, hid_t dxpl_id);
 H5_DLL herr_t H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t * ainfo_src,
     H5O_loc_t *dst_oloc, H5O_ainfo_t *ainfo_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);

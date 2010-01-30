@@ -218,8 +218,8 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *u
 
     /* General array creation/configuration information */
     hdr->cparam.raw_elmt_size = *p++;         	   /* Element size in file (in bytes) */
-    hdr->cparam.max_dblk_page_nelmts_bits = *p++;  /* Log2(Max. # of elements in data block page) - 
-						      i.e. # of bits needed to store max. # of 
+    hdr->cparam.max_dblk_page_nelmts_bits = *p++;  /* Log2(Max. # of elements in data block page) -
+						      i.e. # of bits needed to store max. # of
 						      elements in data block page. */
 
     /* Array statistics */
@@ -790,7 +790,7 @@ H5FA__cache_dblock_size(const H5F_t UNUSED *f, const H5FA_dblock_t *dblock,
     else
         *size_ptr = H5FA_DBLOCK_PREFIX_SIZE(dblock);
 
-END_FUNC(STATIC)   /* end H5FA__cache_dblock_size() */ 
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_size() */
 
 
 /*-------------------------------------------------------------------------

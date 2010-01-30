@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This file contains Fortran90 interfaces for H5P functions needed by || MPI programs.
@@ -21,19 +21,19 @@
          CONTAINS
 
 !----------------------------------------------------------------------
-! Name:		h5pset_fapl_mpio_f 
+! Name:		h5pset_fapl_mpio_f
 !
-! Purpose: 	Stores MPI IO communicator information to the file 
-!		access property list. 
+! Purpose: 	Stores MPI IO communicator information to the file
+!		access property list.
 !
-! Inputs:  	
+! Inputs:
 !		prp_id		- file access property list identifier
 !		comm		- MPI-2 communicator
 !		info		- MPI-2 info object
-! Outputs:  
-!		hdferr:		- error code		
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
@@ -42,9 +42,9 @@
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-         SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr) 
+         SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
@@ -58,34 +58,34 @@
           END SUBROUTINE h5pset_fapl_mpio_f
 
 !----------------------------------------------------------------------
-! Name:		h5pget_fapl_mpio_f 
+! Name:		h5pget_fapl_mpio_f
 !
-! Purpose: 	Returns MPI communicator information. 	
+! Purpose: 	Returns MPI communicator information.
 !
-! Inputs:  
+! Inputs:
 !		prp_id		- file access property list identifier
-! Outputs:  
+! Outputs:
 !		comm		- MPI-2 communicator
 !		info		- MPI-2 info object
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Elena Pourmal
 !		November, 2000
 !
-! Modifications: 
+! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr) 
+          SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator 
-            INTEGER, INTENT(OUT) :: info ! buffer to return info object 
+            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator
+            INTEGER, INTENT(OUT) :: info ! buffer to return info object
                                         ! as defined in MPI_FILE_OPEN of MPI-2
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -94,32 +94,32 @@
           END SUBROUTINE h5pget_fapl_mpio_f
 
 !----------------------------------------------------------------------
-! Name:		h5pset_dxpl_mpio_f 
+! Name:		h5pset_dxpl_mpio_f
 !
-! Purpose: 	Sets data transfer mode. 
+! Purpose: 	Sets data transfer mode.
 !
-! Inputs:  
+! Inputs:
 !		prp_id		- data transfer property list identifier
 !		data_xfer_mode	- transfer mode
 !				  Possible values are:
 !				  H5FD_MPIO_INDEPENDENT_F
 !				  H5FD_MPIO_COLLECTIVE_F
-! Outputs:  
-!		hdferr:		- error code		
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Elena Pourmal
 !		November, 2000
 !
-! Modifications: 	
+! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
-         SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr) 
+         SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: data_xfer_mode ! Data transfer mode. Possible values are:
@@ -127,37 +127,37 @@
                                                   ! H5FD_MPIO_COLLECTIVE_F
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
-            INTEGER, EXTERNAL :: h5pset_dxpl_mpio_c 
+            INTEGER, EXTERNAL :: h5pset_dxpl_mpio_c
             hdferr = h5pset_dxpl_mpio_c(prp_id, data_xfer_mode)
           END SUBROUTINE h5pset_dxpl_mpio_f
 
 !----------------------------------------------------------------------
-! Name:		h5pget_dxpl_mpio_f 
+! Name:		h5pget_dxpl_mpio_f
 !
-! Purpose: 	Returns the data transfer mode. 
+! Purpose: 	Returns the data transfer mode.
 !
-! Inputs:  
+! Inputs:
 !		prp_id		- data transfer property list identifier
-! Outputs:  
+! Outputs:
 !		data_xfer_mode	- transfer mode
 !				  Possible values are:
 !				  H5FD_MPIO_INDEPENDENT_F
 !				  H5FD_MPIO_COLLECTIVE_F
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Elena Pourmal
 !		November, 2000
 !
-! Modifications: 
+! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
-         SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr) 
+         SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(OUT) :: data_xfer_mode ! Data transfer mode. Possible values are:
@@ -171,19 +171,19 @@
 
 
 !----------------------------------------------------------------------
-! Name:		h5pset_fapl_mpiposix_f 
+! Name:		h5pset_fapl_mpiposix_f
 !
-! Purpose: 	Stores MPI IO communicator information to the file 
-!		access property list. 
+! Purpose: 	Stores MPI IO communicator information to the file
+!		access property list.
 !
-! Inputs:  	
+! Inputs:
 !		prp_id		- file access property list identifier
 !		comm		- MPI-2 communicator
 !		use_gpfs	- logical flag to use the GPFS hints
-! Outputs:  
-!		hdferr:		- error code		
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
@@ -192,9 +192,9 @@
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-         SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr) 
+         SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
@@ -205,38 +205,38 @@
 
             INTEGER, EXTERNAL :: h5pset_fapl_mpiposix_c
             flag = 0
-            if(use_gpfs) flag = 1 
+            if(use_gpfs) flag = 1
             hdferr = h5pset_fapl_mpiposix_c(prp_id, comm, flag)
           END SUBROUTINE h5pset_fapl_mpiposix_f
 
 !----------------------------------------------------------------------
-! Name:		h5pget_fapl_mpiposix_f 
+! Name:		h5pget_fapl_mpiposix_f
 !
-! Purpose: 	Returns MPI communicator information. 	
+! Purpose: 	Returns MPI communicator information.
 !
-! Inputs:  
+! Inputs:
 !		prp_id		- file access property list identifier
-! Outputs:  
+! Outputs:
 !		comm		- MPI-2 communicator
 !		use_gpfs        - flag to use GPFS hints
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Elena Pourmal
 !		May 6, 2003
 !
-! Modifications: 
+! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr) 
+          SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator 
+            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator
             LOGICAL, INTENT(OUT) :: use_gpfs
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
             INTEGER :: flag

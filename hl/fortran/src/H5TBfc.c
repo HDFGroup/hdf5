@@ -123,7 +123,7 @@ nh5tbmake_table_c(int_f *namelen1,
             c_chunk_size, NULL, *compress, NULL) < 0)
         HGOTO_DONE(FAIL)
 
-done: 
+done:
     if(c_name)
         HDfree(c_name);
     if(c_name1)

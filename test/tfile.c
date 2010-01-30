@@ -2095,8 +2095,8 @@ test_cached_stab_info(void)
 /****************************************************************
 **
 **  test_rw_noupdate(): low-level file test routine.
-**      This test checks to ensure that opening and closing a file 
-**      with read/write permissions does not write anything to the 
+**      This test checks to ensure that opening and closing a file
+**      with read/write permissions does not write anything to the
 **      file if the file does not change.
 **
 **  Programmer: Mike McGreevy
@@ -2533,8 +2533,8 @@ test_userblock_alignment(void)
 
 /****************************************************************
 **
-**  test_free_sections(): 
-**      This routine does the actual work of checking information for 
+**  test_free_sections():
+**      This routine does the actual work of checking information for
 **	free space sections available in a file in various situations.
 **
 *****************************************************************/
@@ -2636,7 +2636,7 @@ test_free_sections(hid_t fapl, char *fname)
     /* Verify the correct # of free-space sections */
     nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)saved_nsects, saved_sect_info);
     VERIFY(nsects, saved_nsects, "H5Fget_free_sections");
-    
+
     /* Verify the amount of free-space is correct */
     total = 0;
     for(i = 0; i < nsects; i++)
@@ -2703,7 +2703,7 @@ test_free_sections(hid_t fapl, char *fname)
 
 /****************************************************************
 **
-**  test_filespace_sects(): 
+**  test_filespace_sects():
 **      This test checks free space section info for
 **	files created with sec2 and split drivers.
 **
@@ -2815,8 +2815,8 @@ test_filespace_sects(void)
 
 /****************************************************************
 **
-**  test_filespace_info(): 
-**	Verify that the public routines H5Pget/set_file_space() 
+**  test_filespace_info():
+**	Verify that the public routines H5Pget/set_file_space()
 **	retrieve and set the file space strategy and free space
 **	section threshold as specified.
 **
@@ -2939,7 +2939,7 @@ test_filespace_info(void)
 
 /****************************************************************
 **
-**  test_filespace_compatible(): 
+**  test_filespace_compatible():
 **	Verify that the branch with file space management enhancement
 **	can open, read and modify 1.6 HDF5 file and 1.8 HDF5 file.
 **	Also verify the correct file space strategy/threshold in use
@@ -3061,7 +3061,7 @@ test_filespace_compatible(void)
 
 /****************************************************************
 **
-**  test_deprec(): 
+**  test_deprec():
 **	Test deprecated functionality.
 **
 ****************************************************************/

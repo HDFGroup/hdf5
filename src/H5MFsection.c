@@ -480,7 +480,7 @@ H5MF_sect_simple_free(H5FS_section_info_t *_sect)
  */
 static herr_t
 H5MF_sect_simple_valid(const H5FS_section_class_t UNUSED *cls,
-    const H5FS_section_info_t 
+    const H5FS_section_info_t
 #ifdef NDEBUG
     UNUSED
 #endif /* NDEBUG */

@@ -570,7 +570,7 @@ typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 /*
  * Free space manager info Message.
- * Contains file space management info and 
+ * Contains file space management info and
  * addresses of free space managers for file memory
  * (Data structure in memory)
  */

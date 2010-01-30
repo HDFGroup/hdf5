@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * This file is modified based on earray.c.
  */
 #include "h5test.h"
@@ -37,7 +37,7 @@
 #define FARRAY_FILENAME_LEN     1024
 
 /* Fixed array creation values */
-#define ELMT_SIZE      	sizeof(uint64_t) 
+#define ELMT_SIZE      	sizeof(uint64_t)
 #define MAX_DBLOCK_PAGE_NELMTS_BITS     10      /* 2^10 = 1024 elements per data block page */
 
 /* Testing # of elements in the Fixed Array */
@@ -130,8 +130,8 @@ init_cparam(H5FA_create_t *cparam, farray_test_param_t *tparam)
 
     cparam->cls = H5FA_CLS_TEST;
     cparam->raw_elmt_size = ELMT_SIZE;
-    cparam->max_dblk_page_nelmts_bits = MAX_DBLOCK_PAGE_NELMTS_BITS;	
-    cparam->nelmts = tparam->nelmts;	
+    cparam->max_dblk_page_nelmts_bits = MAX_DBLOCK_PAGE_NELMTS_BITS;
+    cparam->nelmts = tparam->nelmts;
 
     return(0);
 } /* init_cparam() */
@@ -187,19 +187,19 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if(farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", 
+        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n",
 	    farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR
     } /* end if */
 
     if(farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n", 
+        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n",
 	    farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR
     } /* end if */
 
     if(farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n", 
+        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n",
 	    farray_stats.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
@@ -242,9 +242,9 @@ set_fa_state(const H5FA_create_t *cparam, farray_state_t *state)
 	size_t dblk_page_init_size = (npages + 7) / 8;
 	hsize_t checksum_size = npages * 4;
 
-	state->dblk_size = DBLOCK_PREFIX + dblk_page_init_size + checksum_size + 
+	state->dblk_size = DBLOCK_PREFIX + dblk_page_init_size + checksum_size +
 			    state->nelmts * cparam->raw_elmt_size;
-    } else 
+    } else
 	state->dblk_size = DBLOCK_PREFIX + state->nelmts * cparam->raw_elmt_size;
 
     return(0);
@@ -392,7 +392,7 @@ finish(hid_t file, hid_t fapl, H5F_t *f, H5FA_t *fa, haddr_t fa_addr)
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
     /* Close the fixed array */
-    if(H5FA_close(fa, H5P_DATASET_XFER_DEFAULT) < 0) 
+    if(H5FA_close(fa, H5P_DATASET_XFER_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Delete array */
@@ -1229,7 +1229,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam,
     uint64_t    welmt;                  /* Element to write */
     uint64_t    relmt;                  /* Element to read */
     hsize_t     cnt;                    /* Count of array indices */
-    hssize_t    sidx;                   /* Index value of next element in the fixed array */ 
+    hssize_t    sidx;                   /* Index value of next element in the fixed array */
     hsize_t     idx;                    /* Index value of next element in the fixed array */
     hsize_t	fa_nelmts;		/* # of elements in fixed array */
     haddr_t     fa_addr = HADDR_UNDEF;  /* Array address in file */
@@ -1625,7 +1625,7 @@ main(void)
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), TRUE, "skipping to last element");
 
 	/* Create Fixed Array of MAX_NELMTS elements */
-	/* 
+	/*
 	 * MAX_NELMTS succeeds on jam and smirom.
 	 * The value was adjusted for linew due to the following:
 	    Linew failed with "H5FD_sec2_truncate(): unable to extend file properly"

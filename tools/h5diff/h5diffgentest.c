@@ -334,7 +334,7 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
     }
 
     /*------------------------------------------------------------------------
-     *            INFINITY values 
+     *            INFINITY values
      *------------------------------------------------------------------------
      */
     {
@@ -2385,7 +2385,7 @@ void write_dset_in(hid_t loc_id,
     n = 0;
     for(i = 0; i < 3; i++)
     {
-        for(j = 0; j < 2; j++) 
+        for(j = 0; j < 2; j++)
         {
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
@@ -2431,7 +2431,7 @@ void write_dset_in(hid_t loc_id,
     */
 
 
-    if (make_diffs) 
+    if (make_diffs)
     {
         memset(buf72, 0, sizeof buf72);
         memset(buf82, 0, sizeof buf82);
@@ -2501,13 +2501,13 @@ void write_dset_in(hid_t loc_id,
 
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                     buf23[i][j][k]=0;
                 else buf23[i][j][k]=n++;
             }
@@ -2534,13 +2534,13 @@ void write_dset_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                 {
                     buf33[i][j][k].a=0;
                     buf33[i][j][k].b=0;
@@ -2598,7 +2598,7 @@ void write_dset_in(hid_t loc_id,
     {
         for(j = 0; j < 3; j++)
         {
-            for(k = 0; k < 2; k++) 
+            for(k = 0; k < 2; k++)
             {
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;

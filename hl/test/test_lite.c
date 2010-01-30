@@ -1606,7 +1606,7 @@ out:
         free(line);
     if(fp)
         fclose(fp);
-    
+
     H5_FAILED();
     return -1;
 }

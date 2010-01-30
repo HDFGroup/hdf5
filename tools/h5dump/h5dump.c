@@ -717,7 +717,7 @@ usage(const char *prog)
 /*-------------------------------------------------------------------------
  * Function: table_list_add
  *
- * Purpose: Add a new set of tables 
+ * Purpose: Add a new set of tables
  *
  * Return: index of added table on success, -1 on failure
  *
@@ -1191,17 +1191,17 @@ print_datatype(hid_t type,unsigned in_group)
 
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
-                /* The BNF document states that the type of reference should be 
-                 * displayed after "H5T_REFERENCE". Therefore add the missing 
-                 * reference type if the region command line option is used. This 
+                /* The BNF document states that the type of reference should be
+                 * displayed after "H5T_REFERENCE". Therefore add the missing
+                 * reference type if the region command line option is used. This
                  * reference type will not be displayed if the region option is not used. */
                 if(display_region) {
                     if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
                         printf(" { H5T_STD_REF_DSETREG }");
-                    } 
+                    }
                     else {
                         printf(" { H5T_STD_REF_OBJECT }");
-                    }        
+                    }
                 }
                 break;
 
@@ -2500,14 +2500,14 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
 
         H5Tclose(f_type);
-    } 
+    }
     else {
         /* need to call h5tools_dump_mem for the attribute data */
         space = H5Aget_space(obj_id);
         space_type = H5Sget_simple_extent_type(space);
         if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
             status = SUCCEED;
-        } 
+        }
         else {
             char        string_prefix[64];
             h5tool_format_t    string_dataformat;
@@ -3278,7 +3278,7 @@ set_binary_form(const char *form)
  int bform=-1;
 
  if (strcmp(form,"NATIVE")==0 ||
-     strcmp(form,"MEMORY")==0) 
+     strcmp(form,"MEMORY")==0)
  {/* native form */
   bform = 0;
  }
@@ -4384,7 +4384,7 @@ main(int argc, const char *argv[])
         d_status = EXIT_FAILURE;
         goto done;
     }
-        
+
     /* Initialize object tables */
     if(table_list_add(fid, oi.fileno) < 0) {
         error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);

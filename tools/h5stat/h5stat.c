@@ -34,7 +34,7 @@
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {
-    "unknown",			
+    "unknown",
     "H5F_FILE_SPACE_ALL_PERSIST",
     "H5F_FILE_SPACE_ALL",
     "H5F_FILE_SPACE_AGGR_VFD",
@@ -781,7 +781,7 @@ freespace_stats(hid_t fid, iter_t *iter)
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
  *
- * Modifications: 
+ * Modifications:
  *	Vailin Choi; October 2009
  *	Turn on display_group_metadata, display_dset_metadata
  *	Add 'S' & 's' for printing free space info (previous checkin)
@@ -1149,13 +1149,13 @@ print_dataset_info(const iter_t *iter)
 /*-------------------------------------------------------------------------
  * Function: print_dset_dtype_info
  *
- * Purpose: Prints datasets' datatype information 
+ * Purpose: Prints datasets' datatype information
  *
  * Return: Success: 0
  *
  * Failure: Never fails
  *
- * Programmer: 
+ * Programmer:
  *
  * Modifications:
  *	Vailin Choi; October 2009
@@ -1178,7 +1178,7 @@ print_dset_dtype_info(const iter_t *iter)
 	for(u = 0; u < iter->dset_ntypes; u++) {
 	    H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
 	    printf("\tDataset datatype #%u:\n", u);
-	    printf("\t\tCount (total/named) = (%lu/%lu)\n", 
+	    printf("\t\tCount (total/named) = (%lu/%lu)\n",
 		iter->dset_type_info[u].count, iter->dset_type_info[u].named);
 	    printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
 		(unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
@@ -1284,7 +1284,7 @@ print_storage_summary(const iter_t *iter)
 
     percent = ((float)iter->free_space / (float)iter->filesize) * 100;
     HDfprintf(stdout, "  Amount/Percent of tracked free space: %Hu bytes/%3.1f%\n",
-	    iter->free_space, percent); 
+	    iter->free_space, percent);
 
     if(iter->filesize < (total_meta+iter->dset_storage_size+iter->free_space)) {
 	unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
@@ -1295,7 +1295,7 @@ print_storage_summary(const iter_t *iter)
 	HDfprintf(stdout, "  Unaccounted space: %Hu bytes\n", unaccount);
     }
 
-    HDfprintf(stdout, "Total space: %Hu bytes\n", 
+    HDfprintf(stdout, "Total space: %Hu bytes\n",
 	    total_meta+iter->dset_storage_size+iter->free_space+unaccount);
 
     if(iter->nexternal)
@@ -1331,7 +1331,7 @@ print_file_metadata(const iter_t *iter)
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
     HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
 		iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", 
+    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n",
 		iter->dset_ohdr_info.total_size,
 		iter->dset_ohdr_info.free_size);
     HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
@@ -1367,7 +1367,7 @@ print_file_metadata(const iter_t *iter)
 /*-------------------------------------------------------------------------
  * Function: print_group_metadata
  *
- * Purpose: Prints file space information for groups' metadata 
+ * Purpose: Prints file space information for groups' metadata
  *
  * Return: Success: 0
  *
@@ -1395,7 +1395,7 @@ print_group_metadata(const iter_t *iter)
 /*-------------------------------------------------------------------------
  * Function: print_dataset_metadata
  *
- * Purpose: Prints file space information for datasets' metadata 
+ * Purpose: Prints file space information for datasets' metadata
  *
  * Return: Success: 0
  *
@@ -1559,7 +1559,7 @@ main(int argc, const char *argv[])
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
 	warn_msg(progname, "Unable to retrieve file size\n");
     assert(iter.filesize != 0);
-	
+
     /* Get storge info for file-level structures */
     if(H5Fget_info2(fid, &finfo) < 0)
 	warn_msg(progname, "Unable to retrieve file info\n");
@@ -1593,7 +1593,7 @@ main(int argc, const char *argv[])
 
         u = 0;
         while(hand[u].obj) {
-            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0) 
+            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
 		warn_msg(progname, "Unable to traverse object \"%s\"\n", hand[u].obj);
 	    else
 		print_statistics(hand[u].obj, &iter);

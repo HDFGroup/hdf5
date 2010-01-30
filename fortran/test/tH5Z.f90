@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,17 +11,17 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
     SUBROUTINE filters_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities: h5zfilter_avail_f, h5zunregister_f
 
-   USE HDF5 ! This module contains all necessary modules 
+   USE HDF5 ! This module contains all necessary modules
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error 
+     INTEGER, INTENT(OUT) :: total_error
      LOGICAL :: status
      INTEGER(HID_T)    :: crtpr_id, xfer_id
      INTEGER           :: nfilters
@@ -44,11 +44,11 @@
         CALL h5pset_chunk_f(crtpr_id, RANK, ch_dims, error)
               CALL check("h5pset_chunk_f",error, total_error)
         CALL h5pset_deflate_f(crtpr_id, dlevel, error)
-              CALL check("h5pset_deflate_f", error, total_error) 
+              CALL check("h5pset_deflate_f", error, total_error)
         CALL h5pclose_f(crtpr_id,error)
               CALL check("h5pclose_f", error, total_error)
      endif
-        
+
 !
 ! Shuffle filter
 !
@@ -60,11 +60,11 @@
         CALL h5pset_chunk_f(crtpr_id, RANK, ch_dims, error)
               CALL check("h5pset_chunk_f",error, total_error)
         CALL h5pset_shuffle_f(crtpr_id, error)
-              CALL check("h5pset_shuffle_f", error, total_error) 
+              CALL check("h5pset_shuffle_f", error, total_error)
         CALL h5pclose_f(crtpr_id,error)
               CALL check("h5pclose_f", error, total_error)
      endif
-        
+
 !
 ! Checksum filter
 !
@@ -76,7 +76,7 @@
         CALL h5pset_chunk_f(crtpr_id, RANK, ch_dims, error)
               CALL check("h5pset_chunk_f",error, total_error)
         CALL h5pset_fletcher32_f(crtpr_id, error)
-              CALL check("h5pset_fletcher32_f", error, total_error) 
+              CALL check("h5pset_fletcher32_f", error, total_error)
         CALL h5pclose_f(crtpr_id,error)
               CALL check("h5pclose_f", error, total_error)
         CALL h5pcreate_f(H5P_DATASET_XFER_F, xfer_id, error)
@@ -106,11 +106,11 @@
             CALL h5pcreate_f(H5P_DATASET_CREATE_F, crtpr_id, error)
                   CALL check("h5pcreate_f", error, total_error)
             CALL h5pset_fletcher32_f(crtpr_id, error)
-                  CALL check("h5pset_fletcher32_f", error, total_error) 
+                  CALL check("h5pset_fletcher32_f", error, total_error)
             CALL h5pset_shuffle_f(crtpr_id, error)
-                  CALL check("h5pset_shuffle_f", error, total_error) 
+                  CALL check("h5pset_shuffle_f", error, total_error)
             CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
-                  CALL check("h5pget_nfilters_f", error, total_error) 
+                  CALL check("h5pget_nfilters_f", error, total_error)
 
             ! Verify the correct number of filters
             if (nfilters .ne. 2) then
@@ -120,11 +120,11 @@
 
             ! Delete a single filter
             CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_SHUFFLE_F, error)
-                  CALL check("h5pset_shuffle_f", error, total_error) 
+                  CALL check("h5pset_shuffle_f", error, total_error)
 
             ! Verify the correct number of filters now
             CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
-                  CALL check("h5pget_nfilters_f", error, total_error) 
+                  CALL check("h5pget_nfilters_f", error, total_error)
             if (nfilters .ne. 1) then
                   write(*,*) "number of filters is wrong"
                   total_error = total_error + 1
@@ -132,11 +132,11 @@
 
             ! Delete all filters
             CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_ALL_F, error)
-                  CALL check("h5premove_filter_f", error, total_error) 
+                  CALL check("h5premove_filter_f", error, total_error)
 
             ! Verify the correct number of filters now
             CALL h5pget_nfilters_f(crtpr_id, nfilters, error)
-                  CALL check("h5pget_nfilters_f", error, total_error) 
+                  CALL check("h5pget_nfilters_f", error, total_error)
             if (nfilters .ne. 0) then
                   write(*,*) "number of filters is wrong"
                   total_error = total_error + 1
@@ -150,24 +150,24 @@
      END SUBROUTINE filters_test
 
         SUBROUTINE szip_test(szip_flag, cleanup, total_error)
-        USE HDF5 ! This module contains all necessary modules 
+        USE HDF5 ! This module contains all necessary modules
 
           IMPLICIT NONE
           LOGICAL, INTENT(OUT) :: szip_flag
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
- 
+          INTEGER, INTENT(OUT) :: total_error
+
 
           CHARACTER(LEN=4), PARAMETER :: filename = "szip" ! File name
-          CHARACTER(LEN=80) :: fix_filename 
+          CHARACTER(LEN=80) :: fix_filename
           CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
           INTEGER, PARAMETER :: N = 1024
           INTEGER, PARAMETER :: NN = 64
           INTEGER, PARAMETER :: M = 512
           INTEGER, PARAMETER :: MM = 32
 
-          INTEGER(HID_T) :: file_id       ! File identifier 
-          INTEGER(HID_T) :: dset_id       ! Dataset identifier 
+          INTEGER(HID_T) :: file_id       ! File identifier
+          INTEGER(HID_T) :: dset_id       ! Dataset identifier
           INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
           INTEGER(HID_T) :: dtype_id      ! Datatype identifier
 
@@ -183,9 +183,9 @@
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HID_T) ::  crp_list
-          INTEGER :: options_mask, pix_per_block 
+          INTEGER :: options_mask, pix_per_block
           LOGICAL :: flag
-          CHARACTER(LEN=4) filter_name 
+          CHARACTER(LEN=4) filter_name
 
           INTEGER :: filter_flag = -1
           INTEGER(SIZE_T) :: cd_nelemnts = 4
@@ -213,7 +213,7 @@
           CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flag, error)
               CALL check("h5zget_filter_info_f", error, total_error)
           ! Quit if failed
-          if (error .ne. 0) return 
+          if (error .ne. 0) return
           !
           ! Make sure h5zget_filter_info_f returns the right flag
           !
@@ -225,10 +225,10 @@
                      CALL check("h5zget_filter_info_f config_flag", error, total_error)
                   endif
               endif
-          endif    
+          endif
 
           ! Continue only when encoder is available
-          if ( IAND(config_flag,  H5Z_FILTER_ENCODE_ENABLED_F) .EQ. 0 ) return 
+          if ( IAND(config_flag,  H5Z_FILTER_ENCODE_ENABLED_F) .EQ. 0 ) return
 
           options_mask = H5_SZIP_NN_OM_F
           pix_per_block = 32
@@ -244,7 +244,7 @@
 
           !
           ! Create a new file using default properties.
-          ! 
+          !
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
@@ -254,12 +254,12 @@
               CALL check("h5fcreate_f", error, total_error)
 
 
-          ! 
+          !
           ! Create the dataspace.
           !
           CALL h5screate_simple_f(rank, dims, dspace_id, error)
               CALL check("h5screate_simple_f", error, total_error)
-          
+
           CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
               CALL check("h5pcreat_f",error,total_error)
 
@@ -277,11 +277,11 @@
              total_error = -1
              return
           endif
- 
+
          CALL h5pget_filter_by_id_f(crp_list, H5Z_FILTER_SZIP_F, filter_flag, &
- 
+
                                     cd_nelemnts, cd_values,&
- 
+
                                     filter_name_len, filter_name, error)
                CALL check("h5pget_filter_by_id_f",error,total_error)
           !
@@ -300,9 +300,9 @@
               CALL check("h5dwrite_f", error, total_error)
 
 
-          !   
+          !
           ! End access to the dataset and release resources used by it.
-          ! 
+          !
           CALL h5dclose_f(dset_id, error)
               CALL check("h5dclose_f", error, total_error)
 
@@ -312,7 +312,7 @@
           CALL h5sclose_f(dspace_id, error)
               CALL check("h5sclose_f", error, total_error)
 
-          ! 
+          !
           ! Close the file.
           !
              CALL h5pclose_f(crp_list, error)
@@ -326,20 +326,20 @@
               CALL check("h5fopen_f", error, total_error)
 
           !
-          ! Open the existing dataset. 
+          ! Open the existing dataset.
           !
           CALL h5dopen_f(file_id, dsetname, dset_id, error)
               CALL check("h5dopen_f", error, total_error)
                CALL check("h5pget_filter_by_id_f",error,total_error)
 
           !
-          ! Get the dataset type. 
+          ! Get the dataset type.
           !
           CALL h5dget_type_f(dset_id, dtype_id, error)
               CALL check("h5dget_type_f", error, total_error)
 
           !
-          ! Get the data space. 
+          ! Get the data space.
           !
           CALL h5dget_space_f(dset_id, dspace_id, error)
               CALL check("h5dget_space_f", error, total_error)
@@ -352,10 +352,10 @@
 
           !
           !Compare the data.
-          ! 
+          !
           do i = 1, N
               do j = 1, M
-                  IF (data_out(i,j) .NE. dset_data(i, j)) THEN 
+                  IF (data_out(i,j) .NE. dset_data(i, j)) THEN
                       write(*, *) "dataset test error occured"
                       write(*,*) "data read is not the same as the data written"
                       num_errors = num_errors + 1
@@ -364,15 +364,15 @@
                         goto 100
                       END IF
                   END IF
-              end do    
+              end do
           end do
 100       IF (num_errors .GT. 0) THEN
             total_error=total_error + 1
           END IF
 
-          !   
+          !
           ! End access to the dataset and release resources used by it.
-          ! 
+          !
           CALL h5dclose_f(dset_id, error)
               CALL check("h5dclose_f", error, total_error)
 
@@ -387,7 +387,7 @@
           !
           CALL h5tclose_f(dtype_id, error)
               CALL check("h5tclose_f", error, total_error)
-          ! 
+          !
           ! Close the file.
           !
           CALL h5fclose_f(file_id, error)
@@ -395,6 +395,6 @@
           if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
           endif ! SZIP available
-     
+
           RETURN
         END SUBROUTINE szip_test

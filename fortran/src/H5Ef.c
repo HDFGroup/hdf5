@@ -62,7 +62,7 @@ nh5eprint_c1(_fcd name, int_f* namelen)
     FILE *file = NULL;
     char *c_name = NULL;
     int_f ret_value = 0;
-    
+
     if(NULL == (c_name = (char*)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
     if(NULL == (file = HDfopen(c_name, "a")))
@@ -138,9 +138,9 @@ nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen);
-    if(!HDstrcmp(c_name, "Invalid major error number")) 
+    if(!HDstrcmp(c_name, "Invalid major error number"))
         HGOTO_DONE(FAIL)
-    
+
 done:
     if(c_name)
         HDfree(c_name);
@@ -176,13 +176,13 @@ nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
      */
     H5Eget_msg((hid_t)*error_no, NULL, c_name, c_namelen);
     HD5packFstring((char *)c_name, _fcdtocp(name), c_namelen);
-    if(!HDstrcmp(c_name, "Invalid minor error number")) 
+    if(!HDstrcmp(c_name, "Invalid minor error number"))
         HGOTO_DONE(FAIL)
-    
+
 done:
     if(c_name)
         HDfree(c_name);
-        
+
     return ret_value;
 }
 

@@ -149,10 +149,10 @@ herr_t H5DSattach_scale(hid_t did,
     * parameter checking
     *-------------------------------------------------------------------------
     */
-   
+
     if ((is_scale = H5DSis_scale(did)) < 0)
         return FAIL;
-  
+
     /* the dataset cannot be a DS dataset */
     if ( is_scale == 1)
         return FAIL;
@@ -473,7 +473,7 @@ herr_t H5DSattach_scale(hid_t did,
 
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
-        
+
         if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
             goto out;
 
@@ -656,10 +656,10 @@ herr_t H5DSdetach_scale(hid_t did,
     * parameter checking
     *-------------------------------------------------------------------------
     */
-   
+
     if ((is_scale = H5DSis_scale(did)) < 0)
         return FAIL;
-  
+
     /* the dataset cannot be a DS dataset */
     if ( is_scale == 1)
         return FAIL;
@@ -770,7 +770,7 @@ herr_t H5DSdetach_scale(hid_t did,
                 goto out;
 
             /* same object, reset */
-            if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr) 
+            if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
             {
                 size_t len;
 
@@ -778,13 +778,13 @@ herr_t H5DSdetach_scale(hid_t did,
                 {
                     ((hobj_ref_t *)buf[idx].p)[jj] = ((hobj_ref_t *)buf[idx].p)[jj+1];
                 }
-               
+
                 buf[idx].len--;
                 len = buf[idx].len;
                 buf[idx].p = realloc( buf[idx].p, len * sizeof(hobj_ref_t));
-                
+
                 found_ds = 1;
-                
+
                 /* close the dereferenced dataset and break */
                 if (H5Dclose(dsid_j) < 0)
                     goto out;
@@ -831,7 +831,7 @@ herr_t H5DSdetach_scale(hid_t did,
 
     if((tid = H5Aget_type(aid)) < 0)
         goto out;
-    
+
     if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
         goto out;
 
@@ -950,17 +950,17 @@ herr_t H5DSdetach_scale(hid_t did,
     if (H5Tclose(tid) < 0)
         goto out;
 
-    if (dsbuf) 
+    if (dsbuf)
     {
         free(dsbuf);
         dsbuf=NULL;
     }
-    if (dsbufn) 
+    if (dsbufn)
     {
         free(dsbufn);
         dsbufn=NULL;
     }
-    if (dims) 
+    if (dims)
     {
         free(dims);
         dims=NULL;
@@ -976,23 +976,23 @@ out:
         H5Aclose(aid);
         H5Tclose(ntid);
         H5Tclose(tid);
-        
-        if (dsbuf) 
+
+        if (dsbuf)
         {
             free(dsbuf);
             dsbuf=NULL;
         }
-        if (dsbufn) 
+        if (dsbufn)
         {
             free(dsbufn);
             dsbufn=NULL;
         }
-        if (dims) 
+        if (dims)
         {
             free(dims);
             dims=NULL;
         }
-        if (buf) 
+        if (buf)
         {
             free(buf);
             buf=NULL;
@@ -1056,10 +1056,10 @@ htri_t H5DSis_attached(hid_t did,
     * parameter checking
     *-------------------------------------------------------------------------
     */
-   
+
     if ((is_scale = H5DSis_scale(did)) < 0)
         return FAIL;
-  
+
     /* the dataset cannot be a DS dataset */
     if ( is_scale == 1)
         return FAIL;
@@ -1202,10 +1202,10 @@ htri_t H5DSis_attached(hid_t did,
 
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
-        
+
         if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
             goto out;
-        
+
         /* get and save the old reference(s) */
         if((sid = H5Aget_space(aid)) < 0)
             goto out;
@@ -1313,8 +1313,8 @@ out:
 *
 *  hid_t DID;               IN: the dataset
 *  unsigned int DIM;        IN: the dimension of the dataset
-*  int *DS_IDX;             IN/OUT: on input the dimension scale index to start iterating, 
-*                               on output the next index to visit. If NULL, start at 
+*  int *DS_IDX;             IN/OUT: on input the dimension scale index to start iterating,
+*                               on output the next index to visit. If NULL, start at
 *                               the first position.
 *  H5DS_iterate_t VISITOR;  IN: the visitor function
 *  void *VISITOR_DATA;      IN: arbitrary data to pass to the visitor function.
@@ -1455,7 +1455,7 @@ herr_t H5DSiterate_scales(hid_t did,
                 if((ret_value=(visitor)(did,dim,scale_id,visitor_data))!=0)
                 {
                     /* break */
-                    
+
                     /* close the DS id */
                     if (H5Dclose(scale_id) < 0)
                         goto out;
@@ -1521,7 +1521,7 @@ out:
 *-------------------------------------------------------------------------
 */
 
-herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) 
+herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
 {
     int        has_labels;
     hid_t      sid = -1;      /* space ID */
@@ -1573,7 +1573,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
     *-------------------------------------------------------------------------
     */
 
-    if (has_labels == 0) 
+    if (has_labels == 0)
     {
         dims[0] = rank;
 
@@ -1626,7 +1626,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
     *-------------------------------------------------------------------------
     */
 
-    else 
+    else
     {
         if ((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
             goto out;
@@ -1659,7 +1659,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
         buf[idx] = NULL;
 
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < (unsigned int) rank; i++) 
+        for (i = 0; i < (unsigned int) rank; i++)
         {
             if (buf[i])
                 free((void *)buf[i]);
@@ -1680,13 +1680,13 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
     return SUCCEED;
 
     /* error zone */
-out: 
-    if (buf) 
+out:
+    if (buf)
     {
         if (buf[idx]) /* check if we errored during H5Awrite */
             buf[idx] = NULL; /* don't free label */
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < (unsigned int) rank; i++) 
+        for (i = 0; i < (unsigned int) rank; i++)
         {
             if (buf[i])
                 free((void *)buf[i]);
@@ -1723,7 +1723,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) 
+ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
 {
     int        has_labels;
     hid_t      sid = -1;     /* space ID */
@@ -1772,12 +1772,12 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
         return FAIL;
 
     /* return 0 and NULL for label if no label found */
-    if (has_labels == 0) 
+    if (has_labels == 0)
     {
         if (label)
             label[0] = 0;
         return 0;
-    }   
+    }
 
     /*-------------------------------------------------------------------------
     * open the attribute and read label
@@ -1808,7 +1808,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     copy_len = MIN(size-1, nbytes);
 
     /* copy all/some of the name */
-    if (label) 
+    if (label)
     {
         memcpy(label, buf[idx], copy_len);
 
@@ -1817,7 +1817,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     }
 
     /* free all the ptr's from the H5Aread() */
-    for (i = 0; i < rank; i++) 
+    for (i = 0; i < rank; i++)
     {
         if (buf[i])
             free(buf[i]);
@@ -1837,11 +1837,11 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     return (ssize_t) nbytes;
 
     /* error zone */
-out: 
-    if (buf) 
+out:
+    if (buf)
     {
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < rank; i++) 
+        for (i = 0; i < rank; i++)
         {
             if (buf[i])
                 free(buf[i]);
@@ -2261,7 +2261,7 @@ herr_t H5DS_is_reserved(hid_t did)
 
     /* error zone */
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Tclose(tid);
         H5Aclose(aid);

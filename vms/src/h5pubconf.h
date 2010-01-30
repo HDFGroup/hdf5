@@ -416,7 +416,7 @@
 /* #define H5_HW_FP_TO_LLONG_NOT_WORKS 1 */
 
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
-#define H5_INCLUDE_HL 1 
+#define H5_INCLUDE_HL 1
 
 /* Define if your system can accurately convert from integers to long double
    values. */

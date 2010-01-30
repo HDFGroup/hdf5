@@ -247,7 +247,7 @@ typedef struct s1_t {
 
 /* File 65 macros */
 #define STRATEGY	H5F_FILE_SPACE_AGGR_VFD	/* File space handling strategy */
-#define THRESHOLD10 	10    			/* Free space section threshold */ 
+#define THRESHOLD10 	10    			/* Free space section threshold */
 
 static void
 gent_group(void)

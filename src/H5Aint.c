@@ -1154,7 +1154,7 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
     HDassert(udata->file);
     HDassert(udata->cpy_info);
 
-    if ( NULL == (attr_dst=H5A_attr_copy_file(attr_src, udata->file, 
+    if ( NULL == (attr_dst=H5A_attr_copy_file(attr_src, udata->file,
         udata->recompute_size, udata->cpy_info,  udata->dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
@@ -1190,7 +1190,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst,
     const H5O_ainfo_t *ainfo_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
@@ -1275,7 +1275,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo_src,
     H5O_loc_t *dst_oloc, H5O_ainfo_t *ainfo_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {

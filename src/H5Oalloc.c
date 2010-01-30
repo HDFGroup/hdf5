@@ -1183,7 +1183,7 @@ H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u, hid_t dxpl_id)
     /* Check arguments. */
     HDassert(f);
     HDassert(oh);
- 
+
     cont_msg = &oh->mesg[cont_u];
     H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, cont_msg, FAIL)
     deleted_chunkno = ((H5O_cont_t *)(cont_msg->native))->chunkno;

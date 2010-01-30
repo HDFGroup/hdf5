@@ -2,7 +2,7 @@
 !
 ! NAME
 !   H5_DBLE_INTERFACE
-!  
+!
 ! FUNCTION
 !   This module is used for when the default REAL is of type DOUBLE PRECISION.
 !   We do not include the double precision interfaces if the defaut REAL is
@@ -13,7 +13,7 @@
 !   Empty module.
 !
 ! COPYRIGHT
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -26,7 +26,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! AUTHOR
 !  M.S. Breitenfeld

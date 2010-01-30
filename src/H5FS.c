@@ -835,8 +835,8 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
     haddr_t	saved_addr;
     hsize_t	saved_size;
     unsigned    cache_flags;
-    unsigned 	sinfo_status = 0; 
-    unsigned 	hdr_status = 0; 
+    unsigned 	sinfo_status = 0;
+    unsigned 	hdr_status = 0;
 
     FUNC_ENTER_NOAPI(H5FS_free, FAIL)
 
@@ -881,7 +881,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 	/* Check whether free-space manager header is in cache or not */
 	if(H5AC_get_entry_status(f, fspace->addr, &hdr_status) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to check metadata cache status for free-space section info")
-    
+
         if(hdr_status & H5AC_ES__IN_CACHE) {
 	    /* Unpin the free-space manager header */
 	    if(H5AC_unpin_entry(fspace) < 0)
@@ -902,7 +902,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 	if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, saved_addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
 	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header")
     }
-	
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_free() */

@@ -35,20 +35,20 @@ const char *FILENAME[] = {
     NULL
 };
 
-hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between 
-				    * cache setup and takedown.  Note 
+hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
+				    * cache setup and takedown.  Note
 				    * that if saved_fapl_id == H5P_DEFAULT,
-				    * we assume that there is no fapl to 
+				    * we assume that there is no fapl to
 				    * close.
 				    */
 
-hid_t saved_fid = -1; /* store the file id here between cache setup 
+hid_t saved_fid = -1; /* store the file id here between cache setup
 		       * and takedown.
 		       */
 
-H5C_t * saved_cache = NULL; /* store the pointer to the instance of 
- 			       * of H5C_t created by H5Fcreate() 
-			       * here between test cache setup and 
+H5C_t * saved_cache = NULL; /* store the pointer to the instance of
+ 			       * of H5C_t created by H5Fcreate()
+			       * here between test cache setup and
 			       * shutdown.
 			       */
 
@@ -1626,7 +1626,7 @@ execute_flush_op(H5F_t * file_ptr,
 
 		    /* change the size of some other entry */
 
-		    resize_entry(file_ptr, op_ptr->type, op_ptr->idx, 
+		    resize_entry(file_ptr, op_ptr->type, op_ptr->idx,
                                  op_ptr->size, op_ptr->flag);
 		}
 		break;
@@ -2011,7 +2011,7 @@ resize_pinned_entry(H5C_t * cache_ptr,
 
 		entry_ptr->size = new_size;
 
-	        result = H5C_resize_pinned_entry((void *)entry_ptr, 
+	        result = H5C_resize_pinned_entry((void *)entry_ptr,
 						 new_size);
 
 		if ( result != SUCCEED ) {
@@ -2586,13 +2586,13 @@ setup_cache(size_t max_cache_size,
 	          < 0 ) {
 
 	    core_file_driver_failed = TRUE;
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", fcn_name);
             }
 
         } else {
-	
+
 	    saved_fapl_id = fapl_id;
 	}
     }
@@ -2601,12 +2601,12 @@ setup_cache(size_t max_cache_size,
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* if we either aren't using the core file driver, or a create 
+    /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
      * If this fails, we are cooked.
      */
     if ( ( pass ) && ( fid < 0 ) ) {
-    
+
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
 	saved_fid = fid;
@@ -2615,7 +2615,7 @@ setup_cache(size_t max_cache_size,
 
             pass = FALSE;
             failure_mssg = "H5Fcreate() failed.";
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", fcn_name);
             }
@@ -2636,7 +2636,7 @@ setup_cache(size_t max_cache_size,
 
             pass = FALSE;
             failure_mssg = "H5Fflush() failed.";
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
             }
@@ -2649,7 +2649,7 @@ setup_cache(size_t max_cache_size,
 
                 pass = FALSE;
                 failure_mssg = "Can't get file_ptr.";
-        
+
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
                 }
@@ -2679,15 +2679,15 @@ setup_cache(size_t max_cache_size,
 	 * and we have modified many cache routines to use a file
 	 * pointer to look up the target cache.
 	 *
-	 * Thus we now make note of the address of the instance of 
-	 * H5C_t created by the call to H5Fcreate(), set 
+	 * Thus we now make note of the address of the instance of
+	 * H5C_t created by the call to H5Fcreate(), set
 	 * file_ptr->shared->cache to NULL, call H5C_create()
 	 * to allocate a new instance of H5C_t for test purposes,
-	 * and store than new instance's address in 
+	 * and store than new instance's address in
 	 * file_ptr->shared->cache.
 	 *
 	 * On shut down, we call H5C_dest on our instance of H5C_t,
-	 * set file_ptr->shared->cache to point to the original 
+	 * set file_ptr->shared->cache to point to the original
 	 * instance, and then close the file normally.
 	 */
 
@@ -2714,7 +2714,7 @@ setup_cache(size_t max_cache_size,
                   fcn_name, mile_stone++, (int)pass);
 
     if ( pass ) {
-	    
+
 	if ( cache_ptr == NULL ) {
 
             pass = FALSE;
@@ -2741,14 +2741,14 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, 
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if ( actual_base_addr == HADDR_UNDEF ) {
 
             pass = FALSE;
 	    failure_mssg = "H5MF_alloc() failed.";
-	    
+
 	    if ( verbose ) {
                 HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
             }
@@ -2763,7 +2763,7 @@ setup_cache(size_t max_cache_size,
 	    failure_mssg = "actual_base_addr > BASE_ADDR";
 
 	    if ( verbose ) {
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", 
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
 			  fcn_name);
             }
         }
@@ -2820,7 +2820,7 @@ takedown_cache(H5F_t * file_ptr,
 
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
-	
+
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
         H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT);
@@ -2846,7 +2846,7 @@ takedown_cache(H5F_t * file_ptr,
             if ( NULL == file_ptr )  {
                 file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
                 HDassert ( file_ptr );
-            } 
+            }
 
             H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
                                           (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
@@ -3018,7 +3018,7 @@ flush_cache(H5F_t * file_ptr,
 	        ( cache_ptr->dirty_index_size != 0 ) ) ) {
 
 	if ( verbose ) {
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
 		      "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
 		      fcn_name,
 		      (long long)(cache_ptr->index_len),
@@ -3027,7 +3027,7 @@ flush_cache(H5F_t * file_ptr,
 		      (long long)(cache_ptr->dirty_index_size));
 	}
         pass = FALSE;
-        failure_mssg = 
+        failure_mssg =
 	   "non zero index len/sizes after H5C_flush_cache() with invalidate.";
     }
 
@@ -4020,7 +4020,7 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
             if ( result < 0 )
                 HDfprintf(stdout, "%s: H5C_unprotect() failed.\n", fcn_name);
 
-            if ( entry_ptr->header.is_protected ) 
+            if ( entry_ptr->header.is_protected )
                 HDfprintf(stdout, "%s: entry still protected?!?.\n", fcn_name);
 
             if ( entry_ptr->header.type != &(types[type]) )
@@ -4549,7 +4549,7 @@ row_major_scan_backward(H5F_t * file_ptr,
     if ( pass ) {
 
         cache_ptr = file_ptr->shared->cache;
-        
+
         HDassert( cache_ptr != NULL );
         HDassert( lag >= 10 );
 
@@ -5324,7 +5324,7 @@ hl_col_major_scan_backward(H5F_t * file_ptr,
     if ( pass ) {
 
         cache_ptr = file_ptr->shared->cache;
-     
+
         HDassert( cache_ptr != NULL );
         HDassert( lag > 5 );
         HDassert( max_index >= 500 );

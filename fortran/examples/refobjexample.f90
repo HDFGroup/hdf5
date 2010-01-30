@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,49 +11,49 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 !    This program shows how to create and store references to the objects.
-!    Program creates a file, two groups, a dataset to store integer data and 
-!    a dataset to store references to the objects. 
+!    Program creates a file, two groups, a dataset to store integer data and
+!    a dataset to store references to the objects.
 !    Stored references are used to open the objects they are point to.
 !    Data is written to the dereferenced dataset, and class type is displayed for
 !    the shared datatype.
 !
-     PROGRAM OBJ_REFERENCES 
+     PROGRAM OBJ_REFERENCES
 
-        USE HDF5 ! This module contains all necessary modules 
-        
+        USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
-     CHARACTER(LEN=10), PARAMETER :: filename = "FORTRAN.h5"  ! File 
+     CHARACTER(LEN=10), PARAMETER :: filename = "FORTRAN.h5"  ! File
      CHARACTER(LEN=8), PARAMETER :: dsetnamei = "INTEGERS"    ! Dataset with the integer data
      CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES" ! Dataset wtih object
                                                                      ! references
      CHARACTER(LEN=6), PARAMETER :: groupname1 = "GROUP1"            ! Groups in the file
      CHARACTER(LEN=6), PARAMETER :: groupname2 = "GROUP2"            !
-      
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: grp1_id       ! Group identifiers 
-     INTEGER(HID_T) :: grp2_id       !  
-     INTEGER(HID_T) :: dset_id       ! Dataset identifiers 
-     INTEGER(HID_T) :: dsetr_id      !  
-     INTEGER(HID_T) :: type_id       ! Type identifier  
-     INTEGER(HID_T) :: space_id      ! Dataspace identifiers 
-     INTEGER(HID_T) :: spacer_id     !  
+
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: grp1_id       ! Group identifiers
+     INTEGER(HID_T) :: grp2_id       !
+     INTEGER(HID_T) :: dset_id       ! Dataset identifiers
+     INTEGER(HID_T) :: dsetr_id      !
+     INTEGER(HID_T) :: type_id       ! Type identifier
+     INTEGER(HID_T) :: space_id      ! Dataspace identifiers
+     INTEGER(HID_T) :: spacer_id     !
      INTEGER     ::   error
      INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/5/)
      INTEGER(HSIZE_T), DIMENSION(1) :: dimsr= (/4/)
      INTEGER(HSIZE_T), DIMENSION(1) :: my_maxdims = (/5/)
-     INTEGER :: rank = 1 
-     INTEGER :: rankr = 1 
+     INTEGER :: rank = 1
+     INTEGER :: rankr = 1
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
      INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
      INTEGER :: class
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims, ref_size
      !
-     !  Initialize FORTRAN interface. 
+     !  Initialize FORTRAN interface.
      !
      CALL h5open_f(error)
      !
@@ -61,17 +61,17 @@
      !
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
                                          ! Default file access and file creation
-                                         ! properties are used. 
+                                         ! properties are used.
      !
      !  Create a group in the file
      !
      CALL h5gcreate_f(file_id, groupname1, grp1_id, error)
      !
-     ! Create a group inside the created gorup 
+     ! Create a group inside the created gorup
      !
      CALL h5gcreate_f(grp1_id, groupname2, grp2_id, error)
-     ! 
-     ! Create dataspaces for datasets   
+     !
+     ! Create dataspaces for datasets
      !
      CALL h5screate_simple_f(rank, dims, space_id, error, maxdims=my_maxdims)
      CALL h5screate_simple_f(rankr, dimsr, spacer_id, error)
@@ -92,7 +92,7 @@
      CALL h5tcommit_f(file_id, "MyType", type_id, error)
      !
      !  Close dataspaces, groups and integer dataset
-     ! 
+     !
      CALL h5sclose_f(space_id, error)
      CALL h5sclose_f(spacer_id, error)
      CALL h5tclose_f(type_id, error)
@@ -113,7 +113,7 @@
      ! Close the dataset
      !
      CALL h5dclose_f(dsetr_id, error)
-     ! 
+     !
      ! Reopen the dataset with object references and read references to the buffer
      !
      CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
@@ -141,7 +141,7 @@
      ! Get datatype class and display it if it is of a FLOAT class.
      !
      CALL h5tget_class_f(type_id, class, error)
-     if(class .eq. H5T_FLOAT_F) write(*,*) "Stored datatype is of a FLOAT class" 
+     if(class .eq. H5T_FLOAT_F) write(*,*) "Stored datatype is of a FLOAT class"
      !
      ! Close all objects.
      !
@@ -150,10 +150,10 @@
      CALL h5dclose_f(dsetr_id, error)
      CALL h5fclose_f(file_id, error)
      !
-     !  Close FORTRAN interface. 
+     !  Close FORTRAN interface.
      !
      CALL h5close_f(error)
 
-     END PROGRAM OBJ_REFERENCES 
+     END PROGRAM OBJ_REFERENCES
 
 

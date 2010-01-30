@@ -327,7 +327,7 @@ test_copy(void)
  * Modifications:
  *              Raymond Lu
  *              8 December 2009
- *              I added a field of VL string in the compound type to test 
+ *              I added a field of VL string in the compound type to test
  *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
@@ -523,7 +523,7 @@ test_compound_1(void)
     TESTING("compound datatypes");
 
     /* Create the empty type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0) 
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0)
         goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
@@ -626,7 +626,7 @@ test_compound_1(void)
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
 
-    if (H5Tclose (complex_id) < 0) 
+    if (H5Tclose (complex_id) < 0)
         goto error;
 
     PASSED();
@@ -2429,7 +2429,7 @@ test_compound_14(void)
        char         c2;
        char*        str;
     } cmpd_struct_1;
-    
+
     typedef struct cmpd_struct_2 {
        char         c1;
        char         c2;
@@ -2441,7 +2441,7 @@ test_compound_14(void)
     } cmpd_struct_2;
 
     cmpd_struct_1 wdata1 = {'A', 'B', "variable-length string"};
-    
+
     cmpd_struct_1 rdata1;
     cmpd_struct_2 wdata2 = {'C', 'D', "another vlen!", 1, 2, -1, 9001};
     cmpd_struct_2 rdata2;
@@ -4192,9 +4192,9 @@ test_conv_str_3(void)
     ret_value = 0;
 
 error:
-    if(buf) 
+    if(buf)
         HDfree(buf);
-    if(tag) 
+    if(tag)
         HDfree(tag);
     reset_hdf5();
     return ret_value;  /* Number of errors */
@@ -5016,7 +5016,7 @@ test_encode(void)
         printf("Can't copy a string type\n");
         goto error;
     } /* end if */
-    if(H5Tset_size(tid3, H5T_VARIABLE) < 0) { 
+    if(H5Tset_size(tid3, H5T_VARIABLE) < 0) {
         H5_FAILED();
         printf("Can't the string type to be variable-length\n");
         goto error;

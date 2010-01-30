@@ -374,8 +374,8 @@ done:
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to ssize_t to  accommadate 
- *              potential large number of objects. 
+ *              Changed the return value to ssize_t to  accommadate
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -415,8 +415,8 @@ done:
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to size_t to accommadate 
- *              potential large number of objects. 
+ *              Changed the return value to size_t to accommadate
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -447,8 +447,8 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref)
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to ssize_t and MAX_OBJTS to size_t to 
- *              accommadate potential large number of objects. 
+ *              Changed the return value to ssize_t and MAX_OBJTS to size_t to
+ *              accommadate potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -466,7 +466,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
     HDassert(oid_list);
- 
+
     /* H5F_get_objects doesn't fail */
     ret_value = (ssize_t)H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
 
@@ -489,7 +489,7 @@ done:
  *              Raymond Lu
  *              24 September 2008
  *              Changed the return value and MAX_OBJTS to size_t to accommadate
- *              potential large number of objects. 
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -546,7 +546,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
     } /* end else */
 
     /* Search through file IDs to count the number, and put their
-     * IDs on the object list.  H5I_search returns NULL if no object 
+     * IDs on the object list.  H5I_search returns NULL if no object
      * is found, so don't return failure in this function. */
     if(types & H5F_OBJ_FILE) {
         olist.obj_type = H5I_FILE;
@@ -633,7 +633,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    	(*olist->obj_id_count)++;
 
             /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
              * preset to FALSE) because H5I_search needs the return value of FALSE
              * to continue searching. */
             if(olist->max_index>0 && olist->list_index>=olist->max_index)
@@ -686,7 +686,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             	(*olist->obj_id_count)++;
 
             /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
              * preset to FALSE) because H5I_search needs the return value of FALSE
              * to continue searching. */
             if(olist->max_index>0 && olist->list_index>=olist->max_index)
@@ -2838,7 +2838,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     /* Set version # fields */
     finfo->super.version = f->shared->sblock->super_vers;
     finfo->sohm.version = f->shared->sohm_vers;
-    finfo->free.version = HDF5_FREESPACE_VERSION; 
+    finfo->free.version = HDF5_FREESPACE_VERSION;
 
 done:
     FUNC_LEAVE_API(ret_value)

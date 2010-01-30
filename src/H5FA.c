@@ -29,7 +29,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5FA_MODULE 
+#define H5FA_MODULE
 
 /***********************/
 /* Other Packages Used */
@@ -702,7 +702,7 @@ herr_t, SUCCEED, FAIL,
 H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
 
     /* Local variables */
-    uint8_t             *elmt = NULL; 
+    uint8_t             *elmt = NULL;
     hsize_t		u;
 
     /*

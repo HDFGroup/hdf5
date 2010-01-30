@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,10 +11,10 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! The following example shows how to create an empty dataset. 
+! The following example shows how to create an empty dataset.
 ! It creates a file called 'dsetf.h5', defines the
 ! dataset dataspace, creates a dataset which is a 4x6 integer array,
 ! and then closes the dataspace, the dataset, and the file.
@@ -22,15 +22,15 @@
 
      PROGRAM DSETEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=8), PARAMETER :: filename = "dsetf.h5" ! File name
      CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
 
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: dset_id       ! Dataset identifier 
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: dset_id       ! Dataset identifier
      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
 
 
@@ -46,10 +46,10 @@
 
      !
      ! Create a new file using default properties.
-     ! 
+     !
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
 
-     ! 
+     !
      ! Create the dataspace.
      !
      CALL h5screate_simple_f(rank, dims, dspace_id, error)
@@ -60,9 +60,9 @@
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
                       dset_id, error)
 
-     !   
+     !
      ! End access to the dataset and release resources used by it.
-     ! 
+     !
      CALL h5dclose_f(dset_id, error)
 
      !
@@ -70,7 +70,7 @@
      !
      CALL h5sclose_f(dspace_id, error)
 
-     ! 
+     !
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
@@ -80,6 +80,6 @@
      !
      CALL h5close_f(error)
 
-     END PROGRAM DSETEXAMPLE 
-     
- 
+     END PROGRAM DSETEXAMPLE
+
+
