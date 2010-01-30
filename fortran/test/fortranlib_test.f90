@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,16 +11,16 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! 
+!
 !    Testing Fortran functionality.
 !
 PROGRAM fortranlibtest
-  
+
   USE HDF5
-  
+
   IMPLICIT NONE
   INTEGER :: total_error = 0
   INTEGER :: error
@@ -42,7 +42,7 @@ PROGRAM fortranlibtest
 
      WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
      WRITE(*, '(I1)', advance="NO") majnum
-     WRITE(*, '(".")', advance="NO") 
+     WRITE(*, '(".")', advance="NO")
      WRITE(*, '(I1)', advance="NO") minnum
      WRITE(*, '(" release ")', advance="NO")
      WRITE(*, '(I3)') relnum
@@ -59,7 +59,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL mountingtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Mounting test', total_error)
-  
+
   ret_total_error = 0
   CALL reopentest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
@@ -85,7 +85,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL datasettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset test', total_error)
-  
+
   ret_total_error = 0
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
@@ -107,7 +107,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL refobjtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to object test', total_error)
-  
+
   ret_total_error = 0
   CALL refregtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reference to dataset region test', total_error)
@@ -125,7 +125,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_hyperslab( cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Hyperslab selection test', total_error)
-  
+
   ret_total_error = 0
   CALL test_select_element(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Element selection test', total_error)
@@ -141,7 +141,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_select_bounds(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
-  
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing DATATYPE interface               '
@@ -164,7 +164,7 @@ PROGRAM fortranlibtest
 
 !     write(*,*)
 !     write(*,*) '========================================='
-!     write(*,*) 'Testing PROPERTY interface               ' 
+!     write(*,*) 'Testing PROPERTY interface               '
 !     write(*,*) '========================================='
 
   ret_total_error = 0
@@ -180,7 +180,7 @@ PROGRAM fortranlibtest
 
 !     write(*,*)
 !     write(*,*) '========================================='
-!     write(*,*) 'Testing ATTRIBUTE interface              ' 
+!     write(*,*) 'Testing ATTRIBUTE interface              '
 !     write(*,*) '========================================='
 
   ret_total_error = 0
@@ -202,7 +202,7 @@ PROGRAM fortranlibtest
 
   ret_total_error = 0
   CALL szip_test(szip_flag, cleanup, ret_total_error)
-  
+
   IF (.NOT. szip_flag) THEN ! test not available
      CALL write_test_status(-1, ' SZIP filter test', total_error)
   ELSE
@@ -235,7 +235,7 @@ PROGRAM fortranlibtest
   WRITE(*, fmt = '(i4)', advance='NO') total_error
   WRITE(*, fmt = '(12a)' ) ' error(s) ! '
   WRITE(*,*) '                  ============================================  '
-  
+
   CALL h5close_f(error)
 
   ! if errors detected, exit with non-zero code.

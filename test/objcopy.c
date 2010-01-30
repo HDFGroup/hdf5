@@ -7249,7 +7249,7 @@ static int
 test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
-    hid_t tid = -1;                             /* Datatype ID */   
+    hid_t tid = -1;                             /* Datatype ID */
     hid_t tid2 = -1;                            /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1;                             /* Dataset ID */

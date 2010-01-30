@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,15 +11,15 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! Fortran parallel example.  Copied from Tutorial's example program of
 ! dataset.f90.
 
      PROGRAM DATASET
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      INCLUDE 'mpif.h'
@@ -28,18 +28,18 @@
 
      CHARACTER(LEN=100) :: filename  ! File name
      INTEGER        :: fnamelen	     ! File name length
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: dset_id       ! Dataset identifier 
-     INTEGER(HID_T) :: filespace     ! Dataspace identifier in file 
-     INTEGER(HID_T) :: plist_id      ! Property list identifier 
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: dset_id       ! Dataset identifier
+     INTEGER(HID_T) :: filespace     ! Dataspace identifier in file
+     INTEGER(HID_T) :: plist_id      ! Property list identifier
 
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/5,8/) ! Dataset dimensions.
-!     INTEGER, DIMENSION(7) :: dimsfi = (/5,8,0,0,0,0,0/) 
+!     INTEGER, DIMENSION(7) :: dimsfi = (/5,8,0,0,0,0,0/)
 !     INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi = (/5,8/)
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsfi
 
      INTEGER, ALLOCATABLE :: data(:,:)   ! Data to write
-     INTEGER :: rank = 2 ! Dataset rank 
+     INTEGER :: rank = 2 ! Dataset rank
 
      INTEGER :: error, error_n  ! Error flags
      INTEGER :: i, j
@@ -53,22 +53,22 @@
      info = MPI_INFO_NULL
      CALL MPI_INIT(mpierror)
      CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
-     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror) 
-     ! 
+     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
+     !
      ! Initialize data buffer with trivial data.
      !
      ALLOCATE ( data(dimsf(1),dimsf(2)))
      do i = 1, dimsf(2)
      do j = 1, dimsf(1)
-        data(j,i) = j - 1 + (i-1)*dimsf(1) 
+        data(j,i) = j - 1 + (i-1)*dimsf(1)
      enddo
      enddo
      !
      ! Initialize FORTRAN interface
      !
-     CALL h5open_f(error) 
+     CALL h5open_f(error)
 
-     ! 
+     !
      ! Setup file access property list with parallel I/O access.
      !
      CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
@@ -89,11 +89,11 @@
 
      !
      ! Create the file collectively.
-     ! 
+     !
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plist_id)
      CALL h5pclose_f(plist_id, error)
      !
-     ! Create the data space for the  dataset. 
+     ! Create the data space for the  dataset.
      !
      CALL h5screate_simple_f(rank, dimsf, filespace, error)
 
@@ -105,15 +105,15 @@
      !
      ! Create property list for collective dataset write
      !
-     CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error) 
+     CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
      CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
      !
-     ! For independent write use 
+     ! For independent write use
      ! CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_INDEPENDENT_F, error)
      !
-     
+
      !
-     ! Write the dataset collectively. 
+     ! Write the dataset collectively.
      !
      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, dimsfi, error, &
                       xfer_prp = plist_id)

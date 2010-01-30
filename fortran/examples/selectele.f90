@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,25 +11,25 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-!            This program creates two files, copy1.h5, and copy2.h5. 
-!            In copy1.h5, it creates a 3x4 dataset called 'Copy1',   
-!            and write 0's to this dataset.                         
-!            In copy2.h5, it create a 3x4 dataset called 'Copy2',    
-!            and write 1's to this dataset.                          
-!            It closes both files, reopens both files, selects two   
-!            points in copy1.h5 and writes values to them.  Then it  
-!            uses an H5Scopy to write the same selection to copy2.h5. 
-!            Program reopens the files, and reads and prints the contents of 
-!            the two datasets.   
-!                            
+!            This program creates two files, copy1.h5, and copy2.h5.
+!            In copy1.h5, it creates a 3x4 dataset called 'Copy1',
+!            and write 0's to this dataset.
+!            In copy2.h5, it create a 3x4 dataset called 'Copy2',
+!            and write 1's to this dataset.
+!            It closes both files, reopens both files, selects two
+!            points in copy1.h5 and writes values to them.  Then it
+!            uses an H5Scopy to write the same selection to copy2.h5.
+!            Program reopens the files, and reads and prints the contents of
+!            the two datasets.
+!
 
      PROGRAM SELECTEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=8), PARAMETER :: filename1 = "copy1.h5" ! File name
@@ -41,27 +41,27 @@
 
      INTEGER(SIZE_T), PARAMETER :: NUMP = 2 ! Number of points selected
 
-     INTEGER(HID_T) :: file1_id       ! File1 identifier 
-     INTEGER(HID_T) :: file2_id       ! File2 identifier 
-     INTEGER(HID_T) :: dset1_id       ! Dataset1 identifier 
-     INTEGER(HID_T) :: dset2_id       ! Dataset2 identifier 
-     INTEGER(HID_T) :: dataspace1     ! Dataspace identifier 
-     INTEGER(HID_T) :: dataspace2     ! Dataspace identifier 
-     INTEGER(HID_T) :: memspace       ! memspace identifier 
+     INTEGER(HID_T) :: file1_id       ! File1 identifier
+     INTEGER(HID_T) :: file2_id       ! File2 identifier
+     INTEGER(HID_T) :: dset1_id       ! Dataset1 identifier
+     INTEGER(HID_T) :: dset2_id       ! Dataset2 identifier
+     INTEGER(HID_T) :: dataspace1     ! Dataspace identifier
+     INTEGER(HID_T) :: dataspace2     ! Dataspace identifier
+     INTEGER(HID_T) :: memspace       ! memspace identifier
 
-     INTEGER(HSIZE_T), DIMENSION(1) :: dimsm = (/2/)  
-                                                   ! Memory dataspace dimensions 
+     INTEGER(HSIZE_T), DIMENSION(1) :: dimsm = (/2/)
+                                                   ! Memory dataspace dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/3,4/)
                                                    ! File dataspace dimensions
      INTEGER(HSIZE_T), DIMENSION(RANK,NUMP) :: coord ! Elements coordinates
-                                                      ! in the file 
+                                                      ! in the file
 
      INTEGER, DIMENSION(3,4) :: buf1, buf2, bufnew ! Data buffers
      INTEGER, DIMENSION(2) :: val = (/53, 59/) ! Values to write
- 
+
      INTEGER :: memrank = 1  ! Rank of the dataset in memory
 
-     INTEGER :: i, j 
+     INTEGER :: i, j
 
      INTEGER :: error  ! Error flag
      LOGICAL :: status
@@ -70,11 +70,11 @@
 
    !
    ! Create two files containing identical datasets. Write 0's to one
-   ! and 1's to the other. 
+   ! and 1's to the other.
    !
 
      !
-     ! Data initialization. 
+     ! Data initialization.
      !
      do i = 1, 3
           do j = 1, 4
@@ -87,21 +87,21 @@
                buf2(i,j) = 1;
           end do
      end do
- 
+
      !
-     ! Initialize FORTRAN interface. 
+     ! Initialize FORTRAN interface.
      !
-     CALL h5open_f(error) 
+     CALL h5open_f(error)
 
      !
      ! Create file1, file2  using default properties.
-     ! 
+     !
      CALL h5fcreate_f(filename1, H5F_ACC_TRUNC_F, file1_id, error)
 
      CALL h5fcreate_f(filename2, H5F_ACC_TRUNC_F, file2_id, error)
 
      !
-     ! Create the data space for the  datasets. 
+     ! Create the data space for the  datasets.
      !
      CALL h5screate_simple_f(RANK, dimsf, dataspace1, error)
 
@@ -120,7 +120,7 @@
      ! Write the datasets.
      !
      data_dims(1) = 3
-     data_dims(2) = 4 
+     data_dims(2) = 4
      CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, buf1, data_dims, error)
 
      CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, buf2, data_dims, error)
@@ -147,8 +147,8 @@
      CALL h5fclose_f(file2_id, error)
 
   !
-  ! Open the two files.  Select two points in one file, write values to 
-  ! those point locations, then do H5Scopy and write the values to the  
+  ! Open the two files.  Select two points in one file, write values to
+  ! those point locations, then do H5Scopy and write the values to the
   ! other file.  Close files.
   !
 
@@ -156,7 +156,7 @@
      ! Open the files.
      !
      CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
-       
+
      CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
 
      !
@@ -170,19 +170,19 @@
      ! Get dataset1's dataspace identifier.
      !
      CALL h5dget_space_f(dset1_id, dataspace1, error)
-                                           
+
      !
      ! Create memory dataspace.
      !
      CALL h5screate_simple_f(memrank, dimsm, memspace, error)
-                                                               
+
      !
-     ! Set the selected point positions. Because Fortran array index starts 
+     ! Set the selected point positions. Because Fortran array index starts
      ! from 1, so add one to the actual select points in C.
      !
-     coord(1,1) = 1     
-     coord(2,1) = 2     
-     coord(1,2) = 1     
+     coord(1,1) = 1
+     coord(2,1) = 2
+     coord(1,2) = 1
      coord(2,2) = 4
 
      !
@@ -201,7 +201,7 @@
      !
      ! Copy the daspace1 into dataspace2.
      !
-     CALL h5scopy_f(dataspace1, dataspace2, error)  
+     CALL h5scopy_f(dataspace1, dataspace2, error)
 
      !
      ! Write value into the selected points in dataset2.
@@ -244,7 +244,7 @@
      ! Open the files.
      !
      CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
-       
+
      CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
 
      !
@@ -257,8 +257,8 @@
      !
      ! Read dataset from the first file.
      !
-     data_dims(1) = 3 
-     data_dims(2) = 4 
+     data_dims(1) = 3
+     data_dims(2) = 4
      CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, bufnew, data_dims, error)
 
      !

@@ -327,7 +327,7 @@ typedef struct {
  *              14 Jan. 2009
  *-------------------------------------------------------------------------
  */
-static void 
+static void
 fix_ext_filename(char *path_name, char *cwd, const char *file_name)
 {
     HDstrcpy(path_name, cwd);

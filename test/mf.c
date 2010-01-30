@@ -3669,7 +3669,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4108,7 +4108,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         if((file_size = h5_get_file_size(filename, new_fapl)) < 0)
@@ -4316,7 +4316,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4573,7 +4573,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4902,7 +4902,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5198,7 +5198,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5405,7 +5405,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5674,7 +5674,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5930,7 +5930,7 @@ main(void)
 	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
     } /* end if */
 
-    if (H5Pclose(new_fapl) < 0) 
+    if (H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR
     h5_cleanup(FILENAME, fapl);
 

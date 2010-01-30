@@ -110,7 +110,7 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->delta = atof( opt_arg );
-            
+
             /* -d 0 is the same as default */
             if (options->delta == 0)
             options->d=0;
@@ -223,8 +223,8 @@ void parse_command_line(int argc,
              printf("--------------------------------\n");
              printf("Use -c for a list of objects.\n");
          }
-        
-             
+
+
      }
 
  }
@@ -373,7 +373,7 @@ void usage(void)
  printf("                               DBL_EPSILON = 2.22045E-16 for double\n");
 
  printf("                           -d, -p, and --use-system-epsilon options are used for comparing floating point values.\n");
- printf("                           By default, strict equality is used. Use -p or -d to set specific tolerance.\n");  
+ printf("                           By default, strict equality is used. Use -p or -d to set specific tolerance.\n");
  printf("\n");
 
  printf(" Modes of output:\n");

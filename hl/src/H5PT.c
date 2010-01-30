@@ -215,8 +215,8 @@ out:
  * Modifications:
  *
  * 		John Mainzer -- 4/23/08
- * 		Added error check on malloc of table, initialized fields 
- * 		in table to keep lower level code from choking on bogus 
+ * 		Added error check on malloc of table, initialized fields
+ * 		in table to keep lower level code from choking on bogus
  * 		data in error cases.
  *
  *-------------------------------------------------------------------------

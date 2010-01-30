@@ -698,7 +698,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Since names are hashed, getting them in strictly increasing or 
+        /* Since names are hashed, getting them in strictly increasing or
          *      decreasing order requires building a table and sorting it.
          *      If the order is native, use the B-tree for names.
          */
@@ -716,7 +716,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
-     * use the B-tree for names instead of building a table to speed up the 
+     * use the B-tree for names instead of building a table to speed up the
      * process.
      */
     if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
@@ -1004,7 +1004,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Since names are hashed, getting them in strictly increasing or 
+        /* Since names are hashed, getting them in strictly increasing or
          * decreasing order requires building a table and sorting it. If
          * the order is native, use the B-tree for names.
          */
@@ -1022,7 +1022,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
-     * use the B-tree for names instead of building a table to speed up the 
+     * use the B-tree for names instead of building a table to speed up the
      * process.
      */
     if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
@@ -1209,7 +1209,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Since names are hashed, getting them in strictly increasing or 
+        /* Since names are hashed, getting them in strictly increasing or
          * decreasing order requires building a table and sorting it.  If
          * the order is native, use the B-tree for names.
          */
@@ -1227,7 +1227,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
-     * use the B-tree for names instead of building a table to speed up the 
+     * use the B-tree for names instead of building a table to speed up the
      * process.
      */
     if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
@@ -1647,7 +1647,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Since names are hashed, getting them in strictly increasing or 
+        /* Since names are hashed, getting them in strictly increasing or
          * decreasing order requires building a table and sorting it.  If
          * the order is native, use the B-tree for names.
          */
@@ -1665,14 +1665,14 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     } /* end else */
 
     /* If the order is native and there's no B-tree for indexing the links,
-     * use the B-tree for names instead of building a table to speed up the 
+     * use the B-tree for names instead of building a table to speed up the
      * process.
      */
     if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
         bt2_addr = linfo->name_bt2_addr;
         HDassert(H5F_addr_defined(bt2_addr));
     } /* end if */
- 
+
     /* If there is an index defined for the field, use it */
     if(H5F_addr_defined(bt2_addr)) {
         H5G_bt2_ud_rmbi_t udata;            /* User data for v2 B-tree record removal */

@@ -17,11 +17,11 @@
  * Purpose:     This program is run to generate an HDF5 data file with datasets
  *              that use dimension scales.
  *
- *              Compile and run this program to generate the "test_ds_xx.h5" 
+ *              Compile and run this program to generate the "test_ds_xx.h5"
  *              file, where xx is "le" on a little-endian machine and "be"
  *              on a big-endian machine.
  *              Move it to the test directory in the current branch.
- *              The test: test_foreign_scaleattached(const char *fileforeign) 
+ *              The test: test_foreign_scaleattached(const char *fileforeign)
  *              in test_ds.c will read them.
  */
 
@@ -33,7 +33,7 @@
 
 /* prototypes */
 static hid_t open_test_file(const char *fileext);
-herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx); 
+herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx);
 herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx);
 herr_t test_detach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx);
 herr_t test_set_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx);
@@ -79,7 +79,7 @@ int main(int argc , char **argv)
     int nerrors=0;
     char filename[65];
 
-    
+
     if (argc < 2) {
         printf("Usage: gen_test [le | be]\n");
         return 1;
@@ -102,7 +102,7 @@ int main(int argc , char **argv)
     nerrors += test_duplicatelong_attachscales(filename) < 0  ? 1 : 0;
     nerrors += test_samelong_scalenames(filename) < 0  ? 1 : 0;
     nerrors += test_foreign_scaleattached(filename) < 0  ? 1 : 0;
-    
+
 
     if(nerrors) goto error;
     printf("Dimension scales file generation passed.\n");
@@ -120,7 +120,7 @@ static hid_t open_test_file(const char *fileext)
     strcpy(filename, FILENAME);
     strcat(filename, fileext);
     strcat(filename, FILEEXT);
-    
+
     return H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 }
 
@@ -129,7 +129,7 @@ static hid_t open_test_file(const char *fileext)
  *-------------------------------------------------------------------------
  */
 
-herr_t create_long_dataset(hid_t fid, const char *name, const char *dsidx) 
+herr_t create_long_dataset(hid_t fid, const char *name, const char *dsidx)
 {
     int     rank = 4;
     int     rankds = 1;
@@ -181,11 +181,11 @@ herr_t create_long_dataset(hid_t fid, const char *name, const char *dsidx)
     return SUCCEED;
 }
 
-herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx) 
+herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx)
 {
     herr_t  ret_value = FAIL;
     hid_t   dsid = -1;
-    
+
     if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if(H5DSis_attached(did, dsid, idx) == 0) {
             if(H5DSattach_scale(did, dsid, idx) >= 0) {
@@ -205,7 +205,7 @@ herr_t test_attach_scale(hid_t fid, hid_t did, const char *name, unsigned int id
     return ret_value;
 }
 
-herr_t test_detach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx) 
+herr_t test_detach_scale(hid_t fid, hid_t did, const char *name, unsigned int idx)
 {
     herr_t  ret_value = FAIL;
     hid_t   dsid = -1;
@@ -225,11 +225,11 @@ herr_t test_detach_scale(hid_t fid, hid_t did, const char *name, unsigned int id
     return ret_value;
 }
 
-herr_t test_set_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx) 
+herr_t test_set_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx)
 {
     herr_t  ret_value = FAIL;
     hid_t   dsid = -1;
-    
+
     if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if(H5DSis_attached(did, dsid, idx) == 1) {
             if(H5DSset_scale(dsid, scalename) >= 0) {
@@ -245,7 +245,7 @@ herr_t test_set_scalename(hid_t fid, hid_t did, const char *name, const char *sc
     return ret_value;
 }
 
-herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx) 
+herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename, unsigned int idx)
 {
     herr_t  ret_value = FAIL;
     hid_t   dsid = -1;
@@ -282,12 +282,12 @@ static int test_long_attachscales(const char *filename)
     char    scalename[32];
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al");
-    
+
     TESTING2("test_long_attachscales");
-    
+
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* make a dataset */
     if(create_long_dataset(fid, dsname, "al") < 0)
         goto out;
@@ -297,22 +297,22 @@ static int test_long_attachscales(const char *filename)
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM0) < 0)
             goto out;
-       
+
         strcpy(scalename, DS_2_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM1) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_3_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM2) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_4_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM3) < 0)
             goto out;
-       
+
         if(H5Dclose(did) < 0)
             goto out;
     }
@@ -320,18 +320,18 @@ static int test_long_attachscales(const char *filename)
         goto out;
 
     PASSED();
-    
+
     H5Fclose(fid);
     return SUCCEED;
-    
+
 out:
     H5E_BEGIN_TRY  {
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    
+
     H5_FAILED();
-    
+
     return FAIL;
 }
 
@@ -343,12 +343,12 @@ static int test_duplicatelong_attachscales(const char *filename)
     char    scalename[32];
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al2");
-    
+
     TESTING2("test_duplicatelong_attachscales");
-    
+
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* make a dataset 2 */
     if(create_long_dataset(fid, dsname, "al2") < 0)
         goto out;
@@ -358,22 +358,22 @@ static int test_duplicatelong_attachscales(const char *filename)
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM0) < 0)
             goto out;
-       
+
         strcpy(scalename, DS_2_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM1) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_3_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM2) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_4_NAME);
         strcat(scalename, "al");
         if(test_attach_scale(fid, did, scalename, DIM3) < 0)
             goto out;
-       
+
         if(H5Dclose(did) < 0)
             goto out;
     }
@@ -381,18 +381,18 @@ static int test_duplicatelong_attachscales(const char *filename)
         goto out;
 
     PASSED();
-    
+
     H5Fclose(fid);
     return SUCCEED;
-    
+
 out:
     H5E_BEGIN_TRY  {
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    
+
     H5_FAILED();
-    
+
     return FAIL;
 }
 
@@ -404,10 +404,10 @@ static int test_long_scalenames(const char *filename) {
     char    name[32];
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al");
-    
+
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     TESTING2("set long scale/cmp scale name");
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         strcpy(scalename, DS_1_NAME);
@@ -419,7 +419,7 @@ static int test_long_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM0) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_2_NAME);
         strcat(scalename, "al");
         strcpy(name, SCALE_2_NAME);
@@ -429,7 +429,7 @@ static int test_long_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM1) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_3_NAME);
         strcat(scalename, "al");
         strcpy(name, SCALE_3_NAME);
@@ -439,7 +439,7 @@ static int test_long_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM2) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_4_NAME);
         strcat(scalename, "al");
         strcpy(name, SCALE_4_NAME);
@@ -449,7 +449,7 @@ static int test_long_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM3) < 0)
             goto out;
-    
+
         if(H5Dclose(did) < 0)
             goto out;
     }
@@ -457,18 +457,18 @@ static int test_long_scalenames(const char *filename) {
         goto out;
 
     PASSED();
-    
+
     H5Fclose(fid);
     return SUCCEED;
-    
+
 out:
     H5E_BEGIN_TRY  {
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    
+
     H5_FAILED();
-    
+
     return FAIL;
 }
 
@@ -481,10 +481,10 @@ static int test_samelong_scalenames(const char *filename) {
 
     strcpy(dsname, DATASET_NAME);
     strcat(dsname, "al2");
-    
+
     if((fid = open_test_file(filename)) < 0)
         goto out;
-    
+
     TESTING2("set same long scale/cmp scale name");
     if((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         strcpy(scalename, DS_1_NAME);
@@ -496,7 +496,7 @@ static int test_samelong_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM0) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_2_NAME);
         strcat(scalename, "al");
         strcpy(name, DS_2_NAME);
@@ -506,7 +506,7 @@ static int test_samelong_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM1) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_3_NAME);
         strcat(scalename, "al");
         strcpy(name, DS_3_NAME);
@@ -516,7 +516,7 @@ static int test_samelong_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM2) < 0)
             goto out;
-        
+
         strcpy(scalename, DS_4_NAME);
         strcat(scalename, "al");
         strcpy(name, DS_4_NAME);
@@ -526,7 +526,7 @@ static int test_samelong_scalenames(const char *filename) {
 
         if(test_cmp_scalename(fid, did, scalename, name, DIM3) < 0)
             goto out;
-    
+
         if(H5Dclose(did) < 0)
             goto out;
     }
@@ -534,18 +534,18 @@ static int test_samelong_scalenames(const char *filename) {
         goto out;
 
     PASSED();
-    
+
     H5Fclose(fid);
     return SUCCEED;
-    
+
 out:
     H5E_BEGIN_TRY  {
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    
+
     H5_FAILED();
-    
+
     return FAIL;
 }
 
@@ -555,7 +555,7 @@ static int test_foreign_scaleattached(const char *filename)
     hid_t   fid = -1;
     hid_t   did = -1;
     hid_t   dsid = -1;
-    
+
     TESTING2("test_foreign_scaleattached");
 
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -565,7 +565,7 @@ static int test_foreign_scaleattached(const char *filename)
         if((dsid = H5Dopen2(fid, "/ds_4_al", H5P_DEFAULT)) >= 0) {
             if(H5DSis_attached(did, dsid, 3) == 1) {
                 ret_value = SUCCEED;
-            }  
+            }
             if(H5Dclose(dsid) < 0)
                 goto out;
         }
@@ -574,22 +574,22 @@ static int test_foreign_scaleattached(const char *filename)
     }
     else
         goto out;
-    
+
     if(ret_value == FAIL)
         goto out;
-    
+
     PASSED();
-    
+
     H5Fclose(fid);
     return 0;
-    
+
 out:
     H5E_BEGIN_TRY  {
         H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-    
+
     H5_FAILED();
-    
+
     return FAIL;
 }

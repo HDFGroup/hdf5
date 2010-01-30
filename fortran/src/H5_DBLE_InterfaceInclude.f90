@@ -2,7 +2,7 @@
 !
 ! NAME
 !   H5_DBLE_INTERFACE
-!  
+!
 ! FUNCTION
 !   This module is used for when the default REAL is not of the type DOUBLE PRECISION.
 !   We only do not include the double precision interfaces if the defaut REAL is
@@ -10,11 +10,11 @@
 !   generic interfaces declared as REAL. Otherwise it is okay to include the interfaces.
 !
 ! NOTES
-!   This module contains all the DOUBLE PRECISION interfaces and corresponding subroutines 
+!   This module contains all the DOUBLE PRECISION interfaces and corresponding subroutines
 !   from the HDF function catagory H5A, H5D and H5P.
 !
 ! COPYRIGHT
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -27,7 +27,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! AUTHOR
 !  M.S. Breitenfeld
@@ -125,11 +125,11 @@ CONTAINS
   !
   SUBROUTINE h5awrite_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-    DOUBLE PRECISION, INTENT(IN) :: buf     ! Attribute data 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    DOUBLE PRECISION, INTENT(IN) :: buf     ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_s_c
@@ -141,7 +141,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_S_C'::h5awrite_double_s_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN)::buf
@@ -153,12 +153,12 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_1(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
-         DIMENSION(dims(1)) :: buf ! Attribute data 
+         DIMENSION(dims(1)) :: buf ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_1_c
@@ -170,7 +170,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_1_C'::h5awrite_double_1_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -184,13 +184,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_2(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-    DOUBLE PRECISION, INTENT(IN), & 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_2_c
@@ -202,7 +202,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_2_C'::h5awrite_double_2_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -216,13 +216,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_3(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_3_c
@@ -234,7 +234,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_3_C'::h5awrite_double_3_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -248,13 +248,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_4(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_4_c
@@ -266,7 +266,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_4_C'::h5awrite_double_4_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -280,13 +280,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_5(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_5_c
@@ -298,7 +298,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_5_C'::h5awrite_double_5_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -312,13 +312,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_6(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_6_c
@@ -330,7 +330,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_6_C'::h5awrite_double_6_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -344,13 +344,13 @@ CONTAINS
 
   SUBROUTINE h5awrite_double_7(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5awrite_double_7_c
@@ -362,7 +362,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_7_C'::h5awrite_double_7_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(IN), &
@@ -376,11 +376,11 @@ CONTAINS
 
   SUBROUTINE h5aread_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-    DOUBLE PRECISION, INTENT(INOUT) :: buf    ! Attribute data 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    DOUBLE PRECISION, INTENT(INOUT) :: buf    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_s_c
@@ -392,7 +392,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_S_C'::h5aread_double_s_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT)::buf
@@ -404,13 +404,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_1(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_1_c
@@ -422,7 +422,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_1_C'::h5aread_double_1_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -436,13 +436,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_2(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_2_c
@@ -454,7 +454,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_2_C'::h5aread_double_2_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -468,13 +468,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_3(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_3_c
@@ -486,7 +486,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_3_C'::h5aread_double_3_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -500,13 +500,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_4(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_4_c
@@ -518,7 +518,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_4_C'::h5aread_double_4_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -532,13 +532,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_5(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_5_c
@@ -550,7 +550,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_5_C'::h5aread_double_5_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -564,13 +564,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_6(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_6_c
@@ -582,7 +582,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_6_C'::h5aread_double_6_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -596,13 +596,13 @@ CONTAINS
 
   SUBROUTINE h5aread_double_7(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
                                                 ! identifier  (in memory)
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-    ! Attribute data 
+    ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
     !            INTEGER, EXTERNAL :: h5aread_double_7_c
@@ -614,7 +614,7 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_7_C'::h5aread_double_7_c
          !DEC$ENDIF
-         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
+         INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
          INTEGER(HID_T), INTENT(IN) :: attr_id
          INTEGER(HID_T), INTENT(IN) :: memtype_id
          DOUBLE PRECISION, INTENT(INOUT), &
@@ -636,16 +636,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN) :: buf ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_s_c
@@ -653,7 +653,7 @@ CONTAINS
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_s_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -675,9 +675,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -692,16 +692,16 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_1_c
@@ -709,7 +709,7 @@ CONTAINS
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_1_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -732,9 +732,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -749,24 +749,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_2_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_2_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -789,9 +789,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -806,24 +806,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_3_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_3_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -846,9 +846,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -863,15 +863,15 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
+    INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
@@ -880,7 +880,7 @@ CONTAINS
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_4_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -903,9 +903,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -920,24 +920,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_5_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_5_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -960,9 +960,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -978,24 +978,24 @@ CONTAINS
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
     ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_6_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_6_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1018,9 +1018,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1036,24 +1036,24 @@ CONTAINS
     DOUBLE PRECISION, INTENT(IN), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
     ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dwrite_double_7_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_7_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1075,9 +1075,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dwrite_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1091,16 +1091,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(INOUT) :: buf ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_s_c
@@ -1108,7 +1108,7 @@ CONTAINS
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_s_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1130,9 +1130,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1147,24 +1147,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_1_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_1_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1187,9 +1187,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1204,24 +1204,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_2_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_2_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1234,7 +1234,7 @@ CONTAINS
          INTEGER(HID_T) :: file_space_id_default
          INTEGER(HID_T) :: xfer_prp_default
          INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-         DOUBLE PRECISION, INTENT(INOUT), & 
+         DOUBLE PRECISION, INTENT(INOUT), &
               DIMENSION(dims(1),dims(2)) :: buf
        END FUNCTION h5dread_double_2_c
     END INTERFACE
@@ -1244,9 +1244,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1261,16 +1261,16 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
-    INTEGER(HID_T) :: mem_space_id_default 
+    INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_3_c
@@ -1278,7 +1278,7 @@ CONTAINS
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_3_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1301,9 +1301,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1319,24 +1319,24 @@ CONTAINS
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
     ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_4_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_4_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1359,9 +1359,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1376,24 +1376,24 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_5_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_5_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1416,9 +1416,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1434,24 +1434,24 @@ CONTAINS
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
     ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
-    INTEGER(HID_T) :: xfer_prp_default 
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_6_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_6_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1474,9 +1474,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1492,24 +1492,24 @@ CONTAINS
     DOUBLE PRECISION, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
     ! Data buffer
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-    ! Memory dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-    ! File dataspace identfier 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-    ! Transfer property list identifier 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
-    INTEGER(HID_T) :: mem_space_id_default 
-    INTEGER(HID_T) :: file_space_id_default 
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
 
     !            INTEGER, EXTERNAL :: h5dread_double_7_c
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
        INTEGER FUNCTION h5dread_double_7_c(dset_id, mem_type_id, &
-            mem_space_id_default, & 
+            mem_space_id_default, &
             file_space_id_default, &
             xfer_prp_default, buf, dims)
          USE H5GLOBAL
@@ -1531,9 +1531,9 @@ CONTAINS
     mem_space_id_default = H5S_ALL_F
     file_space_id_default = H5S_ALL_F
 
-    if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-    if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-    if (present(file_space_id)) file_space_id_default = file_space_id 
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
 
     hdferr = h5dread_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
          file_space_id_default, xfer_prp_default, buf, dims)
@@ -1543,21 +1543,21 @@ CONTAINS
   !----------------------------------------------------------------------
   ! Name:		h5dfill_double
   !
-  ! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
-  !               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
+  ! Purpose:      Fills dataspace elements with a fill value in a memory buffer.
+  !               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
   !               of the fillvalues and buffers are supported. Buffer and fillvalue
   !               are assumed to have the same datatype.
   !               Only one-dimesional buffers are supported.
   !
-  ! Inputs:  
+  ! Inputs:
   !		fill_value	- fill value
   !		space_id	- memory space selection identifier
   !		buf		- data buffer iin memory ro apply selection to
   !				- of k-th dimension of the buf array
-  ! Outputs:  
-  !		hdferr:		- error code		
+  ! Outputs:
+  !		hdferr:		- error code
   !				 	Success:  0
-  !				 	Failure: -1   
+  !				 	Failure: -1
   !
   ! Programmer:	Elena Pourmal
   !		March 12, 2003
@@ -1569,10 +1569,10 @@ CONTAINS
     DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
     DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
-    INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+    INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
 
     !            INTEGER, EXTERNAL :: h5dfill_double_c
     ! MS FORTRAN needs explicit interface for C functions called here.
@@ -1582,19 +1582,19 @@ CONTAINS
             buf, mem_type_id)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DFILL_DOUBLE_C'::h5dfill_double_c  
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DFILL_DOUBLE_C'::h5dfill_double_c
          !DEC$ENDIF
          DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
          INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
          INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
          DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
-         INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
+         INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
        END FUNCTION h5dfill_double_c
     END INTERFACE
     fill_type_id = H5T_NATIVE_DOUBLE
     mem_type_id  = H5T_NATIVE_DOUBLE
 
-    hdferr = h5dfill_double_c(fill_value, fill_type_id, space_id, & 
+    hdferr = h5dfill_double_c(fill_value, fill_type_id, space_id, &
          buf, mem_type_id)
 
 
@@ -1607,9 +1607,9 @@ CONTAINS
   SUBROUTINE h5pset_fill_value_double(prp_id, type_id, fillvalue, &
        hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
-    ! of fillvalue datatype 
+    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
+    ! of fillvalue datatype
     ! (in memory)
     DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1636,10 +1636,10 @@ CONTAINS
   SUBROUTINE h5pget_fill_value_double(prp_id, type_id, fillvalue, &
        hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
+    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
     ! of fillvalue datatype
-    ! (in memory) 
+    ! (in memory)
     DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -1667,28 +1667,28 @@ CONTAINS
   !
   ! Purpose: 	Sets a property list value
   !
-  ! Inputs:  
+  ! Inputs:
   !		prp_id		- iproperty list identifier to modify
   !		name 		- name of property to modify
   !		value		- value to set property to
-  ! Outputs:  
-  !		hdferr:		- error code		
+  ! Outputs:
+  !		hdferr:		- error code
   !				 	Success:  0
-  !				 	Failure: -1   
+  !				 	Failure: -1
   ! Optional parameters:
   !				NONE
   !
   ! Programmer:	Elena Pourmal
-  !	        October 9, 2002	
+  !	        October 9, 2002
   !
-  ! Modifications: 	
+  ! Modifications:
   !
-  ! Comment:		
+  ! Comment:
   !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_double(prp_id, name, value, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
     DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1718,28 +1718,28 @@ CONTAINS
   !
   ! Purpose: 	Gets a property list value
   !
-  ! Inputs:  
+  ! Inputs:
   !		prp_id		- iproperty list identifier to modify
   !		name 		- name of property to modify
-  ! Outputs:  
+  ! Outputs:
   !		value		- value of property
-  !		hdferr:		- error code		
+  !		hdferr:		- error code
   !				 	Success:  0
-  !				 	Failure: -1   
+  !				 	Failure: -1
   ! Optional parameters:
   !				NONE
   !
   ! Programmer:	Elena Pourmal
-  !	        October 9, 2002	
+  !	        October 9, 2002
   !
-  ! Modifications: 	
+  ! Modifications:
   !
-  ! Comment:		
+  ! Comment:
   !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_double(prp_id, name, value, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
     DOUBLE PRECISION,   INTENT(OUT) :: value ! Property value
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1769,33 +1769,33 @@ CONTAINS
   !
   ! Purpose: 	Registers a permanent property with a property list class.
   !
-  ! Inputs:  
-  !		class		- property list class to register 
+  ! Inputs:
+  !		class		- property list class to register
   !                                 permanent property within
   !		name 		- name of property to register
   !               size            - size of property in bytes
-  !		value		- default value for property in newly 
+  !		value		- default value for property in newly
   !                                 created property lists
-  ! Outputs:  
-  !		hdferr:		- error code		
+  ! Outputs:
+  !		hdferr:		- error code
   !				 	Success:  0
-  !				 	Failure: -1   
+  !				 	Failure: -1
   ! Optional parameters:
   !				NONE
   !
   ! Programmer:	Elena Pourmal
-  !	        October 10, 2002	
+  !	        October 10, 2002
   !
-  ! Modifications: 	
+  ! Modifications:
   !
-  ! Comment:		
+  ! Comment:
   !----------------------------------------------------------------------
 
   SUBROUTINE h5pregister_double(class, name, size, value, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
+    INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
-    INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value	
+    INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value
     DOUBLE PRECISION,   INTENT(IN) :: value        ! Property value
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
     INTEGER :: name_len
@@ -1810,7 +1810,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: class
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
-         INTEGER(SIZE_T), INTENT(IN) :: size 
+         INTEGER(SIZE_T), INTENT(IN) :: size
          DOUBLE PRECISION, INTENT(IN) :: value
        END FUNCTION h5pregister_double_c
     END INTERFACE
@@ -1824,32 +1824,32 @@ CONTAINS
   !
   ! Purpose: 	Registers a temporary property with a property list class.
   !
-  ! Inputs:  
+  ! Inputs:
   !		plist		- property list identifier
   !                                 permanent property within
   !		name 		- name of property to insert
   !               size            - size of property in bytes
-  !		value		- initial value for the property 
-  ! Outputs:  
-  !		hdferr:		- error code		
+  !		value		- initial value for the property
+  ! Outputs:
+  !		hdferr:		- error code
   !				 	Success:  0
-  !				 	Failure: -1   
+  !				 	Failure: -1
   ! Optional parameters:
   !				NONE
   !
   ! Programmer:	Elena Pourmal
-  !	        October 10, 2002	
+  !	        October 10, 2002
   !
-  ! Modifications: 	
+  ! Modifications:
   !
-  ! Comment:		
+  ! Comment:
   !----------------------------------------------------------------------
 
   SUBROUTINE h5pinsert_double(plist, name, size, value, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
+    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
+    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
+    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value
     DOUBLE PRECISION, INTENT(IN) :: value ! Property value
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
     INTEGER :: name_len
@@ -1864,7 +1864,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: plist
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
-         INTEGER(SIZE_T), INTENT(IN) :: size 
+         INTEGER(SIZE_T), INTENT(IN) :: size
          DOUBLE PRECISION, INTENT(IN) :: value
        END FUNCTION h5pinsert_double_c
     END INTERFACE

@@ -667,7 +667,7 @@ done:
  *      to the default.  The chunk cache properties in the returned list
  *      are considered to be “set”, and any use of this list will override
  *      the corresponding properties in the file’s file access property
- *      list. 
+ *      list.
  *
  *      All link access properties in the returned list will be set to the
  *      default values.

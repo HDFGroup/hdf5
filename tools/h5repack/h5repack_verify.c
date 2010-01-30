@@ -332,7 +332,7 @@ int h5repack_cmp_pl(const char *fname1,
     trav_table_init(&trav);
     if(h5trav_gettable(fid1, trav) < 0)
         goto error;
-  
+
    /*-------------------------------------------------------------------------
     * traverse the suppplied object list
     *-------------------------------------------------------------------------
@@ -472,7 +472,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static 
+static
 int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
     int           nfilters_dcpl;  /* number of filters in DCPL*/

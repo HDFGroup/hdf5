@@ -87,7 +87,7 @@ extern hid_t H5E_tools_min_id_g;
 }
 
 /*
- * H5E_THROW macro, used to facilitate error reporting within a function body.  
+ * H5E_THROW macro, used to facilitate error reporting within a function body.
  * The arguments are the minor error number, and an error string.
  * The return value is assigned to a variable `ret_value' and control branches
  * to the `catch_except' label, if we're not already past it.
@@ -109,8 +109,8 @@ extern hid_t H5E_tools_min_id_g;
 }
 
 /*
- * HGOTO_DONE macro, used to facilitate normal return within a function body. 
- * The argument is the return value which is assigned to the `ret_value' 
+ * HGOTO_DONE macro, used to facilitate normal return within a function body.
+ * The argument is the return value which is assigned to the `ret_value'
  * variable.  Control branches to the `done' label.
  */
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}

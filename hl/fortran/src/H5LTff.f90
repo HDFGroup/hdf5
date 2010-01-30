@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This file contains FORTRAN90 interfaces for H5LT functions
@@ -19,7 +19,7 @@
 
 module h5lt
 use h5fortran_types
-use hdf5 
+use hdf5
 
 interface h5ltmake_dataset_f
  module procedure h5ltmake_dataset_f_int1
@@ -103,16 +103,16 @@ contains
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_int1(loc_id,& 
+subroutine h5ltmake_dataset_f_int1(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -120,15 +120,15 @@ subroutine h5ltmake_dataset_f_int1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer, intent(in), dimension(*) :: buf           ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer, intent(in), dimension(*) :: buf           ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -137,12 +137,12 @@ subroutine h5ltmake_dataset_f_int1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  integer, intent(in), dimension(*) :: buf                ! data buffer 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  integer, intent(in), dimension(*) :: buf                ! data buffer
   end function h5ltmake_dataset_int1_c
  end interface
 
@@ -168,16 +168,16 @@ end subroutine h5ltmake_dataset_f_int1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_int2(loc_id,& 
+subroutine h5ltmake_dataset_f_int2(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
- implicit none 
- 
+ implicit none
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -185,16 +185,16 @@ subroutine h5ltmake_dataset_f_int2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(in), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
- 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
+
  interface
   integer function h5ltmake_dataset_int2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -203,13 +203,13 @@ subroutine h5ltmake_dataset_f_int2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer  
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltmake_dataset_int2_c
  end interface
 
@@ -235,16 +235,16 @@ end subroutine h5ltmake_dataset_f_int2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_int3(loc_id,& 
+subroutine h5ltmake_dataset_f_int3(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -252,16 +252,16 @@ subroutine h5ltmake_dataset_f_int3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(in), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
- 
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
+
  interface
   integer function h5ltmake_dataset_int3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -270,13 +270,13 @@ subroutine h5ltmake_dataset_f_int3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_int3_c
  end interface
 
@@ -303,16 +303,16 @@ end subroutine h5ltmake_dataset_f_int3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_float1(loc_id,& 
+subroutine h5ltmake_dataset_f_float1(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -320,15 +320,15 @@ subroutine h5ltmake_dataset_f_float1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- real, intent(in), dimension(*) :: buf              ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ real, intent(in), dimension(*) :: buf              ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -337,12 +337,12 @@ subroutine h5ltmake_dataset_f_float1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  real, intent(in), dimension(*) :: buf                   ! data buffer 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  real, intent(in), dimension(*) :: buf                   ! data buffer
   end function h5ltmake_dataset_fl1_c
  end interface
 
@@ -368,16 +368,16 @@ end subroutine h5ltmake_dataset_f_float1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_float2(loc_id,& 
+subroutine h5ltmake_dataset_f_float2(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -385,16 +385,16 @@ subroutine h5ltmake_dataset_f_float2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(in), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
- 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
+
  interface
   integer function h5ltmake_dataset_fl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -403,13 +403,13 @@ subroutine h5ltmake_dataset_f_float2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer  
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltmake_dataset_fl2_c
  end interface
 
@@ -435,16 +435,16 @@ end subroutine h5ltmake_dataset_f_float2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_float3(loc_id,& 
+subroutine h5ltmake_dataset_f_float3(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -452,16 +452,16 @@ subroutine h5ltmake_dataset_f_float3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(in), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
- 
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
+
  interface
   integer function h5ltmake_dataset_fl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -470,13 +470,13 @@ subroutine h5ltmake_dataset_f_float3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_fl3_c
  end interface
 
@@ -502,16 +502,16 @@ end subroutine h5ltmake_dataset_f_float3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_double1(loc_id,& 
+subroutine h5ltmake_dataset_f_double1(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -519,15 +519,15 @@ subroutine h5ltmake_dataset_f_double1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- double precision, intent(in), dimension(*) :: buf  ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ double precision, intent(in), dimension(*) :: buf  ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -536,12 +536,12 @@ subroutine h5ltmake_dataset_f_double1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  double precision, intent(in), dimension(*) :: buf       ! data buffer 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  double precision, intent(in), dimension(*) :: buf       ! data buffer
   end function h5ltmake_dataset_dl1_c
  end interface
 
@@ -567,16 +567,16 @@ end subroutine h5ltmake_dataset_f_double1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_double2(loc_id,& 
+subroutine h5ltmake_dataset_f_double2(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -584,16 +584,16 @@ subroutine h5ltmake_dataset_f_double2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(in), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
- 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
+
  interface
   integer function h5ltmake_dataset_dl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -602,13 +602,13 @@ subroutine h5ltmake_dataset_f_double2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer  
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltmake_dataset_dl2_c
  end interface
 
@@ -634,16 +634,16 @@ end subroutine h5ltmake_dataset_f_double2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_f_double3(loc_id,& 
+subroutine h5ltmake_dataset_f_double3(loc_id,&
                                 dset_name,&
-                                rank,& 
+                                rank,&
                                 dims,&
                                 type_id,&
                                 buf,&
-                                errcode ) 
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -651,16 +651,16 @@ subroutine h5ltmake_dataset_f_double3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(in), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
- 
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
+
  interface
   integer function h5ltmake_dataset_dl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -669,13 +669,13 @@ subroutine h5ltmake_dataset_f_double3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_dl3_c
  end interface
 
@@ -703,15 +703,15 @@ end subroutine h5ltmake_dataset_f_double3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_int1(loc_id,& 
+subroutine h5ltread_dataset_f_int1(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -719,11 +719,11 @@ subroutine h5ltread_dataset_f_int1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
- integer, intent(inout), dimension(*) :: buf        ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer, intent(inout), dimension(*) :: buf        ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -735,11 +735,11 @@ subroutine h5ltread_dataset_f_int1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(HID_T),   intent(IN) :: loc_id                  ! file or group identifier
-  integer(HID_T),   intent(IN) :: type_id                 ! datatype identifier 
+  integer(HID_T),   intent(IN) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(LEN=*), intent(IN) :: dset_name               ! name of the dataset 
-  integer(HSIZE_T), dimension(*), intent(IN) :: dims      ! size of the bufffer buf  
-  integer, intent(IN), dimension(*) :: buf                ! data buffer 
+  character(LEN=*), intent(IN) :: dset_name               ! name of the dataset
+  integer(HSIZE_T), dimension(*), intent(IN) :: dims      ! size of the bufffer buf
+  integer, intent(IN), dimension(*) :: buf                ! data buffer
   end function h5ltread_dataset_int1_c
  end interface
 
@@ -765,15 +765,15 @@ end subroutine h5ltread_dataset_f_int1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_int2(loc_id,& 
+subroutine h5ltread_dataset_f_int2(loc_id,&
                                  dset_name,&
                                  type_id,&
                                  buf,&
                                  dims,&
-                                 errcode )  
+                                 errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -781,14 +781,14 @@ subroutine h5ltread_dataset_f_int2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_int2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -798,12 +798,12 @@ subroutine h5ltread_dataset_f_int2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer 
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_int2_c
  end interface
 
@@ -829,15 +829,15 @@ end subroutine h5ltread_dataset_f_int2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_int3(loc_id,& 
+subroutine h5ltread_dataset_f_int3(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -845,14 +845,14 @@ subroutine h5ltread_dataset_f_int3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_int3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -862,12 +862,12 @@ subroutine h5ltread_dataset_f_int3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_int3_c
  end interface
 
@@ -896,15 +896,15 @@ end subroutine h5ltread_dataset_f_int3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_float1(loc_id,& 
+subroutine h5ltread_dataset_f_float1(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -912,11 +912,11 @@ subroutine h5ltread_dataset_f_float1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
- real, intent(inout), dimension(*) :: buf           ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ real, intent(inout), dimension(*) :: buf           ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -928,11 +928,11 @@ subroutine h5ltread_dataset_f_float1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  real, intent(in), dimension(*) :: buf                   ! data buffer 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  real, intent(in), dimension(*) :: buf                   ! data buffer
   end function h5ltread_dataset_fl1_c
  end interface
 
@@ -958,15 +958,15 @@ end subroutine h5ltread_dataset_f_float1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_float2(loc_id,& 
+subroutine h5ltread_dataset_f_float2(loc_id,&
                                  dset_name,&
                                  type_id,&
                                  buf,&
                                  dims,&
-                                 errcode )  
+                                 errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -975,14 +975,14 @@ subroutine h5ltread_dataset_f_float2(loc_id,&
 !
 
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_fl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -992,12 +992,12 @@ subroutine h5ltread_dataset_f_float2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer 
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_fl2_c
  end interface
 
@@ -1023,15 +1023,15 @@ end subroutine h5ltread_dataset_f_float2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_float3(loc_id,& 
+subroutine h5ltread_dataset_f_float3(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1039,14 +1039,14 @@ subroutine h5ltread_dataset_f_float3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_fl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1056,12 +1056,12 @@ subroutine h5ltread_dataset_f_float3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_fl3_c
  end interface
 
@@ -1088,15 +1088,15 @@ end subroutine h5ltread_dataset_f_float3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_double1(loc_id,& 
+subroutine h5ltread_dataset_f_double1(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1104,11 +1104,11 @@ subroutine h5ltread_dataset_f_double1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
- double precision, intent(inout), dimension(*) :: buf ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ double precision, intent(inout), dimension(*) :: buf ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -1120,11 +1120,11 @@ subroutine h5ltread_dataset_f_double1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  double precision, intent(in), dimension(*) :: buf       ! data buffer 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  double precision, intent(in), dimension(*) :: buf       ! data buffer
   end function h5ltread_dataset_dl1_c
  end interface
 
@@ -1150,15 +1150,15 @@ end subroutine h5ltread_dataset_f_double1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_double2(loc_id,& 
+subroutine h5ltread_dataset_f_double2(loc_id,&
                                  dset_name,&
                                  type_id,&
                                  buf,&
                                  dims,&
-                                 errcode )  
+                                 errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1166,14 +1166,14 @@ subroutine h5ltread_dataset_f_double2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_dl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1183,12 +1183,12 @@ subroutine h5ltread_dataset_f_double2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer 
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_dl2_c
  end interface
 
@@ -1214,15 +1214,15 @@ end subroutine h5ltread_dataset_f_double2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_f_double3(loc_id,& 
+subroutine h5ltread_dataset_f_double3(loc_id,&
                                 dset_name,&
                                 type_id,&
                                 buf,&
                                 dims,&
-                                errcode )  
+                                errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1230,14 +1230,14 @@ subroutine h5ltread_dataset_f_double3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hid_t),   intent(in) :: type_id            ! datatype identifier 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hid_t),   intent(in) :: type_id            ! datatype identifier
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_dl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1247,12 +1247,12 @@ subroutine h5ltread_dataset_f_double3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer  
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_dl3_c
  end interface
 
@@ -1279,15 +1279,15 @@ end subroutine h5ltread_dataset_f_double3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_int_f_1 (loc_id,& 
+subroutine h5ltmake_dataset_int_f_1 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1295,14 +1295,14 @@ subroutine h5ltmake_dataset_int_f_1 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- integer, intent(in), dimension(*) :: buf           ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ integer, intent(in), dimension(*) :: buf           ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
-            
+
  interface
   integer function h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1311,12 +1311,12 @@ subroutine h5ltmake_dataset_int_f_1 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  integer, intent(in), dimension(*) :: buf                ! data buffer  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  integer, intent(in), dimension(*) :: buf                ! data buffer
   end function h5ltmake_dataset_nint1_c
  end interface
 
@@ -1342,15 +1342,15 @@ end subroutine h5ltmake_dataset_int_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_int_f_2 (loc_id,& 
+subroutine h5ltmake_dataset_int_f_2 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1358,16 +1358,16 @@ subroutine h5ltmake_dataset_int_f_2 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(in), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
- 
-            
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
+
+
  interface
   integer function h5ltmake_dataset_nint2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1376,13 +1376,13 @@ subroutine h5ltmake_dataset_int_f_2 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                  ! data buffer 
+  dimension(dims(1),dims(2)) :: buf                  ! data buffer
   end function h5ltmake_dataset_nint2_c
  end interface
 
@@ -1409,15 +1409,15 @@ end subroutine h5ltmake_dataset_int_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_int_f_3 (loc_id,& 
+subroutine h5ltmake_dataset_int_f_3 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1425,16 +1425,16 @@ subroutine h5ltmake_dataset_int_f_3 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(in), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
- 
-            
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
+
+
  interface
   integer function h5ltmake_dataset_nint3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1443,13 +1443,13 @@ subroutine h5ltmake_dataset_int_f_3 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_nint3_c
  end interface
 
@@ -1477,15 +1477,15 @@ end subroutine h5ltmake_dataset_int_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_float_f_1 (loc_id,& 
+subroutine h5ltmake_dataset_float_f_1 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1493,14 +1493,14 @@ subroutine h5ltmake_dataset_float_f_1 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
- real, intent(in), dimension(*) :: buf              ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
+ real, intent(in), dimension(*) :: buf              ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
-            
+
  interface
   integer function h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1509,12 +1509,12 @@ subroutine h5ltmake_dataset_float_f_1 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
-  real, intent(in), dimension(*) :: buf                   ! data buffer  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
+  real, intent(in), dimension(*) :: buf                   ! data buffer
   end function h5ltmake_dataset_nfl1_c
  end interface
 
@@ -1540,15 +1540,15 @@ end subroutine h5ltmake_dataset_float_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_float_f_2 (loc_id,& 
+subroutine h5ltmake_dataset_float_f_2 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1556,15 +1556,15 @@ subroutine h5ltmake_dataset_float_f_2 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(in), &
  dimension(dims(1),dims(2)) :: buf                  ! data buffer
-            
+
  interface
   integer function h5ltmake_dataset_nfl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1573,13 +1573,13 @@ subroutine h5ltmake_dataset_float_f_2 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                  ! data buffer  
+  dimension(dims(1),dims(2)) :: buf                  ! data buffer
   end function h5ltmake_dataset_nfl2_c
  end interface
 
@@ -1605,15 +1605,15 @@ end subroutine h5ltmake_dataset_float_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_float_f_3 (loc_id,& 
+subroutine h5ltmake_dataset_float_f_3 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1621,15 +1621,15 @@ subroutine h5ltmake_dataset_float_f_3 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(in), &
  dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
-            
+
  interface
   integer function h5ltmake_dataset_nfl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1638,13 +1638,13 @@ subroutine h5ltmake_dataset_float_f_3 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer 
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_nfl3_c
  end interface
 
@@ -1673,15 +1673,15 @@ end subroutine h5ltmake_dataset_float_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_double_f_1 (loc_id,& 
+subroutine h5ltmake_dataset_double_f_1 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1689,15 +1689,15 @@ subroutine h5ltmake_dataset_double_f_1 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(in), &
- dimension(dims(1)) :: buf                          ! data buffer 
-            
+ dimension(dims(1)) :: buf                          ! data buffer
+
  interface
   integer function h5ltmake_dataset_ndl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1706,13 +1706,13 @@ subroutine h5ltmake_dataset_double_f_1 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1)) :: buf                               ! data buffer   
+  dimension(dims(1)) :: buf                               ! data buffer
   end function h5ltmake_dataset_ndl1_c
  end interface
 
@@ -1739,15 +1739,15 @@ end subroutine h5ltmake_dataset_double_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_double_f_2 (loc_id,& 
+subroutine h5ltmake_dataset_double_f_2 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1755,15 +1755,15 @@ subroutine h5ltmake_dataset_double_f_2 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(in), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer 
-            
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
+
  interface
   integer function h5ltmake_dataset_ndl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1772,13 +1772,13 @@ subroutine h5ltmake_dataset_double_f_2 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer   
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltmake_dataset_ndl2_c
  end interface
 
@@ -1804,15 +1804,15 @@ end subroutine h5ltmake_dataset_double_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_double_f_3 (loc_id,& 
+subroutine h5ltmake_dataset_double_f_3 (loc_id,&
                                    dset_name,&
-                                   rank,& 
+                                   rank,&
                                    dims,&
                                    buf,&
-                                   errcode )   
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1820,15 +1820,15 @@ subroutine h5ltmake_dataset_double_f_3 (loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(in) :: rank               ! rank 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(in) :: rank               ! rank
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(in), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer 
-            
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
+
  interface
   integer function h5ltmake_dataset_ndl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
@@ -1837,13 +1837,13 @@ subroutine h5ltmake_dataset_double_f_3 (loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(in) :: rank                    ! rank 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(in) :: rank                    ! rank
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(in), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer    
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltmake_dataset_ndl3_c
  end interface
 
@@ -1871,14 +1871,14 @@ end subroutine h5ltmake_dataset_double_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_int_f_1(loc_id,& 
+subroutine h5ltread_dataset_int_f_1(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1886,13 +1886,13 @@ subroutine h5ltread_dataset_int_f_1(loc_id,&
 !DEC$endif
 !
 
- integer(HID_T),   intent(IN) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(HID_T),   intent(IN) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(inout), &
- dimension(dims(1)) :: buf                          ! data buffer  
+ dimension(dims(1)) :: buf                          ! data buffer
 
  interface
   integer function h5ltread_dataset_nint1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1902,12 +1902,12 @@ subroutine h5ltread_dataset_int_f_1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(inout), &
-  dimension(dims(1)) :: buf                               ! data buffer   
+  dimension(dims(1)) :: buf                               ! data buffer
   end function h5ltread_dataset_nint1_c
  end interface
 
@@ -1920,7 +1920,7 @@ end subroutine h5ltread_dataset_int_f_1
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_int_f_2
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -1934,14 +1934,14 @@ end subroutine h5ltread_dataset_int_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_int_f_2(loc_id,& 
+subroutine h5ltread_dataset_int_f_2(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -1949,13 +1949,13 @@ subroutine h5ltread_dataset_int_f_2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer  
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_nint2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1965,12 +1965,12 @@ subroutine h5ltread_dataset_int_f_2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(inout), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer    
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_nint2_c
  end interface
 
@@ -1982,7 +1982,7 @@ end subroutine h5ltread_dataset_int_f_2
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_int_f_3
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -1996,14 +1996,14 @@ end subroutine h5ltread_dataset_int_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_int_f_3(loc_id,& 
+subroutine h5ltread_dataset_int_f_3(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2011,13 +2011,13 @@ subroutine h5ltread_dataset_int_f_3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_nint3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2027,12 +2027,12 @@ subroutine h5ltread_dataset_int_f_3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   integer, intent(inout), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_nint3_c
  end interface
 
@@ -2045,7 +2045,7 @@ end subroutine h5ltread_dataset_int_f_3
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_float_f_1
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2059,14 +2059,14 @@ end subroutine h5ltread_dataset_int_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_float_f_1(loc_id,& 
+subroutine h5ltread_dataset_float_f_1(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2074,13 +2074,13 @@ subroutine h5ltread_dataset_float_f_1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(inout), &
- dimension(dims(1)) :: buf                          ! data buffer  
+ dimension(dims(1)) :: buf                          ! data buffer
 
  interface
   integer function h5ltread_dataset_nfl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2090,12 +2090,12 @@ subroutine h5ltread_dataset_float_f_1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(inout), &
-  dimension(dims(1)) :: buf                               ! data buffer   
+  dimension(dims(1)) :: buf                               ! data buffer
   end function h5ltread_dataset_nfl1_c
  end interface
 
@@ -2108,7 +2108,7 @@ end subroutine h5ltread_dataset_float_f_1
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_float_f_2
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2122,14 +2122,14 @@ end subroutine h5ltread_dataset_float_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_float_f_2(loc_id,& 
+subroutine h5ltread_dataset_float_f_2(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2137,13 +2137,13 @@ subroutine h5ltread_dataset_float_f_2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer  
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_nfl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2153,12 +2153,12 @@ subroutine h5ltread_dataset_float_f_2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(inout), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer    
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_nfl2_c
  end interface
 
@@ -2184,14 +2184,14 @@ end subroutine h5ltread_dataset_float_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_float_f_3(loc_id,& 
+subroutine h5ltread_dataset_float_f_3(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2199,13 +2199,13 @@ subroutine h5ltread_dataset_float_f_3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  real, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_nfl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2215,12 +2215,12 @@ subroutine h5ltread_dataset_float_f_3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   real, intent(inout), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_nfl3_c
  end interface
 
@@ -2232,7 +2232,7 @@ end subroutine h5ltread_dataset_float_f_3
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_double_f_1
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2246,14 +2246,14 @@ end subroutine h5ltread_dataset_float_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_double_f_1(loc_id,& 
+subroutine h5ltread_dataset_double_f_1(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2261,13 +2261,13 @@ subroutine h5ltread_dataset_double_f_1(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(inout), &
- dimension(dims(1)) :: buf                          ! data buffer  
+ dimension(dims(1)) :: buf                          ! data buffer
 
  interface
   integer function h5ltread_dataset_ndl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2277,12 +2277,12 @@ subroutine h5ltread_dataset_double_f_1(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(inout), &
-  dimension(dims(1)) :: buf                               ! data buffer   
+  dimension(dims(1)) :: buf                               ! data buffer
   end function h5ltread_dataset_ndl1_c
  end interface
 
@@ -2295,7 +2295,7 @@ end subroutine h5ltread_dataset_double_f_1
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_double_f_2
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2309,14 +2309,14 @@ end subroutine h5ltread_dataset_double_f_1
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_double_f_2(loc_id,& 
+subroutine h5ltread_dataset_double_f_2(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2324,13 +2324,13 @@ subroutine h5ltread_dataset_double_f_2(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(inout), &
- dimension(dims(1),dims(2)) :: buf                  ! data buffer  
+ dimension(dims(1),dims(2)) :: buf                  ! data buffer
 
  interface
   integer function h5ltread_dataset_ndl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2340,12 +2340,12 @@ subroutine h5ltread_dataset_double_f_2(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(inout), &
-  dimension(dims(1),dims(2)) :: buf                       ! data buffer    
+  dimension(dims(1),dims(2)) :: buf                       ! data buffer
   end function h5ltread_dataset_ndl2_c
  end interface
 
@@ -2357,7 +2357,7 @@ end subroutine h5ltread_dataset_double_f_2
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_double_f_3
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2371,14 +2371,14 @@ end subroutine h5ltread_dataset_double_f_2
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_double_f_3(loc_id,& 
+subroutine h5ltread_dataset_double_f_3(loc_id,&
                                    dset_name,&
                                    buf,&
-                                   dims,& 
-                                   errcode ) 
+                                   dims,&
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2386,13 +2386,13 @@ subroutine h5ltread_dataset_double_f_3(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), dimension(*), intent(in) :: dims ! size of the bufffer buf
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  double precision, intent(inout), &
- dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer  
+ dimension(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
  interface
   integer function h5ltread_dataset_ndl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2402,12 +2402,12 @@ subroutine h5ltread_dataset_double_f_3(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier 
+  integer(hid_t),   intent(in) :: type_id                 ! datatype identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), dimension(*), intent(in) :: dims      ! size of the bufffer buf
   double precision, intent(inout), &
-  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer   
+  dimension(dims(1),dims(2),dims(3)) :: buf               ! data buffer
   end function h5ltread_dataset_ndl3_c
  end interface
 
@@ -2434,13 +2434,13 @@ end subroutine h5ltread_dataset_double_f_3
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltmake_dataset_string_f(loc_id,& 
+subroutine h5ltmake_dataset_string_f(loc_id,&
                                      dset_name,&
                                      buf,&
-                                     errcode )   
+                                     errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2448,13 +2448,13 @@ subroutine h5ltmake_dataset_string_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- character(len=*), intent(in) :: buf                ! data buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ character(len=*), intent(in) :: buf                ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: buflen                                  ! buffer length
-            
+
  interface
   integer function h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buflen,buf)
   use h5global
@@ -2465,8 +2465,8 @@ subroutine h5ltmake_dataset_string_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: buflen                                       ! lenght of data buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  character(len=*), intent(in) :: buf                     ! data buffer  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  character(len=*), intent(in) :: buf                     ! data buffer
   end function h5ltmake_dataset_string_c
  end interface
 
@@ -2479,7 +2479,7 @@ end subroutine h5ltmake_dataset_string_f
 !-------------------------------------------------------------------------
 ! Function: h5ltread_dataset_string_f
 !
-! Purpose: Read a dataset 
+! Purpose: Read a dataset
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -2493,13 +2493,13 @@ end subroutine h5ltmake_dataset_string_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltread_dataset_string_f(loc_id,& 
+subroutine h5ltread_dataset_string_f(loc_id,&
                                      dset_name,&
                                      buf,&
-                                     errcode ) 
+                                     errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2507,8 +2507,8 @@ subroutine h5ltread_dataset_string_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(inout) :: buf             ! data buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
@@ -2522,7 +2522,7 @@ subroutine h5ltread_dataset_string_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(inout) :: buf                  ! data buffer
   end function h5ltread_dataset_string_c
  end interface
@@ -2557,15 +2557,15 @@ end subroutine h5ltread_dataset_string_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltset_attribute_int_f(loc_id,& 
+subroutine h5ltset_attribute_int_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     buf,&
                                     size,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2573,8 +2573,8 @@ subroutine h5ltset_attribute_int_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer(size_t),  intent(in) :: size               ! size of attribute array
  integer :: errcode                                 ! error code
@@ -2593,7 +2593,7 @@ subroutine h5ltset_attribute_int_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   integer(size_t),  intent(in) :: size                    ! size of attribute array
   integer, intent(in), dimension(*) :: buf                ! data buffer
@@ -2623,15 +2623,15 @@ end subroutine h5ltset_attribute_int_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltset_attribute_float_f(loc_id,& 
+subroutine h5ltset_attribute_float_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     buf,&
                                     size,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2639,8 +2639,8 @@ subroutine h5ltset_attribute_float_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer(size_t),  intent(in) :: size               ! size of attribute array
  integer :: errcode                                 ! error code
@@ -2659,7 +2659,7 @@ subroutine h5ltset_attribute_float_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   integer(size_t),  intent(in) :: size                    ! size of attribute array
   real, intent(in), dimension(*) :: buf                   ! data buffer
@@ -2689,15 +2689,15 @@ end subroutine h5ltset_attribute_float_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltset_attribute_double_f(loc_id,& 
+subroutine h5ltset_attribute_double_f(loc_id,&
                                       dset_name,&
                                       attr_name,&
                                       buf,&
                                       size,&
-                                      errcode ) 
+                                      errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2705,8 +2705,8 @@ subroutine h5ltset_attribute_double_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer(size_t),  intent(in) :: size               ! size of attribute array
  integer :: errcode                                 ! error code
@@ -2725,7 +2725,7 @@ subroutine h5ltset_attribute_double_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   integer(size_t),  intent(in) :: size                    ! size of attribute array
   double precision, intent(in), dimension(*) :: buf       ! data buffer
@@ -2756,14 +2756,14 @@ end subroutine h5ltset_attribute_double_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltset_attribute_string_f(loc_id,& 
+subroutine h5ltset_attribute_string_f(loc_id,&
                                       dset_name,&
                                       attr_name,&
                                       buf,&
-                                      errcode ) 
+                                      errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2771,8 +2771,8 @@ subroutine h5ltset_attribute_string_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer :: errcode                                 ! error code
  character(len=*), intent(in) :: buf                ! data buffer
@@ -2792,7 +2792,7 @@ subroutine h5ltset_attribute_string_f(loc_id,&
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
   integer :: buflen                                       ! data buffer length
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   character(len=*), intent(in) :: buf                     ! data buffer
   end function h5ltset_attribute_string_c
@@ -2824,14 +2824,14 @@ end subroutine h5ltset_attribute_string_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_int_f(loc_id,& 
+subroutine h5ltget_attribute_int_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     buf,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2839,8 +2839,8 @@ subroutine h5ltget_attribute_int_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer :: errcode                                 ! error code
  integer, intent(inout), dimension(*) :: buf        ! data buffer
@@ -2858,7 +2858,7 @@ subroutine h5ltget_attribute_int_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   integer, intent(inout), dimension(*) :: buf             ! data buffer
   end function h5ltget_attribute_int_c
@@ -2888,14 +2888,14 @@ end subroutine h5ltget_attribute_int_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_float_f(loc_id,& 
+subroutine h5ltget_attribute_float_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     buf,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2903,8 +2903,8 @@ subroutine h5ltget_attribute_float_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer :: errcode                                 ! error code
  real, intent(inout), dimension(*) :: buf           ! data buffer
@@ -2922,7 +2922,7 @@ subroutine h5ltget_attribute_float_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   real, intent(inout), dimension(*) :: buf                ! data buffer
   end function h5ltget_attribute_float_c
@@ -2951,14 +2951,14 @@ end subroutine h5ltget_attribute_float_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_double_f(loc_id,& 
+subroutine h5ltget_attribute_double_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     buf,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2966,8 +2966,8 @@ subroutine h5ltget_attribute_double_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer :: errcode                                 ! error code
  double precision,intent(inout),dimension(*) :: buf ! data buffer
@@ -2985,7 +2985,7 @@ subroutine h5ltget_attribute_double_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   double precision, intent(inout), dimension(*) :: buf    ! data buffer
   end function h5ltget_attribute_double_c
@@ -3014,14 +3014,14 @@ end subroutine h5ltget_attribute_double_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_string_f(loc_id,& 
+subroutine h5ltget_attribute_string_f(loc_id,&
                                       dset_name,&
                                       attr_name,&
                                       buf,&
-                                      errcode ) 
+                                      errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3029,8 +3029,8 @@ subroutine h5ltget_attribute_string_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
  integer :: errcode                                 ! error code
  character(len=*), intent(inout) :: buf             ! data buffer
@@ -3048,7 +3048,7 @@ subroutine h5ltget_attribute_string_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   character(len=*), intent(inout) :: buf                  ! data buffer
   end function h5ltget_attribute_string_c
@@ -3081,13 +3081,13 @@ end subroutine h5ltget_attribute_string_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_dataset_ndims_f(loc_id,& 
+subroutine h5ltget_dataset_ndims_f(loc_id,&
                                    dset_name,&
                                    rank,&
-                                   errcode ) 
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3095,9 +3095,9 @@ subroutine h5ltget_dataset_ndims_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer,          intent(inout) :: rank            ! rank 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer,          intent(inout) :: rank            ! rank
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -3110,8 +3110,8 @@ subroutine h5ltget_dataset_ndims_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer,          intent(inout) :: rank                 ! rank 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer,          intent(inout) :: rank                 ! rank
   end function h5ltget_dataset_ndims_c
  end interface
 
@@ -3124,7 +3124,7 @@ end subroutine h5ltget_dataset_ndims_f
 !-------------------------------------------------------------------------
 ! Function: h5ltfind_dataset_f
 !
-! Purpose: Inquires if a dataset named dset_name exists attached 
+! Purpose: Inquires if a dataset named dset_name exists attached
 !           to the object loc_id.
 !
 ! Return: Success: 0, Failure: -1
@@ -3139,11 +3139,11 @@ end subroutine h5ltget_dataset_ndims_f
 !
 !-------------------------------------------------------------------------
 
-integer function h5ltfind_dataset_f(loc_id,& 
-                                    dset_name) 
+integer function h5ltfind_dataset_f(loc_id,&
+                                    dset_name)
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3151,8 +3151,8 @@ integer function h5ltfind_dataset_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -3165,7 +3165,7 @@ integer function h5ltfind_dataset_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   end function h5ltfind_dataset_c
  end interface
 
@@ -3192,15 +3192,15 @@ end function h5ltfind_dataset_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_dataset_info_f(loc_id,& 
+subroutine h5ltget_dataset_info_f(loc_id,&
                                    dset_name,&
                                    dims,&
                                    type_class,&
                                    type_size,&
-                                   errcode ) 
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3208,9 +3208,9 @@ subroutine h5ltget_dataset_info_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t),dimension(*),intent(inout):: dims ! dimensions 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t),dimension(*),intent(inout):: dims ! dimensions
  integer, intent(inout)         :: type_class       ! type class
  integer(size_t), intent(inout) :: type_size        ! type size
  integer :: errcode                                 ! error code
@@ -3225,10 +3225,10 @@ subroutine h5ltget_dataset_info_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t),dimension(*),intent(inout):: dims      ! dimensions 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t),dimension(*),intent(inout):: dims      ! dimensions
   integer, intent(inout)         :: type_class            ! type class
-  integer(size_t), intent(inout) :: type_size             ! type size 
+  integer(size_t), intent(inout) :: type_size             ! type size
   end function h5ltget_dataset_info_c
  end interface
 
@@ -3260,14 +3260,14 @@ end subroutine h5ltget_dataset_info_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_ndims_f(loc_id,& 
+subroutine h5ltget_attribute_ndims_f(loc_id,&
                                     dset_name,&
                                     attr_name,&
                                     rank,&
-                                    errcode ) 
+                                    errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3275,10 +3275,10 @@ subroutine h5ltget_attribute_ndims_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
- integer,          intent(inout) :: rank            ! rank 
+ integer,          intent(inout) :: rank            ! rank
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: attrlen                                 ! name length
@@ -3294,9 +3294,9 @@ subroutine h5ltget_attribute_ndims_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
-  integer,          intent(inout) :: rank                 ! rank 
+  integer,          intent(inout) :: rank                 ! rank
   end function h5ltget_attribute_ndims_c
  end interface
 
@@ -3324,16 +3324,16 @@ end subroutine h5ltget_attribute_ndims_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5ltget_attribute_info_f(loc_id,& 
+subroutine h5ltget_attribute_info_f(loc_id,&
                                    dset_name,&
                                    attr_name,&
                                    dims,&
                                    type_class,&
                                    type_size,&
-                                   errcode ) 
+                                   errcode )
 
  implicit none
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -3341,10 +3341,10 @@ subroutine h5ltget_attribute_info_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: attr_name          ! name of the attribute
- integer(hsize_t),dimension(*),intent(inout):: dims ! dimensions 
+ integer(hsize_t),dimension(*),intent(inout):: dims ! dimensions
  integer, intent(inout)         :: type_class       ! type class
  integer(size_t), intent(inout) :: type_size        ! type size
  integer :: errcode                                 ! error code
@@ -3362,11 +3362,11 @@ subroutine h5ltget_attribute_info_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   character(len=*), intent(in) :: attr_name               ! name of the attribute
-  integer(hsize_t),dimension(*),intent(inout):: dims      ! dimensions 
+  integer(hsize_t),dimension(*),intent(inout):: dims      ! dimensions
   integer, intent(inout)         :: type_class            ! type class
-  integer(size_t), intent(inout) :: type_size             ! type size 
+  integer(size_t), intent(inout) :: type_size             ! type size
   end function h5ltget_attribute_info_c
  end interface
 
@@ -3381,9 +3381,9 @@ end subroutine h5ltget_attribute_info_f
 !  end
 !
 end module H5LT
-            
 
-                                     
+
+
 
 
 

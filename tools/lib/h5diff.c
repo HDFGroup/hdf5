@@ -214,7 +214,7 @@ hsize_t h5diff(const char *fname1,
     {
         /* open file 1 */
 
-        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
         {
 
             parallel_print("h5diff: <%s>: unable to open file\n", fname1);
@@ -230,8 +230,8 @@ hsize_t h5diff(const char *fname1,
 
 
         /* open file 2 */
-        
-        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+
+        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
         {
 
             parallel_print("h5diff: <%s>: unable to open file\n", fname2);
@@ -461,14 +461,14 @@ hsize_t diff_match(hid_t file1_id,
     * 2) the graph must match, i.e same names (absolute path)
     * 3) objects with the same name must be of the same type
     *-------------------------------------------------------------------------
-    */     
-       
+    */
+
     /* number of different objects */
     if ( info1->nused != info2->nused )
     {
         options->contents = 0;
     }
-    
+
     /* objects in one file and not the other */
     for( i = 0; i < table->nobjs; i++)
     {
@@ -479,7 +479,7 @@ hsize_t diff_match(hid_t file1_id,
     }
 
     /* objects with the same name but different HDF5 types */
-    for( i = 0; i < table->nobjs; i++) 
+    for( i = 0; i < table->nobjs; i++)
     {
         if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
         {
@@ -936,7 +936,7 @@ hsize_t diff(hid_t file1_id,
                 if (!options->not_cmp && nfound)
                 {
                     do_print_objname("dataset", path1, path2);
-                    print_found(nfound);	
+                    print_found(nfound);
                 }
             }
             break;

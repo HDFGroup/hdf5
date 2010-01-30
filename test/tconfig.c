@@ -65,7 +65,7 @@ void test_exit_definitions(void);
  *              16 Dec 2009
  *              On Boeing's OpenVMS, the value of EXIT_FAILURE is 268435458.
  *              (The test is in test_exit_definitions.)  Their document says
- *              it's supposed to be 2.  I commented it out for further 
+ *              it's supposed to be 2.  I commented it out for further
  *              consideration.
  *-------------------------------------------------------------------------
  */

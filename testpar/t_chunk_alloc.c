@@ -473,7 +473,7 @@ test_chunk_alloc(void)
     hid_t file_id, dataset;
 
     file_id = dataset = -1;
-    
+
     /* Initialize MPI */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);

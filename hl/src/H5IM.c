@@ -165,8 +165,8 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
 *
 *-------------------------------------------------------------------------
 */
-static herr_t find_palette(hid_t loc_id, 
-                           const char *name, 
+static herr_t find_palette(hid_t loc_id,
+                           const char *name,
                            const H5A_info_t *ainfo,
                            void *op_data)
 {
@@ -248,7 +248,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
     hid_t       atid;
     H5T_class_t aclass;
     int         has_pal;
-    int         has_attr;   
+    int         has_attr;
 
     /*assume initially we have no palettes attached*/
     *npals = 0;

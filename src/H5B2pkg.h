@@ -275,14 +275,14 @@ H5_DLL H5B2_internal_t *H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2_split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
-H5_DLL herr_t H5B2_create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, 
+H5_DLL herr_t H5B2_create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *node_ptr);
 
 /* Routines for inserting records */
-H5_DLL herr_t H5B2_insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, 
+H5_DLL herr_t H5B2_insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     unsigned depth, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
-H5_DLL herr_t H5B2_insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, 
+H5_DLL herr_t H5B2_insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, void *udata);
 
 /* Routines for iterating over nodes/records */

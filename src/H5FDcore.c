@@ -1014,7 +1014,7 @@ if(file->eof < new_eof)
         /* Update backing store, if using it */
         if(file->fd >= 0 && file->backing_store) {
 #ifdef H5_VMS
-            /* Reset seek offset to the beginning of the file, so that the file isn't 
+            /* Reset seek offset to the beginning of the file, so that the file isn't
              * re-extended later.  This may happen on Open VMS. */
             if(-1 == HDlseek(file->fd, 0, SEEK_SET))
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")

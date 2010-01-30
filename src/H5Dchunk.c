@@ -1787,8 +1787,8 @@ done:
  *
  * Modification:Raymond Lu
  *              4 Feb 2009
- *              One case that was considered cacheable was when the chunk 
- *              was bigger than the cache size but not allocated on disk.  
+ *              One case that was considered cacheable was when the chunk
+ *              was bigger than the cache size but not allocated on disk.
  *              I moved it to uncacheable branch to bypass the cache to
  *              improve performance.
  *-------------------------------------------------------------------------
@@ -3549,7 +3549,7 @@ H5D_chunk_prune_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write fill value")
 
 done:
-    /* It is currently impossible to fail after the stack node has been 
+    /* It is currently impossible to fail after the stack node has been
      * malloc'ed.  No need to free it here on failure. */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_prune_cb() */
@@ -4818,9 +4818,9 @@ done:
  * Function:	H5D_nonexistent_readvv
  *
  * Purpose:	When the chunk doesn't exist on disk and the chunk is bigger
- *              than the cache size, performs fill value I/O operation on 
- *              memory buffer, advancing through two I/O vectors, until one 
- *              runs out.  
+ *              than the cache size, performs fill value I/O operation on
+ *              memory buffer, advancing through two I/O vectors, until one
+ *              runs out.
  *
  * Note:	This algorithm is pretty inefficient about initializing and
  *              terminating the fill buffer info structure and it would be
@@ -4876,7 +4876,7 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
 
-	/* Check for VL datatype & fill the buffer with VL datatype fill values */ 
+	/* Check for VL datatype & fill the buffer with VL datatype fill values */
 	if(fb_info.has_vlen_fill_type && H5D_fill_refill_vl(&fb_info, fb_info.elmts_per_buf, io_info->dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 

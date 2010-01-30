@@ -27,7 +27,7 @@
 
 const char *FILENAME[1] = {
     "btree_idx_1_8.h5"	/* file with datasets that use B-tree indexing method */
-}; 
+};
 
 #define DSET		"dset"
 #define DSET_FILTER	"dset_filter"
@@ -82,7 +82,7 @@ static void gen_idx_file(void)
     /* Create a 1D dataset */
     did  = H5Dcreate2(fid, DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     assert(did >= 0);
-    
+
     /* Write to the dataset */
     status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     assert(status >= 0);

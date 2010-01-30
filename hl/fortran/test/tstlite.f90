@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,10 +11,10 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! This file contains the FORTRAN90 tests for H5LT 
+! This file contains the FORTRAN90 tests for H5LT
 !
 
 program lite_test
@@ -25,16 +25,16 @@ call test_dataset3D()
 call test_datasets()
 call test_attributes()
 
-end program lite_test 
+end program lite_test
 
 
 !-------------------------------------------------------------------------
-! test_dataset1D 
+! test_dataset1D
 !-------------------------------------------------------------------------
 
 subroutine test_dataset1D()
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
@@ -44,7 +44,7 @@ character(len=9), parameter :: filename = "dsetf1.h5"! File name
 character(LEN=5), parameter :: dsetname1 = "dset1"   ! Dataset name
 character(LEN=5), parameter :: dsetname2 = "dset2"   ! Dataset name
 character(LEN=5), parameter :: dsetname3 = "dset3"   ! Dataset name
-integer(HID_T) :: file_id                            ! File identifier 
+integer(HID_T) :: file_id                            ! File identifier
 integer(HSIZE_T), dimension(1) :: dims = (/DIM1/)    ! Dataset dimensions
 integer        :: rank = 1                           ! Dataset rank
 integer, dimension(DIM1) :: buf1                     ! Data buffer
@@ -72,7 +72,7 @@ end do
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -80,16 +80,16 @@ call h5open_f(errcode)
 call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
 !-------------------------------------------------------------------------
-! H5T_NATIVE_INTEGER 
+! H5T_NATIVE_INTEGER
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf1, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr1, dims, errcode)
 
@@ -105,16 +105,16 @@ do i = 1, DIM1
 end do
 
 !-------------------------------------------------------------------------
-! H5T_NATIVE_REAL 
+! H5T_NATIVE_REAL
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_REAL, buf2, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_REAL, bufr2, dims, errcode)
 
@@ -130,16 +130,16 @@ do i = 1, DIM1
 end do
 
 !-------------------------------------------------------------------------
-! H5T_NATIVE_DOUBLE 
+! H5T_NATIVE_DOUBLE
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_DOUBLE, buf3, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_DOUBLE, bufr3, dims, errcode)
 
@@ -169,14 +169,14 @@ call passed()
 ! end function.
 !
 end subroutine test_dataset1D
- 
+
 !-------------------------------------------------------------------------
-! test_dataset2D 
+! test_dataset2D
 !-------------------------------------------------------------------------
 
 subroutine test_dataset2D()
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
@@ -189,7 +189,7 @@ character(LEN=5), parameter :: dsetname1 = "dset1"   ! Dataset name
 character(LEN=5), parameter :: dsetname2 = "dset2"   ! Dataset name
 character(LEN=5), parameter :: dsetname3 = "dset3"   ! Dataset name
 character(LEN=5), parameter :: dsetname4 = "dset4"   ! Dataset name
-integer(HID_T) :: file_id                            ! File identifier 
+integer(HID_T) :: file_id                            ! File identifier
 integer(HSIZE_T), dimension(2) :: dims = (/4,6/)     ! Dataset dimensions
 integer        :: rank = 2                           ! Dataset rank
 integer, dimension(DIM1*DIM2) :: buf                 ! Data buffer
@@ -222,12 +222,12 @@ do i = 1, dims(1)
   buf4(i,j) = (i-1)*dims(2) + j;
  end do
 end do
-     
+
 
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -239,12 +239,12 @@ call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
 
@@ -264,12 +264,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
 
@@ -291,12 +291,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
 
@@ -318,12 +318,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, buf4, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, buf4r, dims, errcode)
 
@@ -354,7 +354,7 @@ call passed()
 !
 ! end function.
 !
-end subroutine test_dataset2D 
+end subroutine test_dataset2D
 
 
 !-------------------------------------------------------------------------
@@ -364,7 +364,7 @@ end subroutine test_dataset2D
 
 subroutine test_dataset3D()
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
@@ -377,7 +377,7 @@ character(LEN=5), parameter :: dsetname1 = "dset1"          ! Dataset name
 character(LEN=5), parameter :: dsetname2 = "dset2"          ! Dataset name
 character(LEN=5), parameter :: dsetname3 = "dset3"          ! Dataset name
 character(LEN=5), parameter :: dsetname4 = "dset4"          ! Dataset name
-integer(HID_T) :: file_id                                   ! File identifier 
+integer(HID_T) :: file_id                                   ! File identifier
 integer(HSIZE_T), dimension(3) :: dims = (/DIM1,DIM2,DIM3/) ! Dataset dimensions
 integer(HSIZE_T), dimension(3) :: dimsr                     ! Dataset dimensions
 integer, dimension(DIM1*DIM2*DIM3) :: buf                   ! Data buffer
@@ -421,7 +421,7 @@ end do
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -433,12 +433,12 @@ call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
 
@@ -458,12 +458,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
 
@@ -487,12 +487,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
 
@@ -516,12 +516,12 @@ end do
 !-------------------------------------------------------------------------
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, buf4, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, buf4r, dims, errcode)
 
@@ -540,7 +540,7 @@ do i = 1, dims(1)
  end do
 end do
 
-call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode ) 
+call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
 
 !
 ! compare dimensions
@@ -576,13 +576,13 @@ end subroutine test_dataset3D
 
 subroutine test_datasets()
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
 
 character(len=9), parameter :: filename = "dsetf4.h5"! File name
-integer(HID_T) :: file_id                            ! File identifier 
+integer(HID_T) :: file_id                            ! File identifier
 integer        :: errcode                            ! Error flag
 integer, parameter :: DIM1 = 10;                     ! Dimension of array
 character(LEN=5), parameter :: dsetname1 = "dset1"   ! Dataset name
@@ -610,7 +610,7 @@ integer(SIZE_T)  :: type_size
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -629,18 +629,18 @@ do i = 1, DIM1
 end do
 
 !-------------------------------------------------------------------------
-! int 
+! int
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read datasets (integer)   ')
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_int_f(file_id, dsetname2, rank, dims, buf2, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_int_f(file_id, dsetname2, bufr2, dims, errcode)
 
@@ -658,19 +658,19 @@ end do
 call passed()
 
 !-------------------------------------------------------------------------
-! real 
+! real
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read datasets (float)     ')
 
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_float_f(file_id, dsetname3, rank, dims, buf3, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_float_f(file_id, dsetname3, bufr3, dims, errcode)
 
@@ -688,19 +688,19 @@ end do
 call passed()
 
 !-------------------------------------------------------------------------
-! double 
+! double
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read datasets (double)    ')
 
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_double_f(file_id, dsetname4, rank, dims, buf4, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_double_f(file_id, dsetname4, bufr4, dims, errcode)
 
@@ -719,19 +719,19 @@ call passed()
 
 
 !-------------------------------------------------------------------------
-! string 
+! string
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read datasets (string)    ')
 
 
 !
-! write dataset. 
+! write dataset.
 !
 call h5ltmake_dataset_string_f(file_id, dsetname5, buf1, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 call h5ltread_dataset_string_f(file_id, dsetname5, buf1r, errcode)
 
@@ -754,7 +754,7 @@ call passed()
 call test_begin(' Get dataset dimensions/info    ')
 
 !-------------------------------------------------------------------------
-! h5ltget_dataset_ndims_f 
+! h5ltget_dataset_ndims_f
 !-------------------------------------------------------------------------
 
 call h5ltget_dataset_ndims_f(file_id, dsetname4, rankr, errcode)
@@ -780,7 +780,7 @@ endif
 !-------------------------------------------------------------------------
 
 
-call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode ) 
+call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
 
 !
 ! compare dimensions
@@ -811,22 +811,22 @@ call passed()
 ! end function.
 !
 end subroutine test_datasets
- 
- 
+
+
 
 !-------------------------------------------------------------------------
-! test_attributes 
+! test_attributes
 !-------------------------------------------------------------------------
 
 subroutine test_attributes()
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
 
 character(len=9), parameter :: filename = "dsetf5.h5"! File name
-integer(HID_T) :: file_id                            ! File identifier 
+integer(HID_T) :: file_id                            ! File identifier
 integer, parameter :: DIM1 = 10;                     ! Dimension of array
 character(LEN=5), parameter :: attrname1 = "attr1"   ! Attribute name
 character(LEN=5), parameter :: attrname2 = "attr2"   ! Attribute name
@@ -856,13 +856,13 @@ integer, dimension(DIM1)    :: buf                   ! Data buffer
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 !
 ! Create a new file using default properties.
 !
 call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 !
-! make a dataset. 
+! make a dataset.
 !
 call h5ltmake_dataset_int_f(file_id, dsetname1, rank, dims, buf, errcode)
 
@@ -887,12 +887,12 @@ call test_begin(' Set/Get attributes int         ')
 
 
 !
-! write attribute. 
+! write attribute.
 !
 call h5ltset_attribute_int_f(file_id,dsetname1,attrname2,buf2,size,errcode)
 
 !
-! read attribute. 
+! read attribute.
 !
 call h5ltget_attribute_int_f(file_id,dsetname1,attrname2,bufr2,errcode)
 
@@ -917,12 +917,12 @@ call test_begin(' Set/Get attributes float       ')
 
 
 !
-! write attribute. 
+! write attribute.
 !
 call h5ltset_attribute_float_f(file_id,dsetname1,attrname3,buf3,size,errcode)
 
 !
-! read attribute. 
+! read attribute.
 !
 call h5ltget_attribute_float_f(file_id,dsetname1,attrname3,bufr3,errcode)
 
@@ -948,12 +948,12 @@ call test_begin(' Set/Get attributes double      ')
 
 
 !
-! write attribute. 
+! write attribute.
 !
 call h5ltset_attribute_double_f(file_id,dsetname1,attrname4,buf4,size,errcode)
 
 !
-! read attribute. 
+! read attribute.
 !
 call h5ltget_attribute_double_f(file_id,dsetname1,attrname4,bufr4,errcode)
 
@@ -980,12 +980,12 @@ call test_begin(' Set/Get attributes string      ')
 
 
 !
-! write attribute. 
+! write attribute.
 !
 call h5ltset_attribute_string_f(file_id,dsetname1,attrname5,buf1,errcode)
 
 !
-! read attribute. 
+! read attribute.
 !
 call h5ltget_attribute_string_f(file_id,dsetname1,attrname5,bufr1,errcode)
 
@@ -1009,7 +1009,7 @@ call passed()
 call test_begin(' Get attribute rank/info        ')
 
 
-call h5ltget_attribute_ndims_f(file_id,dsetname1,attrname2,rankr,errcode) 
+call h5ltget_attribute_ndims_f(file_id,dsetname1,attrname2,rankr,errcode)
 
 if ( rankr .ne. 1 ) then
  print *, 'h5ltget_attribute_ndims_f return error'
@@ -1017,7 +1017,7 @@ if ( rankr .ne. 1 ) then
 endif
 
 
-call h5ltget_attribute_info_f(file_id,dsetname1,attrname2,dimsr,type_class,type_size,errcode) 
+call h5ltget_attribute_info_f(file_id,dsetname1,attrname2,dimsr,type_class,type_size,errcode)
 
 !
 ! compare dimensions
@@ -1051,17 +1051,17 @@ end subroutine test_attributes
 
 
 !-------------------------------------------------------------------------
-! test_begin 
+! test_begin
 !-------------------------------------------------------------------------
 
 subroutine test_begin(string)
 character(LEN=*), intent(IN) :: string
 write(*, fmt = '(14a)', advance = 'no') string
-write(*, fmt = '(40x,a)', advance = 'no') ' ' 
+write(*, fmt = '(40x,a)', advance = 'no') ' '
 end subroutine test_begin
 
 !-------------------------------------------------------------------------
-! passed 
+! passed
 !-------------------------------------------------------------------------
 
 subroutine passed()

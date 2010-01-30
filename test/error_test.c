@@ -586,7 +586,7 @@ main(void)
         /* Delete an error from the top of error stack */
         H5Epop(ERR_STACK, 1);
 
-        /* Make sure we can use other class's major or minor errors. */ 
+        /* Make sure we can use other class's major or minor errors. */
         H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS2, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
                 "Error stack test failed");
 

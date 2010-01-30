@@ -2015,7 +2015,7 @@ nh5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
     goto DONE;
 
   ret_value = 0;
-  
+
  DONE:
   return ret_value;
 }

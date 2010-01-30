@@ -77,8 +77,8 @@
 /*-------------------------------------------------------------------------
  * Function:    H5MF_aggr_vfd_alloc
  *
- * Purpose:     Allocate SIZE bytes of file memory via H5MF_aggr_alloc() 
- *		and return the relative address where that contiguous chunk 
+ * Purpose:     Allocate SIZE bytes of file memory via H5MF_aggr_alloc()
+ *		and return the relative address where that contiguous chunk
  *		of file memory exists.
  *		The TYPE argument describes the purpose for which the storage
  *		is being requested.
@@ -722,6 +722,6 @@ H5MF_free_aggrs(H5F_t *f, hid_t dxpl_id)
     if(H5MF_aggr_reset(f, dxpl_id, second_aggr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't reset 'small data' block")
 done:
-    FUNC_LEAVE_NOAPI(ret_value) 
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_free_aggrs() */
 

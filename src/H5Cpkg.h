@@ -207,18 +207,18 @@
  * 		the hash table.  Note that the index_size field (above)
  *		is also the sum of the sizes of all entries in the cache.
  *		Thus we should have the invarient that clean_index_size +
- *		dirty_index_size == index_size.  
+ *		dirty_index_size == index_size.
  *
  *		WARNING:
  *
- *		1) The clean_index_size field is not maintained by the 
- *		   index macros, as the hash table doesn't care whether 
+ *		1) The clean_index_size field is not maintained by the
+ *		   index macros, as the hash table doesn't care whether
  *		   the entry is clean or dirty.  Instead the field is
  *		   maintained in the H5C__UPDATE_RP macros.
  *
  *		2) The value of the clean_index_size must not be mistaken
- *		   for the current clean size of the cache.  Rather, the 
- *		   clean size of the cache is the current value of 
+ *		   for the current clean size of the cache.  Rather, the
+ *		   clean size of the cache is the current value of
  *		   clean_index_size plus the amount of empty space (if any)
  *                 in the cache.
  *
@@ -226,12 +226,12 @@
  * 		the hash table.  Note that the index_size field (above)
  *		is also the sum of the sizes of all entries in the cache.
  *		Thus we should have the invarient that clean_index_size +
- *		dirty_index_size == index_size.  
+ *		dirty_index_size == index_size.
  *
  *		WARNING:
  *
- *		1) The dirty_index_size field is not maintained by the 
- *		   index macros, as the hash table doesn't care whether 
+ *		1) The dirty_index_size field is not maintained by the
+ *		   index macros, as the hash table doesn't care whether
  *		   the entry is clean or dirty.  Instead the field is
  *		   maintained in the H5C__UPDATE_RP macros.
  *

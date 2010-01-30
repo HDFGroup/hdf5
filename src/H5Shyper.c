@@ -5509,14 +5509,14 @@ done:
             if(head && down)
                 if(down->head != head)
                     down = NULL;
- 
+
             do {
                 if(down) {
                     head = down->head;
                     (void)H5FL_FREE(H5S_hyper_span_info_t, down);
                 } /* end if */
                 down = head->down;
-    
+
                 while(head) {
                     last_span = head->next;
                     (void)H5FL_FREE(H5S_hyper_span_t, head);

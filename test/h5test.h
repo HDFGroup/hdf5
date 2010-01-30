@@ -157,7 +157,7 @@ H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 H5TEST_DLL int print_func(const char *format, ...);
-H5TEST_DLL int h5_make_local_copy(char *origfilename, char *local_copy_name); 
+H5TEST_DLL int h5_make_local_copy(char *origfilename, char *local_copy_name);
 
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);

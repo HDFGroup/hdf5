@@ -838,8 +838,8 @@ H5AC_expunge_entry(H5F_t *f,
     H5AC_t * cache_ptr = f->shared->cache;
 
 
-    /* For the expunge entry call, only the addr, and type id are really 
-     * necessary in the trace file.  Write the return value to catch occult 
+    /* For the expunge entry call, only the addr, and type id are really
+     * necessary in the trace file.  Write the return value to catch occult
      * errors.
      */
     if ( ( cache_ptr != NULL ) &&

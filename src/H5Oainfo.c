@@ -396,13 +396,13 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Peter Cao 
+ * Programmer:  Peter Cao
  *              July 18, 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
+H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
@@ -475,7 +475,7 @@ H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(ainfo_src);
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
-        if ( H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc, 
+        if ( H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc,
             (H5O_ainfo_t *)mesg_dst, dxpl_id, cpy_info) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
     }

@@ -74,7 +74,7 @@ int do_copy_refobjs(hid_t fidin,
     *-------------------------------------------------------------------------
     */
     for(i = 0; i < travt->nobjs; i++) {
-        switch(travt->objs[i].type) 
+        switch(travt->objs[i].type)
         {
             /*-------------------------------------------------------------------------
             * H5TRAV_TYPE_GROUP
@@ -194,8 +194,8 @@ int do_copy_refobjs(hid_t fidin,
                                         goto error;
                                     if(options->verbose)
                                     {
-                                        
-                                        
+
+
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
@@ -278,9 +278,9 @@ int do_copy_refobjs(hid_t fidin,
                                         goto error;
                                     if(options->verbose)
                                     {
-                                        
-                                        
-                                        
+
+
+
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> region reference created to <%s>\n",
                                             travt->objs[i].name,
@@ -441,7 +441,7 @@ static int copy_refs_attr(hid_t loc_in,
     if(H5Oget_info(loc_in, &oinfo) < 0)
         goto error;
 
-    for(u = 0; u < (unsigned)oinfo.num_attrs; u++) 
+    for(u = 0; u < (unsigned)oinfo.num_attrs; u++)
     {
         /*-------------------------------------------------------------------------
         * open
@@ -488,7 +488,7 @@ static int copy_refs_attr(hid_t loc_in,
         * we cannot just copy the buffers, but instead we recreate the reference
         *-------------------------------------------------------------------------
         */
-        if(H5Tequal(mtype_id, H5T_STD_REF_OBJ)) 
+        if(H5Tequal(mtype_id, H5T_STD_REF_OBJ))
         {
             hid_t       refobj_id;
             hobj_ref_t  *refbuf = NULL;
@@ -501,10 +501,10 @@ static int copy_refs_attr(hid_t loc_in,
             *-------------------------------------------------------------------------
             */
 
-            if (nelmts) 
+            if (nelmts)
             {
                 buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
-                if(buf == NULL) 
+                if(buf == NULL)
                 {
                     printf("cannot read into memory\n");
                     goto error;
@@ -513,15 +513,15 @@ static int copy_refs_attr(hid_t loc_in,
                     goto error;
 
                 refbuf = (hobj_ref_t *)HDcalloc((unsigned)nelmts, msize);
-                if(refbuf == NULL) 
+                if(refbuf == NULL)
                 {
                     printf( "cannot allocate memory\n" );
                     goto error;
                 } /* end if */
 
-                for(k = 0; k < nelmts; k++) 
+                for(k = 0; k < nelmts; k++)
                 {
-                    H5E_BEGIN_TRY 
+                    H5E_BEGIN_TRY
                     {
                         if((refobj_id = H5Rdereference(attr_id, H5R_OBJECT, &buf[k])) < 0)
                             goto error;
@@ -530,7 +530,7 @@ static int copy_refs_attr(hid_t loc_in,
                     /* get the name. a valid name could only occur in the
                      * second traversal of the file
                      */
-                    if((refname = MapIdToName(refobj_id, travt)) != NULL) 
+                    if((refname = MapIdToName(refobj_id, travt)) != NULL)
                     {
                         /* create the reference */
                         if(H5Rcreate(&refbuf[k], fidout, refname, H5R_OBJECT, -1) < 0)
@@ -565,7 +565,7 @@ static int copy_refs_attr(hid_t loc_in,
         * dataset region references
         *-------------------------------------------------------------------------
         */
-        else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) 
+        else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
         {
             hid_t            refobj_id;
             hdset_reg_ref_t  *refbuf = NULL; /* input buffer for region references */
@@ -577,10 +577,10 @@ static int copy_refs_attr(hid_t loc_in,
             * read input to memory
             *-------------------------------------------------------------------------
             */
-            if(nelmts) 
+            if(nelmts)
             {
                 buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
-                if(buf == NULL) 
+                if(buf == NULL)
                 {
                     printf( "cannot read into memory\n" );
                     goto error;
@@ -593,15 +593,15 @@ static int copy_refs_attr(hid_t loc_in,
                 *-------------------------------------------------------------------------
                 */
                 refbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
-                if(refbuf == NULL) 
+                if(refbuf == NULL)
                 {
                     printf( "cannot allocate memory\n" );
                     goto error;
                 } /* end if */
 
-                for(k = 0; k < nelmts; k++) 
+                for(k = 0; k < nelmts; k++)
                 {
-                    H5E_BEGIN_TRY 
+                    H5E_BEGIN_TRY
                     {
                         if((refobj_id = H5Rdereference(attr_id, H5R_DATASET_REGION, &buf[k])) < 0)
                             continue;
@@ -610,7 +610,7 @@ static int copy_refs_attr(hid_t loc_in,
                     /* get the name. a valid name could only occur in the
                      * second traversal of the file
                      */
-                    if((refname = MapIdToName(refobj_id, travt)) != NULL) 
+                    if((refname = MapIdToName(refobj_id, travt)) != NULL)
                     {
                         hid_t region_id;    /* region id of the referenced dataset */
 
@@ -692,9 +692,9 @@ static const char* MapIdToName(hid_t refobj_id,
     unsigned int i;
 
     /* linear search */
-    for(i = 0; i < travt->nobjs; i++) 
+    for(i = 0; i < travt->nobjs; i++)
     {
-        if(travt->objs[i].type == H5O_TYPE_DATASET) 
+        if(travt->objs[i].type == H5O_TYPE_DATASET)
         {
             H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 

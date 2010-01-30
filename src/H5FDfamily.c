@@ -632,9 +632,9 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
-     * This is to guarantee backward compatibility.  If a file is created with 
+     * This is to guarantee backward compatibility.  If a file is created with
      * v1.6 library and the driver info isn't saved in the superblock.  We open
-     * it with v1.8, the FILE->MEMB_SIZE will be the actual size of the first 
+     * it with v1.8, the FILE->MEMB_SIZE will be the actual size of the first
      * member file (see H5FD_family_open).  So it isn't safe to use FILE->MEMB_SIZE.
      * If the file is created with v1.8, the correctness of FILE->PMEM_SIZE is
      * checked in H5FD_family_sb_decode. SLU - 2009/3/21

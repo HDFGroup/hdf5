@@ -2066,8 +2066,8 @@ test_cached_stab_info(void)
 /****************************************************************
 **
 **  test_rw_noupdate(): low-level file test routine.
-**      This test checks to ensure that opening and closing a file 
-**      with read/write permissions does not write anything to the 
+**      This test checks to ensure that opening and closing a file
+**      with read/write permissions does not write anything to the
 **      file if the file does not change.
 **
 **  Programmer: Mike McGreevy

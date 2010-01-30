@@ -925,7 +925,7 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
 #ifdef H5_VMS
-        /* Reset seek offset to the beginning of the file, so that the file isn't 
+        /* Reset seek offset to the beginning of the file, so that the file isn't
          * re-extended later.  This may happen on Open VMS. */
         if(-1 == HDlseek(file->fd, (file_offset_t)0, SEEK_SET))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")

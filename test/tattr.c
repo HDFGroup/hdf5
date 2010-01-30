@@ -10347,7 +10347,7 @@ test_attr(void)
                 test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
                 test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
                 test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
-                test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */ 
+                test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */
             } /* end for */
         } /* end if */
         else {
@@ -10371,7 +10371,7 @@ test_attr(void)
             test_attr_bug3(fcpl, my_fapl);                      /* Test "self referential" attributes */
             test_attr_bug4(fcpl, my_fapl);                      /* Test attributes on named datatypes */
             test_attr_bug5(fcpl, my_fapl);                      /* Test opening/closing attributes through different file handles */
-            test_attr_bug6(fcpl, my_fapl);                      /* Test reading empty attribute */ 
+            test_attr_bug6(fcpl, my_fapl);                      /* Test reading empty attribute */
         } /* end else */
     } /* end for */
 

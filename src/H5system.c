@@ -592,7 +592,7 @@ HDremove_all(const char *fname)
  *      This implementation is taken from the Cygwin source distribution at
  *          src/winsup/mingw/mingwex/gettimeofday.c
  *
- *      The original source code was contributed by 
+ *      The original source code was contributed by
  *          Danny Smith <dannysmith@users.sourceforge.net>
  *      and released in the public domain.
  *
@@ -606,7 +606,7 @@ HDremove_all(const char *fname)
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
 
-int 
+int
 HDgettimeofday(struct timeval *tv, void *tz)
  {
   union {

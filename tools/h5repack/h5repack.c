@@ -268,7 +268,7 @@ static int check_options(pack_opt_t *options)
     if (options->verbose && have_request(options) /* only print if requested */)
     {
         printf("Objects to modify layout are...\n");
-        if (options->all_layout==1)  
+        if (options->all_layout==1)
         {
             switch (options->layout_g)
             {
@@ -290,7 +290,7 @@ static int check_options(pack_opt_t *options)
                 return -1;
             }
             printf(" Apply %s layout to all\n", slayout);
-            if (H5D_CHUNKED==options->layout_g) 
+            if (H5D_CHUNKED==options->layout_g)
             {
                 printf("with dimension [");
                 for ( j = 0; j < options->chunk_g.rank; j++)
@@ -396,24 +396,24 @@ static int check_options(pack_opt_t *options)
     *-------------------------------------------------------------------------
     */
 
-    if (options->grp_compact < 0) 
+    if (options->grp_compact < 0)
     {
         error_msg(progname, "invalid maximum number of links to store as header messages\n");
         return -1;
     }
-    if (options->grp_indexed < 0) 
+    if (options->grp_indexed < 0)
     {
         error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
         return -1;
     }
-    if (options->grp_indexed > options->grp_compact) 
+    if (options->grp_indexed > options->grp_compact)
     {
         error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
         return -1;
     }
-    for (i=0; i<8; i++) 
+    for (i=0; i<8; i++)
     {
-        if (options->msg_size[i]<0) 
+        if (options->msg_size[i]<0)
         {
             error_msg(progname, "invalid shared message size\n");
             return -1;
@@ -513,14 +513,14 @@ static int check_objects(const char* fname,
     if(options->verbose)
         printf("Opening file <%s>. Searching for objects to modify...\n", fname);
 
-    for(i = 0; i < options->op_tbl->nelems; i++) 
+    for(i = 0; i < options->op_tbl->nelems; i++)
     {
         char* name=options->op_tbl->objs[i].path;
         if(options->verbose)
             printf(" <%s>",name);
 
         /* the input object names are present in the file and are valid */
-        if(h5trav_getindext(name, travt) < 0) 
+        if(h5trav_getindext(name, travt) < 0)
         {
             error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
                 (options->verbose?"\n":""),name,fname);
@@ -530,7 +530,7 @@ static int check_objects(const char* fname,
             printf("...Found\n");
 
         /* check for extra filter conditions */
-        switch(options->op_tbl->objs[i].filter->filtn) 
+        switch(options->op_tbl->objs[i].filter->filtn)
         {
             /* chunk size must be smaller than pixels per block */
         case H5Z_FILTER_SZIP:

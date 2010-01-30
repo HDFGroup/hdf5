@@ -424,7 +424,7 @@ void H5Object::reference(void* ref, const H5std_string& name) const
 // Function:	H5Object::p_dereference (protected)
 // Purpose	Dereference a ref into an hdf5 object.
 // Parameters
-//		loc_id - IN: An hdf5 identifier specifying the location of the 
+//		loc_id - IN: An hdf5 identifier specifying the location of the
 //			 referenced object
 //		ref - IN: Reference pointer
 //		ref_type - IN: Reference type

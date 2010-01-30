@@ -129,10 +129,10 @@ long local_pins		   = 0;
  *		processes, and thus cannot be marked as dirty unless they
  *		happen to overlap some collective operation.
  *
- *	cleared: Boolean flag that is set to true whenever the entry is 
+ *	cleared: Boolean flag that is set to true whenever the entry is
  *		dirty, and is cleared via a call to clear_datum().
  *
- *	flushed: Boolean flag that is set to true whenever the entry is 
+ *	flushed: Boolean flag that is set to true whenever the entry is
  *		dirty, and is flushed via a call to flush_datum().
  *
  *	index:	Index of this instance of datum in the data_index[] array
@@ -1434,7 +1434,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
                 HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
                          world_mpi_rank, fcn_name,
-                         mssg_ptr->src, 
+                         mssg_ptr->src,
 			target_index,
 			data[target_index].base_addr);
             }
@@ -1816,7 +1816,7 @@ destroy_datum(H5F_t UNUSED * f,
  * 		value for communications with the server.
  *
  *		JRM -- 2/4/09
- *		Added code to set the flushed flag when a dirty entry 
+ *		Added code to set the flushed flag when a dirty entry
  *		is flushed.
  *
  *-------------------------------------------------------------------------
@@ -3673,11 +3673,11 @@ unlock_entry(H5C_t * cache_ptr,
 
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
 
-        if ( ( (flags & H5AC__DIRTIED_FLAG) != 0 ) && 
+        if ( ( (flags & H5AC__DIRTIED_FLAG) != 0 ) &&
              ( (flags & H5C__DELETED_FLAG) == 0 ) &&
-             ( ! ( ( ( world_mpi_rank == 0 ) && ( entry_ptr->flushed ) ) 
+             ( ! ( ( ( world_mpi_rank == 0 ) && ( entry_ptr->flushed ) )
                    ||
-                   ( ( world_mpi_rank != 0 ) && ( entry_ptr->cleared ) ) 
+                   ( ( world_mpi_rank != 0 ) && ( entry_ptr->cleared ) )
                  )
              )
            ) {
@@ -5128,8 +5128,8 @@ smoke_check_5(void)
     if ( world_mpi_rank == world_server_mpi_rank ) {
 
         /* 1 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
 	if ( ! server_main() ) {
@@ -5143,16 +5143,16 @@ smoke_check_5(void)
         }
 
         /* 2 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
     }
     else /* run the clients */
     {
 
         /* 1 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         if ( ! setup_cache_for_test(&fid, &file_ptr, &cache_ptr) ) {
@@ -5167,8 +5167,8 @@ smoke_check_5(void)
         }
 
         /* 2 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
@@ -5177,8 +5177,8 @@ smoke_check_5(void)
         }
 
         /* 3 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
 	/* flush the file so we can lock known clean entries. */
@@ -5191,8 +5191,8 @@ smoke_check_5(void)
         }
 
         /* 4 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         for ( i = 0; i < (virt_num_data_entries / 4); i++ )
@@ -5219,8 +5219,8 @@ smoke_check_5(void)
         }
 
         /* 5 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         for ( i = (virt_num_data_entries / 2) - 1;
@@ -5255,8 +5255,8 @@ smoke_check_5(void)
         }
 
         /* 6 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         if ( fid >= 0 ) {
@@ -5272,8 +5272,8 @@ smoke_check_5(void)
         }
 
         /* 7 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         /* verify that all instance of datum are back where the started
@@ -5287,8 +5287,8 @@ smoke_check_5(void)
         }
 
         /* 8 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
 
         /* compose the done message */
@@ -5316,8 +5316,8 @@ smoke_check_5(void)
         }
 
         /* 9 */
-        if ( verbose ) { 
-	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++); 
+        if ( verbose ) {
+	    HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);
         }
     }
 

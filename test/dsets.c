@@ -183,7 +183,7 @@ const char *FILENAME[] = {
 #define BYPASS_DIM               1000
 #define BYPASS_CHUNK_DIM         500
 #define BYPASS_FILL_VALUE        7
- 
+
 /* Declarations for test_idx_compatible() */
 #define	FIXED_IDX_FILE	"fixed_idx.h5"
 #define DSET            "dset"
@@ -818,7 +818,7 @@ error:
         HDfree(wbuf);
     if(rbuf)
         HDfree(rbuf);
-        
+
     H5E_BEGIN_TRY {
         /* Close file */
         H5Sclose(space);
@@ -1056,16 +1056,16 @@ test_tconv(hid_t file)
     return 0;
 
 error:
-    if(out) 
+    if(out)
         HDfree(out);
-    if(in) 
+    if(in)
         HDfree(in);
-    
+
     H5E_BEGIN_TRY {
         H5Dclose(dataset);
         H5Sclose(space);
     } H5E_END_TRY;
-    
+
     return -1;
 }
 
@@ -1735,7 +1735,7 @@ error:
  *
  * Modifications:
  *              Make copy of data file since the test writes to the file.
- *              Larry Knox, October 14, 2009   
+ *              Larry Knox, October 14, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1753,12 +1753,12 @@ test_filter_noencoder(const char *dset_name)
     int test_ints[10] = { 12 };
     int read_buf[10];
     int i;
- 
+
     /* Make a local copy of the file since this test writes to the data file
-       from svn. */  
-    if (h5_make_local_copy(NOENCODER_FILENAME, NOENCODER_COPY_FILENAME) < 0) 
+       from svn. */
+    if (h5_make_local_copy(NOENCODER_FILENAME, NOENCODER_COPY_FILENAME) < 0)
         goto error;
-    
+
     /* Open file */
     file_id = H5Fopen(NOENCODER_COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     if(file_id < 0) goto error;
@@ -5566,9 +5566,9 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_copy_dcpl
  *
- * Purpose:	Verifies whether the copy of dataset creation property 
+ * Purpose:	Verifies whether the copy of dataset creation property
  *              list works.  It tests the DCPL for chunked layout with
- *              filter and for contiguous layout with external storage. 
+ *              filter and for contiguous layout with external storage.
  *              (Please see #1608 in Bugzilla)
  *
  * Return:	Success:	0
@@ -5604,7 +5604,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
     if(H5Pset_fletcher32(dcpl) < 0) TEST_ERROR
 
     /* Create first dataset of chunking with filter */
-    if((dsid1 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, 
+    if((dsid1 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
         H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close dataset */
@@ -5629,7 +5629,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
     if(H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, 0, 500*4096*sizeof(int)) < 0) TEST_ERROR
 
     /* Create second dataset of contiguous layout with external storage */
-    if((dsid2 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, 
+    if((dsid2 = H5Dcreate2(file, DSET_COPY_DCPL_NAME_2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
         H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close dataset */
@@ -5646,7 +5646,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
     if(H5Dclose (dsid2) < 0) TEST_ERROR
 
     /* Create a second file and create 2 datasets with the copies of the DCPLs in the first
-     * file.  Test whether the copies of DCPLs work. */ 
+     * file.  Test whether the copies of DCPLs work. */
     h5_fixname(FILENAME[11], fapl, filename, sizeof filename);
     if((new_file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -5662,10 +5662,10 @@ test_copy_dcpl(hid_t file, hid_t fapl)
 
     /* Close datasets */
     if(H5Dclose (new_dsid1) < 0) TEST_ERROR
-    if(H5Dclose (new_dsid2) < 0) TEST_ERROR 
+    if(H5Dclose (new_dsid2) < 0) TEST_ERROR
 
     /* Close the second file */
-    if(H5Fclose (new_file) < 0) TEST_ERROR 
+    if(H5Fclose (new_file) < 0) TEST_ERROR
 
     /* Close dataset creation property lists */
     if(H5Pclose(dcpl) < 0) TEST_ERROR
@@ -6911,7 +6911,7 @@ error:
  *
  * Purpose:     When the chunk size is bigger than the cache size and the
  *              chunk isn't on disk, this test verifies that the library
- *              bypasses the cache. 
+ *              bypasses the cache.
  *
  * Note:        This test is not very conclusive - it doesn't actually check
  *              if the chunks bypass the cache... :-(  -QAK
@@ -6937,7 +6937,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     size_t      rdcc_nelmts, rdcc_nbytes;
     int         fvalue = BYPASS_FILL_VALUE;
     hsize_t     count, stride, offset, block;
-    static int  wdata[BYPASS_CHUNK_DIM/2], rdata1[BYPASS_DIM], 
+    static int  wdata[BYPASS_CHUNK_DIM/2], rdata1[BYPASS_DIM],
                 rdata2[BYPASS_CHUNK_DIM/2];
     int         i, j;
 
@@ -6981,7 +6981,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     count = 1;
     stride = 1;
     block = BYPASS_CHUNK_DIM / 2;
-    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &offset, &stride, &count, &block) < 0) 
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &offset, &stride, &count, &block) < 0)
         FAIL_STACK_ERROR
 
     /* Initialize data to write */
@@ -6997,9 +6997,9 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Reopen the dataset */
     if((dsid = H5Dopen2(fid, BYPASS_DATASET1, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the 
+    /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the
      * chunk is bigger than the cache size and it isn't allocated on disk. */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1) < 0) 
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1) < 0)
         FAIL_STACK_ERROR
 
     for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
@@ -7018,9 +7018,9 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     /* Close the first dataset */
     if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
-   
+
     /* Create a second dataset without fill value.  This time, both write
-     * and read should bypass the cache because the chunk is bigger than the 
+     * and read should bypass the cache because the chunk is bigger than the
      * cache size and it's not allocated on disk. */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) FAIL_STACK_ERROR
 
@@ -7035,10 +7035,10 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Reopen the dataset */
     if((dsid = H5Dopen2(fid, BYPASS_DATASET2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    /* Read back only the part that was written to the file.  Reading the 
+    /* Read back only the part that was written to the file.  Reading the
      * half chunk should bypass the cache because the chunk is bigger than
      * the cache size. */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rdata2) < 0) 
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rdata2) < 0)
 
     for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
         if(rdata2[i] != i) {
@@ -7416,13 +7416,13 @@ error:
 
 /*-------------------------------------------------------------------------
  *
- *  test_idx_compatible(): 
+ *  test_idx_compatible():
  *	Verify that the 1.8 branch cannot read datasets that use
  *	Fixed Array indexing method.
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 test_idx_compatible(void)
 {
     hid_t	fid = -1;	/* File id */
@@ -7456,7 +7456,7 @@ test_idx_compatible(void)
 	    TEST_ERROR
     } H5E_END_TRY;
 
-    if(H5Fclose(fid) < 0) 
+    if(H5Fclose(fid) < 0)
 	FAIL_STACK_ERROR
 
     PASSED();
@@ -7609,7 +7609,7 @@ main(void)
     printf("All dataset tests passed.\n");
 #ifdef H5_HAVE_FILTER_SZIP
     if (GetTestCleanup())
-        HDremove(NOENCODER_COPY_FILENAME); 
+        HDremove(NOENCODER_COPY_FILENAME);
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
