@@ -89,7 +89,7 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_SOHM_TABLE     H5FD_MEM_OHDR
 #define H5FD_MEM_SOHM_INDEX     H5FD_MEM_BTREE
 
-/* Per discussion with Quincey, I'm mapping the metadata journaling 
+/* Per discussion with Quincey, I'm mapping the metadata journaling
  * configuration block to super.
  *
  * 						JRM -- 3/20/08

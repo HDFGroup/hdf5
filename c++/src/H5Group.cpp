@@ -92,7 +92,7 @@ Group::Group(const hid_t existing_id) : H5Object()
 ///             obj - IN: Location reference object is in
 ///\param	ref - IN: Reference pointer
 ///\parDescription
-///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		\c obj can be DataSet, Group, H5File, or named DataType, that
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------

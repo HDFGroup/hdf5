@@ -83,7 +83,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         /* size of the palette is tablesize (rows) X 3 (columns) */
         dims[0] = gifHead.TableSize;
         dims[1] = 3;
-        
+
         /* make a palette */
         if (H5IMmake_palette(file_id,PAL_NAME,dims,(unsigned char *)gifHead.HDFPalette)<0)
          return -1;
@@ -102,11 +102,11 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
 
         /* create the image name */
         sprintf(ImageName , "Image%d" , i);
-        
+
         /* write image */
         if (H5IMmake_image_8bit(file_id,ImageName,dims[1],dims[0],(gifImageDesc->Image))<0)
          return -1;
-      
+
         /* attach the palette to the image dataset */
         if (has_pal)
         {

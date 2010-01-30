@@ -409,7 +409,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
 
     /* Copy any I/O filter pipeline */
-    /* (This code is not in the "finish init phase" routines because those 
+    /* (This code is not in the "finish init phase" routines because those
      *  routines are also called from the cache 'load' callback, and the filter
      *  length is already set in that case (its stored in the header on disk))
      */
@@ -439,7 +439,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         hdr->heap_size = H5HF_HEADER_SIZE(hdr);
 
     /* Set the length of IDs in the heap */
-    /* (This code is not in the "finish init phase" routines because those 
+    /* (This code is not in the "finish init phase" routines because those
      *  routines are also called from the cache 'load' callback, and the ID
      *  length is already set in that case (its stored in the header on disk))
      */
@@ -1188,7 +1188,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
         /* (Skip direct block that will be deleted, if we find it) */
         tmp_entry = curr_entry;
         while(tmp_entry >= 0 &&
-                (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) || 
+                (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
                     !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
             tmp_entry--;
         /* Check for no earlier blocks in this indirect block */

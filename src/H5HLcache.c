@@ -65,7 +65,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image, 
+static void *H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
@@ -73,7 +73,7 @@ static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, s
     size_t *new_len, void **new_image);
 static herr_t H5HL_prfx_free_icr(haddr_t addr, size_t len, void *thing);
 
-static void *H5HL_dblk_deserialize(haddr_t addr, size_t len, const void *image, 
+static void *H5HL_dblk_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
@@ -409,8 +409,8 @@ H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)_thing; /* Pointer to the local heap prefix */
@@ -572,8 +572,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_dblk_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+H5HL_dblk_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */

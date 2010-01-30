@@ -379,7 +379,7 @@
 /* #undef H5_MPI_FILE_SET_SIZE_BIG */
 
 /* Define if shared writing must be disabled (CodeWarrior only) */
-#define H5_NO_SHARED_WRITING 
+#define H5_NO_SHARED_WRITING
 
 /* Name of package */
 #define H5_PACKAGE "hdf5"
@@ -475,7 +475,7 @@
 #define H5_SIZEOF_UINT16_T 2
 
 /* The size of a `uint32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT32_T 4 
+#define H5_SIZEOF_UINT32_T 4
 
 /* The size of a `uint64_t', as computed by sizeof. */
 #define H5_SIZEOF_UINT64_T 8

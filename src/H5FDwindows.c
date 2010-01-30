@@ -20,11 +20,11 @@
  *
  * Purpose:	We would like to create a driver specifically for Windows
  *			to utilize the Win32 API, and reduce the maintenence demands
- *			for the other file drivers.  Our other motivation is that 
+ *			for the other file drivers.  Our other motivation is that
  *			the Windows system calls of the existing sec2 driver differ
  *			from those on other platforms, and are not 64-bit compatible.
- *			From the start, this will have the structure very similar 
- *			to our sec2 driver, but make system calls more similar to 
+ *			From the start, this will have the structure very similar
+ *			to our sec2 driver, but make system calls more similar to
  *			our stdio driver.
  */
 
@@ -66,7 +66,7 @@ static hid_t H5FD_WINDOWS_g = 0;
  */
 typedef struct H5FD_windows_t {
     H5FD_t	pub;			/*public stuff, must be first	*/
-	/* 
+	/*
 	 * .NET doesn't support our 64-bit safe stdio functions,
 	 * so we will use io.h functions instead.
      */
@@ -96,7 +96,7 @@ typedef struct H5FD_windows_t {
 
 
 /* These are used by the macros below */
-#define file_offset_t		__int64 
+#define file_offset_t		__int64
 #define fseek_offset_t		__int64
 
 /*
@@ -128,7 +128,7 @@ static H5FD_t *H5FD_windows_open(const char *name, unsigned flags, hid_t fapl_id
 static herr_t H5FD_windows_close(H5FD_t *_file);
 static int H5FD_windows_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_windows_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_windows_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, 
+static haddr_t H5FD_windows_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
 			      hsize_t size);
 static haddr_t H5FD_windows_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_windows_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -346,7 +346,7 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 	/* Windows needs O_BINARY to correctly handle eol characters */
-	o_flags |= O_BINARY; 
+	o_flags |= O_BINARY;
 
     /* Open the file */
     if ((fd=_open(name, o_flags, 0666))<0)
@@ -388,7 +388,7 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
-    
+
 #ifndef WINDOWS_USE_STDIO
     file->fd = fd;
 #else
@@ -815,7 +815,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 				/* end of file but not end of format address space */
 				HDmemset(buf, 0, size);
 				break;
-			}	
+			}
 		}
 #endif /* WINDOWS_USE_STDIO */
         assert(nbytes>=0);
@@ -982,7 +982,7 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 		/* Extend the file to make sure it's large enough */
 		if( (filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
 			HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
-		
+
 		li.QuadPart = (__int64)file->eoa;
 		(void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
 		if(SetEndOfFile(filehandle) == 0)
@@ -1010,7 +1010,7 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 		/* Reset last file I/O information */
 		file->pos = HADDR_UNDEF;
 		file->op = OP_UNKNOWN;
-	
+
 	}
 
 done:

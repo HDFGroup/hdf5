@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,15 +11,15 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This file contains FORTRAN90 interfaces for H5IM functions
 !
-      
+
 module h5im
 use h5fortran_types
-use hdf5 
+use hdf5
 contains
 
 
@@ -40,12 +40,12 @@ contains
 !
 !-------------------------------------------------------------------------
 
-subroutine h5immake_image_8bit_f(loc_id,& 
+subroutine h5immake_image_8bit_f(loc_id,&
                                  dset_name,&
-                                 width,& 
+                                 width,&
                                  height,&
                                  buf,&
-                                 errcode ) 
+                                 errcode )
 
  implicit none
 
@@ -56,14 +56,14 @@ subroutine h5immake_image_8bit_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), intent(in) :: width              ! width of image  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), intent(in) :: width              ! width of image
  integer(hsize_t), intent(in) :: height             ! height of image
- integer, intent(in), dimension(*) :: buf           ! buffer 
+ integer, intent(in), dimension(*) :: buf           ! buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5immake_image_8bit_c(loc_id,namelen,dset_name,width,height,buf)
   use h5global
@@ -73,10 +73,10 @@ subroutine h5immake_image_8bit_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), intent(in) :: width                   ! width of image  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), intent(in) :: width                   ! width of image
   integer(hsize_t), intent(in) :: height                  ! height of image
-  integer , intent(in), dimension(*) :: buf               ! buffer  
+  integer , intent(in), dimension(*) :: buf               ! buffer
   end function h5immake_image_8bit_c
  end interface
 
@@ -105,10 +105,10 @@ end subroutine h5immake_image_8bit_f
 !-------------------------------------------------------------------------
 
 
-subroutine h5imread_image_f(loc_id,& 
+subroutine h5imread_image_f(loc_id,&
                             dset_name,&
                             buf,&
-                            errcode ) 
+                            errcode )
 
  implicit none
 
@@ -118,12 +118,12 @@ subroutine h5imread_image_f(loc_id,&
 !DEC$attributes dllexport :: h5imread_image_f
 !DEC$endif
 !
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer, intent(inout), dimension(*) :: buf        ! buffer 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer, intent(inout), dimension(*) :: buf        ! buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5imread_image_c(loc_id,namelen,dset_name,buf)
   use h5global
@@ -133,8 +133,8 @@ subroutine h5imread_image_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer, intent(inout), dimension(*) :: buf             ! buffer  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer, intent(inout), dimension(*) :: buf             ! buffer
   end function h5imread_image_c
  end interface
 
@@ -161,13 +161,13 @@ end subroutine h5imread_image_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5immake_image_24bit_f(loc_id,& 
+subroutine h5immake_image_24bit_f(loc_id,&
                                  dset_name,&
-                                 width,& 
+                                 width,&
                                  height,&
                                  il,&
                                  buf,&
-                                 errcode ) 
+                                 errcode )
 
  implicit none
 
@@ -178,16 +178,16 @@ subroutine h5immake_image_24bit_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), intent(in) :: width              ! width of image  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), intent(in) :: width              ! width of image
  integer(hsize_t), intent(in) :: height             ! height of image
  character(len=*), intent(in) :: il                 ! interlace
- integer, intent(in), dimension(*) :: buf           ! buffer 
+ integer, intent(in), dimension(*) :: buf           ! buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: ilen                                    ! name length
- 
+
  interface
   integer function h5immake_image_24bit_c(loc_id,namelen,dset_name,ilen,il,width,height,buf)
   use h5global
@@ -197,14 +197,14 @@ subroutine h5immake_image_24bit_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: il
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
-  integer(hsize_t), intent(in) :: width                   ! width of image  
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
+  integer(hsize_t), intent(in) :: width                   ! width of image
   integer(hsize_t), intent(in) :: height                  ! height of image
   character(len=*), intent(in) :: il                      ! interlace
-  integer, intent(in), dimension(*) :: buf                ! buffer 
+  integer, intent(in), dimension(*) :: buf                ! buffer
   integer :: namelen                                      ! lenght of name buffer
   integer :: ilen                                         ! name length
- 
+
   end function h5immake_image_24bit_c
  end interface
 
@@ -218,7 +218,7 @@ end subroutine h5immake_image_24bit_f
 !-------------------------------------------------------------------------
 ! Function: h5imget_image_info_f
 !
-! Purpose: Gets information about an image dataset (dimensions, interlace mode 
+! Purpose: Gets information about an image dataset (dimensions, interlace mode
 !          and number of associated palettes).
 !
 ! Return: Success: 0, Failure: -1
@@ -233,14 +233,14 @@ end subroutine h5immake_image_24bit_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5imget_image_info_f(loc_id,& 
+subroutine h5imget_image_info_f(loc_id,&
                                 dset_name,&
                                 width,&
                                 height,&
                                 planes,&
                                 interlace,&
                                 npals,&
-                                errcode ) 
+                                errcode )
 
  implicit none
 
@@ -251,13 +251,13 @@ subroutine h5imget_image_info_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- integer(hsize_t), intent(inout) :: width           ! width of image  
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ integer(hsize_t), intent(inout) :: width           ! width of image
  integer(hsize_t), intent(inout) :: height          ! height of image
  integer(hsize_t), intent(inout) :: planes          ! color planes
  integer(hsize_t), intent(inout) :: npals           ! palettes
- character(len=*), intent(inout) :: interlace       ! interlace 
+ character(len=*), intent(inout) :: interlace       ! interlace
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: ilen                                    ! name length
@@ -270,13 +270,13 @@ subroutine h5imget_image_info_f(loc_id,&
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: interlace
-  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
-  character(len=*), intent(in) :: dset_name          ! name of the dataset 
-  integer(hsize_t), intent(inout) :: width           ! width of image  
+  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+  character(len=*), intent(in) :: dset_name          ! name of the dataset
+  integer(hsize_t), intent(inout) :: width           ! width of image
   integer(hsize_t), intent(inout) :: height          ! height of image
   integer(hsize_t), intent(inout) :: planes          ! color planes
   integer(hsize_t), intent(inout) :: npals           ! palettes
-  character(len=*), intent(inout) :: interlace       ! interlace 
+  character(len=*), intent(inout) :: interlace       ! interlace
   integer :: namelen                                 ! name length
   integer :: ilen                                    ! name length
   end function h5imget_image_info_c
@@ -306,8 +306,8 @@ end subroutine h5imget_image_info_f
 !
 !-------------------------------------------------------------------------
 
-integer function h5imis_image_f(loc_id,& 
-                                dset_name) 
+integer function h5imis_image_f(loc_id,&
+                                dset_name)
 
  implicit none
 
@@ -318,8 +318,8 @@ integer function h5imis_image_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -332,7 +332,7 @@ integer function h5imis_image_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   end function h5imis_image_c
  end interface
 
@@ -360,11 +360,11 @@ end function h5imis_image_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5immake_palette_f(loc_id,& 
+subroutine h5immake_palette_f(loc_id,&
                               dset_name,&
-                              pal_dims,& 
+                              pal_dims,&
                               buf,&
-                              errcode ) 
+                              errcode )
 
  implicit none
 
@@ -375,13 +375,13 @@ subroutine h5immake_palette_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id                 ! file or group identifier 
- character(len=*), intent(in) :: dset_name              ! name of the dataset 
- integer(hsize_t), intent(in), dimension(*) :: pal_dims ! dimensions  
- integer, intent(in), dimension(*) :: buf               ! buffer 
+ integer(hid_t),   intent(in) :: loc_id                 ! file or group identifier
+ character(len=*), intent(in) :: dset_name              ! name of the dataset
+ integer(hsize_t), intent(in), dimension(*) :: pal_dims ! dimensions
+ integer, intent(in), dimension(*) :: buf               ! buffer
  integer :: errcode                                     ! error code
  integer :: namelen                                     ! name length
- 
+
  interface
   integer function h5immake_palette_c(loc_id,namelen,dset_name,pal_dims,buf)
   use h5global
@@ -391,9 +391,9 @@ subroutine h5immake_palette_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer(hsize_t), intent(in), dimension(*) :: pal_dims  ! dimensions
-  integer, intent(in), dimension(*) :: buf                ! buffer  
+  integer, intent(in), dimension(*) :: buf                ! buffer
   end function h5immake_palette_c
  end interface
 
@@ -421,10 +421,10 @@ end subroutine h5immake_palette_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5imlink_palette_f(loc_id,& 
+subroutine h5imlink_palette_f(loc_id,&
                               dset_name,&
                               pal_name,&
-                              errcode ) 
+                              errcode )
 
  implicit none
 
@@ -434,9 +434,9 @@ subroutine h5imlink_palette_f(loc_id,&
 !DEC$attributes dllexport :: h5imlink_palette_f
 !DEC$endif
 !
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- character(len=*), intent(in) :: pal_name           ! palette name 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ character(len=*), intent(in) :: pal_name           ! palette name
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: ilen                                    ! name length
@@ -449,9 +449,9 @@ subroutine h5imlink_palette_f(loc_id,&
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: pal_name
-  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
-  character(len=*), intent(in) :: dset_name          ! name of the dataset 
-  character(len=*), intent(in) :: pal_name           ! palette name 
+  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+  character(len=*), intent(in) :: dset_name          ! name of the dataset
+  character(len=*), intent(in) :: pal_name           ! palette name
   integer :: namelen                                 ! name length
   integer :: ilen                                    ! name length
   end function h5imlink_palette_c
@@ -481,10 +481,10 @@ end subroutine h5imlink_palette_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5imunlink_palette_f(loc_id,& 
+subroutine h5imunlink_palette_f(loc_id,&
                               dset_name,&
                               pal_name,&
-                              errcode ) 
+                              errcode )
 
  implicit none
 
@@ -496,9 +496,9 @@ subroutine h5imunlink_palette_f(loc_id,&
 !
 
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
- character(len=*), intent(in) :: pal_name           ! palette name 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
+ character(len=*), intent(in) :: pal_name           ! palette name
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
  integer :: ilen                                    ! name length
@@ -511,9 +511,9 @@ subroutine h5imunlink_palette_f(loc_id,&
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: pal_name
-  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
-  character(len=*), intent(in) :: dset_name          ! name of the dataset 
-  character(len=*), intent(in) :: pal_name           ! palette name 
+  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+  character(len=*), intent(in) :: dset_name          ! name of the dataset
+  character(len=*), intent(in) :: pal_name           ! palette name
   integer :: namelen                                 ! name length
   integer :: ilen                                    ! name length
   end function h5imunlink_palette_c
@@ -544,10 +544,10 @@ end subroutine h5imunlink_palette_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5imget_npalettes_f(loc_id,& 
+subroutine h5imget_npalettes_f(loc_id,&
                                dset_name,&
                                npals,&
-                               errcode ) 
+                               errcode )
 
  implicit none
 
@@ -558,8 +558,8 @@ subroutine h5imget_npalettes_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer(hsize_t), intent(inout) :: npals           ! palettes
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
@@ -571,8 +571,8 @@ subroutine h5imget_npalettes_f(loc_id,&
   !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_NPALETTES_C'::h5imget_npalettes_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
-  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
-  character(len=*), intent(in) :: dset_name          ! name of the dataset 
+  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+  character(len=*), intent(in) :: dset_name          ! name of the dataset
   integer(hsize_t), intent(inout) :: npals           ! palettes
   integer :: namelen                                 ! name length
   end function h5imget_npalettes_c
@@ -601,15 +601,15 @@ end subroutine h5imget_npalettes_f
 !
 !-------------------------------------------------------------------------
 
-subroutine h5imget_palette_info_f(loc_id,& 
+subroutine h5imget_palette_info_f(loc_id,&
                                   dset_name,&
                                   pal_number,&
                                   dims,&
-                                  errcode ) 
+                                  errcode )
 
  implicit none
 
- 
+
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -617,10 +617,10 @@ subroutine h5imget_palette_info_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id                ! file or group identifier 
- character(len=*), intent(in) :: dset_name             ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id                ! file or group identifier
+ character(len=*), intent(in) :: dset_name             ! name of the dataset
  integer, intent(in) :: pal_number                     ! palette number
- integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions 
+ integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions
  integer :: errcode                                    ! error code
  integer :: namelen                                    ! name length
 
@@ -631,10 +631,10 @@ subroutine h5imget_palette_info_f(loc_id,&
   !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_PALETTE_INFO_C'::h5imget_palette_info_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
-  integer(hid_t),   intent(in) :: loc_id                ! file or group identifier 
-  character(len=*), intent(in) :: dset_name             ! name of the dataset 
+  integer(hid_t),   intent(in) :: loc_id                ! file or group identifier
+  character(len=*), intent(in) :: dset_name             ! name of the dataset
   integer, intent(in) :: pal_number                     ! palette number
-  integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions 
+  integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions
   integer :: namelen                                    ! name length
   end function h5imget_palette_info_c
  end interface
@@ -664,11 +664,11 @@ end subroutine h5imget_palette_info_f
 !-------------------------------------------------------------------------
 
 
-subroutine h5imget_palette_f(loc_id,& 
+subroutine h5imget_palette_f(loc_id,&
                              dset_name,&
                              pal_number,&
                              buf,&
-                             errcode ) 
+                             errcode )
 
  implicit none
 
@@ -679,13 +679,13 @@ subroutine h5imget_palette_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer, intent(in) :: pal_number                  ! palette number
- integer, intent(inout), dimension(*) :: buf        ! buffer 
+ integer, intent(inout), dimension(*) :: buf        ! buffer
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
- 
+
  interface
   integer function h5imget_palette_c(loc_id,namelen,dset_name,pal_number,buf)
   use h5global
@@ -695,9 +695,9 @@ subroutine h5imget_palette_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer, intent(in) :: pal_number                       ! palette number
-  integer, intent(inout), dimension(*) :: buf             ! buffer  
+  integer, intent(inout), dimension(*) :: buf             ! buffer
   end function h5imget_palette_c
  end interface
 
@@ -724,8 +724,8 @@ end subroutine h5imget_palette_f
 !
 !-------------------------------------------------------------------------
 
-integer function h5imis_palette_f(loc_id,& 
-                                  dset_name) 
+integer function h5imis_palette_f(loc_id,&
+                                  dset_name)
 
  implicit none
 
@@ -736,8 +736,8 @@ integer function h5imis_palette_f(loc_id,&
 !DEC$endif
 !
 
- integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
- character(len=*), intent(in) :: dset_name          ! name of the dataset 
+ integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
+ character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
 
@@ -750,7 +750,7 @@ integer function h5imis_palette_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
-  character(len=*), intent(in) :: dset_name               ! name of the dataset 
+  character(len=*), intent(in) :: dset_name               ! name of the dataset
   end function h5imis_palette_c
  end interface
 
@@ -764,7 +764,7 @@ end function h5imis_palette_f
 !  end
 !
 end module H5IM
-            
+
 
 
 

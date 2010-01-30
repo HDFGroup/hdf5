@@ -63,7 +63,7 @@
 static void *H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_image_len(const void *thing, size_t *image_len_ptr);
-static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5O_cache_free_icr(haddr_t addr, size_t len, void *thing);
@@ -71,7 +71,7 @@ static herr_t H5O_cache_free_icr(haddr_t addr, size_t len, void *thing);
 static void *H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_chk_serialize(const H5F_t *f, hid_t dxpl_id,
-    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5O_cache_chk_free_icr(haddr_t addr, size_t len, void *thing);
 
@@ -81,7 +81,7 @@ static herr_t H5O_chunk_proxy_dest(H5O_chunk_proxy_t *chunk_proxy);
 /* Chunk routines */
 static herr_t H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len,
     const uint8_t *image, H5O_common_cache_ud_t *udata, hbool_t *dirty);
-static herr_t H5O_chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno, 
+static herr_t H5O_chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno,
     uint8_t *image);
 
 /* Misc. routines */
@@ -362,8 +362,8 @@ H5O_cache_image_len(const void *thing, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5O_t       *oh = (H5O_t *)_thing;  /* Pointer to the object header */
@@ -604,9 +604,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_chk_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
-    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
-    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len, 
+H5O_cache_chk_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
     void UNUSED **new_image)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;  /* Pointer to the object header chunk proxy */

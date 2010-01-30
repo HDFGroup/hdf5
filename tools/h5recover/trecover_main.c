@@ -12,13 +12,13 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  * This is the Main body of the HDF5 Test program for the h5recover tool.
  * It creates two HDF5 files, one as the Data file, the other the Control file.
  * The two files are intended to contain identical data. The Control file will
  * be completed with no error but the Data file, though written with the same
  * data, is intentional crashed without proper file flush or close.
- * 
+ *
  * (The two files are then verified by processes outside of this program.)
  * The crashed Data file is restored by the h5recover tool and compared with
  * the Control file, expecting identical file content up to the last successful
@@ -26,7 +26,7 @@
  *
  * Creator: Albert Cheng, Jan 28, 2008.
  */
- 
+
 #include "trecover.h"
 
 /* Global variables */
@@ -123,7 +123,7 @@ parser(int ac, char **av)
 	    }
 	}else{
 	    fprintf(stderr, "Unknown command option(%s)\n", *av);
-	    help(); 
+	    help();
 	    exit(1);
 	}
     } /* end of while */
@@ -133,9 +133,9 @@ parser(int ac, char **av)
 	   ( DSTypes != DSChunked ) ||
 	   ( PatchMode != 0 ) ) ) {
 
-        fprintf(stderr, 
+        fprintf(stderr,
 		"-v option cannot be combined with other options\n");
-        help(); 
+        help();
         exit(1);
     }
 
@@ -158,7 +158,7 @@ init(void)
 void
 help(void)
 {
-    fprintf(stderr, 
+    fprintf(stderr,
        "Usage: trecover ([-a <seconds>] [-b] [-d <dataset-type>] [-h]) | [-v]\n"
        "\t-a\tAsync crash seconds where <seconds> is a real number.\n"
        "\t-b\tUse binary journal file (default human readable).\n"
@@ -195,8 +195,8 @@ main (int ac, char **av)
 	    /* create/open both files. */
 	    create_files(H5FILE_NAME, CTL_H5FILE_NAME);
 
-	    /* Create datasets in both Control file and data files.  
-	     * Close both. 
+	    /* Create datasets in both Control file and data files.
+	     * Close both.
 	     */
 	    create_dataset(ctl_file, DSTypes, RANK, dims, dimschunk);
 	    close_file(ctl_file);
@@ -205,9 +205,9 @@ main (int ac, char **av)
         }
 
         /* Open data file with Journaling and control file without. */
-        journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, 
+        journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME,
                       PatchMode, humanReadableJnl);
-    
+
         if (PatchMode){
 	    /* extend the datafile again without writing data, then close it. */
 	    extend_dataset(datafile, NX, 4*NX-1, PatchMode);
@@ -229,12 +229,12 @@ main (int ac, char **av)
 	    if (AsyncCrashParam.tinterval == 0)
 	        CRASH;
 
-	    /* Close file only if Async crash is scheduled but has 
-	     * not occurred yet. 
+	    /* Close file only if Async crash is scheduled but has
+	     * not occurred yet.
 	     */
 	    close_file(datafile);
         }
     }
 
     return(ret_val);
-}     
+}

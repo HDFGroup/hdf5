@@ -222,7 +222,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *              of the LRU when this situation occurs.
  *
  *              This field is only compiled in debug mode.
- * 
+ *
  * addr:	Base address of the cache entry on disk.
  *
  * size:	Length of the cache entry on disk.  Note that unlike normal
@@ -286,20 +286,20 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
  *
- * is_read_only: Boolean flag that is only meaningful if is_protected is 
- * 		TRUE.  In this circumstance, it indicates whether the 
+ * is_read_only: Boolean flag that is only meaningful if is_protected is
+ * 		TRUE.  In this circumstance, it indicates whether the
  * 		entry has been protected read only, or read/write.
  *
  * 		If the entry has been protected read only (i.e. is_protected
- * 		and is_read_only are both TRUE), we allow the entry to be 
+ * 		and is_read_only are both TRUE), we allow the entry to be
  * 		protected more than once.
  *
- *		In this case, the number of readers is maintained in the 
+ *		In this case, the number of readers is maintained in the
  *		ro_ref_count field (see below), and unprotect calls simply
  *		decrement that field until it drops to zero, at which point
  *		the entry is actually unprotected.
  *
- * ro_ref_count: Integer field used to maintain a count of the number of 
+ * ro_ref_count: Integer field used to maintain a count of the number of
  * 		outstanding read only protects on this entry.  This field
  * 		must be zero whenever either is_protected or is_read_only
  * 		are TRUE.
@@ -361,7 +361,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * 		is in the process of being flushed.  This allows the cache
  * 		to detect when a call is the result of a flush callback.
  *
- * destroy_in_progress:  Boolean flag that is set to true iff the entry 
+ * destroy_in_progress:  Boolean flag that is set to true iff the entry
  * 		is in the process of being flushed and destroyed.
  *
  *
@@ -623,21 +623,21 @@ typedef struct H5C_cache_entry_t
  *
  * 	The addition of the flash increment mode was occasioned by performance
  * 	problems that appear when a local heap is increased to a size in excess
- * 	of the current cache size.  While the existing re-size code dealt with 
- * 	this eventually, performance was very bad for the remainder of the 
+ * 	of the current cache size.  While the existing re-size code dealt with
+ * 	this eventually, performance was very bad for the remainder of the
  * 	epoch.
- * 	
+ *
  * 	At present, there are two possible values for the flash_incr_mode:
  *
- * 	H5C_flash_incr__off:  Don't perform flash increases in the size of 
- * 		the cache. 
+ * 	H5C_flash_incr__off:  Don't perform flash increases in the size of
+ * 		the cache.
  *
- *	H5C_flash_incr__add_space:  Let x be either the size of a newly 
- *	        newly inserted entry, or the number of bytes by which the 
+ *	H5C_flash_incr__add_space:  Let x be either the size of a newly
+ *	        newly inserted entry, or the number of bytes by which the
  *	        size of an existing entry has been increased.
  *
- *	        If 
- *	        	x > flash_threshold * current max cache size, 
+ *	        If
+ *	        	x > flash_threshold * current max cache size,
  *
  *	       	increase the current maximum cache size by x * flash_multiple
  *	       	less any free space in the cache, and start a new epoch.  For
@@ -646,28 +646,28 @@ typedef struct H5C_cache_entry_t
  *
  *	With a little thought, it should be obvious that the above flash
  *	cache size increase algorithm is not sufficient for all circumstances --
- *	for example, suppose the user round robins through 
- *	(1/flash_threshold) +1 groups, adding one data set to each on each 
- *	pass.  Then all will increase in size at about the same time, requiring 
- *	the max cache size to at least double to maintain acceptable 
- *      performance, however the above flash increment algorithm will not be 
+ *	for example, suppose the user round robins through
+ *	(1/flash_threshold) +1 groups, adding one data set to each on each
+ *	pass.  Then all will increase in size at about the same time, requiring
+ *	the max cache size to at least double to maintain acceptable
+ *      performance, however the above flash increment algorithm will not be
  *	triggered.
  *
- *	Hopefully, the add space algorithm detailed above will be sufficient 
- *	for the performance problems encountered to date.  However, we should 
+ *	Hopefully, the add space algorithm detailed above will be sufficient
+ *	for the performance problems encountered to date.  However, we should
  *	expect to revisit the issue.
  *
- * flash_multiple: Double containing the multiple described above in the 
- * 	H5C_flash_incr__add_space section of the discussion of the 
- * 	flash_incr_mode	section.  This field is ignored unless flash_incr_mode 
+ * flash_multiple: Double containing the multiple described above in the
+ * 	H5C_flash_incr__add_space section of the discussion of the
+ * 	flash_incr_mode	section.  This field is ignored unless flash_incr_mode
  * 	is H5C_flash_incr__add_space.
  *
  * flash_threshold: Double containing the factor by which current max cache size
- *      is multiplied to obtain the size threshold for the add_space flash 
- *      increment algorithm.  The field is ignored unless flash_incr_mode is 
+ *      is multiplied to obtain the size threshold for the add_space flash
+ *      increment algorithm.  The field is ignored unless flash_incr_mode is
  *	H5C_flash_incr__add_space.
  *
- *	
+ *
  * Cache size decrease control fields:
  *
  * decr_mode: Instance of the H5C_cache_decr_mode enumerated type whose

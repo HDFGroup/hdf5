@@ -93,7 +93,7 @@ void parallel_print(const char* format, ...)
 /*-------------------------------------------------------------------------
  * Function: print_dimensions
  *
- * Purpose: print dimensions 
+ * Purpose: print dimensions
  *
  *-------------------------------------------------------------------------
  */
@@ -110,7 +110,7 @@ print_dimensions (int rank, hsize_t *dims)
     }
     parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
     parallel_print("]" );
-    
+
 }
 
 
@@ -192,7 +192,7 @@ void print_type(hid_t type)
             printf("undefined integer");
         }
         break;
-        
+
     case H5T_FLOAT:
         if (H5Tequal(type, H5T_IEEE_F32BE)) {
             printf("H5T_IEEE_F32BE");
@@ -214,7 +214,7 @@ void print_type(hid_t type)
             printf("undefined float");
         }
         break;
-        
+
     }/*switch*/
 }
 
@@ -233,19 +233,19 @@ const char*
 diff_basename(const char *name)
 {
     size_t i;
-    
+
     if (name==NULL)
         return NULL;
-    
+
     /* Find the end of the base name */
     i = strlen(name);
     while (i>0 && '/'==name[i-1])
         --i;
-    
+
     /* Skip backward over base name */
     while (i>0 && '/'!=name[i-1])
         --i;
-    
+
     return(name+i);
 }
 

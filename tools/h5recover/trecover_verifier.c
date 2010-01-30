@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
+/*
  * This file contains a set of routines intended to verify that the crashed
  * file has been recovered correctly.
  *
@@ -21,7 +21,7 @@
  * 1) The file is readable.
  *
  * 2) If the crash file contains a dataset of the same name as a dataset
- *    that appears in the architype, 
+ *    that appears in the architype,
  *
  *    a) it is of the same type and configuration,
  *
@@ -32,10 +32,10 @@
  *       or filler value, or matching data for a while followed by garbage
  *       or filler falue
  *
- * 3) The crash file contains no dataset that are not in the architype 
+ * 3) The crash file contains no dataset that are not in the architype
  *    file.
  *
- * If the crash file is clearly not correctly recoverd, write a message 
+ * If the crash file is clearly not correctly recoverd, write a message
  * to this effect to stderr, and return non-zero.
  *
  * If the raw data looks odd, write a message to stdout, and return zero.
@@ -43,13 +43,13 @@
  * If all is OK, return 0
  *
  * Note that this code make a lot of assumptions about the structure
- * of the control and crash files.  I expect that this file will have 
+ * of the control and crash files.  I expect that this file will have
  * to be reworked whenever the test file generation code is changed.
  *
  * 					JRM -- 12/8/08
  *
  * WARNING: The above is only partially implemented.  Specifically,
- * at present we only check for the chunked integer dataset type, and 
+ * at present we only check for the chunked integer dataset type, and
  * do not check for extraneous dataset.
  */
 
@@ -81,7 +81,7 @@ open_files(const char *filename, const char *ctl_filename)
 	    fprintf(stderr, "Can't open crash file \"%s\".\n", ctl_filename);
 	    H5Fclose(ctl_file);
 	    ctl_file = -1;
-        
+
         }
     }
 
@@ -89,7 +89,7 @@ open_files(const char *filename, const char *ctl_filename)
 
 }
 
-int 
+int
 verify_chunked_dset(void)
 {
     hbool_t done = FALSE;
@@ -128,7 +128,7 @@ verify_chunked_dset(void)
     hsize_t ctl_memspace_dims[RANK];
     hsize_t crash_memspace_dims[RANK];
 
-    /* Check to see if the dataset appears in both the ctl and crash 
+    /* Check to see if the dataset appears in both the ctl and crash
      * files.
      */
     if ( ret_val == 0 )
@@ -155,7 +155,7 @@ verify_chunked_dset(void)
 	    if ( crash_dset >= 0 ) {
 
 	        ret_val = 1;
-		fprintf(stderr, 
+		fprintf(stderr,
 		    "dataset %s appears in crash file but not in ctl file.\n",
 		    DATASETNAME);
 	    }
@@ -207,8 +207,8 @@ verify_chunked_dset(void)
     /* get the extents */
     if ( ( ret_val == 0 ) && ( ! done ) ) {
 
-        ctl_rank = H5Sget_simple_extent_dims(ctl_dspace, 
-                                             ctl_dims, 
+        ctl_rank = H5Sget_simple_extent_dims(ctl_dspace,
+                                             ctl_dims,
                                              ctl_maxdims );
         if ( ctl_rank != RANK ) {
 
@@ -217,8 +217,8 @@ verify_chunked_dset(void)
 
 	}
 
-        crash_rank =  H5Sget_simple_extent_dims(crash_dspace, 
-                                                crash_dims, 
+        crash_rank =  H5Sget_simple_extent_dims(crash_dspace,
+                                                crash_dims,
                                                 crash_maxdims);
         if ( ctl_rank != RANK ) {
 
@@ -284,7 +284,7 @@ verify_chunked_dset(void)
         if ( ctl_maxdims[0] != H5S_UNLIMITED ) {
 
 	    ret_val = 1;
-            fprintf(stderr, 
+            fprintf(stderr,
                       "chunk dspace ctl_maxdims[0] != H5S_UNLIMITED.\n");
 
 	} else if ( ctl_maxdims[1] != NY ) {
@@ -295,7 +295,7 @@ verify_chunked_dset(void)
         } else if ( crash_maxdims[0] != H5S_UNLIMITED ) {
 
 	    ret_val = 1;
-            fprintf(stderr, 
+            fprintf(stderr,
                       "chunk dspace crash_maxdims[0] != H5S_UNLIMITED.\n");
 
 	} else if ( crash_maxdims[1] != NY ) {
@@ -306,8 +306,8 @@ verify_chunked_dset(void)
     }
 
 
-    /* get the underlying type of the data sets, and verify that it 
-     * is as expected 
+    /* get the underlying type of the data sets, and verify that it
+     * is as expected
      */
     if ( ( ret_val == 0 ) && ( ! done ) ) {
 
@@ -379,7 +379,7 @@ verify_chunked_dset(void)
 
     /* finally, read in the contents of the dsets and compare them.
      *
-     * Since we are not journaling raw data, it is hard to say if 
+     * Since we are not journaling raw data, it is hard to say if
      * any particular set of value is right or wrong, but we will
      * try to spot anything odd and comment.
      */
@@ -389,12 +389,12 @@ verify_chunked_dset(void)
 
         ctl_memspace_dims[0] = ctl_dims[0];
         ctl_memspace_dims[1] = ctl_dims[1];
-    
+
 	ctl_memspace = H5Screate_simple(RANK, ctl_memspace_dims, NULL);
 
         crash_memspace_dims[0] = crash_dims[0];
         crash_memspace_dims[1] = crash_dims[1];
-    
+
 	crash_memspace = H5Screate_simple(RANK, crash_memspace_dims, NULL);
 
 	if ( ( ctl_memspace < 0 ) || ( crash_memspace < 0 ) ) {
@@ -405,11 +405,11 @@ verify_chunked_dset(void)
         } else {
 
 	    ctl_result = H5Sselect_hyperslab(ctl_memspace, H5S_SELECT_SET,
-			                     zero_offset, NULL, 
+			                     zero_offset, NULL,
 					     ctl_memspace_dims, NULL);
 
 	    crash_result = H5Sselect_hyperslab(crash_memspace, H5S_SELECT_SET,
-			                       zero_offset, NULL, 
+			                       zero_offset, NULL,
 					       crash_memspace_dims, NULL);
 
 	    if ( ( ctl_result < 0 ) || ( crash_result < 0 ) ) {
@@ -425,10 +425,10 @@ verify_chunked_dset(void)
     /* set up the file space selections */
     if ( ( ret_val == 0 ) && ( ! done ) ) {
 
-        ctl_result = H5Sselect_hyperslab(ctl_dspace, H5S_SELECT_SET, 
+        ctl_result = H5Sselect_hyperslab(ctl_dspace, H5S_SELECT_SET,
 			                 zero_offset, NULL, ctl_dims, NULL);
 
-        crash_result = H5Sselect_hyperslab(crash_dspace, H5S_SELECT_SET, 
+        crash_result = H5Sselect_hyperslab(crash_dspace, H5S_SELECT_SET,
 			                   zero_offset, NULL, crash_dims, NULL);
 
         if ( ( ctl_result < 0 ) || ( crash_result < 0 ) ) {
@@ -466,26 +466,26 @@ verify_chunked_dset(void)
      *
      * 2) All bad data.
      *
-     * 3) Good data at the beginning, turning to gargbage somewhere along 
+     * 3) Good data at the beginning, turning to gargbage somewhere along
      *    the way.  This should be the typical case.
      *    Further, since we this is a chunked data set, we would expect
      *    each chunk to be all good or all bad.
      *
      * The following code is an attempt to check this.  We will not flag
-     * any errors, but if we see anything odd, we will dump the contents 
+     * any errors, but if we see anything odd, we will dump the contents
      * of the data set.
      */
 
     if ( ( ret_val == 0 ) && ( ! done ) ) {
 
-        /* do a raster scan of the dataset and cont the number of 
+        /* do a raster scan of the dataset and cont the number of
          * transitions from good data to bad data and vise versa.
-         * 
+         *
          * If there are "too many" transitions, make note and request
          * a dump of the data sets.
          *
-         * Similarly, if any streak of good or bad data is not a 
-         * multiple of the chunk height, make note and request a 
+         * Similarly, if any streak of good or bad data is not a
+         * multiple of the chunk height, make note and request a
          * dump of the data sets.
          */
 
@@ -522,7 +522,7 @@ verify_chunked_dset(void)
 
                     if ( ctl_data[i][j] == crash_data[i][j] ) {
 
-                        /* don't begin a good data streak unless we have 
+                        /* don't begin a good data streak unless we have
                          * two good values in a row.
                          */
                         if ( prev_entry_matched ) {
@@ -558,7 +558,7 @@ verify_chunked_dset(void)
 
         if ( transitions > (2 * ChunkX) ) {
 
-            fprintf(stdout, 
+            fprintf(stdout,
                     "\nToo many transitions between good and bad data.\n");
             fprintf(stdout, "Dumping the ctl and crash chunked data sets.\n");
             dump_ctl_dset = TRUE;
@@ -662,7 +662,7 @@ verify_chunked_dset(void)
 } /* verify_chunked_dset() */
 
 
-int 
+int
 verify_recovery(void)
 {
     int ret_val = 0;

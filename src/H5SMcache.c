@@ -63,7 +63,7 @@ static herr_t H5SM_table_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
-static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr, 
+static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5SM_list_free_icr(haddr_t addr, size_t len, void *thing);
@@ -121,7 +121,7 @@ const H5AC2_class_t H5AC2_SOHM_LIST[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
+H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
     H5SM_master_table_t *table = NULL;
@@ -224,7 +224,7 @@ done:
         (void)H5SM_table_dest(table);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_table_deserialize() */ 
+} /* end H5SM_table_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -242,7 +242,7 @@ done:
  */
 static herr_t
 H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_master_table_t *table = (H5SM_master_table_t *)_thing;
@@ -254,7 +254,7 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
 
     /* check arguments */
     HDassert(f);
-    HDassert(image);    
+    HDassert(image);
     HDassert(table);
     HDassert(H5F_addr_defined(addr));
 
@@ -340,7 +340,7 @@ H5SM_table_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 
     /* Destroy Shared Object Header Message */
     H5SM_table_dest(thing);
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_table_free_icr() */
 
@@ -454,8 +454,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+H5SM_list_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_list_t *list = (H5SM_list_t *)_thing;
@@ -536,6 +536,6 @@ H5SM_list_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 
     /* Destroy Shared Object Header Message */
     H5SM_list_dest(thing);
-    
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_list_free_icr() */

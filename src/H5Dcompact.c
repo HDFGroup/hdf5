@@ -319,7 +319,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, 
+H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     H5O_layout_t *layout_dst, H5T_t *dt_src, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
@@ -458,7 +458,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             /* Type conversion not necessary */
             HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
     } /* end if */
-    else 
+    else
         /* Type conversion not necessary */
         HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
 

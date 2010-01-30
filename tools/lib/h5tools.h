@@ -40,7 +40,7 @@
 #define H5TOOLS_BUFSIZE         (1024 * 1024)
 #else
 #define H5TOOLS_BUFSIZE         (1024)
-#endif 
+#endif
 
 /*
  * Maximum size used in a call to malloc

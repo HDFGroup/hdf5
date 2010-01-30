@@ -43,7 +43,7 @@
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
 #include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS 
+#ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
 #include "H5FDdirect.h"         /*Linux direct I/O			*/
@@ -941,7 +941,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
 	/* Create a metadata cache with modified API along side the regular
-	 * version.  For now, this is just for testing.  Once we get it 
+	 * version.  For now, this is just for testing.  Once we get it
 	 * fully in use, we will delete the old version.
 	 */
 	if(H5AC2_create(f, (H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
@@ -1185,7 +1185,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		multiple Boolean flags.
  *
  *		Vailin Choi, 2008-04-02
- *		To formulate path for later searching of target file for 
+ *		To formulate path for later searching of target file for
  *		external link via H5_build_extpath().
  *
  *-------------------------------------------------------------------------
@@ -1393,7 +1393,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 
 	config_ptr = &(file->shared->initJnlCfg);
 
-        if(H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2, 
+        if(H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2,
                 config_ptr->journal_recovered) < 0 )
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "H5AC2_check_for_journaling() reports failure.")
 
@@ -1578,7 +1578,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* can't journal at this point as the file is not open */
     /* In theory, opening the file shouldn't generate any dirty metadata,
-     * but we do have one case where we fix some object automatically 
+     * but we do have one case where we fix some object automatically
      * when we first touch it.  Can this happen here?  If so, we will
      * have to do somethings to start a transaction before this happens.
      */
@@ -2154,7 +2154,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
     /* If no intent flags were passed in, exit quietly */
     if(!intent_flags)
 	HGOTO_DONE(SUCCEED)
-    
+
     *intent_flags = H5F_get_intent(file);
 
     /* HDF5 uses some flags internally that users don't know about.
@@ -2207,7 +2207,7 @@ H5F_get_intent(const H5F_t *f)
  *		when searching the target file.
  *
  * Return:	'extpath' on success/abort on failure (shouldn't fail)
- * 
+ *
  * Programmer:	Vailin Choi, April 2, 2008
  *
  * Modifications:
@@ -3385,7 +3385,7 @@ done:
  *
  * Changes:	John Mainzer
  * 		8/4/08
- * 		Reworked function to use the new H5AC2_jnl_config_t 
+ * 		Reworked function to use the new H5AC2_jnl_config_t
  * 		structure and H5AC2_get_jnl_config().
  *
  *-------------------------------------------------------------------------
@@ -3414,7 +3414,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_jnl_config
  *
- * Purpose:     Retrieves the current journaling configuration, and 
+ * Purpose:     Retrieves the current journaling configuration, and
  * 		return it in *config_ptr.
  *
  *		Note that the version field of *config_Ptr must be correctly
@@ -3456,8 +3456,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Fset_jnl_config
  *
- * Purpose:     Sets the current journaling configuration, using the 
- * 		contents of the instance of H5AC2_jnl_config_t pointed 
+ * Purpose:     Sets the current journaling configuration, using the
+ * 		contents of the instance of H5AC2_jnl_config_t pointed
  * 		to by config_ptr.
  *
  * Return:      Success:        SUCCEED

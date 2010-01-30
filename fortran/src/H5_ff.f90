@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,32 +11,32 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 MODULE H5LIB
 
 CONTAINS
 !----------------------------------------------------------------------
-! Name:		h5open_f 
+! Name:		h5open_f
 !
-! Purpose:	Initializes the HDF5 library and Fortran90 interface.   	
+! Purpose:	Initializes the HDF5 library and Fortran90 interface.
 !
-! Inputs:  
-! Outputs:  
-!		error:		- error code		
+! Inputs:
+! Outputs:
+!		error:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  February 28, 2001 
+!			port).  February 28, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
   SUBROUTINE h5open_f(error)
 !
@@ -54,7 +54,7 @@ CONTAINS
 !        INTEGER, EXTERNAL :: h5init_flags_c
 !        INTEGER, EXTERNAL :: h5init1_flags_c
 !        INTEGER, EXTERNAL :: h5open_c
-        
+
 !
 ! MS FORTRAN needs explicit interfaces for C functions called here.
 !
@@ -70,7 +70,7 @@ CONTAINS
          USE H5GLOBAL
          INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: p_types
          INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: f_types
-         INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: i_types   
+         INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: i_types
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5INIT_TYPES_C'::h5init_types_c
          !DEC$ ENDIF
@@ -89,7 +89,7 @@ CONTAINS
             i_H5P_flags_int, &
             i_H5R_flags, &
             i_H5S_flags, &
-            i_H5T_flags, &               
+            i_H5T_flags, &
             i_H5Z_flags, &
             i_H5generic_flags)
          USE H5GLOBAL
@@ -144,26 +144,26 @@ CONTAINS
   END SUBROUTINE h5open_f
 
 !----------------------------------------------------------------------
-! Name:		h5close_f 
+! Name:		h5close_f
 !
-! Purpose:	Closes the HDF5 library and Fortran90 interface.   	
+! Purpose:	Closes the HDF5 library and Fortran90 interface.
 !
-! Inputs:  
-! Outputs:  
-!		error:		- error code		
+! Inputs:
+! Outputs:
+!		error:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  February 28, 2001 
+!			port).  February 28, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5close_f(error)
@@ -196,7 +196,7 @@ CONTAINS
          INTEGER I_TYPES_LEN
          INTEGER(HID_T), DIMENSION(P_TYPES_LEN) :: p_types
          INTEGER(HID_T), DIMENSION(F_TYPES_LEN) :: f_types
-         INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types   
+         INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5CLOSE_TYPES_C'::h5close_types_c
          !DEC$ ENDIF
@@ -209,27 +209,27 @@ CONTAINS
     error = error_1 + error_2
 
   END SUBROUTINE h5close_f
-        
+
 !----------------------------------------------------------------------
-! Name:		h5get_libversion_f 
+! Name:		h5get_libversion_f
 !
 ! Purpose:	Returns the HDF5 LIbrary release number
 !
-! Inputs:  
-! Outputs:  
+! Inputs:
+! Outputs:
 !		majnum:		- major version of the library
 !		minum:		- minor version of the library
 !		relnum:		- release version of the library
-!		error:		- error code		
+!		error:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		September 24, 2002
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
@@ -240,7 +240,7 @@ CONTAINS
 !DEC$endif
 !
     USE H5GLOBAL
-    
+
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
     INTERFACE
@@ -251,31 +251,31 @@ CONTAINS
          INTEGER, INTENT(OUT) :: majnum, minnum, relnum
        END FUNCTION h5get_libversion_c
     END INTERFACE
-    
+
     error = h5get_libversion_c(majnum, minnum, relnum)
-    
+
   END SUBROUTINE h5get_libversion_f
 
 !----------------------------------------------------------------------
-! Name:		h5check_version_f 
+! Name:		h5check_version_f
 !
 ! Purpose:	Verifies that library versions are consistent.
 !
-! Inputs:  
+! Inputs:
 !		majnum:		- major version of the library
 !		minum:		- minor version of the library
 !		relnum:		- release version of the library
-! Outputs:  
-!		error:		- error code		
+! Outputs:
+!		error:		- error code
 !				 	Success:  0
 !				 	Failure:  application aborts
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		September 24, 2002
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
@@ -286,7 +286,7 @@ CONTAINS
 !DEC$endif
 !
     USE H5GLOBAL
-    
+
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: majnum, minnum, relnum
     INTEGER, INTENT(OUT) :: error
@@ -298,29 +298,29 @@ CONTAINS
          INTEGER, INTENT(IN) :: majnum, minnum, relnum
        END FUNCTION h5check_version_c
     END INTERFACE
-    
+
     error = h5check_version_c(majnum, minnum, relnum)
-    
+
   END SUBROUTINE h5check_version_f
 
 !----------------------------------------------------------------------
-! Name:		h5garbage_collect_f 
+! Name:		h5garbage_collect_f
 !
 ! Purpose:	Garbage collects on all free-lists of all types.
 !
-! Inputs:  
-! Outputs:  
-!		error:		- error code		
+! Inputs:
+! Outputs:
+!		error:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		September 24, 2002
 !
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5garbage_collect_f(error)
@@ -331,7 +331,7 @@ CONTAINS
 !DEC$endif
 !
     USE H5GLOBAL
-    
+
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTERFACE
@@ -341,29 +341,29 @@ CONTAINS
          !DEC$ ENDIF
        END FUNCTION h5garbage_collect_c
     END INTERFACE
-    
+
     error = h5garbage_collect_c()
 
   END SUBROUTINE h5garbage_collect_f
 
 !----------------------------------------------------------------------
-! Name:		h5dont_atexit_f 
+! Name:		h5dont_atexit_f
 !
-! Purpose:	Instructs library not to install atexit cleanup routine. 
+! Purpose:	Instructs library not to install atexit cleanup routine.
 !
-! Inputs:  
-! Outputs:  
-!		error:		- error code		
+! Inputs:
+! Outputs:
+!		error:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		September 24, 2002
 !
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5dont_atexit_f(error)
@@ -374,7 +374,7 @@ CONTAINS
 !DEC$endif
 !
     USE H5GLOBAL
-    
+
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTERFACE
@@ -384,8 +384,8 @@ CONTAINS
          !DEC$ ENDIF
        END FUNCTION h5dont_atexit_c
     END INTERFACE
-    
+
     error = h5dont_atexit_c()
-    
+
   END SUBROUTINE h5dont_atexit_f
 END MODULE H5LIB

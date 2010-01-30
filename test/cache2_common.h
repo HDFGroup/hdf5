@@ -48,7 +48,7 @@
 #define MONSTER_ENTRY_TYPE	8
 #define VARIABLE_ENTRY_TYPE	9
 
-#define NUMBER_OF_ENTRY_TYPES   10	
+#define NUMBER_OF_ENTRY_TYPES   10
 
 #define PICO_ENTRY_SIZE		(size_t)1
 #define NANO_ENTRY_SIZE		(size_t)4
@@ -75,10 +75,10 @@
 #define MAX_ENTRIES		(10 * 1024)
 
 
-/* The choice of the BASE_ADDR below is arbitrary -- it just has to be 
+/* The choice of the BASE_ADDR below is arbitrary -- it just has to be
  * larger than the superblock.
  */
-#define BASE_ADDR		(haddr_t)1024 
+#define BASE_ADDR		(haddr_t)1024
 #define PICO_BASE_ADDR		BASE_ADDR
 #define NANO_BASE_ADDR		(haddr_t)(PICO_BASE_ADDR + \
                                       (PICO_ENTRY_SIZE * NUM_PICO_ENTRIES))
@@ -134,7 +134,7 @@
 #define FLUSH_OP__MAX_OP	3
 
 #define MAX_FLUSH_OPS		10	/* Maximum number of flush operations
-					 * that can be associated with a 
+					 * that can be associated with a
 					 * cache entry.
 					 */
 
@@ -161,29 +161,29 @@ typedef struct flush_op
                                          * function implementing the flush
                                          * operation.
 					 */
-    hbool_t		flag;		/* boolean flag passed into the 
+    hbool_t		flag;		/* boolean flag passed into the
 					 * function implementing the flush
 					 * operation.  The meaning of the
 					 * flag is dependant upon the flush
 					 * operation:
 					 *
-					 * FLUSH_OP__DIRTY: TRUE iff the 
-					 *   target is pinned, and is to 
-					 *   be dirtied via the 
+					 * FLUSH_OP__DIRTY: TRUE iff the
+					 *   target is pinned, and is to
+					 *   be dirtied via the
 					 *   H5C_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RESIZE: TRUE iff the
-					 *   target is pinned, and is to 
-					 *   be resized via the 
+					 *   target is pinned, and is to
+					 *   be resized via the
 					 *   H5C_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RENAME: TRUE iff the
-					 *    target is to be renamed to 
+					 *    target is to be renamed to
 					 *    its main address.
 					 */
-    size_t		size;		/* New target size in the 
+    size_t		size;		/* New target size in the
 					 * FLUSH_OP__RENAME operation.
 					 * Unused elsewhere.
 					 */
@@ -208,17 +208,17 @@ typedef struct test_entry_t
     hbool_t		  written_to_main_addr;
     					/* Flag indicating whether an image
 					 * of the entry has been written to
-					 * its main address.  Since we no 
+					 * its main address.  Since we no
 					 * longer have a flush callback, we
 					 * set this field to true whenever the
-					 * entry is serialized while at its 
+					 * entry is serialized while at its
 					 * main address.
 					 */
     hbool_t		  written_to_alt_addr;
-                                        /* Flag indicating whether an image 
-					 * of the entry has been written to 
+                                        /* Flag indicating whether an image
+					 * of the entry has been written to
 					 * its alternate address.  Since we no
-					 * longer have a flush callback, we 
+					 * longer have a flush callback, we
 					 * set this field to true whenever the
 					 * entry is serialized while at its
 					 * alternate address.
@@ -256,7 +256,7 @@ typedef struct test_entry_t
     hbool_t		  is_protected;	/* entry should currently be on
 					 * the cache's protected list.
                                          */
-    hbool_t		  is_read_only; /* TRUE iff the entry should be 
+    hbool_t		  is_read_only; /* TRUE iff the entry should be
 					 * protected read only.
 					 */
     int			  ro_ref_count; /* Number of outstanding read only
@@ -282,14 +282,14 @@ typedef struct test_entry_t
 					 * entries pinned by this entry.
 					 */
     int			  num_flush_ops; /* integer field containing the
-					 * number of flush operations to 
-					 * be executed when the entry is 
+					 * number of flush operations to
+					 * be executed when the entry is
 					 * flushed.  This value must lie in
-					 * the closed interval 
+					 * the closed interval
 					 * [0, MAX_FLUSH_OPS].
 					 */
     struct flush_op	  flush_ops[MAX_FLUSH_OPS]; /* Array of instances
-					 * of struct flush_op detailing the 
+					 * of struct flush_op detailing the
 					 * flush operations (if any) that
 					 * are to be executed when the entry
 					 * is flushed from the cache.
@@ -297,17 +297,17 @@ typedef struct test_entry_t
 					 * num_flush_ops contains the number
 					 * of valid entries in this array.
 					 */
-    hbool_t		  flush_op_self_resize_in_progress; /* Boolean flag 
-					 * that is set to TRUE iff this 
+    hbool_t		  flush_op_self_resize_in_progress; /* Boolean flag
+					 * that is set to TRUE iff this
 					 * entry is being flushed, it has
 					 * been resized by a resize flush
 					 * op, and the flush function has
 					 * not yet returned,  This field is
-					 * used to turn off overactive santity 
-					 * checking code that would otherwise 
+					 * used to turn off overactive santity
+					 * checking code that would otherwise
 					 * cause a false test failure.
 					 */
-    hbool_t		  deserialized; /* entry has been deserialized since 
+    hbool_t		  deserialized; /* entry has been deserialized since
 					 * the last time it was reset.
                                          */
     hbool_t		  cleared;      /* entry has been cleared since the
@@ -634,25 +634,25 @@ herr_t monster_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
 herr_t variable_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
 
 
-void * pico_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * pico_deserialize(haddr_t addr, size_t len, const void * image_ptr,
   		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * nano_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * nano_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * micro_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * micro_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * tiny_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * tiny_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * small_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * small_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * medium_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * medium_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		          const void * udata_ptr, hbool_t * dirty_ptr);
-void * large_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * large_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * huge_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * huge_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * monster_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * monster_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		           const void * udata_ptr, hbool_t * dirty_ptr);
-void * variable_deserialize(haddr_t addr, size_t len, const void * image_ptr, 
+void * variable_deserialize(haddr_t addr, size_t len, const void * image_ptr,
 		            const void * udata_ptr, hbool_t * dirty_ptr);
 
 herr_t pico_image_len(void *thing, size_t *image_len_ptr);
@@ -666,55 +666,55 @@ herr_t huge_image_len(void *thing, size_t *image_len_ptr);
 herr_t monster_image_len(void *thing, size_t *image_len_ptr);
 herr_t variable_image_len(void *thing, size_t *image_len_ptr);
 
-herr_t pico_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		      size_t len, void * image_ptr, 
-		      void * thing, unsigned * flags_ptr, 
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t pico_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		      size_t len, void * image_ptr,
+		      void * thing, unsigned * flags_ptr,
+		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		      void ** new_image_ptr_ptr);
-herr_t nano_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		      size_t len, void * image_ptr, 
-		      void * thing, unsigned * flags_ptr, 
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t nano_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		      size_t len, void * image_ptr,
+		      void * thing, unsigned * flags_ptr,
+		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		      void ** new_image_ptr_ptr);
-herr_t micro_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		       size_t len, void * image_ptr, 
-		       void * thing, unsigned * flags_ptr, 
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t micro_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		       size_t len, void * image_ptr,
+		       void * thing, unsigned * flags_ptr,
+		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		       void ** new_image_ptr_ptr);
-herr_t tiny_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		      size_t len, void * image_ptr, 
-		      void * thing, unsigned * flags_ptr, 
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t tiny_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		      size_t len, void * image_ptr,
+		      void * thing, unsigned * flags_ptr,
+		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		      void ** new_image_ptr_ptr);
-herr_t small_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		       size_t len, void * image_ptr, 
-		       void * thing, unsigned * flags_ptr, 
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t small_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		       size_t len, void * image_ptr,
+		       void * thing, unsigned * flags_ptr,
+		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		       void ** new_image_ptr_ptr);
-herr_t medium_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		        size_t len, void * image_ptr, 
-	  	        void * thing, unsigned * flags_ptr, 
-		        haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t medium_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		        size_t len, void * image_ptr,
+	  	        void * thing, unsigned * flags_ptr,
+		        haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		        void ** new_image_ptr_ptr);
-herr_t large_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		       size_t len, void * image_ptr, 
-		       void * thing, unsigned * flags_ptr, 
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t large_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		       size_t len, void * image_ptr,
+		       void * thing, unsigned * flags_ptr,
+		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
 		       void ** new_image_ptr_ptr);
-herr_t huge_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		      size_t len, void * image_ptr, 
-	              void * thing, unsigned * flags_ptr, 
-	              haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t huge_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		      size_t len, void * image_ptr,
+	              void * thing, unsigned * flags_ptr,
+	              haddr_t * new_addr_ptr, size_t * new_len_ptr,
 	              void ** new_image_ptr_ptr);
-herr_t monster_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		         size_t len, void * image_ptr, 
-	                 void * thing, unsigned * flags_ptr, 
-	                 haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t monster_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		         size_t len, void * image_ptr,
+	                 void * thing, unsigned * flags_ptr,
+	                 haddr_t * new_addr_ptr, size_t * new_len_ptr,
 	                 void ** new_image_ptr_ptr);
-herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
-		          size_t len, void * image_ptr, 
-	                  void * thing, unsigned * flags_ptr, 
-	                  haddr_t * new_addr_ptr, size_t * new_len_ptr, 
+herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
+		          size_t len, void * image_ptr,
+	                  void * thing, unsigned * flags_ptr,
+	                  haddr_t * new_addr_ptr, size_t * new_len_ptr,
 	                  void ** new_image_ptr_ptr);
 
 herr_t pico_free_icr(haddr_t addr, size_t len, void * thing);

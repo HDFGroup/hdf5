@@ -849,7 +849,7 @@ hbool_t        first_quote = 1;
 /* For Lex and Yacc */
 /*int  input_len;
 char *myinput;*/
-    
+
 #define TAG_STRING 1
 
 #line 834 "H5LTanalyze.c"
@@ -1288,17 +1288,17 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 #line 121 "H5LTanalyze.l"
-{return token(H5T_STR_NULLTERM_TOKEN);} 
+{return token(H5T_STR_NULLTERM_TOKEN);}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 122 "H5LTanalyze.l"
-{return token(H5T_STR_NULLPAD_TOKEN);} 
+{return token(H5T_STR_NULLPAD_TOKEN);}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 123 "H5LTanalyze.l"
-{return token(H5T_STR_SPACEPAD_TOKEN);} 
+{return token(H5T_STR_SPACEPAD_TOKEN);}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
@@ -1363,12 +1363,12 @@ YY_RULE_SETUP
 case 55:
 YY_RULE_SETUP
 #line 139 "H5LTanalyze.l"
-{    
-                        if( is_str_size || (is_enum && is_enum_memb) || 
+{
+                        if( is_str_size || (is_enum && is_enum_memb) ||
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
                             (csindex>-1 && cmpd_stack[csindex].is_field) ) {
                             H5LTyylval.ival = atoi(yytext);
-                            return NUMBER; 
+                            return NUMBER;
                         } else
                             REJECT;
                  }
@@ -1378,7 +1378,7 @@ YY_RULE_SETUP
 #line 149 "H5LTanalyze.l"
 {
                     /*if it's first quote, and is a compound field name or an enum symbol*/
-                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field)) 
+                    if((is_opq_tag || is_enum || (csindex>-1 && cmpd_stack[csindex].is_field))
                         && first_quote) {
                         first_quote = 0;
                         BEGIN TAG_STRING;
@@ -2323,8 +2323,8 @@ int main()
 int my_yyinput(char *buf, int max_size)
 {
    int ret;
-    
-   memcpy(buf, myinput, input_len); 
+
+   memcpy(buf, myinput, input_len);
    ret = input_len;
    return ret;
 }

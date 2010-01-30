@@ -62,7 +62,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5HG_deserialize(haddr_t addr, size_t len, const void *image, 
+static void *H5HG_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
@@ -159,7 +159,7 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
         /* Allocate space for the heap->chunk */
         if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)heap->size)))
     	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-        
+
         /* Copy image into chunk */
         HDmemcpy(heap->chunk, image, heap->size);
 
@@ -270,7 +270,7 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
             f->shared->cwfs[0] = heap;
         } /* end else */
 
-        /* Sanity check */    
+        /* Sanity check */
         HDassert((size_t)((const uint8_t *)p - (const uint8_t *)heap->chunk) <= len);
     } /* end if heap->size <= len */
 
@@ -317,7 +317,7 @@ H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     if(heap->size > len) {
         /* free old image buffer */
         H5MM_free(image);
-    
+
         /* allocate new image buffer */
         if(NULL == (*new_image = H5MM_malloc(heap->size)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "new image null after H5MM_realloc()\n")
@@ -347,7 +347,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5HG_image_len
  *
- * Purpose:     Tell the metadata cache about the actual size 
+ * Purpose:     Tell the metadata cache about the actual size
  *              of the global heap
  *
  * Return:	Non-negative on success/Negative on failure
@@ -362,13 +362,13 @@ static herr_t
 H5HG_image_len(const void *thing, size_t *image_len_ptr)
 {
     const H5HG_heap_t    *heap = (const H5HG_heap_t *)thing;    /* Global heap */
-    
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_image_len)
 
     /* Check arguments */
     HDassert(heap);
     HDassert(image_len_ptr);
-    
+
     /* Report the global heap's total size */
     *image_len_ptr = heap->size;
 

@@ -171,7 +171,7 @@ H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t H5Oclose(hid_t object_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

@@ -107,13 +107,13 @@ typedef struct H5C2_t H5C2_t;
  * name: Pointer to a string containing the name of the class of metadata
  * 	cache entries.
  *
- * mem_type:  Instance of H5FD_mem_t, that is used to supply the 
+ * mem_type:  Instance of H5FD_mem_t, that is used to supply the
  * 	mem type passed into H5F_block_read().
  *
  * deserialize: Pointer to the deserialize function.
  *
  * 	This function must be able to read an on disk image of a metadata
- * 	cache entry, allocate and load the equivalent in core representation, 
+ * 	cache entry, allocate and load the equivalent in core representation,
  * 	and return a pointer to that representation.
  *
  *	The typedef for the deserialize callback is as follows:
@@ -140,8 +140,8 @@ typedef struct H5C2_t H5C2_t;
  *              mode, but the parameter may be unused when compiled in
  *              production mode.
  *
- *	image_ptr: Pointer to a buffer of length len containing the 
- *		contents of the file starting at addr and continuing 
+ *	image_ptr: Pointer to a buffer of length len containing the
+ *		contents of the file starting at addr and continuing
  *		for len bytes.
  *
  *	udata_ptr: Pointer to user data provided in the protect call, which
@@ -155,22 +155,22 @@ typedef struct H5C2_t H5C2_t;
  *	Processing in the deserialize function should proceed as follows:
  *
  *      If the image contains valid data, and is of the correct length,
- *      the deserialize function must allocate space for an in core 
- *      representation of that data, load the contents of the image into 
- *      the space allocated for the in core representation, and return 
- *      a pointer to the in core representation.  Observe that an 
- *      instance of H5C2_cache_entry_t must be the first item in this 
- *      representation.  It will have to be initialized appropriately 
+ *      the deserialize function must allocate space for an in core
+ *      representation of that data, load the contents of the image into
+ *      the space allocated for the in core representation, and return
+ *      a pointer to the in core representation.  Observe that an
+ *      instance of H5C2_cache_entry_t must be the first item in this
+ *      representation.  It will have to be initialized appropriately
  *      after the callback returns.
  *
  *      Note that the structure of the in core representation is otherwise
- *      up to the cache client.  All that is required is that the pointer 
- *      returned be sufficient for the clients purposes when it is returned 
+ *      up to the cache client.  All that is required is that the pointer
+ *      returned be sufficient for the clients purposes when it is returned
  *      on a protect call.
  *
  *      If the deserialize function has to clean up file corruption
  *      left over from an old bug in the HDF5 library, it must set
- *      *dirty_ptr to TRUE.  If it doesn't, no action is needed as 
+ *      *dirty_ptr to TRUE.  If it doesn't, no action is needed as
  *      *dirty_ptr will be set to FALSE before the deserialize call.
  *
  *      If the operation fails for any reason (i.e. bad data in buffer, bad
@@ -214,18 +214,18 @@ typedef struct H5C2_t H5C2_t;
  * serialize: Pointer to the serialize callback.
  *
  *	The serialize callback is invoked by the metadata cache whenever
- *	it needs a current on disk image of the metadata entry for purposes 
+ *	it needs a current on disk image of the metadata entry for purposes
  *	either constructing a journal or flushing the entry to disk.
  *
- *	At this point, one would think that the base address and length of 
- *	the length of the entry's image on disk would be well known.  
- *	However, that need not be the case as fractal heap blocks can 
- *	change size (and therefor possible location as well) on 
- *	serialization if compression is enabled.  In the old H5C code, 
- *	this happened on a flush, and occasioned a rename in the midst 
- *	of the flush.  To avoid this in H5C2, the serialize callback 
- *	will return the new base address, length, and image pointer to 
- *	the caller when necessary.  The caller must then update the 
+ *	At this point, one would think that the base address and length of
+ *	the length of the entry's image on disk would be well known.
+ *	However, that need not be the case as fractal heap blocks can
+ *	change size (and therefor possible location as well) on
+ *	serialization if compression is enabled.  In the old H5C code,
+ *	this happened on a flush, and occasioned a rename in the midst
+ *	of the flush.  To avoid this in H5C2, the serialize callback
+ *	will return the new base address, length, and image pointer to
+ *	the caller when necessary.  The caller must then update the
  *	metadata cache's internal structures accordingly.
  *
  *	The typedef for the serialize callback is as follows:
@@ -237,19 +237,19 @@ typedef struct H5C2_t H5C2_t;
  *                                             void * image_ptr,
  *                                             void * thing,
  *                                             unsigned * flags_ptr,
- *                                             haddr_t * new_addr_ptr, 
- *                                             size_t * new_len_ptr, 
+ *                                             haddr_t * new_addr_ptr,
+ *                                             size_t * new_len_ptr,
  *                                             void ** new_image_ptr_ptr);
  *
  *	The parameters of the serialize callback are as follows:
  *
  *	f:	File pointer -- needed if other metadata cache entries
- *		must be modified in the process of serializing the 
+ *		must be modified in the process of serializing the
  *		target entry.
  *
- *	dxpl_id: dxpl_id passed with the file pointer to the cache, and 
- *	        passed on to the callback.  Necessary as some callbacks 
- *	        revise the size and location of the target entry, or 
+ *	dxpl_id: dxpl_id passed with the file pointer to the cache, and
+ *	        passed on to the callback.  Necessary as some callbacks
+ *	        revise the size and location of the target entry, or
  *	        possibly other entries on serialize.
  *
  *	addr:   Base address in file of the entry to be serialized.
@@ -267,157 +267,157 @@ typedef struct H5C2_t H5C2_t;
  *		mode, but the parameter may be unused when compiled in
  *		production mode.
  *
- *	image_ptr: Pointer to a buffer of length len bytes into which a 
- *		serialized image of the target metadata cache entry is 
+ *	image_ptr: Pointer to a buffer of length len bytes into which a
+ *		serialized image of the target metadata cache entry is
  *		to be written.
  *
- * 		Note that this buffer will not in general be initialized 
- * 		to any particular value.  Thus the serialize function may 
- * 		not assume any initial value and must set each byte in 
+ * 		Note that this buffer will not in general be initialized
+ * 		to any particular value.  Thus the serialize function may
+ * 		not assume any initial value and must set each byte in
  * 		the buffer.
  *
- *	thing:  Pointer to void containing the address of the in core 
- *		representation of the target metadata cache entry.  
- *		This is the same pointer returned by a protect of the 
+ *	thing:  Pointer to void containing the address of the in core
+ *		representation of the target metadata cache entry.
+ *		This is the same pointer returned by a protect of the
  *		addr and len given above.
  *
- *	flags_ptr:  Pointer to an unsigned integer used to return flags 
- *		indicating whether the resize function resized or renamed 
- *		the entry.  If the entry was neither resized or renamed, 
- *		the serialize function must set *flags_ptr to zero.  
- *		H5C2__SERIALIZE_RESIZED_FLAG and H5C2__SERIALIZE_RENAMED_FLAG 
+ *	flags_ptr:  Pointer to an unsigned integer used to return flags
+ *		indicating whether the resize function resized or renamed
+ *		the entry.  If the entry was neither resized or renamed,
+ *		the serialize function must set *flags_ptr to zero.
+ *		H5C2__SERIALIZE_RESIZED_FLAG and H5C2__SERIALIZE_RENAMED_FLAG
  *		must be set to indicate a resize and a rename respectively.
  *
- *	        If the H5C2__SERIALIZE_RESIZED_FLAG is set, the new length 
- *	        and image pointer must be stored in *new_len_ptr and 
- *	        *new_image_ptr_ptr respectively.  
+ *	        If the H5C2__SERIALIZE_RESIZED_FLAG is set, the new length
+ *	        and image pointer must be stored in *new_len_ptr and
+ *	        *new_image_ptr_ptr respectively.
  *
- *	        If the H5C2__SERIALIZE_RENAMED_FLAG flag is also set, the 
- *	        new image base address must be stored in *new_addr_ptr.  
- *	        Observe that the H5C2__SERIALIZE_RENAMED_FLAG must not 
- *	        appear without the H5C2__SERIALIZE_RESIZED_FLAG.  
+ *	        If the H5C2__SERIALIZE_RENAMED_FLAG flag is also set, the
+ *	        new image base address must be stored in *new_addr_ptr.
+ *	        Observe that the H5C2__SERIALIZE_RENAMED_FLAG must not
+ *	        appear without the H5C2__SERIALIZE_RESIZED_FLAG.
  *
- *	        Except as noted above, the locations pointed to by the 
- *	        remaining parameters are undefined, and should be ignored 
- *	        by the caller.  
+ *	        Except as noted above, the locations pointed to by the
+ *	        remaining parameters are undefined, and should be ignored
+ *	        by the caller.
  *
- *	new_addr_ptr:  Pointer to haddr_t.  If the entry is renamed by 
- *		the serialize function, the new on disk base address must 
- *		be stored in *new_addr_ptr.  If the entry is not renamed 
- *		by the serialize function, *new_addr_ptr is undefined.  
+ *	new_addr_ptr:  Pointer to haddr_t.  If the entry is renamed by
+ *		the serialize function, the new on disk base address must
+ *		be stored in *new_addr_ptr.  If the entry is not renamed
+ *		by the serialize function, *new_addr_ptr is undefined.
  *
- *	new_len_ptr:  Pointer to size_t.  If the entry is resized by the 
- *		serialize function, the new length of the on disk image 
- *		must be stored in *new_len_ptr.  If the entry is not 
- *		resized by the serialize function, *new_len_ptr is 
- *		undefined.  
+ *	new_len_ptr:  Pointer to size_t.  If the entry is resized by the
+ *		serialize function, the new length of the on disk image
+ *		must be stored in *new_len_ptr.  If the entry is not
+ *		resized by the serialize function, *new_len_ptr is
+ *		undefined.
  *
- *	new_image_ptr_ptr:  Pointer to pointer to void.  If the entry is 
- *		resized by the serialize function, the pointer to the 
- *		new buffer containing the on disk image must be stored 
- *		in *new_image_ptr_ptr.  If the entry is not resized by 
+ *	new_image_ptr_ptr:  Pointer to pointer to void.  If the entry is
+ *		resized by the serialize function, the pointer to the
+ *		new buffer containing the on disk image must be stored
+ *		in *new_image_ptr_ptr.  If the entry is not resized by
  *		the serialize function, *new_image_ptr_ptr is undefined.
  *
- *	Processing in the serialize function should proceed as follows: 
+ *	Processing in the serialize function should proceed as follows:
  *
- *	The serialize function must examine the in core representation 
- *	indicated by the thing parameter, and write a serialized image 
- *	of its contents into the provided buffer.  
+ *	The serialize function must examine the in core representation
+ *	indicated by the thing parameter, and write a serialized image
+ *	of its contents into the provided buffer.
  *
- *	If the serialize function does not change the size or location 
- *	of the on disk image, it must set *flags_ptr to zero.  
+ *	If the serialize function does not change the size or location
+ *	of the on disk image, it must set *flags_ptr to zero.
  *
- *	If the size of the on disk image must be changed, the serialize 
- *	function must free the old image buffer (base address in image_ptr), 
- *	allocate a new one, load the image into the new buffer, load the 
- *	base address of the new buffer into *new_image_ptr_ptr, load the 
- *	length of the new image into *new_len_ptr, and set the 
- *	H5C2__SERIALIZE_RESIZED_FLAG in *flags_ptr.  
+ *	If the size of the on disk image must be changed, the serialize
+ *	function must free the old image buffer (base address in image_ptr),
+ *	allocate a new one, load the image into the new buffer, load the
+ *	base address of the new buffer into *new_image_ptr_ptr, load the
+ *	length of the new image into *new_len_ptr, and set the
+ *	H5C2__SERIALIZE_RESIZED_FLAG in *flags_ptr.
  *
- *	If in addition, the base address of the on disk image must 
- *	be changed, the serialize function must also set *new_addr_ptr 
- *	to the new base address, and set the H5C2__SERIALIZE_RENAMED_FLAG 
+ *	If in addition, the base address of the on disk image must
+ *	be changed, the serialize function must also set *new_addr_ptr
+ *	to the new base address, and set the H5C2__SERIALIZE_RENAMED_FLAG
  *	in *flags_ptr.
  *
- *	If it is successful, the function must return SUCCEED.  
+ *	If it is successful, the function must return SUCCEED.
  *
  *	If it fails for any reason, the function must return FAIL and
- *	push error information on the error stack with the error API 
+ *	push error information on the error stack with the error API
  *	routines.
  *
  *
  * free_icr: Pointer to the free ICR Callback.
  *
- *	The free ICR callback is invoked by the metadata cache when it 
- *	wishes to evict an entry, and needs the client to free the memory 
- *	allocated for the in core representation.  
+ *	The free ICR callback is invoked by the metadata cache when it
+ *	wishes to evict an entry, and needs the client to free the memory
+ *	allocated for the in core representation.
  *
- *	The typedef for the free ICR callback is as follows: 
+ *	The typedef for the free ICR callback is as follows:
  *
- *	typedef herr_t (*N5C_free_icr_func_t)(haddr_t addr, 
+ *	typedef herr_t (*N5C_free_icr_func_t)(haddr_t addr,
  *	                                      size_t len,
  *                                            void * thing);
- * 
- * 	The parameters of the free ICR callback are as follows: 
  *
- * 	addr:   Base address in file of the entry being evicted.  
+ * 	The parameters of the free ICR callback are as follows:
  *
- * 		This parameter is supplied mainly for sanity checking.  
- * 		Sanity checks should be performed when compiled in debug 
- * 		mode, but the parameter may be unused when compiled in 
- * 		production mode.  
+ * 	addr:   Base address in file of the entry being evicted.
  *
- *	len:    Length of the in file image of the entry being evicted 
- *		in bytes.  
+ * 		This parameter is supplied mainly for sanity checking.
+ * 		Sanity checks should be performed when compiled in debug
+ * 		mode, but the parameter may be unused when compiled in
+ * 		production mode.
  *
- *		This parameter is supplied mainly for sanity checking.  
- *		Sanity checks should be performed when compiled in debug 
- *		mode, but the parameter may be unused when compiled in 
- *		production mode.  
+ *	len:    Length of the in file image of the entry being evicted
+ *		in bytes.
  *
- *	thing:  Pointer to void containing the address of the in core 
- *		representation of the target metadata cache entry.  This 
- *		is the same pointer that would be returned by a protect 
- *		of the addr and len above.  
+ *		This parameter is supplied mainly for sanity checking.
+ *		Sanity checks should be performed when compiled in debug
+ *		mode, but the parameter may be unused when compiled in
+ *		production mode.
  *
- *	Processing in the free ICR function should proceed as follows: 
+ *	thing:  Pointer to void containing the address of the in core
+ *		representation of the target metadata cache entry.  This
+ *		is the same pointer that would be returned by a protect
+ *		of the addr and len above.
  *
- *	The free ICR function must free all memory allocated to the 
- *	in core representation.  
+ *	Processing in the free ICR function should proceed as follows:
  *
- *	If the function is successful, it must return SUCCEED.  
+ *	The free ICR function must free all memory allocated to the
+ *	in core representation.
  *
- *	If it fails for any reason, the function must return FAIL and 
- *	push error information on the error stack with the error API 
- *	routines.  
+ *	If the function is successful, it must return SUCCEED.
  *
- *	At least when compiled with debug, it would be useful if the 
- *	free ICR call would fail if the in core representation has been 
+ *	If it fails for any reason, the function must return FAIL and
+ *	push error information on the error stack with the error API
+ *	routines.
+ *
+ *	At least when compiled with debug, it would be useful if the
+ *	free ICR call would fail if the in core representation has been
  *	modified since the last serialize of clear callback.
  *
  *
  * clear_dirty_bits:  Pointer to the clear dirty bits callback.
  *
- * 	For sanity checking purposes, it will be useful if cache clients 
- * 	track whether an in core representation has been modified since 
- * 	the last time it was serialized.  This data is used to flag an 
- * 	error if the cache attempts to free an in core representation 
- * 	that has not been serialized since the last time it was modified.  
+ * 	For sanity checking purposes, it will be useful if cache clients
+ * 	track whether an in core representation has been modified since
+ * 	the last time it was serialized.  This data is used to flag an
+ * 	error if the cache attempts to free an in core representation
+ * 	that has not been serialized since the last time it was modified.
  *
- * 	If this happens, either the client forgot to tell the cache that 
- * 	an entry is dirty, or the cache forgot to flush a dirty entry 
- * 	before evicting it.  In either case we want to know before we 
- * 	get file corruption complaints.  
+ * 	If this happens, either the client forgot to tell the cache that
+ * 	an entry is dirty, or the cache forgot to flush a dirty entry
+ * 	before evicting it.  In either case we want to know before we
+ * 	get file corruption complaints.
  *
- * 	However, in some cases, we want to mark an entry as clean even 
- * 	though it has not been flushed to disk -- most particularly in 
- * 	the parallel case.  Thus we need some way to tell the client 
- * 	that a free of the associated ICR is OK even though it has 
- * 	been modified since the last serialization.  Hence the clear 
- * 	dirty bits callback.  
+ * 	However, in some cases, we want to mark an entry as clean even
+ * 	though it has not been flushed to disk -- most particularly in
+ * 	the parallel case.  Thus we need some way to tell the client
+ * 	that a free of the associated ICR is OK even though it has
+ * 	been modified since the last serialization.  Hence the clear
+ * 	dirty bits callback.
  *
- * 	Since the clear dirty bits callback is purely for sanity checking, 
- * 	it is called only when we compile with debug.  
+ * 	Since the clear dirty bits callback is purely for sanity checking,
+ * 	it is called only when we compile with debug.
  *
  * 	The typedef for the clear callback is as follows:
  *
@@ -425,27 +425,27 @@ typedef struct H5C2_t H5C2_t;
  *                                                    size_t len,
  *                                                    void * thing);
  *
- *	The parameters of the clear callback are as follows: 
+ *	The parameters of the clear callback are as follows:
  *
- *	addr:   Base address in file of the entry whose dirty bits 
- *		are being cleared 
+ *	addr:   Base address in file of the entry whose dirty bits
+ *		are being cleared
  *
- *	len:    Length in bytes of the in file image of the entry 
- *		whose dirty bits are being cleared.  
+ *	len:    Length in bytes of the in file image of the entry
+ *		whose dirty bits are being cleared.
  *
- *	thing:  Pointer to void containing the address of the in 
- *		core representation of the target metadata cache entry.  
- *		This is the same pointer that would be returned by a 
- *		protect of the addr and len above.  
+ *	thing:  Pointer to void containing the address of the in
+ *		core representation of the target metadata cache entry.
+ *		This is the same pointer that would be returned by a
+ *		protect of the addr and len above.
  *
- *	Processing in the clear callback function should proceed as follows: 
+ *	Processing in the clear callback function should proceed as follows:
  *
- *	The function must clear any dirty bits associated with the ICR.  
+ *	The function must clear any dirty bits associated with the ICR.
  *
- *	If successful, the function must return SUCCEED.  
+ *	If successful, the function must return SUCCEED.
  *
- *	If it fails for any reason, the function must return FAIL and 
- *	push error information on the error stack with the error API 
+ *	If it fails for any reason, the function must return FAIL and
+ *	push error information on the error stack with the error API
  *	routines.
  *
  ***************************************************************************/
@@ -454,7 +454,7 @@ typedef void *(*H5C2_deserialize_func_t)(haddr_t addr,
                                          const void * image_ptr,
                                          void * udata_ptr,
 					 hbool_t * dirty_ptr);
- 
+
 typedef herr_t (*H5C2_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
 
@@ -467,12 +467,12 @@ typedef herr_t (*H5C2_serialize_func_t)(const H5F_t *f,
                                         size_t len,
                                         void * image_ptr,
                                         void * thing,
-                                        unsigned * flags_ptr, 
-				        haddr_t * new_addr_ptr, 
-				        size_t * new_len_ptr, 
+                                        unsigned * flags_ptr,
+				        haddr_t * new_addr_ptr,
+				        size_t * new_len_ptr,
 				        void ** new_image_ptr_ptr);
 
-typedef herr_t (*H5C2_free_icr_func_t)(haddr_t addr, 
+typedef herr_t (*H5C2_free_icr_func_t)(haddr_t addr,
                                        size_t len,
                                        void * thing);
 
@@ -543,23 +543,23 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *
  *						JRM - 4/26/04
  *
- * magic:	Unsigned 32 bit integer that must always be set to 
+ * magic:	Unsigned 32 bit integer that must always be set to
  *              H5C2__H5C2_CACHE_ENTRY_T_MAGIC when the entry is valid.
  *              The field must be set to H5C2__H5C2_CACHE_ENTRY_T_BAD_MAGIC
  *              just before the entry is freed.
  *
- *              This is necessary, as the LRU list can be changed out 
+ *              This is necessary, as the LRU list can be changed out
  *              from under H5C2_make_space_in_cache() by the serialize
  *              callback which may change the size of an existing entry,
  *              and/or load a new entry while serializing the target entry.
  *
- *              This in turn can cause a recursive call to 
+ *              This in turn can cause a recursive call to
  *              H5C2_make_space_in_cache() which may either flush or evict
  *              the next entry that the first invocation of that function
  *              was about to examine.
  *
  *              The magic field allows H5C2_make_space_in_cache() to
- *              detect this case, and re-start its scan from the bottom 
+ *              detect this case, and re-start its scan from the bottom
  *              of the LRU when this situation occurs.
  *
  * cache_ptr:	Pointer to the cache that this entry is contained within.
@@ -580,8 +580,8 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *		block of memory on disk.  The image of this block (i.e.
  *		the on disk image) is stored in *image_ptr (discussed below).
  *
- * image_ptr:	Pointer to void.  When not NULL, this field points to a 
- * 		dynamically allocated block of size bytes in which the 
+ * image_ptr:	Pointer to void.  When not NULL, this field points to a
+ * 		dynamically allocated block of size bytes in which the
  * 		on disk image of the metadata cache entry is stored.
  *
  * 		If the entry is dirty, the serialize callback must be used
@@ -645,20 +645,20 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
  *
- * is_read_only: Boolean flag that is only meaningful if is_protected is 
- * 		TRUE.  In this circumstance, it indicates whether the 
+ * is_read_only: Boolean flag that is only meaningful if is_protected is
+ * 		TRUE.  In this circumstance, it indicates whether the
  * 		entry has been protected read only, or read/write.
  *
  * 		If the entry has been protected read only (i.e. is_protected
- * 		and is_read_only are both TRUE), we allow the entry to be 
+ * 		and is_read_only are both TRUE), we allow the entry to be
  * 		protected more than once.
  *
- *		In this case, the number of readers is maintained in the 
+ *		In this case, the number of readers is maintained in the
  *		ro_ref_count field (see below), and unprotect calls simply
  *		decrement that field until it drops to zero, at which point
  *		the entry is actually unprotected.
  *
- * ro_ref_count: Integer field used to maintain a count of the number of 
+ * ro_ref_count: Integer field used to maintain a count of the number of
  * 		outstanding read only protects on this entry.  This field
  * 		must be zero whenever either is_protected or is_read_only
  * 		are TRUE.
@@ -720,7 +720,7 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  * 		is in the process of being flushed.  This allows the cache
  * 		to detect when a call is the result of a flush callback.
  *
- * destroy_in_progress:  Boolean flag that is set to true iff the entry 
+ * destroy_in_progress:  Boolean flag that is set to true iff the entry
  * 		is in the process of being flushed and destroyed.
  *
  *
@@ -811,24 +811,24 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  * 		the specified transaction has made it to disk, we will
  * 		reset this field to zero as well.
  *
- * 		We must maintain this field, as to avoid messages from 
- * 		the future, we must not flush a dirty entry to disk 
- * 		until the last transaction in which it was dirtied 
+ * 		We must maintain this field, as to avoid messages from
+ * 		the future, we must not flush a dirty entry to disk
+ * 		until the last transaction in which it was dirtied
  * 		has made it to disk in the journal file.
  *
- * trans_next:  Next pointer in the entries modified in the current 
+ * trans_next:  Next pointer in the entries modified in the current
  * 		transaction list.  This field should always be null
- * 		unless journaling is enabled, the entry is dirty, 
+ * 		unless journaling is enabled, the entry is dirty,
  * 		and last_trans field contains the current transaction
- * 		number.  Even if all these conditions are fulfilled, 
- * 		the field will still be NULL if this is the last 
+ * 		number.  Even if all these conditions are fulfilled,
+ * 		the field will still be NULL if this is the last
  * 		entry on the list.
  *
- * trans_prev:  Previous pointer in the entries modified in the current 
+ * trans_prev:  Previous pointer in the entries modified in the current
  * 		transaction list.  This field should always be null
- * 		unless journaling is enabled, the entry is dirty, 
+ * 		unless journaling is enabled, the entry is dirty,
  * 		and last_trans field contains the current transaction
- * 		number.  Even if all these conditions are fulfilled, 
+ * 		number.  Even if all these conditions are fulfilled,
  * 		the field will still be NULL if this is the first
  * 		entry on the list.
  *
@@ -1045,7 +1045,7 @@ typedef struct H5C2_cache_entry_t
  *
  *
  *      With a little thought, it should be obvious that the above flash
- *      cache size increase algorithm is not sufficient for all 
+ *      cache size increase algorithm is not sufficient for all
  *      circumstances -- for example, suppose the user round robins through
  *      (1/flash_threshold) +1 groups, adding one data set to each on each
  *      pass.  Then all will increase in size at about the same time, requiring
@@ -1062,11 +1062,11 @@ typedef struct H5C2_cache_entry_t
  *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
  *      is H5C_flash_incr__add_space.
  *
- * flash_threshold: Double containing the factor by which current max cache 
- * 	size is multiplied to obtain the size threshold for the add_space 
- * 	flash increment algorithm.  The field is ignored unless 
+ * flash_threshold: Double containing the factor by which current max cache
+ * 	size is multiplied to obtain the size threshold for the add_space
+ * 	flash increment algorithm.  The field is ignored unless
  * 	flash_incr_mode is H5C2_flash_incr__add_space.
- * 
+ *
  *
  * Cache size decrease control fields:
  *
@@ -1273,14 +1273,14 @@ typedef struct H5C2_auto_size_ctl_t
  *
  * structure H5C2_mdj_config_t
  *
- * H5C2_mdj_config_t is a structure intended for use in comminicating 
- * metadata journaling configuration data to and from the metadata 
- * cache. 
+ * H5C2_mdj_config_t is a structure intended for use in comminicating
+ * metadata journaling configuration data to and from the metadata
+ * cache.
  *
  * In its initial incarnation, it is identical to the H5AC2_jnl_config_t
- * structure less ther version, and journal_recovered fields.  However, 
- * in the future we may support other types of journaling -- which will 
- * likely require modification or replacement of the H5AC2_jnl_config_t 
+ * structure less ther version, and journal_recovered fields.  However,
+ * in the future we may support other types of journaling -- which will
+ * likely require modification or replacement of the H5AC2_jnl_config_t
  * structure.
  *
  * The fields of the structure are discussed individually below.  Note
@@ -1300,7 +1300,7 @@ typedef struct H5C2_auto_size_ctl_t
  *
  *      At present, the length of the journal file path is restricted to
  *      no more than H5C2__MAX_JOURNAL_FILE_NAME_LEN (which must equal
- *      H5AC2__MAX_JOURNAL_FILE_NAME_LEN). 
+ *      H5AC2__MAX_JOURNAL_FILE_NAME_LEN).
  *
  * jbrb_buf_size: size_t containing the size of each individual buffer
  *      in the journal buffer ring buffer.  This size should be chosen
@@ -1636,7 +1636,7 @@ H5_DLL herr_t H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr);
 
 H5_DLL herr_t H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr);
 
-H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr, 
+H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 		                       size_t size,
                                        const char * data,
                                        hbool_t is_end_trans,

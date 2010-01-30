@@ -41,8 +41,8 @@
  *	facilitate re-use.  Re-worked this file again to use H5C.
  *
  *	John Mainzer, 10/18/07
- *	Copied H5AC2.c to H5AC22.c and reworked to use H5C2 instead of H5C.  
- *	All this is in support of cache API modifications needed for 
+ *	Copied H5AC2.c to H5AC22.c and reworked to use H5C2 instead of H5C.
+ *	All this is in support of cache API modifications needed for
  *	journaling.
  *
  *-------------------------------------------------------------------------
@@ -183,7 +183,7 @@ static herr_t H5AC2_log_inserted_entry(H5F_t * f,
                                       H5AC2_t * cache_ptr,
                                       H5AC2_info_t * entry_ptr,
                                       const H5AC2_class_t * type,
-                                      haddr_t addr, 
+                                      haddr_t addr,
                                       size_t size);
 
 static herr_t H5AC2_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
@@ -482,11 +482,11 @@ H5AC2_term_interface(void)
  *              API.
  *              				JRM - 10/18/07
  *
- *		Added the dxpl_id parameter, and updated for parameter 
+ *		Added the dxpl_id parameter, and updated for parameter
  *		list changes in H5C2_create().
  *						JRM - 3/26/08
  *
- *		Updated code for the removal of the f, dxpl_id, and 
+ *		Updated code for the removal of the f, dxpl_id, and
  *		journal_recovered parameters for H5C2_create().
  *
  *						JRM 7/10/08
@@ -769,13 +769,13 @@ done:
  *		Added code to free the auxiliary structure and its
  *		associated slist if present.
  *						   JRM - 6/28/05
- *		
+ *
  *		Added code to close the trace file if it is present.
- *		
+ *
  *						    JRM - 6/8/06
- *		
+ *
  *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -847,7 +847,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC2_begin_transaction()
  *
- * Purpose:	Mark the beginning of a transaction.  
+ * Purpose:	Mark the beginning of a transaction.
  *
  * 		This function is just a wrapper for H5C2_begin_transaction().
  *
@@ -857,7 +857,7 @@ done:
  *              4/12/08
  *
  * Modifications:
- *		
+ *
  *              None.
  *
  *-------------------------------------------------------------------------
@@ -979,7 +979,7 @@ done:
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %llu %d\n", trace, 
+	HDfprintf(trace_file_ptr, "%s %llu %d\n", trace,
                   *trans_num_ptr, (int)ret_value);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -996,7 +996,7 @@ done:
  *              Fail if it exists and the journal recovered flag is
  *              not set.
  *
- * 		This function is just a wrapper for 
+ * 		This function is just a wrapper for
  * 		H5C2_check_for_journaling().
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1005,7 +1005,7 @@ done:
  *              7/4/08
  *
  * Modifications:
- *		
+ *
  *              None.
  *
  *-------------------------------------------------------------------------
@@ -1032,14 +1032,14 @@ H5AC2_check_for_journaling(H5F_t * f,
 
 #if H5AC2__TRACE_FILE_ENABLED
     /* For the end transaction call, only the journal_recovered
-     * parameter is really needed.  Write the return value to catch 
+     * parameter is really needed.  Write the return value to catch
      * occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC2_check_for_journaling %d ", 
+        sprintf(trace, "H5AC2_check_for_journaling %d ",
 		(int)journal_recovered);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -1050,7 +1050,7 @@ H5AC2_check_for_journaling(H5F_t * f,
      * time.
      */
 
-    result = H5C2_check_for_journaling(f, dxpl_id, cache_ptr, 
+    result = H5C2_check_for_journaling(f, dxpl_id, cache_ptr,
 		                       journal_recovered);
 
     if ( result != SUCCEED ) {
@@ -1084,7 +1084,7 @@ done:
  *              8/15/08
  *
  * Modifications:
- *		
+ *
  *              None.
  *
  *-------------------------------------------------------------------------
@@ -1112,11 +1112,11 @@ H5AC2_deregister_mdjsc_callback(H5F_t * file_ptr,
     }
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the deregister metadata journaling status change callback 
-     * call, only the idx is really needed.  Write the return value to 
+    /* For the deregister metadata journaling status change callback
+     * call, only the idx is really needed.  Write the return value to
      * catch occult errors.
      */
-    if ( ( cache_ptr != NULL ) 
+    if ( ( cache_ptr != NULL )
          &&
          ( H5C2_get_trace_file_ptr((H5C2_t *)cache_ptr, &trace_file_ptr) >= 0 )
          &&
@@ -1151,7 +1151,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC2_end_transaction()
  *
- * Purpose:	Mark the end of a transaction.  
+ * Purpose:	Mark the end of a transaction.
  *
  * 		This function is just a wrapper for H5C2_end_transaction().
  *
@@ -1161,7 +1161,7 @@ done:
  *              4/12/08
  *
  * Modifications:
- *		
+ *
  *              None.
  *
  *-------------------------------------------------------------------------
@@ -1192,14 +1192,14 @@ H5AC2_end_transaction(hbool_t do_transaction,
 
 #if H5AC2__TRACE_FILE_ENABLED
     /* For the end transaction call, only the transaction number and the
-     * api call name are really needed.  Write the return value to catch 
+     * api call name are really needed.  Write the return value to catch
      * occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC2_end_transaction %s %llu", 
+        sprintf(trace, "H5AC2_end_transaction %s %llu",
                 api_call_name, trans_num);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -1220,7 +1220,7 @@ H5AC2_end_transaction(hbool_t do_transaction,
 
             cache_ptr = f->shared->cache2;
 
-            result = H5C2_end_transaction(f, dxpl_id, cache_ptr, 
+            result = H5C2_end_transaction(f, dxpl_id, cache_ptr,
 			                  trans_num, api_call_name);
 
             if ( result < 0 ) {
@@ -1232,7 +1232,7 @@ H5AC2_end_transaction(hbool_t do_transaction,
 
 	if ( id_oloc_open ) {
 
-	    result = H5O_close(id_oloc_ptr); 
+	    result = H5O_close(id_oloc_ptr);
 
 	    if ( result < 0 ) {
 
@@ -1269,17 +1269,17 @@ done:
  *              6/30/06
  *
  * Modifications:
- *		
+ *
  *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC2_expunge_entry(H5F_t *f, 
-		   hid_t dxpl_id, 
-		   const H5AC2_class_t *type, 
+H5AC2_expunge_entry(H5F_t *f,
+		   hid_t dxpl_id,
+		   const H5AC2_class_t *type,
 		   haddr_t addr)
 {
     herr_t    result;
@@ -1301,8 +1301,8 @@ H5AC2_expunge_entry(H5F_t *f,
     cache_ptr = f->shared->cache2;
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the expunge entry call, only the addr, and type id are really 
-     * necessary in the trace file.  Write the return value to catch occult 
+    /* For the expunge entry call, only the addr, and type id are really
+     * necessary in the trace file.  Write the return value to catch occult
      * errors.
      */
     if ( ( cache_ptr != NULL ) &&
@@ -1414,7 +1414,7 @@ done:
  * 		Added trace file support.
  *
  *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -1444,8 +1444,8 @@ H5AC2_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     /* For the flush, only the flags are really necessary in the trace file.
      * Write the result to catch occult errors.
      */
-    if ( ( f != NULL ) && 
-         ( f->shared != NULL ) && 
+    if ( ( f != NULL ) &&
+         ( f->shared != NULL ) &&
 	 ( f->shared->cache2 != NULL ) &&
 	 ( H5C2_get_trace_file_ptr(f->shared->cache2, &trace_file_ptr) >= 0) &&
 	 ( trace_file_ptr != NULL ) ) {
@@ -1567,7 +1567,7 @@ done:
  * Modifications:
  *
  *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -1693,7 +1693,7 @@ done:
  *              Added trace file support.
  *
  *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -1725,8 +1725,8 @@ H5AC2_set(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type, haddr_t addr, size
     HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the insert, only the addr, size, type id and flags are really 
-     * necessary in the trace file.  Write the result to catch occult 
+    /* For the insert, only the addr, size, type id and flags are really
+     * necessary in the trace file.  Write the result to catch occult
      * errors.
      *
      * Note that some data is not available right now -- put what we can
@@ -1813,8 +1813,8 @@ done:
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, 
-                  (int)trace_entry_size, 
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
+                  (int)trace_entry_size,
 		  (int)ret_value);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -1857,8 +1857,8 @@ H5AC2_mark_pinned_entry_dirty(void *  thing,
     HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the mark pinned entry dirty call, only the addr, size_changed, 
-     * and new_size are really necessary in the trace file. Write the result 
+    /* For the mark pinned entry dirty call, only the addr, size_changed,
+     * and new_size are really necessary in the trace file. Write the result
      * to catch occult errors.
      */
     if((H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
@@ -1929,13 +1929,13 @@ H5AC2_mark_pinned_or_protected_entry_dirty(void *thing)
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC2_mark_pinned_or_protected_entry_dirty, FAIL)
-	
+
     /* Sanity check */
     HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
     /* For the mark pinned or protected entry dirty call, only the addr
-     * is really necessary in the trace file.  Write the result to catch 
+     * is really necessary in the trace file.  Write the result to catch
      * occult errors.
      */
     if((H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
@@ -2017,7 +2017,7 @@ done:
  *		Added trace file support.
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -2045,7 +2045,7 @@ H5AC2_rename(H5F_t *f, const H5AC2_class_t *type, haddr_t old_addr, haddr_t new_
     HDassert(H5F_addr_ne(old_addr, new_addr));
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the rename call, only the old addr and new addr are really 
+    /* For the rename call, only the old addr and new addr are really
      * necessary in the trace file.  Include the type id so we don't have to
      * look it up.  Also write the result to catch occult errors.
      */
@@ -2143,7 +2143,7 @@ H5AC2_pin_protected_entry(void *thing)
     FUNC_ENTER_NOAPI(H5AC2_pin_protected_entry, FAIL)
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the pin protected entry call, only the addr is really necessary 
+    /* For the pin protected entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
     if((H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
@@ -2226,15 +2226,15 @@ done:
  *		Added trace file support.
  *
  *		JRM - 3/18/07
- *		Modified code to support the new flags parameter for 
- *		H5C2_protect().  For now, that means passing in the 
+ *		Modified code to support the new flags parameter for
+ *		H5C2_protect().  For now, that means passing in the
  *		H5C2_READ_ONLY_FLAG if rw == H5AC2_READ.
  *
- *		Also updated the trace file output to save the 
+ *		Also updated the trace file output to save the
  *		rw parameter, since we are now doing something with it.
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -2273,9 +2273,9 @@ H5AC2_protect(H5F_t *f,
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the protect call, only the addr and type id is really necessary 
-     * in the trace file.  Include the size of the entry protected as a 
-     * sanity check.  Also indicate whether the call was successful to 
+    /* For the protect call, only the addr and type id is really necessary
+     * in the trace file.  Include the size of the entry protected as a
+     * sanity check.  Also indicate whether the call was successful to
      * catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -2341,7 +2341,7 @@ done:
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, 
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
                   (int)trace_entry_size,
                   (int)(ret_value != NULL));
     }
@@ -2358,7 +2358,7 @@ done:
  * Purpose:	Register a metadata journaling status change callback,
  *              and return the index assigned to the callback in *idx_ptr.
  *
- *		If config_ptr is not NULL, return the current metadata 
+ *		If config_ptr is not NULL, return the current metadata
  *		journaling configuration in *config_ptr.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2367,7 +2367,7 @@ done:
  *              8/15/08
  *
  * Modifications:
- *		
+ *
  *              None.
  *
  *-------------------------------------------------------------------------
@@ -2400,22 +2400,22 @@ H5AC2_register_mdjsc_callback(const H5F_t * file_ptr,
     }
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the register metadata journaling status change callback 
-     * call, fnc_ptr, data_ptr, and the returned idx are all that 
+    /* For the register metadata journaling status change callback
+     * call, fnc_ptr, data_ptr, and the returned idx are all that
      * are needed.  Write the return value to catch occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-       sprintf(trace, "H5AC2_register_mdjsc_callback 0x%lx 0x%lx ", 
+       sprintf(trace, "H5AC2_register_mdjsc_callback 0x%lx 0x%lx ",
                (unsigned long)(fcn_ptr), (unsigned long)(data_ptr));
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
 
-    result = H5C2_register_mdjsc_callback(cache_ptr, 
+    result = H5C2_register_mdjsc_callback(cache_ptr,
                                           fcn_ptr,
-                                          data_ptr, 
+                                          data_ptr,
                                           idx_ptr);
 
     if ( result < 0 ) {
@@ -2440,7 +2440,7 @@ done:
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", 
+	HDfprintf(trace_file_ptr, "%s %d %d\n",
                   trace, *idx_ptr, (int)ret_value);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -2478,8 +2478,8 @@ H5AC2_resize_pinned_entry(void *thing, size_t new_size)
     HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the resize pinned entry call, only the addr, and new_size are 
-     * really necessary in the trace file. Write the result to catch 
+    /* For the resize pinned entry call, only the addr, and new_size are
+     * really necessary in the trace file. Write the result to catch
      * occult errors.
      */
     if((H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
@@ -2551,7 +2551,7 @@ H5AC2_unpin_entry(void *thing)
     HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the unpin entry call, only the addr is really necessary 
+    /* For the unpin entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
     if((H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
@@ -2665,17 +2665,17 @@ done:
  *		Added support for the trace file.
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
- *              Note that the H5AC2__SIZE_CHANGED_FLAG must now be set if 
+ *              Note that the H5AC2__SIZE_CHANGED_FLAG must now be set if
  *              the size of the entry has changed.
  *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type, 
+H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
 		haddr_t addr, size_t new_size, void *thing, unsigned flags)
 {
     herr_t		result;
@@ -2705,7 +2705,7 @@ H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
 
 #if H5AC2__TRACE_FILE_ENABLED
     /* For the unprotect call, only the addr, type id, flags, and possible
-     * new size are really necessary in the trace file.  Write the return 
+     * new size are really necessary in the trace file.  Write the return
      * value to catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -2725,7 +2725,7 @@ H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
     dirtied = ( ( (flags & H5AC2__DIRTIED_FLAG) == H5AC2__DIRTIED_FLAG ) ||
 		( ((H5AC2_info_t *)thing)->dirtied ) );
 
-    size_changed = ( (flags & H5AC2__SIZE_CHANGED_FLAG) == 
+    size_changed = ( (flags & H5AC2__SIZE_CHANGED_FLAG) ==
 		      H5AC2__SIZE_CHANGED_FLAG );
 
 #ifdef H5_HAVE_PARALLEL
@@ -2755,7 +2755,7 @@ H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
 
     result = H5C2_unprotect(f,
 		            dxpl_id,
-			    type, 
+			    type,
 			    addr,
 			    thing,
 			    flags,
@@ -2789,8 +2789,8 @@ done:
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %x %d\n", 
-		  trace, 
+	HDfprintf(trace_file_ptr, "%s %d %x %d\n",
+		  trace,
 		  (int)new_size,
 		  (unsigned)flags,
 		  (int)ret_value);
@@ -2817,7 +2817,7 @@ done:
  * Modifications:
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -2875,7 +2875,7 @@ done:
  *		H5C_stats().
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -2924,15 +2924,15 @@ done:
  *
  *		JRM - 7/28/07
  *		Added support for the new evictions enabled related fields.
- *		
- *		Observe that H5AC2_get_cache_auto_resize_config() and 
+ *
+ *		Observe that H5AC2_get_cache_auto_resize_config() and
  *		H5AC2_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain 
- *		switches for functions that are only tenuously related 
+ *		metadata cache configuration routines as they gain
+ *		switches for functions that are only tenuously related
  *		to auto resize configuration.
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *              JRM - 1/2/08
@@ -2942,7 +2942,7 @@ done:
  *              JRM -- 4/12/08
  *              Added support for the new journaling control fields.
  *
- *              JRM - 8/1/08 
+ *              JRM - 8/1/08
  *              Removed support for the new journaling control fields.
  *              This functionality is now handled through the
  *              H5AC2_jnl_config_t structure and the related calls.
@@ -2992,7 +2992,7 @@ H5AC2_get_cache_auto_resize_config(const H5AC2_t * cache_ptr,
                     "H5C2_get_cache_auto_resize_config() failed.")
     }
 
-    result = H5C2_get_evictions_enabled((const H5C2_t *)cache_ptr, 
+    result = H5C2_get_evictions_enabled((const H5C2_t *)cache_ptr,
 		                         &evictions_enabled);
 
     if ( result < 0 ) {
@@ -3063,12 +3063,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC2_get_jnl_config
  *
- * Purpose:     Get the current journaling configuration and load it into 
+ * Purpose:     Get the current journaling configuration and load it into
  * 		the supplied instance of H5AC2_jnl_config_t.
  *
- * 		For the moment, the only journaling we do is metadata 
- * 		journaling, so in effect this function is a wrapper 
- * 		function for H5C2_get_journal_config(). 
+ * 		For the moment, the only journaling we do is metadata
+ * 		journaling, so in effect this function is a wrapper
+ * 		function for H5C2_get_journal_config().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
@@ -3078,7 +3078,7 @@ done:
  * Modifications:
  *
  *		JRM -- 8/14/08
- *		Reworked for change in argument list to 
+ *		Reworked for change in argument list to
  *		H5C2_get_journal_config().
  *
  *-------------------------------------------------------------------------
@@ -3169,7 +3169,7 @@ done:
  * Modifications:
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -3219,7 +3219,7 @@ done:
  * Modifications:
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -3263,7 +3263,7 @@ done:
  * Modifications:
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *-------------------------------------------------------------------------
@@ -3308,7 +3308,7 @@ done:
  *              Updated for the addition of H5AC2_cache_config_t.
  *
  *		John Mainzer -- 10/25/05
- *		Added support for the new dirty_bytes_threshold field of 
+ *		Added support for the new dirty_bytes_threshold field of
  *		both H5AC2_cache_config_t and H5AC2_aux_t.
  *
  *		John Mainzer -- 6/7/06
@@ -3316,15 +3316,15 @@ done:
  *
  *		John Mainzer -- 7/28/07
  *		Added support for the new evictions enabled related fields.
- *		
- *		Observe that H5AC2_get_cache_auto_resize_config() and 
+ *
+ *		Observe that H5AC2_get_cache_auto_resize_config() and
  *		H5AC2_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain 
- *		switches for functions that are only tenuously related 
+ *		metadata cache configuration routines as they gain
+ *		switches for functions that are only tenuously related
  *		to auto resize configuration.
  *
  * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *
  *              John Mainzer -- 1/3/07
@@ -3336,7 +3336,7 @@ done:
  *              This required the addition of the dxpl_id parameter.
  *
  *              John Mainzer -- 8/1/08
- *              Pulled journaling configuration back out of the 
+ *              Pulled journaling configuration back out of the
  *              function, and teh dxpl_id parameter with it.
  *
  *-------------------------------------------------------------------------
@@ -3404,15 +3404,15 @@ H5AC2_set_cache_auto_resize_config(H5AC2_t * cache_ptr,
 done:
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the set cache auto resize config call, only the contents 
-     * of the config is necessary in the trace file. Write the return 
+    /* For the set cache auto resize config call, only the contents
+     * of the config is necessary in the trace file. Write the return
      * value to catch occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-	HDfprintf(trace_file_ptr, 
+	HDfprintf(trace_file_ptr,
                   "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d\n",
 		  "H5AC2_set_cache_auto_resize_config",
 		  trace_config.version,
@@ -3459,7 +3459,7 @@ done:
  * Purpose:     Manage changes in journaling configuration.
  *
  * 		At present, metadata journaling is the only journaling we
- * 		do, so this function can be thought of as a wrapper for 
+ * 		do, so this function can be thought of as a wrapper for
  *		H5C2_begin_journaling() and H5C2_end_journaling().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
@@ -3470,17 +3470,17 @@ done:
  * Modifications:
  *
  * 		JRM -- 8/14/08
- * 		Revised code for the use of the H5C2_mdj_config_t 
+ * 		Revised code for the use of the H5C2_mdj_config_t
  * 		structure in H5C2_get_journal_config() and
- *		H5C2_begin_journaling().  
+ *		H5C2_begin_journaling().
  *
- *		Per Quincey's request, also added code to 
- *		throw an error if journaling is requested when 
+ *		Per Quincey's request, also added code to
+ *		throw an error if journaling is requested when
  *		it is already enabled, or if the end of journaling
  *		is requested when it is already disabled.
  *
- *		Note that this required the addition of the 
- *		initializing parameter, which allows us to 
+ *		Note that this required the addition of the
+ *		initializing parameter, which allows us to
  *		avoid generating an error on startup.
  *
  *-------------------------------------------------------------------------
@@ -3551,7 +3551,7 @@ H5AC2_set_jnl_config(H5F_t * f,
     if ( config_ptr->enable_journaling != internal_config.enable_journaling ) {
 
         /* we have work to do -- start or stop journaling as requested */
-	
+
 	if ( config_ptr->enable_journaling ) {
 
 	    internal_config.enable_journaling = config_ptr->enable_journaling;
@@ -3565,7 +3565,7 @@ H5AC2_set_jnl_config(H5F_t * f,
 	    internal_config.jbrb_buf_size       = config_ptr->jbrb_buf_size;
 	    internal_config.jbrb_num_bufs       = config_ptr->jbrb_num_bufs;
 	    internal_config.jbrb_use_aio        = config_ptr->jbrb_use_aio;
-	    internal_config.jbrb_human_readable = 
+	    internal_config.jbrb_human_readable =
 		    config_ptr->jbrb_human_readable;
 
 	    result = H5C2_begin_journaling(f,
@@ -3605,15 +3605,15 @@ H5AC2_set_jnl_config(H5F_t * f,
 done:
 
 #if H5AC2__TRACE_FILE_ENABLED
-    /* For the set cache journaling config call, only the fields 
-     * of the config that pretain to journaling are necessary in 
+    /* For the set cache journaling config call, only the fields
+     * of the config that pretain to journaling are necessary in
      * the trace file. Write the return value to catch occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-	HDfprintf(trace_file_ptr, 
+	HDfprintf(trace_file_ptr,
                   "%s %d %d \"%s\" %d %d %d %d %d %d\n",
 		  "H5AC2_set_jnl_config",
 		  trace_config.version,
@@ -3636,8 +3636,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC2_set_cache_config
  *
- * Purpose:     Handle all configuration switches in an instance of 
- * 		H5AC2_cache_config_t.  
+ * Purpose:     Handle all configuration switches in an instance of
+ * 		H5AC2_cache_config_t.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
@@ -3809,14 +3809,14 @@ done:
  *              are applied.
  *              					JRM - 5/15/06
  *
- *	      - Added code testing the evictions enabled field.  At 
- *	        present this consists of verifying that if 
- *	        evictions_enabled is FALSE, then automatic cache 
+ *	      - Added code testing the evictions enabled field.  At
+ *	        present this consists of verifying that if
+ *	        evictions_enabled is FALSE, then automatic cache
  *		resizing in disabled.
  *
  *	        					JRM - 7/28/07
  *
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *              					JRM - 10/18/07
  *
@@ -3870,7 +3870,7 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if ( config_ptr->open_trace_file ) {
 
-	/* Can't really test the trace_file_name field without trying to 
+	/* Can't really test the trace_file_name field without trying to
 	 * open the file, so we will content ourselves with a couple of
 	 * sanity checks on the length of the file name.
 	 */
@@ -3896,7 +3896,7 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
     }
 
     if ( ( config_ptr->evictions_enabled == FALSE ) &&
-	 ( ( config_ptr->incr_mode != H5C2_incr__off ) || 
+	 ( ( config_ptr->incr_mode != H5C2_incr__off ) ||
 	   ( config_ptr->incr_mode != H5C2_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
@@ -3939,7 +3939,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC2_validate_jnl_config()
  *
- * Purpose:     Run a sanity check on the contents of the supplied 
+ * Purpose:     Run a sanity check on the contents of the supplied
  * 		instance of H5AC2_jnl_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
@@ -4000,7 +4000,7 @@ H5AC2_validate_jnl_config(const H5AC2_jnl_config_t *config_ptr)
 	if(NULL == config_ptr->journal_file_path)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->journal_file_path is NULL.")
 
-	/* Can't really test the journal_file_path field without trying to 
+	/* Can't really test the journal_file_path field without trying to
 	 * open the file, so we will content ourselves with a couple of
 	 * sanity checks on the length of the file name.
 	 */
@@ -4119,7 +4119,7 @@ H5AC2_validate_cache_config_ver(int version_num)
  *
  * Modifications:
  *
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *              					JRM - 10/18/07
  *
@@ -4184,7 +4184,7 @@ done:
  *
  * Modifications:
  *
- *              Modified code in support of revised cache API needed 
+ *              Modified code in support of revised cache API needed
  *              to permit journaling.
  *              					JRM - 10/18/07
  *
@@ -5665,7 +5665,7 @@ H5AC2_receive_and_apply_clean_list(H5F_t *   f,
 
 
         /* mark the indicated entries as clean */
-        if ( H5C2_mark_entries_as_clean(f, dxpl_id, 
+        if ( H5C2_mark_entries_as_clean(f, dxpl_id,
                                         (int32_t)num_entries,
                                         &(haddr_buf_ptr[0])) < 0 ) {
 

@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,23 +11,23 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
     SUBROUTINE attribute_test(cleanup, total_error)
 
-!   This subroutine tests following functionalities: 
+!   This subroutine tests following functionalities:
 !   h5acreate_f,  h5awrite_f, h5aclose_f,h5aread_f, h5aopen_name_f,
 !   h5aget_name_f,h5aget_space_f, h5aget_type_f,
-! 
+!
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error 
+     INTEGER, INTENT(OUT) :: total_error
 
      CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
-     CHARACTER(LEN=80) :: fix_filename 
+     CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
      CHARACTER(LEN=11), PARAMETER :: aname = "attr_string"   !String Attribute name
      CHARACTER(LEN=14), PARAMETER :: aname2 = "attr_character"!Character Attribute name
@@ -35,7 +35,7 @@
      CHARACTER(LEN=9), PARAMETER :: aname4 = "attr_real"      !Real Attribute name
      CHARACTER(LEN=12), PARAMETER :: aname5 = "attr_integer"  !Integer Attribute name
      CHARACTER(LEN=9), PARAMETER :: aname6 = "attr_null"     !Null Attribute name
-    
+
      !
      !data space rank and dimensions
      !
@@ -45,44 +45,44 @@
 
 
 
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: dset_id       ! Dataset identifier 
-     INTEGER(HID_T) :: dataspace     ! Dataspace identifier for dataset 
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: dset_id       ! Dataset identifier
+     INTEGER(HID_T) :: dataspace     ! Dataspace identifier for dataset
 
-     INTEGER(HID_T) :: attr_id        !String Attribute identifier 
-     INTEGER(HID_T) :: attr2_id       !Character Attribute identifier 
-     INTEGER(HID_T) :: attr3_id       !Double Attribute identifier 
-     INTEGER(HID_T) :: attr4_id       !Real Attribute identifier 
-     INTEGER(HID_T) :: attr5_id       !Integer Attribute identifier 
-     INTEGER(HID_T) :: attr6_id       !Null Attribute identifier 
-     INTEGER(HID_T) :: aspace_id      !String Attribute Dataspace identifier 
+     INTEGER(HID_T) :: attr_id        !String Attribute identifier
+     INTEGER(HID_T) :: attr2_id       !Character Attribute identifier
+     INTEGER(HID_T) :: attr3_id       !Double Attribute identifier
+     INTEGER(HID_T) :: attr4_id       !Real Attribute identifier
+     INTEGER(HID_T) :: attr5_id       !Integer Attribute identifier
+     INTEGER(HID_T) :: attr6_id       !Null Attribute identifier
+     INTEGER(HID_T) :: aspace_id      !String Attribute Dataspace identifier
      INTEGER(HID_T) :: aspace2_id     !Character Attribute Dataspace identifier
-     INTEGER(HID_T) :: aspace6_id     !Null Attribute Dataspace identifier 
-     INTEGER(HID_T) :: atype_id       !String Attribute Datatype identifier 
-     INTEGER(HID_T) :: atype2_id      !Character Attribute Datatype identifier 
-     INTEGER(HID_T) :: atype3_id      !Double Attribute Datatype identifier 
-     INTEGER(HID_T) :: atype4_id      !Real Attribute Datatype identifier 
-     INTEGER(HID_T) :: atype5_id      !Integer Attribute Datatype identifier 
+     INTEGER(HID_T) :: aspace6_id     !Null Attribute Dataspace identifier
+     INTEGER(HID_T) :: atype_id       !String Attribute Datatype identifier
+     INTEGER(HID_T) :: atype2_id      !Character Attribute Datatype identifier
+     INTEGER(HID_T) :: atype3_id      !Double Attribute Datatype identifier
+     INTEGER(HID_T) :: atype4_id      !Real Attribute Datatype identifier
+     INTEGER(HID_T) :: atype5_id      !Integer Attribute Datatype identifier
      INTEGER(HSIZE_T), DIMENSION(1) :: adims = (/2/) ! Attribute dimension
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
      INTEGER     ::   arank = 1                      ! Attribure rank
      INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string
 
-     INTEGER(HID_T) :: attr_space     !Returned String Attribute Space identifier 
-     INTEGER(HID_T) :: attr2_space    !Returned other Attribute Space identifier 
+     INTEGER(HID_T) :: attr_space     !Returned String Attribute Space identifier
+     INTEGER(HID_T) :: attr2_space    !Returned other Attribute Space identifier
      INTEGER(HID_T) :: attr_type      !Returned Attribute Datatype identifier
      INTEGER(HID_T) :: attr2_type      !Returned CHARACTER Attribute Datatype identifier
      INTEGER(HID_T) :: attr3_type      !Returned DOUBLE Attribute Datatype identifier
      INTEGER(HID_T) :: attr4_type      !Returned REAL Attribute Datatype identifier
      INTEGER(HID_T) :: attr5_type      !Returned INTEGER Attribute Datatype identifier
      INTEGER(HID_T) :: attr6_type      !Returned NULL Attribute Datatype identifier
-     INTEGER        :: num_attrs      !number of attributes  
+     INTEGER        :: num_attrs      !number of attributes
      INTEGER(HSIZE_T) :: attr_storage   ! attributes storage requirements .MSB.
      CHARACTER(LEN=256) :: attr_name    !buffer to put attr_name
      INTEGER(SIZE_T)    ::  name_size = 80 !attribute name length
 
      CHARACTER(LEN=35), DIMENSION(2) ::  attr_data  ! String attribute data
-     CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back 
+     CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back
                                                ! string attr data
      CHARACTER ::  attr_character_data = 'A'
      DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459
@@ -90,7 +90,7 @@
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
      INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-     
+
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
      INTEGER, DIMENSION(1)  :: aread_integer_data ! variable to put read back integer attr data
      INTEGER, DIMENSION(1)  :: aread_null_data = 7 ! variable to put read back null attr data
@@ -98,19 +98,19 @@
      REAL, DIMENSION(1)  :: aread_real_data ! variable to put read back real attr data
 
      !
-     !general purpose integer 
-     !         
+     !general purpose integer
+     !
      INTEGER     ::   i, j
      INTEGER     ::   error ! Error flag
-     
-     ! 
+
+     !
      !The dimensions for the dataset.
      !
      INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
 
      !
-     !data buffers 
-     !         
+     !data buffers
+     !
      INTEGER, DIMENSION(NX,NY) :: data_in
 
 
@@ -126,9 +126,9 @@
      ! Initialize attribute's data
      !
      attr_data(1) = 'Dataset character attribute'
-     attr_data(2) = 'Some other string here     ' 
-     attrlen = LEN(attr_data(1)) 
-    
+     attr_data(2) = 'Some other string here     '
+     attrlen = LEN(attr_data(1))
+
      !
      ! Create the file.
      !
@@ -141,13 +141,13 @@
      CALL check("h5fcreate_f",error,total_error)
 
      !
-     !Create data space for the dataset. 
+     !Create data space for the dataset.
      !
      CALL h5screate_simple_f(RANK, dims, dataspace, error)
      CALL check("h5screate_simple_f",error,total_error)
 
      !
-     ! create dataset in the file. 
+     ! create dataset in the file.
      !
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, &
                dset_id, error)
@@ -162,17 +162,17 @@
      CALL check("h5dwrite_f",error,total_error)
 
      !
-     ! Create scalar data space for the String attribute. 
+     ! Create scalar data space for the String attribute.
      !
      CALL h5screate_simple_f(arank, adims, aspace_id, error)
      CALL check("h5screate_simple_f",error,total_error)
      !
-     ! Create scalar data space for all other attributes. 
+     ! Create scalar data space for all other attributes.
      !
      CALL h5screate_simple_f(arank, adims2, aspace2_id, error)
      CALL check("h5screate_simple_f",error,total_error)
      !
-     ! Create null data space for null attributes. 
+     ! Create null data space for null attributes.
      !
      CALL h5screate_f(H5S_NULL_F, aspace6_id, error)
      CALL check("h5screate_f",error,total_error)
@@ -222,7 +222,7 @@
      CALL h5acreate_f(dset_id, aname2, atype2_id, aspace2_id, &
                       attr2_id, error)
      CALL check("h5acreate_f",error,total_error)
-     
+
 
      !
      ! Create dataset DOUBLE attribute.
@@ -250,7 +250,7 @@
                       attr6_id, error)
 
      CALL check("h5acreate_f",error,total_error)
-    
+
      !
      ! Write the String attribute data.
      !
@@ -265,20 +265,20 @@
      !
      ! Write the DOUBLE attribute data.
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5awrite_f(attr3_id, atype3_id, attr_double_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
      !
      ! Write the Real attribute data.
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5awrite_f(attr4_id, atype4_id, attr_real_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
 
      !
      ! Write the Integer attribute data.
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5awrite_f(attr5_id, atype5_id, attr_integer_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
 
@@ -310,9 +310,9 @@
      CALL check("h5aget_storage_size_f",error,total_error)
 !     CALL verify("h5aget_storage_size_f",attr_storage,0,total_error)
 
-   
+
      !
-     ! Close the attribute. 
+     ! Close the attribute.
      !
      CALL h5aclose_f(attr_id, error)
      CALL check("h5aclose_f",error,total_error)
@@ -394,7 +394,7 @@
      !
      CALL h5aopen_name_f(dset_id, aname5, attr5_id, error)
      CALL check("h5aopen_idx_f",error,total_error)
-     
+
      !
      !open the NULL attrbute by name
      !
@@ -412,7 +412,7 @@
      IF (error .NE. 12) THEN
        total_error = total_error + 1
      END IF
-       
+
      !
      !get the STRING attrbute space
      !
@@ -449,7 +449,7 @@
      !
      CALL h5aget_type_f(attr5_id, attr5_type, error)
      CALL check("h5aget_type_f",error,total_error)
-     
+
      !
      !get the null attrbute datatype
      !
@@ -483,9 +483,9 @@
 
      IF ( (aread_data(1) .NE. attr_data(1)) .OR. (aread_data(2) .NE. attr_data(2)) ) THEN
          WRITE(*,*) "Read back string attrbute is wrong", aread_data(1), aread_data(2)
-         total_error = total_error + 1  
+         total_error = total_error + 1
      END IF
-     
+
      !
      !read the CHARACTER attribute data back to memory
      !
@@ -493,51 +493,51 @@
      CALL check("h5aread_f",error,total_error)
      IF (aread_character_data .NE. 'A' ) THEN
          WRITE(*,*) "Read back character attrbute is wrong ",aread_character_data
-         total_error = total_error + 1  
+         total_error = total_error + 1
      END IF
      !
      !read the double attribute data back to memory
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_double_data(1) .NE. 3.459 ) THEN
          WRITE(*,*) "Read back double attrbute is wrong", aread_double_data(1)
          total_error = total_error + 1
-     END IF  
+     END IF
      !
      !read the real attribute data back to memory
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_real_data(1) .NE. 4.0 ) THEN
          WRITE(*,*) "Read back real attrbute is wrong ", aread_real_data
-         total_error = total_error + 1 
-     END IF 
+         total_error = total_error + 1
+     END IF
      !
      !read the Integer attribute data back to memory
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5aread_f(attr5_id, H5T_NATIVE_INTEGER, aread_integer_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_integer_data(1) .NE. 5 ) THEN
          WRITE(*,*) "Read back integer attrbute is wrong ", aread_integer_data
-         total_error = total_error + 1 
-     END IF 
+         total_error = total_error + 1
+     END IF
      !
      !read the null attribute data. nothing can be read.
      !
-     data_dims(1) = 1 
+     data_dims(1) = 1
      CALL h5aread_f(attr6_id, H5T_NATIVE_INTEGER, aread_null_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_null_data(1) .NE. 7 ) THEN
          WRITE(*,*) "Read back null attrbute is wrong ", aread_null_data
-         total_error = total_error + 1 
-     END IF 
-    
+         total_error = total_error + 1
+     END IF
+
      !
-     ! Close the attribute. 
+     ! Close the attribute.
      !
      CALL h5aclose_f(attr_id, error)
      CALL check("h5aclose_f",error,total_error)
@@ -553,9 +553,9 @@
      CALL check("h5aclose_f",error,total_error)
 
      !
-     ! Delete the attribute from the Dataset. 
+     ! Delete the attribute from the Dataset.
      !
-     CALL h5adelete_f(dset_id, aname, error)     
+     CALL h5adelete_f(dset_id, aname, error)
      CALL check("h5adelete_f",error,total_error)
 
      !
@@ -591,13 +591,13 @@
      CALL h5tclose_f(attr6_type, error)
      CALL check("h5tclose_f",error,total_error)
 
-     !   
+     !
      ! End access to the dataset and release resources used by it.
-     ! 
+     !
      CALL h5dclose_f(dset_id, error)
      CALL check("h5dclose_f",error,total_error)
 
-     ! 
+     !
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)

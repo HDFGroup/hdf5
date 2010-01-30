@@ -591,7 +591,7 @@ int test_table(hid_t fid, int write)
   wbufd[i].pressure = wbuf[i].pressure;
   wbufd[i].temperature = wbuf[i].temperature;
   strcpy(wbufd[i].name, wbuf[i].name );
-  
+
  }
 
 
@@ -935,8 +935,8 @@ int test_table(hid_t fid, int write)
   goto out;
 
   {
-   
-   
+
+
    /* compare the read values with the initial values */
    for( i = 0; i < NRECORDS; i++ )
    {
@@ -1098,7 +1098,7 @@ int test_table(hid_t fid, int write)
   }
  }
 
- 
+
 
  PASSED();
 

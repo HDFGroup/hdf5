@@ -49,10 +49,10 @@
 #define H5FILE_NAME        "trecover.h5"
 #define CTL_H5FILE_NAME    "CTL"H5FILE_NAME	/* control file name */
 #define JNL_H5FILE_NAME    H5FILE_NAME".jnl"	/* journal file name */
-#define DATASETNAME "IntArray" 
-#define CHUNKDATASETNAME "IntArrayChunked" 
-#define ZDATASETNAME "IntArrayZCompressed" 
-#define SZDATASETNAME "IntArraySZCompressed" 
+#define DATASETNAME "IntArray"
+#define CHUNKDATASETNAME "IntArrayChunked"
+#define ZDATASETNAME "IntArrayZCompressed"
+#define SZDATASETNAME "IntArraySZCompressed"
 
 /* Data Structures */
 typedef union CrasherParam_t {

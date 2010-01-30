@@ -17,7 +17,7 @@
  *  This program illustrates the usage of HDF5's implicit message sharing
  *  feature, which can be used to save space when the same messages are
  *  used many times in a file.
- *  
+ *
  *  This example creates a standard file using file creation property lists
  *  to control which messages are shared.  Messages that can be shared are
  *  datatypes, dataspaces, attributes, fill values, and filter pipelines.
@@ -153,7 +153,7 @@ int main(void)
 
     ret = create_standard_file("only_huge_mesgs_file.h5", fcpl_id);
     if(ret < 0) goto error;
- 
+
 
     /* Or, suppose we only wanted to shared dataspaces and
      * attributes (which might make sense if we were going to use committed
@@ -176,7 +176,7 @@ int main(void)
     if(ret < 0) goto error;
     ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_SHMESG_ATTR_FLAG, 40);
     if(ret < 0) goto error;
-    
+
     ret = create_standard_file("separate_indexes_file.h5", fcpl_id);
     if(ret < 0) goto error;
 
@@ -242,7 +242,7 @@ create_standard_file(const char *filename, hid_t fcpl_id)
 {
     hid_t file_id=-1;
     hid_t type_id=-1, temp_type_id=-1;
-    hsize_t dims[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1}; 
+    hsize_t dims[] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
     hid_t space_id=-1;
     hid_t attr_type_id = -1;
     hid_t attr_space_id = -1;
@@ -252,7 +252,7 @@ create_standard_file(const char *filename, hid_t fcpl_id)
     int x;
     herr_t ret;
 
-    /* Create the file */ 
+    /* Create the file */
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     if(file_id < 0) goto error;
 

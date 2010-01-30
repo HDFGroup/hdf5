@@ -431,7 +431,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     H5HF_dblock_cache_ud_t udata;	/* parent and other infor for deserializing direct block */
     size_t odi_size;		/* On disk image size of the direct block.
 				 * Note that there is no necessary relation
-				 * between this value, and the actual 
+				 * between this value, and the actual
 				 * direct block size, as conpression may
 				 * reduce the size of the on disk image,
 				 * and check sums may increase it.
@@ -458,7 +458,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     /* set up the direct block size */
     udata.dblock_size = dblock_size;
 
-    /* compute the on disk image size -- observe that odi_size and 
+    /* compute the on disk image size -- observe that odi_size and
      * dblock_size will be identical if there is no filtering.
      */
     if(hdr->filter_len > 0) {
@@ -661,7 +661,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5HF_man_dblock_dest(H5HF_direct_t *dblock)
 {
     herr_t          ret_value = SUCCEED;    /* Return value */

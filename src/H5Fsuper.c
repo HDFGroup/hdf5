@@ -220,15 +220,15 @@ done:
  *
  * Purpose:     Create a superblock extension for the superblock.
  *
- * 		This method will be called either on superblock 
+ * 		This method will be called either on superblock
  * 		initialization, or if journaling is enabled, and there
- * 		is no superblock extension to put the journaling 
+ * 		is no superblock extension to put the journaling
  * 		configuration data into.
  *
  * 		The code in this function was hacked from existing
  * 		code in H5F_super_init().
  *
- * 		The method should fail if a superblock extension 
+ * 		The method should fail if a superblock extension
  * 		exists on entry.
  *
  * Return:      Success:        SUCCEED
@@ -323,7 +323,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
     lf = shared->lf;
 
     /* initialize the metadata journaling configuration sections of the
-     * super block to indicate that journaling is not turned on at 
+     * super block to indicate that journaling is not turned on at
      * present.  These initialization may be overridden shortly.
      */
     shared->mdc_jnl_enabled        = FALSE;
@@ -700,7 +700,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
         } /* end else */
 
-	/* Read in the metadata journaling configuration message, 
+	/* Read in the metadata journaling configuration message,
 	 * if it exists.
 	 */
         if(NULL == H5O_msg_read(&ext_loc, H5O_MDJ_MSG_ID, &mdj_msg, dxpl_id)) {
@@ -843,19 +843,19 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 	f->shared->extension_ok = TRUE;
         need_ext = TRUE;
     } /* end if */
-    /* If we're going to use a version of the superblock format which allows 
+    /* If we're going to use a version of the superblock format which allows
      *  for the superblock extension, check for non-default values to store
      *  in it.
      */
     else if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
-	/* make note of the fact that we can construct a superblock 
+	/* make note of the fact that we can construct a superblock
 	 * extension later if we wish.
 	 */
 	f->shared->extension_ok = TRUE;
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF || 
+                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF)
             need_ext = TRUE;
         /* Check for driver info to store */
@@ -893,7 +893,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF || 
+                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF) {
             H5O_btreek_t btreek;        /* v1 B-tree 'K' value message for superblock extension */
 
@@ -929,19 +929,19 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * super block extension if it is.
          *
          * However, the cache has not been initialized at this point,
-         * so we don't know if we will be successful in creating the 
+         * so we don't know if we will be successful in creating the
          * journal file (the journal file may already exist, or some
-         * directory on the journal path may not exist.  
+         * directory on the journal path may not exist.
          *
          * Further, the cache should refuse to allow the file to open if
          * it detects journaling in progress -- so marking journaling in
          * progress here would introduce some complexities.
-         * status now 
+         * status now
          *
          * Thus, don't write the metadata journaling message now.  Instead,
-         * initialize the metadata journaling related fields to indicate 
+         * initialize the metadata journaling related fields to indicate
          * that journaling is not in progress.  If journaling is requested,
-         * we will write the metadata journaling message after we have 
+         * we will write the metadata journaling message after we have
          * successfully opened the journal file and started journaling.
          *
          *                                        JRM -- 2/19/09
@@ -1119,10 +1119,10 @@ done:
  * Function:    H5F_super_write_mdj_msg
  *
  *              If journaling is enabled, create a superblock extension
- *              if necessary and then write the current contents of 
- *              the mdc_jnl_enabled, mdc_jnl_magic, mdc_jnl_file_name_lenand 
- *              mdc_jnl_file_name fields of the shared structure to the 
- *              mdj_msg in the superblock extention, overwriting the old 
+ *              if necessary and then write the current contents of
+ *              the mdc_jnl_enabled, mdc_jnl_magic, mdc_jnl_file_name_lenand
+ *              mdc_jnl_file_name fields of the shared structure to the
+ *              mdj_msg in the superblock extention, overwriting the old
  *              message if it exists.
  *
  *              If journaling is not enabled, remove the old mdj message
@@ -1170,18 +1170,18 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
     } /* end else */
 
     /* The metadata journaling message is a variable length message.
-     * This raises the question of how to deal with any pre-existing 
+     * This raises the question of how to deal with any pre-existing
      * message.
      *
      * While in theory we could try to re-size it, after looking through
-     * the code and talking to Quincey, it appears that the standard 
-     * practice in such cases seems to be to delete the old message, 
+     * the code and talking to Quincey, it appears that the standard
+     * practice in such cases seems to be to delete the old message,
      * and then replace it with a new message.
      *
-     * Add to this the fact that the metadata journaling message 
-     * should not exist unless journaling is enabled (or to put it 
-     * another way, the message should never appear in a valid HDF5 
-     * file).  
+     * Add to this the fact that the metadata journaling message
+     * should not exist unless journaling is enabled (or to put it
+     * another way, the message should never appear in a valid HDF5
+     * file).
      *
      * Thus, here we check to see if a metadata jouraling message exists,
      * and delete it if it does.  If metadata data journaling is enabled,
@@ -1190,8 +1190,8 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
     if((msg_exists = H5O_msg_exists(&ext_loc, H5O_MDJ_MSG_ID, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine if metadata journaling message exists?!?!")
     if(msg_exists == TRUE) {
-        /* metadata journaling message exists -- delete it from the 
-         * super block extension now.  We will replace it later if 
+        /* metadata journaling message exists -- delete it from the
+         * super block extension now.  We will replace it later if
          * metadata journaling is enabled.
          */
         if(H5O_msg_remove(&ext_loc, H5O_MDJ_MSG_ID, H5O_ALL, FALSE, dxpl_id) < 0)
@@ -1201,7 +1201,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
     if(f->shared->mdc_jnl_enabled) {
         H5O_mdj_msg_t	mdj_msg;        /* Metadata journaling message to insert in superblock extension */
 
-        /* create a metadata journaling message and insert it in 
+        /* create a metadata journaling message and insert it in
          * the superblock extension.
          */
         mdj_msg.mdc_jnl_enabled       = f->shared->mdc_jnl_enabled;

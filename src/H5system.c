@@ -626,7 +626,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 
     *extpath = NULL;
 
-    /* 
+    /*
      * Unix: name[0] is a "/"
      * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
      */
@@ -639,17 +639,17 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         if (NULL == (new_name = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-	/* 
+	/*
 	 * Windows: name[0-1] is "<drive-letter>:"
-	 * 	Get current working directory on the drive specified in NAME 
+	 * 	Get current working directory on the drive specified in NAME
 	 * Unix: does not apply
 	 */
         if (CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrcpy(new_name, &name[2]);
-	/* 
-	 * Windows: name[0] is a '/' or '\' 
+	/*
+	 * Windows: name[0] is a '/' or '\'
 	 *	Get current drive
 	 * Unix: does not apply
 	 */
@@ -696,11 +696,11 @@ done:
  *
  * Function: H5_get_free_ram
  *
- * Purpose:  Determine how much free ram the host system contains, and 
- *           return that value in bytes.  If this data is not available, 
+ * Purpose:  Determine how much free ram the host system contains, and
+ *           return that value in bytes.  If this data is not available,
  *           return 0.
  *
- * Return:	Number of bytes of free ram on the host system, or 
+ * Return:	Number of bytes of free ram on the host system, or
  *		zero if unable to determine this value.
  *
  * Programmer:	John Mainzer
@@ -713,7 +713,7 @@ H5_get_free_ram(void)
 {
     /* const char * fcn_name = "H5_get_free_ram()"; */
     unsigned long long free_ram = 0;
-    
+
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
 #ifdef H5_HAVE_SYSINFO /* LINUX */
     {
@@ -742,11 +742,11 @@ H5_get_free_ram(void)
  *
  * Function: H5_get_free_swap
  *
- * Purpose:  Determine how much free swap the host system contains, and 
- *           return that value in bytes.  If this data is not available, 
+ * Purpose:  Determine how much free swap the host system contains, and
+ *           return that value in bytes.  If this data is not available,
  *           return 0.
  *
- * Return:	Number of bytes of free swap on the host system, or 
+ * Return:	Number of bytes of free swap on the host system, or
  *		zero if unable to determine this value.
  *
  * Programmer:	John Mainzer
@@ -759,7 +759,7 @@ H5_get_free_swap(void)
 {
     /* const char * fcn_name = "H5_get_free_swap()"; */
     unsigned long long free_swap = 0;
-    
+
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
 #ifdef H5_HAVE_SYSINFO /* LINUX */
     {
@@ -788,11 +788,11 @@ H5_get_free_swap(void)
  *
  * Function: H5_get_physical_ram
  *
- * Purpose:  Determine how much physical ram the host system contains, and 
- *           return that value in bytes.  If this data is not available, 
+ * Purpose:  Determine how much physical ram the host system contains, and
+ *           return that value in bytes.  If this data is not available,
  *           return 0.
  *
- * Return:	Number of bytes of physical ram on the host system, or 
+ * Return:	Number of bytes of physical ram on the host system, or
  *		zero if unable to determine this value.
  *
  * Programmer:	John Mainzer
@@ -805,7 +805,7 @@ H5_get_physical_ram(void)
 {
     /* const char * fcn_name = "H5_get_physical_ram()"; */
     unsigned long long physical_ram = 0;
-    
+
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
 #ifdef H5_HAVE_SYSINFO /* LINUX */
     {
@@ -841,7 +841,7 @@ H5_get_physical_ram(void)
 
             if ( len == sizeof(l_physical_mem) ) {
 
-                if ( sysctl(pm_mib, 2, &l_physical_mem, &len, NULL, (size_t)0)  
+                if ( sysctl(pm_mib, 2, &l_physical_mem, &len, NULL, (size_t)0)
                      == -1 ) {
 
 	            /* sysctl() failed for some reason -- do nothing */
@@ -853,7 +853,7 @@ H5_get_physical_ram(void)
                 }
             } else if ( len == sizeof(ll_physical_mem) ) {
 
-                if ( sysctl(pm_mib, 2, &ll_physical_mem, &len, NULL, (size_t)0)  
+                if ( sysctl(pm_mib, 2, &ll_physical_mem, &len, NULL, (size_t)0)
                      == -1 ) {
 
 	            /* sysctl() failed for some reason -- do nothing */
@@ -865,9 +865,9 @@ H5_get_physical_ram(void)
 
             } else {
 
-		/* the initial call to sysctl() returned an unexpected size 
-		 * for the field in which to return the number of bytes of 
-                 * physical memory.  We don't know how to handle this, so 
+		/* the initial call to sysctl() returned an unexpected size
+		 * for the field in which to return the number of bytes of
+                 * physical memory.  We don't know how to handle this, so
                  * just do nothing.
                  */
 

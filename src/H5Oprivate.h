@@ -517,11 +517,11 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  * below:
  *
  * mdc_jnl_enabled: Boolean flag indicating whether metadata journaling
- * 	is currently enabled.  
+ * 	is currently enabled.
  *
  * mdc_jnl_magic: Randomly selected int32_t used to reduce the possibility
- *	of running the wrong journal on an HDF5 file.  The basic idea is 
- *	to pick a random number, store it in both the HDF5 file and the 
+ *	of running the wrong journal on an HDF5 file.  The basic idea is
+ *	to pick a random number, store it in both the HDF5 file and the
  *	journal file, and then refuse to run the journal unless the numbers
  *	match.
  *
@@ -531,8 +531,8 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  *
  *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
  *
- * mdc_jnl_file_name: Array of char of length 
- *	H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1 used to store the journal 
+ * mdc_jnl_file_name: Array of char of length
+ *	H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1 used to store the journal
  *	file path.
  *
  *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
@@ -656,7 +656,7 @@ H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg,
     H5O_msg_crt_idx_t *crt_idx);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     unsigned char *buf, const void *obj);
-H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
+H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);

@@ -59,20 +59,20 @@ static struct long_options l_opts[] = {
 
 /* Utility Function Declarations: */
 
-void address_decode(size_t sizeof_addr, 
-                    const uint8_t **pp /* in, out */, 
+void address_decode(size_t sizeof_addr,
+                    const uint8_t **pp /* in, out */,
                     haddr_t *addr_p/*out*/);
 
-void address_encode(size_t sizeof_addr, 
-                    uint8_t **pp /* in, out */, 
+void address_encode(size_t sizeof_addr,
+                    uint8_t **pp /* in, out */,
                     haddr_t addr);
 
-void length_decode(size_t sizeof_length, 
-                   const uint8_t **pp /* in, out */, 
+void length_decode(size_t sizeof_length,
+                   const uint8_t **pp /* in, out */,
                    hsize_t *len_p /*out*/);
 
-void length_encode(size_t sizeof_length, 
-                   uint8_t **pp /* in, out */, 
+void length_encode(size_t sizeof_length,
+                   uint8_t **pp /* in, out */,
                    hsize_t length);
 
 hbool_t load_buf_from_file(int fd,
@@ -87,14 +87,14 @@ hbool_t load_buf_from_file(int fd,
 
 /* HDF5 File Investigation Function Declarations: */
 
-hbool_t find_super_block(int fd, 
-                         off_t file_len, 
+hbool_t find_super_block(int fd,
+                         off_t file_len,
                          off_t * sb_offset_ptr);
 
-hbool_t get_sb_base_addr(int fd, 
+hbool_t get_sb_base_addr(int fd,
                          off_t file_len,
-                         off_t sb_offset, 
-                         int sb_ver, 
+                         off_t sb_offset,
+                         int sb_ver,
                          int offset_size,
                          haddr_t * sb_base_addr_ptr);
 
@@ -139,7 +139,7 @@ hbool_t get_mdj_msg_addr__scan_chunk(int fd,
                                      haddr_t chunk_addr,
                                      haddr_t chunk_size,
                                      haddr_t * mdj_msg_addr_ptr,
-                                     hbool_t examine, 
+                                     hbool_t examine,
                                      unsigned verbosity);
 
 hbool_t get_mdj_msg_data(int fd,
@@ -275,7 +275,7 @@ hbool_t bjf__chksum_entry_body(int fd,
                                off_t file_len,
                                off_t offset,
                                off_t * new_offset_ptr,
-  	                       int * msg_type_ptr, 
+  	                       int * msg_type_ptr,
                                size_t body_length,
                                uint32_t * chksum_ptr,
                                unsigned verbosity);
@@ -284,16 +284,16 @@ hbool_t bjf__load_begin_trans_msg(int fd,
                                   off_t file_len,
                                   off_t offset,
                                   off_t * new_offset_ptr,
-  		                  int * msg_type_ptr, 
+  		                  int * msg_type_ptr,
                                   int msg_ver,
-                                  uint64_t * trans_num_ptr, 
+                                  uint64_t * trans_num_ptr,
                                   unsigned verbosity);
 
 hbool_t bjf__load_chksum(int fd,
                          off_t file_len,
                          off_t offset,
                          off_t * new_offset_ptr,
-                         int * msg_type_ptr, 
+                         int * msg_type_ptr,
                          uint32_t * chksum_ptr,
                          unsigned verbosity);
 
@@ -301,16 +301,16 @@ hbool_t bjf__load_end_trans_msg(int fd,
                                 off_t file_len,
                                 off_t offset,
                                 off_t * new_offset_ptr,
-  	                        int * msg_type_ptr, 
+  	                        int * msg_type_ptr,
                                 int msg_ver,
-                                uint64_t * trans_num_ptr, 
+                                uint64_t * trans_num_ptr,
                                 unsigned verbosity);
 
 hbool_t bjf__load_entry_body(int fd,
                              off_t file_len,
                              off_t offset,
                              off_t * new_offset_ptr,
-  	                     int * msg_type_ptr, 
+  	                     int * msg_type_ptr,
                              size_t body_length,
                              char * buf_ptr,
                              size_t buf_len,
@@ -321,9 +321,9 @@ hbool_t bjf__load_eoa_msg(int fd,
                           off_t file_len,
                           off_t offset,
                           off_t * new_offset_ptr,
-	                  int * msg_type_ptr, 
+	                  int * msg_type_ptr,
                           int msg_ver,
-                          haddr_t * eoa_ptr, 
+                          haddr_t * eoa_ptr,
                           int hdf5_offset_width,
                           unsigned verbosity);
 
@@ -331,12 +331,12 @@ hbool_t bjf__load_jnl_entry_msg(int fd,
                                 off_t file_len,
                                 off_t offset,
                                 off_t * new_offset_ptr,
-  		                int * msg_type_ptr, 
+  		                int * msg_type_ptr,
                                 int msg_ver,
-                                uint64_t * trans_num_ptr, 
-                                haddr_t * hdf5_offset_ptr, 
+                                uint64_t * trans_num_ptr,
+                                haddr_t * hdf5_offset_ptr,
                                 int hdf5_offset_width,
-                                size_t * hdf5_length_ptr, 
+                                size_t * hdf5_length_ptr,
                                 int hdf5_length_width,
                                 char * buf_ptr,
                                 size_t buf_len,
@@ -346,8 +346,8 @@ hbool_t bjf__load_length(int fd,
                          off_t file_len,
                          off_t offset,
                          off_t * new_offset_ptr,
-                         int * msg_type_ptr, 
-                         size_t * hdf5_length_ptr, 
+                         int * msg_type_ptr,
+                         size_t * hdf5_length_ptr,
                          int hdf5_length_width,
                          uint32_t * chksum_ptr,
                          unsigned verbosity);
@@ -356,11 +356,11 @@ hbool_t bjf__load_next_msg(int fd,
                            off_t file_len,
                            off_t offset,
                            off_t * new_offset_ptr,
-  		           int * msg_type_ptr, 
-                           uint64_t * trans_num_ptr, 
-                           haddr_t * hdf5_offset_ptr, 
+  		           int * msg_type_ptr,
+                           uint64_t * trans_num_ptr,
+                           haddr_t * hdf5_offset_ptr,
                            int hdf5_offset_width,
-                           size_t * hdf5_length_ptr, 
+                           size_t * hdf5_length_ptr,
                            int hdf5_length_width,
                            haddr_t * eoa_ptr,
                            char * buf_ptr,
@@ -371,8 +371,8 @@ hbool_t bjf__load_offset(int fd,
                          off_t file_len,
                          off_t offset,
                          off_t * new_offset_ptr,
-                         int * msg_type_ptr, 
-                         haddr_t * hdf5_offset_ptr, 
+                         int * msg_type_ptr,
+                         haddr_t * hdf5_offset_ptr,
                          int hdf5_offset_width,
                          uint32_t * chksum_ptr,
                          unsigned verbosity);
@@ -381,20 +381,20 @@ hbool_t bjf__load_trans_num(int fd,
                             off_t file_len,
                             off_t offset,
                             off_t * new_offset_ptr,
-  		            int * msg_type_ptr, 
-                            uint64_t * trans_num_ptr, 
+  		            int * msg_type_ptr,
+                            uint64_t * trans_num_ptr,
                             uint32_t * chksum_ptr,
                             unsigned verbosity);
 
 
-/* Unfortunately, H5_checksum_metadata() gives different results depending on 
+/* Unfortunately, H5_checksum_metadata() gives different results depending on
  * how the data is fed to it.  Hence, to duplicate the checksum computed on the
  * library side, we must load the entire metadata journal entry body into RAM
  * and compute the checksum in one call.
  *
- * As we don't know the size of a journal entry body until we read its journal 
- * entry message, a great deal of mallocing and freeing would be required if 
- * we allocated each buffer as needed, and then freed it when we were done 
+ * As we don't know the size of a journal entry body until we read its journal
+ * entry message, a great deal of mallocing and freeing would be required if
+ * we allocated each buffer as needed, and then freed it when we were done
  * computing the check sum.
  *
  * Instead, we will allocate a global buffer for this purpose, and then increase
@@ -417,11 +417,11 @@ size_t body_buf_len = 0;
  *
  * Function:	find_super_block()
  *
- * Purpose:	Scan the supplied file to determine if it is an HDF5 
- *		file, and if it is, load the offset into the file of 
+ * Purpose:	Scan the supplied file to determine if it is an HDF5
+ *		file, and if it is, load the offset into the file of
  *		the superblock in *sb_offset_ptr, and return TRUE.
  *
- *		If the function fails, either because the supplied 
+ *		If the function fails, either because the supplied
  *		file is not an HDF5 file, or for any other reason,
  *		*sb_offset_ptr is undefined, and the function returns
  *		FALSE
@@ -447,15 +447,15 @@ find_super_block(int fd,
     unsigned int verbosity = 0;
     off_t offset = 0;
 
-    if ( ( fd < 0 ) || 
-         ( file_len <= 0 ) || 
+    if ( ( fd < 0 ) ||
+         ( file_len <= 0 ) ||
          ( sb_offset_ptr == NULL ) ) {
 
         success = FALSE;
 	HDfprintf(stderr, "%s bad params on entry.\n", fcn_name);
     }
 
-    while ( ( success ) && ( ! found ) ) 
+    while ( ( success ) && ( ! found ) )
     {
         if ( (offset + H5F_SIGNATURE_LEN) >= file_len ) {
 
@@ -465,19 +465,19 @@ find_super_block(int fd,
 
                 HDfprintf(stderr, "%s: Target file is not an HDF5 file.\n");
             }
-        } else if ( ! load_buf_from_file(fd, file_len, offset, 
-                                         (size_t)H5F_SIGNATURE_LEN, sig_buf, 
+        } else if ( ! load_buf_from_file(fd, file_len, offset,
+                                         (size_t)H5F_SIGNATURE_LEN, sig_buf,
                                          verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n", 
+                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n",
                           fcn_name);
             }
-        } else if ( HDmemcmp(sig_buf, 
-                             H5F_SIGNATURE, 
+        } else if ( HDmemcmp(sig_buf,
+                             H5F_SIGNATURE,
                              (size_t)H5F_SIGNATURE_LEN) == 0 ) {
 
             found = TRUE;
@@ -504,11 +504,11 @@ find_super_block(int fd,
  * Function:	get_sb_base_addr()
  *
  * Purpose:	Read the base address from the super block in the supplied
- *		file using the given superblock offset, load that value 
+ *		file using the given superblock offset, load that value
  *		into *sb_base_addr_ptr, and return TRUE.
  *
- *		If the function fails for any other reason, 
- *		*sb_base_addr_ptr is undefined, and the function returns 
+ *		If the function fails for any other reason,
+ *		*sb_base_addr_ptr is undefined, and the function returns
  *		FALSE.
  *
  * Return:	Success: TRUE
@@ -536,8 +536,8 @@ get_sb_base_addr(int fd,
     off_t sb_base_addr_offset;
     haddr_t sb_base_addr;
 
-    if ( ( fd < 0 ) || 
-         ( (sb_offset % 512) != 0 ) || 
+    if ( ( fd < 0 ) ||
+         ( (sb_offset % 512) != 0 ) ||
          ( offset_size <= 0 ) ||
          ( sizeof(haddr_t) > (size_t)offset_size ) ||
          ( offset_size > MAX_ADDR_SIZE ) ||
@@ -557,28 +557,28 @@ get_sb_base_addr(int fd,
 
         sb_base_addr_offset = sb_offset + H5F_SIGNATURE_LEN + 4;
 
-        if ( ! load_buf_from_file(fd, file_len, sb_base_addr_offset, 
-                                  (size_t)offset_size, addr_buf, 
+        if ( ! load_buf_from_file(fd, file_len, sb_base_addr_offset,
+                                  (size_t)offset_size, addr_buf,
                                   verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n", 
+                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n",
                           fcn_name);
             }
         } else {
 
             address_decode((size_t)offset_size, &buf_ptr, &sb_base_addr);
- 
+
             if ( buf_ptr != &(addr_buf[offset_size]) ) {
 
                 success = FALSE;
 
                 if ( verbosity > 0 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                             "%s: Unexpected buf_ptr after address_decode().\n",
                              fcn_name);
                 }
@@ -599,22 +599,22 @@ get_sb_base_addr(int fd,
  *
  * Function:	get_journaling_status()
  *
- * Purpose:	Determine if the target file exists -- if it doesn't, 
+ * Purpose:	Determine if the target file exists -- if it doesn't,
  *              issue a diagnostic, and return FALSE.
  *
- *		If it exists, determine if it is an HDF5 file -- if it 
+ *		If it exists, determine if it is an HDF5 file -- if it
  *		isn't, issue a diagnostic, and return FALSE.
  *
  *              If it is an HDF5 file, determine whether it uses a super
  *		block that supports journaling -- if it doesn't, issue a
  *		diagnostic and return FALSE.
  *
- *		If the HDF5 file uses a superblock that supports 
- *		journaling, determine whether the file is marked as 
- *		having journaling in progress -- if it is not, issue a 
+ *		If the HDF5 file uses a superblock that supports
+ *		journaling, determine whether the file is marked as
+ *		having journaling in progress -- if it is not, issue a
  *		diagnostic and return FALSE.
  *
- *		If the target file is an HDF5 file that is marked as 
+ *		If the target file is an HDF5 file that is marked as
  *		having journaling in progress, determine its:
  *
  *			absolute superblock offset in the file
@@ -635,10 +635,10 @@ get_sb_base_addr(int fd,
  *		load these values into the locations indicated by the
  *		associated parameters, and return TRUE.
  *
- *		Set error_ptr to TRUE and return FALSE if the function 
+ *		Set error_ptr to TRUE and return FALSE if the function
  *		fails for any reason.
  *
- *		Note that the jnl_file_name_ptr parameter is presumed to 
+ *		Note that the jnl_file_name_ptr parameter is presumed to
  *		point to a buffer of char of length at least
  *		H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1.
  *
@@ -646,11 +646,11 @@ get_sb_base_addr(int fd,
  *		      is marked as having journaling in progress.
  *
  *		FALSE if the supplied path references a file that does
- *		      not exist, doesn't reference an HDF5 file, 
- *		      references an HDF5 file that doesn't support 
+ *		      not exist, doesn't reference an HDF5 file,
+ *		      references an HDF5 file that doesn't support
  *		      journaling, references an HDF5 file that supports
- *		      journaling but that is not marked as having 
- *		      journaling in progress, or if the function fails 
+ *		      journaling but that is not marked as having
+ *		      journaling in progress, or if the function fails
  *		      for any reason.
  *
  * Programmer:	JRM -- 2/24/09
@@ -659,12 +659,12 @@ get_sb_base_addr(int fd,
  *		Added the examine parameter.  This doesn't change
  *		the flow of execution, but it does cause the function to
  *		keep up a running commentary to stdout, and to suppress
- *		much of output to stderr that would normally be generated 
+ *		much of output to stderr that would normally be generated
  *		when errors are detected.
  *
  *		JRM -- 3/19/09
  *		Added the verbosity parameter and associated code.  It
- *		doesn't change the execution, but it does control the 
+ *		doesn't change the execution, but it does control the
  *		amount of comentary generated.
  *
  **************************************************************************/
@@ -705,7 +705,7 @@ get_journaling_status(char * file_path_ptr,
     haddr_t sb_ext_addr;
     haddr_t mdj_msg_addr = HADDR_UNDEF;
 
-    if ( ( file_path_ptr == NULL ) || 
+    if ( ( file_path_ptr == NULL ) ||
          ( file_len_ptr == NULL ) ||
          ( sb_offset_ptr == NULL ) ||
          ( sb_version_ptr == NULL ) ||
@@ -723,7 +723,7 @@ get_journaling_status(char * file_path_ptr,
 
     if ( examine ) {
 
-        HDfprintf(stdout, "Examining the putative HDF5 file %s:\n", 
+        HDfprintf(stdout, "Examining the putative HDF5 file %s:\n",
                   file_path_ptr);
 
         /* We don't want to generate output to stderr when doing an examine
@@ -740,7 +740,7 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "%sattempting to get the length of %s...\n", 
+            HDfprintf(stdout, "%sattempting to get the length of %s...\n",
                       indent1, file_path_ptr);
         }
 
@@ -757,10 +757,10 @@ get_journaling_status(char * file_path_ptr,
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stdout, "%sfile length = %lld\n", 
+                HDfprintf(stdout, "%sfile length = %lld\n",
                          indent2, (long long)file_len);
 
-            } 
+            }
 
             *file_len_ptr = file_len;
 
@@ -768,7 +768,7 @@ get_journaling_status(char * file_path_ptr,
 
                 success = FALSE;
                 *error_ptr = TRUE;
-                HDfprintf(err_file_ptr, "%s%s is empty.\n", 
+                HDfprintf(err_file_ptr, "%s%s is empty.\n",
                           indent1, file_path_ptr);
             }
         }
@@ -778,7 +778,7 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "%sattempting to open %s...\n", 
+            HDfprintf(stdout, "%sattempting to open %s...\n",
                       indent1, file_path_ptr);
         }
 
@@ -790,7 +790,7 @@ get_journaling_status(char * file_path_ptr,
 
             success = FALSE;
             *error_ptr = TRUE;
-            HDfprintf(err_file_ptr, "%scan't open %s.\n", 
+            HDfprintf(err_file_ptr, "%scan't open %s.\n",
                       indent1, file_path_ptr);
 
         } else {
@@ -801,7 +801,7 @@ get_journaling_status(char * file_path_ptr,
             }
         }
     }
- 
+
 
     if ( success ) {
 
@@ -816,7 +816,7 @@ get_journaling_status(char * file_path_ptr,
 
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
 		      "%ssuper block not found in %s -- not an HDF5 file?\n",
 		      indent1, file_path_ptr);
 
@@ -843,7 +843,7 @@ get_journaling_status(char * file_path_ptr,
 
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
 		     "%scan't get super block verison in %s -- file corrupt?\n",
                      indent1, file_path_ptr);
 
@@ -854,7 +854,7 @@ get_journaling_status(char * file_path_ptr,
                 HDfprintf(stdout, "%ssuper block version = %d.\n",
                           indent2, sb_version);
             }
-          
+
             *sb_version_ptr = sb_version;
 
             if ( ( sb_version == 0 ) || ( sb_version == 1 ) ) {
@@ -862,7 +862,7 @@ get_journaling_status(char * file_path_ptr,
                 success = FALSE;
                 *error_ptr = TRUE;
 
-                HDfprintf(err_file_ptr, 
+                HDfprintf(err_file_ptr,
                         "%sjournaling is not supported in the HDF5 file %s.\n",
                         indent1, file_path_ptr);
                 HDfprintf(err_file_ptr,
@@ -883,7 +883,7 @@ get_journaling_status(char * file_path_ptr,
                 HDfprintf(err_file_ptr,
                           "%sblock version.\n",
                           indent1);
-            } 
+            }
         }
     }
 
@@ -891,20 +891,20 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
 		      "%sreading offset and length sizes from super block...\n",
                       indent1);
         }
 
-        success = get_offset_and_length_size(fd, file_len, sb_offset, 
-                                             sb_version, &offset_size, 
+        success = get_offset_and_length_size(fd, file_len, sb_offset,
+                                             sb_version, &offset_size,
                                              &length_size);
 
         if ( ! success ) {
 
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%scan't get offset & length sizes from %s.\n",
                       indent1, file_path_ptr);
             HDfprintf(err_file_ptr, "%ssuper block corrupt?\n", indent1);
@@ -913,9 +913,9 @@ get_journaling_status(char * file_path_ptr,
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stdout, "%soffset_size = %d.\n", 
+                HDfprintf(stdout, "%soffset_size = %d.\n",
                           indent2, offset_size);
-                HDfprintf(stdout, "%slength_size = %d.\n", 
+                HDfprintf(stdout, "%slength_size = %d.\n",
                           indent2, length_size);
             }
         }
@@ -926,18 +926,18 @@ get_journaling_status(char * file_path_ptr,
         if ( sizeof(haddr_t) < (size_t)offset_size ) {
 
             /* we have a problem -- current definition of haddr_t is too
-             * small to represent offsets in the target hdf5 file.  Must 
+             * small to represent offsets in the target hdf5 file.  Must
              * abort.
              */
 
             success = FALSE;
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%sOffsets in %s are too big to fit in haddr_t.\n",
                       indent1, file_path_ptr);
 
-            HDfprintf(err_file_ptr, "%ssizeof(haddr_t) = %d.\n", 
+            HDfprintf(err_file_ptr, "%ssizeof(haddr_t) = %d.\n",
                       indent2, (int)(sizeof(haddr_t)));
 
         } else if ( offset_size > MAX_ADDR_SIZE ) {
@@ -945,11 +945,11 @@ get_journaling_status(char * file_path_ptr,
             success = FALSE;
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "Offsets in %s are too big for the address buffers in\n",
                       file_path_ptr);
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                      "this program.  Increase MAX_ADDR_SIZE and recompile.\n");
         }
     }
@@ -959,18 +959,18 @@ get_journaling_status(char * file_path_ptr,
         if ( sizeof(hsize_t) < (size_t)length_size ) {
 
             /* we have a problem -- current definition of hsize_t is too
-             * small to represent object lengths in the target hdf5 file.  
+             * small to represent object lengths in the target hdf5 file.
              * Must abort.
              */
 
             success = FALSE;
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%sLengths in %s are too big to fit in hsize_t.\n",
                       indent1, file_path_ptr);
 
-            HDfprintf(err_file_ptr, "%ssizeof(hsize_t) = %d.\n", 
+            HDfprintf(err_file_ptr, "%ssizeof(hsize_t) = %d.\n",
                       indent2, (int)(sizeof(hsize_t)));
 
         } else if ( length_size > MAX_LENGTH_SIZE ) {
@@ -978,11 +978,11 @@ get_journaling_status(char * file_path_ptr,
             success = FALSE;
             *error_ptr = TRUE;
 
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                       "Lengths in %s are too big for the length buffers in\n",
                       file_path_ptr);
 
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                    "this program.  Increase MAX_LENGTH_SIZE and recompile.\n");
         }
     }
@@ -994,7 +994,7 @@ get_journaling_status(char * file_path_ptr,
             HDfprintf(stdout, "%scomputing eoa addr and offset...\n", indent1);
         }
 
-        switch ( sb_version ) 
+        switch ( sb_version )
         {
             case 2:
                 eoa_addr = (haddr_t)(12 + (2 * offset_size));
@@ -1002,9 +1002,9 @@ get_journaling_status(char * file_path_ptr,
 
                 if ( verbosity > 0 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
 			      "%seoa_addr = 0x%llx\n%seoa_offset = 0x%llx\n",
-                              indent2, (long long)eoa_addr, 
+                              indent2, (long long)eoa_addr,
                               indent2, (long long)eoa_offset);
                 }
                 break;
@@ -1028,7 +1028,7 @@ get_journaling_status(char * file_path_ptr,
 
         }
 
-        success = get_sb_base_addr(fd, file_len, sb_offset, sb_version, 
+        success = get_sb_base_addr(fd, file_len, sb_offset, sb_version,
                                    offset_size, &base_addr);
 
         if ( ! success ) {
@@ -1059,14 +1059,14 @@ get_journaling_status(char * file_path_ptr,
                       indent1);
         }
 
-        success = get_sb_extension_addr(fd, file_len, sb_offset, sb_version, 
+        success = get_sb_extension_addr(fd, file_len, sb_offset, sb_version,
                                         offset_size, &sb_ext_addr);
 
         if ( ! success ) {
 
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
 	 	      "%scan't read SB extension addr from %s.\n",
                       indent1, file_path_ptr);
 
@@ -1084,7 +1084,7 @@ get_journaling_status(char * file_path_ptr,
 
                 success = FALSE;
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%sThe file %s has no super block extension.\n",
                            indent1, file_path_ptr);
                 HDfprintf(stdout, "%s%s %s\n", indent1,
@@ -1098,19 +1098,19 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%sreading SB extension object header version...\n",
                       indent1);
         }
 
-        success = get_sb_ext_obj_hdr_ver(fd, file_len, base_addr, 
+        success = get_sb_ext_obj_hdr_ver(fd, file_len, base_addr,
                                          sb_ext_addr, &ohdr_version);
 
         if ( ! success ) {
 
             *error_ptr = TRUE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%scan't read SB extension ohdr ver from %s\n",
                       indent1, file_path_ptr);
 
@@ -1121,7 +1121,7 @@ get_journaling_status(char * file_path_ptr,
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stdout, "%sobject header version = %d.\n", 
+                HDfprintf(stdout, "%sobject header version = %d.\n",
                           indent2, ohdr_version);
             }
 
@@ -1147,13 +1147,13 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
 		    "%sscanning SB extension for metadata journaling msg...\n",
                     indent1);
         }
 
         success = get_mdj_msg_addr(fd, file_len, ohdr_version, offset_size,
-                                   length_size, base_addr, sb_ext_addr, 
+                                   length_size, base_addr, sb_ext_addr,
                                    &mdj_msg_addr, examine, verbosity);
 
         if ( ! success ) {
@@ -1164,31 +1164,31 @@ get_journaling_status(char * file_path_ptr,
 
                 HDfprintf(stderr, "%s: get_mdj_msg_addr() reports an error.\n",
                           fcn_name);
-            } 
+            }
         } else {
 
             if ( ( verbosity > 0 ) && ( mdj_msg_addr != HADDR_UNDEF ) ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
 			  "%smetadata journaling msg addr = 0x%llx\n",
                           indent2, (unsigned long long)mdj_msg_addr);
             }
 
             if ( mdj_msg_addr == HADDR_UNDEF ) {
 
-		/* the metadata journaling message doesn't exist -- this 
+		/* the metadata journaling message doesn't exist -- this
                  * implies that metadata journaling is not enabled and that
 		 * it is therefore impossible to run a journal.
                  *
                  * Issue a message to this effect and set success to FALSE.
-                 * 
-                 * Note that this is not an error, so we don't set 
+                 *
+                 * Note that this is not an error, so we don't set
                  * *error_ptr to TRUE.
                  */
 
 		success = FALSE;
-            
-                HDfprintf(stdout, 
+
+                HDfprintf(stdout,
 		          "%sno metadata journaling message found in %s.\n",
                           indent1, file_path_ptr);
                 HDfprintf(stdout, "%s%s %s\n", indent1,
@@ -1206,16 +1206,16 @@ get_journaling_status(char * file_path_ptr,
                       indent1);
         }
 
-        success = 
-	    get_mdj_msg_data(fd, file_len, base_addr, mdj_msg_addr, 
-                             &journaling_enabled, &magic, jnl_file_name, 
+        success =
+	    get_mdj_msg_data(fd, file_len, base_addr, mdj_msg_addr,
+                             &journaling_enabled, &magic, jnl_file_name,
                              examine, verbosity);
 
         if ( ! success ) {
 
             *error_ptr = TRUE;
-            
-            HDfprintf(err_file_ptr, 
+
+            HDfprintf(err_file_ptr,
                       "%sCan't read metadata journal msg data from %s.\n",
                       indent1, file_path_ptr);
         }
@@ -1225,7 +1225,7 @@ get_journaling_status(char * file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "%sattempting to close %s...\n", 
+            HDfprintf(stdout, "%sattempting to close %s...\n",
                       indent1, file_path_ptr);
         }
 
@@ -1242,7 +1242,7 @@ get_journaling_status(char * file_path_ptr,
 
     if ( success ) {
 
-        /* copy relevant data into the locations pointed to by the 
+        /* copy relevant data into the locations pointed to by the
          * supplied parameters.
          */
         if ( journaling_enabled ) {
@@ -1257,21 +1257,21 @@ get_journaling_status(char * file_path_ptr,
 
             if ( examine ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%s%s was journaled and not closed properly.\n",
                           indent1, file_path_ptr);
                 HDfprintf(stdout, "%s%s %s\n",
                           indent1,
 		          "It is probably corrupt, and it cannot be",
                           "opened by the HDF5 library.");
-                HDfprintf(stdout, "%sjournaling enabled = %d\n", 
+                HDfprintf(stdout, "%sjournaling enabled = %d\n",
                           indent2, (int)journaling_enabled);
-                HDfprintf(stdout, "%smagic = 0x%lx\n", 
+                HDfprintf(stdout, "%smagic = 0x%lx\n",
                           indent2, (unsigned long)magic);
                 HDfprintf(stdout, "%sjournal file name = \"%s\".\n",
                           indent2, jnl_file_name);
             }
-        } else { 
+        } else {
 
             /* nothing to do -- set success to FALSE */
             success = FALSE;
@@ -1297,7 +1297,7 @@ get_journaling_status(char * file_path_ptr,
  *		in *file_len_ptr, and return TRUE.
  *
  *		If the file does not exist, or if the function fails
- *		for any other reason, *file_len_ptr is undefined, and 
+ *		for any other reason, *file_len_ptr is undefined, and
  *		the function returns FALSE.
  *
  * Return:	Success: TRUE
@@ -1306,7 +1306,7 @@ get_journaling_status(char * file_path_ptr,
  * Programmer:	JRM -- 2/24/09
  *
  * Changes:	None.
- *		
+ *
  *
  **************************************************************************/
 
@@ -1332,8 +1332,8 @@ get_file_len(char * file_path_ptr,
             success = FALSE;
 
             if ( verbose ) {
-            
-                HDfprintf(stderr, "%s: Can't stat %s.\n", 
+
+                HDfprintf(stderr, "%s: Can't stat %s.\n",
                           fcn_name, file_path_ptr);
             }
         } else {
@@ -1353,17 +1353,17 @@ get_file_len(char * file_path_ptr,
  * Function:	get_mdj_msg_addr
  *
  * Purpose:	Given the base address of the HDF5 file and the relative
- *		address of the object header containing the super block 
- *		extension messages, try to find the address of the metadata 
- *		journaling message if it exists.  
+ *		address of the object header containing the super block
+ *		extension messages, try to find the address of the metadata
+ *		journaling message if it exists.
  *
  *		If it exists, set *mdj_msg_addr_ptr to the relative address
  *		of the message in the file, and return TRUE.
  *
- *		It it does not, set *mdj_msg_addr_ptr to HADDR_UNDEF and 
+ *		It it does not, set *mdj_msg_addr_ptr to HADDR_UNDEF and
  *		return TRUE.
  *
- *		If any errors are detected, return FALSE.  
+ *		If any errors are detected, return FALSE.
  *              In this case, *mdj_msg_addr_ptr is undefined.
  *
  * Return:	Success: TRUE if no errors are detected.
@@ -1378,7 +1378,7 @@ get_file_len(char * file_path_ptr,
  *
  *		JRM -- 3/19/09
  *		Added the verbosity parameter and associated code.  It
- *		doesn't change the execution, but it does control the 
+ *		doesn't change the execution, but it does control the
  *		amount of comentary generated.
  *
  **************************************************************************/
@@ -1407,7 +1407,7 @@ get_mdj_msg_addr(int fd,
     uint8_t flags;
     int msg_count = 0;
     uint16_t num_hdr_msgs;		/* version 1 header only */
-    uint32_t junk;    
+    uint32_t junk;
     uint32_t ohdr_size;			/* version 1 header only */
     uint64_t chunk_0_size;
     int size_of_chunk_0_size;		/* version 2 header only */
@@ -1416,7 +1416,7 @@ get_mdj_msg_addr(int fd,
     off_t offset;
     FILE * err_file_ptr = stderr;
 
-    if ( ( fd < 0 )  || 
+    if ( ( fd < 0 )  ||
          ( ( ohdr_ver != 1 ) && ( ohdr_ver != 2 ) ) ||
          ( mdj_msg_addr_ptr == NULL ) ) {
 
@@ -1452,12 +1452,12 @@ get_mdj_msg_addr(int fd,
                 /* set the offset to point to the number of messages */
                 offset = (off_t)(base_addr + sb_ext_addr + 2);
 
-                success = load_buf_from_file(fd, file_len, offset, (size_t)10, 
+                success = load_buf_from_file(fd, file_len, offset, (size_t)10,
                                              buf, verbosity, fcn_name, NULL);
 
                 if ( ! success ) {
 
-                    HDfprintf(err_file_ptr, 
+                    HDfprintf(err_file_ptr,
 		      "%scan't load section of ohdr -- file corruption?\n",
                       indent1);
                 }
@@ -1471,7 +1471,7 @@ get_mdj_msg_addr(int fd,
                 UINT32DECODE(p, ohdr_size);
 
                 if ( verbosity > 0 ) {
-                
+
                     HDfprintf(stdout, "%snum hdr msgs = %d.\n",
 			      indent2, (int)num_hdr_msgs);
 		    HDfprintf(stdout, "%schunk 0 base addr = 0x%llx.\n",
@@ -1513,7 +1513,7 @@ get_mdj_msg_addr(int fd,
 
                 offset = (off_t)(base_addr + sb_ext_addr + 5);
 
-                success = load_buf_from_file(fd, file_len, offset, (size_t)1, 
+                success = load_buf_from_file(fd, file_len, offset, (size_t)1,
                                              &flags, verbosity, fcn_name,
                                              NULL);
             }
@@ -1616,8 +1616,8 @@ get_mdj_msg_addr(int fd,
 		    offset += (off_t)4;
                 }
 
-                success = load_buf_from_file(fd, file_len, offset, 
-                                             (size_t)size_of_chunk_0_size, 
+                success = load_buf_from_file(fd, file_len, offset,
+                                             (size_t)size_of_chunk_0_size,
                                               buf, verbosity, fcn_name, NULL);
             }
 
@@ -1674,12 +1674,12 @@ get_mdj_msg_addr(int fd,
                 if ( size_of_chunk_0_size > addr_size ) {
 
                     success = FALSE;
-                    HDfprintf(err_file_ptr, 
+                    HDfprintf(err_file_ptr,
                               "%s%s %s\n",
                               indent1,
                               "size of chunk 0 size larger than file"
                               "address size!?!");
-                    HDfprintf(err_file_ptr, 
+                    HDfprintf(err_file_ptr,
                               "%ssize_of_chunk_0_size = %d > addr_size = %d.\n",
                               indent1, size_of_chunk_0_size, addr_size);
 
@@ -1729,7 +1729,7 @@ get_mdj_msg_addr(int fd,
             break;
 
         default:
-	    HDfprintf(stderr, "%s: ohdr_ver = %d out of range.\n", 
+	    HDfprintf(stderr, "%s: ohdr_ver = %d out of range.\n",
                       fcn_name, ohdr_ver);
             break;
     }
@@ -1748,16 +1748,16 @@ get_mdj_msg_addr(int fd,
  *
  * Function:	get_mdj_msg_addr__scan_chunk()
  *
- * Purpose:	Given the address of a chunk of messages associated with 
+ * Purpose:	Given the address of a chunk of messages associated with
  *		the object header containing the super block extension
- *		of the supplied file, scan the chunk for a metadata 
- *		journaling message, and return its address in 
+ *		of the supplied file, scan the chunk for a metadata
+ *		journaling message, and return its address in
  *		*mdj_msg_addr_ptr if one is found.
  *
  *		*mdj_msg_addr_ptr is undefined if no metadata journaling
  *		message is found.
  *
- *		If any errors are detected, return FALSE.  
+ *		If any errors are detected, return FALSE.
  *              In this case, *mdj_msg_addr_ptr is undefined.
  *
  * Return:	Success: TRUE if no errors are detected.
@@ -1772,7 +1772,7 @@ get_mdj_msg_addr(int fd,
  *
  *		JRM -- 3/19/09
  *		Added the verbosity parameter and associated code.  It
- *		doesn't change the execution, but it does control the 
+ *		doesn't change the execution, but it does control the
  *		amount of comentary generated.
  *
  **************************************************************************/
@@ -1791,7 +1791,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                              haddr_t chunk_addr,
                              haddr_t chunk_size,
                              haddr_t * mdj_msg_addr_ptr,
-                             hbool_t examine, 
+                             hbool_t examine,
                              unsigned verbosity)
 {
     const char * fcn_name = "get_mdj_msg_addr__scan_chunk()";
@@ -1818,9 +1818,9 @@ get_mdj_msg_addr__scan_chunk(int fd,
     /* make sure the buffer is big enough */
     HDassert( (MAX_ADDR_SIZE + MAX_LENGTH_SIZE) <= 64 );
 
-    if ( ( fd < 0 )  || 
+    if ( ( fd < 0 )  ||
          ( ( ohdr_ver != 1 ) && ( ohdr_ver != 2 ) ) ||
-         ( mdj_msg_addr_ptr == NULL ) || 
+         ( mdj_msg_addr_ptr == NULL ) ||
          ( *mdj_msg_addr_ptr != HADDR_UNDEF ) ) {
 
         success = FALSE;
@@ -1843,7 +1843,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "%sscanning SB ext chunk %d.\n", 
+            HDfprintf(stdout, "%sscanning SB ext chunk %d.\n",
                       indent1, chunk_num);
         }
 
@@ -1864,22 +1864,22 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
                 }
 
-                if ( chunk_num != 0 ) { 
+                if ( chunk_num != 0 ) {
                     /* continuation chunk -- check signature */
 
                     signature_size = H5O_SIZEOF_MAGIC;
 
                     offset = (off_t)(base_addr + chunk_addr);
 
-                    success = load_buf_from_file(fd, file_len, offset, 
-                                                 (size_t)H5O_SIZEOF_MAGIC, 
-                                                 buf, verbosity, fcn_name, 
+                    success = load_buf_from_file(fd, file_len, offset,
+                                                 (size_t)H5O_SIZEOF_MAGIC,
+                                                 buf, verbosity, fcn_name,
                                                  NULL);
 
                     if ( success ) {
 
-                        if ( HDmemcmp(buf, 
-                                      H5O_CHK_MAGIC, 
+                        if ( HDmemcmp(buf,
+                                      H5O_CHK_MAGIC,
                                       (size_t)H5O_SIZEOF_MAGIC) != 0 ) {
 
                             success = FALSE;
@@ -1892,7 +1892,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                                        "file corruption?");
                         } else if ( verbosity > 1 ) {
 
-                            HDfprintf(stdout, 
+                            HDfprintf(stdout,
                                       "%sContinuation message signature OK.\n",
                                       indent2);
                         }
@@ -1908,14 +1908,14 @@ get_mdj_msg_addr__scan_chunk(int fd,
     }
 
     /* scan the messages */
-    while ( ( success ) && 
+    while ( ( success ) &&
             ( cum_msg_size < chunk_size ) ) {
 
         msg_addr = chunk_addr + signature_size + cum_msg_size;
 
         if ( verbosity > 1 ) {
 
-            HDfprintf(stdout, "%schunk_size = 0x%llx\n", 
+            HDfprintf(stdout, "%schunk_size = 0x%llx\n",
                       indent2, (unsigned long long)chunk_size);
             HDfprintf(stdout, "%scum_msg_size = 0x%llx\n",
                       indent2, (unsigned long long)cum_msg_size);
@@ -1925,8 +1925,8 @@ get_mdj_msg_addr__scan_chunk(int fd,
         offset = (off_t)(base_addr + msg_addr);
 
         /* load the message type, size, flags, and possibly creation order */
-        success = load_buf_from_file(fd, file_len, offset, 
-                                     (size_t)msg_hdr_size, 
+        success = load_buf_from_file(fd, file_len, offset,
+                                     (size_t)msg_hdr_size,
                                      buf, verbosity, fcn_name, NULL);
 
         if ( success ) {
@@ -1949,7 +1949,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
                 default: /* keeping the compiler happy -- this can't happen */
                     success = FALSE;
-                    HDfprintf(stderr, "%s: reached the unreachable.\n", 
+                    HDfprintf(stderr, "%s: reached the unreachable.\n",
                     fcn_name);
                     break;
             }
@@ -1957,9 +1957,9 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
         if ( ( success ) && ( verbosity > 1 ) ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%smsg: %d  type = %d  dsize = %d flags = 0x%x\n",
-                      indent2, *msg_count_ptr, (int)msg_type_num, 
+                      indent2, *msg_count_ptr, (int)msg_type_num,
                       (int)msg_data_size, (unsigned)flags);
         }
 
@@ -1967,13 +1967,13 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
         if ( success ) {
 
-            switch ( msg_type_num ) 
+            switch ( msg_type_num )
             {
 
-                case H5O_MDJ_MSG_ID: 
+                case H5O_MDJ_MSG_ID:
                     if ( verbosity > 0 ) {
 
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
 				  "%sfound journaling message at 0x%llx\n",
                                   indent1,
                                   (unsigned long long)msg_data_addr);
@@ -1985,7 +1985,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
                     } else {
 
-                        /* found a duplicate metadata journaling 
+                        /* found a duplicate metadata journaling
                          * message -- scream and die.
                          */
 
@@ -2009,7 +2009,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                 case H5O_SHMESG_ID:
                 case H5O_BTREEK_ID:
 		case H5O_DRVINFO_ID:
-                    /* These messages are allowed in superblock 
+                    /* These messages are allowed in superblock
 		     * extension messages -- just skip over them.
                      */
 		    break;
@@ -2020,20 +2020,20 @@ get_mdj_msg_addr__scan_chunk(int fd,
                      */
                     if ( verbosity > 0 ) {
 
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                  "%dfound continuation msg -- chunk %d\n",
                                  indent1,
                                  chunk_num + 1);
                     }
 
-                    success = load_buf_from_file(fd, file_len, offset, 
-                                         (size_t)(addr_size + length_size + 1), 
+                    success = load_buf_from_file(fd, file_len, offset,
+                                         (size_t)(addr_size + length_size + 1),
                                          buf, verbosity, fcn_name, NULL);
 
                     if ( success ) {
 
                         address_decode((size_t)addr_size, &p, &new_chunk_addr);
- 
+
                         if ( p != &(buf[addr_size]) ) {
 
                             success = FALSE;
@@ -2051,7 +2051,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                     if ( success ) {
 
                         length_decode((size_t)length_size, &p, &new_chunk_len);
- 
+
                         if ( p != &(buf[addr_size + length_size]) ) {
 
                             success = FALSE;
@@ -2065,7 +2065,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                             }
                         }
                     }
-                    
+
                     if ( ( success ) && ( verbosity > 0 ) ) {
 
                         HDfprintf(stdout, "%schunk %d addr = 0x%llx\n",
@@ -2119,12 +2119,12 @@ get_mdj_msg_addr__scan_chunk(int fd,
                 case H5O_MTIME_NEW_ID:
                 case H5O_AINFO_ID:
                 case H5O_REFCOUNT_ID:
-                    /* these messages clearly shouldn't be in 
+                    /* these messages clearly shouldn't be in
                      * the superblock extension -- scream and die.
                      */
                     success = FALSE;
 
-                    HDfprintf(err_file_ptr, 
+                    HDfprintf(err_file_ptr,
                             "%sSB ext chunk %d contains a dis-allowed mssg.\n",
                             indent1, chunk_num);
                     HDfprintf(stdout, "%sprobably a bug in library\n", indent1);
@@ -2153,7 +2153,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
 
                     success = FALSE;
 
-                    HDfprintf(err_file_ptr, 
+                    HDfprintf(err_file_ptr,
 			      "%sfound gap in SB ext chunk with null msg.\n",
                               indent1);
                     HDfprintf(err_file_ptr, "%slibrary bug?.\n", indent1);
@@ -2164,13 +2164,13 @@ get_mdj_msg_addr__scan_chunk(int fd,
         }
 
         /* check for too many messages -- version 1 ohdr only */
-        if ( ( success ) && 
+        if ( ( success ) &&
              ( ohdr_ver == 1 ) &&
              ( *msg_count_ptr > num_hdr_msgs ) ) {
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%sSB extension has too many messages.\n",
                       indent1);
             HDfprintf(err_file_ptr, "%slibrary bug?.\n", indent1);
@@ -2201,17 +2201,17 @@ get_mdj_msg_addr__scan_chunk(int fd,
  *		address of the metadata journaling super block extension
  *		message, read the message, copy its contents into the
  *		locations indicated by the enabled_ptr, magic_ptr, and
- *		jnl_file_name parameters, and return TRUE.  
+ *		jnl_file_name parameters, and return TRUE.
  *
  *		Note that only * enabled_ptr is defined if journaling is
  *		not enabled.
- * 
- *		Note also that jnl_file_name is presumed to point to a 
- *		buffer of char of length at least 
+ *
+ *		Note also that jnl_file_name is presumed to point to a
+ *		buffer of char of length at least
  *		H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1.
  *
- *		If any errors are detected, return FALSE.  
- *              In this case, *enabled_ptr, *magic_ptr and the 
+ *		If any errors are detected, return FALSE.
+ *              In this case, *enabled_ptr, *magic_ptr and the
  *		contents of jnl_file_name are undefined.
  *
  * Return:	Success: TRUE if no errors are detected.
@@ -2226,7 +2226,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
  *
  *		JRM -- 3/19/09
  *		Added the verbosity parameter and associated code.  It
- *		doesn't change the execution, but it does control the 
+ *		doesn't change the execution, but it does control the
  *		amount of comentary generated.
  *
  **************************************************************************/
@@ -2263,7 +2263,7 @@ get_mdj_msg_data(int fd,
     off_t offset;
     FILE * err_file_ptr = stderr;
 
-    if ( ( fd < 0 ) || 
+    if ( ( fd < 0 ) ||
          ( enabled_ptr == NULL ) ||
          ( magic_ptr == NULL ) ||
          ( jnl_file_name == NULL ) ) {
@@ -2295,8 +2295,8 @@ get_mdj_msg_data(int fd,
 
         offset = (off_t)(base_addr + mdj_msg_addr);
 
-        success = load_buf_from_file(fd, file_len, offset, 
-                                     (size_t)MDJ_MSG_HDR_LEN, 
+        success = load_buf_from_file(fd, file_len, offset,
+                                     (size_t)MDJ_MSG_HDR_LEN,
                                      buf, verbosity, fcn_name, NULL);
     }
 
@@ -2332,30 +2332,30 @@ get_mdj_msg_data(int fd,
 
         if ( (flags & MDJ_MSG__JOURNALING_ENABLED_FLAG) == 0 ) {
 
-            /* journaling is disabled -- this case shouldn't occur so we 
+            /* journaling is disabled -- this case shouldn't occur so we
              * we will print a warning.
              */
             journaling_enabled = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%s%s %s\n",
                       indent1,
                       "Found a metadata journaling message saying that",
             	      "journaling is disabled.");
 
         } else {
-       
+
             journaling_enabled = TRUE;
 
             if ( verbosity > 0 ) {
 
                 HDfprintf(stdout, "%sjournaling enabled = TRUE\n", indent2);
                 HDfprintf(stdout, "%smagic = 0x%x\n", indent2, (unsigned)magic);
-                HDfprintf(stdout, "%sjournal file path len = %d\n", 
+                HDfprintf(stdout, "%sjournal file path len = %d\n",
                           indent2, (int)path_len);
             }
 
-            if ( ( path_len <= 0 ) || 
+            if ( ( path_len <= 0 ) ||
                  ( path_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) ) {
 
                 success = FALSE;
@@ -2363,7 +2363,7 @@ get_mdj_msg_data(int fd,
                 HDfprintf(err_file_ptr, "%s%s %s (%d).\n",
                           indent1,
                           "Encountered metadata journaling message with",
-                          "path len our of range", 
+                          "path len our of range",
                           path_len);
             }
         }
@@ -2373,8 +2373,8 @@ get_mdj_msg_data(int fd,
 
         offset = (off_t)(base_addr + mdj_msg_addr + MDJ_MSG_HDR_LEN);
 
-        success = load_buf_from_file(fd, file_len, offset, 
-                                     (size_t)(path_len + 1), 
+        success = load_buf_from_file(fd, file_len, offset,
+                                     (size_t)(path_len + 1),
                                      buf, verbosity, fcn_name, NULL);
     }
 
@@ -2384,9 +2384,9 @@ get_mdj_msg_data(int fd,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "Encountered metadata journaling message with\n");
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "path_len not matching actual path len.\n");
         }
     }
@@ -2420,14 +2420,14 @@ get_mdj_msg_data(int fd,
  * Function:	get_offset_and_length_size
  *
  * Purpose:	Obtain the number of bytes required to represent offsets
- *		and lengths in the target HDF5 file, load these values into 
+ *		and lengths in the target HDF5 file, load these values into
  *		*offset_size_ptr and *length_size_ptr, and return TRUE.
  *
- *		If the function fails for any other reason, 
- *		*offset_size_ptr is undefined, and the function 
+ *		If the function fails for any other reason,
+ *		*offset_size_ptr is undefined, and the function
  *		returns FALSE.
  *
- *		Note that at present, this function works only with 
+ *		Note that at present, this function works only with
  *		the HDF5 version 2 super block, as that is the only
  *		version (for now) that supports journaling.
  *
@@ -2456,8 +2456,8 @@ get_offset_and_length_size(int fd,
     int offset_size;
     int length_size;
 
-    if ( ( fd < 0 ) || 
-         ( (sb_offset % 512) != 0 ) || 
+    if ( ( fd < 0 ) ||
+         ( (sb_offset % 512) != 0 ) ||
          ( offset_size_ptr == NULL ) ||
          ( length_size_ptr == NULL ) ) {
 
@@ -2475,14 +2475,14 @@ get_offset_and_length_size(int fd,
 
         offset = sb_offset + H5F_SIGNATURE_LEN + 1;
 
-        if ( ! load_buf_from_file(fd, file_len, offset, (size_t)2, 
+        if ( ! load_buf_from_file(fd, file_len, offset, (size_t)2,
                                   buf, verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
 
             if ( verbosity > 2 ) {
 
-                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n", 
+                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n",
                           fcn_name);
             }
         } else {
@@ -2540,11 +2540,11 @@ get_offset_and_length_size(int fd,
  * Function:	get_sb_extension_addr()
  *
  * Purpose:	Read the super block extension address from the supplied
- *		file using the given superblock offset, load that value 
+ *		file using the given superblock offset, load that value
  *		into *sb_ext_addr_ptr, and return TRUE.
  *
- *		If the function fails for any other reason, 
- *		*sb_ext_addr_ptr is undefined, and the function returns 
+ *		If the function fails for any other reason,
+ *		*sb_ext_addr_ptr is undefined, and the function returns
  *		FALSE.
  *
  * Return:	Success: TRUE
@@ -2572,8 +2572,8 @@ get_sb_extension_addr(int fd,
     off_t sb_ext_offset;
     haddr_t sb_ext_addr;
 
-    if ( ( fd < 0 ) || 
-         ( (sb_offset % 512) != 0 ) || 
+    if ( ( fd < 0 ) ||
+         ( (sb_offset % 512) != 0 ) ||
          ( offset_size <= 0 ) ||
          ( sizeof(haddr_t) > (size_t)offset_size ) ||
          ( offset_size > MAX_ADDR_SIZE ) ||
@@ -2593,28 +2593,28 @@ get_sb_extension_addr(int fd,
 
         sb_ext_offset = sb_offset + H5F_SIGNATURE_LEN + 4 + offset_size;
 
-        if ( ! load_buf_from_file(fd, file_len, sb_ext_offset, 
-                                  (size_t)offset_size, addr_buf, 
+        if ( ! load_buf_from_file(fd, file_len, sb_ext_offset,
+                                  (size_t)offset_size, addr_buf,
                                   verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
 
             if ( verbosity > 2 ) {
 
-                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n", 
+                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n",
                           fcn_name);
             }
         } else {
 
             address_decode(sizeof(haddr_t), &buf_ptr, &sb_ext_addr);
- 
+
 	    if ( buf_ptr != &(addr_buf[offset_size]) ) {
 
                 success = FALSE;
 
                 if ( verbosity > 2 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                             "%s: Unexpected buf_ptr after address_decode().\n",
                             fcn_name);
                 }
@@ -2636,9 +2636,9 @@ get_sb_extension_addr(int fd,
  * Function:	get_sb_ext_obj_hdr_ver()
  *
  * Purpose:	Given the supplied HDF5 file base address and super block
- *		extension relative address, attempt to determin the 
- *		version of object header being used to store the super 
- *		block extension messages, and return this value in 
+ *		extension relative address, attempt to determin the
+ *		version of object header being used to store the super
+ *		block extension messages, and return this value in
  *		*obj_hdr_type_ptr.
  *
  *		If successful, return TRUE.  On failure for any reason,
@@ -2661,7 +2661,7 @@ get_sb_ext_obj_hdr_ver(int fd,
                        int * ohdr_ver_ptr)
 {
     const char * fcn_name = "get_sb_ext_obj_hdr_ver()";
-    /* the buffer must be large enough for the object header magic and 
+    /* the buffer must be large enough for the object header magic and
      * its version -- note that version 1 doesn't have magic.
      */
     uint8_t buf[H5O_SIZEOF_MAGIC + 2];
@@ -2670,7 +2670,7 @@ get_sb_ext_obj_hdr_ver(int fd,
     int ohdr_ver;
     off_t ohdr_offset;
 
-    if ( ( fd < 0 ) || 
+    if ( ( fd < 0 ) ||
          ( ohdr_ver_ptr == NULL ) ) {
 
         success = FALSE;
@@ -2681,8 +2681,8 @@ get_sb_ext_obj_hdr_ver(int fd,
 
     if ( success ) {
 
-        if ( ! load_buf_from_file(fd, file_len, ohdr_offset, 
-                                  (size_t)(H5O_SIZEOF_MAGIC + 1), buf, 
+        if ( ! load_buf_from_file(fd, file_len, ohdr_offset,
+                                  (size_t)(H5O_SIZEOF_MAGIC + 1), buf,
                                   verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
@@ -2701,8 +2701,8 @@ get_sb_ext_obj_hdr_ver(int fd,
 
             ohdr_ver = 1;
 
-        } else if ( HDmemcmp(buf, 
-                             H5O_HDR_MAGIC, 
+        } else if ( HDmemcmp(buf,
+                             H5O_HDR_MAGIC,
                              (size_t)H5O_SIZEOF_MAGIC) == 0 ) {
 
             ohdr_ver = (int)(buf[H5O_SIZEOF_MAGIC]);
@@ -2713,13 +2713,13 @@ get_sb_ext_obj_hdr_ver(int fd,
 
             if ( verbosity > 2 ) {
 
-                HDfprintf(stderr, 
+                HDfprintf(stderr,
                           "%s: sb_ext_addr doesn't seem to reference\n",
                           fcn_name);
                 HDfprintf(stderr, "	an object header.\n");
-                HDfprintf(stderr, "	base_addr = 0x%llx\n", 
+                HDfprintf(stderr, "	base_addr = 0x%llx\n",
                           (unsigned long long)base_addr);
-                HDfprintf(stderr, "	sb_ext_addr = 0x%llx\n", 
+                HDfprintf(stderr, "	sb_ext_addr = 0x%llx\n",
                           (unsigned long long)sb_ext_addr);
             }
         }
@@ -2744,11 +2744,11 @@ get_sb_ext_obj_hdr_ver(int fd,
  *
  * Function:	get_sb_version
  *
- * Purpose:	Read the super block version from the supplied file with 
- *		the given superblock offset, load that value into 
+ * Purpose:	Read the super block version from the supplied file with
+ *		the given superblock offset, load that value into
  *		*sb_ver_ptr, and return TRUE.
  *
- *		If the function fails for any other reason, *sb_ver_ptr 
+ *		If the function fails for any other reason, *sb_ver_ptr
  *		is undefined, and the function returns FALSE.
  *
  * Return:	Success: TRUE
@@ -2773,8 +2773,8 @@ get_sb_version(int fd,
     off_t version_offset;
     int version;
 
-    if ( ( fd < 0 ) || 
-         ( (sb_offset % 512) != 0 ) || 
+    if ( ( fd < 0 ) ||
+         ( (sb_offset % 512) != 0 ) ||
          ( sb_ver_ptr == NULL ) ) {
 
         success = FALSE;
@@ -2785,15 +2785,15 @@ get_sb_version(int fd,
 
         version_offset = sb_offset + H5F_SIGNATURE_LEN;
 
-        if ( ! load_buf_from_file(fd, file_len, version_offset, 
-                                  (size_t)1, &ver_buf, 
+        if ( ! load_buf_from_file(fd, file_len, version_offset,
+                                  (size_t)1, &ver_buf,
                                   verbosity, fcn_name, NULL) ) {
 
             success = FALSE;
 
             if ( verbosity > 2 ) {
 
-                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n", 
+                HDfprintf(stderr, "%s: load_buf_from_file() failed.\n",
                           fcn_name);
             }
         } else {
@@ -2822,7 +2822,7 @@ get_sb_version(int fd,
  *
  * Function:	load_buf_from_file()
  *
- * Purpose:	Seek to the specified location in the supplied file and 
+ * Purpose:	Seek to the specified location in the supplied file and
  *		then read the indicated number of bytes into the supplied
  *		buffer.
  *
@@ -2837,14 +2837,14 @@ get_sb_version(int fd,
  *
  * Programmer:	JRM -- 2/26/09
  *
- * Changes:	Added io_err_ptr parameter.  If defined (i.e. eof_ptr 
- *		isn't NULL), this parameter allows the function to 
- *		inform the caller that the failure was caused by an 
+ * Changes:	Added io_err_ptr parameter.  If defined (i.e. eof_ptr
+ *		isn't NULL), this parameter allows the function to
+ *		inform the caller that the failure was caused by an
  *		attempt to read beyond the end of file.
  *
  *		This is necessary, as when scanning the journal file,
  *		we will typically find it to be incomplete, and we need
- *		to distinguish between an eof error, and a system or 
+ *		to distinguish between an eof error, and a system or
  *		file I/O error.
  *						JRM -- 5/22/09
  *
@@ -2864,7 +2864,7 @@ load_buf_from_file(int fd,
     hbool_t success = TRUE;
     ssize_t result;
 
-    if ( ( fd < 0 ) || 
+    if ( ( fd < 0 ) ||
          ( file_len <= 0 ) ||
          ( buf_len <= 0 ) ||
          ( buf_ptr == NULL ) ||
@@ -2896,9 +2896,9 @@ load_buf_from_file(int fd,
 
             if ( verbosity > 2 ) {
 
-                HDfprintf(stderr, 
+                HDfprintf(stderr,
                         "%s:%s: lseek() to 0x%llx failed with errno %d(%s).\n",
-                        fcn_name, 
+                        fcn_name,
                         desc,
                         (unsigned long long)offset,
                         errno,
@@ -2936,7 +2936,7 @@ load_buf_from_file(int fd,
                      (int)result,
                      (int)buf_len);
                 }
-            } 
+            }
         }
     }
 
@@ -2961,14 +2961,14 @@ load_buf_from_file(int fd,
  *		header information, and return this data to the caller
  *		in the indicated locations after closing the file.
  *
- *		If examine is TRUE, do this while maintaining a running 
+ *		If examine is TRUE, do this while maintaining a running
  *		commentary.
  *
  *		If successful, return TRUE.  On failure for any reason,
  *		return FALSE.
  *
  *		Note that the function assumes that target_file_name_ptr
- *		points to a string that is at least MAX_PATH_LEN + 1 
+ *		points to a string that is at least MAX_PATH_LEN + 1
  *		bytes long.
  *
  * Return:	Success: TRUE
@@ -2978,22 +2978,22 @@ load_buf_from_file(int fd,
  *
  * Changes:	JRM -- 3/19/09
  *		Added the verbosity parameter and associated code.  It
- *		doesn't change the execution, but it does control the 
+ *		doesn't change the execution, but it does control the
  *		amount and format of comentary generated.
  *
- *		Also added file_len parameter -- now we are guaranteed 
+ *		Also added file_len parameter -- now we are guaranteed
  *		that the file exists and has positive length on entry.
  *
  *		JRM -- 5/15/09
  *		Updated function to handle the extra fields that appear
  *		in the header when human_readable is false.  This included
  *		adding the offset_width_ptr and length_width_ptr fields.
- *		Note that *offset_width_ptr and *length_width_ptr are 
+ *		Note that *offset_width_ptr and *length_width_ptr are
  *		undefined if *human_readable_ptr is TRUE.
  *
  **************************************************************************/
 
-hbool_t 
+hbool_t
 get_jnl_header_info(char * file_path_ptr,
                     off_t file_len,
                     size_t * header_length_ptr,
@@ -3029,7 +3029,7 @@ get_jnl_header_info(char * file_path_ptr,
          ( human_readable_ptr == NULL ) ||
          ( offset_width_ptr == NULL ) ||
          ( length_width_ptr == NULL ) ) {
-    
+
         success = FALSE;
         HDfprintf(stderr, "%s: bad param(s) on entry.\n", fcn_name);
     }
@@ -3039,10 +3039,10 @@ get_jnl_header_info(char * file_path_ptr,
         indent1 = "\t";
         indent2 = "\t\t";
 
-        /* don't generate output to stderr during examing unless a major 
+        /* don't generate output to stderr during examing unless a major
          * error or a bug in the program is detected.
          */
-         
+
         err_file_ptr = stdout;
 
     }
@@ -3062,7 +3062,7 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, "%sCan't open %s -- permissions?.\n", 
+            HDfprintf(err_file_ptr, "%sCan't open %s -- permissions?.\n",
                       indent1, file_path_ptr);
 
         } else {
@@ -3085,14 +3085,14 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, "%sCan't read first line of %s.\n", 
+            HDfprintf(err_file_ptr, "%sCan't read first line of %s.\n",
                       indent1, file_path_ptr);
 
         } else if ( buf[0] != '0' ) {
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
 		      "%sbad first char of header -- not a journal file.\n",
                       indent1);
         } else {
@@ -3135,13 +3135,13 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
-                      "%sunknown journal file version \"%s\"(%d).\n", 
+            HDfprintf(err_file_ptr,
+                      "%sunknown journal file version \"%s\"(%d).\n",
                       indent1, version_str, version);
 
         } else if ( verbosity > 0 ) {
-    
-            HDfprintf(stdout, "%sjournal file version = %d.\n", 
+
+            HDfprintf(stdout, "%sjournal file version = %d.\n",
                       indent2, version);
         }
     }
@@ -3172,7 +3172,7 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                           "%starget file path exceeds MAX_PATH_LEN.\n",
                           indent1);
 
@@ -3181,8 +3181,8 @@ get_jnl_header_info(char * file_path_ptr,
             HDstrcpy(target_file_name, target_file_str);
 
             if ( verbosity > 0 ) {
-    
-                HDfprintf(stdout, "%starget file = \"%s\"\n", 
+
+                HDfprintf(stdout, "%starget file = \"%s\"\n",
                           indent2, target_file_name);
             }
         }
@@ -3226,7 +3226,7 @@ get_jnl_header_info(char * file_path_ptr,
             magic = (int32_t)tmp_magic;
 
             if ( verbosity > 0 ) {
-    
+
                 HDfprintf(stdout, "%smagic = 0x%x\n", indent2, magic);
             }
         }
@@ -3244,7 +3244,7 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%sUnexpected journal creation date tag \"%s\".\n",
                       indent1, creation_date_tag );
 
@@ -3256,8 +3256,8 @@ get_jnl_header_info(char * file_path_ptr,
                       indent1);
 
         } else if ( verbosity > 0 ) {
-    
-            HDfprintf(stdout, "%screation date = %s\n", 
+
+            HDfprintf(stdout, "%screation date = %s\n",
                       indent2, creation_date_str);
         }
     }
@@ -3271,12 +3271,12 @@ get_jnl_header_info(char * file_path_ptr,
         human_readable_tag = HDstrtok(NULL, " ");
 
         if ( ( human_readable_tag == NULL ) ||
-             ( strcmp(human_readable_tag, H5C2_JNL__HUMAN_READABLE_TAG) 
+             ( strcmp(human_readable_tag, H5C2_JNL__HUMAN_READABLE_TAG)
                != 0 ) ) {
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%sUnexpected human readable tag \"%s\".\n",
                       indent1, human_readable_tag );
 
@@ -3286,14 +3286,14 @@ get_jnl_header_info(char * file_path_ptr,
 
             HDfprintf(err_file_ptr, "%sno human readable string in header.\n",
                       indent1);
- 
-        } else if ( ( (tmp_human_readable = 
+
+        } else if ( ( (tmp_human_readable =
                        HDstrtol(human_readable_str, NULL, 10)) == LONG_MIN ) ||
                     ( tmp_human_readable == LONG_MAX ) ) {
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%serror decoding human readable string: %d (%s)\n",
                       indent1, errno, strerror(errno));
 
@@ -3302,7 +3302,7 @@ get_jnl_header_info(char * file_path_ptr,
 
             success = FALSE;
 
-            HDfprintf(err_file_ptr, 
+            HDfprintf(err_file_ptr,
                       "%shuman readable value out of range (%ld).\n",
                       indent1, tmp_human_readable);
 
@@ -3311,8 +3311,8 @@ get_jnl_header_info(char * file_path_ptr,
             human_readable = (hbool_t)tmp_human_readable;
 
             if ( verbosity > 0 ) {
-    
-                HDfprintf(stdout, "%shuman readable = %d\n", 
+
+                HDfprintf(stdout, "%shuman readable = %d\n",
                           indent2, human_readable);
             }
         }
@@ -3365,7 +3365,7 @@ get_jnl_header_info(char * file_path_ptr,
             offset_width = (int)tmp_offset_width;
 
             if ( verbosity > 0 ) {
-    
+
                 HDfprintf(stdout, "%soffset width = %d\n", indent2, offset_width);
             }
         }
@@ -3418,7 +3418,7 @@ get_jnl_header_info(char * file_path_ptr,
             length_width = (int)tmp_length_width;
 
             if ( verbosity > 0 ) {
-    
+
                 HDfprintf(stdout, "%slength width = %d\n", indent2, length_width);
             }
         }
@@ -3434,7 +3434,7 @@ get_jnl_header_info(char * file_path_ptr,
 
         if ( HDfclose(file_ptr) != 0 ) {
 
-            HDfprintf(stderr, "%serror closing %s.\n", 
+            HDfprintf(stderr, "%serror closing %s.\n",
                       indent1, file_path_ptr);
 
         } else if ( verbosity > 0 ) {
@@ -3467,23 +3467,23 @@ get_jnl_header_info(char * file_path_ptr,
  *
  * Function:	scan_journal_file
  *
- * Purpose:	Scan the supplied journal file to determine whether it 
+ * Purpose:	Scan the supplied journal file to determine whether it
  *		contains any completed transactions.  If it does, also
  *		report the maximum address that appears in an eoa message,
- *		the size of the largest journal entry body, and the 
+ *		the size of the largest journal entry body, and the
  *		number of the last complete transaction.
  *
- *		The function assumes that the header has already been 
+ *		The function assumes that the header has already been
  *		examined, and that its length is in the header_length.
- *		If the journal file is binary, it also assumes that the 
- *		offset_width and length_width parameters contain the 
- *		widths of offsets and lengths in the binary journal file 
+ *		If the journal file is binary, it also assumes that the
+ *		offset_width and length_width parameters contain the
+ *		widths of offsets and lengths in the binary journal file
  *		(and also in the target HDF5 file).
  *
- *		The function also assumes that the journal file is 
+ *		The function also assumes that the journal file is
  *		closed on entry.
  *
- *		Note: While this function has been designed with both 
+ *		Note: While this function has been designed with both
  *		      human readable and binary journal files in mind,
  *		      in its first incarnation, it only supports binary
  *		      journal files.
@@ -3496,7 +3496,7 @@ get_jnl_header_info(char * file_path_ptr,
  *
  **************************************************************************/
 
-hbool_t 
+hbool_t
 scan_journal_file(char * file_path_ptr,
                   off_t file_len,
                   size_t header_length,
@@ -3523,7 +3523,7 @@ scan_journal_file(char * file_path_ptr,
     uint64_t max_trans_num = 0;
     off_t offset;
     off_t new_offset;
-    
+
 
     if ( ( file_path_ptr == NULL ) ||
          ( file_len <= 0 ) ||
@@ -3548,7 +3548,7 @@ scan_journal_file(char * file_path_ptr,
 
             body_buf_len = 0;
             proceed = FALSE;
-            HDfprintf(stderr, "%s: initial allocation of body buffer failed.\n", 
+            HDfprintf(stderr, "%s: initial allocation of body buffer failed.\n",
                       fcn_name);
         }
     }
@@ -3620,7 +3620,7 @@ scan_journal_file(char * file_path_ptr,
 
                 case JF__UNDEFINED_MSG:
                     proceed = FALSE;
-                    HDfprintf(stderr, 
+                    HDfprintf(stderr,
                               "%s: bjf__load_next_msg() returned undef msg?!?\n",
                               fcn_name);
 		    break;
@@ -3628,7 +3628,7 @@ scan_journal_file(char * file_path_ptr,
 		case JF__BEGIN_TRANS_MSG:
                     if ( trans_in_progress ) {
 
-                        /* At present, nested transaction are forbidden -- 
+                        /* At present, nested transaction are forbidden --
                          * scream and die if we encounter one.
                          */
 
@@ -3638,7 +3638,7 @@ scan_journal_file(char * file_path_ptr,
 
                     } else if ( trans_num != max_trans_num + 1 ) {
 
-                        /* we may decide to drop this invarient eventually, 
+                        /* we may decide to drop this invarient eventually,
                          * but we will check it for now, and scream and die
                          * if it fails.
                          */
@@ -3647,7 +3647,7 @@ scan_journal_file(char * file_path_ptr,
                            "Encountered out of sequence transaction in journal");
 
                     } else {
-                    
+
                         trans_in_progress = TRUE;
                         cur_trans_num = trans_num;
 
@@ -3661,13 +3661,13 @@ scan_journal_file(char * file_path_ptr,
 
 		case JF__JNL_ENTRY_MSG:
                     if ( ! trans_in_progress ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered jnl entry outside of transaction");
 
                     } else if ( trans_num != cur_trans_num ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered jnl entry with bad trans num");
@@ -3693,19 +3693,19 @@ scan_journal_file(char * file_path_ptr,
 
 		case JF__END_TRANS_MSG:
                     if ( ! trans_in_progress ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                              "Encountered trans end msg outside of transaction");
 
                     } else if ( trans_num != cur_trans_num ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered trans end with bad trans num");
 
                     } else {
-                        
+
                        trans_in_progress = FALSE;
                        max_trans_num = cur_trans_num;
 
@@ -3734,14 +3734,14 @@ scan_journal_file(char * file_path_ptr,
 		case JF__INVALID_MSG:
                     if ( verbosity > 1 ) {
 
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "\tinvalid message -- end of journal.\n");
                     }
 		    break;
 
 		default:
                     proceed = FALSE;
-                    HDfprintf(stderr, 
+                    HDfprintf(stderr,
                            "%s: bjf__load_next_msg() returned unknown msg?!?\n",
                            fcn_name);
 		    break;
@@ -3796,7 +3796,7 @@ scan_journal_file(char * file_path_ptr,
                           (long long)max_hdf5_length);
             }
 
-            HDfprintf(stdout, "\tMax eoa = 0x%llx.\n", 
+            HDfprintf(stdout, "\tMax eoa = 0x%llx.\n",
                       (unsigned long long)max_eoa);
         }
     }
@@ -3810,7 +3810,7 @@ scan_journal_file(char * file_path_ptr,
 
     return(proceed);
 
-} /* scan_journal_file() */                  
+} /* scan_journal_file() */
 
 
 /**************************************************************************/
@@ -3825,7 +3825,7 @@ scan_journal_file(char * file_path_ptr,
  *
  * Function:	examine_files()
  *
- * Purpose:	Scan the supplied file(s) to determine their status, 
+ * Purpose:	Scan the supplied file(s) to determine their status,
  *		and report.  Do nothing.
  *
  * Return:	void
@@ -3887,8 +3887,8 @@ examine_files(char * hdf5_file_name,
                                                    verbosity);
         if ( error ) {
 
-            HDfprintf(stdout, 
-                "\nEncountered errors examining %s -- can't run journal.\n", 
+            HDfprintf(stdout,
+                "\nEncountered errors examining %s -- can't run journal.\n",
                 hdf5_file_name);
         }
     }
@@ -3899,12 +3899,12 @@ examine_files(char * hdf5_file_name,
 
     } else {
 
-        HDfprintf(stdout, "\nExamining the putative HDF5 journal file %s:\n", 
+        HDfprintf(stdout, "\nExamining the putative HDF5 journal file %s:\n",
                   journal_file_name);
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%sattempting to determine journal file length...\n",
                       indent1);
         }
@@ -3913,7 +3913,7 @@ examine_files(char * hdf5_file_name,
 
             journal_file_exists = FALSE;
             journal_file_ok = FALSE;
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%sCan't get journal file length -- does it exist?\n\n",
                       indent1);
 
@@ -3921,16 +3921,16 @@ examine_files(char * hdf5_file_name,
 
             journal_file_exists = TRUE;
 
-            HDfprintf(stdout, "%sthe file %s is empty.\n\n", 
+            HDfprintf(stdout, "%sthe file %s is empty.\n\n",
                       indent1, journal_file_name);
-        
+
         } else {
 
             journal_file_exists = TRUE;
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stdout, "%sfile length = %lld\n", 
+                HDfprintf(stdout, "%sfile length = %lld\n",
                           indent2, (long long)journal_file_len);
             }
         }
@@ -3958,7 +3958,7 @@ examine_files(char * hdf5_file_name,
 
         } else {
 
-            HDfprintf(stdout, "%sheader in %s looks OK.\n\n", 
+            HDfprintf(stdout, "%sheader in %s looks OK.\n\n",
                       indent1, journal_file_name);
 
         }
@@ -3982,10 +3982,10 @@ examine_files(char * hdf5_file_name,
                 HDfprintf(stdout, "magic mismatch!!! Don't run %s on %s.\n\n",
                           journal_file_name, hdf5_file_name);
             }
-        } else if ( ( journal_file_exists ) && 
+        } else if ( ( journal_file_exists ) &&
                     ( journal_file_len == 0 ) ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
 "Since %s is empty, either %s\n\
 already has consistent metadata and need only be marked as not having\n\
 journaling in progress so it can opened with the hdf5 library, or\n\
@@ -4020,9 +4020,9 @@ If you are sure you have the correct journal file, go ahead and run\n\
  *
  * Purpose:	Examine the supplied HDF5 file, and determine if it is:
  *
- *			a) really an HDF5 file, 
+ *			a) really an HDF5 file,
  *
- *			b) uses a version of the HDF5 file format that 
+ *			b) uses a version of the HDF5 file format that
  *			   supports journaling, and
  *
  *			c) is marked as having journaling in progress.
@@ -4030,18 +4030,18 @@ If you are sure you have the correct journal file, go ahead and run\n\
  *		If any of these conditions fails to hold, there is nothing
  *		to be done -- issue a diagnostic and return false.
  *
- *		If all the above conditions hold, examine the supplied 
+ *		If all the above conditions hold, examine the supplied
  *		journal file and determine if it is either:
  *
- *			a) and empty file, or 
+ *			a) and empty file, or
  *
  *			b) an HDF5 journal file with magic number matching
  *			   that of the supplied HDF5 file.
  *
- *		In the first case, if the force flag is not set, notify the 
- *		user that the journal file is empty, that we therefore 
- *		cannot verify that it is the correct journal file for the 
- *		supplied HDF5 file, and give the user the chance to abort 
+ *		In the first case, if the force flag is not set, notify the
+ *		user that the journal file is empty, that we therefore
+ *		cannot verify that it is the correct journal file for the
+ *		supplied HDF5 file, and give the user the chance to abort
  *		the recovery.  Return false if the the recovery is aborted,
  *		and true if it is allowed to proceed.
  *
@@ -4108,7 +4108,7 @@ verify_files(char * hdf5_file_name,
         proceed = FALSE;
         HDfprintf(stderr, "%s: bad param(s) on entry.\n", fcn_name);
 
-    } 
+    }
 
     if ( proceed ) {
 
@@ -4128,27 +4128,27 @@ verify_files(char * hdf5_file_name,
 
         if ( *error_ptr ) {
 
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                   "\nEncountered errors examining %s -- can't run journal.\n\n",
                   hdf5_file_name);
 
         } else if ( ! proceed ) {
 
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                       "\nJournaling not enabled and/or supported on %s\n",
                       hdf5_file_name);
             HDfprintf(stderr, "Can't run journal.\n\n");
 
         } else {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "\n%s was journaled and not closed properly.\n",
                       hdf5_file_name);
 
             if ( verbosity > 0 ) {
 
                 HDfprintf(stdout, "\tmagic = 0x%lx\n", (unsigned long)magic);
-                HDfprintf(stdout, "\tjournal file name = \"%s\".\n", 
+                HDfprintf(stdout, "\tjournal file name = \"%s\".\n",
                           jnl_file_name);
             }
         }
@@ -4161,7 +4161,7 @@ verify_files(char * hdf5_file_name,
             proceed = FALSE;
             *error_ptr = TRUE;
             journal_file_exists = FALSE;
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "\nCan't get journal file length -- does it exist?\n\n");
 
         } else {
@@ -4172,7 +4172,7 @@ verify_files(char * hdf5_file_name,
         }
     }
 
-    if ( ( proceed ) && 
+    if ( ( proceed ) &&
          ( journal_file_exists) ) {
 
         if ( journal_file_len > 0 ) {
@@ -4192,7 +4192,7 @@ verify_files(char * hdf5_file_name,
             if ( ! proceed ) {
 
                 *error_ptr = TRUE;
-                HDfprintf(stderr, 
+                HDfprintf(stderr,
                           "\nerrors reading %s.  Journal un-useable.\n\n",
                           journal_file_name);
 
@@ -4205,11 +4205,11 @@ verify_files(char * hdf5_file_name,
 
                 if ( magic == jnl_magic ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                                "\nthe journal file %s has matching magic.\n\n",
                                journal_file_name);
 
-                    if ( ( ! jnl_human_readable ) && 
+                    if ( ( ! jnl_human_readable ) &&
                          ( ( jnl_offset_size != hdf5_offset_size ) ||
                            ( jnl_length_size != hdf5_length_size ) ) ) {
 
@@ -4220,9 +4220,9 @@ verify_files(char * hdf5_file_name,
                                  "length size mismatch",
                                  "recovery canceled.");
                         HDfprintf(stderr, "\thdf5/jnl offset size = %d/%d\n",
-			          hdf5_offset_size, jnl_offset_size); 
+			          hdf5_offset_size, jnl_offset_size);
                         HDfprintf(stderr, "\thdf5/jnl length size = %d/%d\n",
-			          hdf5_length_size, jnl_length_size); 
+			          hdf5_length_size, jnl_length_size);
 
                     }
 
@@ -4237,7 +4237,7 @@ verify_files(char * hdf5_file_name,
             }
         } else {
 
-            HDfprintf(stdout, "The journal file %s is empty.\n", 
+            HDfprintf(stdout, "The journal file %s is empty.\n",
                       journal_file_name);
             HDfprintf(stdout, "%s %s\n",
                       "Thus is is impossible to verify that",
@@ -4252,7 +4252,7 @@ verify_files(char * hdf5_file_name,
                 char reply_buf[128];
                 hbool_t done = FALSE;
                 int i;
-                
+
                 while ( ! done ) {
 
                     HDfprintf(stdout, "Proceed with the recovery? (y/n): ");
@@ -4265,7 +4265,7 @@ verify_files(char * hdf5_file_name,
                             i++;
                         }
 
-                        if ( ( reply_buf[i] == 'y' ) || 
+                        if ( ( reply_buf[i] == 'y' ) ||
                              ( reply_buf[i] == 'Y' ) ) {
 
                             done = TRUE;
@@ -4308,11 +4308,11 @@ verify_files(char * hdf5_file_name,
  *
  *		The function assumes that:
  *
- *		1) The supplied journal file and HDF5 file have been 
- *		   examined, and that their magic numbers and offset 
- *		   and length sizes match.  
+ *		1) The supplied journal file and HDF5 file have been
+ *		   examined, and that their magic numbers and offset
+ *		   and length sizes match.
  *
- *		2) That the journal file contains at least one complete 
+ *		2) That the journal file contains at least one complete
  *		   transaction.
  *
  *		3) The max eoa listed in the journal file is known, as
@@ -4323,7 +4323,7 @@ verify_files(char * hdf5_file_name,
  *		transactions, closes the supplied files, and then marks
  *		the HDF5 file as being recovered.
  *
- *		Note: While this function has been designed with both 
+ *		Note: While this function has been designed with both
  *		      human readable and binary journal files in mind,
  *		      in its first incarnation, it only supports binary
  *		      journal files.
@@ -4336,7 +4336,7 @@ verify_files(char * hdf5_file_name,
  *
  **************************************************************************/
 
-hbool_t 
+hbool_t
 apply_journal_file(char * hdf5_file_path_ptr,
                    off_t hdf5_file_len,
                    off_t sb_offset,
@@ -4370,12 +4370,12 @@ apply_journal_file(char * hdf5_file_path_ptr,
     uint64_t trans_num = 0;
     off_t offset;
     off_t new_offset;
-    
+
 
     if ( ( hdf5_file_path_ptr == NULL ) ||
          ( jnl_file_path_ptr == NULL ) ||
          ( jnl_file_len <= 0 ) ||
-         ( header_length <= 0 ) || 
+         ( header_length <= 0 ) ||
          ( max_trans_num <= 0 ) ||
          ( new_eoa == HADDR_UNDEF ) ||
          ( max_body_len <= 0 ) ) {
@@ -4386,7 +4386,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
     } else if ( human_readable ) {
 
         proceed = FALSE;
-        HDfprintf(stderr, 
+        HDfprintf(stderr,
                   "%s: only binary journal files supported at present.\n",
                   fcn_name);
     }
@@ -4401,7 +4401,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         if ( verbosity > 1 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                     "\tattempting to allocate journal entry body buffer...\n");
         }
 
@@ -4411,7 +4411,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
             proceed = FALSE;
             HDfprintf(stderr, "%s: buffer allocation failed.\n", fcn_name);
-        
+
         } else {
 
             if ( verbosity > 0 ) {
@@ -4425,7 +4425,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "\tattempting to open journal file %s...\n", 
+            HDfprintf(stdout, "\tattempting to open journal file %s...\n",
                       jnl_file_path_ptr);
         }
 
@@ -4450,7 +4450,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "\tattempting to open HDF5 file %s...\n", 
+            HDfprintf(stdout, "\tattempting to open HDF5 file %s...\n",
                       hdf5_file_path_ptr);
         }
 
@@ -4461,7 +4461,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
         if ( hdf5_fd == -1 ) {
 
             proceed = FALSE;
-            HDfprintf(stderr, "\tcan't open hdf5 file %s.\n", 
+            HDfprintf(stderr, "\tcan't open hdf5 file %s.\n",
                       hdf5_file_path_ptr);
 
         } else {
@@ -4517,7 +4517,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
                 case JF__UNDEFINED_MSG:
                     proceed = FALSE;
-                    HDfprintf(stderr, 
+                    HDfprintf(stderr,
                              "%s: bjf__load_next_msg() returned undef msg?!?\n",
                              fcn_name);
 		    break;
@@ -4525,7 +4525,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 		case JF__BEGIN_TRANS_MSG:
                     if ( trans_in_progress ) {
 
-                        /* At present, nested transaction are forbidden -- 
+                        /* At present, nested transaction are forbidden --
                          * scream and die if we encounter one.
                          */
 
@@ -4535,7 +4535,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
                     } else if ( trans_num != last_trans_num + 1 ) {
 
-                        /* we may decide to drop this invarient eventually, 
+                        /* we may decide to drop this invarient eventually,
                          * but we will check it for now, and scream and die
                          * if it fails.
                          */
@@ -4544,7 +4544,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
                           "Encountered out of sequence transaction in journal");
 
                     } else {
-                    
+
                         trans_in_progress = TRUE;
                         cur_trans_num = trans_num;
 
@@ -4558,13 +4558,13 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
 		case JF__JNL_ENTRY_MSG:
                     if ( ! trans_in_progress ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered jnl entry outside of transaction");
 
                     } else if ( trans_num != cur_trans_num ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered jnl entry with bad trans num");
@@ -4573,7 +4573,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
                         if ( verbosity > 1 ) {
 
-                            HDfprintf(stdout, 
+                            HDfprintf(stdout,
                                       "\tApplying Jnl Entry: trans = %lld, ",
                                       (long long)cur_trans_num);
 
@@ -4584,10 +4584,10 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
                         /* apply the journal entry */
 
-                        bytes_written = pwrite(hdf5_fd, 
-                                               (const void *)buf, 
+                        bytes_written = pwrite(hdf5_fd,
+                                               (const void *)buf,
                                                hdf5_length,
-                                               (off_t)(hdf5_base_addr + 
+                                               (off_t)(hdf5_base_addr +
                                                        hdf5_offset));
 
                         if ( bytes_written != (ssize_t)hdf5_length ) {
@@ -4603,19 +4603,19 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
 		case JF__END_TRANS_MSG:
                     if ( ! trans_in_progress ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                             "Encountered trans end msg outside of transaction");
 
                     } else if ( trans_num != cur_trans_num ) {
-                    
+
                         proceed = FALSE;
                         HDfprintf(stderr, "%s -- Exiting.\n",
                                  "Encountered trans end with bad trans num");
 
                     } else {
-                        
+
                         trans_in_progress = FALSE;
                         last_trans_num = cur_trans_num;
 
@@ -4631,7 +4631,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
                             if ( done ) {
 
-                                HDfprintf(stdout, 
+                                HDfprintf(stdout,
                                           "\tLast complete transaction applied.\n");
                             }
                         }
@@ -4654,7 +4654,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
 		default:
                     proceed = FALSE;
-                    HDfprintf(stderr, 
+                    HDfprintf(stderr,
                            "%s: bjf__load_next_msg() returned unknown msg?!?\n",
                            fcn_name);
 		    break;
@@ -4673,7 +4673,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         HDfprintf(stdout, "Updating EOA in the hdf5 file %s:\n", hdf5_file_path_ptr);
     }
-    
+
 
     if ( buf != NULL ) {
 
@@ -4692,7 +4692,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "\tattempting to close jnl file %s...\n", 
+            HDfprintf(stdout, "\tattempting to close jnl file %s...\n",
                       jnl_file_path_ptr);
         }
 
@@ -4730,7 +4730,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
         if ( verbosity > 0 ) {
 
-            HDfprintf(stdout, "\tattempting to close hdf5 file %s...\n", 
+            HDfprintf(stdout, "\tattempting to close hdf5 file %s...\n",
                       hdf5_file_path_ptr);
         }
 
@@ -4747,7 +4747,7 @@ apply_journal_file(char * hdf5_file_path_ptr,
 
     return(proceed);
 
-} /* apply_journal_file() */                  
+} /* apply_journal_file() */
 
 
 /**************************************************************************
@@ -4801,7 +4801,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
         if ( H5Pget_jnl_config(fapl, &config) == -1) {
 
             proceed = FALSE;
-            HDfprintf(stderr, "%s: couldn't get mdc config from FAPL.\n", 
+            HDfprintf(stderr, "%s: couldn't get mdc config from FAPL.\n",
                       fcn_name);
         }
     }
@@ -4831,7 +4831,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
             HDfprintf(stderr, "%s: couldn't open recovered HDF5 file.\n",
                       fcn_name);
         }
-    } 
+    }
 
     if ( proceed ) {
 
@@ -4853,8 +4853,8 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
  *
  * Function:	update_hdf5_eoa()
  *
- * Purpose:	Modify the eoa field superblock of the supplied hdf5 file 
- *		to the specified value, and update the superblock checksum 
+ * Purpose:	Modify the eoa field superblock of the supplied hdf5 file
+ *		to the specified value, and update the superblock checksum
  *		accordingly.
  *
  * Return:	TRUE if no errors are detected, and FALSE otherwise.
@@ -4926,7 +4926,7 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
                  + hdf5_offset_width  	/* base address */
                  + hdf5_offset_width; 	/* sb ext address */
 
-        chksum_disp = eoa_disp 
+        chksum_disp = eoa_disp
                     + hdf5_offset_width	/* EOF address */
                     + hdf5_offset_width;/* root group obj hdr address */
 
@@ -4959,8 +4959,8 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
     if ( proceed ) {
 
         /* verify signature and version */
-        if ( HDmemcmp(buf, 
-                      H5F_SIGNATURE, 
+        if ( HDmemcmp(buf,
+                      H5F_SIGNATURE,
                       (size_t)H5F_SIGNATURE_LEN) != 0 ) {
 
             proceed = FALSE;
@@ -4969,7 +4969,7 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
         } else if ( (int)(buf[version_disp]) != sb_ver ) {
 
             proceed = FALSE;
-            HDfprintf(stderr, "%s: Unexpected super block verion?!?!\n", 
+            HDfprintf(stderr, "%s: Unexpected super block verion?!?!\n",
                       fcn_name);
         }
     }
@@ -4980,8 +4980,8 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
 
         p = (uint8_t *)(&(buf[eoa_disp]));
 
-        address_decode((size_t)hdf5_offset_width, 
-                       (const uint8_t **)(&p), 
+        address_decode((size_t)hdf5_offset_width,
+                       (const uint8_t **)(&p),
                        &old_eoa);
 
         p = (uint8_t *)(&(buf[chksum_disp]));
@@ -5002,17 +5002,17 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
 
     if ( ( proceed ) && ( verbosity > 1 ) ) {
 
-        HDfprintf(stdout, "\tpre-update eoa = 0x%llx\n", 
+        HDfprintf(stdout, "\tpre-update eoa = 0x%llx\n",
                   (unsigned long long)old_eoa);
 
-        HDfprintf(stdout, "\tpre-update chksum = 0x%x\n", 
+        HDfprintf(stdout, "\tpre-update chksum = 0x%x\n",
                   (unsigned)old_chksum);
     }
 
     if ( proceed ) {
 
-        /* write the new eoa and chksum to the in core image of the 
-         * super block 
+        /* write the new eoa and chksum to the in core image of the
+         * super block
          */
 
         p = (uint8_t *)(&(buf[eoa_disp]));
@@ -5028,10 +5028,10 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
 
     if ( ( proceed ) && ( verbosity > 1 ) ) {
 
-        HDfprintf(stdout, "\tpost-update eoa = 0x%llx\n", 
+        HDfprintf(stdout, "\tpost-update eoa = 0x%llx\n",
                   (unsigned long long)new_eoa);
 
-        HDfprintf(stdout, "\tpost-update chksum = 0x%x\n", 
+        HDfprintf(stdout, "\tpost-update chksum = 0x%x\n",
                   (unsigned)new_chksum);
     }
 
@@ -5042,7 +5042,7 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
             HDfprintf(stdout, "\tUpdating hdf5 file length.\n");
         }
 
-        /* use ftruncate() to set the HDF5 file length to match the 
+        /* use ftruncate() to set the HDF5 file length to match the
          * the new EOA.
          */
 
@@ -5065,7 +5065,7 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
              (ssize_t)sb_size ) {
 
             proceed = FALSE;
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                      "Write of modified super block to hdf5 file %s failed.\n",
                      hdf5_file_path_ptr);
         }
@@ -5092,7 +5092,7 @@ update_hdf5_eoa(char * hdf5_file_path_ptr,
  *		Set *new_offset_ptr to reference the first byte after the
  *		entry body.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5111,7 +5111,7 @@ bjf__chksum_entry_body(int fd,
                        off_t file_len,
                        off_t offset,
                        off_t * new_offset_ptr,
-  	               int * msg_type_ptr, 
+  	               int * msg_type_ptr,
                        size_t body_length,
                        uint32_t * chksum_ptr,
                        unsigned verbosity)
@@ -5121,7 +5121,7 @@ bjf__chksum_entry_body(int fd,
     hbool_t proceed = TRUE;
     size_t rmdr;
     off_t new_offset;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5149,7 +5149,7 @@ bjf__chksum_entry_body(int fd,
         if ( body_buf == NULL ) {
 
             proceed = FALSE;
-            HDfprintf(stderr, 
+            HDfprintf(stderr,
                       "%s: realloc() of body_buf failed.  Desired new size = %d.\n",
                       fcn_name, (int)body_buf_len);
         }
@@ -5157,12 +5157,12 @@ bjf__chksum_entry_body(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      body_length,
-                                     (uint8_t *)body_buf, 
-                                     verbosity, 
+                                     (uint8_t *)body_buf,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -5173,7 +5173,7 @@ bjf__chksum_entry_body(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -5205,21 +5205,21 @@ bjf__chksum_entry_body(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_begin_trans_msg()
  *
- * Purpose:     Read and validate the contents of the begin transaction 
+ * Purpose:     Read and validate the contents of the begin transaction
  *		message from the supplied file, and set:
  *
- *			*msg_type_ptr to JF__BEGIN_TRANS_MSG, and 
+ *			*msg_type_ptr to JF__BEGIN_TRANS_MSG, and
  *
- *			*trans_num_ptr to the transaction number listed 
+ *			*trans_num_ptr to the transaction number listed
  *				in the message.
  *
- *			*new_offset_ptr to the offset of the byte just 
+ *			*new_offset_ptr to the offset of the byte just
  *				after the begin transaction message.
  *
  *		The supplied offset is presumed to reference the first
  *		byte of the message after the signature and version.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5238,14 +5238,14 @@ bjf__load_begin_trans_msg(int fd,
                           off_t file_len,
                           off_t offset,
                           off_t * new_offset_ptr,
-  		          int * msg_type_ptr, 
+  		          int * msg_type_ptr,
                           int msg_ver,
-                          uint64_t * trans_num_ptr, 
+                          uint64_t * trans_num_ptr,
                           unsigned verbosity)
 {
     const char * fcn_name = "bjf__load_begin_trans_msg()";
     hbool_t proceed = TRUE;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5267,8 +5267,8 @@ bjf__load_begin_trans_msg(int fd,
                                               file_len,
                                               *new_offset_ptr,
                                               new_offset_ptr,
-  		                              msg_type_ptr, 
-                                              trans_num_ptr, 
+  		                              msg_type_ptr,
+                                              trans_num_ptr,
                                               NULL,
                                               verbosity);
 
@@ -5290,7 +5290,7 @@ bjf__load_begin_trans_msg(int fd,
 
                 if ( verbosity > 1 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                        "Unknown begin trans msg ver detected at offset 0x%llx.\n",
                        (unsigned long long)offset);
                 }
@@ -5306,18 +5306,18 @@ bjf__load_begin_trans_msg(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_chksum()
  *
- * Purpose:     Load a checksum from the supplied journal file at the 
+ * Purpose:     Load a checksum from the supplied journal file at the
  *		specified offset.
  *
  *		If successful, set *chksum_ptr to the newly loaded check
- *		sum and set *new_offset_ptr to reference the first byte 
+ *		sum and set *new_offset_ptr to reference the first byte
  *		in the journal file after the checks sum.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
- *		Return TRUE if successful, and FALSE if any error is 
+ *		Return TRUE if successful, and FALSE if any error is
  *		detected,
  *
  * Return:      TRUE on success
@@ -5333,7 +5333,7 @@ bjf__load_chksum(int fd,
                  off_t file_len,
                  off_t offset,
                  off_t * new_offset_ptr,
-                 int * msg_type_ptr, 
+                 int * msg_type_ptr,
                  uint32_t * chksum_ptr,
                  unsigned verbosity)
 {
@@ -5343,7 +5343,7 @@ bjf__load_chksum(int fd,
     hbool_t proceed = TRUE;
     uint8_t * p;
     uint32_t chksum;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5356,12 +5356,12 @@ bjf__load_chksum(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      sizeof(uint32_t),
-                                     (uint8_t *)buf, 
-                                     verbosity, 
+                                     (uint8_t *)buf,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -5373,7 +5373,7 @@ bjf__load_chksum(int fd,
 
             *chksum_ptr = chksum;
             *new_offset_ptr = offset + (off_t)(sizeof(uint32_t));
-            
+
         } else {
 
             *msg_type_ptr = JF__INVALID_MSG;
@@ -5381,7 +5381,7 @@ bjf__load_chksum(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -5400,21 +5400,21 @@ bjf__load_chksum(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_end_trans_msg()
  *
- * Purpose:     Read and validate the contents of the end transaction 
+ * Purpose:     Read and validate the contents of the end transaction
  *		message from the supplied file, and set:
  *
- *			*msg_type_ptr to JF__END_TRANS_MSG, and 
+ *			*msg_type_ptr to JF__END_TRANS_MSG, and
  *
- *			*trans_num_ptr to the transaction number listed 
+ *			*trans_num_ptr to the transaction number listed
  *				in the message.
  *
- *			*new_offset_ptr to the offset of the byte just 
+ *			*new_offset_ptr to the offset of the byte just
  *				after the end transaction message.
  *
  *		The supplied offset is presumed to reference the first
  *		byte of the message after the signature and version.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5433,9 +5433,9 @@ bjf__load_end_trans_msg(int fd,
                         off_t file_len,
                         off_t offset,
                         off_t * new_offset_ptr,
-  	                int * msg_type_ptr, 
+  	                int * msg_type_ptr,
                         int msg_ver,
-                        uint64_t * trans_num_ptr, 
+                        uint64_t * trans_num_ptr,
                         unsigned verbosity)
 {
     const char * fcn_name = "bjf__load_end_trans_msg()";
@@ -5462,8 +5462,8 @@ bjf__load_end_trans_msg(int fd,
                                               file_len,
                                               *new_offset_ptr,
                                               new_offset_ptr,
-  		                              msg_type_ptr, 
-                                              trans_num_ptr, 
+  		                              msg_type_ptr,
+                                              trans_num_ptr,
                                               NULL,
                                               verbosity);
 
@@ -5486,7 +5486,7 @@ bjf__load_end_trans_msg(int fd,
 
                 if ( verbosity > 1 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                        "Unknown end trans msg ver detected at offset 0x%llx.\n",
                        (unsigned long long)offset);
                 }
@@ -5503,7 +5503,7 @@ bjf__load_end_trans_msg(int fd,
  * Function:    bjf__load_entry_body()
  *
  * Purpose:     Read the specifice number of bytes from the supplied file
- *		starting at the indicated offset, and copy them into the 
+ *		starting at the indicated offset, and copy them into the
  *		supplied buffer.
  *
  *		Set *new_offset_ptr to reference the first byte after the
@@ -5512,7 +5512,7 @@ bjf__load_end_trans_msg(int fd,
  *		If chksum_ptr isn't NULL, checksum the data copied into
  *		the buffer, and update *chksum_ptr accordingly.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5531,7 +5531,7 @@ bjf__load_entry_body(int fd,
                     off_t file_len,
                     off_t offset,
                     off_t * new_offset_ptr,
-  	            int * msg_type_ptr, 
+  	            int * msg_type_ptr,
                     size_t body_length,
                     char * buf_ptr,
                     size_t buf_len,
@@ -5541,7 +5541,7 @@ bjf__load_entry_body(int fd,
     const char * fcn_name = "bjf__load_entry_body()";
     hbool_t eof = FALSE;
     hbool_t proceed = TRUE;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5560,12 +5560,12 @@ bjf__load_entry_body(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      body_length,
-                                     (uint8_t *)buf_ptr, 
-                                     verbosity, 
+                                     (uint8_t *)buf_ptr,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -5576,7 +5576,7 @@ bjf__load_entry_body(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -5611,15 +5611,15 @@ bjf__load_entry_body(int fd,
  * Purpose:     Read and validate the contents of the end of address space
  *		message from the supplied file, and set:
  *
- *			*msg_type_ptr to JF__EOA_MSG, and 
+ *			*msg_type_ptr to JF__EOA_MSG, and
  *
- *			*new_offset_ptr to the offset of the byte just 
+ *			*new_offset_ptr to the offset of the byte just
  *				after the end of address space message.
  *
  *		The supplied offset is presumed to reference the first
  *		byte of the message after the signature and version.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5638,15 +5638,15 @@ bjf__load_eoa_msg(int fd,
                   off_t file_len,
                   off_t offset,
                   off_t * new_offset_ptr,
-	          int * msg_type_ptr, 
+	          int * msg_type_ptr,
                   int msg_ver,
-                  haddr_t * eoa_ptr, 
+                  haddr_t * eoa_ptr,
                   int hdf5_offset_width,
                   unsigned verbosity)
 {
     const char * fcn_name = "bjf__load_eoa_msg()";
     hbool_t proceed = TRUE;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5669,13 +5669,13 @@ bjf__load_eoa_msg(int fd,
                                            file_len,
                                            *new_offset_ptr,
                                            new_offset_ptr,
-                                           msg_type_ptr, 
-                                           eoa_ptr, 
+                                           msg_type_ptr,
+                                           eoa_ptr,
                                            hdf5_offset_width,
                                            NULL,
                                            verbosity);
 
-                if ( ( proceed ) && 
+                if ( ( proceed ) &&
                      ( *msg_type_ptr == JF__UNDEFINED_MSG ) ) {
 
                     *msg_type_ptr = JF__EOA_MSG;
@@ -5693,7 +5693,7 @@ bjf__load_eoa_msg(int fd,
 
                 if ( verbosity > 1 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                        "Unknown eoa msg ver detected at offset 0x%llx.\n",
                        (unsigned long long)offset);
                 }
@@ -5714,20 +5714,20 @@ bjf__load_eoa_msg(int fd,
  *
  *		*msg_type_ptr to JF__JNL_ENTRY_MSG,
  *
- *		*trans_num_ptr to the transaction number listed 
+ *		*trans_num_ptr to the transaction number listed
  *			in the message,
  *
  *		*trans_num_ptr to the transaction number listed
  *                     	in the message,
  *
- *		*hdf5_offset_ptr to the base address listed in the 
+ *		*hdf5_offset_ptr to the base address listed in the
  *			message,
  *
  *		*hdf5_length_ptr to the entry length listed in the message,
  *
- *		if buf_ptr is not NULL, and buf_len is less than 
+ *		if buf_ptr is not NULL, and buf_len is less than
  *			or equal to the length found in the message,
- *			load the body of the journal entry into 
+ *			load the body of the journal entry into
  *			*buf_ptr.
  *
  *		*new_offset_ptr to reference the first byte after
@@ -5736,7 +5736,7 @@ bjf__load_eoa_msg(int fd,
  *		The supplied offset is presumed to reference the first
  *		byte of the message after the signature and version.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
@@ -5755,12 +5755,12 @@ bjf__load_jnl_entry_msg(int fd,
                         off_t file_len,
                         off_t offset,
                         off_t * new_offset_ptr,
-  		        int * msg_type_ptr, 
+  		        int * msg_type_ptr,
                         int msg_ver,
-                        uint64_t * trans_num_ptr, 
-                        haddr_t * hdf5_offset_ptr, 
+                        uint64_t * trans_num_ptr,
+                        haddr_t * hdf5_offset_ptr,
                         int hdf5_offset_width,
-                        size_t * hdf5_length_ptr, 
+                        size_t * hdf5_length_ptr,
                         int hdf5_length_width,
                         char * buf_ptr,
                         size_t buf_len,
@@ -5770,7 +5770,7 @@ bjf__load_jnl_entry_msg(int fd,
     hbool_t proceed = TRUE;
     uint32_t chksum = 0;
     uint32_t expected_chksum;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5794,8 +5794,8 @@ bjf__load_jnl_entry_msg(int fd,
                                               file_len,
                                               *new_offset_ptr,
                                               new_offset_ptr,
-  		                              msg_type_ptr, 
-                                              trans_num_ptr, 
+  		                              msg_type_ptr,
+                                              trans_num_ptr,
                                               &chksum,
                                               verbosity);
                 if ( ( proceed ) &&
@@ -5805,8 +5805,8 @@ bjf__load_jnl_entry_msg(int fd,
                                                file_len,
                                                *new_offset_ptr,
                                                new_offset_ptr,
-                                               msg_type_ptr, 
-                                               hdf5_offset_ptr, 
+                                               msg_type_ptr,
+                                               hdf5_offset_ptr,
                                                hdf5_offset_width,
                                                &chksum,
                                                verbosity);
@@ -5819,8 +5819,8 @@ bjf__load_jnl_entry_msg(int fd,
                                                file_len,
                                                *new_offset_ptr,
                                                new_offset_ptr,
-                                               msg_type_ptr, 
-                                               hdf5_length_ptr, 
+                                               msg_type_ptr,
+                                               hdf5_length_ptr,
                                                hdf5_length_width,
                                                &chksum,
                                                verbosity);
@@ -5835,7 +5835,7 @@ bjf__load_jnl_entry_msg(int fd,
                                                        file_len,
                                                        *new_offset_ptr,
                                                        new_offset_ptr,
-  	                                               msg_type_ptr, 
+  	                                               msg_type_ptr,
                                                        *hdf5_length_ptr,
                                                        buf_ptr,
                                                        buf_len,
@@ -5847,7 +5847,7 @@ bjf__load_jnl_entry_msg(int fd,
                                                          file_len,
                                                          *new_offset_ptr,
                                                          new_offset_ptr,
-  	                                                 msg_type_ptr, 
+  	                                                 msg_type_ptr,
                                                          *hdf5_length_ptr,
                                                          &chksum,
                                                          verbosity);
@@ -5861,7 +5861,7 @@ bjf__load_jnl_entry_msg(int fd,
                                                file_len,
                                                *new_offset_ptr,
                                                new_offset_ptr,
-                                               msg_type_ptr, 
+                                               msg_type_ptr,
                                                &expected_chksum,
                                                verbosity);
                 }
@@ -5872,7 +5872,7 @@ bjf__load_jnl_entry_msg(int fd,
 
                     proceed = FALSE;
                     *msg_type_ptr = JF__INVALID_MSG;
-                    
+
                     if ( verbosity > 0 ) {
 
                         HDfprintf(stdout, "Chksum mismatch in jnl entry msg.\n");
@@ -5883,11 +5883,11 @@ bjf__load_jnl_entry_msg(int fd,
 
                     if ( verbosity > 1 ) {
 
-			HDfprintf(stdout, "\ttrans num = %lld\n", 
+			HDfprintf(stdout, "\ttrans num = %lld\n",
                                   (long long)(*trans_num_ptr));
-			HDfprintf(stdout, "\toffset = 0x%llx\n", 
+			HDfprintf(stdout, "\toffset = 0x%llx\n",
                                   (unsigned long long)(*hdf5_offset_ptr));
-			HDfprintf(stdout, "\tlength = 0x%llx\n", 
+			HDfprintf(stdout, "\tlength = 0x%llx\n",
                                   (unsigned long long)(*hdf5_length_ptr));
                     }
                 }
@@ -5905,7 +5905,7 @@ bjf__load_jnl_entry_msg(int fd,
 
                 if ( verbosity > 0 ) {
 
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                        "Unknown jnl entry msg ver detected at offset 0x%llx.\n",
                        (unsigned long long)offset);
                 }
@@ -5921,21 +5921,21 @@ bjf__load_jnl_entry_msg(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_length()
  *
- * Purpose:     Load the length (i.e. hdf5 object length) from the supplied 
+ * Purpose:     Load the length (i.e. hdf5 object length) from the supplied
  *		journal file at the specified offset.
  *
  *		If successful, set *length_ptr to the newly loaded HDF5
- *		object length and set *new_offset_ptr to reference the 
+ *		object length and set *new_offset_ptr to reference the
  *		first byte in the journal file after the HDF5 object length.
- *		Also, if chksum_ptr is not NULL, compute the checksum on 
+ *		Also, if chksum_ptr is not NULL, compute the checksum on
  *		the on disc representation of the HDF5 file object length
  *		and update *chksum_ptr accordingly.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
- *		Return TRUE if successful, and FALSE if any error is 
+ *		Return TRUE if successful, and FALSE if any error is
  *		detected,
  *
  * Return:      TRUE on success
@@ -5951,8 +5951,8 @@ bjf__load_length(int fd,
                  off_t file_len,
                  off_t offset,
                  off_t * new_offset_ptr,
-                 int * msg_type_ptr, 
-                 size_t * hdf5_length_ptr, 
+                 int * msg_type_ptr,
+                 size_t * hdf5_length_ptr,
                  int hdf5_length_width,
                  uint32_t * chksum_ptr,
                  unsigned verbosity)
@@ -5963,7 +5963,7 @@ bjf__load_length(int fd,
     hbool_t proceed = TRUE;
     uint8_t * p;
     size_t hdf5_length;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -5976,12 +5976,12 @@ bjf__load_length(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      (size_t)hdf5_length_width,
-                                     (uint8_t *)buf, 
-                                     verbosity, 
+                                     (uint8_t *)buf,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -6016,7 +6016,7 @@ bjf__load_length(int fd,
 
                         if ( verbosity > 2 ) {
 
-                            HDfprintf(stdout, "%s: invalid hdf5_length_width.\n", 
+                            HDfprintf(stdout, "%s: invalid hdf5_length_width.\n",
                                       fcn_name);
                         }
                         break;
@@ -6028,7 +6028,7 @@ bjf__load_length(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -6054,11 +6054,11 @@ bjf__load_length(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_next_msg()
  *
- * Purpose:     Read the message from the supplied file that starts at 
- *		the supplied offset, and set *msg_type_ptr, *trans_num_ptr, 
- *		*offset_ptr, *length_ptr, and *eoa_ptr as appropriate.  
- *		If the message is a journal entry, buf_ptr is not NULL 
- *		and buf_len is greater than or equal to the length of the 
+ * Purpose:     Read the message from the supplied file that starts at
+ *		the supplied offset, and set *msg_type_ptr, *trans_num_ptr,
+ *		*offset_ptr, *length_ptr, and *eoa_ptr as appropriate.
+ *		If the message is a journal entry, buf_ptr is not NULL
+ *		and buf_len is greater than or equal to the length of the
  *		entry body, load the body into *buf_ptr.
  *
  *		In all cases, set *new_offset_ptr to either the offset at
@@ -6068,66 +6068,66 @@ bjf__load_length(int fd,
  *
  *		More specifically:
  *
- *		If the the message is invalid, set: 
+ *		If the the message is invalid, set:
  *
  *			*msg_type_ptr to JF__INVALID_MSG
  *
- *			The targets of all other pointer parameters are 
+ *			The targets of all other pointer parameters are
  *			undefined.
  *
  *
  *		If the message is a begin transaction message, set:
  *
- *			*msg_type_ptr to JF__BEGIN_TRANS_MSG, and 
+ *			*msg_type_ptr to JF__BEGIN_TRANS_MSG, and
  *
- *			*trans_num_ptr to the transaction number listed 
+ *			*trans_num_ptr to the transaction number listed
  *				in the message.
  *
- *			The targets of all other pointer parameters are 
+ *			The targets of all other pointer parameters are
  *				undefined.
  *
  *
  *		If the message is a journal entry message, set:
- *		
+ *
  *			*msg_type_ptr to JF__JNL_ENTRY_MSG,
  *
  *			*trans_num_ptr to the transaction number listed
  *                      	in the message,
  *
- *			*offset_ptr to the base address listed in the 
+ *			*offset_ptr to the base address listed in the
  *				message,
  *
- *			*length_ptr to the entry length listed in the 
+ *			*length_ptr to the entry length listed in the
  *				message,
  *
- *			if buf_ptr is not NULL, and buf_len is less than 
+ *			if buf_ptr is not NULL, and buf_len is less than
  *				or equal to the length found in the message,
- *				load the body of the journal entry into 
+ *				load the body of the journal entry into
  *				*buf_ptr.
  *
- *			The targets of all other pointer parameters are 
+ *			The targets of all other pointer parameters are
  *			undefined.
  *
  *
  *		If the message is an end transaction message, set:
  *
- *			*msg_type_ptr to JF__END_TRANS_MSG, and 
+ *			*msg_type_ptr to JF__END_TRANS_MSG, and
  *
- *			*trans_num_ptr to the transaction number listed 
+ *			*trans_num_ptr to the transaction number listed
  *				in the message.
  *
- *			The targets of all other pointer parameters are 
+ *			The targets of all other pointer parameters are
  *				undefined.
  *
  *
  *		If the message is an EOA message, set:
  *
- *			*msg_type_ptr to JF__EOA_MSG, and 
+ *			*msg_type_ptr to JF__EOA_MSG, and
  *
  *			*eoa_ptr to the end of address space value listed
  *				in the message
  *
- *			The targets of all other pointer parameters are 
+ *			The targets of all other pointer parameters are
  *			undefined.
  *
  *		In all cases, set *new_offset_ptr to either the offset at
@@ -6150,11 +6150,11 @@ bjf__load_next_msg(int fd,
                    off_t file_len,
                    off_t offset,
                    off_t * new_offset_ptr,
-  		   int * msg_type_ptr, 
-                   uint64_t * trans_num_ptr, 
-                   haddr_t * hdf5_offset_ptr, 
+  		   int * msg_type_ptr,
+                   uint64_t * trans_num_ptr,
+                   haddr_t * hdf5_offset_ptr,
                    int hdf5_offset_width,
-                   size_t * hdf5_length_ptr, 
+                   size_t * hdf5_length_ptr,
                    int hdf5_length_width,
                    haddr_t * eoa_ptr,
                    char * buf_ptr,
@@ -6166,7 +6166,7 @@ bjf__load_next_msg(int fd,
     char msg_ver;
     hbool_t eof = FALSE;
     hbool_t proceed = TRUE;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -6184,9 +6184,9 @@ bjf__load_next_msg(int fd,
         *msg_type_ptr = JF__UNDEFINED_MSG;
 
         /* try to load the message signature and version into sig_buf */
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      (size_t)(H5C2_BJNL__SIG_LEN + 1),
                                      (uint8_t *)sig_buf,
                                      verbosity,
@@ -6199,7 +6199,7 @@ bjf__load_next_msg(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -6217,15 +6217,15 @@ bjf__load_next_msg(int fd,
 
         if ( verbosity > 2 ) {
 
-            HDfprintf(stdout, 
+            HDfprintf(stdout,
                       "%s: Read sig = \"%s\", ver = %d at offset 0x%llx.\n",
-                      fcn_name, 
-                      sig_buf, 
-                      (int)msg_ver, 
+                      fcn_name,
+                      sig_buf,
+                      (int)msg_ver,
                       (unsigned long long)(offset));
         }
 
-        if ( HDstrncmp(sig_buf, H5C2_BJNL__BEGIN_TRANS_SIG, 
+        if ( HDstrncmp(sig_buf, H5C2_BJNL__BEGIN_TRANS_SIG,
                        (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
 
             proceed = bjf__load_begin_trans_msg(fd,
@@ -6237,25 +6237,25 @@ bjf__load_next_msg(int fd,
                                        trans_num_ptr,
                                        verbosity);
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__JOURNAL_ENTRY_SIG, 
+        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__JOURNAL_ENTRY_SIG,
                               (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
 
 	    proceed = bjf__load_jnl_entry_msg(fd,
                                        file_len,
                                        offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
-  		                       msg_type_ptr, 
+  		                       msg_type_ptr,
                                        msg_ver,
-                                       trans_num_ptr, 
-                                       hdf5_offset_ptr, 
+                                       trans_num_ptr,
+                                       hdf5_offset_ptr,
                                        hdf5_offset_width,
-                                       hdf5_length_ptr, 
+                                       hdf5_length_ptr,
                                        hdf5_length_width,
                                        buf_ptr,
                                        buf_len,
                                        verbosity);
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_TRANS_SIG, 
+        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_TRANS_SIG,
                               (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
 
             proceed = bjf__load_end_trans_msg(fd,
@@ -6268,16 +6268,16 @@ bjf__load_next_msg(int fd,
                                        verbosity);
 
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_ADDR_SPACE_SIG, 
+        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_ADDR_SPACE_SIG,
                               (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
 
 	    proceed = bjf__load_eoa_msg(fd,
                                        file_len,
                                        offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
-	                               msg_type_ptr, 
+	                               msg_type_ptr,
                                        msg_ver,
-                                       eoa_ptr, 
+                                       eoa_ptr,
                                        hdf5_offset_width,
                                        verbosity);
 
@@ -6289,7 +6289,7 @@ bjf__load_next_msg(int fd,
 
             if ( verbosity > 0 ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                   "Invalid/unknown binary msg sig detected at offset 0x%llx.\n",
                   (unsigned long long)offset);
             }
@@ -6304,21 +6304,21 @@ bjf__load_next_msg(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_offset()
  *
- * Purpose:     Load the offset (i.e. hdf5 file address) from the supplied 
+ * Purpose:     Load the offset (i.e. hdf5 file address) from the supplied
  *		journal file at the specified offset.
  *
  *		If successful, set *hdf5_offset_ptr to the newly loaded HDF5
- *		file address and set *new_offset_ptr to reference the 
- *		first byte in the journal file after the HDF5 file address.  
- *		Also, if chksum_ptr is not NULL, compute the checksum on 
- *		the on disc representation of the HDF5 file offset number, 
+ *		file address and set *new_offset_ptr to reference the
+ *		first byte in the journal file after the HDF5 file address.
+ *		Also, if chksum_ptr is not NULL, compute the checksum on
+ *		the on disc representation of the HDF5 file offset number,
  *		and update *chksum_ptr accordingly.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
- *		Return TRUE if successful, and FALSE if any error is 
+ *		Return TRUE if successful, and FALSE if any error is
  *		detected,
  *
  * Return:      TRUE on success
@@ -6334,8 +6334,8 @@ bjf__load_offset(int fd,
                  off_t file_len,
                  off_t offset,
                  off_t * new_offset_ptr,
-                 int * msg_type_ptr, 
-                 haddr_t * hdf5_offset_ptr, 
+                 int * msg_type_ptr,
+                 haddr_t * hdf5_offset_ptr,
                  int hdf5_offset_width,
                  uint32_t * chksum_ptr,
                  unsigned verbosity)
@@ -6346,7 +6346,7 @@ bjf__load_offset(int fd,
     hbool_t proceed = TRUE;
     uint8_t * p;
     haddr_t hdf5_offset;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -6359,12 +6359,12 @@ bjf__load_offset(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      (size_t)hdf5_offset_width,
-                                     (uint8_t *)buf, 
-                                     verbosity, 
+                                     (uint8_t *)buf,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -6399,7 +6399,7 @@ bjf__load_offset(int fd,
 
                         if ( verbosity > 1 ) {
 
-                            HDfprintf(stdout, "%s: invalid offset_width.\n", 
+                            HDfprintf(stdout, "%s: invalid offset_width.\n",
                                       fcn_name);
                         }
                         break;
@@ -6411,7 +6411,7 @@ bjf__load_offset(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -6437,21 +6437,21 @@ bjf__load_offset(int fd,
 /*-------------------------------------------------------------------------
  * Function:    bjf__load_trans_num()
  *
- * Purpose:     Load the transaction number from the supplied file at the 
+ * Purpose:     Load the transaction number from the supplied file at the
  *		specified offset.
  *
- *		If successful, set *trans_num_ptr to the newly loaded 
- *		transaction number, and set *new_offset_ptr to reference the 
- *		first byte in the file after the transaction.  Also, if 
+ *		If successful, set *trans_num_ptr to the newly loaded
+ *		transaction number, and set *new_offset_ptr to reference the
+ *		first byte in the file after the transaction.  Also, if
  *		chksum_ptr is not NULL, compute the checksum on the on disc
  *		representation of the transaction number, and update *
  *		chksum_ptr accordingly.
  *
- *		If an error is detected, set *msg_type_ptr to 
+ *		If an error is detected, set *msg_type_ptr to
  *		JF__INVALID_MSG, and set *new_offset_ptr to the offset
  *		at which the error was detected.
  *
- *		Return TRUE if successful, and FALSE if any error is 
+ *		Return TRUE if successful, and FALSE if any error is
  *		detected,
  *
  * Return:      TRUE on success
@@ -6467,8 +6467,8 @@ bjf__load_trans_num(int fd,
                     off_t file_len,
                     off_t offset,
                     off_t * new_offset_ptr,
-  		    int * msg_type_ptr, 
-                    uint64_t * trans_num_ptr, 
+  		    int * msg_type_ptr,
+                    uint64_t * trans_num_ptr,
                     uint32_t * chksum_ptr,
                     unsigned verbosity)
 {
@@ -6478,7 +6478,7 @@ bjf__load_trans_num(int fd,
     hbool_t proceed = TRUE;
     uint8_t * p;
     uint64_t trans_num;
-   
+
     if ( ( fd < 0 ) ||
          ( new_offset_ptr == NULL ) ||
          ( msg_type_ptr == NULL ) ||
@@ -6491,12 +6491,12 @@ bjf__load_trans_num(int fd,
 
     if ( proceed ) {
 
-        proceed = load_buf_from_file(fd, 
-                                     file_len, 
-                                     offset, 
+        proceed = load_buf_from_file(fd,
+                                     file_len,
+                                     offset,
                                      sizeof(uint64_t),
-                                     (uint8_t *)buf, 
-                                     verbosity, 
+                                     (uint8_t *)buf,
+                                     verbosity,
                                      fcn_name,
                                      &eof);
 
@@ -6524,7 +6524,7 @@ bjf__load_trans_num(int fd,
 
             if ( eof ) {
 
-                /* we have encountered the end of file, not a system 
+                /* we have encountered the end of file, not a system
                  * or I/O error.  Set proceed back to TRUE, as encountering
                  * the end of file is not necessarily an error in this
                  * context.
@@ -6592,7 +6592,7 @@ static void
 leave(int ret)
 {
  h5tools_close();
- 
+
  exit(ret);
 }
 
@@ -6608,14 +6608,14 @@ leave(int ret)
  *
  *-------------------------------------------------------------------------
  */
-static int 
+static int
 file_copy(char * file_from, char * file_to)
 {
 
     FILE * from;
     FILE * to;
     char ch;
-    
+
     /* open source file */
     if((from = fopen(file_from, "rb")) == NULL) {
         error_msg(progname, "Could not open source file\n");
@@ -6638,7 +6638,7 @@ file_copy(char * file_from, char * file_to)
             leave( EXIT_FAILURE );
         } /* end if */
 
-        if( !feof(from) ) 
+        if( !feof(from) )
             fputc(ch, to);
 
         if( ferror(to) ) {
@@ -6671,7 +6671,7 @@ file_copy(char * file_from, char * file_to)
  *               updates the pointer to point to the next byte after the
  *               address.
  *
- *               If the value read is all 1's, then the address is 
+ *               If the value read is all 1's, then the address is
  *               returned with an undefined value.
  *
  * Programmer:   Mike McGreevy (utilizing code from Robb Matzke)
@@ -6680,8 +6680,8 @@ file_copy(char * file_from, char * file_to)
  *-------------------------------------------------------------------------
  */
 void
-address_decode(size_t sizeof_addr, 
-               const uint8_t **pp /* in, out */, 
+address_decode(size_t sizeof_addr,
+               const uint8_t **pp /* in, out */,
                haddr_t *addr_p/*out*/)
 {
 
@@ -6694,7 +6694,7 @@ address_decode(size_t sizeof_addr,
     assert(addr_p);
 
     *addr_p = 0;
-    
+
     for (i=0; i<sizeof_addr; i++) {
         c = *(*pp)++;
         if (c != 0xff)
@@ -6729,14 +6729,14 @@ address_decode(size_t sizeof_addr,
  *-------------------------------------------------------------------------
  */
 void
-address_encode(size_t sizeof_addr, 
-               uint8_t **pp /* in, out */, 
+address_encode(size_t sizeof_addr,
+               uint8_t **pp /* in, out */,
                haddr_t addr)
 {
     unsigned u;
-    
+
     assert(pp && *pp);
-    
+
     for(u = 0; u < sizeof_addr; u++) {
         *(*pp)++ = (uint8_t)(addr & 0xff);
         addr >>= 8;
@@ -6761,8 +6761,8 @@ address_encode(size_t sizeof_addr,
  *-------------------------------------------------------------------------
  */
 void
-length_decode(size_t sizeof_length, 
-              const uint8_t **pp /* in, out */, 
+length_decode(size_t sizeof_length,
+              const uint8_t **pp /* in, out */,
               hsize_t *len_p /*out*/)
 {
 
@@ -6775,7 +6775,7 @@ length_decode(size_t sizeof_length,
     HDassert( sizeof_length <= sizeof(hsize_t) );
 
     *len_p = 0;
-    
+
     for ( i = 0; i < sizeof_length; i++ ) {
 
         c = *(*pp)++;
@@ -6797,7 +6797,7 @@ length_decode(size_t sizeof_length,
  *
  * Purpose:     Encodes a length into the buffer pointed to by *pp and
  *              then increments the pointer to the first byte after the
- *              length. 
+ *              length.
  *
  * Programmer:  JRM -- 3/6/09 (rework of address_encode())
  *
@@ -6805,15 +6805,15 @@ length_decode(size_t sizeof_length,
  */
 
 void
-length_encode(size_t sizeof_length, 
-              uint8_t **pp /* in, out */, 
+length_encode(size_t sizeof_length,
+              uint8_t **pp /* in, out */,
               hsize_t length)
 {
     unsigned u;
-    
+
     HDassert(pp && *pp);
     HDassert( sizeof_length <= sizeof(hsize_t) );
-    
+
     for ( u = 0; u < sizeof_length; u++ ) {
 
         *(*pp)++ = (uint8_t)(length & 0xff);
@@ -6840,7 +6840,7 @@ length_encode(size_t sizeof_length,
  * Programmer:   Mike McGreevy <mamcgree@hdfgroup.org>
  *               Monday, March 10, 2008
  *
- * Modifications: 
+ * Modifications:
  *               Mike McGreevy, August 7, 2008
  *               Parses superblock to update EOA value
  *
@@ -6848,7 +6848,7 @@ length_encode(size_t sizeof_length,
  */
 
 int
-main(int argc, 
+main(int argc,
      const char *argv[])
 {
 
@@ -6897,7 +6897,7 @@ main(int argc,
     long             pos_end; /* file descriptor position indicator */
     char             temp[100]; /* temporary buffer */
     H5F_t *          f; /* File pointer */
-    hbool_t          jrnl_has_transactions = TRUE;              
+    hbool_t          jrnl_has_transactions = TRUE;
     hbool_t          examine_files_only = FALSE;
     hbool_t          force = FALSE;
     hbool_t          error = FALSE;
@@ -6943,7 +6943,7 @@ main(int argc,
                 usage();
                 leave( EXIT_SUCCESS );
                 break;
-            
+
             case 'b':
                 custom_name = 1;
                 file_name_backup = strdup ( opt_arg );
@@ -7002,7 +7002,7 @@ main(int argc,
 
     /* check for missing backup file name */
     if ( custom_name == 1) {
-        
+
         if ( file_name_backup == NULL ) {
 
             error_msg(progname, "Journal file backup name missing\n");
@@ -7071,264 +7071,264 @@ main(int argc,
         } /* end if */
 
         else {
-            file_name_backup = HDmalloc(HDstrlen(file_name) + (size_t)10);    
+            file_name_backup = HDmalloc(HDstrlen(file_name) + (size_t)10);
 
             HDsnprintf(file_name_backup, HDstrlen(file_name) + (size_t)8, "%s.backup", file_name);
             if ( verbose ) printf("Copying HDF5 file <%s> into file <%s>\n", file_name, file_name_backup);
             file_copy( /* from */ file_name, /* to */ file_name_backup);
-    
+
         } /* end else */
 
     } /* end if */
 
     if ( jnl_human_readable ) {
-    
+
         /* =========================== */
         /* Open HDF5 and Journal Files */
         /* =========================== */
-    
+
         /* open the journal file for reading */
         journal_fp = fopen(journal_name, "r");
-        
+
         if (journal_fp == NULL) {
-    
+
             error_msg(progname, "Could not open specified journal file\n");
             usage();
             leave( EXIT_FAILURE );
-    
+
         } /* end if */
-        
+
         /* open hdf5 file for reading and writing */
         hdf5_fd = open(file_name, O_RDWR);
-        
+
         if (hdf5_fd == -1) {
-        
+
             error_msg(progname, "Could not open specified hdf5 file\n");
             usage();
             leave( EXIT_FAILURE );
-    
+
         } /* end if */
-    
+
         /* allocate temporary space to store and transaction messages */
         last_trans_msg = HDmalloc((size_t)50);
         if (last_trans_msg == NULL) {
-    
+
             error_msg(progname, "Could not allocate space\n");
             leave( EXIT_FAILURE);
-    
+
         } /* end if */
-    
-        if ( verbose ) printf("Recovering file <%s> from journal <%s>\n\n", 
+
+        if ( verbose ) printf("Recovering file <%s> from journal <%s>\n\n",
                               file_name, journal_name);
-    
+
         /* ====================================================== */
         /* Find the last complete transaction in the journal file */
         /* ====================================================== */
-    
+
         fseek(journal_fp, 0, SEEK_END);
-    
+
         while (last_trans_found == 0) {
-    
+
             while (fgetc(journal_fp) != '\n') {
-                
+
                 if (ftell(journal_fp) <= 1) {
-    
+
                     jrnl_has_transactions = FALSE;
                     printf("Journal file has no complete transactions. Nothing to recover!\n");
                     break;
-            
+
                 } /* end if */
-    
+
                 fseek(journal_fp, -2, SEEK_CUR);
-    
+
             } /* end while */
-    
+
             if (jrnl_has_transactions == FALSE) break;
-    
+
             if ( fgetc(journal_fp) == '3' ) {
-    
+
                 last_trans_found = 1;
                 pos_end = ftell(journal_fp);
                 fseek(journal_fp, -1, SEEK_CUR);
                 fgets(last_trans_msg, 50, journal_fp);
-    
+
             } /* end if */
-    
+
             else {
-    
+
                 fseek(journal_fp, -3, SEEK_CUR);
-    
+
             } /* end else */
-    
+
         } /* end while */
-    
+
         /* ================================================================== */
         /* Only do the recovery procedure if there is something to recover in */
         /* the journal file. Otherwise, skip over these steps and mark        */
         /* the file as recovered.                                             */
         /* ================================================================== */
-        
+
         if (jrnl_has_transactions == TRUE) {
-    
+
             /* ================================================================= */
             /* Pre-parse of journal file to pull information needed before doing */
             /* the recovery.                                                     */
             /*    - max journal size (for buffer allocation)                     */
             /*    - max EOA size (for superblock update, to preserve raw data)   */
             /* ================================================================= */
-    
+
             fseek(journal_fp, 0, SEEK_SET);
-        
+
             c_new = 0;
             c_old = 0;
             max_size = 0;
-    
+
             if ( verbose ) printf("Pre-parsing journal file to pull needed data ... \n");
-    
+
             /* while journal is not at end of file */
             while (ftell(journal_fp) != pos_end) {
-    
+
                 c_old = c_new;
                 c_new = fgetc(journal_fp);
-            
+
                 /* if position is at the start of a line */
                 if (c_old == '\n') {
-    
+
                     /* ========================================================== */
                     /* if the line is a journal entry, determine its size. update */
                     /* max size value if needed.                                  */
                     /* ========================================================== */
                     if (c_new == '2') {
-    
+
                         pos = ftell(journal_fp);
-    
-                        fgets(temp, 100, journal_fp); 
+
+                        fgets(temp, 100, journal_fp);
                         tok[0] = HDstrtok(temp, " ");
                         if (tok[0] == NULL) {
-    
+
                             error_msg(progname, "Could not tokenize entry\n");
                             leave( EXIT_FAILURE);
-        
+
                         } /* end if */
                         for (i=1; i<8; i++) {
-    
+
                             tok[i] = HDstrtok(NULL, " ");
                             if (tok[i] == NULL) {
-    
+
                                 error_msg(progname, "Could not tokenize entry\n");
                                 leave( EXIT_FAILURE);
-    
+
                             } /* end if */
-    
+
                         } /* end for */
-                    
+
                         size = (size_t)HDstrtoll(tok[3], NULL, 10);
-    
+
                         if (max_size < size) {
-    
+
                             max_size = size;
-    
+
                         } /* end if */
-    
+
                         /* jump back to start of line */
                         fseek(journal_fp, pos, SEEK_SET);
-    
+
                     } /* end if */
-    
+
                     /* =========================================================== */
                     /* If the line is an EOA entry, determine its value and update */
                     /* if it exceeds the current max length                        */
                     /* =========================================================== */
-    
+
                     if (c_new == 'E') {
-                
+
                         pos = ftell(journal_fp);
-    
+
                         fgets(temp, 100, journal_fp);
                         p = &temp[11];
-    
-    		    /* according to the man page, strtoll() should accept a 
-    		     * "0x" prefix on any base 16 value -- seems this is 
+
+    		    /* according to the man page, strtoll() should accept a
+    		     * "0x" prefix on any base 16 value -- seems this is
     		     * not the case.  Deal with this by incrementing p
     		     * past the prefix.
     		     */
-    
+
     		    while ( HDisspace(*(p)) ) { p++; }
-    
+
     		    if ( ( *(p) == '0' ) &&
     		         ( *(p + 1) == 'x' ) ) {
-    
+
     		            p += 2;
     		    }
-    
+
                         eoa = (haddr_t)HDstrtoll(p, NULL, 16);
                         if (eoa == 0) {
-        
-                            error_msg(progname, 
+
+                            error_msg(progname,
     				  "Could not convert eoa to integer\n");
                             leave( EXIT_FAILURE);
-    
+
                         } /* end if */
-    
+
                         if (update_eoa < eoa) {
-    
+
                             update_eoa = eoa;
-    
+
                         } /* end if */
-    
+
                         /* jump back to start of line */
                         fseek(journal_fp, pos, SEEK_SET);
-    
+
                     } /* end if */
-    
+
                 } /* end if */
-    
+
             } /* end while */
-    
+
             if ( verbose ) printf(" - Maximum journal entry size = %d\n", max_size);
             if ( verbose ) printf(" - Journaled EOA value = 0x%llx\n", update_eoa);
-    
+
             /* =================================== */
             /* Update EOA value in HDF5 superblock */
             /* =================================== */
-    
+
             if (update_eoa != 0) {
-    
+
                 if ( verbose ) printf("\nLooking for HDF5 superblock ... \n");
                 /* Jump through possible locations of superblock */
                 for(n = 8; n < 16; n++) {
-        
+
                     sb_addr = (8 == n) ? 0 : 1 << n;
-        
+
                     /* read from HDF5 file */
-                    pread(hdf5_fd, buf, H5F_SIGNATURE_LEN, sb_addr);    
-        
+                    pread(hdf5_fd, buf, H5F_SIGNATURE_LEN, sb_addr);
+
                     /* Check to see if superblock has been found. */
                     if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
-        
+
                         if ( verbose ) printf(" - Superblock signature found at location %d\n", sb_addr);
-        
+
                         if ( verbose ) printf(" - Reading in entire superblock\n");
-        
+
                         /* Read in entire superblock */
                         pread(hdf5_fd, sbuf, H5F_MAX_SUPERBLOCK_SIZE, sb_addr/* + H5F_SIGNATURE_LEN */);
-        
+
                         /* Use p as a pointer into superblock buffer */
                         p = sbuf;
-        
+
                         /* Skip over signature */
                         p += H5F_SIGNATURE_LEN;
-    
-                        /* Get superblock version number */   
+
+                        /* Get superblock version number */
                         super_vers = *p++;
-        
+
                         /* add printfs to verbose */
                         if ( verbose ) printf(" - Superblock version number = %d\n", super_vers);
-            
+
                         /* ==================================== */
-                        /* Point to EOA value in the superblock */ 
+                        /* Point to EOA value in the superblock */
                         /* ==================================== */
-    
+
                         /* First part of superblock may be of differing versions */
                         if(super_vers < 2) {
                             /* skip over unneeded data */
@@ -7336,283 +7336,283 @@ main(int argc,
                                  1 +  /* root group version */
                                  1 +  /* reserved byte */
                                  1;   /* shared header version */
-    
+
                             sizeof_addr = *p++; /* size of file addresses */
-    
+
                             p += 1 +  /* size of file sizes */
                                  1 +  /* reserved byte */
                                  2 +  /* 1/2 rank for symtable leaf nodes */
                                  2 +  /* 1/2 rank for btree internal nodes */
                                  4 +  /* file status flags */
                                  2;   /* b-tree internal k value */
-                    
+
                             if (super_vers == 1)
                                 p += 2; /* reserved bytes */
-    
+
                         } /* end if */
-    
+
                         /* Superblock version number > 2 */
                         else {
-                
+
                             sizeof_addr = *p++; /* size of file addresses */
-                    
+
                             p += 1 + /* size of file sizes */
                                  1;  /* file status flags */
-     
+
                             p_front = p;
                             p_end = p;
-                       
+
                         } /* end else */
-                       
+
                         /* Skip over various variable portions of superblock */
                         address_decode((size_t)sizeof_addr, &p_end, &addr); /* base address */
                         address_decode((size_t)sizeof_addr, &p_end, &addr); /* extension address */
-    
+
                         /* ============================ */
                         /* Update EOA in the superblock */
                         /* ============================ */
-    
+
                         p_front = p_end;
-    
+
                         /* Decode the EOA address */
                         address_decode((size_t)sizeof_addr, &p_end, &addr);
-    
+
                         if ( verbose ) printf(" - Current value of EOA in superblock is 0x%llx\n", addr);
-                    
+
                         /* Set the EOA to the address pulled from the journal */
                         addr = (haddr_t)update_eoa;
                         p_end = p_front;
-    
+
                         /* encode new EOA value into superblock buffer */
                         address_encode((size_t)sizeof_addr, &p_end, addr);
-    
+
                         if ( verbose ) printf(" - EOA value has been updated to 0x%llx in superblock\n", update_eoa);
-    
+
                         /* skip over root group object header */
                         address_decode((size_t)sizeof_addr, &p_end, &addr); /* root group object header */
-    
+
                         p_front = p_end;
-    
+
                         if ( verbose ) printf(" - Updating checksum value of superblock\n");
-    
+
                         /* decode checksum */
                         read_chksum = 0;
                         UINT32DECODE(p_end, read_chksum);
-    
+
                         p_end = p_front;
-    
+
                         /* Update the CHECKSUM VALUE */
                         /* Compute superblock checksum */
                         chksum = H5_checksum_metadata(sbuf, (size_t)(p_end - sbuf), 0);
-    
+
                         /* Superblock checksum */
                         UINT32ENCODE(p_end, chksum);
-    
+
                         new_eoa = (haddr_t)update_eoa;
-    
+
                         /* verify new EOA value in buffer is correct */
                         address_decode((size_t)sizeof_addr, &p_front, &addr);
-                    
+
                         /* Extend file to be EOA bytes */
                         HDftruncate(hdf5_fd, new_eoa);
-                
+
                         /* Write out new updated superblock to the file */
                         status = pwrite(hdf5_fd, sbuf, (size_t)H5F_MAX_SUPERBLOCK_SIZE, sb_addr /*+ H5F_SIGNATURE_LEN */);
-    
+
                         if (status == -1) {
                             error_msg(progname, "pwrite failed when trying to update superblock\n");
                             leave( EXIT_FAILURE );
-                        } 
-                
+                        }
+
                         if (status == 0) {
                             error_msg(progname, "pwrite did not write anything to superblock!\n");
                             leave( EXIT_FAILURE);
                         }
-    
+
                         if ( verbose ) printf(" - New superblock written to HDF5 file\n");
-                    
+
                     } /* end if */
-        
+
                 } /* end for */
-    
+
             } /* end if (update_eoa != 0)*/
-    
+
             if ( verbose ) printf("\nBeginning recovery process ... \n\n");
-    
+
             /* ==================================================================== */
             /* Main Recovery Procedure:                                             */
             /* Read through the journal file and recover any journal entries found. */
             /* ==================================================================== */
-    
+
             max_size = max_size * 3 + 200;
-    
+
             /* allocate space large enough to hold largest journal entry */
             readback = HDmalloc( max_size );
             if (readback == NULL) {
-    
+
                 error_msg(progname, "Could not allocate space to hold entries\n");
                 leave( EXIT_FAILURE);
-    
+
             } /* end if */
-    
+
             /* read through journal file. recover any journal entries found, up
              * through the last transaction number */
             fseek(journal_fp, 0, SEEK_SET);
-    
+
             while ( fgets(readback, max_size, journal_fp) != NULL ) {
-        
+
                 if (HDstrcmp(readback, last_trans_msg) == 0) {
-        
+
                     /* done reading from file */
                     break;
-    
+
                 } /* end if */
-        
+
                 /* ===================================================== */
                 /* If journal entry is found, write entry into HDF5 file */
                 /* ===================================================== */
-    
+
                 if ( readback[0] == '2') { /* journal entry found */
-    
+
                     if ( verbose ) printf("Journal entry found.\n");
                     if ( verbose ) printf("Tokenizing journal entry.\n");
-    
+
                     /* ================================================= */
                     /* Tokenize the journal entry in order to grab data */
                     /* ================================================= */
-    
+
                     /* divide the journal entry into tokens */
                     tok[0] = HDstrtok(readback, " ");
                     if (tok[0] == NULL) {
-    
+
                         error_msg(progname, "Could not tokenize journal entry\n");
                         leave( EXIT_FAILURE);
-        
+
                     } /* end if */
-    
+
                     if ( verbose ) printf("  token[0] : <%s>\n", tok[0]);
-    
+
                     for (i=1; i<8; i++) {
-    
+
                         tok[i] = HDstrtok(NULL, " ");
                         if (tok[i] == NULL) {
-    
+
                             error_msg(progname, "Could not tokenize journal entry\n");
                             leave( EXIT_FAILURE);
-    
+
                         } /* end if */
-    
+
                         if ( verbose ) printf("  token[%d] : <%s>\n", i, tok[i]);
-    
+
                     } /* end for */
-    
-                    /* put all remaining data into last token. */ 
+
+                    /* put all remaining data into last token. */
                     /* This contains all of the journal entry body */
                     tok[8] = HDstrtok(NULL, "\n");
                     if (tok[8] == NULL) {
-    
+
                         error_msg(progname, "Could not tokenize journal entry\n");
                         leave( EXIT_FAILURE);
-    
+
                     } /* end if */
-    
+
                     if ( verbose ) printf("  token[8] : <hexadecimal body data>\n");
-    
+
                     /* =================================== */
                     /* Convert Items from Character Arrays */
                     /* =================================== */
-    
+
                     if ( verbose ) printf("Converting data from character strings.\n");
-    
+
                     /* convert address from character character string */
-    
-    		/* according to the man page, strtoll() should accept a 
-    		 * "0x" prefix on any base 16 value -- seems this is 
+
+    		/* according to the man page, strtoll() should accept a
+    		 * "0x" prefix on any base 16 value -- seems this is
     		 * not the case.  Deal with this by incrementing tok[6]
     		 * past the prefix.
     		 */
     		while ( HDisspace(*(tok[6])) ) { (tok[6])++; }
     		if ( ( *(tok[6]) == '0' ) &&
     		     ( *(tok[6] + 1) == 'x' ) ) {
-    
+
     		        (tok[6]) += 2;
     		}
                     address = (off_t)HDstrtoll(tok[6], NULL, 16);
                     if (address == 0) {
-        
+
                         error_msg(progname, "Could not convert address to integer\n");
                         leave( EXIT_FAILURE);
-    
+
                     } /* end if */
-    
+
                     if ( verbose ) printf("  address  : %llx\n", address);
-    
+
                     /* convert size from character string*/
                     size = (size_t)HDstrtoll(tok[4], NULL, 10);
                     if (size == 0) {
-    
+
                         error_msg(progname, "Could not convert size to double\n");
                         leave( EXIT_FAILURE);
-    
+
                     } /* end if */
-    
+
                     if ( verbose ) printf("  length   : %d\n", size);
-    
+
                     /* transform body out of hexadecimal character string */
                     body = HDmalloc(size + 1);
                     if (body == NULL) {
-    
+
                         error_msg(progname, "Could not allocate space for body\n");
                         leave( EXIT_FAILURE);
-    
+
                     } /* end if */
-                
+
                     p = &(tok[8])[0];
-                
+
                     for (i = 0; i < size; i++) {
-                
+
                         body[i] = HDstrtoul(p, NULL, 16);
                         p = &p[3];
-    
+
                     } /* end for */
-    
+
                     body[i] = 0;
-    
+
                     if ( verbose ) printf("  body     : binary body data\n");
-    
+
                     /* ================================================ */
                     /* Write into HDF5 file the recovered journal entry */
                     /* ================================================ */
-    
+
                     if ( verbose ) printf("Writing entry to HDF5 file.\n");
-     
+
                     /* perform a write */
                     status = pwrite(hdf5_fd, body, size, address);
-    
+
                     if (status == -1) {
                         error_msg(progname, "pwrite failed\n");
                         leave( EXIT_FAILURE );
                     }
-                
+
                     if (status == 0) {
                         error_msg(progname, "pwrite did not write anything!\n");
                         leave( EXIT_FAILURE);
                     }
-    
+
                     /* Verify that write occurred correctly */
                     if ( check_file == 1) {
-    
+
                         if ( verbose ) printf("Verifying success of write");
-                
+
                         compare_buf = HDmalloc(size + 1);
-        
+
                         if (compare_buf == NULL) {
                             error_msg(progname, "Could not allocate space\n");
                             leave( EXIT_FAILURE);
                         } /* end if */
-                    
+
                         pread(hdf5_fd, compare_buf, size, address);
-    
+
                         /* do a quick string compare on two items */
                         if (HDstrcmp((const char *)body, (const char *)compare_buf) != 0) {
                             error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
@@ -7621,7 +7621,7 @@ main(int argc,
                             printf(" -- from HDF5 file: '%s'\n", compare_buf);
                             leave( EXIT_FAILURE );
                         } /* end if */
-    
+
                         /* compare each individual value of entry */
                         for (i=0; i<size; i++) {
                             if (body[i] != compare_buf[i]) {
@@ -7632,90 +7632,90 @@ main(int argc,
                                 leave( EXIT_FAILURE );
                             }
                         }
-    
+
                         if ( verbose ) printf(" .... SUCCESS!\n\n");
                         free(compare_buf);
-    
+
                     }
-    
+
                     free(body);
-    
+
                 } /* end if */
-    
+
             } /* end while */
-    
+
             free(readback);
-    
+
         } /* end if jrnl_has_transactions */
-    
+
         fclose(journal_fp);
         close(hdf5_fd);
         free(last_trans_msg);
         free(journal_name);
         if (file_name_backup != NULL) HDfree(file_name_backup);
-    
+
         /* =========================== */
         /* Mark HDF5 File as Recovered */
         /* =========================== */
-    
+
         /* set up appropriate fapl */
         fapl = H5Pcreate(H5P_FILE_ACCESS);
-        
+
         if ( fapl == -1 ) {
-        
+
             error_msg(progname, "Could not create FAPL.\n");
             leave( EXIT_FAILURE );
-        
+
         } /* end if */
-        
+
         config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
-        
+
         /* get H5AC_cache_config_t configuration from fapl */
         if ( H5Pget_jnl_config(fapl, &config) == -1) {
-        
+
             error_msg(progname, "Could not get mdc config from FAPL.\n");
             leave( EXIT_FAILURE );
-        
+
         }
-                
+
         /* make sure journal recovered field is set to TRUE in mdc_config */
         config.journal_recovered = TRUE;
-        
+
         /* set H5AC_cache_config_t configuration with file recovered */
         if ( H5Pset_jnl_config(fapl, &config) == -1) {
-        
+
             error_msg(progname, "Could not set mdc config on FAPL.\n");
             leave( EXIT_FAILURE );
-        
+
         } /* end if */
-    
+
         /* open HDF5 file with provided fapl */
-        fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
-           
+        fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);
+
         if ( fid == -1 ) {
-        
+
             error_msg(progname, "Could not open recovered HDF5 file.\n");
             leave( EXIT_FAILURE );
-        
+
         } /* end if */
-    
+
         /* close HDF5 file */
         if ( H5Fclose(fid) == -1 ) {
-        
+
             error_msg(progname, "Could not close recovered HDF5 file.\n");
             leave( EXIT_FAILURE );
-        
+
         } /* end if */
-    
+
         /* ================ */
         /* Cleanup and Exit */
         /* ================ */
-    
-        if (jrnl_has_transactions == TRUE) 
+
+        if (jrnl_has_transactions == TRUE)
             printf("HDF5 file successfuly recovered.\n");
         else
             printf("File marked as recovered.\n");
-    
+
         if ( verbose ) printf("==============================================\n\n");
     } else {
 
@@ -7763,6 +7763,6 @@ main(int argc,
     free(file_name);
 
     return 0;
-    
+
 } /* end main */
 

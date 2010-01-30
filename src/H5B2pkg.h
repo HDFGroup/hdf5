@@ -143,7 +143,7 @@ typedef struct H5B2_internal_cache_ud_t {
 /* Callback info for loading a free space leaf node into the cache */
 typedef struct H5B2_leaf_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
-    const unsigned *nrec;             /* Number of records in node to load */ 
+    const unsigned *nrec;             /* Number of records in node to load */
     H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
 } H5B2_leaf_cache_ud_t;
 

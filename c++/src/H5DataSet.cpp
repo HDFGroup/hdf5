@@ -83,7 +83,7 @@ DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(origi
 ///\param	ref - IN: Reference pointer
 ///\exception	H5::DataSetIException
 ///\parDescription
-///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		\c obj can be DataSet, Group, H5File, or named DataType, that
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------

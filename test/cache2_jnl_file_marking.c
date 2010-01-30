@@ -96,11 +96,11 @@ static void check_mdj_file_unmarking_on_recovery_test(hbool_t verbose);
 /*-------------------------------------------------------------------------
  * Function:    check_test_in_progress()
  *
- * Purpose:     If pass2 is true on entry, test to see if the test in 
+ * Purpose:     If pass2 is true on entry, test to see if the test in
  *		progress file exists.  If it does not, set pass2 to FALSE
  *		and set a failure message.
  *
- *		If the test in progress file does exist, check to see if 
+ *		If the test in progress file does exist, check to see if
  *		its contents matches the supplied string.  It it does not,
  *		set pass2 to FALSE and set the appropriate failure message.
  *
@@ -157,7 +157,7 @@ check_test_in_progress(const char * str)
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -176,8 +176,8 @@ check_test_in_progress(const char * str)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
@@ -214,16 +214,16 @@ check_test_in_progress(const char * str)
 	        pass2 = FALSE;
 
 	    } else {
-                
+
 	        input_len = (size_t)(buf.st_size);
 
 		if ( verbose ) {
 
-		    HDfprintf(stdout, "%s: input_len = %d.\n", 
+		    HDfprintf(stdout, "%s: input_len = %d.\n",
 		              fcn_name, (int)input_len);
 		}
             }
-	} 
+	}
     }
 
     /* open the test in progress file */
@@ -250,7 +250,7 @@ check_test_in_progress(const char * str)
 
             if ( verbose ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%s: HDread() failed. result = %d, errno = %d.\n",
                           fcn_name, (int)result, errno);
             }
@@ -287,7 +287,7 @@ check_test_in_progress(const char * str)
 
 	    if ( verbose ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
                           "%s: expected/actual test in progress = %s/%s\n",
                           fcn_name, str, buffer);
 	    }
@@ -305,11 +305,11 @@ check_test_in_progress(const char * str)
 /*-------------------------------------------------------------------------
  * Function:    file_exists()
  *
- * Purpose:     If pass2 is true on entry, stat the target file, and 
+ * Purpose:     If pass2 is true on entry, stat the target file, and
  * 		return TRUE if it exists, and FALSE if it does not.
  *
- * 		If any errors are detected in this process, set pass2 
- * 		to FALSE and set failure_mssg2 to point to an appropriate 
+ * 		If any errors are detected in this process, set pass2
+ * 		to FALSE and set failure_mssg2 to point to an appropriate
  * 		error message.
  *
  *              Do nothing and return FALSE if pass2 is FALSE on entry.
@@ -357,15 +357,15 @@ file_exists(const char * file_path_ptr)
 
 	    if ( verbose ) {
 
-	        HDfprintf(stdout, "%s: HDstat(%s) failed with ENOENT\n", 
+	        HDfprintf(stdout, "%s: HDstat(%s) failed with ENOENT\n",
 			  fcn_name, file_path_ptr);
 	    }
-	    
+
 	} else {
 
 	    if ( verbose ) {
 
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 			  "%s: HDstat() failed with unexpected errno = %d.\n",
                           fcn_name, errno);
 	    }
@@ -373,7 +373,7 @@ file_exists(const char * file_path_ptr)
 	    failure_mssg2 = "HDstat() returned unexpected value.";
 	    pass2 = FALSE;
 
-	} 
+	}
     }
 
     return(ret_val);
@@ -384,7 +384,7 @@ file_exists(const char * file_path_ptr)
 /*-------------------------------------------------------------------------
  * Function:    mark_test_in_progress()
  *
- * Purpose:     If pass2 is true on entry, test to see if the test in 
+ * Purpose:     If pass2 is true on entry, test to see if the test in
  *		progress file exists.  If it does, set pass2 to FALSE
  *		and set a failure message.
  *
@@ -442,7 +442,7 @@ mark_test_in_progress(const char * str)
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -461,8 +461,8 @@ mark_test_in_progress(const char * str)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
@@ -489,14 +489,14 @@ mark_test_in_progress(const char * str)
     }
 
     if ( pass2 ) {
-        
+
         result = HDwrite(fd, str, strlen(str));
 
         if ( result != (int)strlen(str) ) {
 
             if ( verbose ) {
 
-                HDfprintf(stdout, 
+                HDfprintf(stdout,
                           "%s: HDwrite() failed. result = %d, errno = %d.\n",
                           fcn_name, (int)result, errno);
             }
@@ -531,12 +531,12 @@ mark_test_in_progress(const char * str)
 /*-------------------------------------------------------------------------
  * Function:    setup_cache_for_journaling()
  *
- * Purpose:     If pass2 is true on entry, create a HDF5 file with 
- * 		journaling enabled and journal file with the specified name.  
- * 		Return pointers to the cache data structure and file data 
+ * Purpose:     If pass2 is true on entry, create a HDF5 file with
+ * 		journaling enabled and journal file with the specified name.
+ * 		Return pointers to the cache data structure and file data
  * 		structures.  and verify that it contains the expected data.
  *
- *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              On failure, set pass2 to FALSE, and set failure_mssg2
  *              to point to an appropriate failure message.
  *
  *              Do nothing if pass2 is FALSE on entry.
@@ -626,7 +626,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 	     ( file_ptr_ptr == NULL ) ||
 	     ( cache_ptr_ptr == NULL ) ) {
 
-            failure_mssg2 = 
+            failure_mssg2 =
                 "Bad param(s) on entry to setup_cache_for_journaling().\n";
 	    pass2 = FALSE;
         }
@@ -641,9 +641,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
             if ( verbose ) {
 
-                HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", 
+                HDfprintf(stdout, "%s: HDF file name = \"%s\".\n",
 			  fcn_name, hdf_file_name);
-                HDfprintf(stdout, "%s: journal file name = \"%s\".\n", 
+                HDfprintf(stdout, "%s: journal file name = \"%s\".\n",
 			  fcn_name, journal_file_name);
 	    }
 	}
@@ -668,7 +668,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				  H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
@@ -717,7 +717,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
- 
+
     /**************************************/
     /* Create a file with the fapl above. */
     /**************************************/
@@ -774,7 +774,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
             failure_mssg2 = "actual_base_addr > BASE_ADDR";
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", 
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
 			  fcn_name);
             }
         }
@@ -782,13 +782,13 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* get a pointer to the files internal data structure and then 
+    /* get a pointer to the files internal data structure and then
      * to the cache structure
      */
     if ( pass2 ) {
 
         if ( file_ptr->shared->cache2 == NULL ) {
-	
+
 	    pass2 = FALSE;
 	    failure_mssg2 = "can't get cache2 pointer(1).\n";
 
@@ -823,7 +823,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 	*cache_ptr_ptr = cache_ptr;
     }
 
-    if ( show_progress ) 
+    if ( show_progress )
         HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
 
     return;
@@ -834,21 +834,21 @@ setup_cache_for_journaling(const char * hdf_file_name,
 /***************************************************************************
  * Function: 	setup_mdj_file_marking_on_create_test
  *
- * Purpose:  	Setup test to verify that HDF5 file is marked as having 
- *              journaling in progress when journaling is enabled at file 
+ * Purpose:  	Setup test to verify that HDF5 file is marked as having
+ *              journaling in progress when journaling is enabled at file
  *              creation time.
  *
- *              Do this by creating a test file with metadata journaling 
+ *              Do this by creating a test file with metadata journaling
  *              enabled, and then exiting without closing the file.
  *
  * Return:      void
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_marking_on_create_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_on_create_test():";
@@ -864,7 +864,7 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -878,21 +878,21 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -902,14 +902,14 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", 
+        HDfprintf(stdout, "%s%d cp = %d.\n",
 		  fcn_name, (int)pass2, cp++);
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -930,7 +930,7 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
          * initialization.
          */
         H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr,
 			     trans_num, "dummy");
 
         if ( show_progress ) {
@@ -940,14 +940,14 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
         }
 
         if ( ( verbose ) && ( ! pass2 ) ) {
-            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n", 
+            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
 		      fcn_name, pass2, failure_mssg2);
 	    HDfflush(stdout);
-        } 
+        }
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d cp = %d child exiting.\n", 
+	    HDfprintf(stdout, "%s%d cp = %d child exiting.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
 	}
@@ -956,7 +956,7 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 
 	abort();
 
-    } 
+    }
 
     return;
 
@@ -966,12 +966,12 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_marking_on_create_test
  *
- * Purpose:  	Check to see if a test to verify that a HDF5 file is marked 
- *              as having journaling in progress when journaling is enabled 
+ * Purpose:  	Check to see if a test to verify that a HDF5 file is marked
+ *              as having journaling in progress when journaling is enabled
  *              at file creation time passes.
  *
- *              Do this by trying to open the test file created by the 
- *              associated setup function.  Open should fail, as the file 
+ *              Do this by trying to open the test file created by the
+ *              associated setup function.  Open should fail, as the file
  *              should be marked as journaling in progress.
  *
  *              On either success or failure, clean up the test file and
@@ -981,10 +981,10 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_marking_on_create_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_on_create_test():";
@@ -1000,7 +1000,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -1014,21 +1014,21 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -1042,9 +1042,9 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -1052,7 +1052,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s:%d: cp = %d  child exited as expected.\n", 
+            HDfprintf(stdout, "%s:%d: cp = %d  child exited as expected.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
@@ -1077,7 +1077,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -1091,12 +1091,12 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
         }
 
 	/* attempt to open the file -- should fail as the child
-	 * exited without closing the file properly, and thus 
+	 * exited without closing the file properly, and thus
 	 * the file should still be marked as having journaling
 	 * in progress.
 	 */
 
-	if ( pass2 ) { 
+	if ( pass2 ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -1124,11 +1124,11 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 #endif
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d parent done.\n", 
+            HDfprintf(stdout, "%s%d cp = %d parent done.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
-    } 
+    }
 
     return;
 
@@ -1138,15 +1138,15 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	setup_mdj_file_marking_after_open_test
  *
- * Purpose:  	Setup a test to verify that a HDF5 file is marked as having 
- *              journaling in progress when journaling is enabled on an 
+ * Purpose:  	Setup a test to verify that a HDF5 file is marked as having
+ *              journaling in progress when journaling is enabled on an
  *              open file.
  *
  *              Do this by:
  *
- *              1) creating a test file, 
+ *              1) creating a test file,
  *
- *              2) writing some data to it, 
+ *              2) writing some data to it,
  *
  *              3) enable journaling on the open file via a call to
  *                 H5Fset_mdc_config()
@@ -1160,10 +1160,10 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_marking_after_open_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_after_open_test():";
@@ -1182,7 +1182,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -1196,7 +1196,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
+    if ( verbose ) {
         HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
 	HDfflush(stdout);
     }
@@ -1204,13 +1204,13 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -1224,9 +1224,9 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-		  fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+		  fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -1253,7 +1253,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -1261,7 +1261,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
             }
         }
 
-	/* open the file with a fapl indicating latest version of 
+	/* open the file with a fapl indicating latest version of
 	 * the file format.
 	 */
         if ( pass2 ) {
@@ -1303,8 +1303,8 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
         if ( pass2 ) {
 
             /* Create the dataset. */
-            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
-	                            dataspace_id, H5P_DEFAULT, 
+            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
+	                            dataspace_id, H5P_DEFAULT,
 				    H5P_DEFAULT, H5P_DEFAULT);
 
             if ( dataspace_id < 0 ) {
@@ -1369,14 +1369,14 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
         }
 
         if ( ( verbose ) && ( ! pass2 ) ) {
-            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n", 
+            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
 		      fcn_name, pass2, failure_mssg2);
 	    HDfflush(stdout);
-        } 
+        }
 
         if ( show_progress ) {
 
-           HDfprintf(stdout, "%s%d cp = %d exiting.\n", 
+           HDfprintf(stdout, "%s%d cp = %d exiting.\n",
 	             fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
@@ -1385,7 +1385,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 
         abort();
 
-    } 
+    }
 
     return;
 
@@ -1395,12 +1395,12 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_marking_after_open_test
  *
- * Purpose:  	Check to see if the test to rvVerify that a HDF5 file is 
- *              marked as having journaling in progress when journaling is 
+ * Purpose:  	Check to see if the test to rvVerify that a HDF5 file is
+ *              marked as having journaling in progress when journaling is
  *              enabled on an open file passed.
  *
  *              Try to open the test file created by the associated setup
- *              function.  Open should fail, as the file should be marked 
+ *              function.  Open should fail, as the file should be marked
  *              as journaling in progress.
  *
  *              On either success or failure, clean up the test file and
@@ -1410,10 +1410,10 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_marking_after_open_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_after_open_test():";
@@ -1429,7 +1429,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -1443,21 +1443,21 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -1467,14 +1467,14 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", 
+        HDfprintf(stdout, "%s%d cp = %d.\n",
 		  fcn_name, (int)pass2, cp++);
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -1493,7 +1493,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s:%d cp = %d.\n", 
+	    HDfprintf(stdout, "%s:%d cp = %d.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
@@ -1501,7 +1501,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -1510,19 +1510,19 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s%d cp = %d.\n", 
+	    HDfprintf(stdout, "%s%d cp = %d.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
 
 	/* attempt to open the file -- should fail as the setup program
-	 * exited without closing the file properly, and thus 
+	 * exited without closing the file properly, and thus
 	 * the file should still be marked as having journaling
 	 * in progress.
 	 */
 
 	if ( pass2 ) {
-  
+
 	    H5E_BEGIN_TRY {
 
 	        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
@@ -1538,7 +1538,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", 
+            HDfprintf(stdout, "%s%d: cp = %d.\n",
                       fcn_name, (int)pass2, cp++);
             HDfflush(stdout);
         }
@@ -1550,11 +1550,11 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 #endif
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d parent done.\n", 
+            HDfprintf(stdout, "%s%d cp = %d parent done.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
 	}
-    } 
+    }
 
     return;
 
@@ -1564,19 +1564,19 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 /***************************************************************************
  * Function: setup_mdj_file_marking_on_open_test
  *
- * Purpose:  	Setup test to verify that a HDF5 file is marked as having 
- *		journaling in progress when journaling is enabled at file 
+ * Purpose:  	Setup test to verify that a HDF5 file is marked as having
+ *		journaling in progress when journaling is enabled at file
  *		open time.
  *
- *              Do this by: 
+ *              Do this by:
  *
- *              1) creating a test file in the child, 
+ *              1) creating a test file in the child,
  *
- *              2) writing some data to it, 
+ *              2) writing some data to it,
  *
  *              3) closing the test file.
  *
- *              4) re-openting the test file with metadata journaling 
+ *              4) re-openting the test file with metadata journaling
  *                 enabled, and then
  *
  *              5) exiting from the child without closing the file.
@@ -1585,10 +1585,10 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_marking_on_open_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_on_open_test():";
@@ -1608,7 +1608,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -1622,21 +1622,21 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -1646,14 +1646,14 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", 
+        HDfprintf(stdout, "%s%d cp = %d.\n",
 		  fcn_name, (int)pass2, cp++);
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -1662,22 +1662,22 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 #if 0 /* JRM */
         /* Quincey:
 	 *
-	 * It looks like we may have a bug here -- 
+	 * It looks like we may have a bug here --
 	 *
 	 * In the original version of this test, I:
 	 *
-	 * 	1) created a file using the default FAPL, 
+	 * 	1) created a file using the default FAPL,
 	 *
 	 * 	2) added a data set to the file
 	 *
 	 * 	3) closed it,
 	 *
-	 * 	4) tried to re-open it using a FAPL that set the 
+	 * 	4) tried to re-open it using a FAPL that set the
 	 * 	   latest format, and enabled journaling.
 	 *
-	 * I hit an assertion failure on step 4.  
+	 * I hit an assertion failure on step 4.
 	 *
-	 * I then modified the above to select the latest file 
+	 * I then modified the above to select the latest file
 	 * format on file create, and the problem went away.
 	 *
 	 * Is this as it should be, or do we have a bug here?
@@ -1687,7 +1687,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
         if ( pass2 ) {
 
-            file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 		                H5P_DEFAULT);
 
             if ( file_id < 0 ) {
@@ -1719,7 +1719,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -1727,7 +1727,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
             }
         }
 
-        /* open the file with a fapl indicating latest version of 
+        /* open the file with a fapl indicating latest version of
          * the file format.
          */
         if ( pass2 ) {
@@ -1769,8 +1769,8 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
         if ( pass2 ) {
 
             /* Create the dataset. */
-            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
-		                    dataspace_id, H5P_DEFAULT, 
+            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
+		                    dataspace_id, H5P_DEFAULT,
 				    H5P_DEFAULT, H5P_DEFAULT);
 
 	    if ( dataspace_id < 0 ) {
@@ -1826,7 +1826,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -1922,14 +1922,14 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
         if ( ( verbose ) && ( ! pass2 ) ) {
 
-            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n", 
+            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
 		      fcn_name, pass2, failure_mssg2);
 	    HDfflush(stdout);
-        } 
+        }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d exiting.\n", 
+            HDfprintf(stdout, "%s%d cp = %d exiting.\n",
                       fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
@@ -1937,7 +1937,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
         mark_test_in_progress("mdj_file_marking_on_open_test");
 
         abort();
-    } 
+    }
 
     return;
 
@@ -1947,8 +1947,8 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_marking_on_open_test
  *
- * Purpose:  	Check to verify that a HDF5 file is marked as having 
- *              journaling in progress when journaling is enabled at 
+ * Purpose:  	Check to verify that a HDF5 file is marked as having
+ *              journaling in progress when journaling is enabled at
  *		file open time.
  *
  *              Do this by trying to open the test file created by the
@@ -1964,10 +1964,10 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_marking_on_open_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_on_open_test():";
@@ -1983,7 +1983,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -1997,21 +1997,21 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2025,9 +2025,9 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2053,7 +2053,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -2067,7 +2067,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
         }
 
 	/* attempt to open the file -- should fail as the child
-	 * exited without closing the file properly, and thus 
+	 * exited without closing the file properly, and thus
 	 * the file should still be marked as having journaling
 	 * in progress.
 	 */
@@ -2100,11 +2100,11 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 #endif
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d done.\n", 
+            HDfprintf(stdout, "%s%d cp = %d done.\n",
                       fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
-    } 
+    }
 
     return;
 
@@ -2114,14 +2114,14 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	setup_mdj_file_unmarking_on_file_close_test
  *
- * Purpose:  	Setup test to verify that a HDF5 file on which journaling 
- *		is enabled is marked as having not having journaling in 
+ * Purpose:  	Setup test to verify that a HDF5 file on which journaling
+ *		is enabled is marked as having not having journaling in
  *		progress when the file is closed.
  *
  *              Do this as follows:
  *
- *                  1) create a test file with metadata journaling 
- *                     enabled, 
+ *                  1) create a test file with metadata journaling
+ *                     enabled,
  *
  *                  2) perform some operation(s) that dirty metadata
  *                     and result in journal activity.
@@ -2132,10 +2132,10 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_unmarking_on_file_close_test():";
@@ -2159,7 +2159,7 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -2173,21 +2173,21 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2201,9 +2201,9 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-		  fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+		  fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2243,8 +2243,8 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     if ( pass2 ) {
 
         /* Create the dataset. */
-        dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
-			        dataspace_id, H5P_DEFAULT, 
+        dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
+			        dataspace_id, H5P_DEFAULT,
 				H5P_DEFAULT, H5P_DEFAULT);
 
         if ( dataspace_id < 0 ) {
@@ -2289,8 +2289,8 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_unmarking_on_file_close_test
  *
- * Purpose:  	Check to verify that a HDF5 file on which journaling is 
- *		enabled is marked as having not having journaling in 
+ * Purpose:  	Check to verify that a HDF5 file on which journaling is
+ *		enabled is marked as having not having journaling in
  *		progress when the file is closed.
  *
  *              To do this, attempt to re-open the file created by the
@@ -2303,10 +2303,10 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_unmarking_on_file_close_test():";
@@ -2328,7 +2328,7 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -2342,21 +2342,21 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2370,9 +2370,9 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-		  fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+		  fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2399,7 +2399,7 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
                                   H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
@@ -2413,7 +2413,7 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
         HDfflush(stdout);
     }
 
-    /* attempt to open the file -- should succeed as the close should 
+    /* attempt to open the file -- should succeed as the close should
      * shutdown journaling.
      */
 
@@ -2472,15 +2472,15 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	setup_mdj_file_unmarking_on_journaling_shutdown_test
  *
- * Purpose:  	Setup test to verify that a HDF5 file on which journaling 
- *		is enabled is marked as having not having journaling in 
- *		progress when journaling is disabled via the 
+ * Purpose:  	Setup test to verify that a HDF5 file on which journaling
+ *		is enabled is marked as having not having journaling in
+ *		progress when journaling is disabled via the
  *		H5Fset_mdc_config() API call.
  *
  *              Do this by:
  *
- *                  1) creating a test file in the child with metadata 
- *                     journaling enabled, 
+ *                  1) creating a test file in the child with metadata
+ *                     journaling enabled,
  *
  *                  2) performing some operation(s) that dirty metadata
  *                     and result in journal activity.
@@ -2493,13 +2493,13 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              7/9/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 {
-    const char * fcn_name = 
+    const char * fcn_name =
 	    "setup_mdj_file_unmarking_on_journaling_shutdown_test():";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
@@ -2517,7 +2517,7 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -2531,21 +2531,21 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2559,9 +2559,9 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2600,8 +2600,8 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
         if ( pass2 ) {
 
             /* Create the dataset. */
-            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
-                                    dataspace_id, H5P_DEFAULT, 
+            dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
+                                    dataspace_id, H5P_DEFAULT,
 				    H5P_DEFAULT, H5P_DEFAULT);
 
             if ( dataspace_id < 0 ) {
@@ -2657,14 +2657,14 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
         }
 
         if ( ( verbose ) && ( ! pass2 ) ) {
-            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n", 
+            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
                      fcn_name, pass2, failure_mssg2);
             HDfflush(stdout);
-        } 
+        }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d exiting.\n", 
+            HDfprintf(stdout, "%s%d cp = %d exiting.\n",
                       fcn_name, (int)pass2, cp++);
             HDfflush(stdout);
         }
@@ -2672,7 +2672,7 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
         mark_test_in_progress("mdj_file_unmarking_on_journaling_shutdown_test");
 
         abort();
-    } 
+    }
 
     return;
 
@@ -2682,23 +2682,23 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_unmarking_on_journaling_shutdown_test
  *
- * Purpose:  	Check to verify that a HDF5 file on which journaling is 
- *		enabled is marked as having not having journaling in 
- *		progress when journaling is disabled via the 
+ * Purpose:  	Check to verify that a HDF5 file on which journaling is
+ *		enabled is marked as having not having journaling in
+ *		progress when journaling is disabled via the
  *		H5Fset_mdc_config() API	call.
  *
- *              Do this by trying to open the test file created by the 
+ *              Do this by trying to open the test file created by the
  *		associated setup function.
  *
- *              Open should succeed, as the file should be marked as 
+ *              Open should succeed, as the file should be marked as
  *              journaling not in progress.
  *
- *              Note that the file will be synced out as part of the 
- *              journaling shutdown process, so the metadata should be 
+ *              Note that the file will be synced out as part of the
+ *              journaling shutdown process, so the metadata should be
  *              in a consistant state.  Strictly speaking, this is not
  *              necessary for this test, for as long as the the file is
  *              not marked as having journaling in progress, we should
- *              pass.  However, testing this without using the HDF5 
+ *              pass.  However, testing this without using the HDF5
  *              library to open the file would be inconvenient -- hence
  *              we make use of the sync on journal shutdown to make the
  *              test easier to implement.
@@ -2710,13 +2710,13 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 {
-    const char * fcn_name = 
+    const char * fcn_name =
 	    "check_mdj_file_unmarking_on_journaling_shutdown_test():";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
@@ -2730,7 +2730,7 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -2744,21 +2744,21 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2772,9 +2772,9 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-                  fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+                  fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2800,7 +2800,7 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -2858,11 +2858,11 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 #endif
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d done.\n", 
+            HDfprintf(stdout, "%s%d cp = %d done.\n",
 		      fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
 	}
-    } 
+    }
 
     return;
 
@@ -2872,13 +2872,13 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	setup_mdj_file_unmarking_on_recovery_test
  *
- * Purpose:  	Setup test to verify that HDF5 file that is marked as as 
- *		having journaling in progress is unmarked when the file 
- *		is opened with the journal_recovered flag set in the 
- *		cache configuration structure in the file access 
+ * Purpose:  	Setup test to verify that HDF5 file that is marked as as
+ *		having journaling in progress is unmarked when the file
+ *		is opened with the journal_recovered flag set in the
+ *		cache configuration structure in the file access
  *		property list.
  *
- *              Do this by creating a test file metadata journaling enabled, 
+ *              Do this by creating a test file metadata journaling enabled,
  *		and then exiting without closing the file.  Note that
  *              we must flush the file before exiting, as we want the file
  *              to be readable, but be marked as journaling in progress.
@@ -2887,10 +2887,10 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              7/14/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_unmarking_on_recovery_test():";
@@ -2906,7 +2906,7 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -2920,21 +2920,21 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -2948,9 +2948,9 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -2971,7 +2971,7 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
          * initialization.
          */
         H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr,
                              trans_num, "dummy");
 
         if ( show_progress ) {
@@ -2996,14 +2996,14 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
         }
 
         if ( ( verbose ) && ( ! pass2 ) ) {
-            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n", 
+            HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
                      fcn_name, pass2, failure_mssg2);
 	    HDfflush(stdout);
-        } 
+        }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d exiting.\n", 
+            HDfprintf(stdout, "%s%d cp = %d exiting.\n",
                       fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
@@ -3011,7 +3011,7 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
         mark_test_in_progress("mdj_file_unmarking_on_recovery_test");
 
         abort();
-    } 
+    }
 
     return;
 
@@ -3021,10 +3021,10 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 /***************************************************************************
  * Function: 	check_mdj_file_unmarking_on_recovery_test
  *
- * Purpose:  	Check to verify that a HDF5 file that is marked as as 
- *		having journaling in progress is unmarked when the file 
- *		is opened with the journal_recovered flag set in the 
- *		cache configuration structure in the file access property 
+ * Purpose:  	Check to verify that a HDF5 file that is marked as as
+ *		having journaling in progress is unmarked when the file
+ *		is opened with the journal_recovered flag set in the
+ *		cache configuration structure in the file access property
  *		list.
  *
  *              Do this by trying to open the test file created by the
@@ -3034,10 +3034,10 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
  *              in progress.
  *
  *              Try to open again with the journal_recovered flag set.  This
- *              should succeed.  
+ *              should succeed.
  *
- *		Close and open again without the journal recovered flag 
- *		set to verify that the file is no longer marked as 
+ *		Close and open again without the journal recovered flag
+ *		set to verify that the file is no longer marked as
  *		having journaling in progress.
  *
  *              On either success or failure, clean up the test file and
@@ -3047,10 +3047,10 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
  *
  * Programmer: 	John Mainzer
  *              10/8/08
- * 
+ *
  **************************************************************************/
 
-static void 
+static void
 check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_unmarking_on_recovery_test():";
@@ -3068,7 +3068,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
     /* setup the file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
             pass2 = FALSE;
@@ -3082,21 +3082,21 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
     if ( pass2 ) {
 
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
             pass2 = FALSE;
             failure_mssg2 = "h5_fixname() failed (2).\n";
         }
-        else if ( strlen(journal_filename) >= 
+        else if ( strlen(journal_filename) >=
 			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             pass2 = FALSE;
@@ -3110,9 +3110,9 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
-	          fcn_name, journal_filename); 
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+	          fcn_name, journal_filename);
 	HDfflush(stdout);
     }
 
@@ -3138,7 +3138,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
         /* call H5Pset_libver_bounds() on the fapl_id */
         if ( pass2 ) {
 
-            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
                 pass2 = FALSE;
@@ -3152,12 +3152,12 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
         }
 
 	/* attempt to open the file -- should fail as the setup fcn
-	 * exited without closing the file properly, and thus 
+	 * exited without closing the file properly, and thus
 	 * the file should still be marked as having journaling
 	 * in progress.
 	 */
 
-	if ( pass2 ) { 
+	if ( pass2 ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -3179,7 +3179,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
         }
 
 
-	/* now set the file recovered flag in the journal config 
+	/* now set the file recovered flag in the journal config
 	 * structure in the fapl, and try to open again.  Should
 	 * succeed, and the file should not be marked as having
 	 * journaling in progress.
@@ -3222,7 +3222,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) { 
+	if ( pass2 ) {
 
 	    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
@@ -3254,7 +3254,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	    HDfflush(stdout);
         }
 
-	/* now, turn off the journal recovered flag, and try to 
+	/* now, turn off the journal recovered flag, and try to
 	 * open the file again.  Should succeed.
 	 */
 
@@ -3277,7 +3277,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) { 
+	if ( pass2 ) {
 
 	    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
@@ -3296,7 +3296,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 
 	if ( pass2 ) {
 
-	    if ( ( H5Fclose(file_id) < 0 ) || 
+	    if ( ( H5Fclose(file_id) < 0 ) ||
 		 ( H5Pclose(fapl_id) < 0 ) ) {
 
                 pass2 = FALSE;
@@ -3317,11 +3317,11 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 #endif
 	if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d done.\n", 
+            HDfprintf(stdout, "%s%d cp = %d done.\n",
                       fcn_name, (int)pass2, cp++);
 	    HDfflush(stdout);
         }
-    } 
+    }
 
     return;
 
@@ -3348,7 +3348,7 @@ void
 usage(void)
 
 {
-    const char * s[] = 
+    const char * s[] =
     {
 	"\n",
         "cache2_jnl_file_marking:\n",
@@ -3388,7 +3388,7 @@ usage(void)
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	Run the specified setup or check of metadata journaling 
+ * Purpose:	Run the specified setup or check of metadata journaling
  * 		HDF5 file marking or unmarking.
  *
  * Return:	Success: 0
@@ -3473,7 +3473,7 @@ main(int argc,
                 check_mdj_file_marking_after_open_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
@@ -3489,7 +3489,7 @@ main(int argc,
                 check_mdj_file_marking_on_create_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
@@ -3505,7 +3505,7 @@ main(int argc,
                 check_mdj_file_marking_on_open_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
@@ -3521,12 +3521,12 @@ main(int argc,
                 check_mdj_file_unmarking_on_file_close_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
 
-	} else if ( strcmp("file_unmarking_on_journaling_shutdown", argv[1]) 
+	} else if ( strcmp("file_unmarking_on_journaling_shutdown", argv[1])
 		    == 0 ) {
 
             if ( setup ) {
@@ -3538,7 +3538,7 @@ main(int argc,
                 check_mdj_file_unmarking_on_journaling_shutdown_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
@@ -3554,7 +3554,7 @@ main(int argc,
                 check_mdj_file_unmarking_on_recovery_test(verbose);
 
 	    } else {
-	
+
 		pass2 = FALSE;
 		failure_mssg2 = "setup and check both FALSE?";
 	    }
@@ -3582,7 +3582,7 @@ main(int argc,
             }
 	} else {
 
-	    HDfprintf(stdout, "FAILED.  Failure mssg = \"%s\"\n", 
+	    HDfprintf(stdout, "FAILED.  Failure mssg = \"%s\"\n",
 		      failure_mssg2);
         }
     }
@@ -3592,7 +3592,7 @@ main(int argc,
         result = 1;
     }
 
-    if ( result != 0 ) { 
+    if ( result != 0 ) {
 
         HDfprintf(stderr, "fail\n");
     }

@@ -300,7 +300,7 @@ static void test_h5s_scalar_write()
 	verify_val(ext_type, H5S_SCALAR, "DataSpace::getSimpleExtentType", __LINE__, __FILE__);
 
 	// Create and write a dataset
-	DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT,sid1); 
+	DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT,sid1);
 	dataset.write(&space3_data, PredType::NATIVE_UINT);
 
 	PASSED();

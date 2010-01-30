@@ -77,7 +77,7 @@ helppage(void)
 
 
 int
-set_journal(hid_t faccpl, const char * journalname) 
+set_journal(hid_t faccpl, const char * journalname)
 {
     H5AC2_jnl_config_t jnl_config;
 
@@ -132,8 +132,8 @@ main (int ac, char **av)
      *			        # add more rows, then crash. JournalEG.h5
      *				# is not readable as an HDF5 file.
      * ./h5recover -j JournalEG.h5.jnl JournalEG.h5	# Recover the file.
-     * 
-     * 
+     *
+     *
      */
     if (ac<=1){
 	helppage();
@@ -155,7 +155,7 @@ main (int ac, char **av)
 	}
     }
 
-    /* Create a file access property list to be used by both create and 
+    /* Create a file access property list to be used by both create and
      * reopen modes.
      * Use latest lib version needed by the Journaling feature.
      */
@@ -191,7 +191,7 @@ main (int ac, char **av)
 
 	/* Create dataset creation property list */
 	dsetpl = H5Pcreate(H5P_DATASET_CREATE);
-	
+
 	/* Enable chunking needed for unlimited dimesion */
 	H5Pset_layout(dsetpl, H5D_CHUNKED);
 	H5Pset_chunk(dsetpl, 2, chunk);
@@ -344,7 +344,7 @@ writedata(hid_t file, hid_t dataset, int begin, int end, hid_t timestep)
     fprintf(stderr, "File data flushed.\n");
     retcode = H5Awrite(timestep, H5T_NATIVE_INT, &timecounter);
     fprintf(stderr, "Time step counter updated.\n");
-    
-    
+
+
     return(retcode);
 }

@@ -55,7 +55,7 @@ extern "C" {
  * structure.
  *
  * Similarly, the open_trace_file, close_trace_file, and trace_file_name
- * fields do not appear in H5C2_auto_size_ctl_t, as most trace file 
+ * fields do not appear in H5C2_auto_size_ctl_t, as most trace file
  * issues are handled at the H5AC2 level.  The one exception is storage of
  * the pointer to the trace file, which is handled by H5C2.
  *
@@ -80,7 +80,7 @@ extern "C" {
  *
  * 	The trace file is a debuging feature that allow the capture of
  * 	top level metadata cache requests for purposes of debugging and/or
- * 	optimization.  This field should normally be set to FALSE, as 
+ * 	optimization.  This field should normally be set to FALSE, as
  * 	trace file collection imposes considerable overhead.
  *
  * 	This field should only be set to TRUE when the trace_file_name
@@ -98,7 +98,7 @@ extern "C" {
  * trace_file_name: Full path of the trace file to be opened if the
  * 	open_trace_file field is TRUE.
  *
- * 	In the parallel case, an ascii representation of the mpi rank of 
+ * 	In the parallel case, an ascii representation of the mpi rank of
  * 	the process will be appended to the file name to yield a unique
  * 	trace file name for each process.
  *
@@ -106,12 +106,12 @@ extern "C" {
  * 	characters.
  *
  * evictions_enabled:  Boolean field used to either report the current
- * 	evictions enabled status of the cache, or to set the cache's 
+ * 	evictions enabled status of the cache, or to set the cache's
  *	evictions enabled status.
  *
- * 	In general, the metadata cache should always be allowed to 
- * 	evict entries.  However, in some cases it is advantageous to 
- * 	disable evictions briefly, and thereby postpone metadata 
+ * 	In general, the metadata cache should always be allowed to
+ * 	evict entries.  However, in some cases it is advantageous to
+ * 	disable evictions briefly, and thereby postpone metadata
  * 	writes.  However, this must be done with care, as the cache
  * 	can grow quickly.  If you do this, re-enable evictions as
  * 	soon as possible and monitor cache size.
@@ -177,7 +177,7 @@ extern "C" {
  *              at its maximum size, or if the cache is not already using
  *              all available space.
  *
- *      Note that you must set decr_mode to H5C2_incr__off if you 
+ *      Note that you must set decr_mode to H5C2_incr__off if you
  *      disable metadata cache entry evictions.
  *
  * lower_hr_threshold: Lower hit rate threshold.  If the increment mode
@@ -291,7 +291,7 @@ extern "C" {
  *              over the last epoch exceeds the value provided in the
  *              upper_hr_threshold field.
  *
- *      Note that you must set decr_mode to H5C2_decr__off if you 
+ *      Note that you must set decr_mode to H5C2_decr__off if you
  *      disable metadata cache entry evictions.
  *
  * upper_hr_threshold: Upper hit rate threshold.  The use of this field
@@ -449,11 +449,11 @@ typedef struct H5AC2_cache_config_t
  * structure H5AC2_jnl_config_t
  *
  * H5AC2_jnl_config_t is a public structure intended for use in public APIs.
- * At least in its initial incarnation, it is intended to package all the 
- * data needed to configure metadata journaling.  In the future, we may 
+ * At least in its initial incarnation, it is intended to package all the
+ * data needed to configure metadata journaling.  In the future, we may
  * use it to package configuration data for other types of journaling as well.
  *
- * The fields of the structure are discussed individually below.  Note 
+ * The fields of the structure are discussed individually below.  Note
  * that the fields with the "jbrb_" prefix are used to configure the
  * journal buffer ring buffer -- a ring buffer of buffers used to buffer
  * output of journal messages.
@@ -463,17 +463,17 @@ typedef struct H5AC2_cache_config_t
  *      H5AC2_cache_config_t passed to the cache must have a known
  *      version number, or an error will be flagged.
  *
- * enable_journaling:  Boolean flag that is set to TRUE if journaling is 
- * 	to be enabled, and to FALSE otherwise.  
+ * enable_journaling:  Boolean flag that is set to TRUE if journaling is
+ * 	to be enabled, and to FALSE otherwise.
  *
  * 	When the cache configuration is reported, this field is TRUE iff
  * 	journaling is enabled.
  *
- * journal_file_path:  Full path of the file to be used to store the 
+ * journal_file_path:  Full path of the file to be used to store the
  * 	metadata journal.  This field is only defined if enable_journaling
  * 	is TRUE.
  *
- * 	At present, the length of the journal file path is restricted to 
+ * 	At present, the length of the journal file path is restricted to
  * 	no more than H5AC2__MAX_JOURNAL_FILE_NAME_LEN.
  *
  * journal_recovered:  Boolean flag use to indicate that we are opening
@@ -483,22 +483,22 @@ typedef struct H5AC2_cache_config_t
  * 	Unless you are the writer of a new journal recovery tool, you
  * 	should always set this field to FALSE.
  *
- * jbrb_buf_size: size_t containing the size of each individual buffer 
+ * jbrb_buf_size: size_t containing the size of each individual buffer
  * 	in the journal buffer ring buffer.  This size should be chosen
- * 	to be some multiple of the block size used by the file system 
+ * 	to be some multiple of the block size used by the file system
  * 	on which the journal file will be written.
  *
  * jbrb_num_bufs: Integer containing the number of buffers in the journal
  * 	buffer ring buffer.  If synchronous I/O is used, one or two buffers
  * 	is sufficient.  If asynchronous I/O is used, the number of buffers
- * 	should be sufficiently large that a write on buffer is likely to 
+ * 	should be sufficiently large that a write on buffer is likely to
  * 	complete before that buffer is needed again.
  *
- * jbrb_use_aio:  Boolean flag indicating whether we should use 
+ * jbrb_use_aio:  Boolean flag indicating whether we should use
  * 	asynchronous I/O for journal entry writes.
  *
  * jbrb_human_readable: Boolean flag which determines whether the journal
- * 	file will be written in human readable form.  In general, this 
+ * 	file will be written in human readable form.  In general, this
  * 	field should be set to false, as the human readable journal
  * 	file is at least twice a large as the machine readable version.
  *

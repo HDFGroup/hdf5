@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 !
 ! This file contains a FORTRAN90 example for the H5LT API
@@ -20,7 +20,7 @@
 program lite_example
 
 
-use H5LT ! module of H5LT 
+use H5LT ! module of H5LT
 use HDF5 ! module of HDF5 library
 
 implicit none
@@ -28,7 +28,7 @@ implicit none
 integer, parameter :: DIM1 = 4;                      ! Dimension of array
 character(len=9), parameter :: filename = "exlite.h5"! File name
 character(LEN=5), parameter :: dsetname1 = "dset1"   ! Dataset name
-integer(HID_T) :: file_id                            ! File identifier 
+integer(HID_T) :: file_id                            ! File identifier
 integer(HSIZE_T), dimension(1) :: dims = (/DIM1/)    ! Dataset dimensions
 integer        :: rank = 1                           ! Dataset rank
 integer, dimension(DIM1) :: buf1                     ! Data buffer
@@ -49,7 +49,7 @@ end do
 ! Initialize FORTRAN predefined datatypes.
 !
 
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -58,13 +58,13 @@ call h5open_f(errcode)
 call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
 !
-! write dataset. 
+! write dataset.
 !
 
 call h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf1, errcode)
 
 !
-! read dataset. 
+! read dataset.
 !
 
 call h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr1, dims, errcode)
@@ -96,10 +96,10 @@ call h5fclose_f(file_id, errcode)
 call h5close_f(errcode)
 
 !
-! end 
+! end
 !
 
-end program lite_example 
+end program lite_example
 
 
 

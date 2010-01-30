@@ -77,15 +77,15 @@ static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *
 /* Metadata cache callbacks */
 static void *H5FS_cache_hdr_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id, 
-    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5FS_cache_sinfo_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
-    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_sinfo_free_icr(haddr_t addr, size_t len, void *thing);
 
@@ -145,7 +145,7 @@ const H5AC2_class_t H5AC2_FSPACE_SINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
+H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
@@ -267,9 +267,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
-    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
-    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len, 
+H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
     void UNUSED **new_image)
 {
     H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
@@ -396,7 +396,7 @@ H5FS_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
+H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
@@ -417,7 +417,7 @@ H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Allocate a new free space section info */
     if(NULL == (sinfo = H5FS_sinfo_new(udata->f, udata->fspace)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    
+
     /* Link free space manager to section info */
     /* (for deserializing sections) */
     HDassert(udata->fspace->sinfo == NULL);
@@ -660,8 +660,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5FS_sinfo_t * sinfo = (H5FS_sinfo_t *)_thing;

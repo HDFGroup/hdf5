@@ -263,7 +263,7 @@ H5G_ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
 /*-------------------------------------------------------------------------
  * Function:	H5G_link_to_info
  *
- * Purpose:	Retrieve information from a link object 
+ * Purpose:	Retrieve information from a link object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -336,7 +336,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_link_to_loc
  *
- * Purpose:	Build group location from group and link object 
+ * Purpose:	Build group location from group and link object
  *
  * Return:	Non-negative on success/Negative on failure
  *

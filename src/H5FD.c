@@ -208,9 +208,9 @@ H5FD_term_interface(void)
             /* Reset the VFL drivers, if they've been closed */
             if(H5I_nmembers(H5I_VFL)==0) {
                 H5FD_sec2_term();
-#ifdef H5_HAVE_DIRECT 
+#ifdef H5_HAVE_DIRECT
                 H5FD_direct_term();
-#endif           
+#endif
                 H5FD_log_term();
                 H5FD_stdio_term();
 #ifdef H5_HAVE_WINDOWS

@@ -552,12 +552,12 @@ typedef struct H5HF_dblock_cache_ud_t {
     H5HF_parent_t par_info;     /* Parent info */
     H5F_t * f;                  /* File pointer */
     size_t dblock_size;		/* size of the direct block, which bears
-				 * no necessary relation to the block 
-				 * odi_size -- the size of the on disk 
-				 * image of the block.  Note that the 
+				 * no necessary relation to the block
+				 * odi_size -- the size of the on disk
+				 * image of the block.  Note that the
 				 * metadata cache is only interested
-				 * in the odi_size, and thus it is this 
-				 * value that is passed to the cache in 
+				 * in the odi_size, and thus it is this
+				 * value that is passed to the cache in
 				 * calls to it.
 				 */
     unsigned filter_mask;	/* Excluded filters for direct block */

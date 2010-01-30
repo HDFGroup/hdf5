@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,11 +11,11 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 SUBROUTINE test_h5o(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
@@ -35,7 +35,7 @@ SUBROUTINE test_h5o(cleanup, total_error)
   CALL check("h5_cleanup_f", error, total_error)
   IF(cleanup) CALL h5_cleanup_f("test", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
-  
+
 END SUBROUTINE test_h5o
 
 !/****************************************************************
@@ -46,8 +46,8 @@ END SUBROUTINE test_h5o
 
 SUBROUTINE test_h5o_link(total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
 
@@ -79,7 +79,7 @@ SUBROUTINE test_h5o_link(total_error)
         wdata(i,j) = i*j
      ENDDO
   ENDDO
-  
+
   ! /* Create the dataspace */
   CALL h5screate_simple_f(2, dims, space_id, error)
   CALL check("h5screate_simple_f",error,total_error)
@@ -97,14 +97,14 @@ SUBROUTINE test_h5o_link(total_error)
   !/* Make a FAPL that uses the "use the latest version of the format" bounds */
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F,fapl_id,error)
   CALL check("h5Pcreate_f",error,total_error)
-  
+
   ! /* Set the "use the latest version of the format" bounds for creating objects in the file */
-  
+
   CALL H5Pset_libver_bounds_f(fapl_id, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
-  
+
 !!$ ret = H5Pset_libver_bounds(fapl_id, (new_format ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST);
-  
+
   ! /* Create a new HDF5 file */
   CALL H5Fcreate_f(TEST_FILENAME, H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
   CALL check("H5Fcreate_f", error, total_error)
@@ -112,11 +112,11 @@ SUBROUTINE test_h5o_link(total_error)
   ! /* Close the FAPL */
   CALL h5pclose_f(fapl_id, error)
   CALL check("h5pclose_f",error,total_error)
-  
+
   ! /* Create and commit a datatype with no name */
   CALL H5Tcopy_f( H5T_NATIVE_INTEGER, type_id, error)
   CALL check("H5Tcopy_F",error,total_error)
-  
+
   CALL H5Tcommit_anon_f(file_id, type_id, error) ! using no optional parameters
   CALL check("H5Tcommit_anon_F",error,total_error)
 
@@ -130,7 +130,7 @@ SUBROUTINE test_h5o_link(total_error)
 
 
   ! /* Verify that we can write to and read from the dataset */
-  
+
   ! /* Write the data to the dataset */
 
 !EP  CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata, dims, error, &
@@ -143,7 +143,7 @@ SUBROUTINE test_h5o_link(total_error)
 !EP       mem_space_id=H5S_ALL_F, file_space_id=H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
   CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error)
   CALL check("h5dread_f", error, total_error)
-        
+
   ! /* Verify the data */
   DO i = 1, TEST6_DIM1
      DO j = 1, TEST6_DIM2
@@ -175,17 +175,17 @@ SUBROUTINE test_h5o_link(total_error)
   ! /* Re-open datatype using new link */
   CALL H5Topen_f(group_id, "datatype", type_id, error)
   CALL check("h5topen_f", error, total_error)
-  
+
   ! /* Link nameless group to root group and close the group ID*/
   CALL H5Olink_f(group_id, file_id, "/group", error)
   CALL check("H5Olink_f", error, total_error)
-  
+
 
   CALL h5gclose_f(group_id, error)
   CALL check("h5gclose_f",error,total_error)
 
   ! /* Open dataset through root group and verify its data */
-  
+
   CALL H5Dopen_f(file_id, "/group/inter_group/dataset", dset_id, error)
   CALL check("test_lcpl.h5dopen_f", error, total_error)
 
@@ -227,8 +227,8 @@ END SUBROUTINE test_h5o_link
 
 SUBROUTINE test_h5o_plist(total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
 
@@ -240,7 +240,7 @@ SUBROUTINE test_h5o_plist(total_error)
   INTEGER :: max_compact, min_dense            !/* Actual phase change parameters */
   INTEGER :: error                             !/* Value returned from API calls */
   CHARACTER(LEN=7), PARAMETER :: TEST_FILENAME = 'test.h5'
-  
+
 
 !  PRINT*,'Testing object creation properties'
 
@@ -275,7 +275,7 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
   CALL H5Pset_attr_phase_change_f(tcpl, def_max_compact+1, def_min_dense-1, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  
+
   ! /* Retrieve attribute phase change values on each creation property list and verify */
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
@@ -307,7 +307,7 @@ SUBROUTINE test_h5o_plist(total_error)
   ! /* Commit the type inside the group anonymously and link it in */
   CALL h5tcopy_f(H5T_NATIVE_INTEGER, dtype, error)
   CALL check("h5tcopy_f", error, total_error)
-  
+
   CALL H5Tcommit_anon_f(fid, dtype, error, tcpl_id=tcpl)
   CALL check("H5Tcommit_anon_f",error,total_error)
 
@@ -321,7 +321,7 @@ SUBROUTINE test_h5o_plist(total_error)
   ! /* Create the dataset anonymously and link it in */
   CALL H5Dcreate_anon_f(fid, H5T_NATIVE_INTEGER, dspace, dset, error, dcpl )
   CALL check("H5Dcreate_anon_f",error,total_error)
-  
+
   CALL H5Olink_f(dset, fid, "dataset", error)
   CALL check("H5Olink_f", error, total_error)
 
@@ -338,7 +338,7 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL check("h5pclose_f", error, total_error)
 
   ! /* Retrieve each object's creation property list */
-  
+
   CALL H5Gget_create_plist_f(grp, gcpl, error)
   CALL check("H5Gget_create_plist", error, total_error)
 
@@ -367,7 +367,7 @@ SUBROUTINE test_h5o_plist(total_error)
 
 
   !/* Close current objects */
-  
+
   CALL h5pclose_f(gcpl,error)
   CALL check("h5pclose_f", error, total_error)
   CALL h5pclose_f(dcpl,error)
@@ -427,7 +427,7 @@ SUBROUTINE test_h5o_plist(total_error)
 
 
   ! /* Close current objects */
-  
+
   CALL h5pclose_f(gcpl,error)
   CALL check("h5pclose_f", error, total_error)
   CALL h5pclose_f(dcpl,error)

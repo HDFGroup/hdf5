@@ -218,7 +218,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *                                  EIP, April 9, 2005
  *                    Added Generic flags introduced in version 1.8
  *                                  MSB, January, 2008
- *                    Added types in lines h5*_flags = ( )variable to match input 
+ *                    Added types in lines h5*_flags = ( )variable to match input
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
@@ -272,7 +272,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
     h5f_flags[15] = (int_f)H5F_OBJ_ALL;
     h5f_flags[16] = (int_f)H5F_LIBVER_EARLIEST;
     h5f_flags[17] = (int_f)H5F_LIBVER_LATEST;
-                           
+
 /*
  *  H5FD flags
  */
@@ -309,7 +309,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
     h5g_flags[3] = (int_f)H5O_TYPE_NAMED_DATATYPE;
 /* This value can no longer be returned and all these flags should be updated
  *      to reflect the refinements between links and objects. -QAK */
-/*      h5g_flags[4] = H5G_LINK; */    
+/*      h5g_flags[4] = H5G_LINK; */
     h5g_flags[5] = (int_f)H5L_TYPE_ERROR;
     h5g_flags[6] = (int_f)H5L_TYPE_HARD;
     h5g_flags[7] = (int_f)H5L_TYPE_SOFT;
@@ -339,7 +339,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
     h5l_flags[3] = (int_f)H5L_TYPE_EXTERNAL;
     h5l_flags[4] = (int_f)H5L_SAME_LOC; /* Macro to indicate operation occurs on same location */
     h5l_flags[5] = (int_f)H5L_LINK_CLASS_T_VERS; /* Current version of the H5L_class_t struct */
- 
+
 /*
  *  H5O flags
  */
@@ -374,7 +374,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5o_flags[16] = (int_f)H5O_HDR_ATTR_CRT_ORDER_INDEXED; /* Attribute creation order has index */
       h5o_flags[17] = (int_f)H5O_HDR_ATTR_STORE_PHASE_CHANGE; /* Non-default attribute storage phase change values stored */
       h5o_flags[18] = (int_f)H5O_HDR_STORE_TIMES; /* Store access, modification, change & birth times for object */
-      h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS; 
+      h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS;
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
@@ -519,8 +519,8 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5_generic_flags[1] = (int_f)H5_INDEX_NAME;      /* Index on names 			*/
       h5_generic_flags[2] = (int_f)H5_INDEX_CRT_ORDER; /* Index on creation order 		*/
       h5_generic_flags[3] = (int_f)H5_INDEX_N;         /* Index on creation order 		*/
-      
-      
+
+
       /* H5_iter_order_t enum struct */
 
       h5_generic_flags[4] = (int_f)H5_ITER_UNKNOWN;       /* Unknown order */

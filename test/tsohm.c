@@ -1072,7 +1072,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
 
     attr_id = H5Acreate2(group_id, "attribute", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
-    
+
     /* Open the attribute to get another handle */
     attr_id2 = H5Aopen(group_id, "attribute", H5P_DEFAULT);
     CHECK_I(attr_id2, "H5Aopen");
@@ -1177,7 +1177,7 @@ static void test_sohm_attrs(void)
 
     sohm_attr_helper(fcpl_id);
 
-    
+
     /* Run test with all three kinds of message shared */
     ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_ATTR_FLAG, 2);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
@@ -1545,7 +1545,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             /* Get the file's size now */
             if(x == 0)
                 ret_sizes->first_dset = h5_get_file_size(FILENAME);
-            else 
+            else
                 ret_sizes->second_dset = h5_get_file_size(FILENAME);
 
             file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1978,7 +1978,7 @@ static void size2_verify(void)
  *              function size2_helper.  The test measures the size of the
  *              file at various points.  Once all of the files have been
  *              generated, the test compares the measured sizes of the files.
- *              
+ *
  *
  * Programmer:  James Laird
  *              Friday, November 17, 2006
@@ -1998,7 +1998,7 @@ static void test_sohm_size2(int close_reopen)
     /* Sizes for files that don't share all kinds of messages */
     size2_helper_struct share_some_med, share_some_btree;
     /* Sizes for files that share different sizes of messages */
-    size2_helper_struct share_some_toobig_index, share_tiny_index, type_space_index; 
+    size2_helper_struct share_some_toobig_index, share_tiny_index, type_space_index;
     herr_t      ret;
 
     if(close_reopen == 0)
@@ -2619,7 +2619,7 @@ static void delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id,
     CHECK_I(attr_id, "H5Acreate2");
 
     /* Write to attribute */
-    ret = H5Awrite(attr_id, H5T_NATIVE_CHAR, &wdata); 
+    ret = H5Awrite(attr_id, H5T_NATIVE_CHAR, &wdata);
     CHECK_I(ret, "H5Awrite");
 
     ret = H5Aclose(attr_id);
@@ -3134,7 +3134,7 @@ static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
     dset_id = H5Dcreate2(src_file_id, "ext_link/dataset", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(dset_id, "H5Dcreate2");
 
-    /* Close the dataset and both files to make sure everything gets flushed 
+    /* Close the dataset and both files to make sure everything gets flushed
      * out of memory
      */
     ret = H5Dclose(dset_id);
@@ -3785,7 +3785,7 @@ test_sohm_extend_dset(void)
 
 
 /****************************************************************
-** 
+**
 **  test_sohm(): Main Shared Object Header Message testing routine.
 **
 ****************************************************************/

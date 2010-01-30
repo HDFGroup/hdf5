@@ -12,12 +12,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  * writer HDF5 API module of the trecover test program.
  *
  * Creator: Albert Cheng, Jan 28, 2008.
  */
- 
+
 #include "trecover.h"
 
 int
@@ -61,7 +61,7 @@ journal_files(const char *filename, const char *ctl_filename, const char *jnl_fi
     if (!patch){
 
     /* set latest format */
-    if ( H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST ) 
+    if ( H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST )
          < 0 ) {
         fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
         H5Pclose(faccpl);
@@ -114,22 +114,22 @@ create_dataset(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
 {
     hid_t       dataset;         /* dataset handle */
     hid_t       dataspace, plist;      /* handles */
-    herr_t      status;                             
+    herr_t      status;
     hsize_t 	maxdims[RANK]; 		/* Dataset dimensions */
 
     /* Default to create an unlimited dimension dataset unless contigous
      * storeage is used.
      */
     if (dstype & DSContig)
-	dataspace = H5Screate_simple(rank, dims, NULL); 
+	dataspace = H5Screate_simple(rank, dims, NULL);
     else{
 	maxdims[0]=H5S_UNLIMITED;
 	maxdims[1]=NY;
-	dataspace = H5Screate_simple(rank, dims, maxdims); 
+	dataspace = H5Screate_simple(rank, dims, maxdims);
     }
     /*
      * Describe the size of the array and create the data space for fixed
-     * size dataset. 
+     * size dataset.
      */
 
     if (dstype & DSContig) {
@@ -235,13 +235,13 @@ create_dataset(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
 
 
 
-    /* 
+    /*
      * All done, close/release resources.
      */
     H5Sclose(dataspace);
 
     return;
-}     
+}
 
 
 /* extend the dataset size to end rows.  If it is not patch,
@@ -309,7 +309,7 @@ writedata(hid_t dataset, int begin, int end)
     while (beginInc <= end){
 	if (beginInc+nrows-1 > end)
 	    nrows=end-beginInc+1;	/* last fragment of rows */
-	
+
 	start[0]=beginInc;
 	start[1]=0;
 	count[0]=nrows;

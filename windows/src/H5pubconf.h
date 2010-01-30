@@ -19,7 +19,7 @@
 /*
  * End of Windows Specific Definitions
  */
- 
+
 /* Define if your system generates wrong code for log2 routine. */
 /* #undef H5_BAD_LOG2_CODE_GENERATED */
 

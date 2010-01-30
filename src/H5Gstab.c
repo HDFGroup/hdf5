@@ -651,7 +651,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_get_name_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the name of a link
  *
  * Return:	Success:        Non-negative
@@ -869,7 +869,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_lookup_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the link
  *
  * Return:	Success:        Non-negative
@@ -984,7 +984,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_get_type_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the type of an object
  *
  * Return:	Success:        Non-negative

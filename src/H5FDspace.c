@@ -1659,7 +1659,7 @@ done:
  *              5 January 2007
  *              Due to the complexity EOA for Multi driver, this function
  *              is made failed for now.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 hssize_t
@@ -1684,7 +1684,7 @@ H5FD_get_freespace(const H5FD_t *file)
      * It doesn't have eoa for the whole file. */
     if(file->driver_id == H5FD_MULTI)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "Multi driver doesn't support this function")
-    
+
     /* Retrieve the 'eoa' for the file */
     eoa = file->cls->get_eoa(file, H5FD_MEM_DEFAULT);
 

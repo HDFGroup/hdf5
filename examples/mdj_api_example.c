@@ -28,68 +28,68 @@
 /*-------------------------------------------------------------------------
  * Function:	mdj_api_example
  *
- * Purpose:	This example demonstrates enabling metadata journaling at file 
- * 		creation time and enabling journaling on an open file.  It 
- * 		also demonstrates disabling metadata journaling both manually 
+ * Purpose:	This example demonstrates enabling metadata journaling at file
+ * 		creation time and enabling journaling on an open file.  It
+ * 		also demonstrates disabling metadata journaling both manually
  * 		during a computation and automatically at file close.  Finally,
  * 		it demonstrates the use of H5Fflush() to keep the journal
  * 		file from becoming too large.
  *
  * 		We begin by creating an HDF5 file with journaling enabled.
  * 		The paths to the HDF5 and journal files are passed in, so
- * 		the only point to consider is whether the journal file 
- * 		already exists, as HDF5 will refuse to overwrite it if 
+ * 		the only point to consider is whether the journal file
+ * 		already exists, as HDF5 will refuse to overwrite it if
  * 		it does.  In this example, we just remove any pre-existing
  * 		journal file unconditionally, but you will probably wish
  * 		to do otherwise in your application.
  *
- *              With these preliminaries dealt with, we allocate a 
- *              file access property list (FAPL).  Journaling uses some 
+ *              With these preliminaries dealt with, we allocate a
+ *              file access property list (FAPL).  Journaling uses some
  *              recent extensions to the superblock, so the first step
  *              is to call H5Pset_libver_bounds() to specify using the
  *              latest version of the HDF5 file format.
  *
- *              Next, we must set up the journaling property.  We could 
+ *              Next, we must set up the journaling property.  We could
  *              do this in several ways, but in this example we will use
- *              H5Pget_jnl_config() to get the default journaling 
- *              configuration, modify that configuration as needed, and then 
+ *              H5Pget_jnl_config() to get the default journaling
+ *              configuration, modify that configuration as needed, and then
  *		use H5Pset_jnl_config() to replace the default journaling
- *              configuration with our own.  See the comments in the code 
- *		for the particulars -- note that we must set the version 
- *		field of the H5AC2_jnl_config_t struct before calling 
+ *              configuration with our own.  See the comments in the code
+ *		for the particulars -- note that we must set the version
+ *		field of the H5AC2_jnl_config_t struct before calling
  *              H5Pget_jnl_config().
  *
  *		After setting up the FAPL, we create the file as usual.
  *		Since the FAPL calls for metadata journaling, journaling
  *              will be enabled on this file.
  *
- *		With the file created and journaling running, we then go off 
+ *		With the file created and journaling running, we then go off
  *		and do what we want -- in this example we set up a selection
- *		of chunked datasets.  Note that these datasets (and our 
+ *		of chunked datasets.  Note that these datasets (and our
  *		access pattern) are chosen to maximize the amount of dirty
- *		metadata generated.  This is done deliberately to exercise 
- *              the matadata journaling features.  Your application will 
+ *		metadata generated.  This is done deliberately to exercise
+ *              the matadata journaling features.  Your application will
  *		presumably be structured quite differently.
  *
  *		After the datasets are created, we then shut down journaling
  *		and re-enable it via H5Fget_jnl_config() and H5Fset_jnl_config()
- *		calls.  Note that when we re-enable journaling via the 
- *		H5Fset_jnl_config() call, we don't need to set all the fields 
+ *		calls.  Note that when we re-enable journaling via the
+ *		H5Fset_jnl_config() call, we don't need to set all the fields
  *		in the H5AC2_jnl_config_t struct again; we are simply re-using
- *		the configuration obtained via the H5Fget_jnl_config() call.  
+ *		the configuration obtained via the H5Fget_jnl_config() call.
  *		(If we had originally opened the file without journaling and
  *		then wanted to enable journaling, we would have to set up the
- *		fields of the H5AC2_jnl_config_t struct in much the same way 
- *		we did earlier in this example.  We would also have had to 
- *		use H5Pset_libver_bounds() to set the FAPL to create the file 
- *              initially with the latest HDF5 file format format.) 
+ *		fields of the H5AC2_jnl_config_t struct in much the same way
+ *		we did earlier in this example.  We would also have had to
+ *		use H5Pset_libver_bounds() to set the FAPL to create the file
+ *              initially with the latest HDF5 file format format.)
  *
- *		Having re-enabled journaling, we then proceed to write to 
+ *		Having re-enabled journaling, we then proceed to write to
  *		our datasets.  Again, please note that our write strategy
  *		(round robin and small chunks) is designed to maximize
  *		dirty metadata generation and to load on the metadata cache.
  *		In your application, you should try to do just the opposite
- *		if possible.  
+ *		if possible.
  *
  *		However, since we are maximizing dirty metadata generation,
  *		the journal file will grow quickly.  This can be a problem,
@@ -98,24 +98,24 @@
  *		and then truncates the journal file, as the content of the
  *		journal becomes irrelevant after the file is flushed.
  *
- * 		After writing data to our datasets, we then do a number of 
- * 		reads.  We could turn off journaling here, as we are not 
- * 		modifying the file.  But since we are not generating any 
+ * 		After writing data to our datasets, we then do a number of
+ * 		reads.  We could turn off journaling here, as we are not
+ * 		modifying the file.  But since we are not generating any
  * 		dirty metadata, we aren't generating any journal entries
  * 		either, so it really doesn't matter.
  *
  * 		Finally, we close the HDF5 file.  Since journaling is enabled,
- * 		the call to H5Fclose() will flush the journal, flush the 
- * 		metadata cache, truncate the journal, mark the file as not 
- * 		having journaling in progress, and then delete the journal 
+ * 		the call to H5Fclose() will flush the journal, flush the
+ * 		metadata cache, truncate the journal, mark the file as not
+ * 		having journaling in progress, and then delete the journal
  * 		file as part of the close.
  *
- *              This example may run for several minutes.  If you are 
+ *              This example may run for several minutes.  If you are
  *              interested in observing the example's behavior (or if you're
- *              just bored), run 'ls -l' every few seconds in the directory 
- *              containing the journal file; you will be able to watch the 
- *              journal file grow, see when it is truncated as the file is 
- *              flushed, and watch it grow again.  This cycle is repeated many 
+ *              just bored), run 'ls -l' every few seconds in the directory
+ *              containing the journal file; you will be able to watch the
+ *              journal file grow, see when it is truncated as the file is
+ *              flushed, and watch it grow again.  This cycle is repeated many
  *              times through the course of the example.
  *
  *
@@ -179,7 +179,7 @@ mdj_api_example(char * hdf5_file_name,
     }
 
     /* The HDF5 Library will refuse to overwrite an existing journal
-     * file -- thus we delete it unconditionally here.  You probably 
+     * file -- thus we delete it unconditionally here.  You probably
      * want to to be more cautious in your application.
      */
     remove(jnl_file_name);
@@ -198,19 +198,19 @@ mdj_api_example(char * hdf5_file_name,
 
 
     /* Metadata journaling requires the latest version of the file format.  */
-    if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+    if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 			      H5F_LIBVER_LATEST) < 0 ) {
 
-	fprintf(stderr, 
+	fprintf(stderr,
 		"can't set latest version of file format.  Exiting...\n");
 	exit(1);
     }
 
 
-    /* Get the current FAPL journaling configuration; this will normally be 
+    /* Get the current FAPL journaling configuration; this will normally be
      * the default. We could just write a predefined journal configuration
-     * structure to the FAPL directly, but creating it in the manner 
-     * illustrated here shows off the H5Pget_jnl_config() call and is less 
+     * structure to the FAPL directly, but creating it in the manner
+     * illustrated here shows off the H5Pget_jnl_config() call and is less
      * susceptible to API definition changes.
      */
     jnl_config_0.version = H5AC2__CURR_JNL_CONFIG_VER;
@@ -224,7 +224,7 @@ mdj_api_example(char * hdf5_file_name,
     }
 
 
-    /* Modify the current FAPL journaling configuration to enable 
+    /* Modify the current FAPL journaling configuration to enable
      * journaling as desired, then write the revised configuration
      * back to the FAPL.
      */
@@ -233,36 +233,36 @@ mdj_api_example(char * hdf5_file_name,
     strcpy(jnl_config_0.journal_file_path, jnl_file_name);
 
     /* jnl_config_0.journal_recovered should always be FALSE unless
-     * you are writing a new journal recovery tool and need to 
-     * tell the library that you have recovered the journal and 
-     * that the file is now readable.  As this field is set to 
+     * you are writing a new journal recovery tool and need to
+     * tell the library that you have recovered the journal and
+     * that the file is now readable.  As this field is set to
      * FALSE by default, we don't touch it here.
      */
 
-    /* The journal buffer size should be some multiple of the block 
-     * size of the underlying file system.  
+    /* The journal buffer size should be some multiple of the block
+     * size of the underlying file system.
      */
     jnl_config_0.jbrb_buf_size = (8 * 1024);
 
-    /* The number of journal buffers should be either 1 or 2 when 
-     * synchronous I/O is used for journal writes.  If asynchronous I/O (AIO) 
-     * is used, the number should be large enough that the write of a buffer 
+    /* The number of journal buffers should be either 1 or 2 when
+     * synchronous I/O is used for journal writes.  If asynchronous I/O (AIO)
+     * is used, the number should be large enough that the write of a buffer
      * will usually be complete by the time that buffer is needed again.
      */
     jnl_config_0.jbrb_num_bufs = 2;
 
-    /* At present, HDF5 does not support AIO for journal writes, so this 
+    /* At present, HDF5 does not support AIO for journal writes, so this
      * field will be FALSE.
      */
     jnl_config_0.jbrb_use_aio = 0; /* FALSE */
 
     /* At present, only human-readable journal files are supported,
-     * so this field will be TRUE for now.  Once machine readable journal 
-     * files become available, journaling should be faster and journal files 
+     * so this field will be TRUE for now.  Once machine readable journal
+     * files become available, journaling should be faster and journal files
      * will be smaller.
      */
     jnl_config_0.jbrb_human_readable = 1; /* TRUE */
-        
+
     status = H5Pset_jnl_config(fapl_id, &jnl_config_0);
 
     if ( status < 0 ) {
@@ -304,7 +304,7 @@ mdj_api_example(char * hdf5_file_name,
 	    exit(1);
 	}
 
-        /* Set the dataset creation property list to specify that the raw data 
+        /* Set the dataset creation property list to specify that the raw data
          * is to be partitioned into 10X10 element chunks.
          */
 
@@ -327,7 +327,7 @@ mdj_api_example(char * hdf5_file_name,
         /* Create the dataset. */
         sprintf(dset_name, "/dset%03d", i);
         dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-			            dataspace_id, H5P_DEFAULT, 
+			            dataspace_id, H5P_DEFAULT,
 				    properties, H5P_DEFAULT);
 
         if ( dataset_ids[i] < 0 ) {
@@ -353,10 +353,10 @@ mdj_api_example(char * hdf5_file_name,
     fprintf(stdout, "disabling and re-enabling journaling...");
     fflush(stdout);
 
-    /* Just for purposes of demonstration, turn off journaling and 
-     * turn it back on again.  Note that this will force a 
-     * flush of the file, including all metadata.  Turning off 
-     * journaling will also cause HDF5 to close and discard the 
+    /* Just for purposes of demonstration, turn off journaling and
+     * turn it back on again.  Note that this will force a
+     * flush of the file, including all metadata.  Turning off
+     * journaling will also cause HDF5 to close and discard the
      * journal file after all metadata is on disk.
      */
     jnl_config_1.version = H5AC2__CURR_JNL_CONFIG_VER;
@@ -381,10 +381,10 @@ mdj_api_example(char * hdf5_file_name,
 
 
     /* Note that here we simply set jnl_config_1.enable_journaling to
-     * TRUE and pass it back to the HDF5 library via the 
-     * H5Fset_jnl_config() call.  
+     * TRUE and pass it back to the HDF5 library via the
+     * H5Fset_jnl_config() call.
      *
-     * We can do this because jnl_config_1 reflected the current 
+     * We can do this because jnl_config_1 reflected the current
      * journaling configuration when we got it from the library
      * via the H5Fget_jnl_config() call, and H5Fset_mdc_config()
      * doesn't change the values of any fields.
@@ -464,7 +464,7 @@ mdj_api_example(char * hdf5_file_name,
 
                 if ( status < 0 ) {
 
-		    fprintf(stderr, 
+		    fprintf(stderr,
 		        "disk H5Sselect_hyperslab() failed.  Exiting...\n");
 		    exit(1);
                 }
@@ -485,18 +485,18 @@ mdj_api_example(char * hdf5_file_name,
 
         i += CHUNK_SIZE;
 
-	/* We are generating a lot of dirty metadata here, all of which 
+	/* We are generating a lot of dirty metadata here, all of which
 	 * will wind up in the journal file.  To keep the journal file
-	 * from getting too big (and to make sure the raw data is on 
+	 * from getting too big (and to make sure the raw data is on
 	 * disk), we should do an occasional flush of the HDF5 file.
 	 *
 	 * This will force all metadata to disk and cause the journal
 	 * file to be truncated.
 	 *
-	 * On the other hand, it will impose a significant file I/O 
+	 * On the other hand, it will impose a significant file I/O
 	 * overhead, and slow us down. (Try it both ways.)
 	 */
-#if 1 
+#if 1
 	status = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
 
         if ( status < 0 ) {
@@ -713,7 +713,7 @@ mdj_api_example(char * hdf5_file_name,
 
 } /* mdj_api_example() */
 
-int 
+int
 main(void)
 {
     mdj_api_example(HDF5_FILE_NAME, JOURNAL_FILE_NAME);

@@ -46,7 +46,7 @@
 #define MONSTER_ENTRY_TYPE	8
 #define VARIABLE_ENTRY_TYPE	9
 
-#define NUMBER_OF_ENTRY_TYPES   10	
+#define NUMBER_OF_ENTRY_TYPES   10
 
 #define PICO_ENTRY_SIZE		(size_t)1
 #define NANO_ENTRY_SIZE		(size_t)4
@@ -124,7 +124,7 @@
 #define FLUSH_OP__MAX_OP	3
 
 #define MAX_FLUSH_OPS		10	/* Maximum number of flush operations
-					 * that can be associated with a 
+					 * that can be associated with a
 					 * cache entry.
 					 */
 
@@ -151,29 +151,29 @@ typedef struct flush_op
                                          * function implementing the flush
                                          * operation.
 					 */
-    hbool_t		flag;		/* boolean flag passed into the 
+    hbool_t		flag;		/* boolean flag passed into the
 					 * function implementing the flush
 					 * operation.  The meaning of the
 					 * flag is dependant upon the flush
 					 * operation:
 					 *
-					 * FLUSH_OP__DIRTY: TRUE iff the 
-					 *   target is pinned, and is to 
-					 *   be dirtied via the 
+					 * FLUSH_OP__DIRTY: TRUE iff the
+					 *   target is pinned, and is to
+					 *   be dirtied via the
 					 *   H5C_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RESIZE: TRUE iff the
-					 *   target is pinned, and is to 
-					 *   be resized via the 
+					 *   target is pinned, and is to
+					 *   be resized via the
 					 *   H5C_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RENAME: TRUE iff the
-					 *    target is to be renamed to 
+					 *    target is to be renamed to
 					 *    its main address.
 					 */
-    size_t		size;		/* New target size in the 
+    size_t		size;		/* New target size in the
 					 * FLUSH_OP__RENAME operation.
 					 * Unused elsewhere.
 					 */
@@ -224,7 +224,7 @@ typedef struct test_entry_t
     hbool_t		  is_protected;	/* entry should currently be on
 					 * the cache's protected list.
                                          */
-    hbool_t		  is_read_only; /* TRUE iff the entry should be 
+    hbool_t		  is_read_only; /* TRUE iff the entry should be
 					 * protected read only.
 					 */
     int			  ro_ref_count; /* Number of outstanding read only
@@ -250,14 +250,14 @@ typedef struct test_entry_t
 					 * entries pinned by this entry.
 					 */
     int			  num_flush_ops; /* integer field containing the
-					 * number of flush operations to 
-					 * be executed when the entry is 
+					 * number of flush operations to
+					 * be executed when the entry is
 					 * flushed.  This value must lie in
-					 * the closed interval 
+					 * the closed interval
 					 * [0, MAX_FLUSH_OPS].
 					 */
     struct flush_op	  flush_ops[MAX_FLUSH_OPS]; /* Array of instances
-					 * of struct flush_op detailing the 
+					 * of struct flush_op detailing the
 					 * flush operations (if any) that
 					 * are to be executed when the entry
 					 * is flushed from the cache.
@@ -265,14 +265,14 @@ typedef struct test_entry_t
 					 * num_flush_ops contains the number
 					 * of valid entries in this array.
 					 */
-    hbool_t		  flush_op_self_resize_in_progress; /* Boolean flag 
-					 * that is set to TRUE iff this 
+    hbool_t		  flush_op_self_resize_in_progress; /* Boolean flag
+					 * that is set to TRUE iff this
 					 * entry is being flushed, it has
 					 * been resized by a resize flush
 					 * op, and the flush function has
 					 * not yet returned,  This field is
-					 * used to turn off overactive santity 
-					 * checking code that would otherwise 
+					 * used to turn off overactive santity
+					 * checking code that would otherwise
 					 * cause a false test failure.
 					 */
     hbool_t		  loaded;       /* entry has been loaded since the

@@ -169,10 +169,10 @@ void *tts_error_thread(void UNUSED *arg)
     int ret;
 
     /* preserve previous error stack handler */
-    H5Eget_auto2(H5E_DEFAULT, &old_error_cb, &old_error_client_data); 
+    H5Eget_auto2(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto2(H5E_DEFAULT, error_callback, NULL); 
+    H5Eset_auto2(H5E_DEFAULT, error_callback, NULL);
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -198,7 +198,7 @@ void *tts_error_thread(void UNUSED *arg)
     assert(ret >= 0);
 
     /* turn our error stack handler off */
-    H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data); 
+    H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data);
 
     return NULL;
 }

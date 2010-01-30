@@ -36,7 +36,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 
 #define H5F_PACKAGE
-#include "H5Fpkg.h"	       
+#include "H5Fpkg.h"
 
 /*****************************/
 /* Package Private Variables */

@@ -61,19 +61,19 @@
  *			The fields of this structure are discussed below:
  *
  *
- * magic:		Unsigned 32-bit integer always set to 
- * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to 
+ * magic:		Unsigned 32-bit integer always set to
+ * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to
  *			validate pointers to instances of H5C_jbrb_t.
  *
  * journal_magic:	int32_t used to store a randomly selected integer
- *			used to tag both the journal file and the 
- *			mdj_config_block.  Should the journal ever be 
- *			run, we will check to see if the magic number 
- *			from the target HDF5 file matches that in the 
+ *			used to tag both the journal file and the
+ *			mdj_config_block.  Should the journal ever be
+ *			run, we will check to see if the magic number
+ *			from the target HDF5 file matches that in the
  *			journal, and refuse to run the journal if it does
  *			not.
  *
- * journal_file_fd:	File Descriptor of the journal file that is being 
+ * journal_file_fd:	File Descriptor of the journal file that is being
  * 			written to from this ring buffer.
  *
  * num_bufs:		The number of journal buffers in the ring buffer. This
@@ -96,7 +96,7 @@
  * 			of the formatting changes of the journal file.
  *
  * get:			Number of the journal buffer that is next in line to
- * 			be written to disk. (i.e. the least recently dirtied 
+ * 			be written to disk. (i.e. the least recently dirtied
  * 			journal buffer).
  *
  * put:			Number of the journal buffer that is currently being
@@ -111,25 +111,25 @@
  * human_readable:	Boolean flag that indicates whether the journal file
  *			is to be human readable or machine readable.
  *
- * offset_width:	If human_readable is FALSE, this field contains the 
- *			width of offsets in the HDF5 file in bytes (as 
- *			specified in the superblock -- sizeof_addr in 
+ * offset_width:	If human_readable is FALSE, this field contains the
+ *			width of offsets in the HDF5 file in bytes (as
+ *			specified in the superblock -- sizeof_addr in
  *			H5F_file_t).
  *
  *			If human_readable is TRUE, this field is undefined.
  *
  * length_width:	If human_readable is FALSE, this field contains the
- *			width of lengths in the HDF5 file in bytes (as 
- *			specified in the super block -- sizeof_size in 
+ *			width of lengths in the HDF5 file in bytes (as
+ *			specified in the super block -- sizeof_size in
  *			H5F_file_t).
  *
  * chksum_cur_msg:	Boolean flag that is only defined if human_readable
  *			is false.  It is used to indicate whether the current
- *			journal message must be checksumed.  If true, the 
+ *			journal message must be checksumed.  If true, the
  *			message checksum to date is stored in the msg_chksum
  *			(discussed below).
  *
- *			If the journal message is being checksumed, this 
+ *			If the journal message is being checksumed, this
  *			field will be set back to FALSE when the checksum
  *			of the messages is written to buffer.
  *
@@ -137,7 +137,7 @@
  *			journal file message.  Note that not all messages
  *			are checksumed -- this field is only defined when
  *			chksum_cur_msg is TRUE.
- *	
+ *
  * journal_is_empty:	Boolean flag that indicates if the journal file
  *			associated with the ring buffer is currently
  * 			empty.
@@ -155,7 +155,7 @@
  *
  * hdf5_file_name: 	Character array containing the name of the HDF5 file
  *			associated with this journal file.
- *	
+ *
  * header_present:	Boolean flag that indicates if the header message has
  *			been written into the current journal file or journal
  *			buffer.
@@ -165,14 +165,14 @@
  * 			ring buffer needs to switch to writing to the next
  *			journal buffer.
  *
- * rb_space_to_rollover: The amount of space left at the end of the ring 
+ * rb_space_to_rollover: The amount of space left at the end of the ring
  *                      buffer, starting at the head pointer, and ending at
  *                      the end of the ring buffer's allocate space. This
  *                      is used to keep track of when a rollover to the start
  *                      of the ring buffer must occur.
  *
  * rb_free_space:       The amount of unused space in the ring buffer.
- * 
+ *
  * head: 		A pointer to the location in the active journal buffer
  *			that is to be written to.
  *
@@ -182,7 +182,7 @@
  *                      is the last transaction successfully on disk.
  *
  * buf:			Array of char pointers to each journal buffer in the
- *			ring buffer. This is allocated as a single chunk of 
+ *			ring buffer. This is allocated as a single chunk of
  * 			memory, and thus data can be written past a buffer
  * 			boundary provided it will not extend past the end
  * 			of the total area allocated for the ring buffer.
@@ -201,7 +201,7 @@
 #define H5C2_JNL__OFFSET_WIDTH_TAG	"offset_width"
 #define H5C2_JNL__LENGTH_WIDTH_TAG	"length_width"
 
-/* signatures and versions used to mark the beginnings of journal file 
+/* signatures and versions used to mark the beginnings of journal file
  * messages in binary journal files.
  */
 
@@ -215,7 +215,7 @@
 #define H5C2_BJNL__END_ADDR_SPACE_SIG	"eoas"
 #define H5C2_BJNL__END_ADDR_SPACE_VER	((uint8_t)(0))
 
-struct H5C2_jbrb_t 
+struct H5C2_jbrb_t
 {
 	uint32_t	magic;
         int32_t		journal_magic;
@@ -249,12 +249,12 @@ struct H5C2_jbrb_t
 };
 
 
-/* With the introduction of the fractal heap, it is now possible for 
+/* With the introduction of the fractal heap, it is now possible for
  * entries to be dirtied, resized, and/or renamed in the flush callbacks.
  * As a result, on flushes, it may be necessary to make multiple passes
  * through the slist before it is empty.  The H5C2__MAX_PASSES_ON_FLUSH
  * #define is used to set an upper limit on the number of passes.
- * The current value was obtained via personal communication with 
+ * The current value was obtained via personal communication with
  * Quincey.  I have applied a fudge factor of 2.
  */
 
@@ -265,8 +265,8 @@ struct H5C2_jbrb_t
  *
  * structure H5C2_mdjsc_record_t
  *
- * A dynamically allocate array of instances of H5C2_mdjsc_record_t is 
- * used to record metadata journaling status change callbacks -- of which 
+ * A dynamically allocate array of instances of H5C2_mdjsc_record_t is
+ * used to record metadata journaling status change callbacks -- of which
  * there can be an arbitrary number.
  *
  * The fields in the structure are discussed individually below:
@@ -275,20 +275,20 @@ struct H5C2_jbrb_t
  * 		to be called on metadata journaling start or stop.  NULL
  * 		if this record is not in use.
  *
- * 		Note that the cache must be clean when this callback 
+ * 		Note that the cache must be clean when this callback
  * 		is called.
  *
  * data_ptr:	Pointer to void.  This value is supplied on registration,
- * 		and is passed to *fcn_ptr.  NULL if this record is not 
+ * 		and is passed to *fcn_ptr.  NULL if this record is not
  * 		in use.
  *
  * fl_next:	Index of the next free entry in the metadata status change
- * 		callback table, or -1 if there is no next free entry or 
+ * 		callback table, or -1 if there is no next free entry or
  * 		if the entry is in use.
  *
  ****************************************************************************/
 
-typedef struct H5C2_mdjsc_record_t 
+typedef struct H5C2_mdjsc_record_t
 {
     H5C2_mdj_status_change_func_t	fcn_ptr;
     void *				data_ptr;
@@ -334,11 +334,11 @@ typedef struct H5C2_mdjsc_record_t
  *
  *						JRM - 9/26/05
  *
- * magic:	Unsigned 32 bit integer always set to H5C2__H5C2_T_MAGIC.  
- * 		This field is used to validate pointers to instances of 
+ * magic:	Unsigned 32 bit integer always set to H5C2__H5C2_T_MAGIC.
+ * 		This field is used to validate pointers to instances of
  * 		H5C2_t.
  *
- * flush_in_progress: Boolean flag indicating whether a flush is in 
+ * flush_in_progress: Boolean flag indicating whether a flush is in
  * 		progress.
  *
  * trace_file_ptr:  File pointer pointing to the trace file, which is used
@@ -347,7 +347,7 @@ typedef struct H5C2_mdjsc_record_t
  *              no trace file should be recorded.
  *
  *              Since much of the code supporting the parallel metadata
- *              cache is in H5AC, we don't write the trace file from 
+ *              cache is in H5AC, we don't write the trace file from
  *              H5C2.  Instead, H5AC reads the trace_file_ptr as needed.
  *
  *              When we get to using H5C2 in other places, we may add
@@ -420,10 +420,10 @@ typedef struct H5C2_mdjsc_record_t
  * writes.  The following field is used to implement this.
  *
  * evictions_enabled:  Boolean flag that is initialized to TRUE.  When
- * 		this flag is set to FALSE, the metadata cache will not 
+ * 		this flag is set to FALSE, the metadata cache will not
  * 		attempt to evict entries to make space for newly protected
  * 		entries, and instead the will grow without limit.
- * 		
+ *
  * 		Needless to say, this feature must be used with care.
  *
  *
@@ -494,7 +494,7 @@ typedef struct H5C2_mdjsc_record_t
  * following two fields have been added.  They are only compiled in when
  * H5C2_DO_SANITY_CHECKS is TRUE.
  *
- * slist_len_increase: Number of entries that have been added to the 
+ * slist_len_increase: Number of entries that have been added to the
  * 		slist since the last time this field was set to zero.
  *
  * slist_size_increase: Total size of all entries that have been added
@@ -817,39 +817,39 @@ typedef struct H5C2_mdjsc_record_t
  *
  * Metadata journaling fields:
  *
- * The following fields are used to support metadata journaling.  The 
+ * The following fields are used to support metadata journaling.  The
  * objective here is to journal all changes in metadata, so that we will
  * be able to re-construct a HDF5 file with a consistent set of metadata
  * in the event of a crash.
  *
- * mdj_enabled: Boolean flag used to indicate whether journaling is 
- * 		currently enabled.  In general, the values of the 
- * 		remaining fields in this section are undefined if 
+ * mdj_enabled: Boolean flag used to indicate whether journaling is
+ * 		currently enabled.  In general, the values of the
+ * 		remaining fields in this section are undefined if
  * 		mdj_enabled is FALSE.
  *
  * trans_in_progress Boolean flag used to indicate whether a metadata
- * 		transaction is in progress.  
+ * 		transaction is in progress.
  *
- * 		For purposes of metadata journaling, a transaction is a 
- * 		sequence of operations on metadata selected such that 
- * 		the HDF5 file metadata is in a consistent state both at 
- * 		the beginning and at the end of the sequence.  
+ * 		For purposes of metadata journaling, a transaction is a
+ * 		sequence of operations on metadata selected such that
+ * 		the HDF5 file metadata is in a consistent state both at
+ * 		the beginning and at the end of the sequence.
  *
  * 		At least to begin with, transactions will be closely tied
  * 		to user level API calls.
  *
- * trans_api_name: Array of char of length H5C2__MAX_API_NAME_LEN + 1. Used 
- * 		to store the name of the API call associated with the 
+ * trans_api_name: Array of char of length H5C2__MAX_API_NAME_LEN + 1. Used
+ * 		to store the name of the API call associated with the
  * 		current transaction.
  *
- * trans_num:	uint64_t containing the id assigned to the current 
- * 		transaction (if trans_in_progress is TRUE), or of the 
+ * trans_num:	uint64_t containing the id assigned to the current
+ * 		transaction (if trans_in_progress is TRUE), or of the
  * 		last transaction completed (if trans_in_progress is FALSE),
  * 		or zero if no transaction has been initiated yet.
  *
- * last_trans_on_disk:  uint64_t containing the id assigned to the 
+ * last_trans_on_disk:  uint64_t containing the id assigned to the
  * 		last transaction all of whose associated journal entries
- * 		are on disk in the journal file.  
+ * 		are on disk in the journal file.
  *
  * 		We must track this value, as to avoid messages from the
  * 		future, we must not write a cache entry to file until
@@ -858,21 +858,21 @@ typedef struct H5C2_mdjsc_record_t
  * 		file.
  *
  * jnl_magic:   Randomly selected int32_t used to reduce the possibility
- *              of running the wrong journal on an HDF5 file.  The basic 
- *              idea is to pick a random number, store it in both the HDF5 
- *		file and the journal file, and then refuse to run the 
+ *              of running the wrong journal on an HDF5 file.  The basic
+ *              idea is to pick a random number, store it in both the HDF5
+ *		file and the journal file, and then refuse to run the
  *		journal unless the numbers match.
  *
  * jnl_file_name_len: Length of the journal file name, or zero if the
  *		journal file name is undefined.
  *
- * jnl_file_name: Array of char of length H5C2__MAX_JOURNAL_FILE_NAME_LEN 
+ * jnl_file_name: Array of char of length H5C2__MAX_JOURNAL_FILE_NAME_LEN
  *		+ 1 used to store the journal file path.
  *
  * mdj_jbrb:    Instance of H5C2_jbrb_t used to manage logging of journal
  * 		entries to the journal file.
  *
- * While a transaction is in progress, we must maintain a list of the 
+ * While a transaction is in progress, we must maintain a list of the
  * entries that have been modified during the transaction so we can
  * generate the appropriate journal entries.  The following fields are
  * used to maintain this list:
@@ -883,56 +883,56 @@ typedef struct H5C2_mdjsc_record_t
  *              transaction list.
  *
  * tl_head_ptr: Pointer to the head of the doubly linked list of entries
- * 		dirtied in the current transaction.  Note that cache entries 
- * 		on this list are linked by their trans_next and trans_prev 
+ * 		dirtied in the current transaction.  Note that cache entries
+ * 		on this list are linked by their trans_next and trans_prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
  * tl_tail_ptr: Pointer to the tail of the doubly linked list of entries
- *              dirtied in the current transaction.  Note that cache entries 
- *              on this list are linked by their trans_next and trans_prev 
+ *              dirtied in the current transaction.  Note that cache entries
+ *              on this list are linked by their trans_next and trans_prev
  *              fields.
  *
  *              This field is NULL if the list is empty.
  *
- * When an entry is dirtied in a transaction, we must not flush it until 
- * all the journal entries generated by the transaction have reached disk 
+ * When an entry is dirtied in a transaction, we must not flush it until
+ * all the journal entries generated by the transaction have reached disk
  * in the journal file.
  *
  * We could just leave these entries in the LRU and skip over them when
- * we scan the list for candidates for eviction.  However, this will be 
+ * we scan the list for candidates for eviction.  However, this will be
  * costly, so we store them on the journal write in progress list instead
- * until all the journal entries for the specified transaction reaches 
+ * until all the journal entries for the specified transaction reaches
  * disk.
  *
- * jwipl_len:	Number of entries currently residing on the journal 
+ * jwipl_len:	Number of entries currently residing on the journal
  * 		entry write in progress list.
  *
  * jwipl_size:  Number of bytes of cache entries currently residing on the
  *              journal entry write in progress list.
  *
  * jwipl_head_ptr:  Pointer to the head of the doubly linked list of entries
- * 		dirtied in some transaction n, where at least some of the 
+ * 		dirtied in some transaction n, where at least some of the
  * 		journal entries generated in transaction n have not yet
  * 		made it to disk in the journal file.
  *
- * 		Entries on this list are linked by their next and prev 
+ * 		Entries on this list are linked by their next and prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
  * jwipl_tail_ptr:  Pointer to the tail of the doubly linked list of entries
- * 		dirtied in some transaction n, where at least some of the 
+ * 		dirtied in some transaction n, where at least some of the
  * 		journal entries generated in transaction n have not yet
  * 		made it to disk in the journal file.
  *
- * 		Entries on this list are linked by their next and prev 
+ * 		Entries on this list are linked by their next and prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
- * It is necessary to turn off some optimization while journaling is 
+ * It is necessary to turn off some optimization while journaling is
  * in progress, so as to avoid generating dirty metadata during a flush.
  * The following fields are used to maintain a list of functions to be
  * called when journaling is enabled or disabled.  Note that the metadata
@@ -940,15 +940,15 @@ typedef struct H5C2_mdjsc_record_t
  *
  * The metadata journaling status change callback table is initaly allocated
  * with H5C2__MIN_MDJSC_CB_TBL_LEN entries.  The table size is doubled
- * whenever an entry is added to a full table, and halved whenever the 
- * active entries to total entries ratio drops below 
- * H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO and the upper half of the table is 
- * empty (Since entries are removed from the table by specifying the 
+ * whenever an entry is added to a full table, and halved whenever the
+ * active entries to total entries ratio drops below
+ * H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO and the upper half of the table is
+ * empty (Since entries are removed from the table by specifying the
  * index of the entry, we can't compress the table).
  *
  * mdjsc_cb_tbl: Base address of a dynamically allocated array of instances
- * 		of H5C2_mdjsc_record_t used to record an arbitrarily long 
- * 		list of functions to call whenever journaling is enabled or 
+ * 		of H5C2_mdjsc_record_t used to record an arbitrarily long
+ * 		list of functions to call whenever journaling is enabled or
  * 		disabled.
  *
  * mdjsc_cb_tbl_len: Number of entries currently allocated in *mdjsc_cb_tbl.
@@ -960,7 +960,7 @@ typedef struct H5C2_mdjsc_record_t
  * 		or -1 if the table is full.
  *
  * mdjsc_cb_tbl_max_idx_in_use: Maximum of the indicies of metadata journaling
- * 		status change callback table entries in use, or -1 if the 
+ * 		status change callback table entries in use, or -1 if the
  * 		table is empty;
  *
  * Statistics collection fields:
@@ -979,23 +979,23 @@ typedef struct H5C2_mdjsc_record_t
  *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * write_protects:  Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been write protected 
+ * write_protects:  Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been write protected
  * 		in the current epoch.
  *
  * 		Observe that (hits + misses) = (write_protects + read_protects).
  *
- * read_protects: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been read protected in 
+ * read_protects: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been read protected in
  * 		the current epoch.
  *
  *              Observe that (hits + misses) = (write_protects + read_protects).
  *
- * max_read_protects:  Array of int32 of length H5C2__MAX_NUM_TYPE_IDS + 1. 
- * 		The cells are used to maximum number of simultaneous read 
- * 		protects on any entry with type id equal to the array index 
+ * max_read_protects:  Array of int32 of length H5C2__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to maximum number of simultaneous read
+ * 		protects on any entry with type id equal to the array index
  * 		in the current epoch.
  *
  * insertions:  Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -1003,9 +1003,9 @@ typedef struct H5C2_mdjsc_record_t
  *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
- * pinned_insertions:  Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
- * 		with type id equal to the array index has been inserted 
+ * pinned_insertions:  Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to record the number of times an entry
+ * 		with type id equal to the array index has been inserted
  * 		pinned into the cache in the current epoch.
  *
  * clears:      Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -1028,13 +1028,13 @@ typedef struct H5C2_mdjsc_record_t
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
- * entry_flush_renames: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * entry_flush_renames: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during its flush callback in the current epoch.
  *
- * cache_flush_renames: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * cache_flush_renames: Array of int64 of length H5C2__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during a cache flush in the current epoch.
  *
@@ -1073,14 +1073,14 @@ typedef struct H5C2_mdjsc_record_t
  *		with type id equal to the array index has decreased in
  *		size in the current epoch.
  *
- * entry_flush_size_changes:  Array of int64 of length 
- * 		H5C2__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * entry_flush_size_changes:  Array of int64 of length
+ * 		H5C2__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size while in its flush callback.
  *
- * cache_flush_size_changes:  Array of int64 of length 
- * 		H5C2__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * cache_flush_size_changes:  Array of int64 of length
+ * 		H5C2__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size during a cache flush
  *
  * total_ht_insertions: Number of times entries have been inserted into the
@@ -1278,7 +1278,7 @@ struct H5C2_t
 
     int64_t			cache_hits;
     int64_t			cache_accesses;
- 
+
     hbool_t			mdj_enabled;
     hbool_t			trans_in_progress;
     char			trans_api_name[H5C2__MAX_API_NAME_LEN];
@@ -1286,7 +1286,7 @@ struct H5C2_t
     uint64_t			last_trans_on_disk;
     int32_t			jnl_magic;
     int32_t			jnl_file_name_len;
-    char 			jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN 
+    char 			jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN
                                               + 1];
     struct H5C2_jbrb_t		mdj_jbrb;
     int32_t			tl_len;
@@ -1302,7 +1302,7 @@ struct H5C2_t
     int32_t			num_mdjsc_cbs;
     int32_t			mdjsc_cb_tbl_fl_head;
     int32_t			mdjsc_cb_tbl_max_idx_in_use;
-    
+
 #if H5C2_COLLECT_CACHE_STATS
 
     /* stats fields */
@@ -1468,10 +1468,10 @@ struct H5C2_t
  *
  *							JRM - 9/8/05
  *
- *  - Added a set of macros supporting doubly linked lists using the new 
- *    trans_next and trans_prev fields in H5C2_cache_entry_t.  These 
+ *  - Added a set of macros supporting doubly linked lists using the new
+ *    trans_next and trans_prev fields in H5C2_cache_entry_t.  These
  *    fields are used to maintain a list of entries that have been dirtied
- *    in the current transaction.  At the end of the transaction, this 
+ *    in the current transaction.  At the end of the transaction, this
  *    list is used to generate the needed journal entries.
  *
  *    							JRM -- 3/27/08
@@ -1974,7 +1974,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	More pinned entry stats related updates.
  *
  * 	JRM -- 3/31/07
- * 	Updated H5C2__UPDATE_STATS_FOR_PROTECT() to keep stats on 
+ * 	Updated H5C2__UPDATE_STATS_FOR_PROTECT() to keep stats on
  * 	read and write protects.
  *
  ***********************************************************************/
@@ -2553,12 +2553,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		JRM -- 8/25/06
  *		Added the H5C2_DO_SANITY_CHECKS version of the macro.
  *
- *		This version maintains the slist_len_increase and 
+ *		This version maintains the slist_len_increase and
  *		slist_size_increase fields that are used in sanity
  *		checks in the flush routines.
  *
- *		All this is needed as the fractal heap needs to be 
- *		able to dirty, resize and/or rename entries during the 
+ *		All this is needed as the fractal heap needs to be
+ *		able to dirty, resize and/or rename entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -2645,7 +2645,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		Switched over to using skip list routines.
  *
  *		JRM -- 3/28/07
- *		Updated sanity checks for the new is_read_only and 
+ *		Updated sanity checks for the new is_read_only and
  *		ro_ref_count fields in H5C2_cache_entry_t.
  *
  *-------------------------------------------------------------------------
@@ -2693,11 +2693,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		JRM -- 8/27/06
  *		Added the H5C2_DO_SANITY_CHECKS version of the macro.
  *
- *		This version maintains the slist_size_increase field 
+ *		This version maintains the slist_size_increase field
  *		that are used in sanity checks in the flush routines.
  *
- *		All this is needed as the fractal heap needs to be 
- *		able to dirty, resize and/or rename entries during the 
+ *		All this is needed as the fractal heap needs to be
+ *		able to dirty, resize and/or rename entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -2788,7 +2788,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		to do if called for such an entry.
  *
  *		JRM -- 3/28/07
- *		Added sanity checks using the new is_read_only and 
+ *		Added sanity checks using the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM -- 3/29/08
@@ -2936,7 +2936,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		be called on a pinned entry.  Added assert to verify this.
  *
  *		JRM -- 3/28/07
- *		Added sanity checks for the new is_read_only and 
+ *		Added sanity checks for the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM -- 3/29/08
@@ -3203,7 +3203,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		Inserted an assert to verify this.
  *
  *		JRM - 8/9/06
- *		Not any more.  We must now allow insertion of pinned 
+ *		Not any more.  We must now allow insertion of pinned
  *		entries.  Updated macro to support this.
  *
  *		JRM - 3/28/07
@@ -3211,13 +3211,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM - 3/29/30
- *		Added sanity check that verifies that the last_trans field 
- *		of the entry matches the trans_num field of the cache.  
- *		Note that when journaling is disabled, both of these 
- *		fields should contain zero.  Also verify that either 
+ *		Added sanity check that verifies that the last_trans field
+ *		of the entry matches the trans_num field of the cache.
+ *		Note that when journaling is disabled, both of these
+ *		fields should contain zero.  Also verify that either
  *		journaling is disabled or a transaction is in progress.
  *
- *		Added code to put the entry in the journal write in 
+ *		Added code to put the entry in the journal write in
  *		progress list if entries last_trans field is non-
  *		zero and the entry is not pinned.
  *
@@ -3341,13 +3341,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *
  * Macro:	H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE
  *
- * Purpose:     Update the replacement policy data structures for the 
- *              completion of the last pending journal write for the 
+ * Purpose:     Update the replacement policy data structures for the
+ *              completion of the last pending journal write for the
  *              specified un-pinned and un-protected cache entry.
  *
  *		If an entry with a pending journal write is not protected
- *		and is not pinned, it must be on the journal write in 
- *		progress list.  Unlink it from that list, and add it to 
+ *		and is not pinned, it must be on the journal write in
+ *		progress list.  Unlink it from that list, and add it to
  *		the data structures used by the current replacement policy.
  *
  *		At present, we only support the modified LRU policy, so
@@ -3470,8 +3470,8 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		load from disk of the specified cache entry.
  *
  *		Note that we update the replacement policy for load only
- *		as a convenience -- the newly loaded entry will be 
- *		protected immediately.  If this starts to eat up a 
+ *		as a convenience -- the newly loaded entry will be
+ *		protected immediately.  If this starts to eat up a
  *		significant number of cycles, we will have to re-work
  *		the code to avoid this step.
  *
@@ -3608,7 +3608,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		maintained by the replacement policy.
  *
  *		JRM - 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM - 3/29/08
@@ -3798,14 +3798,14 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		nothing to be done.
  *
  *		JRM - 3/28/07
- *		Added sanity checks using the new is_read_only and 
+ *		Added sanity checks using the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM - 3/29/08
  *		Reworked macro to handle the case in which the renamed
  *		entry has a journal write pending -- this required the
- *		addition of the had_jwip parameter.  Also added some 
- *		related sanity checks.  
+ *		addition of the had_jwip parameter.  Also added some
+ *		related sanity checks.
  *
  *-------------------------------------------------------------------------
  */
@@ -4017,7 +4017,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		To do this, determine if the entry is pinned.  If it is,
  *		update the size of the pinned entry list.
  *
- *		If it isn't pinned, the entry must handled by the 
+ *		If it isn't pinned, the entry must handled by the
  *		replacement policy.  Update the appropriate replacement
  *		policy data structures.
  *
@@ -4033,13 +4033,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  * Modifications:
  *
  * 		JRM -- 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM -- 3/29/08
  *		Added code to deal with the journal write in progress
  *		list -- in essence, after checking to see if the entry is
- *		pinned, check to see if it is on the jwip list.  If it 
+ *		pinned, check to see if it is on the jwip list.  If it
  *		is, update the size of that list.  If not, proceed as
  *		before.
  *
@@ -4182,11 +4182,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  * Modifications:
  *
  *		JRM -- 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C2_cache_entry_t.
  *
  *		JRM -- 3/30/08
- *		Added code to place the newly unpinned entry on the 
+ *		Added code to place the newly unpinned entry on the
  *		journal write pending list if appropriate.
  *
  *-------------------------------------------------------------------------
@@ -4354,7 +4354,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		maintained by the replacement policy.
  *
  *		JRM - 3/30/08
- *		Modified macro to put un-pinned entries with pending 
+ *		Modified macro to put un-pinned entries with pending
  *		journal writes on the journal write in progress list.
  *
  *-------------------------------------------------------------------------
@@ -4538,7 +4538,7 @@ if ( cache_ptr->mdj_enabled )                                          \
  * Purpose:     Check to see if journaling is enabled.
  *
  *              If it is, see if the target entry is in the transaction
- *              list.  If it is, remove it from the list, and set its 
+ *              list.  If it is, remove it from the list, and set its
  *              last_trans field to zero.
  *
  * Return:      N/A
@@ -4621,9 +4621,9 @@ if ( cache_ptr->mdj_enabled )                                           \
  *
  * Macro:	H5C2__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE
  *
- * Purpose:     Update the transaction list for a change in the size of 
+ * Purpose:     Update the transaction list for a change in the size of
  *              one of its constituents.  Note that it is the callers
- *              responsibility to verify that the entry is in the 
+ *              responsibility to verify that the entry is in the
  *              transaction list if it should be.
  *
  * Return:      N/A

@@ -22,12 +22,12 @@
  * Purpose:     This file is a general catchall for functions supporting
  *              metadata journaling.  Note that journaling must be tighly
  *              integrated with the metadata cache, and thus this file only
- *              contains only that code that can be easily separated from 
+ *              contains only that code that can be easily separated from
  *              the rest of the cache code.
  *
  *              Observe also that to minimize overhead, it is quite possible
  *              that many of the functions in this file will be converted
- *              into macros at some point in the future.  
+ *              into macros at some point in the future.
  *
  * Modifications:
  *
@@ -108,7 +108,7 @@ static herr_t H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
 
 static herr_t H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
                                         size_t length,
-                                        hbool_t is_end_trans, 
+                                        hbool_t is_end_trans,
                                         uint64_t trans_num);
 
 static herr_t H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
@@ -170,14 +170,14 @@ static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
  *              structure.
  *
  *		JRM -- 8/18/08
- *		Added code to flush the cache before journaling 
+ *		Added code to flush the cache before journaling
  *		starts, and to call the metadata journaling status
  *		change callbacks after journaling has been started.
  *
  *		JRM -- 2/10/09
- *		Added journal_magic variable and supporting code.  
+ *		Added journal_magic variable and supporting code.
  *
- *		The idea is to assign a random magic number to both the 
+ *		The idea is to assign a random magic number to both the
  *		journal file, and to the journal configuration information
  *		information in the super block so that it will be hard to
  *		apply the wrong journal file to a corrupted hdf5 file.
@@ -233,7 +233,7 @@ H5C2_begin_journaling(H5F_t * f,
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_flush_cache() failed.") 
+                    "H5C2_flush_cache() failed.")
     }
 
     journal_magic = (int32_t)HDrand();
@@ -294,8 +294,8 @@ done:
  * Function:    H5C2_begin_transaction
  *
  * Purpose:     Handle book keeping for the beginning of a transaction, and
- *              return the transaction ID assigned to the transaction in 
- *              *trans_num_ptr.  
+ *              return the transaction ID assigned to the transaction in
+ *              *trans_num_ptr.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -361,7 +361,7 @@ done:
  *                 journal file.
  *
  *              2) Mark the superblock to indicate that we are no longer
- *                 journaling.  Note that this will flush the HDF5 file 
+ *                 journaling.  Note that this will flush the HDF5 file
  *                 again in passing.
  *
  *              3) Tell the journal file write code to shutdown.  This will
@@ -409,7 +409,7 @@ H5C2_end_journaling(H5F_t * f,
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                             "H5C2_flush_cache() failed.") 
+                             "H5C2_flush_cache() failed.")
 	}
 
 	HDassert( cache_ptr->mdj_enabled );
@@ -422,7 +422,7 @@ H5C2_end_journaling(H5F_t * f,
         cache_ptr->mdj_enabled = FALSE;
 
         /* Remove the journal configuration information from the superblock
-         * extension.  In passing, also discard the cache's copies of the 
+         * extension.  In passing, also discard the cache's copies of the
          * metadata journaling magic, and the journal file name.
          */
         result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
@@ -569,14 +569,14 @@ done:
  * Purpose:     Return the current metadata journaling status in an
  *              instance of H5C2_mdj_config_t.
  *
- *              If journaling is enabled, config_ptr->enable_journaling 
+ *              If journaling is enabled, config_ptr->enable_journaling
  *              is set to TRUE, and the remaining fields in *config_ptr
  *              will be set to reflect current journaling status.
  *
  *              If journaling is disabled, config_ptr->enable_journaling
  *              is set to FALSE, and the remaining fields of *config_ptr
  *              are undefined.
- * 		
+ *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -612,7 +612,7 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
 
         config_ptr->enable_journaling = TRUE;
 
-	HDstrncpy(&(config_ptr->journal_file_path[0]), 
+	HDstrncpy(&(config_ptr->journal_file_path[0]),
 		  cache_ptr->jnl_file_name,
 		  H5C2__MAX_JOURNAL_FILE_NAME_LEN);
 
@@ -625,7 +625,7 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
 	config_ptr->jbrb_use_aio = (cache_ptr->mdj_jbrb).use_aio;
 
 	config_ptr->jbrb_human_readable = (cache_ptr->mdj_jbrb).human_readable;
-	
+
     } else {
 
         config_ptr->enable_journaling = FALSE;
@@ -657,9 +657,9 @@ done:
  *
  * 		   b) Truncate the journal file
  *
- * 		   c) Reset cache_ptr->trans_num and 
+ * 		   c) Reset cache_ptr->trans_num and
  * 		      cache_ptr->last_trans_on_disk to zero.
- * 		
+ *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -724,7 +724,7 @@ H5C2_journal_post_flush(H5F_t * f,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb__trunc() failed.")
         }
-        
+
 	cache_ptr->trans_num = (uint64_t)0;
 	cache_ptr->last_trans_on_disk = (uint64_t)0;
     }
@@ -751,13 +751,13 @@ done:
  * 		3) Get the ID of the last transaction on disk.
  *
  * 		4) If the value obtained in 3) above has changed,
- * 		   remove all entries whose last transaction has 
+ * 		   remove all entries whose last transaction has
  * 		   made it to disk from the journal write in progress
  * 		   list.
  *
  * 		5) Verify that the journal write in progress list is
  * 		   empty.
- * 		
+ *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -812,7 +812,7 @@ H5C2_journal_pre_flush(H5C2_t * cache_ptr)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_update_for_new_last_trans_on_disk() failed.")
         }
-    }    
+    }
 
     if ( cache_ptr->jwipl_len != 0 ) {
 
@@ -857,11 +857,11 @@ H5C2_journal_transaction(H5F_t * f,
     size_t new_len;
     void * new_image_ptr;
     void * thing;
-    herr_t result;    
+    herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_journal_transaction, FAIL)
-    
+
     HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -879,7 +879,7 @@ H5C2_journal_transaction(H5F_t * f,
                     "H5C2_jb__comment() failed.")
     }
 
-    result = H5C2_jb__start_transaction(&(cache_ptr->mdj_jbrb), 
+    result = H5C2_jb__start_transaction(&(cache_ptr->mdj_jbrb),
 		                        cache_ptr->trans_num);
 
     if ( result != SUCCEED ) {
@@ -897,7 +897,7 @@ H5C2_journal_transaction(H5F_t * f,
 	resized = FALSE;
 	renamed = FALSE;
 
-	if ( entry_ptr->is_protected ) 
+	if ( entry_ptr->is_protected )
         {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -916,7 +916,7 @@ H5C2_journal_transaction(H5F_t * f,
             }
         }
 
-	/* This should always be true, unless the entry has already been 
+	/* This should always be true, unless the entry has already been
 	 * serialized in this function, and that serialization caused the
 	 * entry to be resized (and possibly renamed as well).
 	 */
@@ -941,11 +941,11 @@ H5C2_journal_transaction(H5F_t * f,
 
             if ( serialize_flags != 0 ) {
 
-	        /* if the serialize_flags are not zero, the entry has been 
+	        /* if the serialize_flags are not zero, the entry has been
 	         * modified as a result of the serialize.  Pass these changes
-	         * on to the cache, and don't bother to write a journal entry 
-	         * at this time -- the protect/unprotect/rename will move the 
-	         * entry to the head of the transaction list, where we will 
+	         * on to the cache, and don't bother to write a journal entry
+	         * at this time -- the protect/unprotect/rename will move the
+	         * entry to the head of the transaction list, where we will
 	         * handle it later.
 	         */
 
@@ -958,7 +958,7 @@ H5C2_journal_transaction(H5F_t * f,
                                 "entry renamed but not resized?!?!")
                 }
 
-	        if ( resized ) 
+	        if ( resized )
                 {
                     /* in the following protect/unprotect, the dxpl_id
 		     * is irrelement, as we know that the entry is in cache,
@@ -966,7 +966,7 @@ H5C2_journal_transaction(H5F_t * f,
 	             */
 	            thing = H5C2_protect(f, dxpl_id,
 	                                 entry_ptr->type, entry_ptr->addr,
-				         entry_ptr->size, NULL, 
+				         entry_ptr->size, NULL,
 				         H5C2__NO_FLAGS_SET);
 
                     if ( thing == NULL ) {
@@ -977,7 +977,7 @@ H5C2_journal_transaction(H5F_t * f,
 
                     result = H5C2_unprotect(f, dxpl_id,
                                             entry_ptr->type, entry_ptr->addr,
-                                            thing, H5C2__SIZE_CHANGED_FLAG, 
+                                            thing, H5C2__SIZE_CHANGED_FLAG,
 					    new_len);
 
                     if ( result < 0 ) {
@@ -1009,7 +1009,7 @@ H5C2_journal_transaction(H5F_t * f,
 	 * the journal entry, & remove from the transaction list.
 	 */
 	if ( ( ! resized ) && ( ! renamed ) ) {
-                
+
             result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
                                             cache_ptr->trans_num,
 					    entry_ptr->addr,
@@ -1051,7 +1051,7 @@ done:
  * Purpose:     Update the journal write in progress list for a change in
  * 		the last transaction on disk.
  *
- * 		Specifically, update the last_trans_on_disk field of 
+ * 		Specifically, update the last_trans_on_disk field of
  * 		*cache_ptr, and then scan the journal write in progress
  * 		list for entries whose last_trans field is now less than
  * 		or equal to cache_ptr->last_trans_on_disk.  Remove all
@@ -1060,7 +1060,7 @@ done:
  * 		the eviction policy data structures.
  *
  * 		Similarly, scan the pinned entry list for entries whose
- * 		last_trans field is now less than or equal to 
+ * 		last_trans field is now less than or equal to
  * 		cache_ptr->last_trans_on_disk.  In this case, just set
  * 		the last trans field to 0.  Note that here we assume that
  * 		the pinned entry list will always be small -- if this
@@ -1149,14 +1149,14 @@ done:
  *
  * Purpose:	If the superblock extension of a newly opened HDF5 file
  * 		indicates that journaling is in progress, the process
- * 		that created the file failed to close it properly, and 
+ * 		that created the file failed to close it properly, and
  * 		thus the file is almost certainly corrupted.
  *
  * 		The purpose of this function is to detect this condition,
- * 		and either throw an error telling the user to run the 
- * 		recovery tool, or if so directed (presumably by the 
- * 		recovery tool) simply delete the metadata journaling 
- * 		configuration block and any reference to journaling in the 
+ * 		and either throw an error telling the user to run the
+ * 		recovery tool, or if so directed (presumably by the
+ * 		recovery tool) simply delete the metadata journaling
+ * 		configuration block and any reference to journaling in the
  * 		superblock extension.
  *
  * 							JRM -- 3/26/08
@@ -1180,7 +1180,7 @@ H5C2_check_for_journaling(H5F_t * f,
         "This file was last written with metadata journaling enabled and was \n";
     const char * l1 =
         "not closed cleanly.  To allow HDF5 to read this file, please run the \n";
-    const char * l2 = 
+    const char * l2 =
 	"journal recovery tool on this file.  The journal was written \n";
     const char * l3 = "to \"";
     const char * l4 = "\".\n";
@@ -1215,8 +1215,8 @@ H5C2_check_for_journaling(H5F_t * f,
                  * we were.
 	         */
 
-                result = H5C2_unmark_journaling_in_progress(f, 
-                                                            dxpl_id, 
+                result = H5C2_unmark_journaling_in_progress(f,
+                                                            dxpl_id,
                                                             cache_ptr);
 
 	        if ( result != SUCCEED ) {
@@ -1226,14 +1226,14 @@ H5C2_check_for_journaling(H5F_t * f,
                 }
 	    } else {
 
-                /* we have to play some games here to set up an error message 
-		 * that contains the journal file path.  In essence, what 
-		 * follows is a somewhat modified version of the HGOTO_ERROR() 
+                /* we have to play some games here to set up an error message
+		 * that contains the journal file path.  In essence, what
+		 * follows is a somewhat modified version of the HGOTO_ERROR()
 		 * macro.
 	         */
-                (void)H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__, 
-			       H5E_ERR_CLS_g, H5E_CACHE, H5E_CANTJOURNAL, 
-			       "%s%s%s%s%s%s", l0, l1, l2, l3, 
+                (void)H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__,
+			       H5E_ERR_CLS_g, H5E_CACHE, H5E_CANTJOURNAL,
+			       "%s%s%s%s%s%s", l0, l1, l2, l3,
 			       cache_ptr->jnl_file_name, l4);
 	        (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
 	        HGOTO_DONE(FAIL)
@@ -1253,7 +1253,7 @@ done:
  * Function:    H5C2_get_journaling_in_progress()
  *
  * Purpose:     Query the HDF5 file to see if it is marked as having
- * 		journaling in progress.  Update the journaling 
+ * 		journaling in progress.  Update the journaling
  * 		configuration fields in the cache structure accordingly.
  *
  * 		At least initially, the purpose of this function is
@@ -1279,8 +1279,8 @@ done:
  *              March 11, 2008
  *
  * Changes:	JRM -- 2/20/09
- *		Reworked to reflect the move of the journal file name 
- *		and magic from the journaling configuration block to 
+ *		Reworked to reflect the move of the journal file name
+ *		and magic from the journaling configuration block to
  *		the metadata journaling superblock extension message.
  *		Note that the journaling configuration block no longer
  *		exists.
@@ -1310,7 +1310,7 @@ H5C2_get_journaling_in_progress(const H5F_t * f,
                         "journaling enabled but jnl file name empty?!?.")
         }
 
-        if ( f->shared->mdc_jnl_file_name_len > 
+        if ( f->shared->mdc_jnl_file_name_len >
              H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -1325,7 +1325,7 @@ H5C2_get_journaling_in_progress(const H5F_t * f,
 
         if ( ( (cache_ptr->jnl_file_name)[cache_ptr->jnl_file_name_len]
                != '\0' ) ||
-             ( HDstrlen(cache_ptr->jnl_file_name) != 
+             ( HDstrlen(cache_ptr->jnl_file_name) !=
                (size_t)(cache_ptr->jnl_file_name_len) ) ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -1343,14 +1343,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C2_mark_journaling_in_progress()
  *
- * Purpose:     Modify the HDF5 file to indicate that journaling is 
- * 		in progress, and flush the file to disk.  
+ * Purpose:     Modify the HDF5 file to indicate that journaling is
+ * 		in progress, and flush the file to disk.
  *
- * 		The objective here is to allow us to detect the fact 
- * 		the file was being journaled if we crash before we 
+ * 		The objective here is to allow us to detect the fact
+ * 		the file was being journaled if we crash before we
  * 		close the file properly.
  *
- * 		Note that the function assumes that the file is not 
+ * 		Note that the function assumes that the file is not
  * 		currently marked as having journaling in progress.
  *
  * Return:      Success:        SUCCEED
@@ -1422,8 +1422,8 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
               (size_t)(cache_ptr->jnl_file_name_len + 1));
 
     /* now, load the journaling information into shared, and then call
-     * H5F_super_write_mdj_msg() to write the metadata journaling 
-     * superblock extension message to file.  
+     * H5F_super_write_mdj_msg() to write the metadata journaling
+     * superblock extension message to file.
      */
     f->shared->mdc_jnl_enabled       = TRUE;
     f->shared->mdc_jnl_magic         = journal_magic;
@@ -1455,12 +1455,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C2_unmark_journaling_in_progress()
  *
- * Purpose:     Modify the HDF5 file to indicate that journaling is 
- * 		not in progress, and flush the file to disk.  
+ * Purpose:     Modify the HDF5 file to indicate that journaling is
+ * 		not in progress, and flush the file to disk.
  *
  * 		The objective here is to remove the messages indicating
- * 		that the file is being journaled.  We will typically do 
- * 		this either on file close, or if directed to cease 
+ * 		that the file is being journaled.  We will typically do
+ * 		this either on file close, or if directed to cease
  * 		journaling.  Once these messages are removed, we will
  * 		be able to open the file without triggering a "journaling
  * 		in progress" failure.
@@ -1475,10 +1475,10 @@ done:
  *              March 11, 2008
  *
  * Changes:	JRM -- 2/20/09
- *		Reworked function to reflect the move of the journal 
+ *		Reworked function to reflect the move of the journal
  *		file name and magic from the metadata journaling config
- *		block and into a superblock extension message.  Note that 
- *		the metadata journaling configuration block no longer 
+ *		block and into a superblock extension message.  Note that
+ *		the metadata journaling configuration block no longer
  *		exists.
  *
  *-------------------------------------------------------------------------
@@ -1520,7 +1520,7 @@ H5C2_unmark_journaling_in_progress(H5F_t * f,
     cache_ptr->jnl_file_name_len  = 0;
     (cache_ptr->jnl_file_name)[0] = '\0';
 
-    /* now, mark f->shared to indicate that journaling is not in 
+    /* now, mark f->shared to indicate that journaling is not in
      * progress, and then call H5F_super_write_mdj_msg() to write
      * the changes to disk.
      */
@@ -1568,7 +1568,7 @@ done:
  */
 
 static herr_t
-H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr, 
+H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
 		          hid_t dxpl_id,
 		          H5C2_mdj_config_t * config_ptr)
 {
@@ -1587,27 +1587,27 @@ H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
     HDassert( ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
 	      ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) );
 
-    if ( ( cache_ptr->num_mdjsc_cbs < 0 ) 
+    if ( ( cache_ptr->num_mdjsc_cbs < 0 )
          ||
-	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len )
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_fl_head < -1 ) 
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head < -1 )
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_fl_head > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head > cache_ptr->mdjsc_cb_tbl_len )
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < -1 ) 
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < -1 )
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
-	   cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >=
+	   cache_ptr->mdjsc_cb_tbl_len )
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) 
+	 ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN )
 	 ||
          ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len )
 	   &&
-	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) 
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 )
 	     ||
 	     ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use !=
-	       cache_ptr->mdjsc_cb_tbl_len - 1 ) 
+	       cache_ptr->mdjsc_cb_tbl_len - 1 )
 	   )
 	 )
 	 ||
@@ -1652,7 +1652,7 @@ done:
  * Function:    H5C2_deregister_mdjsc_callback()
  *
  * Purpose:     Deregister a metadata journaling status change callback,
- * 		shrinking the metadata journaling status callback table 
+ * 		shrinking the metadata journaling status callback table
  * 		as necessary.
  *
  * Return:      Success:        SUCCEED
@@ -1682,10 +1682,10 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
     }
 
     if ( ( cache_ptr->mdjsc_cb_tbl == NULL ) ||
-         ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len ) 
+         ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len )
 	   &&
 	   ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) ) ||
-	 ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	 ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 )
 	   &&
 	   ( cache_ptr->num_mdjsc_cbs != cache_ptr->mdjsc_cb_tbl_len ) ) ||
          ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
@@ -1694,7 +1694,7 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
 	 ( cache_ptr->num_mdjsc_cbs < 0 ) ||
 	 ( ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 0 ) &&
 	   ( cache_ptr->num_mdjsc_cbs > 0 ) ) ) {
-	    
+
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(1)?!?!");
     }
 
@@ -1710,19 +1710,19 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad idx?!?");
 
     } else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr == NULL ) {
-	
+
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 		    "callback already deregistered");
-   
+
     } else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next != -1 ) {
-	
+
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "free list corrupted.");
 
     }
 
     ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr = NULL;
     ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr = NULL;
-    ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next = 
+    ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next =
 	    cache_ptr->mdjsc_cb_tbl_fl_head;
     cache_ptr->mdjsc_cb_tbl_fl_head = idx;
     (cache_ptr->num_mdjsc_cbs)--;
@@ -1752,19 +1752,19 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
 
     if ( ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len )
 	 ||
-	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len )
 	   &&
-	   ( cache_ptr->num_mdjsc_cbs > 0 ) 
+	   ( cache_ptr->num_mdjsc_cbs > 0 )
 	   &&
-	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 )
 	     ||
 	     ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len )
-	   ) 
-	 ) 
+	   )
+	 )
 	 ||
-	 ( ( cache_ptr->num_mdjsc_cbs == 0 ) 
+	 ( ( cache_ptr->num_mdjsc_cbs == 0 )
 	   &&
-	   ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != -1 ) 
+	   ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != -1 )
 	 )
        ) {
 
@@ -1776,7 +1776,7 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
 
     if ( ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
          ( cache_ptr->mdjsc_cb_tbl_len > H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
-         ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 
+         ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use <
 	   (cache_ptr->mdjsc_cb_tbl_len / 2) ) ) {
         herr_t result;
 
@@ -1833,7 +1833,7 @@ H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
 
     if ( ( cache_ptr->num_mdjsc_cbs != cache_ptr->mdjsc_cb_tbl_len ) ||
 	 ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) ||
-	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != 
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use !=
 	   cache_ptr->mdjsc_cb_tbl_len - 1 ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -1889,7 +1889,7 @@ done:
  * Function:    H5C2_register_mdjsc_callback()
  *
  * Purpose:     Register a metadata journaling status change callback,
- * 		growing the metadata journaling status callback table 
+ * 		growing the metadata journaling status callback table
  * 		as necessary.
  *
  * Return:      Success:        SUCCEED
@@ -1972,18 +1972,18 @@ H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
     (cache_ptr->num_mdjsc_cbs)++;
 
     if ( ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len ) &&
-	   ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) 
-	 ) 
+	   ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 )
+	 )
          ||
-	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len )
 	 ||
-	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) 
+	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len )
 	   &&
-	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 )
 	     ||
 	     ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len )
-	   ) 
-	 ) 
+	   )
+	 )
        ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(2)?!?!");
@@ -2060,7 +2060,7 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
     if ( ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len ) ||
 	 ( (cache_ptr->mdjsc_cb_tbl_len / 2) < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
 	 ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
-	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >=
 	   cache_ptr->mdjsc_cb_tbl_len / 2 ) ||
 	 ( fraction_in_use >= H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) ) {
 
@@ -2074,10 +2074,10 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
     new_mdjsc_cb_tbl_len = old_mdjsc_cb_tbl_len / 2;
 
     while ( ( (new_mdjsc_cb_tbl_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
-	    ( (((double)(cache_ptr->num_mdjsc_cbs)) / 
-	       ((double)new_mdjsc_cb_tbl_len)) <= 
+	    ( (((double)(cache_ptr->num_mdjsc_cbs)) /
+	       ((double)new_mdjsc_cb_tbl_len)) <=
 	      H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
-	    ( (new_mdjsc_cb_tbl_len / 2) > 
+	    ( (new_mdjsc_cb_tbl_len / 2) >
 	      cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) )
     {
 	new_mdjsc_cb_tbl_len /= 2;
@@ -2107,7 +2107,7 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
 	    new_mdjsc_cb_tbl[i].fcn_ptr = NULL;
 	    new_mdjsc_cb_tbl[i].data_ptr = NULL;
 	    new_mdjsc_cb_tbl[i].fl_next = -1;
-	
+
 	    if ( new_fl_head == -1 ) {
 
 	        new_fl_head = i;
@@ -2155,9 +2155,9 @@ done:
 /**************************************************************************/
 
 /* The following macros are wrappers for the low level binary journal file
- * functions.  They exist, as it is likely that these function will be 
- * converted into macros once we have asynchronous journal file writes 
- * running, and by setting up these wrappers now, we will make this 
+ * functions.  They exist, as it is likely that these function will be
+ * converted into macros once we have asynchronous journal file writes
+ * running, and by setting up these wrappers now, we will make this
  * conversion easier.
  */
 
@@ -2236,7 +2236,7 @@ if ( H5C2_jb_bjf__write_trans_num((struct_ptr), (is_end_trans),           \
  *
  * Programmer:		John Mainzer
  *
- * Purpose:		In the binary journal file format, a comment is 
+ * Purpose:		In the binary journal file format, a comment is
  *			a no-op.  Thus in this function, we simply verify
  *			that we are in fact writing a binary journal file,
  *			and then return.
@@ -2245,14 +2245,14 @@ if ( H5C2_jb_bjf__write_trans_num((struct_ptr), (is_end_trans),           \
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__comment(H5C2_jbrb_t * struct_ptr,
                      const char * comment_ptr)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb_bjf__comment, FAIL)
-	
+
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
@@ -2282,13 +2282,13 @@ done:
  * Programmer:		John Mainzer
  *
  * Purpose:		Verify that the supplied transaction is in progress,
- *			and that at least one journal entry has been written 
- *			under it. 
+ *			and that at least one journal entry has been written
+ *			under it.
  *
- *                      Then write an end transaction message to the ring 
+ *                      Then write an end transaction message to the ring
  *			buffer.
  *
- *			Make note that the supplied transaction is closed, 
+ *			Make note that the supplied transaction is closed,
  *			and that no transaction is in progress.
  *
  * Returns:		SUCCEED on success.
@@ -2309,7 +2309,7 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
     HDassert( struct_ptr->human_readable == FALSE );
-	
+
     /* Verify that the supplied transaction is in progress */
     if ( ( struct_ptr->trans_in_prog != TRUE ) ||
          ( struct_ptr->cur_trans != trans_num ) ) {
@@ -2317,9 +2317,9 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                    "Transaction not in progress or bad transaction number.")
     } /* end if */
-	
-    /* Verify that at least one journal entry has been written under 
-     * the current transaction 
+
+    /* Verify that at least one journal entry has been written under
+     * the current transaction
      */
     if ( struct_ptr->jentry_written != TRUE ) {
 
@@ -2341,8 +2341,8 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
                                  trans_num,                  \
                                  /* fail_return */ FAIL)
 
-    /* reset boolean flag indicating that at least one journal entry has 
-     * been written under transaction 
+    /* reset boolean flag indicating that at least one journal entry has
+     * been written under transaction
      */
     struct_ptr->jentry_written = FALSE;
 
@@ -2350,7 +2350,7 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     struct_ptr->trans_in_prog = FALSE;
 
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb_bjf__end_transaction */
@@ -2362,15 +2362,15 @@ done:
  *
  * Programmer:		John Mainzer
  *
- * Purpose:		Write an end of address space message with the 
+ * Purpose:		Write an end of address space message with the
  *			supplied EOA in binary format to the journal file.
  *
- *			Note that EOA messages are not generated by the 
- *			metadata cache, and thus are not associated with 
+ *			Note that EOA messages are not generated by the
+ *			metadata cache, and thus are not associated with
  *			transactions.  Since H5C2_jb__write_to_buffer()
- *			expects a transaction number, we use 
+ *			expects a transaction number, we use
  *			struct_ptr->cur_trans and pass is_end_trans
- *			as FALSE.  However, this is just a cluge to 
+ *			as FALSE.  However, this is just a cluge to
  *			keep pre-existing code happy.
  *
  * Returns:		SUCCEED on success.
@@ -2379,21 +2379,21 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
 		 haddr_t eoa)
 {
     herr_t ret_value = SUCCEED;
     FUNC_ENTER_NOAPI(H5C2_jb_bjf__eoa, FAIL)
-	
+
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
     HDassert( struct_ptr->human_readable == FALSE );
     HDassert( struct_ptr->hdf5_file_name != NULL );
 
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
+    /* Verify that header message is present in journal file or ring buffer.
+     * If not, write it.
      */
     if ( struct_ptr->header_present == FALSE ) {
 
@@ -2404,10 +2404,10 @@ H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
         }
     } /* end if */
 
-    /* Note that EOA messages are not generated by the metadata cache, and 
-     * thus are not associated with transactions.  Since 
-     * H5C2_jb__write_to_buffer() expects a transaction number, we use 
-     * struct_ptr->cur_trans and pass is_end_trans as FALSE.  However, 
+    /* Note that EOA messages are not generated by the metadata cache, and
+     * thus are not associated with transactions.  Since
+     * H5C2_jb__write_to_buffer() expects a transaction number, we use
+     * struct_ptr->cur_trans and pass is_end_trans as FALSE.  However,
      * this is just a cluge to keep pre-existing code happy.
      */
 
@@ -2446,7 +2446,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
 			   uint64_t trans_num,
 			   haddr_t base_addr,
@@ -2507,8 +2507,8 @@ H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
                               trans_num,                         \
                               /* fail_return */ FAIL)
 
-    /* Indicate that at least one journal entry has been written under 
-     * this transaction 
+    /* Indicate that at least one journal entry has been written under
+     * this transaction
      */
     struct_ptr->jentry_written = TRUE;
 
@@ -2527,9 +2527,9 @@ done:
  * Programmer:		John Mainzer
  *
  * Purpose:		Verify that there is no transaction in progress, and
- *			that the supplied transaction number greater than 
- *			the last.  Then write a binary start transaction 
- *			message to the ring buffer.  Make note of the fact 
+ *			that the supplied transaction number greater than
+ *			the last.  Then write a binary start transaction
+ *			message to the ring buffer.  Make note of the fact
  *			that the supplied transaction is in progress.
  *
  * Returns:		SUCCEED on success.
@@ -2538,7 +2538,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
 			       uint64_t trans_num)
 
@@ -2551,7 +2551,7 @@ H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
     HDassert(struct_ptr->human_readable == FALSE );
-	
+
     /* Verify that there is no transaction in progress */
     if ( struct_ptr->trans_in_prog != FALSE ) {
 
@@ -2566,8 +2566,8 @@ H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
                     "New transaction out of sequence.")
     } /* end if */
 
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
+    /* Verify that header message is present in journal file or ring buffer.
+     * If not, write it.
      */
     if ( struct_ptr->header_present == FALSE ) {
 
@@ -2593,13 +2593,13 @@ H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
                                  /* is_end_trans */ FALSE,     \
                                  trans_num,                    \
                                  /* fail_return */ FAIL)
-		
+
     /* Make note of the fact that supplied transaction is in progress */
     struct_ptr->trans_in_prog = TRUE;
     struct_ptr->cur_trans = trans_num;
 
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb_bjf__start_transaction */
@@ -2612,16 +2612,16 @@ done:
  * Programmer:		John Mainzer
  *			4/24/09
  *
- * Purpose:		Copy the supplied buffer to the ring buffer as 
+ * Purpose:		Copy the supplied buffer to the ring buffer as
  *			efficiently as possible.
  *
- *			If there is space available in the current buffer in 
- *			the ring buffer is big enough, just memcpy the 
+ *			If there is space available in the current buffer in
+ *			the ring buffer is big enough, just memcpy the
  *                      supplied buffer directly into the ring buffer buffer
- *                      and update its fields accordingly.  
+ *                      and update its fields accordingly.
  *
- *			If the supplied buffer will cross ring buffer buffer 
- *			boundaries, for now just call 
+ *			If the supplied buffer will cross ring buffer buffer
+ *			boundaries, for now just call
  *			H5C2_jb__write_to_buffer().
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
@@ -2638,7 +2638,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
                           size_t buf_size,
                           const char * buf_ptr,
@@ -2653,7 +2653,7 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
     HDassert( buf_size > 0 );
     HDassert( buf_ptr != NULL );
-    HDassert( trans_num > 0 ); 
+    HDassert( trans_num > 0 );
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
      * Throw an error if this invarient doesn't hold.
@@ -2668,8 +2668,8 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
     /* Update the check sum if required */
     if ( struct_ptr->chksum_cur_msg ) {
 
-        struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf_ptr), 
-                                                      buf_size, 
+        struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf_ptr),
+                                                      buf_size,
                                                       struct_ptr->msg_chksum);
     }
 
@@ -2677,10 +2677,10 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
 
         /* If the buffer will fit in the current ring buffer buffer with space
          * left over, just memcpy() it in and touch up the ring buffer
-         * fields accordingly.  
+         * fields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -2708,15 +2708,15 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
         if ( is_end_trans == TRUE ) {
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
-        } 
+        }
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
 
     } else {
 
         /* Here, handle the case where the write will reach the edge
-         * of a ring buffer buffer.  This gets a bit more complex, so 
-         * for now at least, we will call H5C2_jb__write_to_buffer().  
+         * of a ring buffer buffer.  This gets a bit more complex, so
+         * for now at least, we will call H5C2_jb__write_to_buffer().
          * If this proves too costly, further optimizations will be necessary.
          */
 
@@ -2733,7 +2733,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_jb_bjf__write_buffer() */
- 
+
 
 /******************************************************************************
  *
@@ -2744,15 +2744,15 @@ done:
  *
  * Purpose:		Write the checksum of a binary journal file message
  *			to the ring buffer as eficiently as possible.  Note
- *			that this checksum is computed only on the body of 
+ *			that this checksum is computed only on the body of
  *			the message -- not the signature and version.
  *
- *			If there is space available in the current buffer in 
+ *			If there is space available in the current buffer in
  *			the ring buffer is big enough, just write the chksum
- *                      directly into the ring buffer buffer and update its 
- *			fields accordingly.  
+ *                      directly into the ring buffer buffer and update its
+ *			fields accordingly.
  *
- *			If the chksum will cross ring buffer buffer boundaries, 
+ *			If the chksum will cross ring buffer buffer boundaries,
  *			for now just call H5C2_jb__write_to_buffer().
  *
  *			Note that this function will probably prove to be
@@ -2763,7 +2763,7 @@ done:
  *			FAIL on failure.
  *
  ******************************************************************************/
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
     uint64_t trans_num)
 {
@@ -2775,7 +2775,7 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
     /* Sanity check */
     HDassert(struct_ptr != NULL);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-    HDassert(trans_num > 0); 
+    HDassert(trans_num > 0);
 
     if(!struct_ptr->chksum_cur_msg)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "struct_ptr->chksum_cur_msg is false?!?!.")
@@ -2783,11 +2783,11 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
     if(H5C2__CHECKSUM_SIZE < struct_ptr->cur_buf_free_space) {
 
         /* If the checksum will fit in the current buffer with space
-         * left over, just write it directly into the buffer, and 
-         * touch up the ring buffer fields accordingly.  
+         * left over, just write it directly into the buffer, and
+         * touch up the ring buffer fields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -2825,17 +2825,17 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
         uint8_t buf[H5C2__CHECKSUM_SIZE + 1];
 
         /* Here, handle the case where the write will reach the edge
-         * of a buffer.  This gets a bit more complex, so for now at 
-         * least, we will construct a buffer containing a binary 
-         * representation of the checksum, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * of a buffer.  This gets a bit more complex, so for now at
+         * least, we will construct a buffer containing a binary
+         * representation of the checksum, and then call
+         * H5C2_jb__write_to_buffer().  If this proves too costly,
          * further optimizations will be necessary.
          */
         p = buf;
         UINT32ENCODE(p, struct_ptr->msg_chksum);
         HDassert( p == &(buf[H5C2__CHECKSUM_SIZE]) );
 
-        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2__CHECKSUM_SIZE, 
+        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2__CHECKSUM_SIZE,
                 (const char *)buf, is_end_trans, trans_num) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
     } /* end else */
@@ -2847,7 +2847,7 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, hbool_t is_end_trans,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C2_jb_bjf__write_chksum() */
- 
+
 
 /******************************************************************************
  *
@@ -2856,15 +2856,15 @@ done:
  * Programmer:		John Mainzer
  *			4/24/09
  *
- * Purpose:		Write a HDF5 file length to the ring buffer as 
+ * Purpose:		Write a HDF5 file length to the ring buffer as
  *			efficiently as possible.
  *
- *			If the space available in the current buffer in 
- *			the ring buffer is big enough, just encode the 
- *                      lenght directly into the buffer and update its 
- *			fields accordingly.  
+ *			If the space available in the current buffer in
+ *			the ring buffer is big enough, just encode the
+ *                      lenght directly into the buffer and update its
+ *			fields accordingly.
  *
- *			If the binary representation of the length will 
+ *			If the binary representation of the length will
  *			touch buffer boundaries, create a buffer containing
  *			the binary representation of the length, and then
  *			call H5C2_jb__write_to_buffer() to handle the write.
@@ -2883,7 +2883,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
                           size_t length,
                           hbool_t is_end_trans,
@@ -2897,7 +2897,7 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
 
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
-    HDassert( trans_num > 0 ); 
+    HDassert( trans_num > 0 );
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
      * Throw an error if this invarient doesn't hold.
@@ -2911,18 +2911,18 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
 
     length_width = struct_ptr->length_width;
 
-    HDassert( ( length_width == 2 ) || 
-              ( length_width == 4 ) || 
+    HDassert( ( length_width == 2 ) ||
+              ( length_width == 4 ) ||
               ( length_width == 8 ) );
 
     if ( length_width < struct_ptr->cur_buf_free_space ) {
 
         /* If the offset will fit in the current buffer with space
-         * left over, just write it directly into the buffer, and 
-         * touch up the ring buffer fields accordingly.  
+         * left over, just write it directly into the buffer, and
+         * touch up the ring buffer fields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -2961,9 +2961,9 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
         /* Update the check sum if required */
         if ( struct_ptr->chksum_cur_msg ) {
 
-            struct_ptr->msg_chksum = 
-		H5_checksum_metadata((const void *)(struct_ptr->head), 
-                                     length_width, 
+            struct_ptr->msg_chksum =
+		H5_checksum_metadata((const void *)(struct_ptr->head),
+                                     length_width,
                                      struct_ptr->msg_chksum);
         }
 
@@ -2982,17 +2982,17 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
         if ( is_end_trans == TRUE ) {
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
-        } 
+        }
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
 
     } else {
 
         /* Here, handle the case where the write will reach the edge
-         * of a buffer.  This gets a bit more complex, so for now at 
-         * least, we will construct a buffer containing a binary 
-         * representation of the offset, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * of a buffer.  This gets a bit more complex, so for now at
+         * least, we will construct a buffer containing a binary
+         * representation of the offset, and then call
+         * H5C2_jb__write_to_buffer().  If this proves too costly,
          * further optimizations will be necessary.
          */
 
@@ -3019,22 +3019,22 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
         } /* end switch */
 
         HDassert( p == &(buf[length_width]) );
-        if(H5C2_jb__write_to_buffer(struct_ptr, length_width, 
+        if(H5C2_jb__write_to_buffer(struct_ptr, length_width,
                                       (const char *)buf,
                                       is_end_trans, trans_num) != SUCCEED)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
 
         /* Update the check sum if required */
         if(struct_ptr->chksum_cur_msg)
-            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf), 
-                                                        length_width, 
+            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf),
+                                                        length_width,
                                                         struct_ptr->msg_chksum);
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C2_jb_bjf__write_length() */
- 
+
 
 /******************************************************************************
  *
@@ -3043,15 +3043,15 @@ done:
  * Programmer:		John Mainzer
  *			4/24/09
  *
- * Purpose:		Write a HDF5 file offset to the ring buffer as 
+ * Purpose:		Write a HDF5 file offset to the ring buffer as
  *			efficiently as possible.
  *
- *			If the space available in the current buffer in 
- *			the ring buffer is big enough, just encode the 
- *                      offset directly into the buffer and update its 
- *			fields accordingly.  
+ *			If the space available in the current buffer in
+ *			the ring buffer is big enough, just encode the
+ *                      offset directly into the buffer and update its
+ *			fields accordingly.
  *
- *			If the binary representation of the offset will 
+ *			If the binary representation of the offset will
  *			touch buffer boundaries, create a buffer containing
  *			the binary representation of the offset, and then
  *			call H5C2_jb__write_to_buffer() to handle the write.
@@ -3070,7 +3070,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
                           haddr_t offset,
                           hbool_t is_end_trans,
@@ -3085,11 +3085,11 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
     /* eoa messages can be written outside transactions -- so it is
-     * possible that the trans_num will be 0.  Since the trans_num is 
+     * possible that the trans_num will be 0.  Since the trans_num is
      * not used unless is_end_trans is TRUE, we make an exception for
      * the eoa message.
      */
-    HDassert( ( ! is_end_trans ) || ( trans_num > 0 ) ); 
+    HDassert( ( ! is_end_trans ) || ( trans_num > 0 ) );
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
      * Throw an error if this invarient doesn't hold.
@@ -3103,18 +3103,18 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
 
     offset_width = struct_ptr->offset_width;
 
-    HDassert( ( offset_width == 2 ) || 
-              ( offset_width == 4 ) || 
+    HDassert( ( offset_width == 2 ) ||
+              ( offset_width == 4 ) ||
               ( offset_width == 8 ) );
 
     if ( offset_width < struct_ptr->cur_buf_free_space ) {
 
         /* If the offset will fit in the current buffer with space
-         * left over, just write it directly into the buffer, and 
-         * touch up the ring buffer fields accordingly.  
+         * left over, just write it directly into the buffer, and
+         * touch up the ring buffer fields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -3153,9 +3153,9 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
         /* Update the check sum if required */
         if ( struct_ptr->chksum_cur_msg ) {
 
-            struct_ptr->msg_chksum = 
-		H5_checksum_metadata((const void *)(struct_ptr->head), 
-                                     offset_width, 
+            struct_ptr->msg_chksum =
+		H5_checksum_metadata((const void *)(struct_ptr->head),
+                                     offset_width,
                                      struct_ptr->msg_chksum);
         }
 
@@ -3174,17 +3174,17 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
         if ( is_end_trans == TRUE ) {
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
-        } 
+        }
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
 
     } else {
 
         /* Here, handle the case where the write will reach the edge
-         * of a buffer.  This gets a bit more complex, so for now at 
-         * least, we will construct a buffer containing a binary 
-         * representation of the offset, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * of a buffer.  This gets a bit more complex, so for now at
+         * least, we will construct a buffer containing a binary
+         * representation of the offset, and then call
+         * H5C2_jb__write_to_buffer().  If this proves too costly,
          * further optimizations will be necessary.
          */
 
@@ -3216,7 +3216,7 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
 
         HDassert( p == &(buf[offset_width]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, offset_width, 
+        if ( H5C2_jb__write_to_buffer(struct_ptr, offset_width,
                                       (const char *)buf,
                                       is_end_trans, trans_num) != SUCCEED ) {
 
@@ -3227,8 +3227,8 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
         /* Update the check sum if required */
         if ( struct_ptr->chksum_cur_msg ) {
 
-            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf), 
-                                                        offset_width, 
+            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf),
+                                                        offset_width,
                                                         struct_ptr->msg_chksum);
         }
 
@@ -3239,7 +3239,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_jb_bjf__write_offset() */
- 
+
 
 /******************************************************************************
  *
@@ -3248,24 +3248,24 @@ done:
  * Programmer:		John Mainzer
  *			4/24/09
  *
- * Purpose:		Write the signature and version of a binary journal 
- *			file message to the ring buffer as efficiently as 
+ * Purpose:		Write the signature and version of a binary journal
+ *			file message to the ring buffer as efficiently as
  *			possible.
  *
- *			If there is space available in the current buffer in 
- *			the ring buffer is big enough, just memcpy the 
- *                      signature and write the version directly into the 
- *			buffer and update its fields accordingly.  
+ *			If there is space available in the current buffer in
+ *			the ring buffer is big enough, just memcpy the
+ *                      signature and write the version directly into the
+ *			buffer and update its fields accordingly.
  *
- *			If the signature and version will cross buffer 
- *			boundaries, for now just call 
+ *			If the signature and version will cross buffer
+ *			boundaries, for now just call
  *			H5C2_jb__write_to_buffer().
  *
  *			In either case, if keep_chksum is TRUE, initialize
  *			struct_ptr->msg_chksum to 0, and set struct_ptr->
  *			chksum_cur_msg to TRUE.
  *
- *			Observe that the checksum does not include the 
+ *			Observe that the checksum does not include the
  *			signature and version.
  *
  *			Note that this function will probably prove to be
@@ -3276,7 +3276,7 @@ done:
  *			FAIL on failure.
  *
  ******************************************************************************/
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
     const uint8_t version, hbool_t keep_chksum, hbool_t is_end_trans,
     uint64_t trans_num)
@@ -3290,21 +3290,21 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
     HDassert(sig_ptr);
     HDassert(H5C2_BJNL__SIG_LEN == HDstrlen(sig_ptr));
     HDassert(!is_end_trans);
-    /* eoa messages can occur outside of transactions -- and thus it is 
-     * possible that we will have to process one before any transaction 
+    /* eoa messages can occur outside of transactions -- and thus it is
+     * possible that we will have to process one before any transaction
      * has started -- in which case trans_num will be 0.  Since the trans_num
-     * isn't used unless is_end_trans is TRUE, we carve a small exception 
+     * isn't used unless is_end_trans is TRUE, we carve a small exception
      * for the eoa message.
      */
     HDassert((!is_end_trans) || (trans_num > 0));
 
     if((H5C2_BJNL__SIG_LEN + 1) < struct_ptr->cur_buf_free_space) {
-        /* If the signature and version will fit in the current buffer 
-         * with space left over, just memcpy()/write it in and touch up 
-         * the ring bufferfields accordingly.  
+        /* If the signature and version will fit in the current buffer
+         * with space left over, just memcpy()/write it in and touch up
+         * the ring bufferfields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -3329,7 +3329,7 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
         /* update end of buffer space */
         struct_ptr->rb_space_to_rollover -= H5C2_BJNL__SIG_LEN + 1;
 
-        /* is_end_trans must be false in this call, so just throw an 
+        /* is_end_trans must be false in this call, so just throw an
          * error if it is TRUE.
          */
         if(is_end_trans)
@@ -3341,14 +3341,14 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
         uint8_t buf[H5C2_BJNL__SIG_LEN + 2];
 
         /* Here, handle the case where the write will reach the edge
-         * of a buffer.  This gets a bit more complex, so for now at 
-         * least, we will call H5C2_jb__write_to_buffer().  If this 
+         * of a buffer.  This gets a bit more complex, so for now at
+         * least, we will call H5C2_jb__write_to_buffer().  If this
          * proves too costly, further optimizations will be necessary.
          */
         HDmemcpy(buf, (const void *)sig_ptr, H5C2_BJNL__SIG_LEN);
         buf[H5C2_BJNL__SIG_LEN] = version;
 
-        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2_BJNL__SIG_LEN + 1, 
+        if(H5C2_jb__write_to_buffer(struct_ptr, H5C2_BJNL__SIG_LEN + 1,
                 (const char *)buf, is_end_trans, trans_num) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__write_to_buffer() failed.")
     } /* end else */
@@ -3364,7 +3364,7 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, const char *sig_ptr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5C2_jb_bjf__write_sig_and_ver() */
- 
+
 
 /******************************************************************************
  *
@@ -3373,17 +3373,17 @@ done:
  * Programmer:		John Mainzer
  *			4/24/09
  *
- * Purpose:		Write the transaction number in a binary journal file 
+ * Purpose:		Write the transaction number in a binary journal file
  *			message to the ring buffer as efficiently as possible.
  *
- *			If the space available in the current buffer in 
- *			the ring buffer is big enough, just write the 
- *                      transaction number directly into the buffer and 
- *			update its fields accordingly.  
+ *			If the space available in the current buffer in
+ *			the ring buffer is big enough, just write the
+ *                      transaction number directly into the buffer and
+ *			update its fields accordingly.
  *
- *			If the transaction will cross or touch buffer 
- *			boundaries, construct binary representation of the 
- *			transaction number in a buffer, and pass it to 
+ *			If the transaction will cross or touch buffer
+ *			boundaries, construct binary representation of the
+ *			transaction number in a buffer, and pass it to
  *			H5C2_jb__write_to_buffer().
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
@@ -3400,7 +3400,7 @@ done:
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
                              hbool_t is_end_trans,
                              uint64_t trans_num)
@@ -3412,7 +3412,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
 
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
-    HDassert( trans_num > 0 ); 
+    HDassert( trans_num > 0 );
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
      * Throw an error if this invarient doesn't hold.
@@ -3427,11 +3427,11 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
     if ( H5C2__TRANS_NUM_SIZE < struct_ptr->cur_buf_free_space ) {
 
         /* If the transaction number will fit in the current buffer with space
-         * left over, just write it directly into the buffer, and touch up the 
-         * ring buffer fields accordingly.  
+         * left over, just write it directly into the buffer, and touch up the
+         * ring buffer fields accordingly.
          *
-         * This is the common case, so when we convert this function into 
-         * a macro, this will allow us to avoid a function call in the vast 
+         * This is the common case, so when we convert this function into
+         * a macro, this will allow us to avoid a function call in the vast
          * majority of cases.
          */
 
@@ -3450,9 +3450,9 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         /* Update the check sum if required */
         if ( struct_ptr->chksum_cur_msg ) {
 
-            struct_ptr->msg_chksum = 
-		H5_checksum_metadata((const void *)(struct_ptr->head), 
-                                     H5C2__TRANS_NUM_SIZE, 
+            struct_ptr->msg_chksum =
+		H5_checksum_metadata((const void *)(struct_ptr->head),
+                                     H5C2__TRANS_NUM_SIZE,
                                      struct_ptr->msg_chksum);
         }
 
@@ -3471,14 +3471,14 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         if ( is_end_trans == TRUE ) {
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
-        } 
+        }
 
         HDassert( struct_ptr->cur_buf_free_space > 0 );
 
     } else {
 
         /* Here, handle the case where the write will reach the edge
-         * of a buffer.  This gets a bit more complex, so for now at 
+         * of a buffer.  This gets a bit more complex, so for now at
          * least, we will construct a buffer containing a binary representation
          * of the transaction number, and then call H5C2_jb__write_to_buffer().
          * If this proves too costly, further optimizations will be necessary.
@@ -3492,7 +3492,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
 
         HDassert( p == &(buf[H5C2__TRANS_NUM_SIZE]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, H5C2__TRANS_NUM_SIZE, 
+        if ( H5C2_jb__write_to_buffer(struct_ptr, H5C2__TRANS_NUM_SIZE,
                                       (const char *)buf,
                                       is_end_trans, trans_num) != SUCCEED ) {
 
@@ -3503,8 +3503,8 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         /* Update the check sum if required */
         if ( struct_ptr->chksum_cur_msg ) {
 
-            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf), 
-                                                         H5C2__TRANS_NUM_SIZE, 
+            struct_ptr->msg_chksum = H5_checksum_metadata((const void *)(buf),
+                                                         H5C2__TRANS_NUM_SIZE,
                                                          struct_ptr->msg_chksum);
         }
 
@@ -3530,8 +3530,8 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
-H5C2_jb__bin2hex(const uint8_t * buf, 
+herr_t
+H5C2_jb__bin2hex(const uint8_t * buf,
                  char * hexdata,
                  size_t * hexlength,
                  size_t buf_size)
@@ -3540,7 +3540,7 @@ H5C2_jb__bin2hex(const uint8_t * buf,
     size_t         v;                   /* Local index variable */
     uint8_t        c;
     char *         t;
-	
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
 
     t = hexdata;
@@ -3570,16 +3570,16 @@ H5C2_jb__bin2hex(const uint8_t * buf,
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
  *
- * Purpose:		Insert the supplied comment in the journal file. This 
- * 			call may be ignored if the journal file is machine 
+ * Purpose:		Insert the supplied comment in the journal file. This
+ * 			call may be ignored if the journal file is machine
  *			readable.
  *
  * Returns:		SUCCEED on success.
  *
  * Changes:		Turned this function into a switch board function,
- *			calling either the human readable or the binary 
- *			journal file version of the function as indicated 
- *			by struct_ptr->human_readable.  
+ *			calling either the human readable or the binary
+ *			journal file version of the function as indicated
+ *			by struct_ptr->human_readable.
  *
  *			The original version of this file has been renamed
  *			to H5C2_jb_hrjf__comment().
@@ -3588,14 +3588,14 @@ H5C2_jb__bin2hex(const uint8_t * buf,
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
 		 const char * comment_ptr)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__comment, FAIL)
-	
+
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
@@ -3632,7 +3632,7 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Verify that the supplied transaction is in progress,
- *			and that at least one journal entry has been written 
+ *			and that at least one journal entry has been written
  *			under it. Then construct an end transaction message,
  *			and write it to the current journal buffer. Make note
  *			that the supplied transaction is closed, and that no
@@ -3641,9 +3641,9 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Turned this function into a switch board function,
- *			calling either the human readable or the binary 
- *			journal file version of the function as indicated 
- *			by struct_ptr->human_readable.  
+ *			calling either the human readable or the binary
+ *			journal file version of the function as indicated
+ *			by struct_ptr->human_readable.
  *
  *			The original version of this file has been renamed
  *			to H5C2_jb_hrjf__end_transaction().
@@ -3679,9 +3679,9 @@ H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
                         "H5C2_jb_bjf__end_transaction() failed.")
         }
     }
-	
+
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__end_transaction */
@@ -3699,9 +3699,9 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Turned this function into a switch board function,
- *			calling either the human readable or the binary 
- *			journal file version of the function as indicated 
- *			by struct_ptr->human_readable.  
+ *			calling either the human readable or the binary
+ *			journal file version of the function as indicated
+ *			by struct_ptr->human_readable.
  *
  *			The original version of this file has been renamed
  *			to H5C2_jb_hrjf__eoa().
@@ -3710,14 +3710,14 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
              haddr_t eoa)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__eoa, FAIL)
-	
+
     /* Check Arguments */
     HDassert( struct_ptr );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
@@ -3762,7 +3762,7 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
 {
     int result;
@@ -3774,7 +3774,7 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
+
     /* Check if transaction is in progress */
 
     if (struct_ptr->trans_in_prog != FALSE) {
@@ -3786,8 +3786,8 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
     if (struct_ptr->get > struct_ptr->put) {
 
 	/* write from get through end of buffer */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	      (*struct_ptr->buf)[struct_ptr->get], 
+	result = HDwrite(struct_ptr->journal_file_fd,
+	      (*struct_ptr->buf)[struct_ptr->get],
 	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
 
 	if ( result == -1 ) {
@@ -3795,18 +3795,18 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
 		        "Journal file write failed(1).")
         }
-        
+
 	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
         struct_ptr->rb_free_space += (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size;
         struct_ptr->get = 0;
-        
+
     } /* end if */
 
     if (struct_ptr->get < struct_ptr->put) {
 
 	/* write from get up to, but not including, put */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	            (*struct_ptr->buf)[struct_ptr->get], 
+	result = HDwrite(struct_ptr->journal_file_fd,
+	            (*struct_ptr->buf)[struct_ptr->get],
 	            (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size);
 
 	if ( result == -1 ) {
@@ -3824,8 +3824,8 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
     if ( struct_ptr->cur_buf_free_space != struct_ptr->buf_size ) {
 
         /* flush partially filled portion of current journal buffer to disk */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	               (*struct_ptr->buf)[struct_ptr->put], 
+	result = HDwrite(struct_ptr->journal_file_fd,
+	               (*struct_ptr->buf)[struct_ptr->put],
 	               struct_ptr->buf_size - struct_ptr->cur_buf_free_space);
 
 	if ( result == -1 ) {
@@ -3849,19 +3849,19 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Journal file sync failed.")
 
     /* record last transaction number that made it to disk */
-    struct_ptr->last_trans_on_disk = 
+    struct_ptr->last_trans_on_disk =
 		(*struct_ptr->trans_tracking)[struct_ptr->put];
 
-    /* MIKE: optimization note: don't reset to top of ring buffer. 
-     * instead, keep filling out current buffer so we can keep writes 
-     * on block boundaries. 
+    /* MIKE: optimization note: don't reset to top of ring buffer.
+     * instead, keep filling out current buffer so we can keep writes
+     * on block boundaries.
      */
     struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
     struct_ptr->rb_space_to_rollover = struct_ptr->num_bufs * struct_ptr->buf_size;
     struct_ptr->head = (*struct_ptr->buf)[0];
     struct_ptr->put = 0;
 
-    /* Propogate the last transaction on in the buffers throughout the 
+    /* Propogate the last transaction on in the buffers throughout the
      * transaction tracking array. */
     for(i = 0; i < struct_ptr->num_bufs; i++)
 	(*struct_ptr->trans_tracking)[i] = struct_ptr->last_trans_on_disk;
@@ -3881,17 +3881,17 @@ done:
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
  *
- * Purpose:		Flush all the dirtied buffers in the ring buffer 
- *                      starting with the buffer referenced by struct_ptr->get 
+ * Purpose:		Flush all the dirtied buffers in the ring buffer
+ *                      starting with the buffer referenced by struct_ptr->get
  *                      and ending with the buffer right before the one
- *                      referenced by struct_ptr->put. 
+ *                      referenced by struct_ptr->put.
  *
  * Returns:		SUCCEED on success.
  *
  ******************************************************************************/
 
-herr_t 
-H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)	
+herr_t
+H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
 {
     int result;
     herr_t ret_value = SUCCEED;
@@ -3907,12 +3907,12 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
     /* flush all full, dirtied journal buffers to disk */
     if (struct_ptr->get < struct_ptr->put) {
 
-	/* can write solid chunk from get up to, but not 
-	 * including, put 
+	/* can write solid chunk from get up to, but not
+	 * including, put
 	 */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	                 (*struct_ptr->buf)[struct_ptr->get], 
-	                 (struct_ptr->put - struct_ptr->get) * 
+	result = HDwrite(struct_ptr->journal_file_fd,
+	                 (*struct_ptr->buf)[struct_ptr->get],
+	                 (struct_ptr->put - struct_ptr->get) *
                            struct_ptr->buf_size);
 
 	if ( result == -1 ) {
@@ -3929,8 +3929,8 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
     else {
 
 	/* write from get through end of buffer */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	      (*struct_ptr->buf)[struct_ptr->get], 
+	result = HDwrite(struct_ptr->journal_file_fd,
+	      (*struct_ptr->buf)[struct_ptr->get],
 	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
 
 	if ( result == -1 ) {
@@ -3946,12 +3946,12 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
         /* if put = 0, then everything that needs to be flushed will have been
          * flushed, so we can stop here. Otherwise, need to flush all buffers
          * from the start of the ring buffer's allocated space up to, but not
-         * including, the buffer indexed by put. 
+         * including, the buffer indexed by put.
          */
         if (struct_ptr->put != 0) {
 
-            result = HDwrite(struct_ptr->journal_file_fd, 
-                             (*struct_ptr->buf)[0], 
+            result = HDwrite(struct_ptr->journal_file_fd,
+                             (*struct_ptr->buf)[0],
                              (struct_ptr->put) * struct_ptr->buf_size);
 
 	    if ( result == -1 ) {
@@ -3967,21 +3967,21 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
 	struct_ptr->bufs_in_use -= struct_ptr->put;
 
     } /* end else */
-	
+
     HDassert(struct_ptr->bufs_in_use <= 1);
 
     /* update get index */
     struct_ptr->get = struct_ptr->put;
-	
+
     /* record last transaction number that made it to disk */
     if (struct_ptr->put == 0) {
 
-	struct_ptr->last_trans_on_disk = 
+	struct_ptr->last_trans_on_disk =
 		(*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
 
     } else {
 
-	struct_ptr->last_trans_on_disk = 
+	struct_ptr->last_trans_on_disk =
 		(*struct_ptr->trans_tracking)[struct_ptr->put - 1];
     }
 
@@ -4008,20 +4008,20 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
 				      uint64_t * trans_num_ptr)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__get_last_transaction_on_disk, FAIL)
-	
+
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
     HDassert( trans_num_ptr != NULL );
     HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
 
-    /* JRM: In machine readable version, lets check to see if a sync is 
+    /* JRM: In machine readable version, lets check to see if a sync is
      *      necessary, and call it only if it is.
      */
     /* perform a sync to ensure everything gets to disk before continuing */
@@ -4044,19 +4044,19 @@ done:
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
  *
- * Purpose:		Insert the supplied comment in the journal file. This 
- * 			call may be ignored if the journal file is machine 
+ * Purpose:		Insert the supplied comment in the journal file. This
+ * 			call may be ignored if the journal file is machine
  *			readable.
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__comment() to H5C2_jb_hrjf__comment().  
+ * Changes:		Renamed H5C2_jb__comment() to H5C2_jb_hrjf__comment().
  *
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
  		      const char * comment_ptr)
 {
@@ -4065,15 +4065,15 @@ H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb_hrjf__comment, FAIL)
-	
+
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(comment_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
     HDassert(struct_ptr->hdf5_file_name);
 
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
+    /* Verify that header message is present in journal file or ring buffer.
+     * If not, write it.
      */
     if ( struct_ptr->header_present == FALSE ) {
 
@@ -4116,7 +4116,7 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Verify that the supplied transaction is in progress,
- *			and that at least one journal entry has been written 
+ *			and that at least one journal entry has been written
  *			under it. Then construct an end transaction message,
  *			and write it to the current journal buffer. Make note
  *			that the supplied transaction is closed, and that no
@@ -4125,7 +4125,7 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Renamed H5C2_jb__end_transaction() to
- *			H5C2_jb_hrjf__end_transaction().  
+ *			H5C2_jb_hrjf__end_transaction().
  *							JRM -- 5/2/09
  *
  *****************************************************************************/
@@ -4142,7 +4142,7 @@ H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
+
     /* Verify that the supplied transaction is in progress */
     if ( ( struct_ptr->trans_in_prog != TRUE ) ||
          ( struct_ptr->cur_trans != trans_num ) ) {
@@ -4150,9 +4150,9 @@ H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "Transaction not in progress or bad transaction number.")
     } /* end if */
-	
-    /* Verify that at least one journal entry has been written under 
-     * the current transaction 
+
+    /* Verify that at least one journal entry has been written under
+     * the current transaction
      */
     if ( struct_ptr->jentry_written != TRUE ) {
 
@@ -4165,15 +4165,15 @@ H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     HDsnprintf(temp, (size_t)25, "3 end_trans %llu\n", trans_num);
 
     /* Write end transaction message */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp,
 			          TRUE, trans_num ) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
 
-    /* reset boolean flag indicating if at least one journal entry has 
-     * been written under transaction 
+    /* reset boolean flag indicating if at least one journal entry has
+     * been written under transaction
      */
     struct_ptr->jentry_written = FALSE;
 
@@ -4181,7 +4181,7 @@ H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     struct_ptr->trans_in_prog = FALSE;
 
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb_hrjf__end_transaction */
@@ -4198,12 +4198,12 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__eoa() to H5C2_jb_hrjf__eoa().  
+ * Changes:		Renamed H5C2_jb__eoa() to H5C2_jb_hrjf__eoa().
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
 		  haddr_t eoa)
 {
@@ -4212,14 +4212,14 @@ H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb_hrjf__eoa, FAIL)
-	
+
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
     HDassert(struct_ptr->hdf5_file_name);
 
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
+    /* Verify that header message is present in journal file or ring buffer.
+     * If not, write it.
      */
     if(struct_ptr->header_present == FALSE ) {
         if(H5C2_jb__write_header_entry(struct_ptr) != SUCCEED)
@@ -4254,13 +4254,13 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__journal_entry() to 
- *			H5C2_jb_hrjf__journal_entry().  
+ * Changes:		Renamed H5C2_jb__journal_entry() to
+ *			H5C2_jb_hrjf__journal_entry().
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
 	   		    uint64_t trans_num,
 			    haddr_t base_addr,
@@ -4288,7 +4288,7 @@ H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
     }
 
     HDmemcpy(bodydata, body, length);
-	
+
     /* Verify that the supplied transaction is in progress */
     if ( ( struct_ptr->trans_in_prog != TRUE ) ||
          ( struct_ptr->cur_trans != trans_num ) ) {
@@ -4310,11 +4310,11 @@ H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
     }
 
     /* Write journal entry */
-    HDsnprintf(temp, 
+    HDsnprintf(temp,
                (size_t)(length + 100),
-               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
- 	       trans_num, 
-	       length, 
+               "2 trans_num %llu length %zu base_addr 0x%lx body ",
+ 	       trans_num,
+	       length,
 	       (unsigned long)base_addr);
 
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, trans_num) < 0 ) {
@@ -4332,8 +4332,8 @@ H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
 
-    /* Indicate that at least one journal entry has been written under 
-     * this transaction 
+    /* Indicate that at least one journal entry has been written under
+     * this transaction
      */
     if ( struct_ptr->jentry_written == FALSE ) {
 
@@ -4372,21 +4372,21 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Verify that there is no transaction in progress, and
- *			that the supplied transaction number greater than 
- *			the last.  Then construct a start transaction message, 
+ *			that the supplied transaction number greater than
+ *			the last.  Then construct a start transaction message,
  *			and write it to the current journal buffer. Make note
  *			of the fact that the supplied transaction is in
  *			progress.
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__start_transaction() to 
- *			H5C2_jb_hrjf__start_transaction().  
+ * Changes:		Renamed H5C2_jb__start_transaction() to
+ *			H5C2_jb_hrjf__start_transaction().
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
-static herr_t 
+static herr_t
 H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
 			   uint64_t trans_num)
 
@@ -4399,7 +4399,7 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
+
     /* Verify that there is no transaction in progress */
     if ( struct_ptr->trans_in_prog != FALSE ) {
 
@@ -4407,7 +4407,7 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
                     "Transaction already in progress.")
     } /* end if */
 
-    /* JRM: Heads up:  we may relax this constraint to rquire that the 
+    /* JRM: Heads up:  we may relax this constraint to rquire that the
      *      new transaction number is greater than the old, but possibly
      *      not the next integer in sequence.  Will this cause problems
      *      with testing?
@@ -4420,8 +4420,8 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
                     "New transaction out of sequence.")
     } /* end if */
 
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
+    /* Verify that header message is present in journal file or ring buffer.
+     * If not, write it.
      */
     if ( struct_ptr->header_present == FALSE ) {
 
@@ -4435,19 +4435,19 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
 
     /* Write start transaction message */
     HDsnprintf(temp, (size_t)150, "1 bgn_trans %llu\n", trans_num);
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp,
 			          FALSE, trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
-		
+
     /* Make note of the fact that supplied transaction is in progress */
     struct_ptr->trans_in_prog = TRUE;
     struct_ptr->cur_trans = trans_num;
 
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_jb_hrjf__start_transaction() */
@@ -4472,26 +4472,26 @@ done:
  *			Added the journal_magic parameter and related code.
  *
  *			Also deleted code to write the header message.
- *			Since the base address of the journal magic in 
+ *			Since the base address of the journal magic in
  *			the HDF5 file isn't available at this time, wait
  *			until our first real entry to write the header.
  *
  *			JRM -- 4/16/09
  *			Added the sizeof_addr and sizeof_size parameters, and
- *			associated code.  These parameters must contain the 
+ *			associated code.  These parameters must contain the
  *			values of the same name in the instance of H5F_file_t
  *			associated with the target file.
  *
  ******************************************************************************/
 
-herr_t 
-H5C2_jb__init(H5C2_jbrb_t * struct_ptr,  	
+herr_t
+H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
               const int32_t journal_magic,
-	      const char * HDF5_file_name,	 	
-	      const char * journal_file_name, 	
-	      size_t buf_size,		
-	      int num_bufs,		 	
-	      hbool_t use_aio,		
+	      const char * HDF5_file_name,
+	      const char * journal_file_name,
+	      size_t buf_size,
+	      int num_bufs,
+	      hbool_t use_aio,
  	      hbool_t human_readable,
               size_t sizeof_addr,
               size_t sizeof_size)
@@ -4537,7 +4537,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                 "allocation of space for copy of journal_file_name failed.");
-    } 
+    }
 
     struct_ptr->hdf5_file_name = HDstrdup(HDF5_file_name);
 
@@ -4545,7 +4545,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                 "allocation of space for copy of HDF5_file_name failed.");
-    } 
+    }
 
     struct_ptr->header_present = FALSE;
     struct_ptr->cur_buf_free_space = buf_size;
@@ -4555,9 +4555,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->trans_tracking = NULL;
     struct_ptr->buf = NULL;
 
-	
+
     /* Open journal file */
-    struct_ptr->journal_file_fd = 
+    struct_ptr->journal_file_fd =
 	    HDopen(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
 
     if ( struct_ptr->journal_file_fd  == -1) {
@@ -4566,7 +4566,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                     "Can't create journal file.  Does it already exist?")
     } /* end if */
 
-	
+
     /* Allocate space for the ring buffer's journal buffer pointers */
     struct_ptr->buf = H5MM_malloc(struct_ptr->num_bufs * sizeof(char *));
 
@@ -4575,9 +4575,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "allocation of buf pointer array failed.");
     } /* end if */
-	
+
     /* Allocate space for journal buffers */
-    (*struct_ptr->buf)[0] = 
+    (*struct_ptr->buf)[0] =
             H5MM_malloc(struct_ptr->buf_size * struct_ptr->num_bufs);
 
     if ( (*struct_ptr->buf)[0] == NULL ) {
@@ -4586,10 +4586,10 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                     "allocation of buffers failed.");
     } /* end if */
 
-    /* Allocate space for the purposes of tracking the last 
-     * transaction on disk 
+    /* Allocate space for the purposes of tracking the last
+     * transaction on disk
      */
-    struct_ptr->trans_tracking = 
+    struct_ptr->trans_tracking =
     	H5MM_malloc(struct_ptr->num_bufs * sizeof(unsigned long));
 
     if ( struct_ptr->trans_tracking == NULL ) {
@@ -4597,19 +4597,19 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "allocation of trans_tracking failed.");
     } /* end if */
-	
+
     /* Initialize the transaction tracking array */
     for (i=0; i<struct_ptr->num_bufs; i++)
     {
 	(*struct_ptr->trans_tracking)[i] = 0;
     }
-	
-    /* Make journal buffer pointers point to the right location in 
-     * chunk of allocated memory above 
+
+    /* Make journal buffer pointers point to the right location in
+     * chunk of allocated memory above
      */
     for ( i = 1; i < struct_ptr->num_bufs; i++ )
     {
-	(*struct_ptr->buf)[i] = 
+	(*struct_ptr->buf)[i] =
 		&((*struct_ptr->buf)[0])[i * struct_ptr->buf_size];
     }
 
@@ -4617,7 +4617,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->head = (*struct_ptr->buf)[struct_ptr->put];
 
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__init */
@@ -4638,9 +4638,9 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Turned this function into a switch board function,
- *			calling either the human readable or the binary 
- *			journal file version of the function as indicated 
- *			by struct_ptr->human_readable.  
+ *			calling either the human readable or the binary
+ *			journal file version of the function as indicated
+ *			by struct_ptr->human_readable.
  *
  *			The original version of this file has been renamed
  *			to H5C2_jb_hrjf__journal_entry().
@@ -4649,7 +4649,7 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			uint64_t trans_num,
 			haddr_t base_addr,
@@ -4666,7 +4666,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__journal_entry(struct_ptr, trans_num, base_addr, 
+        if ( H5C2_jb_hrjf__journal_entry(struct_ptr, trans_num, base_addr,
                                          length, body) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -4697,8 +4697,8 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Verify that there is no transaction in progress, and
- *			that the supplied transaction number greater than 
- *			the last.  Then construct a start transaction message, 
+ *			that the supplied transaction number greater than
+ *			the last.  Then construct a start transaction message,
  *			and write it to the current journal buffer. Make note
  *			of the fact that the supplied transaction is in
  *			progress.
@@ -4706,9 +4706,9 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Turned this function into a switch board function,
- *			calling either the human readable or the binary 
- *			journal file version of the function as indicated 
- *			by struct_ptr->human_readable.  
+ *			calling either the human readable or the binary
+ *			journal file version of the function as indicated
+ *			by struct_ptr->human_readable.
  *
  *			The original version of this file has been renamed
  *			to H5C2_jb_hrjf__start_transaction().
@@ -4717,7 +4717,7 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 			   uint64_t trans_num)
 
@@ -4732,7 +4732,7 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__start_transaction(struct_ptr, trans_num) 
+        if ( H5C2_jb_hrjf__start_transaction(struct_ptr, trans_num)
              != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -4740,16 +4740,16 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
         }
     } else {
 
-        if ( H5C2_jb_bjf__start_transaction(struct_ptr, trans_num) 
+        if ( H5C2_jb_bjf__start_transaction(struct_ptr, trans_num)
              != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb_bjf__start_transaction() failed.")
         }
     }
-	
+
 done:
-	
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_jb__start_transaction() */
@@ -4765,31 +4765,31 @@ done:
  * Purpose:		Verify that the journal buffers are empty, and that the
  *			journal file has been truncated. Then close and delete
  *			the journal file associated with *struct_ptr, and free
- *			all dynamically allocated memory associated with 
+ *			all dynamically allocated memory associated with
  *			*struct_ptr.
  *
  * Returns:		SUCCEED on success.
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr)
 
 {
     herr_t ret_value = SUCCEED;
-	
+
     FUNC_ENTER_NOAPI(H5C2_jb__takedown, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
+
     /* Verify that the journal buffers are empty */
     if ( struct_ptr->bufs_in_use != 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 	            "Attempt to takedown with non-empty buffers.")
-    } /* end if */	
+    } /* end if */
 
     /* Verify that the journal file has been truncated */
     if (struct_ptr->journal_is_empty != TRUE) {
@@ -4878,7 +4878,7 @@ done:
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Thursday, February 7, 2008
  *
- * Purpose:		Verify that there is no transaction in progress, and 
+ * Purpose:		Verify that there is no transaction in progress, and
  *			that the journal entry buffers are empty. Truncate
  *			the journal file. Does not return until the file
  *			is truncated on disk.
@@ -4887,7 +4887,7 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
 
 {
@@ -4899,7 +4899,7 @@ H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
+
     /* Verify that there is no transaction in progress */
     if ( struct_ptr->trans_in_prog != FALSE ) {
 
@@ -4912,7 +4912,7 @@ H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 	            "Attempt to truncate with non-empty buffers.")
-    } /* end if */	
+    } /* end if */
 
     /* Truncate the journal file */
     if ( HDftruncate(struct_ptr->journal_file_fd, (off_t)0) < 0 ) {
@@ -4927,7 +4927,7 @@ H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
     /* reset the transaction number fields */
     struct_ptr->cur_trans = 0;
     struct_ptr->last_trans_on_disk = 0;
-	
+
     /* reset the transaction tracking array */
     for (i=0; i<struct_ptr->num_bufs; i++)
     {
@@ -4954,21 +4954,21 @@ done:
  *			2/12/09
  *
  * Purpose:		Write the header message to the journal file.
- * 
+ *
  *			This message appear exactly once in every journal
  *			file, and is always the first message in the file.
- *			It identifies the journal file, and contains 
- *			information required to run the journal, should 
+ *			It identifies the journal file, and contains
+ *			information required to run the journal, should
  *			that be necessary.
  *
  *			It is always in human readable format.
- *			
+ *
  * Returns:		SUCCEED on success.
  *			FAIL on failure.
  *
  * Changes:		JRM -- 3/21/09
- *                      Moved the entry tag strings into #defines.  
- *			Replaced all white space in the creation date 
+ *                      Moved the entry tag strings into #defines.
+ *			Replaced all white space in the creation date
  *			string with underscores.
  *
  *			JRM -- 4/16/09
@@ -4977,7 +4977,7 @@ done:
  *
  ******************************************************************************/
 
-herr_t 
+herr_t
 H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
 
 {
@@ -4990,7 +4990,7 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
     size_t      file_name_len;
     size_t	buf_len;
     time_t      current_date;
-	
+
     FUNC_ENTER_NOAPI(H5C2_jb__write_header_entry, FAIL)
 
     /* Check Arguments */
@@ -5005,7 +5005,7 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
     HDassert( file_name_len > 0 );
 
     buf_len = file_name_len + 256;
-	
+
     /* Allocate space for journal buffers */
     buf = H5MM_malloc(buf_len);
 
@@ -5014,7 +5014,7 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "buffer allocation failed.");
     } /* end if */
-	
+
     /* Get the current date */
     current_date = HDtime(NULL);
 
@@ -5030,7 +5030,7 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
 
     } else {
 
-        /* copy the string into time_buf, replacing white space with 
+        /* copy the string into time_buf, replacing white space with
          * underscores.
          *
          * Do this to make parsing the header easier.
@@ -5059,14 +5059,14 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
 
     if ( struct_ptr->human_readable ) {
 
-        chars_written = 
-            HDsnprintf(buf, 
+        chars_written =
+            HDsnprintf(buf,
                        buf_len - 1,
                        "0 %s %ld %s %s %s %d %s %10.10s %s %d\n",
                        H5C2_JNL__VER_NUM_TAG,
-	               struct_ptr->jvers, 
+	               struct_ptr->jvers,
                        H5C2_JNL__TGT_FILE_NAME_TAG,
-	               struct_ptr->hdf5_file_name, 
+	               struct_ptr->hdf5_file_name,
                        H5C2_JNL__JNL_MAGIC_TAG,
                        (int)(struct_ptr->journal_magic),
                        H5C2_JNL__CREATION_DATE_TAG,
@@ -5076,24 +5076,24 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
 
     } else {
 
-        /* Only include the offset and length widths in header for a binary 
-         * journal file.  Leave this data out of the human readable journal 
+        /* Only include the offset and length widths in header for a binary
+         * journal file.  Leave this data out of the human readable journal
          * file header because:
          *
-         *	1) Everything is in ASCII so it isn't needed, and 
+         *	1) Everything is in ASCII so it isn't needed, and
          *
-         *	2) If we included it anyway, we would have to update the 
+         *	2) If we included it anyway, we would have to update the
          *	   tests for the human readable journal file code.
          */
 
-        chars_written = 
-            HDsnprintf(buf, 
+        chars_written =
+            HDsnprintf(buf,
                        buf_len - 1,
                        "0 %s %ld %s %s %s %d %s %10.10s %s %d %s %d %s %d\n",
                        H5C2_JNL__VER_NUM_TAG,
-	               struct_ptr->jvers, 
+	               struct_ptr->jvers,
                        H5C2_JNL__TGT_FILE_NAME_TAG,
-	               struct_ptr->hdf5_file_name, 
+	               struct_ptr->hdf5_file_name,
                        H5C2_JNL__JNL_MAGIC_TAG,
                        (int)(struct_ptr->journal_magic),
                        H5C2_JNL__CREATION_DATE_TAG,
@@ -5116,7 +5116,7 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
     HDassert( HDstrlen(buf) < buf_len );
 
     /* Write the header message into the ring buffer */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, FALSE, 
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, FALSE,
 			          (uint64_t)0) < 0) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -5146,7 +5146,7 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Put the contents of data into the journal buffers. This
- * 			is done as follows: While the data to be written is 
+ * 			is done as follows: While the data to be written is
  * 			larger than the amount of space left in the ring buffer,
  * 			the ring buffer is filled to capacity with data and
  *			flushed. This repeats until the unwritten data remaining
@@ -5155,18 +5155,18 @@ done:
  *
  *			At this point, the rest of the data can just be written
  *			without having to break it up further. In the event
- *			the data covers more than one journal buffer, the get 
- *			and put indices are updated to state this fact. Any 
- *			journal buffers that were filled during the write are 
+ *			the data covers more than one journal buffer, the get
+ *			and put indices are updated to state this fact. Any
+ *			journal buffers that were filled during the write are
  *			flushed.
  *
  * Returns:		SUCCEED on success.
  *
  ******************************************************************************/
 
-herr_t 
-H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
-			size_t size,			
+herr_t
+H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
+			size_t size,
 			const char * data,
                         hbool_t is_end_trans,
                         uint64_t trans_num)
@@ -5175,26 +5175,26 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
     unsigned long track_last_trans = 0;
     int oldput = 0;
     int i;
-	
+
     FUNC_ENTER_NOAPI(H5C2_jb__write_to_buffer, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(data);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-    HDassert( ( struct_ptr->human_readable == FALSE ) || 
+    HDassert( ( struct_ptr->human_readable == FALSE ) ||
               ( HDstrlen(data) == size ) );
-    HDassert(struct_ptr->rb_space_to_rollover <= 
+    HDassert(struct_ptr->rb_space_to_rollover <=
 		    struct_ptr->num_bufs * struct_ptr->buf_size);
-    HDassert(struct_ptr->rb_space_to_rollover > 0); 
+    HDassert(struct_ptr->rb_space_to_rollover > 0);
 
-    /* If the data size exceeds the bounds of the ring buffer's allocated 
-     * memory, loop around to top 
+    /* If the data size exceeds the bounds of the ring buffer's allocated
+     * memory, loop around to top
      */
     if (size >= struct_ptr->rb_space_to_rollover) {
 
 	while (size >= struct_ptr->rb_space_to_rollover) {
-			
+
 	    /* Assertions */
 	    HDassert(size != 0);
 	    HDassert( ( struct_ptr->human_readable == FALSE ) ||
@@ -5202,13 +5202,13 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
 	    /* fill up remaining space in the ring buffer */
 	    HDmemcpy(struct_ptr->head, data, struct_ptr->rb_space_to_rollover);
-			
+
 	    /* move head to point to start of ring buffer */
 	    struct_ptr->head = (*struct_ptr->buf)[0];
 
             /* make note of last transaction on disk */
             track_last_trans = (*struct_ptr->trans_tracking)[struct_ptr->put];
-            
+
             /* update rb_free_space */
             struct_ptr->rb_free_space -= struct_ptr->rb_space_to_rollover;
 
@@ -5230,8 +5230,8 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
                then update it */
             if ((size == struct_ptr->rb_space_to_rollover) &&
                 (is_end_trans == TRUE)) {
-                
-                (*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1] 
+
+                (*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1]
                                                     = trans_num;
                 (*struct_ptr->trans_tracking)[0] = trans_num;
             }
@@ -5246,13 +5246,13 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	    /* update remaining size of data to be written */
 	    size = size - struct_ptr->rb_space_to_rollover;
 
-	    /* update the data pointer to point to the remaining data to be 
-	     * written 
+	    /* update the data pointer to point to the remaining data to be
+	     * written
 	     */
 	    data = &data[struct_ptr->rb_space_to_rollover];
 
 	    /* update the amount of space left at end of ring buffer */
-	    struct_ptr->rb_space_to_rollover = 
+	    struct_ptr->rb_space_to_rollover =
 		    struct_ptr->buf_size * struct_ptr->num_bufs;
 
 	    /* update the amount of space in the current buffer */
@@ -5260,9 +5260,9 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
 	} /* end while */
     } /* end if */
-	
-    /* If the size of the data exceeds the bounds of a single journal 
-     * buffer, will write into multiple 
+
+    /* If the size of the data exceeds the bounds of a single journal
+     * buffer, will write into multiple
      */
     if (size > struct_ptr->cur_buf_free_space) {
 
@@ -5282,11 +5282,11 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
         struct_ptr->rb_free_space -= size;
 
 	/* update put index */
-	struct_ptr->put += 
-            (size-struct_ptr->cur_buf_free_space)/(struct_ptr->buf_size) + 1; 
+	struct_ptr->put +=
+            (size-struct_ptr->cur_buf_free_space)/(struct_ptr->buf_size) + 1;
 
-        /* Drag the last transaction in a filled buffer value residing in the 
-           old put location through the trans_tracking array to the new 
+        /* Drag the last transaction in a filled buffer value residing in the
+           old put location through the trans_tracking array to the new
            corresponding put position. */
         for (i=oldput; i<struct_ptr->put+1; i++)
         {
@@ -5294,9 +5294,9 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
         }
 
 	/* update current buffer usage */
-	struct_ptr->cur_buf_free_space = 
-            struct_ptr->rb_space_to_rollover - size - 
-            (struct_ptr->num_bufs - (struct_ptr->put + 1)) * 
+	struct_ptr->cur_buf_free_space =
+            struct_ptr->rb_space_to_rollover - size -
+            (struct_ptr->num_bufs - (struct_ptr->put + 1)) *
             (struct_ptr->buf_size );
 
 	/* update bufs_in_use as necessary */
@@ -5309,7 +5309,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
         /* check to see if trans_tracking needs to be updated. If so,
            then update it */
         if (is_end_trans == TRUE) {
-                
+
             if (struct_ptr->cur_buf_free_space == struct_ptr->buf_size) {
                 (*struct_ptr->trans_tracking)[struct_ptr->put - 1] = trans_num;
             }
@@ -5331,13 +5331,13 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
     } /* end if */
 
-    /* if the data can fit in the remaining space in the current journal 
-     * buffer indexed by put 
+    /* if the data can fit in the remaining space in the current journal
+     * buffer indexed by put
      */
     else if (size > 0)  {
 
 	HDassert(size <= struct_ptr->cur_buf_free_space);
-		
+
 	/* write data into journal buffer */
 	HDmemcpy(struct_ptr->head, data, size);
 
@@ -5358,17 +5358,17 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
 	/* update end of buffer space */
 	struct_ptr->rb_space_to_rollover -= size;
-		
+
         /* check to see if trans_tracking needs to be updated. If so,
            then update it */
         if (is_end_trans == TRUE) {
-                
-            (*struct_ptr->trans_tracking)[struct_ptr->put] 
+
+            (*struct_ptr->trans_tracking)[struct_ptr->put]
                                             = trans_num;
         } /* end if */
 
-	/* if buffer is full, flush it, and loop to the top of the 
-	 * ring buffer if at the end. 
+	/* if buffer is full, flush it, and loop to the top of the
+	 * ring buffer if at the end.
 	 */
 	if (struct_ptr->cur_buf_free_space == 0) {
 
@@ -5380,18 +5380,18 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
                         (*struct_ptr->trans_tracking)[struct_ptr->put - 1];
 
 	    } /* end if */
-                
+
             else {
 
 		struct_ptr->put = 0;
 
                 /* Drag trans_tracking value into next buffer */
-                (*struct_ptr->trans_tracking)[0] 
+                (*struct_ptr->trans_tracking)[0]
                  = (*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
 
                 /* reset head pointer and free space values */
 		struct_ptr->head = (*struct_ptr->buf)[0];
-		struct_ptr->rb_space_to_rollover = 
+		struct_ptr->rb_space_to_rollover =
 			struct_ptr->buf_size * struct_ptr->num_bufs;
 
 	    } /* end else */
@@ -5407,7 +5407,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	} /* end if */
 
     } /* end else */
-	
+
     HDassert(struct_ptr->bufs_in_use <= struct_ptr->num_bufs);
 
 done:

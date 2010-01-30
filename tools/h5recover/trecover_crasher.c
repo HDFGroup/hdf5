@@ -12,12 +12,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*  
+/*
  * crasher HDF5 API module of the trecover test program.
  *
  * Creator: Albert Cheng, Jan 28, 2008.
  */
- 
+
 #include "trecover.h"
 
 /* Crasher
@@ -54,13 +54,13 @@ crasher(int crash_mode, CrasherParam_t *crash_param)
 	    fprintf(stderr, "Unknown Crash Mode (%d)\n", crash_mode);
 	    break;
     }
-}     
+}
 
 
 /* Red Storm may hang if the signal handlin routine does I/O, even just printf() calls.
  * Be aware if you want to add printf calls.
  */
-void wakeup(int signum) 
+void wakeup(int signum)
 {
     /* call crasher with sync mode */
     crasher(SyncCrash, 0);

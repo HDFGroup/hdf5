@@ -258,7 +258,7 @@ const H5C2_class_t epoch_marker_class_2 =
     /* serialize        = */ &H5C2_epoch_marker_serialize,
     /* free_icr         = */ &H5C2_epoch_marker_free_icr,
     /* clear_dirty_bits = */ &H5C2_epoch_marker_clear_dirty_bits,
-}; 
+};
 
 
 /***************************************************************************
@@ -303,7 +303,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-static herr_t 
+static herr_t
 H5C2_epoch_marker_serialize(const H5F_t UNUSED *f,
 		            hid_t UNUSED dxpl_id,
                             haddr_t UNUSED addr,
@@ -423,18 +423,18 @@ done:
  *
  *		JRM -- 8/25/06
  *		Added initialization for the slist_len_increase and
- *		slist_size_increase fields.  These fields are used 
+ *		slist_size_increase fields.  These fields are used
  *		for sanity checking in the flush process, and are not
  *		compiled in unless H5C2_DO_SANITY_CHECKS is TRUE.
  *
  *		JRM -- 3/28/07
- *		Added initialization for the new is_read_only and 
+ *		Added initialization for the new is_read_only and
  *		ro_ref_count fields.
  *
  *		JRM -- 7/10/07
- *		Added the f parameter, along with initialization of 
+ *		Added the f parameter, along with initialization of
  *		the field of the same in in H5C2_t.  Also removed the
- *		type name table, as type names are now included in 
+ *		type name table, as type names are now included in
  *		instances of H5C2_class_t.
  *
  *              JRM -- 3/28/07
@@ -446,19 +446,19 @@ done:
  *              related fields of H5C2_t.
  *
  * 		JRM -- 3/6/08
- * 		Added initialization for metadata journaling related 
+ * 		Added initialization for metadata journaling related
  * 		fields in H5C2_t.
  *
  * 		JRM -- 3/26/08
  * 		Added dxpl_id and journal_recovered parameters.  Also
  * 		added code to test to see if the file is marked as having
- * 		journaling in progress, and fail if it does unless 
+ * 		journaling in progress, and fail if it does unless
  * 		the journal_recovered parameter is TRUE.
  *
  * 		JRM -- 7/10/08
  * 		Removed the f, dxpl_id, and journal_recovered parameters,
  * 		as checking for journaling in progress is no longer handled
- * 		in H5C2_create().  
+ * 		in H5C2_create().
  *
  *-------------------------------------------------------------------------
  */
@@ -621,7 +621,7 @@ H5C2_create(size_t		        max_cache_size,
     {
         (cache_ptr->epoch_marker_active)[i]		 = FALSE;
 #ifndef NDEBUG
-        ((cache_ptr->epoch_markers)[i]).magic		 = 
+        ((cache_ptr->epoch_markers)[i]).magic		 =
 					       H5C2__H5C2_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
@@ -659,7 +659,7 @@ H5C2_create(size_t		        max_cache_size,
     cache_ptr->jnl_magic                                 = 0;
     cache_ptr->jnl_file_name_len                         = 0;
     (cache_ptr->jnl_file_name)[0]                        = '\0';
-    (cache_ptr->mdj_jbrb).magic                          = 
+    (cache_ptr->mdj_jbrb).magic                          =
 	    					H5C2__H5C2_JBRB_T_MAGIC;
     cache_ptr->tl_len                                    = 0;
     cache_ptr->tl_size                                   = 0;
@@ -670,12 +670,12 @@ H5C2_create(size_t		        max_cache_size,
     cache_ptr->jwipl_head_ptr                            = NULL;
     cache_ptr->jwipl_tail_ptr                            = NULL;
 
-    /* allocate and initialze the metadata journaling status change 
+    /* allocate and initialze the metadata journaling status change
      * callback table, along with the associated fields.  Note that
      * the table will grow and shrink as needed.
      */
-    cache_ptr->mdjsc_cb_tbl = 
-	    H5MM_malloc(H5C2__MIN_MDJSC_CB_TBL_LEN * 
+    cache_ptr->mdjsc_cb_tbl =
+	    H5MM_malloc(H5C2__MIN_MDJSC_CB_TBL_LEN *
 			sizeof(H5C2_mdjsc_record_t));
     if ( cache_ptr->mdjsc_cb_tbl == NULL ) {
 
@@ -708,14 +708,14 @@ H5C2_create(size_t		        max_cache_size,
     cache_ptr->skip_dxpl_id_checks		= FALSE;
     cache_ptr->prefix[0]			= '\0';  /* empty string */
 
-    /* We used to check for journaling here, but the super block hasn't 
-     * been read in yet at cache creation time -- thus the check for 
-     * journaling has been moved to H5AC2_check_for_journaling(), which 
+    /* We used to check for journaling here, but the super block hasn't
+     * been read in yet at cache creation time -- thus the check for
+     * journaling has been moved to H5AC2_check_for_journaling(), which
      * is simply a wrapper for H5C2_check_for_journaling().
      *
      * H5AC2_check_for_journaling() is called at the end of H5Fopen() --
      * at which point the superblock has been read.
-     * 
+     *
      * Note that H5Fopen() is called by both H5Fcreate() and H5Fopen().
      */
 
@@ -964,8 +964,8 @@ H5C2_def_auto_resize_rpt_fcn(H5C2_t * cache_ptr,
  *
  *              JRM -- 7/11/07
  *              Reworked parameter list for the revised cache API.
- *              The function lost its pointer to an instance of 
- *              H5F_t (now supplied via cache_ptr), and one of its 
+ *              The function lost its pointer to an instance of
+ *              H5F_t (now supplied via cache_ptr), and one of its
  *              dxlp ids.
  *
  *-------------------------------------------------------------------------
@@ -1088,8 +1088,8 @@ done:
  *
  * Function:    H5C2_expunge_entry
  *
- * Purpose:     Use this function to tell the cache to expunge an entry 
- * 		from the cache without writing it to disk even if it is 
+ * Purpose:     Use this function to tell the cache to expunge an entry
+ * 		from the cache without writing it to disk even if it is
  * 		dirty.  The entry may not be either pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1101,11 +1101,11 @@ done:
  *
  * 		JRM -- 7/11/07
  *		Reworked the parameter list for the revised cache API.
- *		The function lost its file pointer (now passed in the 
+ *		The function lost its file pointer (now passed in the
  *		*cache_ptr), and one of the dxpl ids.
  *
  *		JRM -- 4/3/08
- *		Added code to test to see if journaling is enabled, and 
+ *		Added code to test to see if journaling is enabled, and
  *		if it is, test to see if entry_ptr->last_trans > zero.
  *		If so, must remove the entry from the transaction list
  *		(if it is present), remove the entry from the journal
@@ -1132,7 +1132,7 @@ H5C2_expunge_entry(H5F_t *              f,
 #if H5C2_PRINT_ENTRY_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
     {
-        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", 
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n",
 	          FUNC, (unsigned long)addr, type->name);
     }
 #endif /* H5C2_PRINT_ENTRY_POINTS */
@@ -1200,7 +1200,7 @@ H5C2_expunge_entry(H5F_t *              f,
         }
     }
 
-    /* If we get this far, call H5C2_flush_single_entry() with the 
+    /* If we get this far, call H5C2_flush_single_entry() with the
      * H5C2__FLUSH_INVALIDATE_FLAG and the H5C2__FLUSH_CLEAR_ONLY_FLAG.
      * This will clear the entry, and then delete it from the cache.
      */
@@ -1210,7 +1210,7 @@ H5C2_expunge_entry(H5F_t *              f,
                                      cache_ptr,
                                      entry_ptr->type,
                                      entry_ptr->addr,
-                                     H5C2__FLUSH_INVALIDATE_FLAG | 
+                                     H5C2__FLUSH_INVALIDATE_FLAG |
 				     H5C2__FLUSH_CLEAR_ONLY_FLAG,
                                      TRUE);
 
@@ -1232,7 +1232,7 @@ done:
 
 #if H5C2_PRINT_EXIT_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n",
                   FUNC, (int)ret_value);
     }
 #endif /* H5C2_PRINT_EXIT_POINTS */
@@ -1314,31 +1314,31 @@ done:
  *		Updated function to handle pinned entries.
  *
  *		JRM -- 8/19/06
- *		Added code managing the new flush_in_progress field of 
+ *		Added code managing the new flush_in_progress field of
  *		H5C2_t.
  *
  *		Also reworked function to allow for the possibility that
  *		entries will be dirtied, resized, or renamed during flush
- *		callbacks.  As a result, we may have to make multiple 
+ *		callbacks.  As a result, we may have to make multiple
  *		passes through the skip list before the cache is flushed.
  *
  *		JRM -- 7/11/07
  *		Reworked function to support the new metadata cache API.
- *		The function lost the H5F_t parameter (now passed via 
+ *		The function lost the H5F_t parameter (now passed via
  *		*cache_ptr), and one of the dxpl id parameters.
  *
  *		JRM -- 10/13/07
- *		Added code to detect and manage the case in which a 
+ *		Added code to detect and manage the case in which a
  *		serialize callback changes the s-list out from under
  *		the function.  The only way I can think of in which this
  *		can happen is if a serialize function loads an entry
  *		into the cache that isn't there already.  Quincey tells
- *		me that this will never happen, but I'm not sure I 
+ *		me that this will never happen, but I'm not sure I
  *		believe him.
  *
- *		Note that this is a pretty bad scenario if it ever 
- *		happens.  The code I have added should allow us to 
- *		handle the situation, but one can argue that I should 
+ *		Note that this is a pretty bad scenario if it ever
+ *		happens.  The code I have added should allow us to
+ *		handle the situation, but one can argue that I should
  *		just scream and die if I ever detect the condidtion.
  *
  *              JRM -- 10/13/07
@@ -1357,7 +1357,7 @@ done:
  *              ever detect the condidtion.
  *
  *              JRM -- 4/10/08
- *              Added code to support journaling.  
+ *              Added code to support journaling.
  *
  *-------------------------------------------------------------------------
  */
@@ -1469,7 +1469,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                                 "next_entry_ptr == NULL 1 ?!?!");
                 }
 #ifndef NDEBUG
-		HDassert( next_entry_ptr->magic == 
+		HDassert( next_entry_ptr->magic ==
 				H5C2__H5C2_CACHE_ENTRY_T_MAGIC );
 #endif /* NDEBUG */
                 HDassert( next_entry_ptr->is_dirty );
@@ -1480,7 +1480,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 		next_entry_ptr = NULL;
 
 	    }
-       
+
 	    HDassert( node_ptr != NULL );
 
 #if H5C2_DO_SANITY_CHECKS
@@ -1495,7 +1495,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 	     * fractal heap, the entry serialize callback can cause entries
 	     * to be dirtied, resized, and/or renamed.
 	     *
-	     * To deal with this, we first make note of the initial 
+	     * To deal with this, we first make note of the initial
 	     * skip list length and size:
 	     */
             initial_slist_len = cache_ptr->slist_len;
@@ -1507,12 +1507,12 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
             flushed_entries_count = 0;
             flushed_entries_size = 0;
 
-	    /* As mentioned above, there is the possibility that 
+	    /* As mentioned above, there is the possibility that
 	     * entries will be dirtied, resized, and/or flushed during
-	     * our pass through the skip list.  To capture the number 
-	     * of entries added, and the skip list size delta, 
+	     * our pass through the skip list.  To capture the number
+	     * of entries added, and the skip list size delta,
 	     * zero the slist_len_increase and slist_size_increase of
-	     * the cache's instance of H5C2_t.  These fields will be 
+	     * the cache's instance of H5C2_t.  These fields will be
 	     * updated elsewhere to account for slist insertions and/or
 	     * dirty entry size changes.
 	     */
@@ -1533,18 +1533,18 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 		 * that the serialize callback will dirty and/or resize
 		 * other entries in the cache.  In particular, while
 		 * Quincey has promised me that this will never happen,
-		 * it is possible that the serialize callback for an 
+		 * it is possible that the serialize callback for an
 		 * entry may protect an entry that is not in the cache,
-		 * perhaps causing the cache to flush and possibly 
+		 * perhaps causing the cache to flush and possibly
 		 * evict the entry associated with node_ptr to make
 		 * space for the new entry.
 		 *
 		 * Thus we do a bit of extra sanity checking on entry_ptr,
-		 * and break out of this scan of the skip list if we 
-		 * detect minor problems.  We have a bit of leaway on the 
-		 * number of passes though the skip list, so this shouldn't 
-		 * be an issue in the flush in and of itself, as it should 
-		 * be all but impossible for this to happen more than once 
+		 * and break out of this scan of the skip list if we
+		 * detect minor problems.  We have a bit of leaway on the
+		 * number of passes though the skip list, so this shouldn't
+		 * be an issue in the flush in and of itself, as it should
+		 * be all but impossible for this to happen more than once
 		 * in any flush.
 		 *
 		 * Observe that that breaking out of the scan early
@@ -1554,7 +1554,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 		 * If an entry has merely been marked clean and removed from
                  * the s-list, we simply break out of the scan.
                  *
-                 * If the entry has been evicted, we flag an error and 
+                 * If the entry has been evicted, we flag an error and
                  * exit.
 		 */
 #ifndef NDEBUG
@@ -1563,12 +1563,12 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                 "entry_ptr->magic invalid ?!?!");
 
-                } else 
+                } else
 #endif /* NDEBUG */
 		if ( ( ! entry_ptr->is_dirty ) ||
 	             ( ! entry_ptr->in_slist ) ) {
 
-		    /* the s-list has been modified out from under us. 
+		    /* the s-list has been modified out from under us.
 		     * set node_ptr to NULL and break out of the loop.
 		     */
 		    node_ptr = NULL;
@@ -1590,7 +1590,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                                     "next_entry_ptr == NULL 2 ?!?!");
 		    }
 #ifndef NDEBUG
-		    HDassert( next_entry_ptr->magic == 
+		    HDassert( next_entry_ptr->magic ==
 				    H5C2__H5C2_CACHE_ENTRY_T_MAGIC );
 #endif /* NDEBUG */
                     HDassert( next_entry_ptr->is_dirty );
@@ -1602,7 +1602,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                 HDassert( entry_ptr != NULL );
                 HDassert( entry_ptr->in_slist );
 
-                if ( ( ! flush_marked_entries ) || 
+                if ( ( ! flush_marked_entries ) ||
                      ( entry_ptr->flush_marker ) ) {
 
                     if ( entry_ptr->is_protected ) {
@@ -1617,13 +1617,13 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                     } else if ( entry_ptr->is_pinned ) {
 
                         /* Test to see if we are can flush the entry now.
-                         * If we can, go ahead and flush.  Note that we 
-			 * aren't trying to do a destroy here, so that 
+                         * If we can, go ahead and flush.  Note that we
+			 * aren't trying to do a destroy here, so that
 			 * is not an issue.
                          */
                         if ( TRUE ) { /* When we get to multithreaded cache,
-                                       * we will need either locking code, 
-				       * and/or a test to see if the entry 
+                                       * we will need either locking code,
+				       * and/or a test to see if the entry
 				       * is in flushable condition here.
                                        */
 #if H5C2_DO_SANITY_CHECKS
@@ -1639,7 +1639,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                                                              FALSE);
                             if ( status < 0 ) {
 
-                                /* This shouldn't happen -- if it does, we 
+                                /* This shouldn't happen -- if it does, we
 				 * are toast so just scream and die.
                                  */
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
@@ -1661,7 +1661,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
                                                          FALSE);
                         if ( status < 0 ) {
 
-                            /* This shouldn't happen -- if it does, we are 
+                            /* This shouldn't happen -- if it does, we are
 			     * toast so just scream and die.
                              */
                             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
@@ -1675,7 +1675,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 #if H5C2_DO_SANITY_CHECKS
             /* Verify that the slist size and length are as expected. */
 
-	    HDassert( (initial_slist_len + cache_ptr->slist_len_increase - 
+	    HDassert( (initial_slist_len + cache_ptr->slist_len_increase -
                        flushed_entries_count) == cache_ptr->slist_len );
 	    HDassert( (initial_slist_size + cache_ptr->slist_size_increase -
 		       flushed_entries_size) == cache_ptr->slist_size );
@@ -1714,7 +1714,7 @@ H5C2_flush_cache(H5F_t *f, hid_t    dxpl_id, unsigned flags)
 
     if ( cache_ptr->mdj_enabled ) {
 
-        status = H5C2_journal_post_flush(f, dxpl_id, cache_ptr, 
+        status = H5C2_journal_post_flush(f, dxpl_id, cache_ptr,
 			              (hbool_t)(flush_marked_entries == FALSE));
 
 	if ( status != SUCCEED ) {
@@ -1729,7 +1729,7 @@ done:
     cache_ptr->flush_in_progress = FALSE;
 
 #if H5C2_PRINT_EXIT_POINTS
-    HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+    HDfprintf(stdout, "%s: Exiting with result = %d.\n",
               FUNC, (int)ret_value);
 #endif /* H5C2_PRINT_EXIT_POINTS */
 
@@ -1783,13 +1783,13 @@ done:
  *		find a case where it helps, lets get rid of it.
  *
  *
- *		Added some sanity checks to the change which verify the 
+ *		Added some sanity checks to the change which verify the
  *		expected values of the new is_read_only and ro_ref_count
  *		fields.
  *						JRM - 3/29/07
  *
  *		Modified parameter list for the new metadata cache API.
- *		THe function lost its H5F_t parameter (now passed via 
+ *		THe function lost its H5F_t parameter (now passed via
  *		*cache_ptr), and one of its dxpl ids.
  *
  *						JRM - 7/11/07
@@ -2269,7 +2269,7 @@ H5C2_get_evictions_enabled(const H5C2_t *  cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_get_evictions_enabled, FAIL)
 
-    if ( ( cache_ptr == NULL ) || 
+    if ( ( cache_ptr == NULL ) ||
          ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
@@ -2296,7 +2296,7 @@ done:
  * Purpose:     Get the trace_file_ptr field from the cache.
  *
  *              This field will either be NULL (which indicates that trace
- *              file logging is turned off), or contain a pointer to the 
+ *              file logging is turned off), or contain a pointer to the
  *              open file to which trace file data is to be written.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2327,7 +2327,7 @@ H5C2_get_trace_file_ptr(const H5C2_t *cache_ptr, FILE **trace_file_ptr_ptr)
  * Purpose:     Get the trace_file_ptr field from the cache, via an entry.
  *
  *              This field will either be NULL (which indicates that trace
- *              file logging is turned off), or contain a pointer to the 
+ *              file logging is turned off), or contain a pointer to the
  *              open file to which trace file data is to be written.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2421,13 +2421,13 @@ H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
  *		destroy_in_progress fields.
  *
  *		JRM -- 3/29/07
- *		Added initialization for the new is_read_only and 
+ *		Added initialization for the new is_read_only and
  *		ro_ref_count fields.
  *
  *		JRM -- 7/11/07
- *		Reworked the parameter list for the revised metadata 
+ *		Reworked the parameter list for the revised metadata
  *		cache API.  The function lost its pointer to H5F_t
- *		(now supplied via *cache_ptr), and one of dxpl id 
+ *		(now supplied via *cache_ptr), and one of dxpl id
  *		parameters.  It gained a entry length parameter.
  *		Numerous internal changes to support the API change.
  *
@@ -2471,10 +2471,10 @@ H5C2_insert_entry(H5F_t *              f,
 
     FUNC_ENTER_NOAPI(H5C2_insert_entry, FAIL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
     {
-        HDfprintf(stdout, "%s: addr = 0x%lX, len = %d, type = %s.\n", FUNC, 
+        HDfprintf(stdout, "%s: addr = 0x%lX, len = %d, type = %s.\n", FUNC,
 	          (unsigned long)addr, (int)len, type->name);
     }
 #endif /* JRM */
@@ -2487,7 +2487,7 @@ H5C2_insert_entry(H5F_t *              f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->skip_file_checks || f );
-    HDassert( ( ! ( cache_ptr->mdj_enabled ) ) || 
+    HDassert( ( ! ( cache_ptr->mdj_enabled ) ) ||
               ( cache_ptr->trans_in_progress ) );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
@@ -2559,7 +2559,7 @@ H5C2_insert_entry(H5F_t *              f,
     if ( ( cache_ptr->flash_size_increase_possible ) &&
          ( entry_ptr->size > cache_ptr->flash_size_increase_threshold ) ) {
 
-        result = H5C2__flash_increase_cache_size(cache_ptr, 0, 
+        result = H5C2__flash_increase_cache_size(cache_ptr, 0,
 			                         entry_ptr->size);
 
         if ( result < 0 ) {
@@ -2715,7 +2715,7 @@ done:
 
 #if H5C2_PRINT_EXIT_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n",
                   FUNC, (int)ret_value);
     }
 #endif /* H5C2_PRINT_EXIT_POINTS */
@@ -2771,20 +2771,20 @@ done:
  *
  *		JRM -- 7/11/07
  *		Revised function for the new metadata cache API.  The
- *		function lost its point to H5F_t (now supplied via 
+ *		function lost its point to H5F_t (now supplied via
  *		*cache_ptr), and one of its dxpl ids.  Also internal
  *		changes supporting the revised API.
  *
  *		JRM -- 10/13/07
  *		Didn't modify this function to detect the case in which
  *		the LRU is modified out from under it.  It shouldn't be
- *		an issue here, as this function is only called in the 
+ *		an issue here, as this function is only called in the
  *		parallel case, and serialize callbacks must not modify
  *		other entries in parallel case.  If they do, they will
  *		cause inconsistancies in metadata across processes.
  *
- *		Further, since this function only clears entries, and 
- *		thus the serialize functions are never called, the 
+ *		Further, since this function only clears entries, and
+ *		thus the serialize functions are never called, the
  *		situation will be even worse, as the changes will only
  *		exist on process 0.
  *
@@ -3091,11 +3091,11 @@ H5C2_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
     HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
     HDassert((!cache_ptr->mdj_enabled) || cache_ptr->trans_in_progress);
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
-        HDfprintf(stdout, 
-                  "%s: addr = 0x%lX, size_changed = %d, new_size = %d.\n", 
-	          FUNC, (unsigned long)(entry_ptr->addr), (int)size_changed, 
+        HDfprintf(stdout,
+                  "%s: addr = 0x%lX, size_changed = %d, new_size = %d.\n",
+	          FUNC, (unsigned long)(entry_ptr->addr), (int)size_changed,
 	          (int)new_size);
 #endif /* JRM */
 
@@ -3147,7 +3147,7 @@ H5C2_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
                                               (new_size));
         }
 
-	/* if journaling is enabled, and the entry is already in the 
+	/* if journaling is enabled, and the entry is already in the
 	 * transaction list, update that list for the size change as well.
 	 */
 	H5C2__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
@@ -3166,8 +3166,8 @@ H5C2_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
 	H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
-    /* if journaling is enabled, check to see if the entry is in the 
-     * transaction list.  If it isn't, insert it.  If it is, move it to 
+    /* if journaling is enabled, check to see if the entry is in the
+     * transaction list.  If it isn't, insert it.  If it is, move it to
      * the head of the list.
      */
     H5C2__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
@@ -3223,9 +3223,9 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *thing)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
-        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC,
 	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
 #endif /* JRM */
 
@@ -3237,7 +3237,7 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *thing)
         entry_ptr->dirtied = TRUE;
 
 	/* don't do anything with the transaction list now, as the
-	 * entry will be added to the transaction list when it is 
+	 * entry will be added to the transaction list when it is
 	 * unprotected.
 	 */
 
@@ -3319,14 +3319,14 @@ done:
  *              modification is now obsolete.
  *
  *              JRM -- 3/31/08
- *              Updated function to check if journaling is enabled.  If 
- *              it is, the function now inserts the renamed entry in the 
+ *              Updated function to check if journaling is enabled.  If
+ *              it is, the function now inserts the renamed entry in the
  *              transaction list (if it wasn't there already).
  *
- *              Also added sanity checks that will scream and die if 
+ *              Also added sanity checks that will scream and die if
  *              we attempt to rename an entry during either a destroy
- *              or flush if journaling is enabled.  Recall that any 
- *              rename should have already been triggered when the 
+ *              or flush if journaling is enabled.  Recall that any
+ *              rename should have already been triggered when the
  *              entry was serialized to construct its journal entry.
  *
  *-------------------------------------------------------------------------
@@ -3349,11 +3349,11 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_rename_entry, FAIL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
     {
-        HDfprintf(stdout, "%s: type = %s,  old_addr = 0x%lX, new_addr = 0x%lx.\n", 
-	          FUNC, type->name, (unsigned long)old_addr, 
+        HDfprintf(stdout, "%s: type = %s,  old_addr = 0x%lX, new_addr = 0x%lx.\n",
+	          FUNC, type->name, (unsigned long)old_addr,
 		  (unsigned long)new_addr);
     }
 #endif /* JRM */
@@ -3390,14 +3390,14 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
 		    "Target entry is protected.")
     }
 
-    if ( ( entry_ptr->destroy_in_progress ) && 
+    if ( ( entry_ptr->destroy_in_progress ) &&
          ( cache_ptr->mdj_enabled ) )
     {
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "rename on destroy when journaling is enabled.\n");
     }
 
-    if ( ( entry_ptr->flush_in_progress ) && 
+    if ( ( entry_ptr->flush_in_progress ) &&
          ( cache_ptr->mdj_enabled ) )
     {
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -3432,7 +3432,7 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
      * Since this is a simple re-name, cache size should be unaffected.
      *
      * Check to see if the target entry is in the process of being destroyed
-     * before we delete from the index, etc.  If it is, all we do is 
+     * before we delete from the index, etc.  If it is, all we do is
      * change the addr.  If the entry is only in the process of being flushed,
      * don't mark it as dirty either, lest we confuse the flush call back.
      */
@@ -3478,7 +3478,7 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
 
             if ( removed_entry_from_slist ) {
 
-		/* we just removed the entry from the slist.  Thus we 
+		/* we just removed the entry from the slist.  Thus we
 		 * must touch up cache_ptr->slist_len_increase and
 		 * cache_ptr->slist_size_increase to keep from skewing
 		 * the sanity checks.
@@ -3522,7 +3522,7 @@ done:
 
 #if H5C2_PRINT_EXIT_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n",
                   FUNC, (int)ret_value);
     }
 #endif /* H5C2_PRINT_EXIT_POINTS */
@@ -3538,8 +3538,8 @@ done:
  * Purpose:	Resize a pinned entry.  The target entry MUST be
  * 		be pinned, and MUST not be unprotected.
  *
- * 		Resizing an entry dirties it, so if the entry is not 
- * 		already dirty, the function places the entry on the 
+ * 		Resizing an entry dirties it, so if the entry is not
+ * 		already dirty, the function places the entry on the
  * 		skip list.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -3567,10 +3567,10 @@ H5C2_resize_pinned_entry(void *thing, size_t new_size)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C2__H5C2_T_MAGIC);
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
-        HDfprintf(stdout, "%s: type = %s, addr = 0x%lX, new_size = %d.\n", 
-	          FUNC, entry_ptr->type->name, (unsigned long)(entry_ptr->addr), 
+        HDfprintf(stdout, "%s: type = %s, addr = 0x%lX, new_size = %d.\n",
+	          FUNC, entry_ptr->type->name, (unsigned long)(entry_ptr->addr),
 		  (int)new_size);
 #endif /* JRM */
 
@@ -3582,8 +3582,8 @@ H5C2_resize_pinned_entry(void *thing, size_t new_size)
     if(entry_ptr->is_protected)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry is protected??")
 
-    /* resizing dirties entries -- mark the entry as dirty if it 
-     * isn't already 
+    /* resizing dirties entries -- mark the entry as dirty if it
+     * isn't already
      */
     entry_ptr->is_dirty = TRUE;
     entry_ptr->image_up_to_date = FALSE;
@@ -3634,7 +3634,7 @@ H5C2_resize_pinned_entry(void *thing, size_t new_size)
                                               (new_size));
         }
 
-	/* if journaling is enabled, and the entry is already in the 
+	/* if journaling is enabled, and the entry is already in the
 	 * transaction list, update that list for the size change as well.
 	 */
 	H5C2__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
@@ -3654,8 +3654,8 @@ H5C2_resize_pinned_entry(void *thing, size_t new_size)
 	H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
 
-    /* if journaling is enabled, check to see if the entry is in the 
-     * transaction list.  If it isn't, insert it.  If it is, move it to 
+    /* if journaling is enabled, check to see if the entry is in the
+     * transaction list.  If it isn't, insert it.  If it is, move it to
      * the head of the list.
      */
     H5C2__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
@@ -3694,9 +3694,9 @@ H5C2_pin_protected_entry(void *thing)
 
     FUNC_ENTER_NOAPI(H5C2_pin_protected_entry, FAIL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if(H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id))
-        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC,
 	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
 #endif /* JRM */
 
@@ -3772,8 +3772,8 @@ done:
  *		make space in the cache.
  *
  *		JRM -- 11/12/04
- *		Added code to call to H5C2_make_space_in_cache()	
- *		after the call to H5C2__auto_adjust_cache_size() if that 
+ *		Added code to call to H5C2_make_space_in_cache()
+ *		after the call to H5C2__auto_adjust_cache_size() if that
  *		function sets the size_decreased flag is TRUE.
  *
  *		JRM -- 4/25/05
@@ -3794,12 +3794,12 @@ done:
  *
  *		JRM -- 6/23/06
  *		Modified code to allow dirty entries to be loaded from
- *		disk.  This is necessary as a bug fix in the object 
+ *		disk.  This is necessary as a bug fix in the object
  *		header code requires us to modify a header as it is read.
  *
  *		JRM -- 3/28/07
  *		Added the flags parameter and supporting code.  At least
- *		for now, this parameter is used to allow the entry to 
+ *		for now, this parameter is used to allow the entry to
  *		be protected read only, thus allowing multiple protects.
  *
  * 		Also added code to allow multiple read only protects
@@ -3811,9 +3811,9 @@ done:
  *
  *		JRM -- 7/11/07
  *		Revised function for the new metadata cache API.  The
- *		function lost its point to H5F_t (now supplied via 
+ *		function lost its point to H5F_t (now supplied via
  *		*cache_ptr), one of its dxpl ids. and one of the udata
- *		fields.  Gained the len parameter.  Also internal 
+ *		fields.  Gained the len parameter.  Also internal
  *		changes supporting the revised API.
  *
  * 		JRM -- 1/3/08
@@ -3821,8 +3821,8 @@ done:
  *              when a large entry is loaded.
  *
  *              JRM 3/31/08
- *              Updated function to insert the newly protected entry in 
- *              the transaction list if journaling is enabled and the 
+ *              Updated function to insert the newly protected entry in
+ *              the transaction list if journaling is enabled and the
  *              entry was dirtied on load.
  *
  *-------------------------------------------------------------------------
@@ -3851,11 +3851,11 @@ H5C2_protect(H5F_t *		  f,
 
     FUNC_ENTER_NOAPI(H5C2_protect, NULL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
     {
-        HDfprintf(stdout, 
-		  "%s: addr = 0x%lX, len = %d, type = %s, flags = 0x%x.\n", 
+        HDfprintf(stdout,
+		  "%s: addr = 0x%lX, len = %d, type = %s, flags = 0x%x.\n",
 	          FUNC, (unsigned long)addr, (int)len, type->name, flags);
     }
 #endif /* JRM */
@@ -3892,11 +3892,11 @@ H5C2_protect(H5F_t *		  f,
 
     if ( entry_ptr != NULL ) {
 
-        hit = TRUE; 
-	thing = (void *)entry_ptr; 
-    
-    } else { 
-	    
+        hit = TRUE;
+	thing = (void *)entry_ptr;
+
+    } else {
+
         /* must try to load the entry from disk. */
 
         hit = FALSE;
@@ -3926,8 +3926,8 @@ H5C2_protect(H5F_t *		  f,
              }
         }
 
-	/* try to free up some space if necessary and if 
-	 * evictions are permitted 
+	/* try to free up some space if necessary and if
+	 * evictions are permitted
 	 */
 	if ( ( cache_ptr->evictions_enabled ) &&
              ( (cache_ptr->index_size + entry_ptr->size) >
@@ -3989,7 +3989,7 @@ H5C2_protect(H5F_t *		  f,
              * for the cache to grow without bound.
 	     *
 	     * Third, the user may choose to disable evictions -- causing
-	     * the cache to grow without bound until evictions are 
+	     * the cache to grow without bound until evictions are
 	     * re-enabled.
              *
              * Finally, we usually don't check to see if the cache is
@@ -3997,7 +3997,7 @@ H5C2_protect(H5F_t *		  f,
              * possible to have a vastly oversized cache with no protected
              * entries as long as all the protects preceed the unprotects.
              *
-             * Since items 1, 2, and 3 are not changing any time soon, I 
+             * Since items 1, 2, and 3 are not changing any time soon, I
              * see no point in worrying about the fourth.
              */
 
@@ -4025,7 +4025,7 @@ H5C2_protect(H5F_t *		  f,
         }
 
 	/* under rare (we hope) circumstances, the load routine will
-	 * modify an entry as it loads it to repair corruption from 
+	 * modify an entry as it loads it to repair corruption from
 	 * a previous version of the library.  If this happens, we must
 	 * place the entry on the transaction list.
 	 */
@@ -4040,8 +4040,8 @@ H5C2_protect(H5F_t *		  f,
 	 * code.  If we do this often enough, we may want to optimize this.
 	 *
 	 * Note that we used to do an update for insertion here, but
-	 * that confused the journaling code -- the update for load is 
-	 * just a simplified version of update for insertion that 
+	 * that confused the journaling code -- the update for load is
+	 * just a simplified version of update for insertion that
 	 * avoids the problem.
 	 */
 
@@ -4054,7 +4054,7 @@ H5C2_protect(H5F_t *		  f,
     if ( entry_ptr->is_protected ) {
 
 	if ( ( read_only ) && ( entry_ptr->is_read_only ) ) {
-	
+
 	    HDassert( entry_ptr->ro_ref_count > 0 );
 
 	    (entry_ptr->ro_ref_count)++;
@@ -4150,7 +4150,7 @@ H5C2_protect(H5F_t *		  f,
                 result = H5C2_make_space_in_cache(f,
                                                   dxpl_id,
                                                   cache_ptr,
-                                                  (size_t)0, 
+                                                  (size_t)0,
                                                   write_permitted);
 
                 if ( result < 0 ) {
@@ -4174,7 +4174,7 @@ done:
 
 #if H5C2_PRINT_EXIT_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = 0x%lX.\n", 
+        HDfprintf(stdout, "%s: Exiting with result = 0x%lX.\n",
                   FUNC, (unsigned long)ret_value);
     }
 #endif /* H5C2_PRINT_EXIT_POINTS */
@@ -4747,8 +4747,8 @@ done:
  *		JRM -- 8/23/06
  *		Added code supporting new flush related statistics.
  *
- *		JRM -- 3/31/07 
- *		Added code supporting the new write_protects, 
+ *		JRM -- 3/31/07
+ *		Added code supporting the new write_protects,
  *		read_protects, and max_read_protects fields.
  *
  *-------------------------------------------------------------------------
@@ -4835,9 +4835,9 @@ H5C2_stats(H5C2_t * cache_ptr,
 				+= cache_ptr->cache_flush_renames[i];
         total_size_increases    += cache_ptr->size_increases[i];
         total_size_decreases    += cache_ptr->size_decreases[i];
-    	total_entry_flush_size_changes 
+    	total_entry_flush_size_changes
 				+= cache_ptr->entry_flush_size_changes[i];
-    	total_cache_flush_size_changes 
+    	total_cache_flush_size_changes
 				+= cache_ptr->cache_flush_size_changes[i];
 	total_pins              += cache_ptr->pins[i];
 	total_unpins            += cache_ptr->unpins[i];
@@ -4979,14 +4979,14 @@ H5C2_stats(H5C2_t * cache_ptr,
               (long)total_flushes,
               (long)total_evictions);
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
 	      "%s  Total insertions(pinned) / renames = %ld(%ld) / %ld\n",
               cache_ptr->prefix,
               (long)total_insertions,
               (long)total_pinned_insertions,
               (long)total_renames);
 
-    HDfprintf(stdout, 
+    HDfprintf(stdout,
 	      "%s  Total entry / cache flush renames  = %ld / %ld\n",
               cache_ptr->prefix,
               (long)total_entry_flush_renames,
@@ -5168,7 +5168,7 @@ done:
  *		JRM - 3/20/06
  *		Updated for pin / unpin related statistics.
  *
- *		JRM - 8/9/06 
+ *		JRM - 8/9/06
  *		Further updates for pin related statistics.
  *
  *		JRM 8/23/06
@@ -5179,7 +5179,7 @@ done:
  *		warning in the production build.
  *
  *		JRM 3/31/07
- *		Added initialization for the new write_protects, 
+ *		Added initialization for the new write_protects,
  *		read_protects, and max_read_protects fields.
  *
  *-------------------------------------------------------------------------
@@ -5412,7 +5412,7 @@ done:
  *		equivalent of setting the H5C2__DIRTIED_FLAG.
  *
  *		JRM -- 3/29/07
- *		Modified function to allow a entry to be protected 
+ *		Modified function to allow a entry to be protected
  *		more than once if the entry is protected read only.
  *
  *		Also added sanity checks using the new is_read_only and
@@ -5420,8 +5420,8 @@ done:
  *
  *		JRM -- 9/8/07
  *		Revised function for the new metadata cache API.  The
- *		function lost its pointer to H5F_t (now supplied via 
- *		*cache_ptr), and one of its dxpl ids.  Also internal 
+ *		function lost its pointer to H5F_t (now supplied via
+ *		*cache_ptr), and one of its dxpl ids.  Also internal
  *		changes supporting the revised API.
  *
  *		JRM -- 12/31/07
@@ -5457,11 +5457,11 @@ H5C2_unprotect(H5F_t *		    f,
 
     FUNC_ENTER_NOAPI(H5C2_unprotect, FAIL)
 
-#if H5C2_PRINT_ENTRY_POINTS 
+#if H5C2_PRINT_ENTRY_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
     {
-    HDfprintf(stdout, 
-	      "%s: addr = 0x%lX, type = %s, flags = 0x%x, new_size = %d.\n", 
+    HDfprintf(stdout,
+	      "%s: addr = 0x%lX, type = %s, flags = 0x%x, new_size = %d.\n",
 	      FUNC, (unsigned long)addr, type->name, flags, (int)new_size);
     }
 #endif /* JRM */
@@ -5524,7 +5524,7 @@ H5C2_unprotect(H5F_t *		    f,
         HDassert( entry_ptr->is_read_only );
 
 	if ( dirtied ) {
-	    
+
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                         "Read only entry modified(1)??")
 	}
@@ -5839,7 +5839,7 @@ done:
 
 #if H5C2_PRINT_EXIT_POINTS
     if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
-        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n",
                   FUNC, (int)ret_value);
     }
 #endif /* H5C2_PRINT_EXIT_POINTS */
@@ -6144,10 +6144,10 @@ done:
  *		H5C2_auto_size_ctl_t structure.
  *
  *		JRM -- 9/8/07
- *		Reworked to accomodate cache API changes needed to 
+ *		Reworked to accomodate cache API changes needed to
  *		support metadata journaling.  Mostly, this involved
- *		removing a bunch of parameters that used to be 
- *		passed through to other calls, and are no longer 
+ *		removing a bunch of parameters that used to be
+ *		passed through to other calls, and are no longer
  *		needed.
  *
  *		JRM -- 1/5/08
@@ -6509,7 +6509,7 @@ done:
  *              JRM -- 9/9/07
  *		Reworked function to support API changes in support of
  *		metadata cacheing.  In essence, the change involved
- *		removal of arguments that are no longer needed by the 
+ *		removal of arguments that are no longer needed by the
  *		callbacks, and thus no-longer need be passed through.
  *
  *-------------------------------------------------------------------------
@@ -6780,7 +6780,7 @@ done:
  *              JRM -- 9/9/07
  *		Reworked function to support API changes in support of
  *		metadata cacheing.  In essence, the change involved
- *		removal of arguments that are no longer needed by the 
+ *		removal of arguments that are no longer needed by the
  *		callbacks, and thus no-longer need be passed through.
  *
  *		JRM -- 10/13/07
@@ -6789,8 +6789,8 @@ done:
  *		function by a serialize function.  This can happen if
  *		the serialize function associated with the entry being
  *		flushed either accesses the next item in the LRU list,
- *		or (as Quincey assures me is impossible), it accesses 
- *		an entry not currently in cache, causing the eviction 
+ *		or (as Quincey assures me is impossible), it accesses
+ *		an entry not currently in cache, causing the eviction
  *		of the next entry in the LRU.
  *
  *		We handle this situation by detecting it, and restarting
@@ -6805,7 +6805,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                                                  H5C2_t * cache_ptr,
                                                  hbool_t write_permitted)
 {
-    /* const char *	 fcn_name = 
+    /* const char *	 fcn_name =
 	    "H5C2__autoadjust__ageout__evict_aged_out_entries()"; */
     herr_t               ret_value = SUCCEED;      /* Return value */
     herr_t               result;
@@ -6893,7 +6893,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                 "*prev_ptr corrupt")
 
-                } else 
+                } else
 #endif /* NDEBUG */
 		if ( ( prev_ptr->is_dirty != prev_is_dirty )
                      ||
@@ -7335,10 +7335,10 @@ H5C2__flash_increase_cache_size(H5C2_t * cache_ptr,
             case H5C2_flash_incr__add_space:
                 if ( cache_ptr->index_size < cache_ptr->max_cache_size ) {
 
-                    HDassert( (cache_ptr->max_cache_size - 
+                    HDassert( (cache_ptr->max_cache_size -
 					    cache_ptr->index_size)
                                < space_needed );
-                    space_needed -= cache_ptr->max_cache_size - 
+                    space_needed -= cache_ptr->max_cache_size -
 			            cache_ptr->index_size;
                 }
                 space_needed =
@@ -7557,29 +7557,29 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 
     /* The flush proceedure here is a bit strange.
      *
-     * In the outer while loop we make at least one pass through the 
+     * In the outer while loop we make at least one pass through the
      * cache, and then repeat until either all the pinned entries
      * unpin themselves, or until the number of pinned entries stops
      * declining.  In this later case, we scream and die.
      *
      * Since the fractal heap can dirty, resize, and/or rename entries
      * in is flush callback, it is possible that the cache will still
-     * contain dirty entries at this point.  If so, we must make up to 
-     * H5C2__MAX_PASSES_ON_FLUSH more passes through the skip list 
+     * contain dirty entries at this point.  If so, we must make up to
+     * H5C2__MAX_PASSES_ON_FLUSH more passes through the skip list
      * to allow it to empty.  If is is not empty at this point, we again
      * scream and die.
      *
-     * Further, since clean entries can be dirtied, resized, and/or renamed 
+     * Further, since clean entries can be dirtied, resized, and/or renamed
      * as the result of a flush call back (either the entries own, or that
-     * for some other cache entry), we can no longer promise to flush 
+     * for some other cache entry), we can no longer promise to flush
      * the cache entries in increasing address order.
      *
      * Instead, we just do the best we can -- making a pass through
-     * the skip list, and then a pass through the "clean" entries, and 
-     * then repeating as needed.  Thus it is quite possible that an 
+     * the skip list, and then a pass through the "clean" entries, and
+     * then repeating as needed.  Thus it is quite possible that an
      * entry will be evicted from the cache only to be re-loaded later
-     * in the flush process (From what Quincey tells me, the pin 
-     * mechanism makes this impossible, but even it it is true now, 
+     * in the flush process (From what Quincey tells me, the pin
+     * mechanism makes this impossible, but even it it is true now,
      * we shouldn't count on it in the future.)
      *
      * The bottom line is that entries will probably be flushed in close
@@ -7592,10 +7592,10 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
     while ( ! done )
     {
 	/* first, try to flush-destroy any dirty entries.   Do this by
-	 * making a scan through the slist.  Note that new dirty entries 
+	 * making a scan through the slist.  Note that new dirty entries
 	 * may be created by the flush call backs.  Thus it is possible
 	 * that the slist will not be empty after we finish the scan.
-	 */ 
+	 */
 
         if ( cache_ptr->slist_len == 0 ) {
 
@@ -7619,7 +7619,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                             "next_entry_ptr == NULL 1 ?!?!");
             }
 #ifndef NDEBUG
-            HDassert( next_entry_ptr->magic == 
+            HDassert( next_entry_ptr->magic ==
 			    H5C2__H5C2_CACHE_ENTRY_T_MAGIC );
 #endif /* NDEBUG */
             HDassert( next_entry_ptr->is_dirty );
@@ -7664,18 +7664,18 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 	     * that the serialize callback will dirty and/or resize
 	     * other entries in the cache.  In particular, while
 	     * Quincey has promised me that this will never happen,
-	     * it is possible that the serialize callback for an 
+	     * it is possible that the serialize callback for an
 	     * entry may protect an entry that is not in the cache,
-	     * perhaps causing the cache to flush and possibly 
+	     * perhaps causing the cache to flush and possibly
 	     * evict the entry associated with node_ptr to make
 	     * space for the new entry.
 	     *
 	     * Thus we do a bit of extra sanity checking on entry_ptr,
-	     * and break out of this scan of the skip list if we 
-	     * detect major problems.  We have a bit of leaway on the 
-	     * number of passes though the skip list, so this shouldn't 
-	     * be an issue in the flush in and of itself, as it should 
-	     * be all but impossible for this to happen more than once 
+	     * and break out of this scan of the skip list if we
+	     * detect major problems.  We have a bit of leaway on the
+	     * number of passes though the skip list, so this shouldn't
+	     * be an issue in the flush in and of itself, as it should
+	     * be all but impossible for this to happen more than once
 	     * in any flush.
 	     *
 	     * Observe that that breaking out of the scan early
@@ -7685,7 +7685,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 	     * If an entry has merely been marked clean and removed from
              * the s-list, we simply break out of the scan.
              *
-             * If the entry has been evicted, we flag an error and 
+             * If the entry has been evicted, we flag an error and
              * exit.
 	     */
 #ifndef NDEBUG
@@ -7694,12 +7694,12 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "entry_ptr->magic is invalid ?!?!");
 
-            } else 
+            } else
 #endif /* NDEBUG */
 	    if ( ( ! entry_ptr->is_dirty ) ||
                  ( ! entry_ptr->in_slist ) ) {
 
-	        /* the s-list has been modified out from under us. 
+	        /* the s-list has been modified out from under us.
 	         * break out of the loop.
 	         */
 	        break;
@@ -7719,7 +7719,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                                 "next_entry_ptr == NULL 2 ?!?!");
 	        }
 #ifndef NDEBUG
-	        HDassert( next_entry_ptr->magic == 
+	        HDassert( next_entry_ptr->magic ==
 				H5C2__H5C2_CACHE_ENTRY_T_MAGIC );
 #endif /* NDEBUG */
                 HDassert( next_entry_ptr->is_dirty );
@@ -7736,8 +7736,8 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
              * the slist.
              *
              * While this optimization used to be easy, with the possibility
-	     * of new entries being added to the slist in the midst of the 
-	     * flush, we must keep the slist in cannonical form at all 
+	     * of new entries being added to the slist in the midst of the
+	     * flush, we must keep the slist in cannonical form at all
 	     * times.
              */
 
@@ -7753,7 +7753,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 	     * cache_ptr->slist_size_increase.
 	     *
 	     * Note that we include pinned entries in this count, even
-	     * though we will not actually flush them.  
+	     * though we will not actually flush them.
 	     */
             actual_slist_len++;
             actual_slist_size += entry_ptr->size;
@@ -7774,7 +7774,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                  * as pinned entries can't be evicted.
                  */
 		if ( TRUE ) { /* When we get to multithreaded cache,
-			       * we will need either locking code, and/or 
+			       * we will need either locking code, and/or
 			       * a test to see if the entry is in flushable
 			       * condition here.
 			       */
@@ -7831,18 +7831,18 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 
 	if ( node_ptr == NULL ) {
 
-            HDassert( (actual_slist_len + cache_ptr->slist_len) == 
+            HDassert( (actual_slist_len + cache_ptr->slist_len) ==
 		      (initial_slist_len + cache_ptr->slist_len_increase) );
-            HDassert( (actual_slist_size + cache_ptr->slist_size) == 
+            HDassert( (actual_slist_size + cache_ptr->slist_size) ==
 		      (initial_slist_size + cache_ptr->slist_size_increase) );
 	}
 #endif /* H5C2_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
          * the hash table and try to flush - destroy all entries that
-         * remain.  
+         * remain.
 	 *
-	 * It used to be that all entries remaining in the cache at 
+	 * It used to be that all entries remaining in the cache at
 	 * this point had to be clean, but with the fractal heap mods
 	 * this may not be the case.  If so, we will flush entries out
 	 * of increasing address order.
@@ -7856,13 +7856,13 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
             while ( next_entry_ptr != NULL )
             {
                 entry_ptr = next_entry_ptr;
-#ifndef NDEBUG		
+#ifndef NDEBUG
 		HDassert( entry_ptr->magic == H5C2__H5C2_CACHE_ENTRY_T_MAGIC );
 #endif /* NDEBUG */
                 next_entry_ptr = entry_ptr->ht_next;
 #ifndef NDEBUG
 		HDassert ( ( next_entry_ptr == NULL ) ||
-			   ( next_entry_ptr->magic == 
+			   ( next_entry_ptr->magic ==
 			     H5C2__H5C2_CACHE_ENTRY_T_MAGIC ) );
 #endif /* NDEBUG */
                 if ( entry_ptr->is_protected ) {
@@ -7878,7 +7878,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                     }
                 } else if ( ! ( entry_ptr->is_pinned ) ) {
 
-                    status = 
+                    status =
 		        H5C2_flush_single_entry(f,
                                                 dxpl_id,
                                                 cache_ptr,
@@ -7908,7 +7908,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 
 		/* if the serialize function on the entry we last evicted
 		 * loaded an entry into cache (as Quincey has promised me
-		 * it never will), and if the cache was full, it is 
+		 * it never will), and if the cache was full, it is
 		 * possible that *nexte_entry_ptr was flushed or evicted.
 		 *
 		 * Test to see if this happened here, and set next_entry_ptr
@@ -7918,10 +7918,10 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
 		 */
 #ifndef NDEBUG
 		if ( ( next_entry_ptr != NULL ) &&
-                     ( next_entry_ptr->magic != 
+                     ( next_entry_ptr->magic !=
 		       H5C2__H5C2_CACHE_ENTRY_T_MAGIC ) ) {
 
-		    /* Something horrible has happened to 
+		    /* Something horrible has happened to
                      * *next_entry_ptr -- scream and die.
                      */
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -7946,7 +7946,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
         } else if ( ( cur_pel_len == 0 ) && ( old_pel_len == 0 ) ) {
 
 	    /* increment the pass count */
-	    passes++; 
+	    passes++;
 	}
 
 	if ( passes >= H5C2__MAX_PASSES_ON_FLUSH ) {
@@ -8068,19 +8068,19 @@ done:
  *		as there is no write to file in this case.
  *
  *		JRM -- 8/21/06
- *		Added code maintaining the flush_in_progress and 
- *		destroy_in_progress fields in H5C2_cache_entry_t.  
+ *		Added code maintaining the flush_in_progress and
+ *		destroy_in_progress fields in H5C2_cache_entry_t.
  *
- *		Also added flush_flags parameter to the call to 
- *		type_ptr->flush() so that the flush routine can report 
- *		whether the entry has been resized or renamed.  Added 
- *		code using the flush_flags variable to detect the case 
- *		in which the target entry is resized during flush, and 
+ *		Also added flush_flags parameter to the call to
+ *		type_ptr->flush() so that the flush routine can report
+ *		whether the entry has been resized or renamed.  Added
+ *		code using the flush_flags variable to detect the case
+ *		in which the target entry is resized during flush, and
  *		update the caches data structures accordingly.
  *
  *
  *		JRM -- 3/29/07
- *		Added sanity checks on the new is_read_only and 
+ *		Added sanity checks on the new is_read_only and
  *		ro_ref_count fields.
  *
  *		JRM -- 6/25/07
@@ -8095,12 +8095,12 @@ done:
  *		is now in the cache, the function of these flags should
  *		be documented explicitly here in H5C2.
  *
- *		If the H5C2__FLUSH_INVALIDATE_FLAG is set, the entry is to 
- *		be written to disk if dirty, and then evicted from the 
+ *		If the H5C2__FLUSH_INVALIDATE_FLAG is set, the entry is to
+ *		be written to disk if dirty, and then evicted from the
  *		cache and discarded.  As an optimization, the destroyed
  *		is deleted from the slist only on request.
  *
- *		If the H5C2__FLUSH_CLEAR_ONLY_FLAG is set, the entry is 
+ *		If the H5C2__FLUSH_CLEAR_ONLY_FLAG is set, the entry is
  *		to be marked clean if it is dirty.  Under no circumstances
  *		will it be written to disk.
  *
@@ -8111,7 +8111,7 @@ done:
  *		or not as requested.
  *
  *		JRM -- 3/31/08
- *		If journaling is enabled, modified function to remove 
+ *		If journaling is enabled, modified function to remove
  *		the target entry from the transaction list on a clear.
  *		Also added some sanity checks.
  *
@@ -8163,7 +8163,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 
         if ( entry_ptr->in_slist ) {
 
-            if ( ( ( entry_ptr->flush_marker ) && ( ! entry_ptr->is_dirty ) ) 
+            if ( ( ( entry_ptr->flush_marker ) && ( ! entry_ptr->is_dirty ) )
                  ||
                  ( entry_ptr->addr != addr ) ) {
 
@@ -8181,7 +8181,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
             }
         }
     }
-#if 0 
+#if 0
     /* this should be useful for debugging from time to time.
      * lets leave it in for now.       -- JRM 12/15/04
      */
@@ -8244,7 +8244,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
             }
 
             /* Sanity check transfer mode */
-	    /* I'm surprised that this sanity check is working at 
+	    /* I'm surprised that this sanity check is working at
 	     * present -- will need to look into it at some point.
 	     *
 	     * 					JRM -- 7/7/07
@@ -8277,8 +8277,8 @@ H5C2_flush_single_entry(const H5F_t *	     f,
          * from the slist only if requested.
          *
 	 * Note that it is possible that the entry will be renamed during
-	 * its call to flush.  This will upset H5C2_rename_entry() if we 
-	 * don't tell it that it doesn't have to worry about updating the 
+	 * its call to flush.  This will upset H5C2_rename_entry() if we
+	 * don't tell it that it doesn't have to worry about updating the
 	 * index and SLIST.  Use the destroy_in_progress field for this
 	 * purpose.
          */
@@ -8302,7 +8302,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 #if 0 /* JRM */
             /* This test code may come in handy -- lets keep it for a while.
              *
-             * Note that it will cause spurious errors in the serial case 
+             * Note that it will cause spurious errors in the serial case
              * unless we are maintaining the clean and dirty LRU lists.
              */
             {
@@ -8319,12 +8319,12 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                                   fcn_name);
 
                     if ( cache_ptr->dLRU_list_len <= 0 )
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_list_len <= 0.\n",
                                   fcn_name);
 
                     if ( cache_ptr->dLRU_list_size <= 0 )
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_list_size <= 0.\n",
                                   fcn_name);
 
@@ -8341,14 +8341,14 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 
                     if ( ( entry_ptr->aux_prev == NULL ) &&
                          ( cache_ptr->dLRU_head_ptr != entry_ptr ) )
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: entry_ptr->aux_prev == NULL && dLRU_head_ptr != entry_ptr\n",
                                   fcn_name);
 
                     if ( ( entry_ptr->aux_next == NULL ) &&
                          ( cache_ptr->dLRU_tail_ptr != entry_ptr ) )
-                        HDfprintf(stdout, 
-                                  "%s: entry_ptr->aux_next == NULL && dLRU_tail_ptr != entry_ptr\n", 
+                        HDfprintf(stdout,
+                                  "%s: entry_ptr->aux_next == NULL && dLRU_tail_ptr != entry_ptr\n",
                                   fcn_name);
 
                     if ( ( cache_ptr->dLRU_list_len == 1 ) &&
@@ -8361,7 +8361,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                          )
                        )
                     {
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                "%s: single entry dlru sanity check fails\n",
                                fcn_name);
                     }
@@ -8370,12 +8370,12 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                 else
                 {
                     if ( cache_ptr->cLRU_head_ptr == NULL )
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_head_ptr == NULL.\n",
                                   fcn_name);
 
                     if ( cache_ptr->cLRU_tail_ptr == NULL )
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_tail_ptr == NULL.\n",
                                    fcn_name);
 
@@ -8418,7 +8418,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                          )
                        )
                     {
-                        HDfprintf(stdout, 
+                        HDfprintf(stdout,
                                   "%s: single entry clru sanity check fails\n",
                                   fcn_name);
                     }
@@ -8435,17 +8435,17 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 	     * list and set its last_trans field to zero.
 	     *
 	     * Must do this now, as otherwise H5C2__UPDATE_RP_FOR_FLUSH may
-	     * scream incorrectly about flushing an entry with a pending 
+	     * scream incorrectly about flushing an entry with a pending
 	     * journal write.
 	     */
 	    if ( clear_only ) {
                 H5C2__UPDATE_TL_FOR_ENTRY_CLEAR(cache_ptr, entry_ptr, FAIL);
             }
 
-            /* We are either doing a flush or a clear. 
-	     * 
+            /* We are either doing a flush or a clear.
+	     *
 	     * A clear and a flush are the same from the point of view of
-	     * the replacement policy and the slist.  Hence no 
+	     * the replacement policy and the slist.  Hence no
 	     * differentiation between them.
 	     * 					JRM -- 7/7/07
 	     */
@@ -8460,7 +8460,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 
 
         /* Clear the dirty flag only, if requested */
-        if ( clear_only ) 
+        if ( clear_only )
 	{
 	    if ( entry_ptr->is_dirty )
             {
@@ -8468,8 +8468,8 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 		/* only call the clear_dirty_bits callback if debugging
 		 * is enabled.
 		 */
-	        if ( entry_ptr->type->clear_dirty_bits && entry_ptr->type->clear_dirty_bits(addr, 
-					               entry_ptr->size, 
+	        if ( entry_ptr->type->clear_dirty_bits && entry_ptr->type->clear_dirty_bits(addr,
+					               entry_ptr->size,
 						       (void *)entry_ptr)
                      != SUCCEED )
                 {
@@ -8477,20 +8477,20 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                                 "clear_dirty_bits() failed.")
                 }
-#endif /* NDEBUG */ 
+#endif /* NDEBUG */
             }
 	    entry_ptr->is_dirty = FALSE;
 
-        } 
-	else if ( entry_ptr->is_dirty ) 
+        }
+	else if ( entry_ptr->is_dirty )
 	{
-	    /* The entry is dirty, and we are doing either a flush, 
-	     * or a flush destroy.  In either case, serialize the 
+	    /* The entry is dirty, and we are doing either a flush,
+	     * or a flush destroy.  In either case, serialize the
 	     * entry and write it to disk.
 	     *
 	     * If the serialize function changes the size or location
 	     * of the entry, and we are not doing a flush destroy, we
-	     * will have to touch up the cache to account for the 
+	     * will have to touch up the cache to account for the
 	     * change(s).
 	     */
 
@@ -8519,7 +8519,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 
 	        if ( entry_ptr->type->serialize(f,
 					        dxpl_id,
-                                                entry_ptr->addr, 
+                                                entry_ptr->addr,
 				                entry_ptr->size,
 					        entry_ptr->image_ptr,
 					        (void *)entry_ptr,
@@ -8543,31 +8543,31 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                            "rename/resize on destroy when journaling enabled.");
                         }
 
-                        /* We have already removed the entry from the 
+                        /* We have already removed the entry from the
 		         * cache's data structures, so no need to update
 		         * them for the re-size and/or rename.  All we need
 		         * to do is update the cache entry so we will have
 		         * the correct values when we actually write the
 		         * image of the entry to disk.
 		         *
-		         * Note that if the serialize function changes the 
+		         * Note that if the serialize function changes the
 		         * size of the disk image of the entry, it must
 		         * deallocate the old image, and allocate a new.
 		         */
 
-                        switch ( serialize_flags ) 
-		        { 
-		  	    case H5C2__SERIALIZE_RESIZED_FLAG: 
+                        switch ( serialize_flags )
+		        {
+		  	    case H5C2__SERIALIZE_RESIZED_FLAG:
 			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(    \
 						                  cache_ptr, \
 					                          entry_ptr, \
 								  new_len)
 			        entry_ptr->size = new_len;
 			        entry_ptr->image_ptr = new_image_ptr;
-			        break; 
-			
-			    case (H5C2__SERIALIZE_RESIZED_FLAG | 
-                                  H5C2__SERIALIZE_RENAMED_FLAG): 
+			        break;
+
+			    case (H5C2__SERIALIZE_RESIZED_FLAG |
+                                  H5C2__SERIALIZE_RENAMED_FLAG):
 			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
 						                   cache_ptr, \
 					                           entry_ptr, \
@@ -8575,9 +8575,9 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 			        entry_ptr->addr = new_addr;
 			        entry_ptr->size = new_len;
 			        entry_ptr->image_ptr = new_image_ptr;
-			        break; 
-			
-			    default: 
+			        break;
+
+			    default:
 			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
 					    "unexpected serialize flag(s)")
 			        break;
@@ -8592,21 +8592,21 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                         }
 
 		        /* The entry is not being destroyed, and thus has not
-		         * been removed from the cache's data structures.  
+		         * been removed from the cache's data structures.
 		         *
-		         * Thus, in addition to updating the entry for the 
+		         * Thus, in addition to updating the entry for the
 		         * re-size and/or rename, we must also update the
 		         * cache data structures.
 		         */
 
-                        switch ( serialize_flags ) 
-		        { 
-			    case H5C2__SERIALIZE_RESIZED_FLAG: 
+                        switch ( serialize_flags )
+		        {
+			    case H5C2__SERIALIZE_RESIZED_FLAG:
 			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
 						                   cache_ptr, \
 					                           entry_ptr, \
 								   new_len)
-			        /* The replacement policy code thinks the 
+			        /* The replacement policy code thinks the
 			         * entry is already clean, so modify is_dirty
 			         * to meet this expectation.
 			         */
@@ -8619,34 +8619,34 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 							    (new_len));
 
                                 /* The entry can't be protected since we  are
-			         * in the process of flushing it.  Thus we must 
-			         * update the replacement policy data 
-				 * structures for the size change.  The macro 
-				 * deals with the pinned case.  
+			         * in the process of flushing it.  Thus we must
+			         * update the replacement policy data
+				 * structures for the size change.  The macro
+				 * deals with the pinned case.
 			         */
 			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
 					                        entry_ptr, \
 						 	        new_len);
 
-                                /* The entry can't be in the slist, so no need 
-			         * to update the slist for the size change.  
+                                /* The entry can't be in the slist, so no need
+			         * to update the slist for the size change.
 			         */
 
-			        /* finally, set is_dirty to TRUE again, and 
+			        /* finally, set is_dirty to TRUE again, and
 			         * update the size and image_ptr.
 			         */
 			        entry_ptr->is_dirty = TRUE;
 			        entry_ptr->size = new_len;
 			        entry_ptr->image_ptr = new_image_ptr;
-			        break; 
-			
-			    case (H5C2__SERIALIZE_RESIZED_FLAG | 
-                                  H5C2__SERIALIZE_RENAMED_FLAG): 
+			        break;
+
+			    case (H5C2__SERIALIZE_RESIZED_FLAG |
+                                  H5C2__SERIALIZE_RENAMED_FLAG):
 			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
 						                   cache_ptr, \
 					                           entry_ptr, \
 								   new_len)
-			        /* The replacement policy code thinks the 
+			        /* The replacement policy code thinks the
 			         * entry is already clean, so modify is_dirty
 			         * to meet this expectation.
 			         */
@@ -8664,30 +8664,30 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                                                             (entry_ptr->size),\
 							    (new_len));
 
-                                /* The entry can't be protected since we  are 
-			         * in the process of flushing it.  Thus we must 
-			         * update the replacement policy data 
-				 * structures for the size change.  The macro 
-				 * deals with the pinned case.  
+                                /* The entry can't be protected since we  are
+			         * in the process of flushing it.  Thus we must
+			         * update the replacement policy data
+				 * structures for the size change.  The macro
+				 * deals with the pinned case.
 			         */
 			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
 					                        entry_ptr, \
 						   	        new_len);
 
-                                /* The entry can't be in the slist, so no need 
-			         * to update the slist for the size change.  
+                                /* The entry can't be in the slist, so no need
+			         * to update the slist for the size change.
 			         */
 
-			        /* finally, set is_dirty to TRUE again, and 
+			        /* finally, set is_dirty to TRUE again, and
 			         * update the size and image_ptr.
 			         */
 			        entry_ptr->is_dirty = TRUE;
 
 			        entry_ptr->size = new_len;
 			        entry_ptr->image_ptr = new_image_ptr;
-			        break; 
-			
-			    default: 
+			        break;
+
+			    default:
 			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
 			 		    "unexpected serialize flag(s)")
 			        break;
@@ -8698,8 +8698,8 @@ H5C2_flush_single_entry(const H5F_t *	     f,
             }
 
 	    /* now write the image to disk */
-	    if ( H5F_block_write(f, type_ptr->mem_type, entry_ptr->addr, 
-				 entry_ptr->size, dxpl_id, 
+	    if ( H5F_block_write(f, type_ptr->mem_type, entry_ptr->addr,
+				 entry_ptr->size, dxpl_id,
 				 entry_ptr->image_ptr) < 0 )
 	    {
 		    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
@@ -8714,25 +8714,25 @@ H5C2_flush_single_entry(const H5F_t *	     f,
             if ( serialize_flags != 0 ) {
 
                 /* In the parallel case, resizes and renames in
-		 * the serialize operation can cause problems.  
+		 * the serialize operation can cause problems.
 		 * If they occur, scream and die.
 		 *
 		 * At present, in the parallel case, the aux_ptr
-		 * will only be set if there is more than one 
-		 * process.  Thus we can use this to detect 
+		 * will only be set if there is more than one
+		 * process.  Thus we can use this to detect
 		 * the parallel case.
 		 *
-		 * This works for now, but if we start using the 
-		 * aux_ptr for other purposes, we will have to 
+		 * This works for now, but if we start using the
+		 * aux_ptr for other purposes, we will have to
 		 * change this test accordingly.
 		 *
 		 * NB: While this test detects entryies that attempt
 		 *     to resize or rename themselves during a flush
 		 *     in the parallel case, it will not detect an
-		 *     entry that dirties, resizes, and/or renames 
+		 *     entry that dirties, resizes, and/or renames
 		 *     other entries during its flush.
 		 *
-		 *     From what Quincey tells me, this test is 
+		 *     From what Quincey tells me, this test is
 		 *     sufficient for now, as any flush routine that
 		 *     does the latter will also do the former.
 		 *
@@ -8767,7 +8767,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 	    }
 
 	    /* we are about to discard the in core representation --
-	     * set the magic field to bad magic so we can detect a 
+	     * set the magic field to bad magic so we can detect a
 	     * freed entry if we see one.
 	     *
 	     * Also reset the pointer to the cache the entry is within. -QAK
@@ -8835,7 +8835,7 @@ done:
  *
  *		JRM - 6/23/06
  *		Deleted assertion that verified that a newly loaded
- *		entry is clean.  Due to a bug fix, this need not be 
+ *		entry is clean.  Due to a bug fix, this need not be
  *		the case, as our code will attempt to repair errors
  *		on load.
  *
@@ -8844,19 +8844,19 @@ done:
  *		destroy in progress fields.
  *
  *		JRM - 3/29/07
- *		Added initialization for the new is_read_only and 
+ *		Added initialization for the new is_read_only and
  *		ro_ref_count fields.
  *
  *		JRM - 6/25/07
- *		Reworked function to use the new client callback 
- *		functions that are needed to implement metadata 
+ *		Reworked function to use the new client callback
+ *		functions that are needed to implement metadata
  *		journaling.  Removed skip_file_checks parameter.
  *
  *		JRM -- 10/12/07
  *		Added initialization for the new magic field.
  *
  *		JRM -- 3/26/08
- *		Added initialization for the journaling related 
+ *		Added initialization for the journaling related
  *		fields.
  *
  *-------------------------------------------------------------------------
@@ -8943,7 +8943,7 @@ H5C2_load_entry(H5F_t *              f,
     }
 
     /* If the client's cache has an image_len callback, check it */
-    if ( type->image_len ) 
+    if ( type->image_len )
     {
         size_t			new_len;
 
@@ -8965,8 +8965,8 @@ H5C2_load_entry(H5F_t *              f,
                             "image_ptr null after H5MM_realloc().")
 	    }
 
-            /* If the thing's image needs to be bigger, free the thing 
-             * and retry with new length 
+            /* If the thing's image needs to be bigger, free the thing
+             * and retry with new length
              */
             if ( new_len > len)
             {
@@ -8976,14 +8976,14 @@ H5C2_load_entry(H5F_t *              f,
                                 "free_icr callback failed.")
                 }
 
-                if ( H5F_block_read(f, type->mem_type, addr, new_len, 
+                if ( H5F_block_read(f, type->mem_type, addr, new_len,
                                     dxpl_id, image_ptr) < 0 ) {
 
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
                                 "Can't read image")
                 }
 
-                thing = type->deserialize(addr, new_len, image_ptr, 
+                thing = type->deserialize(addr, new_len, image_ptr,
                                           udata_ptr, &dirty);
 
                 if ( thing == NULL ) {
@@ -9002,10 +9002,10 @@ H5C2_load_entry(H5F_t *              f,
     entry_ptr = (H5C2_cache_entry_t *)thing;
 
     /* In general, an entry should be clean just after it is loaded.
-     * 
+     *
      * However, when this code is used in the metadata cache, it is
-     * possible that object headers will be dirty at this point, as 
-     * the deserialize function will alter object headers if necessary to 
+     * possible that object headers will be dirty at this point, as
+     * the deserialize function will alter object headers if necessary to
      * fix an old bug.
      *
      * In the following assert:
@@ -9015,7 +9015,7 @@ H5C2_load_entry(H5F_t *              f,
      * note that type ids 5 & 6 are associated with object headers in the metadata
      * cache.
      *
-     * When we get to using H5C2 for other purposes, we may wish to 
+     * When we get to using H5C2 for other purposes, we may wish to
      * tighten up the assert so that the loophole only applies to the
      * metadata cache.
      */
@@ -9122,17 +9122,17 @@ done:
  *		min clean size before the cache has filled.
  *
  *		JRM -- 3/29/07
- *		Added sanity checks using the new is_read_only and 
+ *		Added sanity checks using the new is_read_only and
  *		ro_ref_count fields.
  *
  *		JRM -- 8/24/07
  *		Reworked parameter list and code for the removal of the
- *		secondary dxpl id, and the decision to store the file 
+ *		secondary dxpl id, and the decision to store the file
  *		pointer f in *cache_ptr.
  *
  *		JRM -- 10/12/07
  *		Added code to detect the case in which the LRU list has
- *		been modified by a serialize callback, and cause the 
+ *		been modified by a serialize callback, and cause the
  *		function to re-start its scan at the tail of the LRU.
  *
  *-------------------------------------------------------------------------
@@ -9207,7 +9207,7 @@ H5C2_make_space_in_cache(H5F_t * f,
                                                      FALSE);
                 } else {
 
-                    result = 
+                    result =
 		        H5C2_flush_single_entry(f,
                                                 dxpl_id,
                                                 cache_ptr,
@@ -9235,13 +9235,13 @@ H5C2_make_space_in_cache(H5F_t * f,
 #ifndef NDEBUG
 		if ( prev_ptr->magic != H5C2__H5C2_CACHE_ENTRY_T_MAGIC ) {
 
-		    /* something horrible has happened to *prev_ptr -- 
+		    /* something horrible has happened to *prev_ptr --
 		     * scream and die.
 		     */
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 				"*prev_ptr corrupt 1")
 
-                } else 
+                } else
 #endif /* NDEBUG */
 		if ( entry_is_epoch_maker ) {
 
@@ -9251,7 +9251,7 @@ H5C2_make_space_in_cache(H5F_t * f,
 		     */
                     entry_ptr = prev_ptr;
 
-		} else if ( ( prev_ptr->is_dirty != prev_is_dirty ) 
+		} else if ( ( prev_ptr->is_dirty != prev_is_dirty )
 		            ||
 		            ( prev_ptr->next != next_ptr )
 		            ||
@@ -9259,7 +9259,7 @@ H5C2_make_space_in_cache(H5F_t * f,
 		            ||
 		            ( prev_ptr->is_pinned ) ) {
 
-		    /* something has happened to the LRU -- start over 
+		    /* something has happened to the LRU -- start over
 		     * from the tail.
 		     */
 	            entry_ptr = cache_ptr->LRU_tail_ptr;
@@ -9333,16 +9333,16 @@ H5C2_make_space_in_cache(H5F_t * f,
 #ifndef NDEBUG
 		if (prev_ptr->magic != H5C2__H5C2_CACHE_ENTRY_T_MAGIC) {
 
-		    /* something horrible has happened to *prev_ptr -- 
+		    /* something horrible has happened to *prev_ptr --
 		     * scream and die.
 		     */
 
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 				"*prev_ptr corrupt 2")
 
-		} else 
+		} else
 #endif /* #ifndef NDEBUG */
-		if ( ( ! ( prev_ptr->is_dirty ) ) 
+		if ( ( ! ( prev_ptr->is_dirty ) )
 	             ||
 	             ( prev_ptr->aux_next != next_ptr )
 	             ||
@@ -9350,29 +9350,29 @@ H5C2_make_space_in_cache(H5F_t * f,
 	             ||
 	             ( prev_ptr->is_pinned ) ) {
 
-		    /* something has happened to the dirty LRU -- start over 
+		    /* something has happened to the dirty LRU -- start over
 		     * from the tail.
 		     */
 
 #if 0 /* This debuging code may be useful in the future -- keep it for now. */
 		    if ( ! ( prev_ptr->is_dirty ) ) {
-			HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n", 
+			HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n",
 				  fcn_name);
 		    }
 		    if ( prev_ptr->aux_next != next_ptr ) {
-			HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n", 
+			HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n",
 				  fcn_name);
 		    }
 		    if ( prev_ptr->is_protected ) {
-			HDfprintf(stdout, "%s: prev_ptr->is_protected\n", 
+			HDfprintf(stdout, "%s: prev_ptr->is_protected\n",
 				  fcn_name);
 		    }
 		    if ( prev_ptr->is_pinned ) {
-			HDfprintf(stdout, "%s:prev_ptr->is_pinned\n", 
+			HDfprintf(stdout, "%s:prev_ptr->is_pinned\n",
 				  fcn_name);
 		    }
 
-		    HDfprintf(stdout, "%s: re-starting scan of dirty list\n", 
+		    HDfprintf(stdout, "%s: re-starting scan of dirty list\n",
 		      	     fcn_name);
 #endif /* JRM */
 	            entry_ptr = cache_ptr->dLRU_tail_ptr;
@@ -9431,9 +9431,9 @@ H5C2_make_space_in_cache(H5F_t * f,
                             "unable to flush entry")
             }
 
-	    /* we are scanning the clean LRU, so the serialize function 
+	    /* we are scanning the clean LRU, so the serialize function
 	     * will not be called on any entry -- thus there is no
-	     * concern about the list being modified out from under 
+	     * concern about the list being modified out from under
 	     * this function.
 	     */
 

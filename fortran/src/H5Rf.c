@@ -242,7 +242,7 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
 /*----------------------------------------------------------------------------
  * Name:        h5rget_name_object_c
  * Purpose:     Call H5Rget_name for an object
- * Inputs: 
+ * Inputs:
  *       loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
  *          ref - An object or dataset region reference.
  *
@@ -285,14 +285,14 @@ nh5rget_name_object_c (hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *nam
      *size_default = (size_t_f)c_size;
      ret_value = 0;
      if(c_buf) HDfree(c_buf);
-     
+
      return ret_value;
 }
 
 /*----------------------------------------------------------------------------
  * Name:        h5rget_name_region_c
  * Purpose:     Call H5Rget_name for a dataset region
- * Inputs: 
+ * Inputs:
  *       loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
  *          ref - An object or dataset region reference.
  *
@@ -330,11 +330,11 @@ nh5rget_name_region_c (hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_le
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-     HD5packFstring(c_buf, _fcdtocp(name), c_bufsize-1); 
+     HD5packFstring(c_buf, _fcdtocp(name), c_bufsize-1);
 
      *size_default = (size_t_f)c_size;
      ret_value = 0;
      if(c_buf) HDfree(c_buf);
-     
+
      return ret_value;
 }

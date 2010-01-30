@@ -572,7 +572,7 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
     /* See if a data transform is already set, and free it if it is */
     if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) >= 0)
 	H5Z_xform_destroy(data_xform_prop);
-	    
+
     /* Create data transform info from expression */
     if(NULL == (data_xform_prop = H5Z_xform_create(expression)))
         HGOTO_ERROR(H5E_PLINE, H5E_NOSPACE, FAIL, "unable to create data transform info")

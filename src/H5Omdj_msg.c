@@ -28,8 +28,8 @@
  *
  * Modifications:
  *
- *              Re-worked message to include the journal file name and 
- *		magic, instead of simply containing a pointer to a 
+ *              Re-worked message to include the journal file name and
+ *		magic, instead of simply containing a pointer to a
  *		journal configuration block containing this data.
  *
  *-------------------------------------------------------------------------
@@ -104,7 +104,7 @@ const H5O_msg_class_t H5O_MSG_MDJ_CONF[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    H5O_mdj_msg_decode
  *
- * Purpose:     Decode a journaling configuration message and return a 
+ * Purpose:     Decode a journaling configuration message and return a
  * 		pointer to a newly allocated H5O_mdj_msg_t struct.
  *
  * Return:      Success:        Ptr to new message in native struct.
@@ -117,8 +117,8 @@ const H5O_msg_class_t H5O_MSG_MDJ_CONF[1] = {{
  */
 
 static void *
-H5O_mdj_msg_decode(H5F_t *f, 
-		    hid_t UNUSED dxpl_id, 
+H5O_mdj_msg_decode(H5F_t *f,
+		    hid_t UNUSED dxpl_id,
 		    unsigned UNUSED mesg_flags,
 		    const uint8_t *p)
 {
@@ -145,7 +145,7 @@ H5O_mdj_msg_decode(H5F_t *f,
 
     /* Allocate space for message */
 
-    if ( NULL == 
+    if ( NULL ==
          (mesg = (H5O_mdj_msg_t *)H5MM_calloc(sizeof(H5O_mdj_msg_t))) ) {
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
@@ -186,8 +186,8 @@ H5O_mdj_msg_decode(H5F_t *f,
 
     /* copy out the journal file path -- check length in passing.
      *
-     * we could probably do this faster with a memcpy(), but this 
-     * operation happens very infrequently, and doing it this way 
+     * we could probably do this faster with a memcpy(), but this
+     * operation happens very infrequently, and doing it this way
      * adds a bit of sanity checking.
      */
     i = 0;
@@ -199,7 +199,7 @@ H5O_mdj_msg_decode(H5F_t *f,
     } while ( ( ch != '\0' ) && ( i <= path_len ) );
 
     if ( ( ch != '\0' ) || ( i != path_len + 1 ) ) {
-    
+
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, \
 		    "bad path and/or path len")
     }
@@ -228,9 +228,9 @@ done:
  */
 
 static herr_t
-H5O_mdj_msg_encode(H5F_t *f, 
-		    hbool_t UNUSED disable_shared, 
-		    uint8_t *p, 
+H5O_mdj_msg_encode(H5F_t *f,
+		    hbool_t UNUSED disable_shared,
+		    uint8_t *p,
 		    const void *_mesg)
 {
     const H5O_mdj_msg_t *mesg = (const H5O_mdj_msg_t *)_mesg;
@@ -245,7 +245,7 @@ H5O_mdj_msg_encode(H5F_t *f,
     HDassert(f);
     HDassert(p);
     HDassert(mesg);
-    
+
     if ( ( f == NULL ) || ( p == NULL ) || ( mesg == NULL ) ) {
 
 	HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "Bad params on entry.");
@@ -335,8 +335,8 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
 
     /* copy the journal file path -- check length in passing.
      *
-     * we could probably do this faster with a memcpy(), but this 
-     * operation happens very infrequently, and doing it this way 
+     * we could probably do this faster with a memcpy(), but this
+     * operation happens very infrequently, and doing it this way
      * adds a bit of sanity checking.
      */
     if ( mesg->mdc_jnl_file_name_len == 0 ) {
@@ -350,7 +350,7 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
         size_t path_len;
 
         path_len = mesg->mdc_jnl_file_name_len;
-    
+
         do {
 
 	    ch = (mesg->mdc_jnl_file_name)[i];
@@ -359,7 +359,7 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
         } while ( ( ch != '\0' ) && ( i <= path_len ) );
 
         if ( ( ch != '\0' ) || ( i != path_len + 1 ) ) {
-    
+
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, \
 		    "bad path and/or path len???")
         }
@@ -390,8 +390,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mdj_msg_size(const H5F_t *f, 
-		  hbool_t UNUSED disable_shared, 
+H5O_mdj_msg_size(const H5F_t *f,
+		  hbool_t UNUSED disable_shared,
 		  const void *_mesg)
 {
     const H5O_mdj_msg_t * mesg = (const H5O_mdj_msg_t *)_mesg;
@@ -459,11 +459,11 @@ H5O_mdj_msg_reset(void *_mesg)
  */
 
 static herr_t
-H5O_mdj_msg_debug(H5F_t UNUSED *f, 
-		   hid_t UNUSED dxpl_id, 
-		   const void *_mesg, 
+H5O_mdj_msg_debug(H5F_t UNUSED *f,
+		   hid_t UNUSED dxpl_id,
+		   const void *_mesg,
 		   FILE *stream,
-		   int indent, 
+		   int indent,
 		   int fwidth)
 {
     const H5O_mdj_msg_t *mesg = (const H5O_mdj_msg_t *)_mesg;
@@ -478,19 +478,19 @@ H5O_mdj_msg_debug(H5F_t UNUSED *f,
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-             "mdc_jnl_enabled:", 
+             "mdc_jnl_enabled:",
 	     (int)(mesg->mdc_jnl_enabled));
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-             "mdc_jnl_magic:", 
+             "mdc_jnl_magic:",
 	     (int)(mesg->mdc_jnl_magic));
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-             "mdc_jnl_file_name_len:", 
+             "mdc_jnl_file_name_len:",
 	     (int)(mesg->mdc_jnl_file_name_len));
 
     HDfprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
-             "mdc_jnl_file_name:", 
+             "mdc_jnl_file_name:",
 	     (char *)(mesg->mdc_jnl_file_name));
 
     FUNC_LEAVE_NOAPI(SUCCEED)

@@ -54,11 +54,11 @@ hid_t noblock_dxpl_id=(-1);
 const char *FILENAME[NFILENAME]={"Cache2TestDummy", NULL};
 char    filenames[NFILENAME][PATH_MAX];
 hid_t   fapl;                           /* file access property list */
-haddr_t max_addr = 0;			/* used to store the end of 
+haddr_t max_addr = 0;			/* used to store the end of
 					 * the address space used by
 					 * the data array (see below).
 					 */
-hbool_t callbacks_verbose = FALSE;	/* flag used to control whether 
+hbool_t callbacks_verbose = FALSE;	/* flag used to control whether
 					 * the callback functions are in
 					 * verbose mode.
 					 */
@@ -109,8 +109,8 @@ long local_pins		   = 0;
  *		value must be positive, and may not be larger than len.
  *
  *		The field exists to allow us change the sizes of entries
- *		in the cache without upsetting the server.  This value 
- *		is only used locally, and is never sent to the server.  
+ *		in the cache without upsetting the server.  This value
+ *		is only used locally, and is never sent to the server.
  *
  *	ver:	Version number of the entry.  This number is initialize
  *		to zero, and incremented each time the entry is modified.
@@ -396,7 +396,7 @@ void pin_protected_entry(H5C2_t * cache_ptr, H5F_t * file_ptr,
                          int32_t idx, hbool_t global);
 void rename_entry(H5C2_t * cache_ptr, H5F_t * file_ptr,
                   int32_t old_idx, int32_t new_idx);
-void resize_entry(H5C2_t * cache_ptr, H5F_t * file_ptr, 
+void resize_entry(H5C2_t * cache_ptr, H5F_t * file_ptr,
 		  int32_t idx, size_t  new_size);
 hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
                              H5C2_t ** cache_ptr_ptr);
@@ -1457,7 +1457,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
                 HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
                          world_mpi_rank, fcn_name,
-                         mssg_ptr->src, 
+                         mssg_ptr->src,
 			target_index,
 			data[target_index].base_addr);
             }
@@ -1696,7 +1696,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
  *-------------------------------------------------------------------------
  */
 
-herr_t 
+herr_t
 datum_clear_dirty_bits(UNUSED haddr_t addr,
                        UNUSED size_t len,
                        void * thing)
@@ -1712,7 +1712,7 @@ datum_clear_dirty_bits(UNUSED haddr_t addr,
 
     if ( callbacks_verbose ) {
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
 		  "%d: clear_dirty_bits() idx = %d, addr = %ld, len = %d.\n",
 		  world_mpi_rank, idx, (long)addr, (int)len);
 	fflush(stdout);
@@ -1788,9 +1788,9 @@ datum_deserialize(haddr_t addr,
 
     if ( callbacks_verbose ) {
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
 	  "%d: deserialize() idx = %d, addr = %ld, len = %d, is_dirty = %d.\n",
-	  world_mpi_rank, idx, (long)addr, (int)len, 
+	  world_mpi_rank, idx, (long)addr, (int)len,
 	  (int)(entry_ptr->header.is_dirty));
 	fflush(stdout);
     }
@@ -1921,8 +1921,8 @@ datum_deserialize(haddr_t addr,
  * Function:	datum_image_len
  *
  * Purpose:	Return the real (and possibly reduced) length of the image.
- * 		The helper functions verify that the correct version of 
- * 		deserialize is being called, and then call deserialize 
+ * 		The helper functions verify that the correct version of
+ * 		deserialize is being called, and then call deserialize
  * 		proper.
  *
  * Return:	SUCCEED
@@ -1937,7 +1937,7 @@ datum_deserialize(haddr_t addr,
  *-------------------------------------------------------------------------
  */
 
-herr_t 
+herr_t
 datum_image_len(void *thing,
                 size_t *image_len_ptr)
 {
@@ -1962,9 +1962,9 @@ datum_image_len(void *thing,
 
     if ( callbacks_verbose ) {
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
 		  "%d: image_len() idx = %d, addr = %ld, len = %d.\n",
-		  world_mpi_rank, idx, (long)(entry_ptr->base_addr), 
+		  world_mpi_rank, idx, (long)(entry_ptr->base_addr),
 		  (int)(entry_ptr->local_len));
 	fflush(stdout);
     }
@@ -1995,7 +1995,7 @@ datum_image_len(void *thing,
  *-------------------------------------------------------------------------
  */
 
-herr_t 
+herr_t
 datum_serialize(const H5F_t UNUSED *f,
                 hid_t UNUSED dxpl_id,
                 haddr_t UNUSED addr,
@@ -2035,7 +2035,7 @@ datum_serialize(const H5F_t UNUSED *f,
 
     if ( callbacks_verbose ) {
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
 		  "%d: serialize() idx = %d, addr = %ld, len = %d.\n",
 		  world_mpi_rank, idx, (long)addr, (int)len);
 	fflush(stdout);
@@ -2133,12 +2133,12 @@ datum_serialize(const H5F_t UNUSED *f,
 /*-------------------------------------------------------------------------
  * Function:	datum_free_icr
  *
- * Purpose:	Nominally, this callback is supposed to free the 
- * 		in core representation of the entry.  
+ * Purpose:	Nominally, this callback is supposed to free the
+ * 		in core representation of the entry.
  *
- * 		In the context of this test bed, we use it to do 
+ * 		In the context of this test bed, we use it to do
  * 		do all the processing we used to do on a destroy.
- * 		
+ *
  * Return:	SUCCEED
  *
  * Programmer:	John Mainzer
@@ -2151,7 +2151,7 @@ datum_serialize(const H5F_t UNUSED *f,
  *-------------------------------------------------------------------------
  */
 
-herr_t 
+herr_t
 datum_free_icr(UNUSED haddr_t addr,
                UNUSED size_t len,
                void * thing)
@@ -2172,9 +2172,9 @@ datum_free_icr(UNUSED haddr_t addr,
 
     if ( callbacks_verbose ) {
 
-        HDfprintf(stdout, 
+        HDfprintf(stdout,
 	  "%d: free_icr() idx = %d, addr = %ld, len = %d, dirty = %d.\n",
-		  world_mpi_rank, idx, (long)addr, (int)len, 
+		  world_mpi_rank, idx, (long)addr, (int)len,
 		  (int)(entry_ptr->dirty));
 	fflush(stdout);
     }
@@ -2244,7 +2244,7 @@ expunge_entry(H5C2_t * cache_ptr,
 
     if ( nerrors == 0 ) {
 
-        result = H5AC2_expunge_entry(file_ptr, -1, &(types[0]), 
+        result = H5AC2_expunge_entry(file_ptr, -1, &(types[0]),
 			            entry_ptr->header.addr);
 
         if ( result < 0 ) {
@@ -2333,7 +2333,7 @@ insert_entry(H5C2_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC2_set(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]), 
+        result = H5AC2_set(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
                            entry_ptr->base_addr, entry_ptr->local_len,
                           (void *)(&(entry_ptr->header)), flags);
 
@@ -2749,7 +2749,7 @@ lock_and_unlock_random_entry(H5C2_t * cache_ptr,
  * Modifications:
  *
  * 		JRM -- 7/11/06
- * 		Modified asserts to handle the new local_len field in 
+ * 		Modified asserts to handle the new local_len field in
  * 		datum.
  *
  *****************************************************************************/
@@ -2773,7 +2773,7 @@ lock_entry(H5C2_t * cache_ptr,
 
 	HDassert( ! (entry_ptr->locked) );
 
-        cache_entry_ptr = H5AC2_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, 
+        cache_entry_ptr = H5AC2_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                         &(types[0]), entry_ptr->base_addr,
                                         entry_ptr->local_len, NULL, H5AC2_WRITE);
 
@@ -3053,7 +3053,7 @@ pin_protected_entry(H5C2_t * cache_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 			  "%d:%s: Error in H5AC2_pin_protected entry().\n",
 	                  world_mpi_rank, fcn_name);
             }
@@ -3068,7 +3068,7 @@ pin_protected_entry(H5C2_t * cache_ptr,
 	} else {
 
 	    entry_ptr->local_pinned = TRUE;
- 
+
 	    local_pins++;
 
 	}
@@ -3098,7 +3098,7 @@ pin_protected_entry(H5C2_t * cache_ptr,
  *
  * Modifications:
  *
- *              7/11/06 -- JRM 
+ *              7/11/06 -- JRM
  *              Added support for the phony_len field in datum.
  *
  *****************************************************************************/
@@ -3232,7 +3232,7 @@ resize_entry(H5C2_t * cache_ptr,
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
         HDassert( !(entry_ptr->header.is_protected) );
         HDassert( !(entry_ptr->locked) );
-	HDassert( ( entry_ptr->global_pinned ) && 
+	HDassert( ( entry_ptr->global_pinned ) &&
 		  ( ! entry_ptr->local_pinned ) );
 	HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
 	          ( entry_ptr->header.size == entry_ptr->local_len ) );
@@ -3330,7 +3330,7 @@ setup_cache_for_test(hid_t * fid_ptr,
     }
 
     if ( file_ptr == NULL ) {
-        
+
         if ( verbose ) {
 	    HDfprintf(stdout, "%d:%s: Can't get file_ptr.\n",
                       world_mpi_rank, fcn_name);
@@ -3377,7 +3377,7 @@ setup_cache_for_test(hid_t * fid_ptr,
 
             config.rpt_fcn_enabled = TRUE;
 
-            if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+            if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config)
 		 != SUCCEED ) {
 
 	        HDfprintf(stdout,
@@ -3852,7 +3852,7 @@ unpin_entry(H5C2_t * cache_ptr,
 
 	    if ( dirty ) {
 
-		mark_pinned_entry_dirty(cache_ptr, file_ptr, idx, FALSE, 
+		mark_pinned_entry_dirty(cache_ptr, file_ptr, idx, FALSE,
 				        (size_t)0);
 
 	    }
@@ -5000,7 +5000,7 @@ smoke_check_4(void)
 
 		/* Insert some entries pinned, and then unpin them
 		 * immediately.  We have tested pinned entries elsewhere,
-		 * so it should be sufficient to verify that the 
+		 * so it should be sufficient to verify that the
 		 * entries are in fact pinned (which unpin_entry() should do).
 		 */
                 insert_entry(cache_ptr, file_ptr, i, H5C2__PIN_ENTRY_FLAG);
@@ -5222,7 +5222,7 @@ smoke_check_4(void)
  * Modifications:
  *
  *		JRM -- 7/12/06
- *		Added test code for H5AC2_expunge_entry() and 
+ *		Added test code for H5AC2_expunge_entry() and
  *		H5AC2_resize_pinned_entry().
  *
  *****************************************************************************/
@@ -5529,7 +5529,7 @@ smoke_check_5(void)
  *              H5AC2 level, so all calls have to go through H5AC2.  Thus it
  *              is more convenient to test trace file capabilities in the
  *              parallel cache test which works at the H5AC2 level, instead
- *              of in the serial test code which does everything at the 
+ *              of in the serial test code which does everything at the
  *              H5C2 level.
  *
  *              The function must test trace file output in the following
@@ -5559,13 +5559,13 @@ smoke_check_5(void)
  * Modifications:
  *
  *		JRM -- 7/11/06
- *		Updated for H5AC2_expunge_entry() and 
+ *		Updated for H5AC2_expunge_entry() and
  *		H5AC2_resize_pinned_entry().
  *
  *		JRM -- 2/14/08
  *		Updated for changes in H5AC2_set_cache_auto_resize_config
  *		to support the new flash cache size increment code.
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -5661,12 +5661,12 @@ trace_file_check(void)
 
             config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC2_get_cache_auto_resize_config(cache_ptr, &config) 
+            if ( H5AC2_get_cache_auto_resize_config(cache_ptr, &config)
                  != SUCCEED ) {
 
 		nerrors++;
-	        HDfprintf(stdout, 
-                        "%d:%s: H5AC2_get_cache_auto_resize_config() failed.\n", 
+	        HDfprintf(stdout,
+                        "%d:%s: H5AC2_get_cache_auto_resize_config() failed.\n",
                         world_mpi_rank, fcn_name);
 
             } else {
@@ -5674,11 +5674,11 @@ trace_file_check(void)
                 config.open_trace_file = TRUE;
 		strcpy(config.trace_file_name, "t_cache2_trace.txt");
 
-                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config)
 			!= SUCCEED ) {
 
 		    nerrors++;
-	            HDfprintf(stdout, 
+	            HDfprintf(stdout,
                          "%d:%s: H5AC2_set_cache_auto_resize_config() failed.\n",
                           world_mpi_rank, fcn_name);
                 }
@@ -5715,7 +5715,7 @@ trace_file_check(void)
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -5724,12 +5724,12 @@ trace_file_check(void)
 
             config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC2_get_cache_auto_resize_config(cache_ptr, &config) 
+            if ( H5AC2_get_cache_auto_resize_config(cache_ptr, &config)
                  != SUCCEED ) {
 
 		nerrors++;
-	        HDfprintf(stdout, 
-                        "%d:%s: H5AC2_get_cache_auto_resize_config() failed.\n", 
+	        HDfprintf(stdout,
+                        "%d:%s: H5AC2_get_cache_auto_resize_config() failed.\n",
                         world_mpi_rank, fcn_name);
 
             } else {
@@ -5738,11 +5738,11 @@ trace_file_check(void)
                 config.close_trace_file = TRUE;
 		config.trace_file_name[0] = '\0';
 
-                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config)
 			!= SUCCEED ) {
 
 		    nerrors++;
-	            HDfprintf(stdout, 
+	            HDfprintf(stdout,
                         "%d:%s: H5AC2_set_cache_auto_resize_config() failed.\n",
                         world_mpi_rank, fcn_name);
                 }
@@ -5761,7 +5761,7 @@ trace_file_check(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -5789,22 +5789,22 @@ trace_file_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
 
         if ( nerrors == 0 ) {
-	
-	    sprintf(trace_file_name, "t_cache2_trace.txt.%d", 
+
+	    sprintf(trace_file_name, "t_cache2_trace.txt.%d",
 		    (int)file_mpi_rank);
 
 	    if ( (trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL ) {
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n", 
+                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -5840,7 +5840,7 @@ trace_file_check(void)
 
 	        nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
 			      "%d:%s: Unexpected data in trace file line %d.\n",
                               world_mpi_rank, fcn_name, i);
 		    HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n",
@@ -6081,10 +6081,10 @@ main(int argc, char **argv)
 #endif
 #if 1
     smoke_check_5();
-#endif   
+#endif
 #if 1
     trace_file_check();
-#endif   
+#endif
 
 finish:
     /* make sure all processes are finished before final report, cleanup

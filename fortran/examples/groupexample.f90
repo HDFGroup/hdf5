@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,35 +11,35 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! The following example shows how to create and close a group. 
+! The following example shows how to create and close a group.
 ! It creates a file called 'group.h5', creates a group
 ! called MyGroup in the root group, and then closes the group and file.
-! 
+!
 
 
      PROGRAM GROUPEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=9), PARAMETER :: filename = "groupf.h5" ! File name
      CHARACTER(LEN=7), PARAMETER :: groupname = "MyGroup"  ! Group name
 
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: group_id      ! Group identifier 
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: group_id      ! Group identifier
 
      INTEGER     ::   error ! Error flag
 !
 !    Initialize FORTRAN interface.
 !
-     CALL h5open_f(error)     
+     CALL h5open_f(error)
      !
      ! Create a new file using default properties.
-     ! 
+     !
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
 
      !
@@ -61,4 +61,4 @@
 !
      CALL h5close_f(error)
 
-     END PROGRAM GROUPEXAMPLE 
+     END PROGRAM GROUPEXAMPLE
