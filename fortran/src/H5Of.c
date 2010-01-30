@@ -21,7 +21,7 @@
 /*----------------------------------------------------------------------------
  * Name:        h5olink_c
  * Purpose:     Calls H5Olink
- * Inputs:   
+ * Inputs:
  *      object_id        - Object to be linked.
  *      new_loc_id       - File or group identifier specifying location at which object is to be linked.
  *      name             - Name of link to be created, relative to new_loc_id.
@@ -50,7 +50,7 @@ nh5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namele
   /*
    * Call H5Olink function.
    */
-  if((hid_t_f)H5Olink((hid_t)*object_id, (hid_t)*new_loc_id, c_name, 
+  if((hid_t_f)H5Olink((hid_t)*object_id, (hid_t)*new_loc_id, c_name,
 		       (hid_t)*lcpl_id, (hid_t)*lapl_id) < 0)
     HGOTO_DONE(FAIL);
 

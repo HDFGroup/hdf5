@@ -41,10 +41,10 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
          *obj =  options->op_tbl->objs[i];
          return i;
      }
-     
+
      pdest  = strstr(name,options->op_tbl->objs[i].path);
      result = (int)(pdest - name);
-     
+
      /* found at position 1, meaning without '/' */
      if( pdest != NULL && result==1 )
      {
@@ -72,19 +72,19 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
                    pack_opt_t *options,         /* repack options */
                    pack_info_t *obj /*OUT*/)    /* info about object to filter */
 {
-    
+
     int  idx, i;
     pack_info_t tmp;
-    
+
     init_packobject(&tmp);
-    
+
     idx = aux_find_obj(name,options,&tmp);
-    
+
     /* name was on input */
     if (idx>=0)
     {
-        
-        
+
+
         /* applying to all objects */
         if (options->all_layout)
         {
@@ -114,9 +114,9 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
             default:
                 break;
             }/*switch*/
-            
+
         }
-        
+
         /* applying to all objects */
         if (options->all_filter)
         {
@@ -132,16 +132,16 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
                 tmp.filter[i] = options->op_tbl->objs[idx].filter[i];
             }
         }
-        
-        
+
+
     } /* if idx */
-    
-    
+
+
     /* no input name */
-    
+
     else
     {
-        
+
         if (options->all_filter)
         {
             int k;
@@ -167,11 +167,11 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
             }/*switch*/
         }
     }
-    
+
     *obj = tmp;
     return 1;
-    
-}       
+
+}
 
 
 /*-------------------------------------------------------------------------
@@ -206,40 +206,40 @@ int apply_filters(const char* name,    /* object name from traverse list */
     pack_info_t  obj;
 
     *has_filter = 0;
-    
+
     if (rank==0) /* scalar dataset, do not apply */
         return 0;
-    
+
    /*-------------------------------------------------------------------------
     * initialize the assigment object
     *-------------------------------------------------------------------------
     */
     init_packobject(&obj);
-    
+
    /*-------------------------------------------------------------------------
     * find options
     *-------------------------------------------------------------------------
     */
     if (aux_assign_obj(name,options,&obj)==0)
         return 0;
-    
+
     /* get information about input filters */
     if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
         return -1;
-    
+
    /*-------------------------------------------------------------------------
     * check if we have filters in the pipeline
     * we want to replace them with the input filters
     * only remove if we are inserting new ones
     *-------------------------------------------------------------------------
     */
-    if (nfilters && obj.nfilters ) 
+    if (nfilters && obj.nfilters )
     {
         *has_filter = 1;
         if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0)
             return -1;
     }
-    
+
    /*-------------------------------------------------------------------------
     * check if there is an existent chunk
     * read it only if there is not a requested layout
@@ -249,7 +249,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
     {
         if ((layout = H5Pget_layout(dcpl_id))<0)
             return -1;
-        
+
         if (layout==H5D_CHUNKED)
         {
             if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
@@ -260,7 +260,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                 obj.chunk.chunk_lengths[i] = chsize[i];
         }
     }
-    
+
     /*-------------------------------------------------------------------------
     * the type of filter and additional parameter
     * type can be one of the filters
@@ -273,10 +273,10 @@ int apply_filters(const char* name,    /* object name from traverse list */
     * H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
     *-------------------------------------------------------------------------
     */
-    
+
     if (obj.nfilters)
     {
-        
+
    /*-------------------------------------------------------------------------
     * filters require CHUNK layout; if we do not have one define a default
     *-------------------------------------------------------------------------
@@ -287,14 +287,14 @@ int apply_filters(const char* name,    /* object name from traverse list */
             for (i=0; i<rank; i++)
                 obj.chunk.chunk_lengths[i] = dims[i];
         }
-        
+
         for ( i=0; i<obj.nfilters; i++)
         {
             switch (obj.filter[i].filtn)
             {
             default:
                 break;
-                
+
            /*-------------------------------------------------------------------------
             * H5Z_FILTER_DEFLATE       1 , deflation like gzip
             *-------------------------------------------------------------------------
@@ -302,7 +302,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
             case H5Z_FILTER_DEFLATE:
                 {
                     unsigned     aggression;     /* the deflate level */
-                    
+
                     aggression = obj.filter[i].cd_values[0];
                     /* set up for deflated data */
                     if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
@@ -311,7 +311,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                         return -1;
                 }
                 break;
-                
+
            /*-------------------------------------------------------------------------
             * H5Z_FILTER_SZIP       4 , szip compression
             *-------------------------------------------------------------------------
@@ -320,19 +320,19 @@ int apply_filters(const char* name,    /* object name from traverse list */
                 {
                     unsigned  options_mask;
                     unsigned  pixels_per_block;
-                    
+
                     options_mask     = obj.filter[i].cd_values[0];
                     pixels_per_block = obj.filter[i].cd_values[1];
-                    
+
                     /* set up for szip data */
                     if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
                         return -1;
                     if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0)
                         return -1;
-                    
+
                 }
                 break;
-                
+
            /*-------------------------------------------------------------------------
             * H5Z_FILTER_SHUFFLE    2 , shuffle the data
             *-------------------------------------------------------------------------
@@ -343,7 +343,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                 if (H5Pset_shuffle(dcpl_id)<0)
                     return -1;
                 break;
-                
+
            /*-------------------------------------------------------------------------
             * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
             *-------------------------------------------------------------------------
@@ -368,15 +368,15 @@ int apply_filters(const char* name,    /* object name from traverse list */
              * H5Z_FILTER_SCALEOFFSET , scale+offset compression
              *-------------------------------------------------------------------------
              */
-                
+
             case H5Z_FILTER_SCALEOFFSET:
                 {
                     H5Z_SO_scale_type_t scale_type;
                     int                 scale_factor;
-                    
+
                     scale_type   = obj.filter[i].cd_values[0];
                     scale_factor = obj.filter[i].cd_values[1];
-                    
+
                     if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
                         return -1;
                     if (H5Pset_scaleoffset(dcpl_id,scale_type,scale_factor)<0)
@@ -385,21 +385,21 @@ int apply_filters(const char* name,    /* object name from traverse list */
                 break;
             } /* switch */
         }/*i*/
-        
+
     }
     /*obj.nfilters*/
-    
+
     /*-------------------------------------------------------------------------
     * layout
     *-------------------------------------------------------------------------
     */
-    
+
     if (obj.layout>=0)
     {
         /* a layout was defined */
         if (H5Pset_layout(dcpl_id, obj.layout)<0)
             return -1;
-        
+
         if (H5D_CHUNKED==obj.layout) { /* set up chunk */
             if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
                 return -1;
@@ -408,7 +408,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
             if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0)
                 return -1;
         }
-        
+
     }
 
  return 0;

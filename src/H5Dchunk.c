@@ -1314,12 +1314,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t 
+hbool_t
 H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr)
 {
     const H5D_t *dataset = io_info->dset;
     hbool_t ret_value;
- 
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_cacheable)
 
     HDassert(io_info);
@@ -1370,13 +1370,13 @@ H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t 
+static hbool_t
 H5D_chunk_in_cache(const H5D_t *dset, const hsize_t *chunk_offset,
     hsize_t chunk_idx)
 {
     H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);/*raw data chunk cache*/
     hbool_t	found = FALSE;		/*already in cache?	*/
- 
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_in_cache)
 
     /* Sanity checks */
@@ -2420,7 +2420,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
 
         if(NULL == (chunk = H5D_chunk_alloc(chunk_size, pline)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-	
+
         /* In the case that some dataset functions look through this data,
          * clear it to all 0s. */
         HDmemset(chunk, 0, chunk_size);
@@ -4103,7 +4103,7 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
 
         /* Check for reference datatype and no expanding references & clear background buffer */
-        if(!cpy_info->expand_ref && 
+        if(!cpy_info->expand_ref &&
                 ((H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) && (f_src != f_dst)))
             /* Reset value to zero */
             HDmemset(bkg, 0, buf_size);

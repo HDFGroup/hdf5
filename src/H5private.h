@@ -495,7 +495,7 @@ typedef struct {
  * Redefine all the POSIX functions.  We should never see a POSIX
  * function (or any other non-HDF5 function) in the source!
  */
- 
+
  /* Use platform-specific versions if necessary */
 #include "H5win32defs.h"
 
@@ -503,7 +503,7 @@ typedef struct {
     #define HDabort()		abort()
 #endif /* HDabort */
 #ifndef HDabs
-    #define HDabs(X)		abs(X) 
+    #define HDabs(X)		abs(X)
 #endif /* HDabs */
 #ifndef HDaccess
     #define HDaccess(F,M)		access(F, M)

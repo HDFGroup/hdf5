@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,27 +11,27 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! 
+!
 !    Testing File Interface functionality.
 !
-!    In the mountingtest subroutine we create one file with a group in it, 
+!    In the mountingtest subroutine we create one file with a group in it,
 !    and another file with a dataset. Mounting is used to
-!    access the dataset from the second file as a member of a group 
-!    in the first file. 
+!    access the dataset from the second file as a member of a group
+!    in the first file.
 !
         SUBROUTINE mountingtest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER, INTENT(OUT) :: total_error
 
           !
           !the respective filename is "mount1.h5" and "mount2.h5"
           !
-          CHARACTER(LEN=6)  :: filename1 
+          CHARACTER(LEN=6)  :: filename1
           CHARACTER(LEN=6)  :: filename2
           CHARACTER(LEN=80) :: fix_filename1
           CHARACTER(LEN=80) :: fix_filename2
@@ -46,12 +46,12 @@
           !
           ! File identifiers
           !
-          INTEGER(HID_T) :: file1_id, file2_id  
+          INTEGER(HID_T) :: file1_id, file2_id
 
           !
           ! Group identifier
           !
-          INTEGER(HID_T) :: gid 
+          INTEGER(HID_T) :: gid
 
           !
           ! dataset identifier
@@ -68,29 +68,29 @@
           !
           INTEGER(HID_T) :: dtype_id
 
-          ! 
+          !
           !The dimensions for the dataset.
           !
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
-   
+
           !
           !return value for testing whether a file is in hdf5 format
           !
           LOGICAL     ::  status
 
           !
-          !flag to check operation success 
-          !         
+          !flag to check operation success
+          !
           INTEGER     ::   error
 
           !
-          !general purpose integer 
-          !         
+          !general purpose integer
+          !
           INTEGER     ::   i, j
 
           !
-          !data buffers 
-          !         
+          !data buffers
+          !
           INTEGER, DIMENSION(NX,NY) :: data_in, data_out
 
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
@@ -114,26 +114,26 @@
           ! Fix names of the files
           !
           CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
-          if(error .ne. 0) stop 
+          if(error .ne. 0) stop
           CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
-          if(error .ne. 0) stop 
+          if(error .ne. 0) stop
 
           !
           !Create first file "mount1.h5" using default properties.
-          ! 
+          !
           CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
                CALL check("h5fcreate_f",error,total_error)
-        
+
 
           !
           !Create group "/G" inside file "mount1.h5".
-          ! 
+          !
           CALL h5gcreate_f(file1_id, "/G", gid, error)
                CALL check("h5gcreate_f",error,total_error)
 
           !
           !close file and group identifiers.
-          ! 
+          !
           CALL h5gclose_f(gid, error)
                CALL check("h5gclose_f",error,total_error)
           CALL h5fclose_f(file1_id, error)
@@ -141,19 +141,19 @@
 
           !
           !Create second file "mount2.h5" using default properties.
-          ! 
+          !
           CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error)
                CALL check("h5fcreate_f",error,total_error)
 
           !
-          !Create data space for the dataset. 
+          !Create data space for the dataset.
           !
           CALL h5screate_simple_f(RANK, dims, dataspace, error)
                CALL check("h5screate_simple_f",error,total_error)
 
           !
           !Create dataset "/D" inside file "mount2.h5".
-          ! 
+          !
           CALL h5dcreate_f(file2_id, "/D", H5T_NATIVE_INTEGER, dataspace, &
                dset_id, error)
               CALL check("h5dcreate_f",error,total_error)
@@ -168,7 +168,7 @@
 
           !
           !close file, dataset and dataspace identifiers.
-          ! 
+          !
           CALL h5sclose_f(dataspace, error)
               CALL check("h5sclose_f",error,total_error)
           CALL h5dclose_f(dset_id, error)
@@ -195,7 +195,7 @@
 
           !
           !reopen both files.
-          ! 
+          !
           CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
               CALL check("hfopen_f",error,total_error)
           CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
@@ -203,44 +203,44 @@
 
           !
           !mount the second file under the first file's "/G" group.
-          ! 
+          !
           CALL h5fmount_f (file1_id, "/G", file2_id, error)
               CALL check("h5fmount_f",error,total_error)
 
 
           !
           !Access dataset D in the first file under /G/D name.
-          ! 
+          !
           CALL h5dopen_f(file1_id, "/G/D", dset_id, error)
               CALL check("h5dopen_f",error,total_error)
 
           !
           !Get dataset's data type.
-          ! 
+          !
           CALL h5dget_type_f(dset_id, dtype_id, error)
               CALL check("h5dget_type_f",error,total_error)
 
           !
           !Read the dataset.
-          ! 
+          !
           CALL h5dread_f(dset_id, dtype_id, data_out, data_dims, error)
               CALL check("h5dread_f",error,total_error)
 
           !
           !Compare the data.
-          ! 
+          !
           do i = 1, NX
               do j = 1, NY
-                  IF (data_out(i,j) .NE. data_in(i, j)) THEN 
+                  IF (data_out(i,j) .NE. data_in(i, j)) THEN
                       write(*, *) "mounting test error occured"
                   END IF
-              end do    
+              end do
           end do
 
 
           !
           !Close dset_id and dtype_id.
-          ! 
+          !
           CALL h5dclose_f(dset_id, error)
               CALL check("h5dclose_f",error,total_error)
           CALL h5tclose_f(dtype_id, error)
@@ -248,13 +248,13 @@
 
           !
           !unmount the second file.
-          ! 
+          !
           CALL h5funmount_f(file1_id, "/G", error);
               CALL check("h5funmount_f",error,total_error)
 
           !
           !Close both files.
-          ! 
+          !
           CALL h5fclose_f(file1_id, error)
               CALL check("h5fclose_f",error,total_error)
           CALL h5fclose_f(file2_id, error)
@@ -269,27 +269,27 @@
 
 !
 !    The following subroutine tests h5freopen_f.
-!    It creates the file which has name "reopen.h5" and 
+!    It creates the file which has name "reopen.h5" and
 !    the "/dset" dataset inside the file.
 !    writes the data to the file, close the dataset.
-!    Reopen the file based upon the file_id, open the 
-!    dataset use the reopen_id then reads the 
+!    Reopen the file based upon the file_id, open the
+!    dataset use the reopen_id then reads the
 !    dataset back to memory to test whether the data
-!    read is identical to the data written  
+!    read is identical to the data written
 !
 
         SUBROUTINE reopentest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
-     
+          INTEGER, INTENT(OUT) :: total_error
+
           !
           CHARACTER(LEN=6), PARAMETER :: filename = "reopen"
-          CHARACTER(LEN=80)  :: fix_filename 
+          CHARACTER(LEN=80)  :: fix_filename
 
-          INTEGER(HID_T) :: file_id, reopen_id  ! File identifiers 
-          INTEGER(HID_T) :: dset_id             ! Dataset identifier 
+          INTEGER(HID_T) :: file_id, reopen_id  ! File identifiers
+          INTEGER(HID_T) :: dset_id             ! Dataset identifier
 
           !
           !dataset name is "dset"
@@ -308,30 +308,30 @@
           !
           INTEGER(HID_T) :: dataspace
 
-          ! 
+          !
           !The dimensions for the dataset.
           !
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
 
           !
           !flag to check operation success
-          !          
+          !
           INTEGER     ::   error
 
           !
           !general purpose integer
-          !          
+          !
           INTEGER     ::  i, j
 
           !
-          !array to store data 
+          !array to store data
           !
           INTEGER, DIMENSION(4,6) :: dset_data, data_out
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HSIZE_T)  :: file_size
           CHARACTER(LEN=80) :: file_name
           INTEGER(SIZE_T) :: name_size
-     
+
           !
           !initialize the dset_data array which will be written to the "/dset"
           !
@@ -344,13 +344,13 @@
           !
           !Initialize FORTRAN predifined datatypes
           !
-!          CALL h5init_types_f(error) 
+!          CALL h5init_types_f(error)
 !               CALL check("h5init_types_f",error,total_error)
 
 
           !
           !Create file "reopen.h5" using default properties.
-          ! 
+          !
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
@@ -360,14 +360,14 @@
                CALL check("h5fcreate_f",error,total_error)
 
           !
-          !Create data space for the dataset. 
+          !Create data space for the dataset.
           !
           CALL h5screate_simple_f(RANK, dims, dataspace, error)
                CALL check("h5screate_simple_f",error,total_error)
 
           !
           !Create dataset "/dset" inside the file .
-          ! 
+          !
           CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, &
                dset_id, error)
               CALL check("h5dcreate_f",error,total_error)
@@ -393,7 +393,7 @@
               CALL check("h5sclose_f",error,total_error)
 
          !
-         !Reopen file dsetf.h5. 
+         !Reopen file dsetf.h5.
          !
          CALL h5freopen_f(file_id, reopen_id, error)
               CALL check("h5freopen_f",error,total_error)
@@ -404,7 +404,7 @@
               CALL check("h5fget_filesize_f",error,total_error)
 
          !
-         !Open the dataset based on the reopen_id. 
+         !Open the dataset based on the reopen_id.
          !
          CALL h5dopen_f(reopen_id, dsetname, dset_id, error)
               CALL check("h5dopen_f",error,total_error)
@@ -415,7 +415,7 @@
               CALL check("h5fget_name_f",error,total_error)
               IF(file_name(1:name_size) .NE. fix_filename(1:name_size)) THEN
                  write(*,*) "file name obtained from the dataset id is incorrect"
-              END IF 
+              END IF
 
          !
          !Read the dataset.
@@ -425,13 +425,13 @@
 
           !
           !Compare the data.
-          ! 
+          !
           do i = 1, NX
               do j = 1, NY
-                  IF (data_out(i,j) .NE. dset_data(i, j)) THEN 
+                  IF (data_out(i,j) .NE. dset_data(i, j)) THEN
                       write(*, *) "reopen test error occured"
                   END IF
-              end do    
+              end do
           end do
 
 
@@ -448,7 +448,7 @@
               CALL check("h5fclose_f",error,total_error)
          CALL h5fclose_f(reopen_id, error)
               CALL check("h5fclose_f",error,total_error)
-     
+
 
           if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
@@ -462,13 +462,13 @@
 !    We first create a file using the default creation and access property
 !    list. Then, the file was closed and reopened. We then get the
 !    creation and access property lists of the first file. The second file is
-!    created using the got property lists 
+!    created using the got property lists
 
         SUBROUTINE plisttest(cleanup, total_error)
          USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER, INTENT(OUT) :: total_error
 
           !
           !file names are "plist1.h5" and "plist2.h5"
@@ -482,12 +482,12 @@
           INTEGER(HID_T) :: prop_id    ! File creation property list identifier
           INTEGER(HID_T) :: access_id  ! File Access property list identifier
 
-          !flag to check operation success          
+          !flag to check operation success
           INTEGER     ::   error
 
           !
           !Create a file1 using default properties.
-          ! 
+          !
           CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify file name"
@@ -540,7 +540,7 @@
               CALL check("h5pclose_f",error,total_error)
           CALL h5pclose_f(access_id, error)
               CALL check("h5pclose_f",error,total_error)
-          
+
           !
           !Terminate access to the files.
           !
@@ -557,8 +557,8 @@
           RETURN
 
         END SUBROUTINE plisttest
-              
-     
+
+
 !
 !    The following subroutine tests h5pget(set)_fclose_degree_f
 !
@@ -567,21 +567,21 @@
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER, INTENT(OUT) :: total_error
           INTEGER              :: error
-     
+
           !
           CHARACTER(LEN=10), PARAMETER :: filename = "file_close"
-          CHARACTER(LEN=80)  :: fix_filename 
+          CHARACTER(LEN=80)  :: fix_filename
 
-          INTEGER(HID_T) :: fid, fid_d, fid1, fid2, fid3  ! File identifiers 
+          INTEGER(HID_T) :: fid, fid_d, fid1, fid2, fid3  ! File identifiers
           INTEGER(HID_T) :: fapl, fapl1, fapl2, fapl3 ! File access identifiers
           INTEGER(HID_T) :: fid_d_fapl, fid1_fapl     ! File access identifiers
           LOGICAL        :: flag
           INTEGER        :: obj_count, obj_countf
           INTEGER(HID_T), ALLOCATABLE, DIMENSION(:) :: obj_ids
           INTEGER        :: i
-          
+
           CALL h5eset_auto_f(0, error)
 
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
@@ -652,7 +652,7 @@
                  total_error = total_error + 1
                  write(*,*) "Wrong number of open objects reported, error"
                endif
-          allocate(obj_ids(obj_countf), stat = error) 
+          allocate(obj_ids(obj_countf), stat = error)
           CALL h5fget_obj_ids_f(fid, H5F_OBJ_FILE_F, obj_countf, obj_ids, error)
                CALL check("h5fget_obj_ids_f",error,total_error)
           if(error .eq. 0) then
@@ -661,22 +661,22 @@
                          CALL check("h5fclose_f",error,total_error)
              enddo
           endif
-          
+
           CALL h5fclose_f(fid, error)
               if(error .eq. 0) then
                  total_error = total_error + 1
                  write(*,*) "File should be closed at this point, error"
-              endif 
+              endif
           CALL h5fclose_f(fid1, error)
               if(error .eq. 0) then
                  total_error = total_error + 1
                  write(*,*) "File should be closed at this point, error"
-              endif 
+              endif
           CALL h5fclose_f(fid_d, error)
               if(error .eq. 0) then
                  total_error = total_error + 1
                  write(*,*) "File should be closed at this point, error"
-              endif 
+              endif
 
           if(cleanup) then
               CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
@@ -685,7 +685,7 @@
           deallocate(obj_ids)
           RETURN
 
-        END SUBROUTINE file_close 
+        END SUBROUTINE file_close
 
 !
 !    The following subroutine tests h5fget_freespace_f
@@ -695,18 +695,18 @@
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
-          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER, INTENT(OUT) :: total_error
           INTEGER              :: error
-     
+
           !
           CHARACTER(LEN=10), PARAMETER :: filename = "file_space"
           CHARACTER(LEN=3), PARAMETER :: grpname = "grp"
-          CHARACTER(LEN=80)  :: fix_filename 
+          CHARACTER(LEN=80)  :: fix_filename
 
-          INTEGER(HID_T) :: fid ! File identifiers 
+          INTEGER(HID_T) :: fid ! File identifiers
           INTEGER(HSSIZE_T) :: free_space
-          INTEGER(HID_T) :: group_id      ! Group identifier 
-          
+          INTEGER(HID_T) :: group_id      ! Group identifier
+
           CALL h5eset_auto_f(0, error)
 
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
@@ -731,7 +731,7 @@
           ! Close group
           CALL h5gclose_f(group_id, error)
           CALL check("h5gclose_f", error, total_error)
-          
+
           ! Check the free space now
           CALL h5fget_freespace_f(fid, free_space, error)
                CALL check("h5fget_freespace_f",error,total_error)
@@ -759,7 +759,7 @@
               CALL check("h5_cleanup_f", error, total_error)
           RETURN
 
-        END SUBROUTINE file_space 
+        END SUBROUTINE file_space
 
 
 

@@ -935,7 +935,7 @@ initialize_stype2(unsigned char *buf, const size_t num)
  *
  * Purpose:	Initialize data buffer.
  *
- * Return:	Success:	
+ * Return:	Success:
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1019,7 +1019,7 @@ initialize_stype4(unsigned char *buf, const size_t num)
  *
  * Return:	Success:        datatype ID
  *
- *              Failure:        negative	
+ *              Failure:        negative
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1053,7 +1053,7 @@ create_stype1(void)
             H5Tinsert(tid, "k", HOFFSET(stype1, k), H5T_NATIVE_DOUBLE) < 0 ||
             H5Tinsert(tid, "l", HOFFSET(stype1, l), H5T_NATIVE_DOUBLE) < 0 ||
             H5Tinsert(tid, "m", HOFFSET(stype1, m), H5T_NATIVE_DOUBLE) < 0 ||
-            H5Tinsert(tid, "n", HOFFSET(stype1, n), H5T_NATIVE_DOUBLE) < 0) 
+            H5Tinsert(tid, "n", HOFFSET(stype1, n), H5T_NATIVE_DOUBLE) < 0)
         goto error;
 
     if(H5Tclose(array_dt1) < 0)
@@ -1075,7 +1075,7 @@ error:
  *
  * Return:	Success:        datatype ID
  *
- *              Failure:        negative	
+ *              Failure:        negative
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1134,7 +1134,7 @@ error:
  *
  * Return:	Success:        datatype ID
  *
- *              Failure:        negative	
+ *              Failure:        negative
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1177,7 +1177,7 @@ error:
  *
  * Return:	Success:        datatype ID
  *
- *              Failure:        negative	
+ *              Failure:        negative
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1239,7 +1239,7 @@ error:
  *
  * Return:	Success:        0
  *
- *              Failure:        negative	
+ *              Failure:        negative
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
@@ -1286,14 +1286,14 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
-		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7], 
+		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7],
                    s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
                    s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
                    s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
                    s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n);
 	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
-		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7], 
+		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7],
                    d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
                    d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
                    d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
@@ -1330,7 +1330,7 @@ error:
  *		Failure:	1
  *
  * Programmer:	Raymond Lu
- *              Friday, 15 June 2007 
+ *              Friday, 15 June 2007
  *
  * Modifications:
  *-------------------------------------------------------------------------
@@ -1338,7 +1338,7 @@ error:
 static int
 test_hdf5_src_subset(char *filename, hid_t fapl)
 {
-    hid_t   file;     
+    hid_t   file;
     hid_t   rew_tid, src_tid, dst_tid;
     hid_t   dataset;
     hid_t   space;
@@ -1415,7 +1415,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /*
      *######################################################################
-     * STEP 2. Rewrite the data with a subset of original data type. 
+     * STEP 2. Rewrite the data with a subset of original data type.
      */
     TESTING("rewriting data with a subset of original data type");
 
@@ -1463,7 +1463,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR
 
-    if(compare_data(orig, rbuf, TRUE) < 0) 
+    if(compare_data(orig, rbuf, TRUE) < 0)
         TEST_ERROR
 
     if(H5Dclose(dataset) < 0)
@@ -1476,7 +1476,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR
 
-    if(compare_data(orig, rbuf, TRUE) < 0) 
+    if(compare_data(orig, rbuf, TRUE) < 0)
         TEST_ERROR
 
     if(H5Dclose(dataset) < 0)
@@ -1527,15 +1527,15 @@ error:
  *                      TYPE4 D;               }
  *                      TYPE5 E;
  *                  };
- *              This optimization is for the Chicago company.  This test 
- *              is in opposite of test_hdf5_src_subset. 
+ *              This optimization is for the Chicago company.  This test
+ *              is in opposite of test_hdf5_src_subset.
  *
  * Return:	Success:	0
  *
  *		Failure:	1
  *
  * Programmer:	Raymond Lu
- *              Friday, 15 June 2007 
+ *              Friday, 15 June 2007
  *
  * Modifications:
  *-------------------------------------------------------------------------
@@ -1543,7 +1543,7 @@ error:
 static int
 test_hdf5_dst_subset(char *filename, hid_t fapl)
 {
-    hid_t   file;     
+    hid_t   file;
     hid_t   rew_tid, src_tid, dst_tid;
     hid_t   dataset;
     hid_t   space;
@@ -1619,7 +1619,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
 
     /*
      *######################################################################
-     * STEP 2. Rewrite the data with a subset of original data type. 
+     * STEP 2. Rewrite the data with a subset of original data type.
      */
     TESTING("rewriting data with a subset of original data type");
 
@@ -1667,7 +1667,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if(compare_data(orig, rbuf, FALSE) < 0) 
+    if(compare_data(orig, rbuf, FALSE) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1680,7 +1680,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
-    if(compare_data(orig, rbuf, FALSE) < 0) 
+    if(compare_data(orig, rbuf, FALSE) < 0)
         goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1721,12 +1721,12 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	Test different cases of I/O for compound data and the 
+ * Purpose:	Test different cases of I/O for compound data and the
  *              compound optimization for the Chicago company.
  *
  * Return:	Success:         0
  *
- *              Failure:         1	
+ *              Failure:         1
  *
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007

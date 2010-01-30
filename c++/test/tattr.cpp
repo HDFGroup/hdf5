@@ -1051,7 +1051,7 @@ static void test_attr_dtype_shared()
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
 	// Enclosing to work around the issue of unused variables and/or
-	// objects created by copy constructors stay around until end of 
+	// objects created by copy constructors stay around until end of
 	// scope, causing incorrect number of ref counts.
 	{ // First enclosed block
 

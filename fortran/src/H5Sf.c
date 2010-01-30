@@ -1030,7 +1030,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
 /*----------------------------------------------------------------------------
  * Name:        h5sdecode_c
  * Purpose:     Call H5Sdecode
- * Inputs:       
+ * Inputs:
  *		buf     - Buffer for the data space object to be decoded.
  * Outputs:
  *              obj_id  - Object_id (non-negative)
@@ -1052,7 +1052,7 @@ nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
    * Call H5Sdecode function.
    */
 
-  c_buf = (unsigned char*)buf; 
+  c_buf = (unsigned char*)buf;
 
   c_obj_id = H5Sdecode(c_buf);
   if(c_obj_id < 0)
@@ -1067,7 +1067,7 @@ nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 /*----------------------------------------------------------------------------
  * Name:        h5sencode_c
  * Purpose:     Call H5Sencode
- * Inputs:       
+ * Inputs:
  *            obj_id - Identifier of the object to be encoded.
  *		 buf - Buffer for the object to be encoded into.
  *            nalloc - The size of the allocated buffer.
@@ -1112,9 +1112,9 @@ nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
     return ret_value;
   }
 
-  /* copy the C buffer to the FORTRAN buffer. 
+  /* copy the C buffer to the FORTRAN buffer.
    * Can not use HD5packFstring because we don't want to
-   * eliminate the NUL terminator or pad remaining space 
+   * eliminate the NUL terminator or pad remaining space
    * with blanks.
    */
 
@@ -1128,7 +1128,7 @@ nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 /*----------------------------------------------------------------------------
  * Name:        h5sextent_equal_c
  * Purpose:     Call H5Sextent_equal
- * Inputs:        
+ * Inputs:
  *		space1_id - First dataspace identifier.
  *              space2_id - Second dataspace identifier.
  * Outputs:

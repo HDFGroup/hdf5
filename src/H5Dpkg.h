@@ -189,7 +189,7 @@ typedef struct H5D_io_info_t {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
         H5FD_mpio_collective_opt_t coll_opt_mode; /* Parallel transfer with independent IO or collective IO with this mode */
         H5D_io_ops_t io_ops;    /* I/O operation function pointers */
-    } orig;                     
+    } orig;
 #endif /* H5_HAVE_PARALLEL */
     H5D_storage_t *store;       /* Dataset storage info */
     H5D_layout_ops_t layout_ops;    /* Dataset layout I/O operation function pointers */
@@ -253,7 +253,7 @@ typedef struct H5D_chunk_ud_t {
     uint32_t	nbytes;			/*size of stored data	*/
     unsigned	filter_mask;		/*excluded filters	*/
     haddr_t	addr;			/*file address of chunk */
-} H5D_chunk_ud_t; 
+} H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
 typedef int (*H5D_chunk_cb_func_t)(const H5D_chunk_rec_t *chunk_rec,
@@ -556,7 +556,7 @@ H5_DLL ssize_t H5D_contig_readvv(const H5D_io_info_t *io_info,
 H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst, 
+H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on chunked dataset storage */
@@ -564,7 +564,7 @@ H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset);
-H5_DLL haddr_t H5D_chunk_get_addr(const H5D_t *dset, hid_t dxpl_id, 
+H5_DLL haddr_t H5D_chunk_get_addr(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
     H5D_chunk_ud_t *udata, hbool_t relax, unsigned *idx_hint/*in,out*/);

@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* 
+/*
  This program reads binary output from h5dump (-b option).
  To use change the following 3 symbols accordingly.
  For example, to read 2 elements of a float type , define
@@ -82,7 +82,7 @@ main (int argc, const char *argv[])
  {
   numread = fread( buf, sizeof( TYPE ), nelmts, stream );
   printf( "Number of items read = %d\n", numread );
-  
+
   for (i = 0; i < nelmts; i++)
   {
    printf(FORMAT,buf[i]);

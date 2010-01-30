@@ -575,62 +575,62 @@ herr_t H5IMlink_palette( hid_t loc_id,
  {
   if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
-  
+
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
-  
+
   if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
-  
+
   /* Get and save the old reference(s) */
   if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
-  
+
   n_refs = H5Sget_simple_extent_npoints(attr_space_id);
-  
+
   dim_ref = n_refs + 1;
-  
+
   refbuf = malloc( sizeof(hobj_ref_t) * (int)dim_ref );
-  
+
   if ( H5Aread( attr_id, attr_type, refbuf ) < 0)
    goto out;
- 
+
   /* The attribute must be deleted, in order to the new one can reflect the changes*/
   if(H5Adelete(image_id, "PALETTE") < 0)
    goto out;
-  
+
   /* Create a new reference for this palette. */
   if ( H5Rcreate( &ref, loc_id, pal_name, H5R_OBJECT, -1 ) < 0)
    goto out;
-  
+
   refbuf[n_refs] = ref;
-  
+
   /* Create the data space for the new references */
   if(H5Sclose(attr_space_id) < 0)
    goto out;
-  
+
   if((attr_space_id = H5Screate_simple(1, &dim_ref, NULL)) < 0)
    goto out;
-  
+
   /* Create the attribute again with the changes of space */
   if(H5Aclose(attr_id) < 0)
    goto out;
 
   if((attr_id = H5Acreate2(image_id, "PALETTE", attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
-  
+
   /* Write the attribute with the new references */
   if(H5Awrite(attr_id, attr_type, refbuf) < 0)
    goto out;
-  
+
   /* close */
   if(H5Sclose(attr_space_id) < 0)
    goto out;
   if(H5Aclose(attr_id) < 0)
    goto out;
-  
+
   free( refbuf );
- 
+
  } /* ok_pal ==  1 */
 
   /* Close the image dataset. */
@@ -869,51 +869,51 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  hid_t      pal_id;
  hid_t      pal_space_id;
  hsize_t    pal_maxdims[2];
- 
+
  /* Open the dataset. */
  if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
- 
+
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
  has_pal = H5IM_find_palette(image_id);
- 
+
  if(has_pal ==  1)
  {
   if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
-  
+
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
-  
+
   if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
-  
+
   /* Get the reference(s) */
   if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
-  
+
   n_refs = H5Sget_simple_extent_npoints(attr_space_id);
-  
+
   dim_ref = n_refs;
-  
+
   refbuf = malloc( sizeof(hobj_ref_t) * (int)dim_ref );
-  
+
   if ( H5Aread( attr_id, attr_type, refbuf ) < 0)
    goto out;
-  
+
   /* Get the actual palette */
   if ( (pal_id = H5Rdereference( image_id, H5R_OBJECT, &refbuf[pal_number] )) < 0)
    goto out;
-  
+
   if ( (pal_space_id = H5Dget_space( pal_id )) < 0)
    goto out;
-  
+
   if ( H5Sget_simple_extent_ndims( pal_space_id ) < 0)
    goto out;
-  
+
   if ( H5Sget_simple_extent_dims( pal_space_id, pal_dims, pal_maxdims ) < 0)
    goto out;
-  
+
   /* close */
   if (H5Dclose(pal_id)<0)
    goto out;
@@ -926,23 +926,23 @@ herr_t H5IMget_palette_info( hid_t loc_id,
   if ( H5Aclose( attr_id ) < 0)
    goto out;
   free( refbuf );
-  
-   
+
+
  }
- 
+
  /* Close the image dataset. */
  if ( H5Dclose( image_id ) < 0)
   return -1;
- 
+
  return 0;
- 
+
 out:
  H5Dclose( image_id );
  H5Sclose( attr_space_id );
  H5Tclose( attr_type );
  H5Aclose( attr_id );
  return -1;
- 
+
 }
 
 
@@ -993,30 +993,30 @@ herr_t H5IMget_palette( hid_t loc_id,
  {
   if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
-  
+
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
-  
+
   if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
-  
+
   /* Get the reference(s) */
   if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
-  
+
   n_refs = H5Sget_simple_extent_npoints(attr_space_id);
-  
+
   dim_ref = n_refs;
-  
+
   refbuf = malloc( sizeof(hobj_ref_t) * (int)dim_ref );
-  
+
   if ( H5Aread( attr_id, attr_type, refbuf ) < 0)
    goto out;
-  
+
   /* Get the palette id */
   if ( (pal_id = H5Rdereference( image_id, H5R_OBJECT, &refbuf[pal_number] )) < 0)
    goto out;
-  
+
   /* Read the palette dataset */
   if ( H5Dread( pal_id, H5Dget_type(pal_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data ) < 0)
    goto out;

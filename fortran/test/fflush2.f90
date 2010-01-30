@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! Purpose:	This is the second half of a two-part test that makes sure
@@ -22,8 +22,8 @@
 
      PROGRAM FFLUSH2EXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=7), PARAMETER :: filename = "fflush1"
@@ -39,37 +39,37 @@
      !
      ! File identifiers
      !
-     INTEGER(HID_T) :: file_id 
-     
+     INTEGER(HID_T) :: file_id
+
      !
      ! Group identifier
      !
-     INTEGER(HID_T) :: gid 
+     INTEGER(HID_T) :: gid
 
      !
      ! dataset identifier
      !
      INTEGER(HID_T) :: dset_id
 
- 
+
      !
      ! data type identifier
      !
      INTEGER(HID_T) :: dtype_id
 
      !
-     !flag to check operation success 
-     !         
+     !flag to check operation success
+     !
      INTEGER     ::   error
 
      !
-     !general purpose integer 
-     !         
+     !general purpose integer
+     !
      INTEGER     ::   i, j, total_error = 0
 
      !
-     !data buffers 
-     !         
+     !data buffers
+     !
      INTEGER, DIMENSION(NX,NY) :: data_out
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      data_dims(1) = NX
@@ -78,7 +78,7 @@
      !
      !Initialize FORTRAN predifined datatypes
      !
-     CALL h5open_f(error) 
+     CALL h5open_f(error)
           CALL check("h5open_f",error,total_error)
 
      !
@@ -95,13 +95,13 @@
 
      !
      !Open the dataset
-     ! 
+     !
      CALL h5dopen_f(file_id, "/D", dset_id, error)
           CALL check("h5dopen_f",error,total_error)
 
      !
      !Get dataset's data type.
-     ! 
+     !
      CALL h5dget_type_f(dset_id, dtype_id, error)
           CALL check("h5dget_type_f",error,total_error)
 
@@ -128,14 +128,14 @@
      !
      !Open the group.
      !
-     CALL h5gopen_f(file_id, "G", gid, error)     
+     CALL h5gopen_f(file_id, "G", gid, error)
           CALL check("h5gopen_f",error,total_error)
-    
+
      !
      !In case error happens, exit.
      !
      IF (error == -1) CALL h5_exit_f (1)
-    
+
      !
      !Close the datatype
      !
@@ -166,7 +166,7 @@
      CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
      CALL h5close_f(error)
          CALL check("h5close_types_f",error,total_error)
-     
+
      ! if errors detected, exit with non-zero code.
      IF (total_error .ne. 0) CALL h5_exit_f (1)
 

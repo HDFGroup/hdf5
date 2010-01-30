@@ -39,7 +39,7 @@
  * Note that this may not be necessary on your system; many Windows systems can
  * understand Unix paths.
  */
-static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, 
+static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group,
     const void *udata, size_t udata_size, hid_t lapl_id)
 {
     hid_t         fid;
@@ -148,7 +148,7 @@ unix2win_example(void)
     if((fid=H5Fcreate("u2w/u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 #endif
     if(H5Fclose(fid) < 0) goto error;
-    
+
     /* Create the source file with an external link in Windows format */
     if((fid=H5Fcreate("unix2win.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 

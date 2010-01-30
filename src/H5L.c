@@ -151,7 +151,7 @@ static herr_t H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_create_real(const H5G_loc_t *link_loc, const char *link_name,
-    H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk, H5O_obj_create_t *ocrt_info, 
+    H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk, H5O_obj_create_t *ocrt_info,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_get_val_real(const H5O_link_t *lnk, void *buf, size_t size);
 static herr_t H5L_get_val_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
@@ -345,7 +345,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
             lapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
-done:    
+done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lmove() */
 
@@ -403,7 +403,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                 lapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
 
-done:    
+done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcopy() */
 
@@ -1586,7 +1586,7 @@ H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
     lnk.u.hard.addr = obj_loc->oloc->addr;
 
     /* Create the link */
-    if(H5L_create_real(new_loc, new_name, obj_loc->path, obj_loc->oloc->file, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0) 
+    if(H5L_create_real(new_loc, new_name, obj_loc->path, obj_loc->oloc->file, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
@@ -1629,7 +1629,7 @@ H5L_link_object(const H5G_loc_t *new_loc, const char *new_name,
     lnk.type = H5L_TYPE_HARD;
 
     /* Create the link */
-    if(H5L_create_real(new_loc, new_name, NULL, NULL, &lnk, ocrt_info, lcpl_id, lapl_id, dxpl_id) < 0) 
+    if(H5L_create_real(new_loc, new_name, NULL, NULL, &lnk, ocrt_info, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
@@ -2048,7 +2048,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5L_get_val_real
  *
- * Purpose:	Retrieve link value from a link object 
+ * Purpose:	Retrieve link value from a link object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2080,7 +2080,7 @@ H5L_get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
     else if(lnk->type >= H5L_TYPE_UD_MIN) {
         const H5L_class_t *link_class;             /* User-defined link class */
 
-        /* Get the link class for this type of link.  It's okay if the class 
+        /* Get the link class for this type of link.  It's okay if the class
          * isn't registered, though--we just can't give any more information
          * about it
          */
@@ -2671,7 +2671,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
 
     /* Do the move */
     if(H5G_traverse(src_loc, src_name, target_flags, H5L_move_cb, &udata, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")    
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

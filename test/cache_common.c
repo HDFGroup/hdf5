@@ -34,20 +34,20 @@ const char *FILENAME[] = {
     NULL
 };
 
-hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between 
-				    * cache setup and takedown.  Note 
+hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between
+				    * cache setup and takedown.  Note
 				    * that if saved_fapl_id == H5P_DEFAULT,
-				    * we assume that there is no fapl to 
+				    * we assume that there is no fapl to
 				    * close.
 				    */
 
-hid_t saved_fid = -1; /* store the file id here between cache setup 
+hid_t saved_fid = -1; /* store the file id here between cache setup
 		       * and takedown.
 		       */
 
-H5C_t * saved_cache = NULL; /* store the pointer to the instance of 
- 			       * of H5C_t created by H5Fcreate() 
-			       * here between test cache setup and 
+H5C_t * saved_cache = NULL; /* store the pointer to the instance of
+ 			       * of H5C_t created by H5Fcreate()
+			       * here between test cache setup and
 			       * shutdown.
 			       */
 
@@ -768,7 +768,7 @@ flush(H5F_t *f,
     HDassert( entry_ptr->header.addr == entry_ptr->addr );
     HDassert( entry_ptr->addr == addr );
     HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) || 
+    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
 	      ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
     HDassert( entry_ptr->header.is_dirty == entry_ptr->is_dirty );
     HDassert( entry_ptr->cache_ptr != NULL );
@@ -814,8 +814,8 @@ flush(H5F_t *f,
 
 } /* flush() */
 
-herr_t 
-pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+herr_t
+pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
            void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
@@ -823,7 +823,7 @@ pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 	   void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
@@ -831,7 +831,7 @@ nano_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
             void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
@@ -839,7 +839,7 @@ micro_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
            void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
@@ -847,7 +847,7 @@ tiny_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
             void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
@@ -855,7 +855,7 @@ small_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
              void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
@@ -863,7 +863,7 @@ medium_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
             void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
@@ -871,7 +871,7 @@ large_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
            void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
@@ -879,7 +879,7 @@ huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 	      void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
@@ -887,7 +887,7 @@ monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 }
 
 herr_t
-variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, 
+variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 	       void *thing, unsigned * flags_ptr)
 {
     HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
@@ -1167,7 +1167,7 @@ variable_size(H5F_t * f, void * thing, size_t * size_ptr)
  *
  * Purpose:	Do noting if pass is FALSE on entry.
  *
- *              Otherwise, add the specified flush operation to the 
+ *              Otherwise, add the specified flush operation to the
  *              target instance of test_entry_t.
  *
  * Return:	void
@@ -1194,10 +1194,10 @@ add_flush_op(int target_type,
     test_entry_t * target_entry_ptr;
 
     HDassert( ( 0 <= target_type ) && ( target_type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( 0 <= target_idx ) && 
+    HDassert( ( 0 <= target_idx ) &&
 	      ( target_idx <= max_indices[target_type] ) );
     HDassert( ( 0 <= op_code ) && ( op_code <= FLUSH_OP__MAX_OP ) );
-    HDassert( ( op_code != FLUSH_OP__RESIZE ) || 
+    HDassert( ( op_code != FLUSH_OP__RESIZE ) ||
 	      ( type == VARIABLE_ENTRY_TYPE ) );
     HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
     HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
@@ -1222,7 +1222,7 @@ add_flush_op(int target_type,
 	(target_entry_ptr->flush_ops)[i].size = new_size;
 
     }
-        
+
     return;
 
 } /* add_flush_op() */
@@ -1314,11 +1314,11 @@ create_pinned_entry_dependency(H5F_t * file_ptr,
  * Function:	dirty_entry
  *
  * Purpose:	Given a pointer to a cache, an entry type, and an index,
- *		dirty the target entry.  
+ *		dirty the target entry.
  *
  *		If the dirty_pin parameter is true, verify that the
- *		target entry is in the cache and is pinned.  If it 
- *		isn't, scream and die.  If it is, use the 
+ *		target entry is in the cache and is pinned.  If it
+ *		isn't, scream and die.  If it is, use the
  *		H5C_mark_pinned_entry_dirty() call to dirty it.
  *
  *		Do nothing if pass is false on entry.
@@ -1373,7 +1373,7 @@ dirty_entry(H5F_t * file_ptr,
 
                     pass = FALSE;
                     failure_mssg = "entry to be dirty pinned is not pinned.";
-		    
+
                 } else {
 
 		    mark_pinned_entry_dirty(type, idx, FALSE, (size_t)0);
@@ -1381,7 +1381,7 @@ dirty_entry(H5F_t * file_ptr,
 		}
 	    }
         } else {
-        
+
 	    protect_entry(file_ptr, type, idx);
             unprotect_entry(file_ptr, type, idx, TRUE, H5C__NO_FLAGS_SET);
 	}
@@ -1430,13 +1430,13 @@ execute_flush_op(H5F_t * file_ptr,
     HDassert( ( entry_ptr->flush_op_self_resize_in_progress ) ||
               ( entry_ptr->header.size == entry_ptr->size ) );
     HDassert( op_ptr != NULL );
-    HDassert( ( 0 <= entry_ptr->type ) && 
+    HDassert( ( 0 <= entry_ptr->type ) &&
 	      ( entry_ptr->type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( 0 <= entry_ptr->index ) && 
+    HDassert( ( 0 <= entry_ptr->index ) &&
               ( entry_ptr->index <= max_indices[entry_ptr->type] ) );
-    HDassert( ( 0 <= op_ptr->type ) && 
+    HDassert( ( 0 <= op_ptr->type ) &&
               ( op_ptr->type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( 0 <= op_ptr->idx ) && 
+    HDassert( ( 0 <= op_ptr->idx ) &&
               ( op_ptr->idx <= max_indices[op_ptr->type] ) );
     HDassert( ( op_ptr->flag == FALSE ) || ( op_ptr->flag == TRUE ) );
     HDassert( flags_ptr != NULL );
@@ -1449,17 +1449,17 @@ execute_flush_op(H5F_t * file_ptr,
 		break;
 
 	    case FLUSH_OP__DIRTY:
-		HDassert( ( entry_ptr->type != op_ptr->type ) || 
+		HDassert( ( entry_ptr->type != op_ptr->type ) ||
 			  ( entry_ptr->index != op_ptr->idx ) );
 
 		dirty_entry(file_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
 		break;
 
             case FLUSH_OP__RESIZE:
-		if ( ( entry_ptr->type == op_ptr->type ) && 
+		if ( ( entry_ptr->type == op_ptr->type ) &&
                      ( entry_ptr->index == op_ptr->idx ) ) {
 
-                    /* the flush operation is acting on the entry to 
+                    /* the flush operation is acting on the entry to
 		     * which it is attached.  Handle this here:
 		     */
                     HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
@@ -1478,18 +1478,18 @@ execute_flush_op(H5F_t * file_ptr,
 
 			entry_ptr->header.size = entry_ptr->size;
 		    }
-		    
+
 		} else {
 
 		    /* change the size of some other entry */
 
-		    resize_entry(file_ptr, op_ptr->type, op_ptr->idx, 
+		    resize_entry(file_ptr, op_ptr->type, op_ptr->idx,
                                  op_ptr->size, op_ptr->flag);
 		}
 		break;
 
 	    case FLUSH_OP__RENAME:
-		rename_entry(cache_ptr, op_ptr->type, op_ptr->idx, 
+		rename_entry(cache_ptr, op_ptr->type, op_ptr->idx,
 			     op_ptr->flag);
 		break;
 
@@ -1577,7 +1577,7 @@ entry_in_cache(H5C_t * cache_ptr,
  * 		fields.
  *
  * 		JRM -- 4/1/07
- * 		Added initialization for the new is_read_only, and 
+ * 		Added initialization for the new is_read_only, and
  * 		ro_ref_count fields.
  *
  *-------------------------------------------------------------------------
@@ -1680,12 +1680,12 @@ reset_entries(void)
  *
  * Purpose:	Given a pointer to a cache, an entry type, an index, and
  * 		a size, set the size of the target entry to the size.  Note
- * 		that at present, the type of the entry must be 
+ * 		that at present, the type of the entry must be
  * 		VARIABLE_ENTRY_TYPE.
  *
  *		If the resize_pin parameter is true, verify that the
- *		target entry is in the cache and is pinned.  If it 
- *		isn't, scream and die.  If it is, use the 
+ *		target entry is in the cache and is pinned.  If it
+ *		isn't, scream and die.  If it is, use the
  *		H5C_mark_pinned_entry_dirty() call to resize it.
  *
  *		Do nothing if pass is false on entry.
@@ -1742,14 +1742,14 @@ resize_entry(H5F_t * file_ptr,
 
                     pass = FALSE;
                     failure_mssg = "entry to be resized pinned is not pinned.";
-		    
+
                 } else {
 
 		    mark_pinned_entry_dirty(type, idx, TRUE, new_size);
 		}
 	    }
         } else {
-        
+
 	    protect_entry(file_ptr, type, idx);
 	    unprotect_entry_with_size_change(file_ptr, type, idx,
                                              H5C__SIZE_CHANGED_FLAG, new_size);
@@ -1818,12 +1818,12 @@ resize_pinned_entry(H5C_t * cache_ptr,
 
                 pass = FALSE;
                 failure_mssg = "entry to be resized is not pinned.";
-		    
+
             } else {
 
 		entry_ptr->size = new_size;
 
-	        result = H5C_resize_pinned_entry((void *)entry_ptr, 
+	        result = H5C_resize_pinned_entry((void *)entry_ptr,
 						 new_size);
 
 		if ( result != SUCCEED ) {
@@ -1884,7 +1884,7 @@ verify_clean(void)
 
             for ( j = 0; j <= max_index; j++ )
             {
-                if ( ( base_addr[j].header.is_dirty ) || 
+                if ( ( base_addr[j].header.is_dirty ) ||
 		     ( base_addr[j].is_dirty ) ) {
 
                     dirty_count++;
@@ -1953,7 +1953,7 @@ verify_entry_status(H5C_t * cache_ptr,
 
         if ( pass ) {
 
-	    in_cache = entry_in_cache(cache_ptr, expected[i].entry_type, 
+	    in_cache = entry_in_cache(cache_ptr, expected[i].entry_type,
 		                      expected[i].entry_index);
 
 	    if ( in_cache != expected[i].in_cache ) {
@@ -1975,7 +1975,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->size != expected[i].size ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                         "%d entry (%d, %d) size actualexpected = %ld/%ld.\n",
 			tag,
 	                (int)expected[i].entry_type,
@@ -1991,7 +1991,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.size != expected[i].size ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                         "%d entry (%d, %d) header size actual/expected = %ld/%ld.\n",
 			tag,
 		        (int)expected[i].entry_type,
@@ -2007,7 +2007,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->at_main_addr != expected[i].at_main_addr ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) at main addr actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2023,7 +2023,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_dirty != expected[i].is_dirty ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) is_dirty actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2039,7 +2039,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_dirty != expected[i].is_dirty ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) header is_dirty actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2055,7 +2055,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_protected != expected[i].is_protected ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) is_protected actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2071,7 +2071,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_protected != expected[i].is_protected ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) header is_protected actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2087,7 +2087,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->is_pinned != expected[i].is_pinned ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                       "%d entry (%d, %d) is_pinned actual/expected = %d/%d.\n",
 		      tag,
 		      (int)expected[i].entry_type,
@@ -2103,7 +2103,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	    if ( entry_ptr->header.is_pinned != expected[i].is_pinned ) {
 
 	        pass = FALSE;
-	        sprintf(msg, 
+	        sprintf(msg,
                   "%d entry (%d, %d) header is_pinned actual/expected = %d/%d.\n",
 		  tag,
 		  (int)expected[i].entry_type,
@@ -2278,13 +2278,13 @@ setup_cache(size_t max_cache_size,
 	          < 0 ) {
 
 	    core_file_driver_failed = TRUE;
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", fcn_name);
             }
 
         } else {
-	
+
 	    saved_fapl_id = fapl_id;
 	}
     }
@@ -2293,12 +2293,12 @@ setup_cache(size_t max_cache_size,
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* if we either aren't using the core file driver, or a create 
+    /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
      * If this fails, we are cooked.
      */
     if ( ( pass ) && ( fid < 0 ) ) {
-    
+
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
 	saved_fid = fid;
@@ -2307,7 +2307,7 @@ setup_cache(size_t max_cache_size,
 
             pass = FALSE;
             failure_mssg = "H5Fcreate() failed.";
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", fcn_name);
             }
@@ -2328,7 +2328,7 @@ setup_cache(size_t max_cache_size,
 
             pass = FALSE;
             failure_mssg = "H5Fflush() failed.";
-        
+
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
             }
@@ -2341,7 +2341,7 @@ setup_cache(size_t max_cache_size,
 
                 pass = FALSE;
                 failure_mssg = "Can't get file_ptr.";
-        
+
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
                 }
@@ -2371,15 +2371,15 @@ setup_cache(size_t max_cache_size,
 	 * and we have modified many cache routines to use a file
 	 * pointer to look up the target cache.
 	 *
-	 * Thus we now make note of the address of the instance of 
-	 * H5C_t created by the call to H5Fcreate(), set 
+	 * Thus we now make note of the address of the instance of
+	 * H5C_t created by the call to H5Fcreate(), set
 	 * file_ptr->shared->cache to NULL, call H5C_create()
 	 * to allocate a new instance of H5C_t for test purposes,
-	 * and store than new instance's address in 
+	 * and store than new instance's address in
 	 * file_ptr->shared->cache.
 	 *
 	 * On shut down, we call H5C_dest on our instance of H5C_t,
-	 * set file_ptr->shared->cache to point to the original 
+	 * set file_ptr->shared->cache to point to the original
 	 * instance, and then close the file normally.
 	 */
 
@@ -2406,7 +2406,7 @@ setup_cache(size_t max_cache_size,
                   fcn_name, mile_stone++, (int)pass);
 
     if ( pass ) {
-	    
+
 	if ( cache_ptr == NULL ) {
 
             pass = FALSE;
@@ -2433,14 +2433,14 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, 
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if ( actual_base_addr == HADDR_UNDEF ) {
 
             pass = FALSE;
 	    failure_mssg = "H5MF_alloc() failed.";
-	    
+
 	    if ( verbose ) {
                 HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
             }
@@ -2455,7 +2455,7 @@ setup_cache(size_t max_cache_size,
 	    failure_mssg = "actual_base_addr > BASE_ADDR";
 
 	    if ( verbose ) {
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", 
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
 			  fcn_name);
             }
         }
@@ -2512,7 +2512,7 @@ takedown_cache(H5F_t * file_ptr,
 
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
-	
+
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
         H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT);
@@ -2872,7 +2872,7 @@ mark_pinned_entry_dirty(int32_t type,
 	entry_ptr->is_dirty = TRUE;
 
 	if ( size_changed ) {
-	
+
 	    /* update entry size now to keep the sanity checks happy */
 	    entry_ptr->size = new_size;
 	}
@@ -2894,16 +2894,16 @@ mark_pinned_entry_dirty(int32_t type,
 		      (int)(entry_ptr->header.is_dirty));
 	    HDfprintf(stdout, "entry_ptr->header.is_pinned = %d.\n",
 		      (int)(entry_ptr->header.is_pinned));
-	    HDfprintf(stdout, 
+	    HDfprintf(stdout,
 		      "(entry_ptr->header.type != &(types[type])) = %d.\n",
 		      (int)(entry_ptr->header.type != &(types[type])));
-	    HDfprintf(stdout, 
+	    HDfprintf(stdout,
 		      "entry_ptr->size = %ld, entry_ptr->header.size = %ld.\n",
 		      (long)(entry_ptr->size), (long)(entry_ptr->header.size));
-	    HDfprintf(stdout, 
+	    HDfprintf(stdout,
 		      "entry_ptr->addr = %ld, entry_ptr->header.addr = %ld.\n",
 		      (long)(entry_ptr->addr), (long)(entry_ptr->header.addr));
-#endif 
+#endif
             pass = FALSE;
             failure_mssg = "error in H5C_mark_pinned_entry_dirty().";
 
@@ -3082,7 +3082,7 @@ rename_entry(H5C_t * cache_ptr,
 
     if ( ! done ) {
 
-        if ( ( result < 0 ) || 
+        if ( ( result < 0 ) ||
 	     ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
 	       ( entry_ptr->header.addr != new_addr ) ) ) {
 
@@ -3119,8 +3119,8 @@ rename_entry(H5C_t * cache_ptr,
  *              6/11/04
  *
  * Modifications:
- *	
- *    - Modified call to H5C_protect to pass H5C__NO_FLAGS_SET in the 
+ *
+ *    - Modified call to H5C_protect to pass H5C__NO_FLAGS_SET in the
  *      new flags parameter.
  *    						JRM -- 3/28/07
  *
@@ -3209,7 +3209,7 @@ protect_entry(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	protect_entry_ro()
  *
- * Purpose:	Do a read only protect the entry indicated by the type 
+ * Purpose:	Do a read only protect the entry indicated by the type
  * 		and index.
  *
  *		Do nothing if pass is FALSE on entry.
@@ -3220,7 +3220,7 @@ protect_entry(H5F_t * file_ptr,
  *              4/1/07
  *
  * Modifications:
- *	
+ *
  *    - None.
  *
  *-------------------------------------------------------------------------
@@ -3251,8 +3251,8 @@ protect_entry_ro(H5F_t * file_ptr,
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
-        HDassert( ( ! ( entry_ptr->is_protected ) ) || 
-		  ( ( entry_ptr->is_read_only ) && 
+        HDassert( ( ! ( entry_ptr->is_protected ) ) ||
+		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
@@ -3384,7 +3384,7 @@ unpin_entry(int32_t type,
  *		JRM -- 3/31/06
  *		Update for pinned entries.
  *
- *		JRM -- 4/1/07 
+ *		JRM -- 4/1/07
  *		Updated for new multiple read protects.
  *
  *-------------------------------------------------------------------------
@@ -3485,7 +3485,7 @@ unprotect_entry(H5F_t * file_ptr,
 		entry_ptr->ro_ref_count = 0;
 
 	    } else {
-            
+
 		entry_ptr->is_protected = FALSE;
 
 	    }
@@ -3592,14 +3592,14 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
 	HDassert ( ( ! pin_flag_set ) || ( ! (entry_ptr->is_pinned) ) );
 	HDassert ( ( ! unpin_flag_set ) || ( entry_ptr->is_pinned ) );
 	HDassert ( ( ! size_changed_flag_set ) || ( new_size > 0 ) );
-	HDassert ( ( ! size_changed_flag_set ) || 
+	HDassert ( ( ! size_changed_flag_set ) ||
 		   ( type == VARIABLE_ENTRY_TYPE ) );
 
         entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty_flag_set);
 
 	if ( size_changed_flag_set ) {
 
-            entry_ptr->is_dirty = TRUE;  
+            entry_ptr->is_dirty = TRUE;
 	    entry_ptr->size = new_size;
         }
 
@@ -3791,7 +3791,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 5) % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx + lag - 5));
 
 		    protect_entry_ro(file_ptr, type, (idx + lag - 5));
@@ -3802,7 +3802,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 6) % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx + lag - 6));
 
 		    protect_entry_ro(file_ptr, type, (idx + lag - 6));
@@ -3813,7 +3813,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 7) % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx + lag - 7));
 
 		    protect_entry_ro(file_ptr, type, (idx + lag - 7));
@@ -3824,7 +3824,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 7) % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx + lag - 7));
 
 		    unprotect_entry(file_ptr, type, (idx + lag - 7),
@@ -3836,7 +3836,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 8) % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx + lag - 8));
 
 		    unprotect_entry(file_ptr, type, (idx + lag - 8),
@@ -3848,7 +3848,7 @@ row_major_scan_forward(H5F_t * file_ptr,
 		     ( (idx + lag - 9) % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx + lag - 9));
 
 		    unprotect_entry(file_ptr, type, (idx + lag - 9),
@@ -4124,7 +4124,7 @@ row_major_scan_backward(H5F_t * file_ptr,
     if ( pass ) {
 
         cache_ptr = file_ptr->shared->cache;
-        
+
         HDassert( cache_ptr != NULL );
         HDassert( lag >= 10 );
 
@@ -4212,7 +4212,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 5) % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx - lag + 5));
 
 		    protect_entry_ro(file_ptr, type, (idx - lag + 5));
@@ -4223,7 +4223,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 6) % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx - lag + 6));
 
 		    protect_entry_ro(file_ptr, type, (idx - lag + 6));
@@ -4234,7 +4234,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 7) % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type,
 				  (idx - lag + 7));
 
 		    protect_entry_ro(file_ptr, type, (idx - lag + 7));
@@ -4245,7 +4245,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 7) % 9 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx - lag + 7));
 
 		    unprotect_entry(file_ptr, type, (idx - lag + 7),
@@ -4257,7 +4257,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 8) % 11 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx - lag + 8));
 
 		    unprotect_entry(file_ptr, type, (idx - lag + 8),
@@ -4269,7 +4269,7 @@ row_major_scan_backward(H5F_t * file_ptr,
 		     ( (idx - lag + 9) % 13 == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type,
 				  (idx - lag + 9));
 
 		    unprotect_entry(file_ptr, type, (idx - lag + 9),
@@ -4899,7 +4899,7 @@ hl_col_major_scan_backward(H5F_t * file_ptr,
     if ( pass ) {
 
         cache_ptr = file_ptr->shared->cache;
-     
+
         HDassert( cache_ptr != NULL );
         HDassert( lag > 5 );
         HDassert( max_index >= 500 );

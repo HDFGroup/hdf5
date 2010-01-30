@@ -309,14 +309,14 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
  * Programmer: Quincey Koziol
  *             Tuesday, August 16, 2005
  *
- * Modifications: Refactored code from the walk_function 
- *                EIP, Wednesday, August 16, 2006 
+ * Modifications: Refactored code from the walk_function
+ *                EIP, Wednesday, August 16, 2006
  *
  *		  Vailin Choi 12 July 2007
  *		  1. Gathered storage info for btree and heap
  *		     (groups and attributes)
  *		  2. Gathered info for attributes
- *		  
+ *
  *		  Vailin Choi 14 July 2007
  *		  Cast "num_objs" and "num_attrs" to size_t
  *		  Due to the -Mbounds problem for the pgi-32 bit compiler on indexing
@@ -389,8 +389,8 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
  * Programmer:    Quincey Koziol
  *                Tuesday, August 16, 2005
  *
- * Modifications: Refactored code from the walk_function 
- *                EIP, Wednesday, August 16, 2006 
+ * Modifications: Refactored code from the walk_function
+ *                EIP, Wednesday, August 16, 2006
  *
  *                Vailin Choi 12 July 2007
  *                1. Gathered storage info for btree and heap
@@ -813,7 +813,7 @@ print_file_info(const iter_t *iter)
 
     return 0;
 }
-        
+
 
 /*-------------------------------------------------------------------------
  * Function: print_file_metadata
@@ -841,9 +841,9 @@ static herr_t
 print_file_metadata(const iter_t *iter)
 {
     printf("Object header size: (total/unused)\n");
-    HDfprintf(stdout, "\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size, 
+    HDfprintf(stdout, "\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
                                              iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\tDatasets: %Hu/%Hu\n", iter->dset_ohdr_info.total_size, 
+    HDfprintf(stdout, "\tDatasets: %Hu/%Hu\n", iter->dset_ohdr_info.total_size,
                                                iter->dset_ohdr_info.free_size);
 
     printf("Storage information:\n");
@@ -911,7 +911,7 @@ print_group_info(const iter_t *iter)
     power = 1;
     for(u = 1; u < iter->group_nbins; u++) {
         if(iter->group_bins[u] > 0) {
-           printf("\t# of groups of size %lu - %lu: %lu\n", power, (power * 10) - 1, 
+           printf("\t# of groups of size %lu - %lu: %lu\n", power, (power * 10) - 1,
                     iter->group_bins[u]);
            total += iter->group_bins[u];
         } /* end if */
@@ -961,7 +961,7 @@ print_attr_info(const iter_t *iter)
     power = 1;
     for(u = 1; u < iter->attr_nbins; u++) {
         if(iter->attr_bins[u] > 0) {
-           printf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1, 
+           printf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
                     iter->attr_bins[u]);
            total += iter->attr_bins[u];
         } /* end if */
@@ -1012,7 +1012,7 @@ print_dataset_info(const iter_t *iter)
         total = 0;
         for(u = 0; u < SIZE_SMALL_DSETS; u++) {
             if(iter->small_dset_dims[u] > 0) {
-                printf("\t\t# of dataset dimensions of size %u: %lu\n", u, 
+                printf("\t\t# of dataset dimensions of size %u: %lu\n", u,
                          iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
@@ -1030,7 +1030,7 @@ print_dataset_info(const iter_t *iter)
             power = 1;
             for(u = 1; u < iter->dset_dim_nbins; u++) {
                 if(iter->dset_dim_bins[u] > 0) {
-                    printf("\t\t# of datasets of size %lu - %lu: %lu\n", power, (power * 10) - 1, 
+                    printf("\t\t# of datasets of size %lu - %lu: %lu\n", power, (power * 10) - 1,
                              iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
@@ -1067,7 +1067,7 @@ print_dataset_info(const iter_t *iter)
                 H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
                 printf("\tDataset datatype #%u:\n", u);
                 printf("\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count, iter->dset_type_info[u].named);
-                printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size, 
+                printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
                         (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
                 H5Tclose(iter->dset_type_info[u].tid);
                 total += iter->dset_type_info[u].count;
@@ -1143,7 +1143,7 @@ print_object_statistics(const char *name)
 /*-------------------------------------------------------------------------
  * Function: print_statistics
  *
- * Purpose: Prints statistics 
+ * Purpose: Prints statistics
  *
  * Return: Success: 0
  *
@@ -1159,7 +1159,7 @@ print_object_statistics(const char *name)
 static void
 print_statistics(const char *name, const iter_t *iter)
 {
-    if(display_object) 
+    if(display_object)
         print_object_statistics(name);
     else
         print_file_statistics(iter);
@@ -1199,7 +1199,7 @@ main(int argc, const char *argv[])
 
     /* Initialize iter structure */
     iter_init(&iter, fid);
-    
+
     /* Get storge info for SOHM's btree/list/heap and superblock extension */
     if(H5Fget_info(fid, &finfo) < 0)
 	warn_msg(progname, "Unable to retrieve SOHM info\n");

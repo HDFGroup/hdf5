@@ -229,7 +229,7 @@ test_h5o_close(void)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 }
-   
+
 
 /****************************************************************
 **
@@ -834,7 +834,7 @@ test_h5o_link(void)
         /* Read the data back */
         ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
         CHECK(ret, FAIL, "H5Dread");
-        
+
         /* Verify the data */
         for(i = 0; i < TEST6_DIM1; i++)
             for(j = 0; j < TEST6_DIM2; j++)
@@ -878,7 +878,7 @@ test_h5o_link(void)
         for(i = 0; i < TEST6_DIM1; i++)
             for(j = 0; j < TEST6_DIM2; j++)
                 VERIFY(wdata[i][j], rdata[i][j], "H5Dread");
-            
+
         /* Close open IDs */
         ret = H5Dclose(dset_id);
         CHECK(ret, FAIL, "H5Dclose");

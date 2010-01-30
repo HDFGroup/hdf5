@@ -70,7 +70,7 @@ static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned *cache_flags_ptr);
 static herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
-    H5SM_index_header_t *header, const H5O_shared_t * mesg, 
+    H5SM_index_header_t *header, const H5O_shared_t * mesg,
     unsigned *cache_flags, void ** /*out*/ encoded_mesg);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 static herr_t H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
@@ -1999,7 +1999,7 @@ H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
 herr_t
 H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const H5O_shared_t *sh_mesg, hsize_t *ref_count)
-{    
+{
     H5HF_t *fheap = NULL;               /* Fractal heap that contains shared messages */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
     H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
@@ -2466,7 +2466,7 @@ done:
  *
  * Purpose:     Loop through the master SOHM table (if there is one) to:
  *			1. collect storage used for header
- *                      1. collect storage used for B-tree and List 
+ *                      1. collect storage used for B-tree and List
  *			   (include btree storage used by huge objects in fractal heap)
  *                      2. collect fractal heap storage
  *

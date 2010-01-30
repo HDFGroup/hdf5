@@ -112,7 +112,7 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
  * Function:    H5HF_size
  *
  * Purpose:     Retrieve storage info for:
- *			1. fractal heap 
+ *			1. fractal heap
  *			2. btree storage used by huge objects in fractal heap
  *			3. free space storage info
  *

@@ -368,7 +368,7 @@ void null_dataset(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
- 
+
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 

@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,10 +11,10 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! This file contains the FORTRAN90 tests for H5LT 
+! This file contains the FORTRAN90 tests for H5LT
 !
 
 program table_test
@@ -22,23 +22,23 @@ program table_test
 call test_table1()
 
 
-end program table_test 
+end program table_test
 
 
 !-------------------------------------------------------------------------
-! test_table1 
+! test_table1
 !-------------------------------------------------------------------------
 
 subroutine test_table1()
 
-use H5TB ! module of H5TB 
+use H5TB ! module of H5TB
 use HDF5 ! module of HDF5 library
 
 implicit none
 
 character(len=8), parameter :: filename = "f1tab.h5"   ! File name
 character(LEN=5), parameter :: dsetname1 = "dset1"     ! Dataset name
-integer(HID_T) :: file_id                              ! File identifier 
+integer(HID_T) :: file_id                              ! File identifier
 integer(HSIZE_T), parameter :: nfields  = 4;           ! nfields
 integer(HSIZE_T), parameter :: nrecords = 5;           ! nrecords
 character(LEN=6), dimension(nfields) :: field_names    ! field names
@@ -49,7 +49,7 @@ integer, parameter :: compress = 0                     ! compress
 integer            :: errcode                          ! Error flag
 integer            :: i                                ! general purpose integer
 integer(SIZE_T)    :: type_size                        ! Size of the datatype
-integer(SIZE_T)    :: type_sizec                       ! Size of the character datatype 
+integer(SIZE_T)    :: type_sizec                       ! Size of the character datatype
 integer(SIZE_T)    :: type_sizei                       ! Size of the integer datatype
 integer(SIZE_T)    :: type_sized                       ! Size of the double precision datatype
 integer(SIZE_T)    :: type_sizer                       ! Size of the real datatype
@@ -84,7 +84,7 @@ end do
 !
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -142,9 +142,9 @@ call test_begin(' Make table                     ')
 
 
 call h5tbmake_table_f(dsetname1,&
-                      file_id,& 
+                      file_id,&
                       dsetname1,&
-                      nfields,& 
+                      nfields,&
                       nrecords,&
                       type_size,&
                       field_names,&
@@ -163,7 +163,7 @@ call passed()
 call test_begin(' Read/Write field by name       ')
 
 call h5tbwrite_field_name_f(file_id,dsetname1,field_names(1),start,nrecords,type_sizec,&
-                            bufs,errcode) 
+                            bufs,errcode)
 
 call h5tbwrite_field_name_f(file_id,dsetname1,field_names(2),start,nrecords,type_sizei,&
                             bufi,errcode)
@@ -236,7 +236,7 @@ do i = 1, nrecords
   endif
 end do
 
-                     
+
 call passed()
 
 
@@ -247,7 +247,7 @@ call passed()
 call test_begin(' Read/Write field by index      ')
 
 call h5tbwrite_field_index_f(file_id,dsetname1,1,start,nrecords,type_sizec,&
-                            bufs,errcode) 
+                            bufs,errcode)
 
 call h5tbwrite_field_index_f(file_id,dsetname1,2,start,nrecords,type_sizei,&
                             bufi,errcode)
@@ -320,12 +320,12 @@ do i = 1, nrecords
   endif
 end do
 
-                     
+
 call passed()
 
 
 !-------------------------------------------------------------------------
-! Insert field 
+! Insert field
 ! we insert a field callsed "field5" with the same type and buffer as field 4 (Real)
 !-------------------------------------------------------------------------
 
@@ -362,12 +362,12 @@ call passed()
 
 
 !-------------------------------------------------------------------------
-! Gets the number of records and fields 
+! Gets the number of records and fields
 !-------------------------------------------------------------------------
 
 call test_begin(' Get table info                 ')
 
-call h5tbget_table_info_f(file_id,dsetname1,nfieldsr,nrecordsr,errcode ) 
+call h5tbget_table_info_f(file_id,dsetname1,nfieldsr,nrecordsr,errcode )
 
 if ( nfieldsr .ne. nfields .and. nrecordsr .ne. nrecords ) then
  print *, 'h5tbget_table_info_f return error'
@@ -384,7 +384,7 @@ call passed()
 !call test_begin(' Get fields info                ')
 
 !call h5tbget_field_info_f(file_id,dsetname1,nfields,field_namesr,field_sizesr,&
-!						  field_offsetr,type_sizeout,errcode ) 
+!						  field_offsetr,type_sizeout,errcode )
 
 
 !call passed()
@@ -416,17 +416,17 @@ end subroutine test_table1
 
 
 !-------------------------------------------------------------------------
-! test_begin 
+! test_begin
 !-------------------------------------------------------------------------
 
 subroutine test_begin(string)
 character(LEN=*), intent(IN) :: string
 write(*, fmt = '(14a)', advance = 'no') string
-write(*, fmt = '(40x,a)', advance = 'no') ' ' 
+write(*, fmt = '(40x,a)', advance = 'no') ' '
 end subroutine test_begin
 
 !-------------------------------------------------------------------------
-! passed 
+! passed
 !-------------------------------------------------------------------------
 
 subroutine passed()

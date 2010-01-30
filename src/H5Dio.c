@@ -164,9 +164,9 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which 
-     * doesn't support this feature. 
-     */ 
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
     if(!buf)
         buf = &fake_char;
 
@@ -254,11 +254,11 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
     if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
-    
+
     /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which 
-     * doesn't support this feature. 
-     */ 
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
     if(!buf)
         buf = &fake_char;
 

@@ -61,47 +61,47 @@ main(void)
     /*
      * Check if group /G1 exists in the file.
      */
-    if(H5Lexists(file, "/G1", H5P_DEFAULT) !=FALSE) 
+    if(H5Lexists(file, "/G1", H5P_DEFAULT) !=FALSE)
     printf("Group /G1 exists in the file\n");
-    
+
     /*
-     * Check that group G2/G3 exists in /G1 and if not create it using 
+     * Check that group G2/G3 exists in /G1 and if not create it using
      * intermediate group creation property.
      */
     g1_id = H5Gopen2(file, "/G1", H5P_DEFAULT);
 /* Next commented call causes error stack to be printed out; the next one
- * works fine; is it a bug or a feature? EIP 04-25-07 
+ * works fine; is it a bug or a feature? EIP 04-25-07
 */
-/*  if (H5Lexists(g1_id, "G2/G3", H5P_DEFAULT) !=TRUE) { */ 
-    if (H5Lexists(g1_id, "G2", H5P_DEFAULT) !=TRUE) {  
-       
+/*  if (H5Lexists(g1_id, "G2/G3", H5P_DEFAULT) !=TRUE) { */
+    if (H5Lexists(g1_id, "G2", H5P_DEFAULT) !=TRUE) {
+
     grp_crt_plist = H5Pcreate(H5P_LINK_CREATE);
 
     /* Set flag for intermediate group creation */
     status = H5Pset_create_intermediate_group(grp_crt_plist, TRUE);
     g3_id = H5Gcreate2(g1_id, "G2/G3", grp_crt_plist, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(g3_id);
-    } 
+    }
     H5Gclose(g1_id);
 
 
     /* Now check if group /G1/G2 exists in the file, then open it and print
      * its members names
      */
-    if (H5Lexists(file, "/G1/G2", H5P_DEFAULT)) { 
+    if (H5Lexists(file, "/G1/G2", H5P_DEFAULT)) {
 
     	g2_id = H5Gopen2(file, "/G1/G2", H5P_DEFAULT);
     	status = H5Gget_info(g2_id, &g2_info);
     	printf("Group /G1/G2 has %d member(s)\n", (int)g2_info.nlinks);
 
     	for (i=0; i < (int)g2_info.nlinks; i++) {
-    	H5Lget_name_by_idx(g2_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)i, 
+    	H5Lget_name_by_idx(g2_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)i,
     	                   name, 3, H5P_DEFAULT);
     	printf("Object's name is %s\n", name);
 
     	}
     H5Gclose(g2_id);
-    } 
+    }
     H5Fclose(file);
     return 0;
 }

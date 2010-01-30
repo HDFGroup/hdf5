@@ -972,7 +972,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
   size_t c_bufsize;
   char *c_buf=NULL;           /* Buffer to hold C string */
   int_f ret_value=0;          /* Return value */
-    
+
   c_bufsize = (size_t)*bufsize+1;
   /*
    * Allocate buffer to hold name of an attribute
@@ -983,7 +983,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
   /*
    * Call H5Aget_name function
    */
-  
+
   if ((ret_value = (int_f)H5Aget_name((hid_t)*attr_id, c_bufsize, c_buf)) < 0)
     HGOTO_DONE(FAIL);
 
@@ -1022,7 +1022,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_create_plist_c
- * Purpose:     Call H5Aget_create_plist 
+ * Purpose:     Call H5Aget_create_plist
  * Inputs:      attr_id - identifier of an attribute
  * Outputs:     creation_prop_id - Identifier for the attribute’s creation property
  * Returns:     0 on success, -1 on failure
@@ -1046,8 +1046,8 @@ done:
 /*----------------------------------------------------------------------------
  * Name:      h5arename_by_name_c
  * Purpose:   Calls H5Arename_by_name
- * Inputs:    loc_id        - Object identifier 
- *            obj_name      - Name of object, relative to location, 
+ * Inputs:    loc_id        - Object identifier
+ *            obj_name      - Name of object, relative to location,
  *                             whose attribute is to be renamed
  *            obj_name_len      - Object name length
  *            old_attr_name     - Prior attribute name
@@ -1063,9 +1063,9 @@ done:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5arename_by_name_c( hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
+nh5arename_by_name_c( hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		      _fcd old_attr_name, size_t_f *old_attr_namelen,
-		      _fcd new_attr_name, size_t_f *new_attr_namelen, 
+		      _fcd new_attr_name, size_t_f *new_attr_namelen,
 		      hid_t_f *lapl_id )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1076,9 +1076,9 @@ nh5arename_by_name_c( hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
       * Convert FORTRAN name to C name
       */
     if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);  
+      HGOTO_DONE(FAIL);
     if((c_old_attr_name = HD5f2cstring(old_attr_name, (size_t)*old_attr_namelen)) == NULL)
-      HGOTO_DONE(FAIL);  
+      HGOTO_DONE(FAIL);
     if((c_new_attr_name = HD5f2cstring(new_attr_name, (size_t)*new_attr_namelen)) == NULL)
       HGOTO_DONE(FAIL);
 
@@ -1132,15 +1132,15 @@ done:
     return ret_value;
 }
 /*----------------------------------------------------------------------------
- * Name:        h5adelete_by_name_c 
- * Purpose:     Call h5adelete_by_name to remove an attribute from a specified location 
+ * Name:        h5adelete_by_name_c
+ * Purpose:     Call h5adelete_by_name to remove an attribute from a specified location
  * Inputs:      loc_id - identifer for object to which attribute is attached
  *              obj_name - object identifier
  *              obj_namelen - name length
  *              attr_name - name of the attribute
  *              attr_namelen - name length
  *              lapl_id - link access property list
- *              
+ *
  * Outputs:     N/A
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
@@ -1158,7 +1158,7 @@ nh5adelete_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fc
       * Convert FORTRAN name to C name
       */
     if((c_obj_name = HD5f2cstring(obj_name, (size_t)*obj_namelen)) == NULL)
-      HGOTO_DONE(FAIL);  
+      HGOTO_DONE(FAIL);
     if((c_attr_name = HD5f2cstring(attr_name, (size_t)*attr_namelen)) == NULL)
       HGOTO_DONE(FAIL);
 
@@ -1176,15 +1176,15 @@ done:
     return ret_value;
 }
 /*----------------------------------------------------------------------------
- * Name:        h5adelete_by_idx_c 
- * Purpose:     Call h5adelete_by_idx 
- * Inputs:      loc_id - Location or object identifier; may be dataset or group 
+ * Name:        h5adelete_by_idx_c
+ * Purpose:     Call h5adelete_by_idx
+ * Inputs:      loc_id - Location or object identifier; may be dataset or group
  *              obj_name - object identifier
  *              obj_namelen - name length
  *              attr_name - name of the attribute
  *              attr_namelen - name length
  *              lapl_id - link access property list
- *              
+ *
  * Outputs:     N/A
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
@@ -1192,7 +1192,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
+nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		     int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1210,7 +1210,7 @@ nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
     c_order = (H5_iter_order_t)*order;
 
      /*
-      * Call H5Adelete_by_name function. 
+      * Call H5Adelete_by_name function.
       */
 
     if(H5Adelete_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n, (hid_t)*lapl_id) < 0)
@@ -1244,13 +1244,13 @@ done:
  *                          H5_ITER_N	     - Number of iteration orders
  *
  *            n  - Attribute’s position in index
- *      attr_id  - Attribute identifier 
+ *      attr_id  - Attribute identifier
  *         size  - Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
- *   
+ *
  *     lapl_id   - Link access property list
  *      hdferr   - Error code:
  *                            Returns attribute name size, -1 if fail
- *              
+ *
  * Outputs:     name - Attribute name
  *
  * Returns:     Size of buffer on success, -1 on failure
@@ -1259,8 +1259,8 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		       int_f *idx_type, int_f *order, hsize_t_f *n, _fcd name, 
+nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+		       int_f *idx_type, int_f *order, hsize_t_f *n, _fcd name,
 		       size_t_f *size, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1282,7 +1282,7 @@ nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
     /*
      * Allocate buffer to hold name of an attribute
      */
-    c_buf_size = (size_t)*size + 1; 
+    c_buf_size = (size_t)*size + 1;
     c_buf = (char *)HDmalloc(c_buf_size);
     if (c_buf == NULL) return ret_value;
      /*
@@ -1308,7 +1308,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_by_idx_c
- * Purpose:     Call H5Aopen_by_idx 
+ * Purpose:     Call H5Aopen_by_idx
  * Inputs:   loc_id    - Object identifier
  *            obj_name - Name of object to which attribute is attached
  *         obj_namelen - name length
@@ -1324,7 +1324,7 @@ done:
  *                          H5_ITER_DEC      - Decreasing order
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
- *                
+ *
  *                   n - Attribute’s position in index
  *             aapl_id - Attribute access property list
  *             lapl_id - Link access property list
@@ -1335,7 +1335,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
+nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		   int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1367,8 +1367,8 @@ done:
  * Name:        h5aget_info_c
  * Purpose:     Call H5Aget_info
  * Inputs:     loc_id  - Object identifier
- * Outputs:   
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute 
+ * Outputs:
+ *        corder_valid - Indicates whether the the creation order data is valid for this attribute
  *              corder - Is a positive integer containing the creation order of the attribute
  *                cset - Indicates the character set used for the attribute’s name
  *           data_size - indicates the size, in the number of characters, of the attribute
@@ -1379,7 +1379,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder, 
+nh5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder,
 		int_f *cset, hsize_t_f *data_size )
 {
 
@@ -1424,11 +1424,11 @@ done:
  *                          H5_ITER_DEC      - Decreasing order
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
- *                
+ *
  *                   n - Attribute’s position in index
  *             lapl_id - Link access property list
- * Outputs:   
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute 
+ * Outputs:
+ *        corder_valid - Indicates whether the the creation order data is valid for this attribute
  *              corder - Is a positive integer containing the creation order of the attribute
  *                cset - Indicates the character set used for the attribute’s name
  *           data_size - indicates the size, in the number of characters, of the attribute
@@ -1439,9 +1439,9 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
+nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
-		int_f *corder_valid, int_f *corder, 
+		int_f *corder_valid, int_f *corder,
 		int_f *cset, hsize_t_f *data_size )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1487,8 +1487,8 @@ done:
  *           attr_name - Attribute name
  *        attr_namelen - attribute name length
  *             lapl_id - Link access property list
- * Outputs:   
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute 
+ * Outputs:
+ *        corder_valid - Indicates whether the the creation order data is valid for this attribute
  *              corder - Is a positive integer containing the creation order of the attribute
  *                cset - Indicates the character set used for the attribute’s name
  *           data_size - indicates the size, in the number of characters, of the attribute
@@ -1501,7 +1501,7 @@ done:
 int_f
 nh5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 			_fcd attr_name, size_t_f *attr_namelen, hid_t_f *lapl_id,
-			int_f *corder_valid, int_f *corder, 
+			int_f *corder_valid, int_f *corder,
 			int_f *cset, hsize_t_f *data_size )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1553,8 +1553,8 @@ done:
  *         aapl_id - Attribute access property list identifier (Currently not used.)
  *         lapl_id - Link access property list
  *
- * Outputs:   
- *            attr - an attribute identifier 
+ * Outputs:
+ *            attr - an attribute identifier
  *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
@@ -1596,7 +1596,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aexists_c
- * Purpose:     CAll h5aexists 
+ * Purpose:     CAll h5aexists
  * Inputs:
  *             obj_id - Object identifier
  *          attr_name - Attribute name
@@ -1633,7 +1633,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aexists_by_name_c
- * Purpose:     CAll H5Aexists_by_name 
+ * Purpose:     CAll H5Aexists_by_name
  * Inputs:
  *     loc_id - Location identifier
  *   obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
@@ -1647,7 +1647,7 @@ done:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, 
+nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
 		      hid_t_f *lapl_id, int_f *attr_exists)
 {
   char *c_obj_name = NULL;          /* Buffer to hold object name C string */
@@ -1678,7 +1678,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_by_name_c
- * Purpose:     Call H5Aopen_by_name 
+ * Purpose:     Call H5Aopen_by_name
  * Inputs:
  *     loc_id - Location identifier
  *   obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
@@ -1693,7 +1693,7 @@ done:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, 
+nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
 		    hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id)
 {
   char *c_obj_name = NULL;          /* Buffer to hold object name C string */
@@ -1738,7 +1738,7 @@ nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd 
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5arename_c( hid_t_f *loc_id, 
+nh5arename_c( hid_t_f *loc_id,
 		      _fcd old_attr_name, size_t_f *old_attr_namelen,
 		      _fcd new_attr_name, size_t_f *new_attr_namelen)
 {
@@ -1747,9 +1747,9 @@ nh5arename_c( hid_t_f *loc_id,
   int_f ret_value=0;          /* Return value */
   /*
    * Convert FORTRAN name to C name
-   */ 
+   */
   if((c_old_attr_name = HD5f2cstring(old_attr_name, (size_t)*old_attr_namelen)) == NULL)
-    HGOTO_DONE(FAIL);  
+    HGOTO_DONE(FAIL);
   if((c_new_attr_name = HD5f2cstring(new_attr_name, (size_t)*new_attr_namelen)) == NULL)
     HGOTO_DONE(FAIL);
 

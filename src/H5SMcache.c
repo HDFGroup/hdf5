@@ -233,7 +233,7 @@ done:
         (void)H5SM_table_dest(f, table);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_table_load() */ 
+} /* end H5SM_table_load() */
 
 
 /*-------------------------------------------------------------------------

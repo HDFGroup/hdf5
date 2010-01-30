@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This file contains FORTRAN90 interfaces for H5I functions
@@ -19,17 +19,17 @@
       MODULE H5I
 
         USE H5GLOBAL
-      
+
       CONTAINS
 
 !----------------------------------------------------------------------
-! Name:		h5iget_type_f 
+! Name:		h5iget_type_f
 !
-! Purpose:	Retrieves the type of an object.  	
+! Purpose:	Retrieves the type of an object.
 !
-! Inputs: 	obj_id		- object identifier 
-! Outputs:  
-!		type		- type of the object, possible values:   
+! Inputs: 	obj_id		- object identifier
+! Outputs:
+!		type		- type of the object, possible values:
 !				  H5I_FILE_F
 !				  H5I_GROUP_F
 !				  H5I_DATATYPE_F
@@ -37,22 +37,22 @@
 !				  H5I_DATASET_F
 !				  H5I_ATTR_F
 !				  H5I_BADID_F
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  March 5, 2001 
+!			port).  March 5, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
+          SUBROUTINE h5iget_type_f(obj_id, type, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -60,8 +60,8 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
-            INTEGER, INTENT(OUT) :: type !type of an object. 
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier
+            INTEGER, INTENT(OUT) :: type !type of an object.
                                          !possible values are:
                                          !H5I_FILE_F
                                          !H5I_GROUP_F
@@ -81,7 +81,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IGET_TYPE_C':: h5iget_type_c
               !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(OUT) :: type
               END FUNCTION h5iget_type_c
             END INTERFACE
@@ -89,39 +89,39 @@
           END SUBROUTINE h5iget_type_f
 
 !----------------------------------------------------------------------
-! Name:		h5iget_name_f 
+! Name:		h5iget_name_f
 !
-! Purpose: 	Gets a name of an object specified by its idetifier.  
+! Purpose: 	Gets a name of an object specified by its idetifier.
 !
-! Inputs:  
+! Inputs:
 !		obj_id		- attribute identifier
 !		buf_size	- size of a buffer to read name in
-! Outputs:  
+! Outputs:
 !		buf		- buffer to read name in, name will be truncated if
 !                                 buffer is not big enough
 !               name_size       - name size
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!				NONE			
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		March 12, 2003
 !
-! Modifications: 	
+! Modifications:
 !
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr) 
+          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5iget_name_f
 !DEC$endif
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier 
-            INTEGER(SIZE_T), INTENT(IN) :: buf_size  ! Buffer size 
+            INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier
+            INTEGER(SIZE_T), INTENT(IN) :: buf_size  ! Buffer size
             CHARACTER(LEN=*), INTENT(OUT) :: buf   ! Buffer to hold object name
             INTEGER(SIZE_T), INTENT(OUT) :: name_size ! Actual name size
             INTEGER, INTENT(OUT) :: hdferr         ! Error code:
@@ -152,23 +152,23 @@
 !
 ! Purpose:	Increments the reference count of an ID
 !
-! Inputs: 	obj_id		- object identifier 
-! Outputs:  
+! Inputs: 	obj_id		- object identifier
+! Outputs:
 !		ref_count       - Current reference count of the ID
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Quincey Koziol
-!		December  9, 2003	
+!		December  9, 2003
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-          SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr) 
+          SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -176,7 +176,7 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -189,7 +189,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IINC_REF_C':: h5iinc_ref_c
               !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5iinc_ref_c
             END INTERFACE
@@ -201,23 +201,23 @@
 !
 ! Purpose:	Decrements the reference count of an ID
 !
-! Inputs: 	obj_id		- object identifier 
-! Outputs:  
+! Inputs: 	obj_id		- object identifier
+! Outputs:
 !		ref_count       - Current reference count of the ID
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Quincey Koziol
-!		December  9, 2003	
+!		December  9, 2003
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-          SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr) 
+          SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -225,7 +225,7 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -238,7 +238,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IDEC_REF_C':: h5idec_ref_c
               !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5idec_ref_c
             END INTERFACE
@@ -250,23 +250,23 @@
 !
 ! Purpose:	Retrieves the reference count of an ID
 !
-! Inputs: 	obj_id		- object identifier 
-! Outputs:  
+! Inputs: 	obj_id		- object identifier
+! Outputs:
 !		ref_count       - Current reference count of the ID
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
 ! Programmer:	Quincey Koziol
-!		December  9, 2003	
+!		December  9, 2003
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr) 
+          SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -274,7 +274,7 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -287,7 +287,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IGET_REF_C':: h5iget_ref_c
               !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER(HID_T), INTENT(IN) :: obj_id
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5iget_ref_c
             END INTERFACE
@@ -299,12 +299,12 @@
 !
 ! Purpose:	Obtains file identifier from the object identifier
 !
-! Inputs: 	obj_id		- object identifier 
-! Outputs:       
+! Inputs: 	obj_id		- object identifier
+! Outputs:
 !		file_id         - file identifier
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !				NONE
 !
@@ -313,9 +313,9 @@
 !
 ! Modifications:
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr) 
+          SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -323,7 +323,7 @@
 !DEC$endif
 !
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN)  :: obj_id   ! Object identifier 
+            INTEGER(HID_T), INTENT(IN)  :: obj_id   ! Object identifier
             INTEGER(HID_T), INTENT(OUT) :: file_id  ! File identifier
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -333,8 +333,8 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IGET_FILE_ID_C':: h5iget_file_id_c
               !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN)  :: obj_id 
-              INTEGER(HID_T), INTENT(OUT) :: file_id 
+              INTEGER(HID_T), INTENT(IN)  :: obj_id
+              INTEGER(HID_T), INTENT(OUT) :: file_id
               END FUNCTION h5iget_file_id_c
             END INTERFACE
             hdferr = h5iget_file_id_c(obj_id, file_id)

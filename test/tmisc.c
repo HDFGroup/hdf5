@@ -3989,7 +3989,7 @@ test_misc23(void)
 
     status = H5Tcommit2(group_id, "B13/C12/dtype", tmp_id, create_id, H5P_DEFAULT, access_id);
     CHECK(status, FAIL, "H5Tcommit2");
- 
+
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
 

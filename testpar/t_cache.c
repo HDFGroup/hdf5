@@ -98,8 +98,8 @@ long local_pins		   = 0;
  *		value must be positive, and may not be larger than len.
  *
  *		The field exists to allow us change the sizes of entries
- *		in the cache without upsetting the server.  This value 
- *		is only used locally, and is never sent to the server.  
+ *		in the cache without upsetting the server.  This value
+ *		is only used locally, and is never sent to the server.
  *
  *	ver:	Version number of the entry.  This number is initialize
  *		to zero, and incremented each time the entry is modified.
@@ -1416,7 +1416,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
                 HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
                          world_mpi_rank, fcn_name,
-                         mssg_ptr->src, 
+                         mssg_ptr->src,
 			target_index,
 			data[target_index].base_addr);
             }
@@ -2087,8 +2087,8 @@ load_datum(H5F_t UNUSED *f,
  * 		JRM -- 7/11/06
  * 		Modified function to return the local_len field instead
  * 		of the len field.  These two fields usually contain the
- * 		same value, but if the size of an entry is changed, we 
- * 		store the altered size in local_len without changing 
+ * 		same value, but if the size of an entry is changed, we
+ * 		store the altered size in local_len without changing
  * 		len.  Note that local_len must be positive, and may
  * 		not exceed len.
  *
@@ -2174,7 +2174,7 @@ expunge_entry(H5C_t * cache_ptr,
 
     if ( nerrors == 0 ) {
 
-        result = H5AC_expunge_entry(file_ptr, -1, &(types[0]), 
+        result = H5AC_expunge_entry(file_ptr, -1, &(types[0]),
 			            entry_ptr->header.addr);
 
         if ( result < 0 ) {
@@ -2678,7 +2678,7 @@ lock_and_unlock_random_entry(H5C_t * cache_ptr,
  * Modifications:
  *
  * 		JRM -- 7/11/06
- * 		Modified asserts to handle the new local_len field in 
+ * 		Modified asserts to handle the new local_len field in
  * 		datum.
  *
  *****************************************************************************/
@@ -2970,7 +2970,7 @@ pin_protected_entry(int32_t idx,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, 
+	        HDfprintf(stdout,
 			  "%d:%s: Error in H5AC_pin_protected entry().\n",
 	                  world_mpi_rank, fcn_name);
             }
@@ -2985,7 +2985,7 @@ pin_protected_entry(int32_t idx,
 	} else {
 
 	    entry_ptr->local_pinned = TRUE;
- 
+
 	    local_pins++;
 
 	}
@@ -3015,7 +3015,7 @@ pin_protected_entry(int32_t idx,
  *
  * Modifications:
  *
- *              7/11/06 -- JRM 
+ *              7/11/06 -- JRM
  *              Added support for the phony_len field in datum.
  *
  *****************************************************************************/
@@ -3145,7 +3145,7 @@ resize_entry(int32_t idx,
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
         HDassert( !(entry_ptr->header.is_protected) );
         HDassert( !(entry_ptr->locked) );
-	HDassert( ( entry_ptr->global_pinned ) && 
+	HDassert( ( entry_ptr->global_pinned ) &&
 		  ( ! entry_ptr->local_pinned ) );
 	HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
 	          ( entry_ptr->header.size == entry_ptr->local_len ) );
@@ -4788,7 +4788,7 @@ smoke_check_4(void)
 
 		/* Insert some entries pinned, and then unpin them
 		 * immediately.  We have tested pinned entries elsewhere,
-		 * so it should be sufficient to verify that the 
+		 * so it should be sufficient to verify that the
 		 * entries are in fact pinned (which unpin_entry() should do).
 		 */
                 insert_entry(cache_ptr, file_ptr, i, H5C__PIN_ENTRY_FLAG);
@@ -5010,7 +5010,7 @@ smoke_check_4(void)
  * Modifications:
  *
  *		JRM -- 7/12/06
- *		Added test code for H5AC_expunge_entry() and 
+ *		Added test code for H5AC_expunge_entry() and
  *		H5AC_resize_pinned_entry().
  *
  *****************************************************************************/
@@ -5210,7 +5210,7 @@ smoke_check_5(void)
  *              H5AC level, so all calls have to go through H5AC.  Thus it
  *              is more convenient to test trace file capabilities in the
  *              parallel cache test which works at the H5AC level, instead
- *              of in the serial test code which does everything at the 
+ *              of in the serial test code which does everything at the
  *              H5C level.
  *
  *              The function must test trace file output in the following
@@ -5240,9 +5240,9 @@ smoke_check_5(void)
  * Modifications:
  *
  *		JRM -- 7/11/06
- *		Updated fro H5AC_expunge_entry() and 
+ *		Updated fro H5AC_expunge_entry() and
  *		H5AC_resize_pinned_entry().
- *	
+ *
  *****************************************************************************/
 
 hbool_t
@@ -5338,12 +5338,12 @@ trace_file_check(void)
 
             config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config) 
+            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config)
                  != SUCCEED ) {
 
 		nerrors++;
-	        HDfprintf(stdout, 
-                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", 
+	        HDfprintf(stdout,
+                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n",
                         world_mpi_rank, fcn_name);
 
             } else {
@@ -5351,11 +5351,11 @@ trace_file_check(void)
                 config.open_trace_file = TRUE;
 		strcpy(config.trace_file_name, "t_cache_trace.txt");
 
-                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config) 
+                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config)
                      != SUCCEED ) {
 
 		    nerrors++;
-	            HDfprintf(stdout, 
+	            HDfprintf(stdout,
                          "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
                           world_mpi_rank, fcn_name);
                 }
@@ -5392,7 +5392,7 @@ trace_file_check(void)
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n", 
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -5401,12 +5401,12 @@ trace_file_check(void)
 
             config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config) 
+            if ( H5AC_get_cache_auto_resize_config(cache_ptr, &config)
                  != SUCCEED ) {
 
 		nerrors++;
-	        HDfprintf(stdout, 
-                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n", 
+	        HDfprintf(stdout,
+                        "%d:%s: H5AC_get_cache_auto_resize_config() failed.\n",
                         world_mpi_rank, fcn_name);
 
             } else {
@@ -5415,11 +5415,11 @@ trace_file_check(void)
                 config.close_trace_file = TRUE;
 		config.trace_file_name[0] = '\0';
 
-                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config) 
+                if ( H5AC_set_cache_auto_resize_config(cache_ptr, &config)
                      != SUCCEED ) {
 
 		    nerrors++;
-	            HDfprintf(stdout, 
+	            HDfprintf(stdout,
                          "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
                           world_mpi_rank, fcn_name);
                 }
@@ -5438,7 +5438,7 @@ trace_file_check(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started 
+        /* verify that all instance of datum are back where the started
          * and are clean.
          */
 
@@ -5466,22 +5466,22 @@ trace_file_check(void)
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n", 
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
         }
 
         if ( nerrors == 0 ) {
-	
-	    sprintf(trace_file_name, "t_cache_trace.txt.%d", 
+
+	    sprintf(trace_file_name, "t_cache_trace.txt.%d",
 		    (int)file_mpi_rank);
 
 	    if ( (trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL ) {
 
                 nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n", 
+                    HDfprintf(stdout, "%d:%s: HDfopen failed.\n",
                               world_mpi_rank, fcn_name);
                 }
             }
@@ -5517,7 +5517,7 @@ trace_file_check(void)
 
 	        nerrors++;
                 if ( verbose ) {
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
 			      "%d:%s: Unexpected data in trace file line %d.\n",
                               world_mpi_rank, fcn_name, i);
 		    HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n",
@@ -5758,10 +5758,10 @@ main(int argc, char **argv)
 #endif
 #if 1
     smoke_check_5();
-#endif   
+#endif
 #if 1
     trace_file_check();
-#endif   
+#endif
 
 finish:
     /* make sure all processes are finished before final report, cleanup

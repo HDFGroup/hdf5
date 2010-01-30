@@ -50,7 +50,7 @@ static double	the_data[100][100];
  */
 static int
 check_dset(hid_t file, const char* name)
-{ 
+{
     hid_t	space, dset;
     hsize_t	ds_size[2] = {100, 100};
     double	error;
@@ -122,7 +122,7 @@ check_file(char* filename, hid_t fapl, int flag)
 	if(H5Gclose(grp) < 0) goto error;
     } /* end for */
 
-    /* Check to see if that last added dataset in the third file is accessible 
+    /* Check to see if that last added dataset in the third file is accessible
      * (it shouldn't be...but it might.  Flag an error in case it is for now */
     if(flag && check_dset(file, "dset2")) goto error;
 
@@ -180,8 +180,8 @@ main(void)
 	}
 	else
 	    PASSED();
-    
-	
+
+
 	/* Check the case where the file was not flushed.  This should give an error
 	 * so we turn off the error stack temporarily */
 	TESTING("H5Fflush (part2 without flush)");
@@ -229,7 +229,7 @@ main(void)
 	}
 	H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
-	
+
 	h5_cleanup(FILENAME, fapl);
     }
     else

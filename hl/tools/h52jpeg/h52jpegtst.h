@@ -276,7 +276,7 @@ const unsigned char pal_rgb[PAL_ENTRIES*3] = {0,0,0,
 131,0,0,
 127,0,0
 };
- 
+
 
 
 #endif /* _PAL_RGB_H */

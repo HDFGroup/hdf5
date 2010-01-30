@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,38 +11,38 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
     SUBROUTINE identifier_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities: h5iget_type_f
 
-   USE HDF5 ! This module contains all necessary modules 
+   USE HDF5 ! This module contains all necessary modules
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
-     INTEGER, INTENT(OUT) :: total_error 
+     INTEGER, INTENT(OUT) :: total_error
 
      CHARACTER(LEN=6), PARAMETER :: filename = "itestf" ! File name
      CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=10), PARAMETER :: dsetname = "/itestdset" ! Dataset name
      CHARACTER(LEN=10), PARAMETER :: groupname = "itestgroup"! group name
      CHARACTER(LEN=10), PARAMETER :: aname = "itestattr"! group name
-          
-          
+
+
 
      INTEGER(HID_T) :: file_id       ! File identifier
      INTEGER(HID_T) :: new_file_id   ! File identifier
-     INTEGER(HID_T) :: group_id      ! group identifier  
-     INTEGER(HID_T) :: dset_id       ! Dataset identifier 
+     INTEGER(HID_T) :: group_id      ! group identifier
+     INTEGER(HID_T) :: dset_id       ! Dataset identifier
      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
      INTEGER(HID_T) :: attr_id      ! Datatype attribute identifier
      INTEGER(HID_T) :: aspace_id     ! attribute data space identifier
      INTEGER(HID_T) :: atype_id     ! attribute data type identifier
 
 
-     INTEGER, DIMENSION(1) :: dset_data = 0 ! Data value 
-     
+     INTEGER, DIMENSION(1) :: dset_data = 0 ! Data value
+
      INTEGER(HSIZE_T), DIMENSION(1) :: dims = 1 ! Datasets dimensions
      INTEGER(HSIZE_T), DIMENSION(1) :: adims = 1 ! Attribute dimensions
 
@@ -62,7 +62,7 @@
 
      !
      ! Create a new file using default properties.
-     ! 
+     !
      CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
@@ -70,7 +70,7 @@
      endif
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f",error,total_error)
-    
+
      !
      ! Create a group named "/MyGroup" in the file.
      !
@@ -78,20 +78,20 @@
      CALL check("h5gcreate_f",error,total_error)
 
      !
-     !Create data space for the dataset. 
+     !Create data space for the dataset.
      !
      CALL h5screate_simple_f(rank, dims, dspace_id, error)
      CALL check("h5screate_simple_f",error,total_error)
 
      !
-     ! create dataset in the file. 
+     ! create dataset in the file.
      !
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
                dset_id, error)
      CALL check("h5dcreate_f",error,total_error)
      !
      ! Get dataset name from dataset identifier
-     ! 
+     !
      buf_size = 80
      CALL h5iget_name_f(dset_id, name_buf, buf_size, name_size, error)
      CALL check("h5iget_name_f",error,total_error)
@@ -104,8 +104,8 @@
               total_error = total_error + 1
           endif
       endif
-     
-     ! 
+
+     !
      ! Get file identifier from dataset identifier and then get file name
      !
      CALL h5iget_file_id_f(dset_id, new_file_id, error)
@@ -126,7 +126,7 @@
      CALL check("h5dwrite_f",error,total_error)
 
      !
-     ! Create scalar data space for dataset attribute. 
+     ! Create scalar data space for dataset attribute.
      !
      CALL h5screate_simple_f(arank, adims, aspace_id, error)
      CALL check("h5screate_simple_f",error,total_error)
@@ -191,37 +191,37 @@
      CALL check("h5iget_type_f",error,total_error)
      CALL verify("get attribute identifier wrong",type,H5I_ATTR_F,total_error)
 
-     !   
+     !
      ! Close the attribute.
-     ! 
+     !
      CALL h5aclose_f(attr_id, error)
      CALL check("h5aclose_f",error,total_error)
-     !   
+     !
      ! Close the dataspace.
-     ! 
+     !
      CALL h5sclose_f(aspace_id, error)
      CALL check("h5sclose_f",error,total_error)
      CALL h5sclose_f(dspace_id, error)
      CALL check("h5sclose_f",error,total_error)
-     !   
+     !
      ! Close the dataype.
-     ! 
+     !
      CALL h5tclose_f(atype_id, error)
      CALL check("h5tclose_f",error,total_error)
 
-     !   
+     !
      ! Close the dataset.
-     ! 
+     !
      CALL h5dclose_f(dset_id, error)
      CALL check("h5dclose_f",error,total_error)
 
-     !   
+     !
      ! Close the group.
-     ! 
+     !
      CALL h5gclose_f(group_id, error)
      CALL check("h5gclose_f",error,total_error)
 
-     ! 
+     !
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
@@ -236,7 +236,7 @@
      ! Create a file
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f",error,total_error)
-    
+
      ! Get the reference count for the file ID
      CALL h5iget_ref_f(file_id, ref_count, error)
      CALL check("h5iget_ref_f",error,total_error)

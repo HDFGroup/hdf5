@@ -60,7 +60,7 @@ static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_COPY_FILE		H5O_dtype_shared_copy_file
 #define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
 #define H5O_SHARED_POST_COPY_FILE	H5O_dtype_shared_post_copy_file
-#undef  H5O_SHARED_POST_COPY_FILE_REAL	
+#undef  H5O_SHARED_POST_COPY_FILE_REAL
 #define H5O_SHARED_DEBUG		H5O_dtype_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_dtype_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -1131,7 +1131,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                         ret_value += offset_nbytes; 	/*member offset*/
                     if(dt->shared->version >= H5O_DTYPE_VERSION_2)
                         ret_value += 4; 	/*member offset*/
-                    else 
+                    else
                         ret_value += 4 +	/*member offset*/
                              1 +		/*dimensionality*/
                              3 +		/*reserved*/
@@ -1295,7 +1295,7 @@ done:
  * Function:	H5O_dtype_can_share
  *
  * Purpose:	Determines if this datatype is allowed to be shared or
- *              not.  Immutable datatypes or datatypes that are already 
+ *              not.  Immutable datatypes or datatypes that are already
  *              shared cannot be shared (again).
  *
  * Return:	TRUE if datatype can be shared
@@ -1389,12 +1389,12 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_dtype_copy_file
- *  
+ *
  * Purpose:     Copy a native datatype message from one file to another.
  *
  * Return:      Success:        Native copy of message
  *              Failure:        NULL
- *  
+ *
  * Programmer:  James Laird
  *              December 12, 2006
  *

@@ -303,22 +303,22 @@ main(int argc, const char *argv[])
         error_msg(progname, "Could not close link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Close file */
     if(H5Fclose(fid) < 0) {
         error_msg(progname, "Could not close output file '%s'??\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Close file access property list */
     if(H5Pclose(fapl_id) < 0) {
         error_msg(progname, "Could not close file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Shut down h5tools lib */
     h5tools_close();
- 
+
     return 0;
 } /* end main() */
 

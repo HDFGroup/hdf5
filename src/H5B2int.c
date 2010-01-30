@@ -220,7 +220,7 @@ HDmemset(shared->page, 0, shared->node_size);
             shared->node_info[u].split_nrec = (shared->node_info[u].max_nrec * shared->split_percent) / 100;
             shared->node_info[u].merge_nrec = (shared->node_info[u].max_nrec * shared->merge_percent) / 100;
 
-            shared->node_info[u].cum_max_nrec = ((shared->node_info[u].max_nrec + 1) * 
+            shared->node_info[u].cum_max_nrec = ((shared->node_info[u].max_nrec + 1) *
                 shared->node_info[u - 1].cum_max_nrec) + shared->node_info[u].max_nrec;
             u_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[u].cum_max_nrec);
             H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ unsigned char)
@@ -583,7 +583,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
     H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[shared->depth].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
     shared->node_info[shared->depth].split_nrec = (shared->node_info[shared->depth].max_nrec * shared->split_percent) / 100;
     shared->node_info[shared->depth].merge_nrec = (shared->node_info[shared->depth].max_nrec * shared->merge_percent) / 100;
-    shared->node_info[shared->depth].cum_max_nrec = ((shared->node_info[shared->depth].max_nrec + 1) * 
+    shared->node_info[shared->depth].cum_max_nrec = ((shared->node_info[shared->depth].max_nrec + 1) *
         shared->node_info[shared->depth - 1].cum_max_nrec) + shared->node_info[shared->depth].max_nrec;
     u_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[shared->depth].cum_max_nrec);
     H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[shared->depth].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ unsigned char)
@@ -3160,22 +3160,22 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:    H5B2_iterate_size_node
- *      
+ *
  * Purpose:     Iterate over all the records from a B-tree node, collecting
  *		btree storage info.
- *  
+ *
  * Return:      non-negative on success, negative on error
- *  
+ *
  * Programmer:  Vailin Choi
  *              July 12 2007
- *      
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5B2_iterate_size_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     const H5B2_node_ptr_t *curr_node, hsize_t *btree_size)
 {
-    H5B2_shared_t 	*shared;        	/* Pointer to B-tree's shared information */    
+    H5B2_shared_t 	*shared;        	/* Pointer to B-tree's shared information */
     H5B2_internal_t 	*internal = NULL;     	/* Pointer to internal node */
     herr_t 		ret_value = SUCCEED;  	/* Iterator return value */
 

@@ -55,7 +55,7 @@ static void
 leave(int ret)
 {
  h5tools_close();
- 
+
  exit(ret);
 }
 
@@ -118,8 +118,8 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
  * soft     H5O_COPY_EXPAND_SOFT_LINK_FLAG:  Expand soft links into new objects
  * ext      H5O_COPY_EXPAND_EXT_LINK_FLAG: Expand external links into new objects
  * ref      H5O_COPY_EXPAND_OBJ_REFERENCE_FLAG: Copy objects that are pointed by references
- * noattr   H5O_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes 
- * allflags Switches all flags from the default to the non-default setting 
+ * noattr   H5O_COPY_WITHOUT_ATTR_FLAG Copy object without copying attributes
+ * allflags Switches all flags from the default to the non-default setting
  *
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
@@ -139,7 +139,7 @@ static int parse_flag(const char* str_flag, unsigned *flag)
  if (strcmp(str_flag,"shallow")==0)
  {
   fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
- } 
+ }
  else  if (strcmp(str_flag,"soft")==0)
  {
   fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
@@ -214,14 +214,14 @@ main (int argc, const char *argv[])
  } /* end if */
 
  /* parse command line options */
- while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
+ while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
  {
-  switch ((char)opt) 
+  switch ((char)opt)
   {
   case 'd':
    oname_dst = strdup(opt_arg);
    break;
-   
+
   case 'f':
    /* validate flag */
    if (parse_flag(opt_arg,&flag)<0)
@@ -272,28 +272,28 @@ main (int argc, const char *argv[])
  * check for missing file/object names
  *-------------------------------------------------------------------------*/
 
- if (fname_src==NULL) 
+ if (fname_src==NULL)
  {
   error_msg(progname, "Input file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
- if (fname_dst==NULL) 
+ if (fname_dst==NULL)
  {
   error_msg(progname, "Output file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
- if (oname_src==NULL) 
+ if (oname_src==NULL)
  {
   error_msg(progname, "Source object name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
- if (oname_dst==NULL) 
+ if (oname_dst==NULL)
  {
   error_msg(progname, "Destination object name missing\n");
   usage();
@@ -304,7 +304,7 @@ main (int argc, const char *argv[])
 /*-------------------------------------------------------------------------
  * open input file
  *-------------------------------------------------------------------------*/
- 
+
   fid_src = h5tools_fopen(fname_src, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0);
 
 /*-------------------------------------------------------------------------
@@ -342,11 +342,11 @@ main (int argc, const char *argv[])
    free(fname_dst);
   leave(EXIT_FAILURE);
  }
-  
+
 /*-------------------------------------------------------------------------
  * print some info
  *-------------------------------------------------------------------------*/
- 
+
  if (verbose)
  {
   printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
@@ -358,19 +358,19 @@ main (int argc, const char *argv[])
    printf("Using %s flag\n", str_flag);
  }
 
- 
+
 /*-------------------------------------------------------------------------
  * create property lists for copy
  *-------------------------------------------------------------------------*/
- 
+
  /* create property to pass copy options */
- if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) 
+ if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
   goto error;
 
  /* set options for object copy */
  if (flag)
  {
-  if ( H5Pset_copy_object(ocpl_id, flag) < 0) 
+  if ( H5Pset_copy_object(ocpl_id, flag) < 0)
    goto error;
  }
 
@@ -404,7 +404,7 @@ main (int argc, const char *argv[])
               ocpl_id,          /* Object copy property list */
               lcpl_id)<0)       /* Link creation property list */
               goto error;
- 
+
  /* close propertis */
  if(H5Pclose(ocpl_id)<0)
   goto error;
@@ -427,7 +427,7 @@ main (int argc, const char *argv[])
   free(oname_src);
 
  h5tools_close();
- 
+
  return 0;
 
 error:
@@ -448,7 +448,7 @@ error:
   free(oname_src);
 
  h5tools_close();
- 
+
  return 1;
 }
 

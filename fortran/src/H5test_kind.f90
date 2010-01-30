@@ -15,7 +15,7 @@
 ! H5test_kind.f90
 !
 ! This fortran program generates H5fortran_detect.f90
-! 
+!
 !
          PROGRAM test_kind
          INTEGER :: i, j, ii, last, kind_numbers(10)
@@ -72,7 +72,7 @@
              WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_16"" "
              WRITE(*,*)"   endif"
              WRITE(*,*)"   return"
-             WRITE(*,*)"   end subroutine"    
+             WRITE(*,*)"   end subroutine"
               jr = 0
              WRITE(*, "("" subroutine r"", i2.2,""()"")") j
              WRITE(*,*)"   implicit none"
@@ -98,7 +98,7 @@
              WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_16"" "
              WRITE(*,*)"   endif"
              WRITE(*,*)"   return"
-             WRITE(*,*)"   end subroutine"    
+             WRITE(*,*)"   end subroutine"
               jd = 0
              WRITE(*, "("" subroutine d"", i2.2,""()"")") jd
              WRITE(*,*)"   implicit none"
@@ -115,7 +115,7 @@
              WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_16"" "
              WRITE(*,*)"   endif"
              WRITE(*,*)"   return"
-             WRITE(*,*)"   end subroutine"    
+             WRITE(*,*)"   end subroutine"
           DO i = 1, ii
               j = kind_numbers(i)
              WRITE(*, "("" subroutine i"", i2.2,""()"")") j
@@ -139,9 +139,9 @@
              WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_16"" "
              WRITE(*,*)"   endif"
              WRITE(*,*)"   return"
-             WRITE(*,*)"   end subroutine"    
+             WRITE(*,*)"   end subroutine"
           ENDDO
           END PROGRAM
-              
-            
+
+
 

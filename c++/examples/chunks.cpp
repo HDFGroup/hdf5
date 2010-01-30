@@ -80,7 +80,7 @@ int main (void)
 	hsize_t dims[2]; 	// dataset dimensions
 	rank = filespace.getSimpleExtentDims( dims );
 	cout << "dataset rank = " << rank << ", dimensions "
-	     << (unsigned long)(dims[0]) << " x " 
+	     << (unsigned long)(dims[0]) << " x "
 	     << (unsigned long)(dims[1]) << endl;
 
 	/*

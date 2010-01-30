@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,17 +11,17 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 SUBROUTINE group_test(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
 
   INTEGER(HID_T) :: fapl, fapl2, my_fapl ! /* File access property lists */
-  
+
   INTEGER :: error, ret_total_error
 
 !  WRITE(*,*) "TESTING GROUPS"
@@ -39,7 +39,7 @@ SUBROUTINE group_test(cleanup, total_error)
   ! /* Check for FAPL to USE */
   my_fapl = fapl2
 
-  
+
   ret_total_error = 0
   CALL mklinks(fapl2, ret_total_error)
   CALL write_test_status(ret_total_error, &
@@ -76,7 +76,7 @@ SUBROUTINE group_test(cleanup, total_error)
   CALL write_test_status(ret_total_error, &
        ' Testing deleting links by index', &
        total_error)
-  
+
   ret_total_error = 0
   CALL test_lcpl(cleanup, fapl, ret_total_error)
   CALL write_test_status(ret_total_error, &
@@ -119,15 +119,15 @@ END SUBROUTINE group_test
 
 SUBROUTINE group_info(cleanup, fapl, total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
 
   INTEGER(HID_T) :: gcpl_id ! /* Group creation property list ID */
 
-  INTEGER :: max_compact ! /* Maximum # of links to store in group compactly */ 
+  INTEGER :: max_compact ! /* Maximum # of links to store in group compactly */
   INTEGER :: min_dense ! /* Minimum # of links to store in group "densely" */
 
   INTEGER :: idx_type ! /* Type of index to operate on */
@@ -145,7 +145,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
                                           ! H5G_STORAGE_TYPE_DENSE: Indexed storage
                                           ! H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
   INTEGER :: nlinks ! Number of links in group
-  INTEGER :: max_corder ! Current maximum creation order value for group 
+  INTEGER :: max_corder ! Current maximum creation order value for group
 
   INTEGER :: u,v  ! /* Local index variables */
   CHARACTER(LEN=2) :: chr2
@@ -349,7 +349,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
               ! /* Close group created */
               CALL H5Gclose_f(group_id2, error)
               CALL check("H5Gclose_f", error, total_error)
-              
+
               ! /* Retrieve main group's information */
               CALL H5Gget_info_f(group_id, storage_type, nlinks, max_corder, error)
               CALL check("H5Gget_info_f", error, total_error)
@@ -358,11 +358,11 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
               CALL VERIFY("H5Gget_info_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
               CALL VERIFY("H5Gget_info_f2", max_corder, u+1, total_error)
               CALL VERIFY("H5Gget_info_f", nlinks, u+1, total_error)
-              
+
               ! /* Retrieve main group's information, by name */
               CALL H5Gget_info_by_name_f(file_id, CORDER_GROUP_NAME, storage_type, nlinks, max_corder, error)
               CALL check("H5Gget_info_by_name_f", error, total_error)
-              
+
               ! /* Check main group's information */
               CALL VERIFY("H5Gget_info_by_name_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
               CALL VERIFY("H5Gget_info_by_name_f", max_corder, u+1, total_error)
@@ -381,7 +381,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
               valname = CORDER_GROUP_NAME//objname
 
               CALL H5Lcreate_soft_f(valname, soft_group_id, objname, error, H5P_DEFAULT_F, H5P_DEFAULT_F)
-              
+
               ! /* Retrieve soft link group's information, by name */
               CALL H5Gget_info_f(soft_group_id, storage_type, nlinks, max_corder, error)
               CALL check("H5Gget_info_f", error, total_error)
@@ -398,7 +398,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
               CALL check("H5Gclose_f", error, total_error)
               CALL H5Gclose_f(soft_group_id, error)
               CALL check("H5Gclose_f", error, total_error)
-           
+
               ! /* Close the file */
               CALL H5Fclose_f(file_id, error)
               CALL check("H5Fclose_f", error, total_error)
@@ -431,8 +431,8 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
    SUBROUTINE timestamps(cleanup, fapl, total_error)
 
-     USE HDF5 ! This module contains all necessary modules 
-     
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
      INTEGER(HID_T), INTENT(IN) :: fapl
@@ -442,7 +442,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER(HID_T) :: group_id2 !/* Group ID */
      INTEGER(HID_T) :: gcpl_id !/* Group creation property list ID */
      INTEGER(HID_T) :: gcpl_id2 !/* Group creation property list ID */
-     
+
      CHARACTER(LEN=6), PARAMETER :: prefix = 'links9'
      CHARACTER(LEN=9), PARAMETER :: filename = prefix//'.h5'  ! /* File name */
      ! /* Timestamp macros */
@@ -480,7 +480,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
      ! /* Create file */
      !h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-     
+
      CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl)
      CALL check("h5fcreate_f",error,total_error)
 
@@ -511,7 +511,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      CALL H5Pget_obj_track_times_f(gcpl_id2, track_times, error)
      CALL check("H5Pget_obj_track_times_f", error, total_error)
      CALL VerifyLogical("H5Pget_obj_track_times2",track_times,.TRUE.,total_error)
-     
+
 !    /* Query the object information for each group */
 !    if(H5Oget_info(group_id, &oinfo) < 0) TEST_ERROR
 !    if(H5Oget_info(group_id2, &oinfo2) < 0) TEST_ERROR
@@ -628,8 +628,8 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
    SUBROUTINE mklinks(fapl, total_error)
 
-     USE HDF5 ! This module contains all necessary modules 
-     
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
      INTEGER(HID_T), INTENT(IN) :: fapl
@@ -649,7 +649,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      CALL check("mklinks.h5screate_simple_f",error,total_error)
 
      !/* Create a group */
-     CALL H5Gcreate_f(file, "grp1", grp, error) 
+     CALL H5Gcreate_f(file, "grp1", grp, error)
      CALL check("H5Gcreate_f", error, total_error)
      CALL H5Gclose_f(grp, error)
      CALL check("h5gclose_f",error,total_error)
@@ -663,7 +663,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      !/* Create a hard link */
      CALL H5Lcreate_hard_f(file, "d1", INT(H5L_SAME_LOC_F,HID_T), "grp1/hard", error)
      CALL check("H5Lcreate_hard_f", error, total_error)
-     
+
      !/* Create a symbolic link */
      CALL H5Lcreate_soft_f("/d1", file, "grp1/soft",error)
      CALL check("H5Lcreate_soft_f", error, total_error)
@@ -699,8 +699,8 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
   SUBROUTINE test_move_preserves(fapl_id, total_error)
 
-    USE HDF5 ! This module contains all necessary modules 
-    
+    USE HDF5 ! This module contains all necessary modules
+
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: total_error
     INTEGER(HID_T), INTENT(IN) :: fapl_id
@@ -723,7 +723,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     INTEGER :: crt_order_flags ! /* Status of creation order info for GCPL */
     CHARACTER(LEN=12), PARAMETER :: filename = 'TestLinks.h5'
 
-    INTEGER :: cset ! Indicates the character set used for the link’s name. 
+    INTEGER :: cset ! Indicates the character set used for the link’s name.
     INTEGER :: corder ! Specifies the link’s creation order position.
     LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
     INTEGER :: link_type ! Specifies the link class:
@@ -748,17 +748,17 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     CALL H5Pget_link_creation_order_f(fcpl_id, crt_order_flags, error)
     CALL check("H5Pget_link_creation_order_f",error, total_error)
     CALL VERIFY("H5Pget_link_creation_order_f",crt_order_flags,0, total_error)
-    
+
     CALL H5Pset_link_creation_order_f(fcpl_id, H5P_CRT_ORDER_TRACKED_F, error)
     CALL check("H5Pset_link_creation_order_f", error, total_error)
- 
+
     CALL H5Pget_link_creation_order_f(fcpl_id, crt_order_flags, error)
     CALL check("H5Pget_link_creation_order_f",error, total_error)
     CALL VERIFY("H5Pget_link_creation_order_f",crt_order_flags, H5P_CRT_ORDER_TRACKED_F, total_error)
 
     !/* Create file */
     !/* (with creation order tracking for the root group) */
-    
+
     CALL h5fcreate_f(FileName, H5F_ACC_TRUNC_F, file_id, error, fcpl_id, fapl_id)
     CALL check("h5fcreate_f",error,total_error)
 
@@ -770,7 +770,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     CALL check("H5Pset_char_encoding_f",error, total_error)
 
     !/* Create a group with that lcpl */
-    CALL H5Gcreate_f(file_id, "group", group_id, error,lcpl_id=lcpl_id, gcpl_id=H5P_DEFAULT_F, gapl_id=H5P_DEFAULT_F) 
+    CALL H5Gcreate_f(file_id, "group", group_id, error,lcpl_id=lcpl_id, gcpl_id=H5P_DEFAULT_F, gapl_id=H5P_DEFAULT_F)
     CALL check("H5Gcreate_f", error, total_error)
     CALL H5Gclose_f(group_id, error)
     CALL check("H5Gclose_f", error, total_error)
@@ -799,7 +799,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 !    /* Close the file and reopen it */
     CALL H5Fclose_f(file_id, error)
     CALL check("H5Fclose_f", error, total_error)
-    
+
 !!$    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0) TEST_ERROR
 !!$
 !!$    /* Get the link's character set & modification time .  They should be unchanged */
@@ -882,7 +882,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      CALL check("H5Pclose_f", error, total_error)
      CALL H5Pclose_f(lcpl_id, error)
      CALL check("H5Pclose_f", error, total_error)
-    
+
     ! if(H5Fclose(file_id) < 0) TEST_ERROR
 
    END SUBROUTINE test_move_preserves
@@ -906,8 +906,8 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 
-  USE HDF5 ! This module contains all necessary modules 
-    
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl2
@@ -959,7 +959,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
   ! /* Set up group creation property list */
   CALL H5Pcreate_f(H5P_GROUP_CREATE_F,gcpl,error)
   CALL check("H5Pcreate_f",error,total_error)
-  
+
 
   ! /* Query default group creation property settings */
   CALL H5Pget_local_heap_size_hint_f(gcpl, lheap_size_hint, error)
@@ -976,7 +976,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
   CALL check("H5Pget_est_link_info_f", error, total_error)
   CALL verify("H5Pget_est_link_info_f", est_num_entries, H5G_CRT_GINFO_EST_NUM_ENTRIES,total_error)
   CALL verify("H5Pget_est_link_info_f", est_name_len, H5G_CRT_GINFO_EST_NAME_LEN,total_error)
-  
+
 
   !/* Set GCPL parameters */
 
@@ -1018,7 +1018,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
     CALL H5Ldelete_f(fid, LIFECYCLE_TOP_GROUP, error)
     CALL check("H5Ldelete_f", error, total_error)
-    
+
     ! /* Close GCPL */
     CALL H5Pclose_f(gcpl, error)
     CALL check("H5Pclose_f", error, total_error)
@@ -1053,8 +1053,8 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
   SUBROUTINE cklinks(fapl, total_error)
 
 !    USE ISO_C_BINDING
-  USE HDF5 ! This module contains all necessary modules 
-    
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
@@ -1090,7 +1090,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 !!$	TEST_ERROR
 !!$    } /* end if */
 
-  
+
   CALL H5Lexists_f(file,"d1",Lexists, error)
   CALL verifylogical("test_lcpl.H5Lexists", Lexists,.TRUE.,total_error)
 
@@ -1122,8 +1122,8 @@ END SUBROUTINE cklinks
 ! */
 SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
@@ -1133,16 +1133,16 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   INTEGER(HID_T) :: gcpl_id  ! /* Group creation property list ID */
 
   INTEGER :: idx_type        ! /* Type of index to operate on */
-  LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./) 
+  LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
                              ! /* Use index on creation order values */
-  INTEGER :: max_compact     ! /* Maximum # of links to store in group compactly */ 
+  INTEGER :: max_compact     ! /* Maximum # of links to store in group compactly */
   INTEGER :: min_dense       ! /* Minimum # of links to store in group "densely" */
 
   CHARACTER(LEN=7) :: objname   ! /* Object name */
   CHARACTER(LEN=8) :: filename = 'file0.h5' ! /* File name */
   CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME = "corder_group"
 
-  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! Indicates the size, in the number of characters, of the attribute
@@ -1208,7 +1208,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            ! /* Create file */
            CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp=fapl)
            CALL check("delete_by_idx.H5Fcreate_f", error, total_error)
-           
+
            ! /* Create group creation property list */
            CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl_id, error )
            CALL check("delete_by_idx.H5Pcreate_f", error, total_error)
@@ -1258,7 +1258,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            ! IF(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
            ! /* Check for out of bound deletion */
-           htmp =9 
+           htmp =9
 !EP           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
            CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, htmp, error)
            CALL VERIFY("delete_by_idx.H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
@@ -1342,8 +1342,8 @@ END SUBROUTINE delete_by_idx
 SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
     hard_link, use_index, total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: group_id
@@ -1352,7 +1352,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   LOGICAL, INTENT(IN) :: hard_link
   LOGICAL, INTENT(IN) :: use_index
 
-  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! Indicates the size, in the number of characters, of the attribute
@@ -1388,7 +1388,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   ! /* Verify value for new soft link, in increasing creation order */
 !!$  IF(hard_link)THEN
 !!$     ! HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
-!!$     
+!!$
 !!$     CALL H5Lget_val_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, n, tmpval, INT(7,SIZE_T),error)
 !!$     CALL check("H5Lget_val_by_idx",error,total_error)
 !!$
@@ -1444,21 +1444,21 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   SUBROUTINE test_lcpl(cleanup, fapl, total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
   LOGICAL :: cleanup
-    
+
   INTEGER(HID_T) :: file_id
   INTEGER(HID_T) :: group_id
   INTEGER(HID_T) :: space_id, data_space
   INTEGER(HID_T) :: dset_id
   INTEGER(HID_T) :: type_id
   INTEGER(HID_T) :: lcpl_id
-  
-  INTEGER :: cset ! Indicates the character set used for the link’s name. 
+
+  INTEGER :: cset ! Indicates the character set used for the link’s name.
   INTEGER :: corder ! Specifies the link’s creation order position.
   LOGICAL :: f_corder_valid ! Indicates whether the value in corder is valid.
   INTEGER :: link_type ! Specifies the link class:
@@ -1484,25 +1484,25 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
 !  WRITE(*,*) "link creation property lists (w/new group format)"
 
-  
+
   !/* Actually, intermediate group creation is tested elsewhere (tmisc).
   ! * Here we only need to test the character encoding property */
 
   !/* Create file */
   !  h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-  
+
   CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl)
   CALL check("test_lcpl.H5Fcreate_f", error, total_error)
 
 
   ! /* Create and link a group with the default LCPL */
-  
+
   CALL H5Gcreate_f(file_id, "/group", group_id, error)
   CALL check("test_lcpl.H5Gcreate_f", error, total_error)
-  
+
 
   ! /* Check that its character encoding is the default */
-  
+
   CALL H5Lget_info_f(file_id, "group", &
        cset, corder, f_corder_valid, link_type, address, val_size, &
        error, H5P_DEFAULT_F)
@@ -1520,7 +1520,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("test_lcpl.h5tcommit_f", error, total_error)
   CALL h5tclose_f(type_id, error)
   CALL check("test_lcpl.h5tclose_f", error, total_error)
-  
+
 
   ! /* Check that its character encoding is the default */
   CALL H5Lget_info_f(file_id, "type", &
@@ -1561,7 +1561,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   CALL h5sget_simple_extent_dims_f(data_space, dimsout, maxdimsout, error)
   CALL check("test_lcpl.h5sget_simple_extent_dims_f",error, total_error)
-  
+
   DO i = 1, 2
      tmp1 = dimsout(i)
      tmp2 = extend_dim(i)
@@ -1576,7 +1576,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   ! /* close data set */
 
   CALL h5dclose_f(dset_id, error)
-  CALL check("test_lcpl.h5dclose_f", error, total_error) 
+  CALL check("test_lcpl.h5dclose_f", error, total_error)
 
   ! /* Check that its character encoding is the default */
   CALL H5Lget_info_f(file_id, "dataset", &
@@ -1637,7 +1637,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   CALL H5Pget_char_encoding_f(lcpl_id, encoding, error)
   CALL check("test_lcpl.H5Pget_char_encoding_f", error, total_error)
-  CALL VERIFY("test_lcpl.H5Pget_char_encoding_f", encoding, H5T_CSET_UTF8_F, total_error) 
+  CALL VERIFY("test_lcpl.H5Pget_char_encoding_f", encoding, H5T_CSET_UTF8_F, total_error)
 
   ! /* Check that its character encoding is UTF-8 */
   CALL H5Lget_info_f(file_id, "dataset2", &
@@ -1666,7 +1666,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
        cset, corder, f_corder_valid, link_type, address, val_size, &
        error)
   CALL check("test_lcpl.H5Lget_info_f", error, total_error)
-  CALL verify("test_lcpl.H5Lget_info_f",cset, H5T_CSET_ASCII_F,total_error) 
+  CALL verify("test_lcpl.H5Lget_info_f",cset, H5T_CSET_ASCII_F,total_error)
 
   ! /* Check that the first link's encoding hasn't changed */
 
@@ -1679,7 +1679,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !/* Make sure that LCPLs work properly for other API calls: */
   !/* H5Lcreate_soft */
-  
+
   CALL H5Pset_char_encoding_f(lcpl_id, H5T_CSET_UTF8_F, error)
   CALL check("test_lcpl.H5Pset_char_encoding_f",error, total_error)
   CALL H5Lcreate_soft_f("dataset2", file_id, "slink_to_dset2",error,lcpl_id)
@@ -1707,12 +1707,12 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
 
   ! /* H5Lcopy */
-  
+
   CALL H5Pset_char_encoding_f(lcpl_id, H5T_CSET_UTF8_F, error)
   CALL check("test_lcpl.H5Pset_char_encoding_f",error, total_error)
 
   CALL H5Lcopy_f(file_id, "moved_slink", file_id, "copied_slink", error, lcpl_id)
-  
+
   CALL H5Lget_info_f(file_id, "copied_slink", &
        cset, corder, f_corder_valid, link_type, address, val_size, &
        error)
@@ -1749,8 +1749,8 @@ END SUBROUTINE test_lcpl
 
 SUBROUTINE objcopy(fapl, total_error)
 
-  USE HDF5 ! This module contains all necessary modules 
-  
+  USE HDF5 ! This module contains all necessary modules
+
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(HID_T), INTENT(IN) :: fapl
@@ -1769,13 +1769,13 @@ SUBROUTINE objcopy(fapl, total_error)
 
 !/* Set the "use the latest version of the format" bounds for creating objects in the file */
   CALL H5Pset_libver_bounds_f(fapl2, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
-  
+
   ! /* create property to pass copy options */
   CALL h5pcreate_f(H5P_OBJECT_COPY_F, pid, error)
   CALL check("h5pcreate_f",error, total_error)
 
   ! /* set options for object copy */
-  CALL H5Pset_copy_object_f(pid, flag, error) 
+  CALL H5Pset_copy_object_f(pid, flag, error)
   CALL check("H5Pset_copy_object_f",error, total_error)
 
   ! /* Verify object copy flags */
@@ -1784,7 +1784,7 @@ SUBROUTINE objcopy(fapl, total_error)
   CALL VERIFY("H5Pget_copy_object_f", cpy_flags, flag, total_error)
 
 !!$
-!!$  CALL test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, 
+!!$  CALL test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG,
 !!$                       FALSE, "H5Ocopy(): without attributes");
 
   CALL lapl_nlinks(fapl2, total_error)
@@ -1813,7 +1813,7 @@ END SUBROUTINE objcopy
 SUBROUTINE lapl_nlinks( fapl, total_error)
 
   USE HDF5
-  
+
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: fapl
   INTEGER, INTENT(INOUT) :: total_error
@@ -1825,13 +1825,13 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   INTEGER(HID_T) :: plist = (-1) ! /* lapl ID */
   INTEGER(HID_T) :: tid = (-1) ! /* Other IDs */
   INTEGER(HID_T) :: gapl = (-1), dapl = (-1), tapl = (-1) ! /* Other property lists */
-  
+
   CHARACTER(LEN=7) :: objname ! /* Object name */
   INTEGER(size_t) :: name_len ! /* Length of object name */
   CHARACTER(LEN=12) :: filename = 'TestLinks.h5'
   INTEGER(size_t) ::              nlinks ! /* nlinks for H5Pset_nlinks */
   INTEGER(size_t) :: buf_size = 7
-  
+
 !  WRITE(*,*) "adjusting nlinks with LAPL (w/new group format)"
 
 
@@ -1840,9 +1840,9 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   CALL check(" lapl_nlinks.h5fcreate_f",error,total_error)
 
   ! /* Create group with short name in file (used as target for links) */
-  CALL H5Gcreate_f(fid, "final", gid, error) 
+  CALL H5Gcreate_f(fid, "final", gid, error)
   CALL check(" lapl_nlinks.H5Gcreate_f", error, total_error)
-  
+
   !/* Create chain of soft links to existing object (limited) */
   CALL H5Lcreate_soft_f("final", fid, "soft1", error)
   CALL H5Lcreate_soft_f("soft1", fid, "soft2", error)
@@ -1869,13 +1869,13 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   CALL check("h5fclose_f",error,total_error)
 
   !/* Open file */
-  
+
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
   CALL check("h5open_f",error,total_error)
-  
+
   !/* Create LAPL with higher-than-usual nlinks value */
   !/* Create a non-default lapl with udata set to point to the first group */
-  
+
   CALL H5Pcreate_f(H5P_LINK_ACCESS_F,plist,error)
   CALL check("h5Pcreate_f",error,total_error)
   nlinks = 20
@@ -1890,7 +1890,7 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
 
   !/* Open object through what is normally too many soft links using
   ! * new property list */
-  
+
   CALL H5Oopen_f(fid,"soft17",gid,error,plist)
   CALL check("H5Oopen_f",error,total_error)
 
@@ -1902,9 +1902,9 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   CALL H5Gcreate_f(gid, "new_soft", gid2, error)
   CALL check("H5Gcreate_f", error, total_error)
 
-  ! /* Close groups */ 
+  ! /* Close groups */
   CALL H5Gclose_f(gid2, error)
-  CALL check("H5Gclose_f", error, total_error) 
+  CALL check("H5Gclose_f", error, total_error)
   CALL H5Gclose_f(gid, error)
   CALL check("H5Gclose_f", error, total_error)
 
@@ -1922,7 +1922,7 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   CALL VERIFY("H5Pget_nlinks_f", INT(nlinks), 4, total_error)
 
   ! /* Try opening through what is now too many soft links */
-  
+
   CALL H5Oopen_f(fid,"soft5",gid,error,plist)
   CALL VERIFY("H5Oopen_f", error, -1, total_error) ! should fail
 
@@ -2012,11 +2012,11 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
 !!$    } H5E_END_TRY
 !!$
     ! /* Create property lists with nlinks set */
-  
+
   CALL H5Pcreate_f(H5P_GROUP_ACCESS_F,gapl,error)
-  CALL check("h5Pcreate_f",error,total_error) 
+  CALL check("h5Pcreate_f",error,total_error)
   CALL H5Pcreate_f(H5P_DATATYPE_ACCESS_F,tapl,error)
-  CALL check("h5Pcreate_f",error,total_error) 
+  CALL check("h5Pcreate_f",error,total_error)
   CALL H5Pcreate_f(H5P_DATASET_ACCESS_F,dapl,error)
   CALL check("h5Pcreate_f",error,total_error)
 
@@ -2038,11 +2038,11 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
 
   CALL H5Topen_f(fid, "soft17/datatype", tid, error, tapl)
   CALL check("H5Gopen_f",error,total_error)
-  
+
 !!$    if((did = H5Dopen2(fid, "soft17/dataset", dapl)) < 0) TEST_ERROR
 
   ! /* Close objects */
-  
+
   CALL h5gclose_f(gid, error)
   CALL check("h5gclose_f",error,total_error)
   CALL h5tclose_f(tid, error)
@@ -2051,7 +2051,7 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
 !!$    if(H5Dclose(did) < 0) TEST_ERROR
 !!$
   ! /* Close plists */
-  
+
   CALL h5pclose_f(gapl, error)
   CALL check("h5pclose_f", error, total_error)
   CALL h5pclose_f(tapl, error)

@@ -180,7 +180,7 @@ H5_DLL ssize_t H5Eget_num(hid_t error_stack_id);
 
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

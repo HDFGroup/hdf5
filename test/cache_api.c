@@ -3851,7 +3851,7 @@ check_file_mdc_api_errs(void)
     {
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, 
+	    HDfprintf(stdout,
 		    "%s: testing H5Fset_mdc_config() with invalid config %d.\n",
 		    fcn_name, i);
 	}
@@ -3881,7 +3881,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n", 
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n",
 		      fcn_name);
 	}
 
@@ -3900,7 +3900,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n", 
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n",
 		      fcn_name);
 	}
 
@@ -3921,7 +3921,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n", 
+	    HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n",
 		      fcn_name);
 	}
 

@@ -74,7 +74,7 @@ main(void)
     hbool_t     b;                      /* Index for "new format" loop */
     const char  *envval = NULL;
     herr_t      ret;                    /* Generic return value */
- 
+
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
@@ -175,7 +175,7 @@ main(void)
          */
         TESTING("close & re-open object header");
         envval = HDgetenv("HDF5_DRIVER");
-        if(envval == NULL) 
+        if(envval == NULL)
             envval = "nomatch";
         if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
             if(H5O_close(&oh_loc) < 0)
@@ -260,7 +260,7 @@ main(void)
         /* Test reading datasets with undefined object header messages */
         HDputs("Accessing objects with unknown header messages:");
         envval = HDgetenv("HDF5_DRIVER");
-        if(envval == NULL) 
+        if(envval == NULL)
             envval = "nomatch";
         if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
             hid_t file2;                    /* File ID for 'bogus' object file */

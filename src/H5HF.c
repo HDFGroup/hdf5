@@ -635,7 +635,7 @@ done:
  *
  * Purpose:	Perform an operation directly on a heap object
  *
- * Note:	The library routines currently assume that the 'op' callback 
+ * Note:	The library routines currently assume that the 'op' callback
  *		won't modify the object.  This can easily be changed later for
  *		"managed" heap objects, and, with some difficulty, for 'huge'
  *		and 'tiny' heap objects.

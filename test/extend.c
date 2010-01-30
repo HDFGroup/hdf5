@@ -254,7 +254,7 @@ main (void)
     const char *envval = NULL;
 
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split")) {
 	h5_reset();
