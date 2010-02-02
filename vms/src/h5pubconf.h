@@ -1,6 +1,9 @@
 /* src/H5config.h.  Generated from H5config.h.in by configure.  */
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if building universal (internal helper macro) */
+/* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
+
 /* Define if your system generates wrong code for log2 routine. */
 /* #undef H5_BAD_LOG2_CODE_GENERATED */
 
@@ -84,6 +87,9 @@
 
 /* Define to 1 if you have the <dmalloc.h> header file. */
 /* #undef H5_HAVE_DMALLOC_H */
+
+/* Define if library information should be embedded in the executables */
+/* #unfine H5_HAVE_EMBEDDED_LIBINFO */
 
 /* Define to 1 if you have the <features.h> header file. */
 /* #define H5_HAVE_FEATURES_H 1 */
@@ -302,6 +308,9 @@
 /* Define if `struct videoconfig' is defined */
 /* #undef H5_HAVE_STRUCT_VIDEOCONFIG */
 
+/* Define to 1 if you have the `symlink' function. */
+#define H5_HAVE_SYMLINK 1
+
 /* Define to 1 if you have the `system' function. */
 #define H5_HAVE_SYSTEM 1
 
@@ -470,6 +479,9 @@
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
+
+/* Define to the home page for this package. */
+#define H5_PACKAGE_URL ""
 
 /* Define to the version of this package. */
 #define H5_PACKAGE_VERSION "1.8.4-snap10"
