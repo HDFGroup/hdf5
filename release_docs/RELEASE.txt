@@ -320,6 +320,15 @@ Cray XT3 2.0.62                      n       n         n         n
 
 Known Problems
 ==============
+* All the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
+  structure H5FD_class_t changed in 1.8.  There is new parameter added to
+  get_eoa and set_eoa callback functions.  A new callback function
+  get_type_map was added in.  The public function H5FDrealloc was taken
+  out in 1.8.  The problem only happens when users define their own driver
+  for 1.6 and try to plug in 1.8 library.  Because there's only one user 
+  complaining about it, we (Elena, Quincey, and I) decided to leave it as 
+  it is (see bug report #1279).  Quincey will make a plan for 1.10.
+  SLU - 2010/2/2
 * MinGW has a missing libstdc++.dll.a library file and will not successfully link
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
