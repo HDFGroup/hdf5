@@ -55,7 +55,8 @@
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
 #define H5G_TARGET_UDLINK	0x0004
-#define H5G_CRT_INTMD_GROUP	0x0008
+#define H5G_TARGET_EXISTS	0x0008
+#define H5G_CRT_INTMD_GROUP	0x0010
 
 /****************************/
 /* Package Private Typedefs */
@@ -369,7 +370,7 @@ H5_DLL herr_t H5G_iterate(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
     const H5O_link_t *lnk, unsigned target, size_t *nlinks, hbool_t last_comp,
-    H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id);
+    H5G_loc_t *obj_loc, hbool_t *obj_exists, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);

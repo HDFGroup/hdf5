@@ -40,6 +40,8 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"		/* Links				*/
+
 
 /****************/
 /* Local Macros */
@@ -55,6 +57,12 @@ typedef struct {
     /* upward */
     H5G_loc_t  *loc;            /* Group location to set */
 } H5G_loc_fnd_t;
+
+/* User data for checking if an object exists */
+typedef struct {
+    /* upward */
+    hbool_t exists;             /* Whether the object exists */
+} H5G_loc_exists_t;
 
 /* User data for looking up an object in a group by index */
 typedef struct {
@@ -493,8 +501,9 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata;   /* User data passed in */
     H5O_link_t fnd_lnk;                 /* Link within group */
     hbool_t lnk_copied = FALSE;         /* Whether the link was copied */
-    size_t links_left = 1;              /* # of links left to traverse (somewhat bogus... :-/ ) */
+    size_t links_left = H5L_NUM_LINKS;  /* # of links left to traverse */
     hbool_t obj_loc_valid = FALSE;      /* Flag to indicate that the object location is valid */
+    hbool_t obj_exists = FALSE;         /* Whether the object exists (unused) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_by_idx_cb)
@@ -517,7 +526,7 @@ H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     /* Perform any special traversals that the link needs */
     /* (soft links, user-defined links, file mounting, etc.) */
     /* (may modify the object location) */
-    if(H5G_traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, &links_left, TRUE, udata->loc, udata->lapl_id, udata->dxpl_id) < 0)
+    if(H5G_traverse_special(obj_loc, &fnd_lnk, H5G_TARGET_NORMAL, &links_left, TRUE, udata->loc, &obj_exists, udata->lapl_id, udata->dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_TRAVERSE, FAIL, "special link traversal failed")
 
 done:
@@ -628,6 +637,84 @@ H5G_loc_insert(H5G_loc_t *grp_loc, const char *name, H5G_loc_t *obj_loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_exists_cb
+ *
+ * Purpose:	Callback for checking if an object exists
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, February 2, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_loc_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
+{
+    H5G_loc_exists_t *udata = (H5G_loc_exists_t *)_udata;   /* User data passed in */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_loc_exists_cb)
+
+    /* Check if the name in this group resolved to a valid object */
+    if(obj_loc == NULL)
+        if(lnk)
+            udata->exists = FALSE;
+        else
+            udata->exists = FAIL;
+    else
+        udata->exists = TRUE;
+
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_loc_exists_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_exists
+ *
+ * Purpose:	Check if an object actually exists at a location
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, February 2, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
+{
+    H5G_loc_exists_t udata;     /* User data for traversal callback */
+    htri_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_loc_exists, FAIL)
+
+    /* Check args. */
+    HDassert(loc);
+    HDassert(name && *name);
+
+    /* Set up user data for locating object */
+    udata.exists = FALSE;
+
+    /* Traverse group hierarchy to locate object */
+    if(H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G_loc_exists_cb, &udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists")
+
+    /* Set return value */
+    ret_value = (htri_t)udata.exists;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_exists() */
 
 
 /*-------------------------------------------------------------------------
