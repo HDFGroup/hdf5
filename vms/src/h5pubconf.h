@@ -15,6 +15,9 @@
 /* src/H5config.h.  Generated from H5config.h.in by configure.  */
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if building universal (internal helper macro) */
+/* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
+
 /* Define if your system generates wrong code for log2 routine. */
 /* #undef H5_BAD_LOG2_CODE_GENERATED */
 
@@ -98,6 +101,9 @@
 
 /* Define to 1 if you have the <dmalloc.h> header file. */
 /* #undef H5_HAVE_DMALLOC_H */
+
+/* Define if library information should be embedded in the executables */
+/* #define H5_HAVE_EMBEDDED_LIBINFO 1 */
 
 /* Define to 1 if you have the <features.h> header file. */
 /* #define H5_HAVE_FEATURES_H 1 */
@@ -315,6 +321,9 @@
 
 /* Define if `struct videoconfig' is defined */
 /* #undef H5_HAVE_STRUCT_VIDEOCONFIG */
+
+/* Define to 1 if you have the `symlink' function. */
+#define H5_HAVE_SYMLINK 1
 
 /* Define to 1 if you have the `system' function. */
 #define H5_HAVE_SYSTEM 1
@@ -599,6 +608,9 @@
 /* The size of `uint_least8_t', as computed by sizeof. */
 /* #define H5_SIZEOF_UINT_LEAST8_T 1 */
 
+/* The size of `unsigned', as computed by sizeof. */
+#define H5_SIZEOF_UNSIGNED 4
+
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 0
 
@@ -653,7 +665,15 @@
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
-/* #undef H5_WORDS_BIGENDIAN */
+/* #if defined AC_APPLE_UNIVERSAL_BUILD */
+/* # if defined __BIG_ENDIAN__ */
+/* #  define WORDS_BIGENDIAN 1 */
+/* # endif */
+/* #else */
+/* # ifndef WORDS_BIGENDIAN */
+/* #  undef WORDS_BIGENDIAN */
+/* # endif */
+/* #endif */
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef H5_const */
