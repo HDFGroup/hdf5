@@ -35,7 +35,7 @@ $ type sys$input
 $!
 $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Abtree2, H5A, H5AC, H5Adense, H5Adeprec, H5Aint, H5Atest,"+-
-        "H5B2, H5B2cache, H5B2dbg, H5B2int, H5B2stat, H5B2test, H5B, H5Bcache, H5Bdbg,"+-
+        "H5B2, H5B2cache, H5B2dbg, H5B2hdr, H5B2int, H5B2stat, H5B2test, H5B, H5Bcache, H5Bdbg,"+-
         "H5C, H5CS,"+-
         "H5Dbtree, H5D, H5Dchunk, H5Dcompact, H5Dcontig, H5Ddbg, H5Ddeprec, H5Defl, H5Dfill,"+-
         "H5Dint, H5Dio, H5Dlayout, H5Dmpio, H5Doh, H5Dscatgath, H5Dselect, H5Dtest,"+-
