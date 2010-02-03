@@ -30,14 +30,14 @@ $ type sys$input
 $!
 $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Abtree2, H5A, H5AC, H5Adense, H5Adeprec, H5Aint, H5Atest, H5B2, H5B2cache,"+-
-        "H5B2dbg, H5B2int, H5B2stat, H5B2test, H5B, H5Bcache, H5Bdbg, H5C, H5CS,"+-  
+        "H5B2dbg, H5B2hdr, H5B2int, H5B2stat, H5B2test, H5B, H5Bcache, H5Bdbg, H5C, H5CS,"+-  
         "H5Dbtree, H5D, H5Dchunk, H5Dcompact, H5Dcontig, H5Ddbg, H5Ddeprec,"+-
         "H5Defl, H5Dfill, H5Dint, H5Dio, H5Dlayout, H5Dmpio, H5Doh, H5Dscatgath, H5Dselect, H5Dtest,"+-
         "H5EA, H5EAcache, H5EAdbg, H5EAdblkpage, H5EAdblock, H5EAhdr, H5EAiblock, H5EAint,"+-
         "H5EAsblock, H5EAstat, H5EAtest, H5E, H5Edeprec, H5Eint,"+-
         "H5FA, H5FAcache, H5FAdbg, H5FAdblkpage, H5FAdblock, H5FAhdr, H5FAstat, H5FAtest,"+-
-        "H5Faccum, H5F, H5Fdbg, H5FD, H5FDcore, H5FDdirect, H5FDfamily, H5FDint, H5FDlog, H5FDmpi,"+-
-        "H5FDmpio, H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDspace, H5FDstdio, H5FDwindows,"+-
+        "H5Faccum, H5F, H5Fdbg, H5Fdeprec, H5FD, H5FDcore, H5FDdirect, H5FDfamily, H5FDint, H5FDlog, "+-
+        "H5FDmpi, H5FDmpio, H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDspace, H5FDstdio, H5FDwindows,"+-
         "H5Ffake, H5Fio, H5FL, H5Fmount, H5Fmpi, H5FO, H5Fquery, H5FS, H5FScache, H5FSdbg, H5Fsfile,"+-
         "H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Fsuper_cache, H5Ftest,"+-
         "H5Gbtree2, H5G, H5Gcache, H5Gcompact, H5Gdense, H5Gdeprec, H5Gent, H5Gint, H5Glink, H5Gloc,"+-
@@ -47,9 +47,9 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLcache, H5HLdbg, H5HLint, H5HP, H5I, H5L, H5Lexternal"
 $ cobj1= "H5MFaggr, H5MF, H5MFdbg, H5MFsection, H5MM,"+-
         "H5MP, H5MPtest, H5Oainfo, H5Oalloc, H5Oattr, H5Oattribute, H5Obogus, H5Obtreek,"+-
-        "H5O, H5Ocache, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo, H5Odtype, H5Oefl, H5Ofill, H5Oginfo,"+-
-        "H5Olayout, H5Olinfo, H5Olink, H5Omessage, H5Omtime, H5Oname, H5Onull, H5Opline, H5Orefcount,"+-
-        "H5Osdspace, H5Oshared, H5Oshmesg, H5Ostab, H5Otest, H5Ounknown,"+-
+        "H5O, H5Ocache, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo, H5Odtype, H5Oefl, H5Ofill, H5Ofsinfo,"+-
+        "H5Oginfo, H5Olayout, H5Olinfo, H5Olink, H5Omessage, H5Omtime, H5Oname, H5Onull, H5Opline,"+-
+        "H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg, H5Ostab, H5Otest, H5Ounknown,"+-
         "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Pint,"+-
         "H5Plapl, H5Plcpl, H5Pocpl, H5Pocpypl, H5Pstrcpl, H5Ptest,"+-
         "H5R, H5RC, H5Rdeprec, H5RS, H5Sall, H5S, H5Sdbg, H5Shyper, H5SL, H5SMbtree2, H5SM, H5SMcache,"+-
