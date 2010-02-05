@@ -5450,6 +5450,8 @@ H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride
         head = NULL;
         last_span = NULL;
 
+        HDassert(count[i] > 0);
+
         /* Generate all the span segments for this dimension */
         for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i]) {
             /* Allocate a span node */
@@ -7492,23 +7494,26 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
 partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 
     /* Perform the I/O on the elements, based on the position of the iterator */
-    while(io_bytes_left>0 && curr_seq<maxseq) {
+    while(io_bytes_left > 0 && curr_seq < maxseq) {
+        /* Sanity check */
+        HDassert(curr_span);
+
         /* Adjust location offset of destination to compensate for initial increment below */
-        loc_off-=curr_span->pstride;
+        loc_off -= curr_span->pstride;
 
         /* Loop over all the spans in the fastest changing dimension */
-        while(curr_span!=NULL) {
+        while(curr_span != NULL) {
             /* Move location offset of destination */
-            loc_off+=curr_span->pstride;
+            loc_off += curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
+            H5_ASSIGN_OVERFLOW(span_size, curr_span->nelem, hsize_t, size_t);
 
             /* Check number of elements against upper bounds allowed */
-            if(span_size>=io_bytes_left) {
+            if(span_size >= io_bytes_left) {
                 /* Trim the number of bytes to output */
-                span_size=io_bytes_left;
-                io_bytes_left=0;
+                span_size = io_bytes_left;
+                io_bytes_left = 0;
 
 /* COMMON */
                 /* Store the I/O information for the span */

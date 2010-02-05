@@ -762,6 +762,9 @@ done:
     if(c_name)
         HDfree(c_name);
 
+    if(c_name1)
+        HDfree(c_name1);
+
     return ret_value;
 }
 

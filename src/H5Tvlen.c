@@ -161,7 +161,7 @@ H5T_vlen_create(const H5T_t *base)
 
     /* Build new type */
     if(NULL == (dt = H5T_alloc()))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed")
     dt->shared->type = H5T_VLEN;
 
     /*
@@ -169,7 +169,8 @@ H5T_vlen_create(const H5T_t *base)
      * data, not point to the same VL sequences)
      */
     dt->shared->force_conv = TRUE;
-    dt->shared->parent = H5T_copy(base, H5T_COPY_ALL);
+    if(NULL == (dt->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype")
 
     /* Inherit encoding version from base type */
     dt->shared->version = base->shared->version;
@@ -185,6 +186,10 @@ H5T_vlen_create(const H5T_t *base)
     ret_value = dt;
 
 done:
+    if(!ret_value)
+        if(dt && H5T_close(dt) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_vlen_create() */
 

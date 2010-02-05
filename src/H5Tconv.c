@@ -10501,6 +10501,8 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         sfirst = (ssize_t)(src.prec - 1);
                         is_max_neg = 0;
                     }
+                    if(sfirst < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "zero bit not found")
 
                     /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of
                      * sign bit to 0 in the temporary buffer because they're all negated from the previous
