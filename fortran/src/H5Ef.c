@@ -128,10 +128,11 @@ nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
     size_t c_namelen = (size_t)*namelen;
     int_f ret_value = 0;
 
-    if(c_namelen) {
-        if(NULL == (c_name = (char *)HDmalloc(c_namelen + 1)))
-            HGOTO_DONE(FAIL)
-    } /* end if */
+    if(c_namelen > 0) 
+        c_name = (char *)HDmalloc(c_namelen + 1);
+
+    if(!c_name)
+        HGOTO_DONE(FAIL)
 
     /*
      * Call H5Eget_major function.
@@ -166,10 +167,11 @@ nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
     size_t c_namelen = (size_t)*namelen;
     int_f ret_value = 0;
 
-    if(c_namelen) {
-        if(NULL == (c_name = (char *)HDmalloc(c_namelen + 1)))
-            HGOTO_DONE(FAIL)
-    } /* end if */
+    if(c_namelen > 0) 
+        c_name = (char *)HDmalloc(c_namelen + 1);
+
+    if(!c_name)
+        HGOTO_DONE(FAIL)
 
     /*
      * Call H5Eget_minor function.

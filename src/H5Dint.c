@@ -1309,17 +1309,19 @@ done:
     if(ret_value < 0) {
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
-        if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-        if(dataset->shared->type) {
-            if(dataset->shared->type_id > 0) {
-                if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+        if(dataset->shared) {
+            if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            if(dataset->shared->type) {
+                if(dataset->shared->type_id > 0) {
+                    if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end if */
+                else {
+                    if(H5T_close(dataset->shared->type) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end else */
             } /* end if */
-            else {
-                if(H5T_close(dataset->shared->type) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-            } /* end else */
         } /* end if */
     } /* end if */
 
