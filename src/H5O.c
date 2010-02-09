@@ -537,7 +537,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Oexists
+ * Function:	H5Oexists_by_name
  *
  * Purpose:	Determine if a linked-to object exists
  *
@@ -550,12 +550,12 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Oexists(hid_t loc_id, const char *name, hid_t lapl_id)
+H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location info */
     hid_t       ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_API(H5Oexists, FAIL)
+    FUNC_ENTER_API(H5Oexists_by_name, FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
@@ -575,7 +575,7 @@ H5Oexists(hid_t loc_id, const char *name, hid_t lapl_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oexists() */
+} /* end H5Oexists_by_name() */
 
 
 /*-------------------------------------------------------------------------

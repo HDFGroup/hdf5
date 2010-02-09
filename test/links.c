@@ -9131,9 +9131,9 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
 /* Hard links */
-    /* Verify that H5Oexists() fails for non-existent link in root group */
+    /* Verify that H5Oexists_by_name() fails for non-existent link in root group */
     H5E_BEGIN_TRY {
-        status = H5Oexists(fid, "foo", H5P_DEFAULT);
+        status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0) TEST_ERROR
 
@@ -9142,13 +9142,13 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() succeeds for hard linked object */
-    if(TRUE != H5Oexists(fid, "group", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() succeeds for hard linked object */
+    if(TRUE != H5Oexists_by_name(fid, "group", H5P_DEFAULT))
         TEST_ERROR
 
-    /* Verify that H5Oexists() fails for non-existent link in non-root group */
+    /* Verify that H5Oexists_by_name() fails for non-existent link in non-root group */
     H5E_BEGIN_TRY {
-        status = H5Oexists(fid, "group/foo", H5P_DEFAULT);
+        status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT);
     } H5E_END_TRY
     if(status >= 0) TEST_ERROR
 
@@ -9157,29 +9157,29 @@ obj_exists(hid_t fapl, hbool_t new_format)
     /* Create dangling soft-link in root group */
     if(H5Lcreate_soft("dangle", fid, "soft1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling soft-link in root group */
-    if(FALSE != H5Oexists(fid, "soft1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling soft-link in root group */
+    if(FALSE != H5Oexists_by_name(fid, "soft1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to object */
     if(H5Lcreate_soft("/group", fid, "soft2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE for soft-link in root group that points to object */
-    if(TRUE != H5Oexists(fid, "soft2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE for soft-link in root group that points to object */
+    if(TRUE != H5Oexists_by_name(fid, "soft2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create dangling soft-link in non-root group */
     if(H5Lcreate_soft("dangle", fid, "group/soft1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling soft-link in non-root group */
-    if(FALSE != H5Oexists(fid, "group/soft1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling soft-link in non-root group */
+    if(FALSE != H5Oexists_by_name(fid, "group/soft1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to object */
     if(H5Lcreate_soft("/group", fid, "group/soft2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE for soft-link in non-root group that points to object */
-    if(TRUE != H5Oexists(fid, "group/soft2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE for soft-link in non-root group that points to object */
+    if(TRUE != H5Oexists_by_name(fid, "group/soft2", H5P_DEFAULT))
         TEST_ERROR
 
 
@@ -9187,43 +9187,43 @@ obj_exists(hid_t fapl, hbool_t new_format)
     /* Create dangling (file doesn't exist) external link in root group */
     if(H5Lcreate_external("nofile", "dangle", fid, "external1", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling (file doesn't exist) external link in root group */
-    if(FALSE != H5Oexists(fid, "external1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling (file doesn't exist) external link in root group */
+    if(FALSE != H5Oexists_by_name(fid, "external1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create dangling (object doesn't exist) external link in root group */
     if(H5Lcreate_external(filename, "dangle", fid, "external2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling (object doesn't exist) external link in root group */
-    if(FALSE != H5Oexists(fid, "external2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling (object doesn't exist) external link in root group */
+    if(FALSE != H5Oexists_by_name(fid, "external2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in root group that points to object */
     if(H5Lcreate_external(filename, "group", fid, "external3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE for external link in root group that points to object */
-    if(TRUE != H5Oexists(fid, "external3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE for external link in root group that points to object */
+    if(TRUE != H5Oexists_by_name(fid, "external3", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create dangling (file doesn't exist) external link in non-root group */
     if(H5Lcreate_external("nofile", "dangle", fid, "group/external1", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling (file doesn't exist) external link in non-root group */
-    if(FALSE != H5Oexists(fid, "group/external1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling (file doesn't exist) external link in non-root group */
+    if(FALSE != H5Oexists_by_name(fid, "group/external1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create dangling (object doesn't exist) external link in non-root group */
     if(H5Lcreate_external(filename, "dangle", fid, "group/external2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE for dangling (object doesn't exist) external link in non-root group */
-    if(FALSE != H5Oexists(fid, "group/external2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE for dangling (object doesn't exist) external link in non-root group */
+    if(FALSE != H5Oexists_by_name(fid, "group/external2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in non-root group that points to object */
     if(H5Lcreate_external(filename, "group", fid, "group/external3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE for external link in non-root group that points to object */
-    if(TRUE != H5Oexists(fid, "group/external3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE for external link in non-root group that points to object */
+    if(TRUE != H5Oexists_by_name(fid, "group/external3", H5P_DEFAULT))
         TEST_ERROR
 
 
@@ -9231,85 +9231,85 @@ obj_exists(hid_t fapl, hbool_t new_format)
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link */
     if(H5Lcreate_soft("external1", fid, "soft-elink1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "soft-elink1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "soft-elink1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to dangling (object doesn't exist) external link */
     if(H5Lcreate_soft("external2", fid, "soft-elink2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "soft-elink2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "soft-elink2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to external link that points to object */
     if(H5Lcreate_soft("external3", fid, "soft-elink3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "soft-elink3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "soft-elink3", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link in non-root group */
     if(H5Lcreate_soft("group/external1", fid, "soft-elink4", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "soft-elink4", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "soft-elink4", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to dangling (object doesn't exist) external link in non-root group */
     if(H5Lcreate_soft("group/external2", fid, "soft-elink5", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "soft-elink5", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "soft-elink5", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in root group that points to external link in non-root group that points to object */
     if(H5Lcreate_soft("group/external3", fid, "soft-elink6", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "soft-elink6", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "soft-elink6", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link */
     if(H5Lcreate_soft("/external1", fid, "group/soft-elink1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/soft-elink1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/soft-elink1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to dangling (object doesn't exist) external link */
     if(H5Lcreate_soft("/external2", fid, "group/soft-elink2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/soft-elink2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/soft-elink2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to external link that points to object */
     if(H5Lcreate_soft("/external3", fid, "group/soft-elink3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "group/soft-elink3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "group/soft-elink3", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link in non-root group */
     if(H5Lcreate_soft("/group/external1", fid, "group/soft-elink4", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/soft-elink4", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/soft-elink4", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to dangling (object doesn't exist) external link in non-root group */
     if(H5Lcreate_soft("/group/external2", fid, "group/soft-elink5", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/soft-elink5", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/soft-elink5", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create soft-link in non-root group that points to external link in non-root group that points to object */
     if(H5Lcreate_soft("/group/external3", fid, "group/soft-elink6", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "group/soft-elink6", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "group/soft-elink6", H5P_DEFAULT))
         TEST_ERROR
 
 
@@ -9317,57 +9317,57 @@ obj_exists(hid_t fapl, hbool_t new_format)
     /* Create external link in root group that points to dangling soft link in root group */
     if(H5Lcreate_external(filename, "soft1", fid, "elink-soft1", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "elink-soft1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "elink-soft1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in root group that points to soft link in root group that points to object */
     if(H5Lcreate_external(filename, "soft2", fid, "elink-soft2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "elink-soft2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "elink-soft2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in root group that points to dangling soft link in non-root group */
     if(H5Lcreate_external(filename, "group/soft1", fid, "elink-soft3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "elink-soft3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "elink-soft3", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in root group that points to soft link in root group that points to object */
     if(H5Lcreate_external(filename, "group/soft2", fid, "elink-soft4", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "elink-soft4", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "elink-soft4", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in non-root group that points to dangling soft link in root group */
     if(H5Lcreate_external(filename, "soft1", fid, "group/elink-soft1", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/elink-soft1", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/elink-soft1", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in non-root group that points to soft link in root group that points to object */
     if(H5Lcreate_external(filename, "soft2", fid, "group/elink-soft2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "group/elink-soft2", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "group/elink-soft2", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in non-root group that points to dangling soft link in non-root group */
     if(H5Lcreate_external(filename, "group/soft1", fid, "group/elink-soft3", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns FALSE */
-    if(FALSE != H5Oexists(fid, "group/elink-soft3", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns FALSE */
+    if(FALSE != H5Oexists_by_name(fid, "group/elink-soft3", H5P_DEFAULT))
         TEST_ERROR
 
     /* Create external link in non-root group that points to soft link in non-root group that points to object */
     if(H5Lcreate_external(filename, "group/soft2", fid, "group/elink-soft4", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
-    /* Verify that H5Oexists() returns TRUE */
-    if(TRUE != H5Oexists(fid, "group/elink-soft4", H5P_DEFAULT))
+    /* Verify that H5Oexists_by_name() returns TRUE */
+    if(TRUE != H5Oexists_by_name(fid, "group/elink-soft4", H5P_DEFAULT))
         TEST_ERROR
 
 
