@@ -1119,46 +1119,46 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
     oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_8, "H5Fget_obj_count");
+ 
+    if(oid_count > 0) {
+        hid_t *oid_list;
 
-    {
-        hid_t      *oid_list;
-        int   i;
-        H5I_type_t id_type;
-
-        oid_list = (hid_t*)calloc((size_t)oid_count, sizeof(hid_t));
+        oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
         if(oid_list != NULL) {
+            int   i;
+
 	    ret_count = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
 	    CHECK(ret_count, FAIL, "H5Fget_obj_ids");
-        }
 
-        for(i=0; i<oid_count; i++) {
-	    id_type = H5Iget_type(oid_list[i]);
-	    switch(id_type) {
-	        case H5I_FILE:
-		    if(oid_list[i]!=fid1 && oid_list[i]!=fid2 &&
-			oid_list[i]!=fid3 && oid_list[i]!=fid4) {
-			ret = FAIL;
-			CHECK(ret, FAIL, "H5Fget_obj_ids");
-		    }
-		    break;
-	        case H5I_GROUP:
-                    if(oid_list[i]!=gid1 && oid_list[i]!=gid2 &&
-                        oid_list[i]!=gid3) {
-			ret = FAIL;
-                        CHECK(ret, FAIL, "H5Fget_obj_ids");
-                    }
-		    break;
-	        case H5I_DATASET:
-	 	    VERIFY(oid_list[i], did, "H5Fget_obj_ids");
-		    break;
-		default:
-		    ret = FAIL;
-                    CHECK(ret, FAIL, "H5Fget_obj_ids");
-	    }
-        }
+            for(i = 0; i < oid_count; i++) {
+                H5I_type_t id_type;
 
-        free(oid_list);
-    }
+                id_type = H5Iget_type(oid_list[i]);
+                switch(id_type) {
+                    case H5I_FILE:
+                        if(oid_list[i] != fid1 && oid_list[i] != fid2
+                                && oid_list[i] != fid3 && oid_list[i] != fid4)
+                            ERROR("H5Fget_obj_ids");
+                        break;
+
+                    case H5I_GROUP:
+                        if(oid_list[i] != gid1 && oid_list[i] != gid2
+                                && oid_list[i] != gid3)
+                            ERROR("H5Fget_obj_ids");
+                        break;
+
+                    case H5I_DATASET:
+                        VERIFY(oid_list[i], did, "H5Fget_obj_ids");
+                        break;
+
+                    default:
+                        ERROR("H5Fget_obj_ids");
+                } /* end switch */
+            } /* end for */
+
+            HDfree(oid_list);
+        } /* end if */
+    } /* end if */
 
     /* close the two new files */
     ret = H5Fclose(fid3);

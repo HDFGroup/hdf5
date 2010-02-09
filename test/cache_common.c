@@ -2712,60 +2712,58 @@ flush_cache(H5F_t * file_ptr,
             hbool_t dump_detailed_stats)
 {
     const char * fcn_name = "flush_cache()";
-    H5C_t * cache_ptr;
-    herr_t result = 0;
     hbool_t verbose = FALSE;
 
     verify_unprotected();
 
-    if ( pass ) {
+    if(pass) {
+        H5C_t * cache_ptr = NULL;
+        herr_t result = 0;
 
         HDassert(file_ptr);
 
         cache_ptr = file_ptr->shared->cache;
 
-        if ( destroy_entries ) {
+        if(destroy_entries) {
 
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                                     H5C__FLUSH_INVALIDATE_FLAG);
+            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
+                    H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
-        } else {
+        }
+        else {
 
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                                     H5C__NO_FLAGS_SET);
+            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
+                    H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        }
+
+        if(dump_stats) {
+
+            H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
+        }
+
+        if(result < 0) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_flush_cache().";
+        }
+        else if((destroy_entries) && ((cache_ptr->index_len != 0)
+                || (cache_ptr->index_size != 0)
+                || (cache_ptr->clean_index_size != 0)
+                || (cache_ptr->dirty_index_size != 0))) {
+
+            if(verbose) {
+                HDfprintf(stdout,
+                        "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
+                        fcn_name,
+                        (long long)(cache_ptr->index_len),
+                        (long long)(cache_ptr->index_size),
+                        (long long)(cache_ptr->clean_index_size),
+                        (long long)(cache_ptr->dirty_index_size));
+            }
+            pass = FALSE;
+            failure_mssg = "non zero index len/sizes after H5C_flush_cache() with invalidate.";
         }
     }
-
-    if ( dump_stats ) {
-
-        H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
-    }
-
-    if ( result < 0 ) {
-
-        pass = FALSE;
-        failure_mssg = "error in H5C_flush_cache().";
-    }
-    else if ( ( destroy_entries ) &&
-	      ( ( cache_ptr->index_len != 0 ) ||
-	        ( cache_ptr->index_size != 0 ) ||
-	        ( cache_ptr->clean_index_size != 0 ) ||
-	        ( cache_ptr->dirty_index_size != 0 ) ) ) {
-
-	if ( verbose ) {
-            HDfprintf(stdout,
-		      "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
-		      fcn_name,
-		      (long long)(cache_ptr->index_len),
-		      (long long)(cache_ptr->index_size),
-		      (long long)(cache_ptr->clean_index_size),
-		      (long long)(cache_ptr->dirty_index_size));
-	}
-        pass = FALSE;
-        failure_mssg =
-	   "non zero index len/sizes after H5C_flush_cache() with invalidate.";
-    }
-
 
     return;
 
