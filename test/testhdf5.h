@@ -127,6 +127,15 @@
 /* Used to document process through a test */
 #define MESSAGE(V,A) {if (HDGetTestVerbosity()>(V)) print_func A;}
 
+/* Used to indicate an error that is complex to check for */
+#define ERROR(where) do {						      \
+    if(VERBOSE_HI)					                      \
+	print_func("   Call to routine: %15s at line %4d in %s returned "     \
+           "invalid result\n", where, (int)__LINE__, __FILE__);               \
+    TestErrPrintf("*** UNEXPECTED RESULT from %s at line %4d in %s\n"         \
+               where, (int)__LINE__, __FILE__);                               \
+} while(0)
+
 /* definitions for command strings */
 #define VERBOSITY_STR   "Verbosity"
 #define SKIP_STR        "Skip"

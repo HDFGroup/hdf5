@@ -264,9 +264,6 @@ H5B2_hdr_alloc(H5F_t *f)
     ret_value = hdr;
 
 done:
-    if(!ret_value && hdr)
-        if(H5B2_hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to free shared v2 B-tree info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_hdr_alloc() */
