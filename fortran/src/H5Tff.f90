@@ -1510,8 +1510,9 @@ CONTAINS
 !		type_id		- datatype identifier
 ! Outputs:
 !		cset		- character set type of a string datatype
-!				  Possible values of padding type are:
+!				  Possible values are:
 !				                  H5T_CSET_ASCII_F = 0
+!                                                 H5T_CSET_UTF8_F
 !		hdferr:		- error code
 !				 	Success:  0
 !				 	Failure: -1
@@ -1532,8 +1533,9 @@ CONTAINS
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
             INTEGER, INTENT(OUT) :: cset ! character set type of a string datatype
-                                            ! Possible values of padding type are:
-                                            !H5T_CSET_ASCII_F = 0
+                                            ! Possible values are:
+                                            !    H5T_CSET_ASCII_F = 0
+                                            !    H5T_CSET_UTF8_F
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
 !            INTEGER, EXTERNAL :: h5tget_cset_c
@@ -1561,8 +1563,9 @@ CONTAINS
 ! Inputs:
 !		type_id		- datatype identifier
 !		cset		- character set type of a string datatype
-!				  Possible values of padding type are:
+!				  Possible values are:
 !				                  H5T_CSET_ASCII_F = 0
+!                                                 H5T_CSET_UTF8_F
 ! Outputs:
 !		hdferr:		- error code
 !				 	Success:  0
@@ -1584,8 +1587,10 @@ CONTAINS
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
             INTEGER, INTENT(IN) :: cset !character set type of a string datatype
-                                           !Possible values of padding type are:
-                                           !H5T_CSET_ASCII_F = 0
+                                           !Possible values are:
+                                           !     H5T_CSET_ASCII_F = 0
+                                           !     H5T_CSET_UTF8_F
+
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
 !            INTEGER, EXTERNAL :: h5tset_cset_c
