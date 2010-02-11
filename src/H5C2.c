@@ -130,7 +130,6 @@
 #endif /* H5C2_PRINT_ENTRY_POINTS */
 
 
-
 
 /*
  * Private file-scope variables.
@@ -485,6 +484,7 @@ H5C2_create(size_t		        max_cache_size,
 
     HDassert( max_type_id >= 0 );
     HDassert( max_type_id < H5C2__MAX_NUM_TYPE_IDS );
+    HDassert( type_name_table_ptr );
 
     HDassert( ( write_permitted == TRUE ) || ( write_permitted == FALSE ) );
 
@@ -1121,7 +1121,6 @@ H5C2_expunge_entry(H5F_t *              f,
                    const H5C2_class_t * type,
                    haddr_t 	        addr)
 {
-    /* const char *	fcn_name = "H5C2_expunge_entry()"; */
     H5C2_t *            cache_ptr;
     herr_t		result;
     herr_t		ret_value = SUCCEED;      /* Return value */
@@ -2177,7 +2176,6 @@ H5C2_get_entry_status(const H5F_t *  f,
                       hbool_t * is_protected_ptr,
 		      hbool_t * is_pinned_ptr)
 {
-    /* const char *  		fcn_name = "H5C2_get_entry_status()"; */
     H5C2_t *                    cache_ptr;
     herr_t			ret_value = SUCCEED;      /* Return value */
     H5C2_cache_entry_t *	entry_ptr = NULL;
@@ -2459,7 +2457,6 @@ H5C2_insert_entry(H5F_t *              f,
                   void *	       thing,
                   unsigned int         flags)
 {
-    /* const char *     fcn_name = "H5C2_insert_entry()"; */
     H5C2_t *                    cache_ptr;
     herr_t			result;
     herr_t			ret_value = SUCCEED;    /* Return value */
@@ -3837,7 +3834,6 @@ H5C2_protect(H5F_t *		  f,
              void *               udata,
 	     unsigned		  flags)
 {
-    /* const char *	fcn_name = "H5C2_protect()"; */
     H5C2_t *		cache_ptr;
     hbool_t		hit;
     hbool_t		first_flush;
@@ -5438,7 +5434,6 @@ H5C2_unprotect(H5F_t *		    f,
                unsigned int         flags,
                size_t               new_size)
 {
-    /* const char *	fcn_name = "H5C2_unprotect()"; */
     H5C2_t *            cache_ptr;
     hbool_t		deleted;
     hbool_t		dirtied;
@@ -6162,7 +6157,6 @@ H5C2__auto_adjust_cache_size(H5F_t * f,
                              H5C2_t * cache_ptr,
                              hbool_t write_permitted)
 {
-    herr_t			ret_value = SUCCEED;      /* Return value */
     herr_t			result;
     hbool_t			inserted_epoch_marker = FALSE;
     size_t			new_max_cache_size = 0;
@@ -6171,6 +6165,7 @@ H5C2__auto_adjust_cache_size(H5F_t * f,
     size_t			old_min_clean_size = 0;
     double			hit_rate;
     enum H5C2_resize_status	status = in_spec2; /* will change if needed */
+    herr_t			ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__auto_adjust_cache_size)
 
@@ -6805,9 +6800,6 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                                                  H5C2_t * cache_ptr,
                                                  hbool_t write_permitted)
 {
-    /* const char *	 fcn_name =
-	    "H5C2__autoadjust__ageout__evict_aged_out_entries()"; */
-    herr_t               ret_value = SUCCEED;      /* Return value */
     herr_t               result;
     size_t		 eviction_size_limit;
     size_t		 bytes_evicted = 0;
@@ -6815,6 +6807,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
     H5C2_cache_entry_t * entry_ptr;
     H5C2_cache_entry_t * next_ptr;
     H5C2_cache_entry_t * prev_ptr;
+    herr_t               ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__autoadjust__ageout__evict_aged_out_entries)
 
@@ -7294,8 +7287,6 @@ H5C2__flash_increase_cache_size(H5C2_t * cache_ptr,
                                 size_t old_entry_size,
                                 size_t new_entry_size)
 {
-    /* const char *     fcn_name = "H5C2__flash_increase_cache_size()";*/
-    herr_t                      ret_value = SUCCEED;      /* Return value */
     size_t                      new_max_cache_size = 0;
     size_t                      old_max_cache_size = 0;
     size_t                      new_min_clean_size = 0;
@@ -7303,6 +7294,7 @@ H5C2__flash_increase_cache_size(H5C2_t * cache_ptr,
     size_t                      space_needed;
     enum H5C2_resize_status     status = flash_increase2; /* may change */
     double                      hit_rate;
+    herr_t                      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__flash_increase_cache_size)
     HDassert( cache_ptr );
@@ -7510,9 +7502,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
                             H5C2_t * cache_ptr,
 			    unsigned flags)
 {
-    /* const char *	fcn_name = "H5C2_flush_invalidate_cache()"; */
     herr_t              status;
-    herr_t		ret_value = SUCCEED;
     hbool_t		done = FALSE;
     int32_t		protected_entries = 0;
     int32_t		i;
@@ -7529,6 +7519,7 @@ H5C2_flush_invalidate_cache(const H5F_t * f,
     size_t              actual_slist_size = 0;
     size_t              initial_slist_size = 0;
 #endif /* H5C2_DO_SANITY_CHECKS */
+    herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_flush_invalidate_cache, FAIL)
 
@@ -8127,7 +8118,6 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                         unsigned	     flags,
                         hbool_t		     del_entry_from_slist_on_destroy)
 {
-    /* const char *         fcn_name = "H5C2_flush_single_entry()"; */
     hbool_t		 destroy;
     hbool_t		 clear_only;
     hbool_t		 was_dirty;
@@ -8311,45 +8301,45 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                     if ( cache_ptr->dLRU_head_ptr == NULL )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_head_ptr == NULL.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->dLRU_tail_ptr == NULL )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_tail_ptr == NULL.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->dLRU_list_len <= 0 )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_list_len <= 0.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->dLRU_list_size <= 0 )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->dLRU_list_size <= 0.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->dLRU_list_size < entry_ptr->size )
                         HDfprintf(stdout,
                           "%s: cache_ptr->dLRU_list_size < entry_ptr->size.\n",
-                          fcn_name);
+                          FUNC);
 
                     if ( ( (cache_ptr->dLRU_list_size) == entry_ptr->size ) &&
                          ( ! ( (cache_ptr->dLRU_list_len) == 1 ) ) )
                         HDfprintf(stdout,
                           "%s: dLRU_list_size == size && dLRU_list_len != 1\n",
-                          fcn_name);
+                          FUNC);
 
                     if ( ( entry_ptr->aux_prev == NULL ) &&
                          ( cache_ptr->dLRU_head_ptr != entry_ptr ) )
                         HDfprintf(stdout,
                                   "%s: entry_ptr->aux_prev == NULL && dLRU_head_ptr != entry_ptr\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( ( entry_ptr->aux_next == NULL ) &&
                          ( cache_ptr->dLRU_tail_ptr != entry_ptr ) )
                         HDfprintf(stdout,
                                   "%s: entry_ptr->aux_next == NULL && dLRU_tail_ptr != entry_ptr\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( ( cache_ptr->dLRU_list_len == 1 ) &&
                          ( ! ( ( cache_ptr->dLRU_head_ptr == entry_ptr ) &&
@@ -8363,7 +8353,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                     {
                         HDfprintf(stdout,
                                "%s: single entry dlru sanity check fails\n",
-                               fcn_name);
+                               FUNC);
                     }
 
                 }
@@ -8372,41 +8362,41 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                     if ( cache_ptr->cLRU_head_ptr == NULL )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_head_ptr == NULL.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->cLRU_tail_ptr == NULL )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_tail_ptr == NULL.\n",
-                                   fcn_name);
+                                   FUNC);
 
                     if ( cache_ptr->cLRU_list_len <= 0 )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_list_len <= 0.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->cLRU_list_size <= 0 )
                         HDfprintf(stdout,
                                   "%s: cache_ptr->cLRU_list_size <= 0.\n",
-                                  fcn_name);
+                                  FUNC);
 
                     if ( cache_ptr->cLRU_list_size < entry_ptr->size )
                         HDfprintf(stdout,
                           "%s: cache_ptr->cLRU_list_size < entry_ptr->size.\n",
-                          fcn_name);
+                          FUNC);
 
                     if ( ( (cache_ptr->cLRU_list_size) == entry_ptr->size ) &&
                          ( ! ( (cache_ptr->cLRU_list_len) == 1 ) ) )
                         HDfprintf(stdout,
                               "%s: cLRU_list_size == size && cLRU_list_len != 1\n",
-                              fcn_name);
+                              FUNC);
 
                     if ( ( entry_ptr->aux_prev == NULL ) &&
                          ( cache_ptr->cLRU_head_ptr != entry_ptr ) )
-                        HDfprintf(stdout, "%s: entry_ptr->aux_prev == NULL && cLRU_head_ptr != entry_ptr\n", fcn_name);
+                        HDfprintf(stdout, "%s: entry_ptr->aux_prev == NULL && cLRU_head_ptr != entry_ptr\n", FUNC);
 
                     if ( ( entry_ptr->aux_next == NULL ) &&
                          ( cache_ptr->cLRU_tail_ptr != entry_ptr ) )
-                        HDfprintf(stdout, "%s: entry_ptr->aux_next == NULL && cLRU_tail_ptr != entry_ptr\n", fcn_name);
+                        HDfprintf(stdout, "%s: entry_ptr->aux_next == NULL && cLRU_tail_ptr != entry_ptr\n", FUNC);
 
                     if ( ( cache_ptr->cLRU_list_len == 1 ) &&
                          ( ! ( ( cache_ptr->cLRU_head_ptr == entry_ptr ) &&
@@ -8420,7 +8410,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
                     {
                         HDfprintf(stdout,
                                   "%s: single entry clru sanity check fails\n",
-                                  fcn_name);
+                                  FUNC);
                     }
                 }
             }
@@ -8535,12 +8525,17 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 
 	        if ( serialize_flags != 0 )
                 {
+
+                    /* Check for unexpected flags from serialize callback */
+                    if(serialize_flags & ~(H5C2__SERIALIZE_RESIZED_FLAG | H5C2__SERIALIZE_RENAMED_FLAG))
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unknown serialize flag(s)")
+
                     if ( destroy )
 		    {
 		        if ( cache_ptr->mdj_enabled ) {
 
                             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                           "rename/resize on destroy when journaling enabled.");
+                               "rename/resize on destroy when journaling enabled.")
                         }
 
                         /* We have already removed the entry from the
@@ -8555,33 +8550,28 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 		         * deallocate the old image, and allocate a new.
 		         */
 
-                        switch ( serialize_flags )
-		        {
-		  	    case H5C2__SERIALIZE_RESIZED_FLAG:
-			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(    \
-						                  cache_ptr, \
-					                          entry_ptr, \
-								  new_len)
-			        entry_ptr->size = new_len;
-			        entry_ptr->image_ptr = new_image_ptr;
-			        break;
+                        if(serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) {
+                            H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, \
+                                                              entry_ptr, \
+                                                              new_len)
 
-			    case (H5C2__SERIALIZE_RESIZED_FLAG |
-                                  H5C2__SERIALIZE_RENAMED_FLAG):
-			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
-						                   cache_ptr, \
-					                           entry_ptr, \
-								   new_len)
+                            /* Check for resize+rename */
+                            if(serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) {
+                                H5C2__UPDATE_STATS_FOR_RENAME(cache_ptr, \
+                                                              entry_ptr)
 			        entry_ptr->addr = new_addr;
-			        entry_ptr->size = new_len;
-			        entry_ptr->image_ptr = new_image_ptr;
-			        break;
+                            } /* end if */
 
-			    default:
-			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-					    "unexpected serialize flag(s)")
-			        break;
-		        }
+                            entry_ptr->size = new_len;
+                            entry_ptr->image_ptr = new_image_ptr;
+                        } /* end if */
+                        else {
+                            HDassert(serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG);
+
+                            H5C2__UPDATE_STATS_FOR_RENAME(cache_ptr, \
+                                                          entry_ptr)
+                            entry_ptr->addr = new_addr;
+                        } /* end else */
 		    }
 		    else
 		    {
@@ -8599,99 +8589,79 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 		         * cache data structures.
 		         */
 
-                        switch ( serialize_flags )
-		        {
-			    case H5C2__SERIALIZE_RESIZED_FLAG:
-			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
-						                   cache_ptr, \
-					                           entry_ptr, \
-								   new_len)
-			        /* The replacement policy code thinks the
-			         * entry is already clean, so modify is_dirty
-			         * to meet this expectation.
-			         */
-			        entry_ptr->is_dirty = FALSE;
+                        if(serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) {
 
-                                /* update the hash table for the size change*/
-                                H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
-						            (cache_ptr),      \
-                                                            (entry_ptr->size),\
-							    (new_len));
+                            H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
+                                                               cache_ptr, \
+                                                               entry_ptr, \
+                                                               new_len)
 
-                                /* The entry can't be protected since we  are
-			         * in the process of flushing it.  Thus we must
-			         * update the replacement policy data
-				 * structures for the size change.  The macro
-				 * deals with the pinned case.
-			         */
-			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
-					                        entry_ptr, \
-						 	        new_len);
+                            /* The replacement policy code thinks the
+                             * entry is already clean, so modify is_dirty
+                             * to meet this expectation.
+                             */
+                            entry_ptr->is_dirty = FALSE;
 
-                                /* The entry can't be in the slist, so no need
-			         * to update the slist for the size change.
-			         */
+                            /* Check for resize+rename */
+                            if(serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) {
+                                H5C2__UPDATE_STATS_FOR_RENAME(cache_ptr, \
+                                                              entry_ptr)
 
-			        /* finally, set is_dirty to TRUE again, and
-			         * update the size and image_ptr.
-			         */
-			        entry_ptr->is_dirty = TRUE;
-			        entry_ptr->size = new_len;
-			        entry_ptr->image_ptr = new_image_ptr;
-			        break;
-
-			    case (H5C2__SERIALIZE_RESIZED_FLAG |
-                                  H5C2__SERIALIZE_RENAMED_FLAG):
-			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
-						                   cache_ptr, \
-					                           entry_ptr, \
-								   new_len)
-			        /* The replacement policy code thinks the
-			         * entry is already clean, so modify is_dirty
-			         * to meet this expectation.
-			         */
-			        entry_ptr->is_dirty = FALSE;
-
-			        /* first update the hash table for the rename */
+			        /* update the hash table for the rename */
 			        H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
 		                entry_ptr->addr = new_addr;
 			        H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, \
 						      FAIL)
+                            } /* end if */
 
-                                /* update the hash table for the size change */
-                                H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
-						            (cache_ptr),      \
-                                                            (entry_ptr->size),\
-							    (new_len));
+                            /* update the hash table for the size change*/
+                            H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
+                                                        (cache_ptr),      \
+                                                        (entry_ptr->size),\
+                                                        (new_len));
 
-                                /* The entry can't be protected since we  are
-			         * in the process of flushing it.  Thus we must
-			         * update the replacement policy data
-				 * structures for the size change.  The macro
-				 * deals with the pinned case.
-			         */
-			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
-					                        entry_ptr, \
-						   	        new_len);
+                            /* The entry can't be protected since we  are
+                             * in the process of flushing it.  Thus we must
+                             * update the replacement policy data
+                             * structures for the size change.  The macro
+                             * deals with the pinned case.
+                             */
+                            H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
+                                                            entry_ptr, \
+                                                            new_len);
 
-                                /* The entry can't be in the slist, so no need
-			         * to update the slist for the size change.
-			         */
+                            /* The entry can't be in the slist, so no need
+                             * to update the slist for the size change.
+                             */
 
-			        /* finally, set is_dirty to TRUE again, and
-			         * update the size and image_ptr.
-			         */
-			        entry_ptr->is_dirty = TRUE;
+                            /* finally, set is_dirty to TRUE again, and
+                             * update the size and image_ptr.
+                             */
+                            entry_ptr->is_dirty = TRUE;
+                            entry_ptr->size = new_len;
+                            entry_ptr->image_ptr = new_image_ptr;
+                        } /* end if */
+                        else {
+                            HDassert(serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG);
 
-			        entry_ptr->size = new_len;
-			        entry_ptr->image_ptr = new_image_ptr;
-			        break;
+                            /* The replacement policy code thinks the
+                             * entry is already clean, so modify is_dirty
+                             * to meet this expectation.
+                             */
+                            entry_ptr->is_dirty = FALSE;
 
-			    default:
-			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-			 		    "unexpected serialize flag(s)")
-			        break;
-		        }
+                            H5C2__UPDATE_STATS_FOR_RENAME(cache_ptr, \
+                                                          entry_ptr)
+
+                            /* first update the hash table for the rename */
+                            H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+                            entry_ptr->addr = new_addr;
+                            H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, \
+                                                  FAIL)
+
+                            /* finally, set is_dirty to TRUE again */
+                            entry_ptr->is_dirty = TRUE;
+                        } /* end else */
 		    }
                 }
 		entry_ptr->image_up_to_date = TRUE;
@@ -8870,12 +8840,11 @@ H5C2_load_entry(H5F_t *              f,
 		size_t		     len,
                 void *         udata_ptr)
 {
-    /* const char *		fcn_name = "H5C2_load_entry()"; */
     hbool_t			dirty = FALSE;
     void *			image_ptr = NULL;
     void *			thing = NULL;
-    void *			ret_value = NULL;
     H5C2_cache_entry_t *	entry_ptr = NULL;
+    void *			ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2_load_entry)
 
@@ -9145,8 +9114,6 @@ H5C2_make_space_in_cache(H5F_t * f,
 		        size_t	 space_needed,
                         hbool_t	 write_permitted)
 {
-    /* const char *	fcn_name = "H5C2_make_space_in_cache()"; */
-    herr_t		ret_value = SUCCEED;      /* Return value */
     herr_t		result;
     int32_t		entries_examined = 0;
     int32_t		initial_list_len;
@@ -9158,6 +9125,7 @@ H5C2_make_space_in_cache(H5F_t * f,
     H5C2_cache_entry_t *	entry_ptr;
     H5C2_cache_entry_t *	prev_ptr;
     H5C2_cache_entry_t *	next_ptr;
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2_make_space_in_cache)
 
@@ -9228,7 +9196,7 @@ H5C2_make_space_in_cache(H5F_t * f,
             if ( result < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to flush entry 1")
+                            "unable to flush entry")
             }
 
 	    if ( prev_ptr != NULL ) {
@@ -9326,7 +9294,7 @@ H5C2_make_space_in_cache(H5F_t * f,
             if ( result < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to flush entry 2")
+                            "unable to flush entry")
             }
 
 	    if ( prev_ptr != NULL ) {
@@ -9357,23 +9325,23 @@ H5C2_make_space_in_cache(H5F_t * f,
 #if 0 /* This debuging code may be useful in the future -- keep it for now. */
 		    if ( ! ( prev_ptr->is_dirty ) ) {
 			HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n",
-				  fcn_name);
+				  FUNC);
 		    }
 		    if ( prev_ptr->aux_next != next_ptr ) {
 			HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n",
-				  fcn_name);
+				  FUNC);
 		    }
 		    if ( prev_ptr->is_protected ) {
 			HDfprintf(stdout, "%s: prev_ptr->is_protected\n",
-				  fcn_name);
+				  FUNC);
 		    }
 		    if ( prev_ptr->is_pinned ) {
 			HDfprintf(stdout, "%s:prev_ptr->is_pinned\n",
-				  fcn_name);
+				  FUNC);
 		    }
 
 		    HDfprintf(stdout, "%s: re-starting scan of dirty list\n",
-		      	     fcn_name);
+		      	     FUNC);
 #endif /* JRM */
 	            entry_ptr = cache_ptr->dLRU_tail_ptr;
 

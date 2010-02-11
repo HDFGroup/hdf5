@@ -209,60 +209,60 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* file_ptr               */ file_ptr,
-		            /* max_index              */ max_index,
-                            /* lag                    */ lag,
-                            /* verbose                */ FALSE,
-                            /* reset_stats            */ TRUE,
-                            /* display_stats          */ display_stats,
-                            /* display_detailed_stats */ FALSE,
-                            /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ FALSE,
-                            /* do_destroys            */ TRUE,
-			    /* do_mult_ro_protects    */ TRUE,
-                            /* dirty_destroys         */ dirty_destroys,
-                            /* dirty_unprotects       */ dirty_unprotects);
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ FALSE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* file_ptr               */ file_ptr,
-                             /* max_index              */ max_index,
-                             /* lag                    */ lag,
-                             /* verbose                */ FALSE,
-                             /* reset_stats            */ TRUE,
-                             /* display_stats          */ display_stats,
-                             /* display_detailed_stats */ FALSE,
-                             /* do_inserts             */ FALSE,
-                             /* dirty_inserts          */ dirty_inserts,
-                             /* do_renames             */ TRUE,
-                             /* rename_to_main_addr    */ TRUE,
-                             /* do_destroys            */ FALSE,
-			     /* do_mult_ro_protects    */ TRUE,
-                             /* dirty_destroys         */ dirty_destroys,
-                             /* dirty_unprotects       */ dirty_unprotects);
+                            /* max_index              */ max_index,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ FALSE,
+                            /* do_inserts             */ FALSE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* do_renames             */ TRUE,
+                            /* rename_to_main_addr    */ TRUE,
+                            /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
+                            /* dirty_destroys         */ dirty_destroys,
+                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* file_ptr               */ file_ptr,
-		            /* max_index              */ max_index,
-                            /* lag                    */ lag,
-                            /* verbose                */ FALSE,
-                            /* reset_stats            */ TRUE,
-                            /* display_stats          */ display_stats,
-                            /* display_detailed_stats */ FALSE,
-                            /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ FALSE,
-                            /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
-                            /* dirty_destroys         */ dirty_destroys,
-                            /* dirty_unprotects       */ dirty_unprotects);
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ FALSE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -271,15 +271,41 @@ smoke_check_1(void)
     /* flush and destroy all entries in the cache: */
 
     flush_cache2(/* file_ptr            */ file_ptr,
-                 /* destroy_entries     */ TRUE,
-                 /* dump_stats          */ FALSE,
-                 /* dump_detailed_stats */ FALSE);
+                /* destroy_entries     */ TRUE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
 
     if ( show_progress ) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* file_ptr               */ file_ptr,
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ TRUE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    /* flush all entries in the cache: */
+
+    flush_cache2(/* file_ptr            */ file_ptr,
+                /* destroy_entries     */ FALSE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    col_major_scan_backward2(/* file_ptr               */ file_ptr,
 		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
@@ -289,32 +315,6 @@ smoke_check_1(void)
                             /* do_inserts             */ TRUE,
                             /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
-
-    if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
-                  fcn_name, mile_stone++, (int)pass2);
-
-    /* flush all entries in the cache: */
-
-    flush_cache2(/* file_ptr            */ file_ptr,
-                 /* destroy_entries     */ FALSE,
-                 /* dump_stats          */ FALSE,
-                 /* dump_detailed_stats */ FALSE);
-
-    if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
-                  fcn_name, mile_stone++, (int)pass2);
-
-    col_major_scan_backward2(/* file_ptr               */ file_ptr,
-		             /* max_index              */ max_index,
-                             /* lag                    */ lag,
-                             /* verbose                */ FALSE,
-                             /* reset_stats            */ TRUE,
-                             /* display_stats          */ display_stats,
-                             /* display_detailed_stats */ TRUE,
-                             /* do_inserts             */ TRUE,
-                             /* dirty_inserts          */ dirty_inserts,
-                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -430,60 +430,60 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* file_ptr               */ file_ptr,
-		            /* max_index              */ max_index,
-                            /* lag                    */ lag,
-                            /* verbose                */ FALSE,
-                            /* reset_stats            */ TRUE,
-                            /* display_stats          */ display_stats,
-                            /* display_detailed_stats */ TRUE,
-                            /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ FALSE,
-                            /* do_destroys            */ TRUE,
-			    /* do_mult_ro_protects    */ TRUE,
-                            /* dirty_destroys         */ dirty_destroys,
-                            /* dirty_unprotects       */ dirty_unprotects);
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ TRUE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* file_ptr               */ file_ptr,
-                             /* max_index              */ max_index,
-                             /* lag                    */ lag,
-                             /* verbose                */ FALSE,
-                             /* reset_stats            */ TRUE,
-                             /* display_stats          */ display_stats,
-                             /* display_detailed_stats */ TRUE,
-                             /* do_inserts             */ FALSE,
-                             /* dirty_inserts          */ dirty_inserts,
-                             /* do_renames             */ TRUE,
-                             /* rename_to_main_addr    */ TRUE,
-                             /* do_destroys            */ FALSE,
-			     /* do_mult_ro_protects    */ TRUE,
-                             /* dirty_destroys         */ dirty_destroys,
-                             /* dirty_unprotects       */ dirty_unprotects);
+                            /* max_index              */ max_index,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ TRUE,
+                            /* do_inserts             */ FALSE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* do_renames             */ TRUE,
+                            /* rename_to_main_addr    */ TRUE,
+                            /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
+                            /* dirty_destroys         */ dirty_destroys,
+                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* file_ptr               */ file_ptr,
-		            /* max_index              */ max_index,
-                            /* lag                    */ lag,
-                            /* verbose                */ FALSE,
-                            /* reset_stats            */ TRUE,
-                            /* display_stats          */ display_stats,
-                            /* display_detailed_stats */ TRUE,
-                            /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ FALSE,
-                            /* do_destroys            */ FALSE,
-			    /* do_mult_ro_protects    */ TRUE,
-                            /* dirty_destroys         */ dirty_destroys,
-                            /* dirty_unprotects       */ dirty_unprotects);
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ TRUE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -501,6 +501,32 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* file_ptr               */ file_ptr,
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ TRUE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    /* flush all entries in the cache: */
+
+    flush_cache2(/* file_ptr            */ file_ptr,
+                /* destroy_entries     */ FALSE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    col_major_scan_backward2(/* file_ptr               */ file_ptr,
 		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
@@ -510,32 +536,6 @@ smoke_check_2(void)
                             /* do_inserts             */ TRUE,
                             /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
-
-    if ( show_progress ) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
-                  fcn_name, mile_stone++, (int)pass2);
-
-    /* flush all entries in the cache: */
-
-    flush_cache2(/* file_ptr            */ file_ptr,
-                 /* destroy_entries     */ FALSE,
-                 /* dump_stats          */ FALSE,
-                 /* dump_detailed_stats */ FALSE);
-
-    if ( show_progress ) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
-                  fcn_name, mile_stone++, (int)pass2);
-
-    col_major_scan_backward2(/* file_ptr               */ file_ptr,
-		             /* max_index              */ max_index,
-                             /* lag                    */ lag,
-                             /* verbose                */ FALSE,
-                             /* reset_stats            */ TRUE,
-                             /* display_stats          */ display_stats,
-                             /* display_detailed_stats */ TRUE,
-                             /* do_inserts             */ TRUE,
-                             /* dirty_inserts          */ dirty_inserts,
-                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -871,20 +871,20 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* file_ptr               */ file_ptr,
-		            /* max_index              */ max_index,
-                            /* lag                    */ lag,
-                            /* verbose                */ FALSE,
-                            /* reset_stats            */ TRUE,
-                            /* display_stats          */ display_stats,
-                            /* display_detailed_stats */ TRUE,
-                            /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ FALSE,
-                            /* do_destroys            */ TRUE,
-			    /* do_mult_ro_protects    */ TRUE,
-                            /* dirty_destroys         */ dirty_destroys,
-                            /* dirty_unprotects       */ dirty_unprotects);
+		           /* max_index              */ max_index,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ TRUE,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -1669,13 +1669,13 @@ smoke_check_7(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     hl_row_major_scan_forward2(/* file_ptr              */ file_ptr,
-                               /* max_index              */ max_index,
-                               /* verbose                */ FALSE,
-                               /* reset_stats            */ TRUE,
-                               /* display_stats          */ display_stats,
-                               /* display_detailed_stats */ FALSE,
-                               /* do_inserts             */ FALSE,
-                               /* dirty_inserts          */ dirty_inserts);
+                              /* max_index              */ max_index,
+                              /* verbose                */ FALSE,
+                              /* reset_stats            */ TRUE,
+                              /* display_stats          */ display_stats,
+                              /* display_detailed_stats */ FALSE,
+                              /* do_inserts             */ FALSE,
+                              /* dirty_inserts          */ dirty_inserts);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -2963,22 +2963,22 @@ write_permitted_check(void)
 static unsigned
 check_insert_entry(void)
 {
-    const char *                fcn_name = "check_insert_entry";
-    int                         entry_type = PICO_ENTRY_TYPE;
-    int                         i;
-    int				point = 0;
-    int				subpoint = 0;
-    herr_t                      result;
-    hbool_t                     in_cache;
-    hbool_t                     is_dirty;
-    hbool_t                     is_protected;
-    hbool_t                     is_pinned;
-    hbool_t			show_progress = FALSE;
-    size_t                      entry_size;
-    H5F_t *                     file_ptr = NULL;
+    const char *               fcn_name = "check_insert_entry";
+    int                        entry_type = PICO_ENTRY_TYPE;
+    int                        i;
+    int			       point = 0;
+    int			       subpoint = 0;
+    herr_t                     result;
+    hbool_t                    in_cache;
+    hbool_t                    is_dirty;
+    hbool_t                    is_protected;
+    hbool_t                    is_pinned;
+    hbool_t		       show_progress = FALSE;
+    size_t                     entry_size;
+    H5F_t *                    file_ptr = NULL;
     H5C2_t *                    cache_ptr = NULL;
-    test_entry_t *              base_addr;
-    test_entry_t *              entry_ptr;
+    test_entry_t *             base_addr;
+    test_entry_t *             entry_ptr;
     struct H5C2_cache_entry_t * search_ptr;
 
 
@@ -3019,10 +3019,10 @@ check_insert_entry(void)
 
         insert_entry2(file_ptr, entry_type, 0, TRUE, H5C2__NO_FLAGS_SET);
         insert_entry2(file_ptr, entry_type, 1, TRUE,
-                      H5C2__SET_FLUSH_MARKER_FLAG);
+                     H5C2__SET_FLUSH_MARKER_FLAG);
         insert_entry2(file_ptr, entry_type, 2, TRUE, H5C2__PIN_ENTRY_FLAG);
         insert_entry2(file_ptr, entry_type, 3, TRUE,
- 		      (H5C2__SET_FLUSH_MARKER_FLAG | H5C2__PIN_ENTRY_FLAG));
+		     (H5C2__SET_FLUSH_MARKER_FLAG | H5C2__PIN_ENTRY_FLAG));
     }
 
     if ( show_progress ) {
@@ -3058,7 +3058,7 @@ check_insert_entry(void)
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5AC_get_entry_status() reports failure.";
+            failure_mssg2 = "H5C2_get_entry_status() reports failure.";
         }
 
         if ( show_progress ) {
@@ -3109,7 +3109,7 @@ check_insert_entry(void)
 	 	      fcn_name, i, point, subpoint++);
 	}
 
-	/* Thats all we can get from H5AC_get_entry_status().
+	/* Thats all we can get from H5C2_get_entry_status().
 	 * Now start looking at the cache data structures directly.
 	 */
 
@@ -3375,7 +3375,7 @@ check_flush_cache(void)
         reset_entries2();
 
         file_ptr = setup_cache2((size_t)(2 * 1024 * 1024),
-                                 (size_t)(1 * 1024 * 1024));
+                                (size_t)(1 * 1024 * 1024));
     }
 
     if ( show_progress ) {	/* 1 */
@@ -3510,7 +3510,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -3522,7 +3522,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_CLEAR_ONLY_FLAG);
+                                H5C2__FLUSH_CLEAR_ONLY_FLAG);
 
         if ( result < 0 ) {
 
@@ -3535,7 +3535,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_MARKED_ENTRIES_FLAG);
+                                H5C2__FLUSH_MARKED_ENTRIES_FLAG);
 
         if ( result < 0 ) {
 
@@ -5432,8 +5432,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          flush_flags);
+        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
 
         if ( result < 0 ) {
 
@@ -5525,7 +5524,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -5684,8 +5683,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          flush_flags);
+        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
 
         if ( result < 0 ) {
 
@@ -5725,15 +5723,15 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
-             "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-             (int)(entry_ptr->deserialized),
-             (int)(spec[i].expected_deserialized),
-             (int)(entry_ptr->cleared),
-             (int)(spec[i].expected_cleared),
-             (int)(entry_ptr->serialized),
-             (int)(spec[i].expected_serialized),
-             (int)(entry_ptr->destroyed),
-             (int)(spec[i].expected_destroyed));
+              "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
+              (int)(entry_ptr->deserialized),
+              (int)(spec[i].expected_deserialized),
+              (int)(entry_ptr->cleared),
+              (int)(spec[i].expected_cleared),
+              (int)(entry_ptr->serialized),
+              (int)(spec[i].expected_serialized),
+              (int)(entry_ptr->destroyed),
+              (int)(spec[i].expected_destroyed));
 
 #endif
 
@@ -5777,7 +5775,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -9818,8 +9816,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          flush_flags);
+        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
 
         if ( result < 0 ) {
 
@@ -9860,15 +9857,15 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
-             "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-             (int)(entry_ptr->deserialized),
-             (int)(spec[i].expected_deserialized),
-             (int)(entry_ptr->cleared),
-             (int)(spec[i].expected_cleared),
-             (int)(entry_ptr->serialized),
-             (int)(spec[i].expected_serialized),
-             (int)(entry_ptr->destroyed),
-             (int)(spec[i].expected_destroyed));
+              "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
+              (int)(entry_ptr->deserialized),
+              (int)(spec[i].expected_deserialized),
+              (int)(entry_ptr->cleared),
+              (int)(spec[i].expected_cleared),
+              (int)(entry_ptr->serialized),
+              (int)(spec[i].expected_serialized),
+              (int)(entry_ptr->destroyed),
+              (int)(spec[i].expected_destroyed));
 
 	    HDfprintf(stdout, "entry_ptr->header.is_dirty = %d\n",
 		      (int)(entry_ptr->header.is_dirty));
@@ -9889,8 +9886,8 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
         while ( ( pass2 ) && ( i < check_size ) )
         {
 	    if ( check[i].in_cache != entry_in_cache2(cache_ptr,
-				                      check[i].entry_type,
-						      check[i].entry_index) ) {
+				                     check[i].entry_type,
+						     check[i].entry_index) ) {
 
                 pass2 = FALSE;
                 HDsnprintf(msg, (size_t)128,
@@ -10063,7 +10060,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -10462,9 +10459,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	    /* verify the expected status of all entries we have loaded to date: */
             num_large_entries = 1;
 	    verify_entry_status2(cache_ptr,
-			         0,
-			         (num_variable_entries + num_monster_entries + num_large_entries),
-				 expected);
+			        0,
+			        (num_variable_entries + num_monster_entries + num_large_entries),
+				expected);
 	}
     }
 
@@ -11293,7 +11290,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -13158,8 +13155,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          flush_flags);
+        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
 
         if ( result < 0 ) {
 
@@ -13190,15 +13186,15 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 #if 1 /* This is useful debugging code -- lets keep it for a while */
 
             HDfprintf(stdout,
-             "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-             (int)(entry_ptr->deserialized),
-             (int)expected_deserialized,
-             (int)(entry_ptr->cleared),
-             (int)expected_cleared,
-             (int)(entry_ptr->serialized),
-             (int)expected_serialized,
-             (int)(entry_ptr->destroyed),
-             (int)expected_destroyed);
+              "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
+              (int)(entry_ptr->deserialized),
+              (int)expected_deserialized,
+              (int)(entry_ptr->cleared),
+              (int)expected_cleared,
+              (int)(entry_ptr->serialized),
+              (int)expected_serialized,
+              (int)(entry_ptr->destroyed),
+              (int)expected_destroyed);
 #endif
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -13236,7 +13232,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -13376,8 +13372,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			          flush_flags);
+        result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
 
         if ( result < 0 ) {
 
@@ -13407,15 +13402,15 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 #endif
 #if 0 /* this is useful debugging code -- keep it around */
             HDfprintf(stdout,
-             "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-             (int)(entry_ptr->deserialized),
-             (int)expected_deserialized,
-             (int)(entry_ptr->cleared),
-             (int)expected_cleared,
-             (int)(entry_ptr->serialized),
-             (int)expected_serialized,
-             (int)(entry_ptr->destroyed),
-             (int)expected_destroyed);
+              "desrlzd = %d(%d), clrd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
+              (int)(entry_ptr->deserialized),
+              (int)expected_deserialized,
+              (int)(entry_ptr->cleared),
+              (int)expected_cleared,
+              (int)(entry_ptr->serialized),
+              (int)expected_serialized,
+              (int)(entry_ptr->destroyed),
+              (int)expected_destroyed);
 #endif
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -13469,7 +13464,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
     if ( pass2 ) {
 
         result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                  H5C2__FLUSH_INVALIDATE_FLAG);
+                                H5C2__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -13562,7 +13557,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 1.");
+                       "H5C2_get_entry_status() reports failure 1.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -13586,7 +13581,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
+                       "H5C2_get_entry_status() reports failure 2.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
@@ -13608,7 +13603,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
+                       "H5C2_get_entry_status() reports failure 3.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
@@ -13630,7 +13625,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
+                       "H5C2_get_entry_status() reports failure 4.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || is_protected || !is_pinned ) {
@@ -13652,7 +13647,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 5.");
+                       "H5C2_get_entry_status() reports failure 5.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || !is_pinned ) {
@@ -13674,7 +13669,7 @@ check_get_entry_status(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 6.");
+                       "H5C2_get_entry_status() reports failure 6.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
@@ -13774,7 +13769,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 1.");
+                       "H5C2_get_entry_status() reports failure 1.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -13812,7 +13807,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
+                       "H5C2_get_entry_status() reports failure 2.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || is_protected || is_pinned ) {
@@ -13858,7 +13853,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
+                       "H5C2_get_entry_status() reports failure 3.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -13900,7 +13895,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
+                       "H5C2_get_entry_status() reports failure 4.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -13939,7 +13934,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 5.");
+                       "H5C2_get_entry_status() reports failure 5.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ) {
@@ -13980,7 +13975,7 @@ check_expunge_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 6.");
+                       "H5C2_get_entry_status() reports failure 6.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -14713,8 +14708,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
                 }
             }
 
-            unpin_entry2(file_ptr, spec_ptr->entry_type,
-			 spec_ptr->entry_index);
+            unpin_entry2(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
 
         } else {
 
@@ -14972,7 +14966,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 1.");
+                       "H5C2_get_entry_status() reports failure 1.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
@@ -15042,7 +15036,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
+                       "H5C2_get_entry_status() reports failure 2.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
@@ -15115,7 +15109,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
+                       "H5C2_get_entry_status() reports failure 3.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
@@ -15180,7 +15174,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
+                       "H5C2_get_entry_status() reports failure 4.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
@@ -15241,7 +15235,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 5.");
+                       "H5C2_get_entry_status() reports failure 5.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
@@ -15278,7 +15272,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 6.");
+                       "H5C2_get_entry_status() reports failure 6.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -15399,7 +15393,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 7.");
+                       "H5C2_get_entry_status() reports failure 7.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || is_dirty || !is_protected || is_pinned ) {
@@ -15471,7 +15465,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 8.");
+                       "H5C2_get_entry_status() reports failure 8.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
@@ -15544,7 +15538,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 9.");
+                       "H5C2_get_entry_status() reports failure 9.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || is_pinned ||
@@ -15611,7 +15605,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 10.");
+                       "H5C2_get_entry_status() reports failure 10.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
@@ -15672,7 +15666,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 11.");
+                       "H5C2_get_entry_status() reports failure 11.");
             failure_mssg2 = msg;
 
 	} else if ( !in_cache || !is_dirty || is_protected || ! is_pinned ||
@@ -15709,7 +15703,7 @@ check_resize_entry(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 12.");
+                       "H5C2_get_entry_status() reports failure 12.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16015,7 +16009,7 @@ check_evictions_enabled(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 1.");
+                       "H5C2_get_entry_status() reports failure 1.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16078,7 +16072,7 @@ check_evictions_enabled(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 2.");
+                       "H5C2_get_entry_status() reports failure 2.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16285,7 +16279,7 @@ check_evictions_enabled(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 3.");
+                       "H5C2_get_entry_status() reports failure 3.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16321,7 +16315,7 @@ check_evictions_enabled(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 4.");
+                       "H5C2_get_entry_status() reports failure 4.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16450,7 +16444,7 @@ check_evictions_enabled(void)
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "H5AC_get_entry_status() reports failure 5.");
+                       "H5C2_get_entry_status() reports failure 5.");
             failure_mssg2 = msg;
 
 	} else if ( in_cache ) {
@@ -16563,8 +16557,7 @@ check_flush_protected_err(void)
 
         protect_entry2(file_ptr, 0, 0);
 
-        if ( H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			      H5C2__NO_FLAGS_SET)
+        if ( H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C2__NO_FLAGS_SET)
              >= 0 ) {
 
             pass2 = FALSE;
@@ -16574,8 +16567,7 @@ check_flush_protected_err(void)
 
             unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
 
-            if ( H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-				  H5C2__NO_FLAGS_SET)
+            if ( H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C2__NO_FLAGS_SET)
                  < 0 ) {
 
                 pass2 = FALSE;
@@ -16749,15 +16741,14 @@ check_destroy_protected_err(void)
         reset_entries2();
 
         file_ptr = setup_cache2((size_t)(2 * 1024),
-                                 (size_t)(1 * 1024));
+                                (size_t)(1 * 1024));
 
         protect_entry2(file_ptr, 0, 0);
 
         if ( H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) >= 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 =
-		    "destroy succeeded on cache with protected entry.\n";
+            failure_mssg2 = "destroy succeeded on cache with protected entry.\n";
 
         } else {
 
@@ -17718,7 +17709,7 @@ check_expunge_entry_errs(void)
     if ( pass2 ) {
 
 	result = H5C2_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                    &(types2[0]), entry_ptr->addr);
+                                  &(types2[0]), entry_ptr->addr);
 
         if ( result > 0 ) {
 
@@ -17736,7 +17727,7 @@ check_expunge_entry_errs(void)
     if ( pass2 ) {
 
 	result = H5C2_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                    &(types2[0]), entry_ptr->addr);
+                                  &(types2[0]), entry_ptr->addr);
 
         if ( result > 0 ) {
 
@@ -17754,7 +17745,7 @@ check_expunge_entry_errs(void)
     if ( pass2 ) {
 
 	result = H5C2_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                    &(types2[0]), entry_ptr->addr);
+                                  &(types2[0]), entry_ptr->addr);
 
         if ( result < 0 ) {
 
@@ -17866,8 +17857,7 @@ check_resize_entry_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_resize_pinned_entry((void *)entry_ptr,
-			                  (size_t)0);
+	result = H5C2_resize_pinned_entry((void *)entry_ptr, (size_t)0);
 
         if ( result > 0 ) {
 
@@ -18362,7 +18352,7 @@ check_auto_cache_resize(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C2_cache_flash_incr_mode      */
+        /* enum H5C2_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C2_flash_incr__off,
 	/* double      flash_multiple         = */ 2.0,
 	/* double      flash_threshold        = */ 0.5,
@@ -21520,7 +21510,7 @@ check_auto_cache_resize(void)
      * code increases the cache size when and as expected.
      */
 
-    /* Place the cache in a know state via a flush destroy on the cache
+    /* Place the cache in a known state via a flush-destroy on the cache
      * to clear out all entries, and then a reset on all the entries.
      * Then configure the cache for the flash cache size increase tests,
      * and force the flash size increase code through all its operational
@@ -21724,8 +21714,7 @@ check_auto_cache_resize(void)
             if ( result != SUCCEED ) {
 
                 pass2 = FALSE;
-                failure_mssg2 =
-			"H5C2_set_cache_auto_resize_config failed 13.\n";
+                failure_mssg2 = "H5C2_set_cache_auto_resize_config failed 13.\n";
 	    }
         }
 
@@ -21883,8 +21872,7 @@ check_auto_cache_resize(void)
             if ( result != SUCCEED ) {
 
                 pass2 = FALSE;
-                failure_mssg2 =
-			"H5C2_set_cache_auto_resize_config failed 13.\n";
+                failure_mssg2 = "H5C2_set_cache_auto_resize_config failed 13.\n";
 	    }
         }
 
@@ -22057,8 +22045,7 @@ check_auto_cache_resize(void)
             if ( result != SUCCEED ) {
 
                 pass2 = FALSE;
-                failure_mssg2 =
-			"H5C2_set_cache_auto_resize_config failed 14.\n";
+                failure_mssg2 = "H5C2_set_cache_auto_resize_config failed 14.\n";
 	    }
         }
 
@@ -22215,8 +22202,7 @@ check_auto_cache_resize(void)
             if ( result != SUCCEED ) {
 
                 pass2 = FALSE;
-                failure_mssg2 =
-			"H5C2_set_cache_auto_resize_config failed 15.\n";
+                failure_mssg2 = "H5C2_set_cache_auto_resize_config failed 15.\n";
 	    }
         }
 
@@ -22689,7 +22675,7 @@ check_auto_cache_resize_disable(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C2_cache_flash_incr_mode      */
+        /* enum H5C2_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C2_flash_incr__off,
 	/* double      flash_multiple         = */ 2.0,
 	/* double      flash_threshold        = */ 0.5,
@@ -25450,7 +25436,7 @@ check_auto_cache_resize_epoch_markers(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C2_cache_flash_incr_mode      */
+        /* enum H5C2_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C2_flash_incr__off,
 	/* double      flash_multiple         = */ 2.0,
 	/* double      flash_threshold        = */ 0.5,
@@ -26198,7 +26184,7 @@ check_auto_cache_resize_input_errs(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C2_cache_flash_incr_mode      */
+        /* enum H5C2_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C2_flash_incr__off,
 	/* double      flash_multiple         = */ 2.0,
 	/* double      flash_threshold        = */ 0.5,
@@ -27558,7 +27544,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        invalid_auto_size_ctl.version           = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        invalid_auto_size_ctl.version            = H5C2__CURR_AUTO_SIZE_CTL_VER;
         invalid_auto_size_ctl.rpt_fcn                = NULL;
 
         invalid_auto_size_ctl.set_initial_size       = TRUE;
@@ -27608,7 +27594,7 @@ check_auto_cache_resize_input_errs(void)
 
             pass2 = FALSE;
             failure_mssg2 =
-           "H5C2_set_cache_auto_resize_config accepted bad flash_incr_mode.\n";
+             "H5C2_set_cache_auto_resize_config accepted bad flash_incr_mode.\n";
         }
     }
 
@@ -27634,7 +27620,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        invalid_auto_size_ctl.version           = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        invalid_auto_size_ctl.version            = H5C2__CURR_AUTO_SIZE_CTL_VER;
         invalid_auto_size_ctl.rpt_fcn                = NULL;
 
         invalid_auto_size_ctl.set_initial_size       = TRUE;
@@ -27684,7 +27670,7 @@ check_auto_cache_resize_input_errs(void)
 
             pass2 = FALSE;
             failure_mssg2 =
-         "H5C2_set_cache_auto_resize_config accepted bad flash_multiple(1).\n";
+           "H5C2_set_cache_auto_resize_config accepted bad flash_multiple(1).\n";
         }
     }
 
@@ -27708,7 +27694,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        invalid_auto_size_ctl.version           = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        invalid_auto_size_ctl.version            = H5C2__CURR_AUTO_SIZE_CTL_VER;
         invalid_auto_size_ctl.rpt_fcn                = NULL;
 
         invalid_auto_size_ctl.set_initial_size       = TRUE;
@@ -27758,7 +27744,7 @@ check_auto_cache_resize_input_errs(void)
 
             pass2 = FALSE;
             failure_mssg2 =
-         "H5C2_set_cache_auto_resize_config accepted bad flash_multiple(2).\n";
+           "H5C2_set_cache_auto_resize_config accepted bad flash_multiple(2).\n";
         }
     }
 
@@ -27784,7 +27770,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        invalid_auto_size_ctl.version           = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        invalid_auto_size_ctl.version            = H5C2__CURR_AUTO_SIZE_CTL_VER;
         invalid_auto_size_ctl.rpt_fcn                = NULL;
 
         invalid_auto_size_ctl.set_initial_size       = TRUE;
@@ -27834,7 +27820,7 @@ check_auto_cache_resize_input_errs(void)
 
             pass2 = FALSE;
             failure_mssg2 =
-        "H5C2_set_cache_auto_resize_config accepted bad flash_threshold(1).\n";
+          "H5C2_set_cache_auto_resize_config accepted bad flash_threshold(1).\n";
         }
     }
 
@@ -27858,7 +27844,7 @@ check_auto_cache_resize_input_errs(void)
 
     if ( pass2 ) {
 
-        invalid_auto_size_ctl.version           = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        invalid_auto_size_ctl.version            = H5C2__CURR_AUTO_SIZE_CTL_VER;
         invalid_auto_size_ctl.rpt_fcn                = NULL;
 
         invalid_auto_size_ctl.set_initial_size       = TRUE;
@@ -27908,7 +27894,7 @@ check_auto_cache_resize_input_errs(void)
 
             pass2 = FALSE;
             failure_mssg2 =
-        "H5C2_set_cache_auto_resize_config accepted bad flash_threshold(2).\n";
+          "H5C2_set_cache_auto_resize_config accepted bad flash_threshold(2).\n";
         }
     }
 
@@ -28655,7 +28641,7 @@ check_auto_cache_resize_aux_fcns(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C2_cache_flash_incr_mode      */
+        /* enum H5C2_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C2_flash_incr__off,
 	/* double      flash_multiple         = */ 2.0,
 	/* double      flash_threshold        = */ 0.5,
@@ -28691,7 +28677,7 @@ check_auto_cache_resize_aux_fcns(void)
         reset_entries2();
 
         file_ptr = setup_cache2((size_t)(2 * 1024),
-                                 (size_t)(1 * 1024));
+                                (size_t)(1 * 1024));
         cache_ptr = file_ptr->shared->cache2;
     }
 

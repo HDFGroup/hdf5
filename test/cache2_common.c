@@ -271,14 +271,9 @@ const H5C2_class_t types2[NUMBER_OF_ENTRY_TYPES] =
   }
 };
 
-static herr_t clear_dirty_bits(haddr_t addr,
-                               size_t len,
-                               void * thing);
-
 static void * deserialize(haddr_t addr,
                           size_t len,
                           const void * image_ptr,
-                          const void * udata_ptr,
                           hbool_t * dirty_ptr);
 
 static herr_t image_len(void *thing,
@@ -293,13 +288,13 @@ static herr_t serialize(haddr_t addr,
                         size_t * new_len_ptr,
                         void ** new_image_ptr_ptr);
 
-static herr_t free_icr(haddr_t addr,
-                       size_t len,
-                       void * thing);
+static herr_t free_icr(test_entry_t *entry_ptr);
 
-
+static herr_t clear_dirty_bits(test_entry_t *entry_ptr);
+
 /* address translation funtions: */
 
+
 /*-------------------------------------------------------------------------
  * Function:	addr_to_type_and_index2
  *
@@ -311,16 +306,12 @@ static herr_t free_icr(haddr_t addr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
 void
 addr_to_type_and_index2(haddr_t addr,
-                        int32_t * type_ptr,
-                        int32_t * index_ptr)
+                       int32_t * type_ptr,
+                       int32_t * index_ptr)
 {
     int i;
     int32_t type;
@@ -379,56 +370,9 @@ addr_to_type_and_index2(haddr_t addr,
 
 } /* addr_to_type_and_index2() */
 
-
-#if 0 /* This function has never been used, but we may want it
-       * some time.  Lets keep it for now.
-       */
-/*-------------------------------------------------------------------------
- * Function:	type_and_index_to_addr2
- *
- * Purpose:	Given a type and index of an entry, compute the associated
- *		addr and return that value.
- *
- * Return:	computed addr
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-type_and_index_to_addr2(int32_t type,
-                        int32_t idx)
-{
-    haddr_t addr;
-
-    HDassert( ( type >= 0 ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( idx >= 0 ) && ( idx <= max_indices2[type] ) );
-
-    addr = base_addrs2[type] + (((haddr_t)idx) * entry_sizes2[type]);
-
-    HDassert( addr == (entries2[type])[idx].addr );
-
-    if ( (entries2[type])[idx].at_main_addr ) {
-
-        HDassert( addr == (entries2[type])[idx].main_addr );
-
-    } else {
-
-        HDassert( addr == (entries2[type])[idx].alt_addr );
-    }
-
-    return(addr);
-
-} /* type_and_index_to_addr2() */
-
-#endif
-
-
 /* Call back functions: */
 
+
 /*-------------------------------------------------------------------------
  *
  * Function:    check_if_write_permitted2
@@ -446,17 +390,13 @@ type_and_index_to_addr2(int32_t type,
  *
  * Programmer:  John Mainzer, 5/15/04
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
 
 herr_t
 check_write_permitted2(const H5F_t UNUSED * f,
-                       hid_t UNUSED dxpl_id,
-                       hbool_t * write_permitted_ptr)
+                      hid_t UNUSED dxpl_id,
+                      hbool_t * write_permitted_ptr)
 {
 
     HDassert( write_permitted_ptr );
@@ -465,149 +405,6 @@ check_write_permitted2(const H5F_t UNUSED * f,
     return(SUCCEED);
 
 } /* check_write_permitted2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	clear_dirty_bits & friends
- *
- * Purpose:	Clear the dirty bits.  The helper functions verify that the
- *		correct version of clear_dirty_gits is being called, and
- *		then call clear_dirty_bits() proper.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              9/20/07
- *
- * Modifications:
- *
- * 		None
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-clear_dirty_bits(haddr_t addr,
-                 size_t len,
-                 void * thing)
-{
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
-
-    HDassert( thing );
-
-    entry_ptr = (test_entry_t *)thing;
-    base_addr = entries2[entry_ptr->type];
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices2[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->header.addr == entry_ptr->addr );
-    HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes2[entry_ptr->type] ) );
-
-    entry_ptr->is_dirty = FALSE;
-
-    entry_ptr->cleared = TRUE;
-
-    return(SUCCEED);
-
-} /* clear_dirty_bits() */
-
-herr_t
-pico_clear_dirty_bits(haddr_t addr,
-                      size_t len,
-                      void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-nano_clear_dirty_bits(haddr_t addr,
-                      size_t len,
-                      void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-micro_clear_dirty_bits(haddr_t addr,
-                       size_t len,
-                       void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-tiny_clear_dirty_bits(haddr_t addr,
-                      size_t len,
-                      void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-small_clear_dirty_bits(haddr_t addr,
-                       size_t len,
-                       void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-medium_clear_dirty_bits(haddr_t addr,
-                        size_t len,
-                        void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-large_clear_dirty_bits(haddr_t addr,
-                       size_t len,
-                       void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-huge_clear_dirty_bits(haddr_t addr,
-                      size_t len,
-                      void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-monster_clear_dirty_bits(haddr_t addr,
-                         size_t len,
-                         void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
-
-herr_t
-variable_clear_dirty_bits(haddr_t addr,
-                          size_t len,
-                          void * thing)
-{
-    HDassert( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(clear_dirty_bits(addr, len, thing));
-}
 
 
 /*-------------------------------------------------------------------------
@@ -622,19 +419,11 @@ variable_clear_dirty_bits(haddr_t addr,
  * Programmer:	John Mainzer
  *              9/20/07
  *
- * Modifications:
- *
- * 		None
- *
  *-------------------------------------------------------------------------
  */
 
-void *
-deserialize(haddr_t addr,
-            size_t len,
-            const void * image_ptr,
-            const UNUSED void * udata_ptr,
-            hbool_t * dirty_ptr)
+static void *
+deserialize(haddr_t addr, size_t len, const void * image_ptr, hbool_t * dirty_ptr)
 {
     int32_t type;
     int32_t idx;
@@ -723,103 +512,73 @@ deserialize(haddr_t addr,
 } /* deserialize() */
 
 void *
-pico_deserialize(haddr_t addr,
-                 size_t len,
-                 const void * image_ptr,
-                 const UNUSED void * udata_ptr,
-                 hbool_t * dirty_ptr)
+pico_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-nano_deserialize(haddr_t addr,
-                 size_t len,
-                 const void * image_ptr,
-                 const UNUSED void * udata_ptr,
-                 hbool_t * dirty_ptr)
+nano_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-micro_deserialize(haddr_t addr,
-                  size_t len,
-                  const void * image_ptr,
-                  const UNUSED void * udata_ptr,
-                  hbool_t * dirty_ptr)
+micro_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-tiny_deserialize(haddr_t addr,
-                 size_t len,
-                 const void * image_ptr,
-                 const UNUSED void * udata_ptr,
-                 hbool_t * dirty_ptr)
+tiny_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-small_deserialize(haddr_t addr,
-                  size_t len,
-                  const void * image_ptr,
-                  const UNUSED void * udata_ptr,
-                  hbool_t * dirty_ptr)
+small_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-medium_deserialize(haddr_t addr,
-                   size_t len,
-                   const void * image_ptr,
-                   const UNUSED void * udata_ptr,
-                   hbool_t * dirty_ptr)
+medium_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-large_deserialize(haddr_t addr,
-                  size_t len,
-                  const void * image_ptr,
-                  const UNUSED void * udata_ptr,
-                  hbool_t * dirty_ptr)
+large_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-huge_deserialize(haddr_t addr,
-                 size_t len,
-                 const void * image_ptr,
-                 const UNUSED void * udata_ptr,
-                 hbool_t * dirty_ptr)
+huge_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-monster_deserialize(haddr_t addr,
-                    size_t len,
-                    const void * image_ptr,
-                    const UNUSED void * udata_ptr,
-                    hbool_t * dirty_ptr)
+monster_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 void *
-variable_deserialize(haddr_t addr,
-                     size_t len,
-                     const void * image_ptr,
-                     const UNUSED void * udata_ptr,
-                     hbool_t * dirty_ptr)
+variable_deserialize(haddr_t addr, size_t len, const void * image_ptr,
+    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, udata_ptr, dirty_ptr);
+    return deserialize(addr, len, image_ptr, dirty_ptr);
 }
 
 
@@ -836,16 +595,11 @@ variable_deserialize(haddr_t addr,
  * Programmer:	John Mainzer
  *              9/19/07
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-image_len(void *thing,
-          size_t *image_len_ptr)
+image_len(void *thing, size_t *image_len_ptr)
 {
     int32_t type;
     int32_t idx;
@@ -886,32 +640,28 @@ image_len(void *thing,
 
 
 herr_t
-pico_image_len(void *thing,
-               size_t *image_len_ptr)
+pico_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-nano_image_len(void *thing,
-               size_t *image_len_ptr)
+nano_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-micro_image_len(void *thing,
-                size_t *image_len_ptr)
+micro_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-tiny_image_len(void *thing,
-               size_t *image_len_ptr)
+tiny_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
@@ -919,48 +669,42 @@ tiny_image_len(void *thing,
 
 
 herr_t
-small_image_len(void *thing,
-                size_t *image_len_ptr)
+small_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-medium_image_len(void *thing,
-                 size_t *image_len_ptr)
+medium_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-large_image_len(void *thing,
-                size_t *image_len_ptr)
+large_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-huge_image_len(void *thing,
-               size_t *image_len_ptr)
+huge_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-monster_image_len(void *thing,
-                  size_t *image_len_ptr)
+monster_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
 }
 
 herr_t
-variable_image_len(void *thing,
-                   size_t *image_len_ptr)
+variable_image_len(void *thing, size_t *image_len_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
     return(image_len(thing, image_len_ptr));
@@ -985,22 +729,13 @@ variable_image_len(void *thing,
  * Programmer:	John Mainzer
  *              9/19/07
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-serialize(haddr_t addr,
-          size_t len,
-          void * image_ptr,
-          void * thing,
-          unsigned * flags_ptr,
-          haddr_t * new_addr_ptr,
-          size_t * new_len_ptr,
-          void ** new_image_ptr_ptr)
+serialize(haddr_t addr, size_t len, void * image_ptr, void * thing,
+    unsigned * flags_ptr, haddr_t * new_addr_ptr, size_t * new_len_ptr,
+    void ** new_image_ptr_ptr)
 {
     const char * fcn_name = "serialize()";
     char * char_ptr;
@@ -1120,12 +855,7 @@ serialize(haddr_t addr,
     }
 
     /* null out the image to avoid spurious failures */
-    char_ptr = (char *)image_ptr;
-    for ( i = 0; (size_t)i < len; i++ )
-    {
-        *char_ptr = '\0';
-	char_ptr++;
-    }
+    HDmemset(image_ptr, 0, len);
 
     if ( ( type == PICO_ENTRY_TYPE ) || ( type == VARIABLE_ENTRY_TYPE ) ) {
 
@@ -1167,16 +897,9 @@ serialize(haddr_t addr,
 } /* serialize() */
 
 herr_t
-pico_serialize(const H5F_t UNUSED *f,
-               hid_t UNUSED dxpl_id,
-               haddr_t addr,
-               size_t len,
-               void * image_ptr,
-               void * thing,
-               unsigned * flags_ptr,
-               haddr_t * new_addr_ptr,
-               size_t * new_len_ptr,
-               void ** new_image_ptr_ptr)
+pico_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1184,16 +907,9 @@ pico_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-nano_serialize(const H5F_t UNUSED *f,
-               hid_t UNUSED dxpl_id,
-               haddr_t addr,
-               size_t len,
-               void * image_ptr,
-               void * thing,
-               unsigned * flags_ptr,
-               haddr_t * new_addr_ptr,
-               size_t * new_len_ptr,
-               void ** new_image_ptr_ptr)
+nano_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1201,16 +917,9 @@ nano_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-micro_serialize(const H5F_t UNUSED *f,
-                hid_t UNUSED dxpl_id,
-                haddr_t addr,
-                size_t len,
-                void * image_ptr,
-                void * thing,
-                unsigned * flags_ptr,
-                haddr_t * new_addr_ptr,
-                size_t * new_len_ptr,
-                void ** new_image_ptr_ptr)
+micro_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1218,16 +927,9 @@ micro_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-tiny_serialize(const H5F_t UNUSED *f,
-               hid_t UNUSED dxpl_id,
-               haddr_t addr,
-               size_t len,
-               void * image_ptr,
-               void * thing,
-               unsigned * flags_ptr,
-               haddr_t * new_addr_ptr,
-               size_t * new_len_ptr,
-               void ** new_image_ptr_ptr)
+tiny_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1235,16 +937,9 @@ tiny_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-small_serialize(const H5F_t UNUSED *f,
-                hid_t UNUSED dxpl_id,
-                haddr_t addr,
-                size_t len,
-                void * image_ptr,
-                void * thing,
-                unsigned * flags_ptr,
-                haddr_t * new_addr_ptr,
-                size_t * new_len_ptr,
-                void ** new_image_ptr_ptr)
+small_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1252,16 +947,9 @@ small_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-medium_serialize(const H5F_t UNUSED *f,
-                 hid_t UNUSED dxpl_id,
-                 haddr_t addr,
-                 size_t len,
-                 void * image_ptr,
-                 void * thing,
-                 unsigned * flags_ptr,
-                 haddr_t * new_addr_ptr,
-                 size_t * new_len_ptr,
-                 void ** new_image_ptr_ptr)
+medium_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1269,16 +957,9 @@ medium_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-large_serialize(const H5F_t UNUSED *f,
-                hid_t UNUSED dxpl_id,
-                haddr_t addr,
-                size_t len,
-                void * image_ptr,
-                void * thing,
-                unsigned * flags_ptr,
-                haddr_t * new_addr_ptr,
-                size_t * new_len_ptr,
-                void ** new_image_ptr_ptr)
+large_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1286,16 +967,9 @@ large_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-huge_serialize(const H5F_t UNUSED *f,
-               hid_t UNUSED dxpl_id,
-               haddr_t addr,
-               size_t len,
-               void * image_ptr,
-               void * thing,
-               unsigned * flags_ptr,
-               haddr_t * new_addr_ptr,
-               size_t * new_len_ptr,
-               void ** new_image_ptr_ptr)
+huge_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1303,16 +977,9 @@ huge_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-monster_serialize(const H5F_t UNUSED *f,
-                  hid_t UNUSED dxpl_id,
-                  haddr_t addr,
-                  size_t len,
-                  void * image_ptr,
-                  void * thing,
-                  unsigned * flags_ptr,
-                  haddr_t * new_addr_ptr,
-                  size_t * new_len_ptr,
-                  void ** new_image_ptr_ptr)
+monster_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1320,16 +987,9 @@ monster_serialize(const H5F_t UNUSED *f,
 }
 
 herr_t
-variable_serialize(const H5F_t UNUSED *f,
-                   hid_t UNUSED dxpl_id,
-                   haddr_t addr,
-                   size_t len,
-                   void * image_ptr,
-                   void * thing,
-                   unsigned * flags_ptr,
-                   haddr_t * new_addr_ptr,
-                   size_t * new_len_ptr,
-                   void ** new_image_ptr_ptr)
+variable_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+    size_t len, void * image_ptr, void * thing, unsigned * flags_ptr,
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, void ** new_image_ptr_ptr)
 {
     HDassert( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
     return(serialize(addr, len, image_ptr, thing, flags_ptr,
@@ -1357,31 +1017,17 @@ variable_serialize(const H5F_t UNUSED *f,
  * Programmer:	John Mainzer
  *              9/19/07
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-free_icr(haddr_t addr,
-         size_t len,
-         void * thing)
+free_icr(test_entry_t *entry_ptr)
 {
-    int i;
-    test_entry_t * entry_ptr;
     test_entry_t * base_addr;
-    test_entry_t * pinned_entry_ptr;
-    test_entry_t * pinned_base_addr;
 
-    HDassert( thing );
+    HDassert( entry_ptr );
 
-    entry_ptr = (test_entry_t *)thing;
     base_addr = entries2[entry_ptr->type];
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
 
     HDassert( entry_ptr->index >= 0 );
     HDassert( entry_ptr->index <= max_indices2[entry_ptr->type] );
@@ -1398,9 +1044,12 @@ free_icr(haddr_t addr,
     HDassert( !(entry_ptr->header.is_dirty) );
 
     if ( entry_ptr->num_pins > 0 ) {
+        int i;
 
-	for ( i = 0; i < entry_ptr->num_pins; i++ )
-        {
+	for ( i = 0; i < entry_ptr->num_pins; i++ ) {
+            test_entry_t * pinned_entry_ptr;
+            test_entry_t * pinned_base_addr;
+
 	    pinned_base_addr = entries2[entry_ptr->pin_type[i]];
 	    pinned_entry_ptr = &(pinned_base_addr[entry_ptr->pin_idx[i]]);
 
@@ -1441,93 +1090,285 @@ free_icr(haddr_t addr,
 } /* free_icr() */
 
 herr_t
-pico_free_icr(haddr_t addr,
-              size_t len,
-              void * thing)
+pico_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == PICO_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == PICO_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-nano_free_icr(haddr_t addr,
-              size_t len,
-              void * thing)
+nano_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == NANO_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == NANO_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-micro_free_icr(haddr_t addr,
-               size_t len,
-               void * thing)
+micro_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == MICRO_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MICRO_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-tiny_free_icr(haddr_t addr,
-              size_t len,
-              void * thing)
+tiny_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == TINY_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == TINY_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-small_free_icr(haddr_t addr,
-               size_t len,
-               void * thing)
+small_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == SMALL_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == SMALL_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-medium_free_icr(haddr_t addr,
-                size_t len,
-                void * thing)
+medium_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == MEDIUM_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MEDIUM_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-large_free_icr(haddr_t addr,
-               size_t len,
-               void * thing)
+large_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == LARGE_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == LARGE_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-huge_free_icr(haddr_t addr,
-              size_t len,
-              void * thing)
+huge_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == HUGE_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == HUGE_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-monster_free_icr(haddr_t addr,
-                 size_t len,
-                 void * thing)
+monster_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == MONSTER_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MONSTER_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
 }
 
 herr_t
-variable_free_icr(haddr_t addr,
-                  size_t len,
-                  void * thing)
+variable_free_icr(haddr_t addr, size_t len, void * thing)
 {
-    HDassert( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
-    return(free_icr(addr, len, thing));
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
+
+    return(free_icr(entry_ptr));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	clear_dirty_bits & friends
+ *
+ * Purpose:	Clear the dirty bits.  The helper functions verify that the
+ *		correct version of clear_dirty_gits is being called, and
+ *		then call clear_dirty_bits() proper.
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	John Mainzer
+ *              9/20/07
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+clear_dirty_bits(test_entry_t * entry_ptr)
+{
+    test_entry_t * base_addr;
+
+    HDassert( entry_ptr );
+
+    base_addr = entries2[entry_ptr->type];
+
+    HDassert( entry_ptr->index >= 0 );
+    HDassert( entry_ptr->index <= max_indices2[entry_ptr->type] );
+    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
+    HDassert( entry_ptr == entry_ptr->self );
+    HDassert( entry_ptr->header.addr == entry_ptr->addr );
+    HDassert( entry_ptr->header.size == entry_ptr->size );
+    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
+	      ( entry_ptr->size == entry_sizes2[entry_ptr->type] ) );
+
+    entry_ptr->is_dirty = FALSE;
+
+    entry_ptr->cleared = TRUE;
+
+    return(SUCCEED);
+
+} /* clear_dirty_bits() */
+
+herr_t
+pico_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == PICO_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+nano_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == NANO_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+micro_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MICRO_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+tiny_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == TINY_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+small_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == SMALL_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+medium_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MEDIUM_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+large_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == LARGE_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+huge_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == HUGE_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+monster_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == MONSTER_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
+}
+
+herr_t
+variable_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
+{
+    test_entry_t * entry_ptr = (test_entry_t *)thing;
+
+    HDassert( entry_ptr->addr == addr );
+    HDassert( entry_ptr->size == len );
+    HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
+
+    return(clear_dirty_bits(entry_ptr));
 }
 
 
@@ -1540,7 +1381,7 @@ variable_free_icr(haddr_t addr,
 /*-------------------------------------------------------------------------
  * Function:	add_flush_op2
  *
- * Purpose:	Do noting if pass2 is FALSE on entry.
+ * Purpose:	Do nothing if pass2 is FALSE on entry.
  *
  *              Otherwise, add the specified flush operation to the
  *              target instance of test_entry_t.
@@ -1550,19 +1391,17 @@ variable_free_icr(haddr_t addr,
  * Programmer:	John Mainzer
  *              9/1/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
 add_flush_op2(int target_type,
-	      int target_idx,
-	      int op_code,
-	      int type,
-	      int idx,
-	      hbool_t flag,
-	      size_t new_size)
+	     int target_idx,
+	     int op_code,
+	     int type,
+	     int idx,
+	     hbool_t flag,
+	     size_t new_size)
 {
     int i;
     test_entry_t * target_base_addr;
@@ -1622,17 +1461,15 @@ add_flush_op2(int target_type,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
 create_pinned_entry_dependency2(H5F_t * file_ptr,
-		                int pinning_type,
-                                int pinning_idx,
-	                        int pinned_type,
-	                        int pinned_idx)
+		               int pinning_type,
+                               int pinning_idx,
+	                       int pinned_type,
+	                       int pinned_idx)
 {
     test_entry_t * pinning_base_addr;
     test_entry_t * pinning_entry_ptr;
@@ -1703,18 +1540,14 @@ create_pinned_entry_dependency2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 dirty_entry2(H5F_t * file_ptr,
-             int32_t type,
-             int32_t idx,
-	     hbool_t dirty_pin)
+            int32_t type,
+            int32_t idx,
+	    hbool_t dirty_pin)
 {
     H5C2_t * cache_ptr;
     test_entry_t * base_addr;
@@ -1781,18 +1614,14 @@ dirty_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              9/1/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 execute_flush_op2(H5F_t * file_ptr,
-		  struct test_entry_t * entry_ptr,
-		  struct flush_op * op_ptr,
-		  unsigned * flags_ptr)
+		 struct test_entry_t * entry_ptr,
+		 struct flush_op * op_ptr,
+		 unsigned * flags_ptr)
 {
     /* const char * fcn_name = "execute_flush_op2()"; */
     H5C2_t * cache_ptr;
@@ -1854,7 +1683,7 @@ execute_flush_op2(H5F_t * file_ptr,
 		    /* change the size of some other entry */
 
 		    resize_entry2(file_ptr, op_ptr->type, op_ptr->idx,
-                                  op_ptr->size, op_ptr->flag);
+                                 op_ptr->size, op_ptr->flag);
 		}
 		break;
 
@@ -1915,19 +1744,13 @@ execute_flush_op2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		JRM - 10/12/04
- *		Removed references to local_H5C2_t, as we now get direct
- *		access to the definition of H5C2_t via H5Cpkg.h.
- *
  *-------------------------------------------------------------------------
  */
 
 hbool_t
 entry_in_cache2(H5C2_t * cache_ptr,
-                int32_t type,
-                int32_t idx)
+               int32_t type,
+               int32_t idx)
 {
     hbool_t in_cache = FALSE; /* will set to TRUE if necessary */
     test_entry_t * base_addr;
@@ -1989,8 +1812,6 @@ entry_in_cache2(H5C2_t * cache_ptr,
  * Programmer:	John Mainzer
  *              1/13/09
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2044,20 +1865,6 @@ recommend_core_file_driver(void)
  *
  * Programmer:	John Mainzer
  *              6/10/04
- *
- * Modifications:
- *
- * 		JRM -- 3/31/06
- * 		Added initialization for new pinned entry test related
- * 		fields.
- *
- * 		JRM -- 4/1/07
- * 		Added initialization for the new is_read_only, and
- * 		ro_ref_count fields.
- *
- * 		JRM -- 9/20/07
- * 		Re-worked function for the cache api mods needed to
- * 		support journaling.
  *
  *-------------------------------------------------------------------------
  */
@@ -2176,10 +1983,6 @@ reset_entries2(void)
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2235,8 +2038,7 @@ resize_entry2(H5F_t * file_ptr,
 
 	    protect_entry2(file_ptr, type, idx);
 	    unprotect_entry_with_size_change2(file_ptr, type, idx,
-                                              H5C2__SIZE_CHANGED_FLAG,
-					      new_size);
+                                             H5C2__SIZE_CHANGED_FLAG, new_size);
 	}
     }
 
@@ -2245,32 +2047,28 @@ resize_entry2(H5F_t * file_ptr,
 } /* resize_entry2() */
 
 
-  /*-------------------------------------------------------------------------
-   * Function:    resize_pinned_entry2
-   *
-   * Purpose:     Given a pointer to a cache, an entry type, an index, and
-   *              a new size, change the size of the target pinned entry
-   *              to match the supplied new size.
-   *
-   *              Do nothing if pass is false on entry.
-   *
-   * Return:      void
-   *
-   * Programmer:  John Mainzer
-   *              1/11/08
-   *
-   * Modifications:
-   *
-   *              None.
-   *
-   *-------------------------------------------------------------------------
-   */
+/*-------------------------------------------------------------------------
+ * Function:    resize_pinned_entry2
+ *
+ * Purpose:     Given a pointer to a cache, an entry type, an index, and
+ *              a new size, change the size of the target pinned entry
+ *              to match the supplied new size.
+ *
+ *              Do nothing if pass is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              1/11/08
+ *
+ *-------------------------------------------------------------------------
+ */
 
 void
 resize_pinned_entry2(H5F_t * file_ptr,
-                     int32_t type,
-                     int32_t idx,
-                     size_t new_size)
+                    int32_t type,
+                    int32_t idx,
+                    size_t new_size)
 {
     H5C2_t * cache_ptr;
     herr_t result;
@@ -2346,8 +2144,6 @@ resize_pinned_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2406,18 +2202,15 @@ verify_clean2(void)
  * Programmer:	John Mainzer
  *              10/8/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
 verify_entry_status2(H5C2_t * cache_ptr,
-		     int tag,
-		     int num_entries,
-		     struct expected_entry_status expected[])
+		    int tag,
+		    int num_entries,
+		    struct expected_entry_status expected[])
 {
-    /* const char *   fcn_name = "verify_entry_status2()"; */
     static char    msg[128];
     hbool_t        in_cache = FALSE; /* will set to TRUE if necessary */
     int            i;
@@ -2648,8 +2441,6 @@ verify_entry_status2(H5C2_t * cache_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2731,7 +2522,7 @@ verify_unprotected2(void)
 
 H5F_t *
 setup_cache2(size_t max_cache_size,
-             size_t min_clean_size)
+            size_t min_clean_size)
 {
     const char * fcn_name = "setup_cache2()";
     char filename[512];
@@ -3031,15 +2822,13 @@ setup_cache2(size_t max_cache_size,
  * Programmer:	John Mainzer
  *              9/14/07
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
 takedown_cache2(H5F_t * file_ptr,
-                hbool_t dump_stats,
-                hbool_t dump_detailed_stats)
+               hbool_t dump_stats,
+               hbool_t dump_detailed_stats)
 {
     char filename[512];
 
@@ -3122,10 +2911,6 @@ takedown_cache2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              7/6/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3189,8 +2974,6 @@ expunge_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/23/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3227,12 +3010,12 @@ flush_cache2(H5F_t * file_ptr,
         if ( destroy_entries ) {
 
             result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                     H5C2__FLUSH_INVALIDATE_FLAG);
+                                    H5C2__FLUSH_INVALIDATE_FLAG);
 
         } else {
 
             result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                                      H5C2__NO_FLAGS_SET);
+                                    H5C2__NO_FLAGS_SET);
         }
     }
 
@@ -3283,24 +3066,6 @@ flush_cache2(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              6/16/04
- *
- * Modifications:
- *
- *		JRM -- 1/13/05
- *		Updated function for the flags parameter in
- *		H5C2_insert_entry(), and to allow access to this parameter.
- *
- *		JRM -- 6/17/05
- *		The interface no longer permits clean inserts.
- *		Accordingly, the dirty parameter is no longer meaningfull.
- *
- *		JRM -- 4/5/06
- *		Added code to initialize the new cache_ptr field of the
- *		test_entry_t structure.
- *
- *		JRM -- 8/10/06
- *		Updated to reflect the fact that entries can now be
- *		inserted pinned.
  *
  *-------------------------------------------------------------------------
  */
@@ -3404,21 +3169,16 @@ insert_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              3/28/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 mark_pinned_entry_dirty2(H5F_t * file_ptr,
-                         int32_t type,
-                         int32_t idx,
-		 	 hbool_t size_changed,
-			 size_t  new_size)
+                        int32_t type,
+                        int32_t idx,
+			hbool_t size_changed,
+			size_t  new_size)
 {
-    /* const char * fcn_name = "mark_pinned_entry_dirty2()"; */
 #ifndef NDEBUG
     H5C2_t * cache_ptr;
 #endif /* NDEBUG */
@@ -3456,8 +3216,8 @@ mark_pinned_entry_dirty2(H5F_t * file_ptr,
         }
 
         result = H5C2_mark_pinned_entry_dirty((void *)entry_ptr,
-				 	      size_changed,
-					      new_size);
+					     size_changed,
+					     new_size);
 
         if ( ( result < 0 ) ||
              ( ! (entry_ptr->header.is_dirty) ) ||
@@ -3508,10 +3268,6 @@ mark_pinned_entry_dirty2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              5/17/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3520,7 +3276,6 @@ mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
                                      int32_t type,
                                      int32_t idx)
 {
-    /* const char * fcn_name = "mark_pinned_or_protected_entry_dirty2()"; */
 #ifndef NDEBUG
     H5C2_t * cache_ptr;
 #endif /* NDEBUG */
@@ -3602,25 +3357,15 @@ mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/21/04
  *
- * Modifications:
- *
- *		JRM -- 6/17/05
- *		Updated code to reflect the fact that renames automatically
- *		dirty entries.
- *
- *		JRM -- 5/16/08
- *		Updated code to do nothing if pass2 is FALSE on entry.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 rename_entry2(H5C2_t * cache_ptr,
-              int32_t type,
-              int32_t idx,
-              hbool_t main_addr)
+             int32_t type,
+             int32_t idx,
+             hbool_t main_addr)
 {
-    /* const char *   fcn_name = "rename_entry2()"; */
     herr_t         result;
     hbool_t	   done = TRUE; /* will set to FALSE if we have work to do */
     haddr_t        old_addr = HADDR_UNDEF;
@@ -3713,10 +3458,6 @@ rename_entry2(H5C2_t * cache_ptr,
  * Programmer:	John Mainzer
  *              5/17/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3792,19 +3533,13 @@ pin_protected_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/11/04
  *
- * Modifications:
- *
- *    - Modified call to H5C2_protect to pass H5C2__NO_FLAGS_SET in the
- *      new flags parameter.
- *    						JRM -- 3/28/07
- *
  *-------------------------------------------------------------------------
  */
 
 void
 protect_entry2(H5F_t * file_ptr,
-               int32_t type,
-               int32_t idx)
+              int32_t type,
+              int32_t idx)
 {
     const char * fcn_name = "protect_entry2()";
     H5C2_t * cache_ptr;
@@ -3920,19 +3655,14 @@ protect_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              4/1/07
  *
- * Modifications:
- *
- *    - None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 protect_entry_ro2(H5F_t * file_ptr,
-                  int32_t type,
-                  int32_t idx)
+                int32_t type,
+                int32_t idx)
 {
-    /* const char * fcn_name = "protect_entry_ro2()"; */
     H5C2_t * cache_ptr;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -4004,33 +3734,26 @@ protect_entry_ro2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              3/28/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 unpin_entry2(H5F_t * file_ptr,
-             int32_t type,
-             int32_t idx)
+            int32_t type,
+            int32_t idx)
 {
-    /* const char * fcn_name = "unpin_entry2()"; */
-#ifndef NDEBUG
-    H5C2_t * cache_ptr;
-#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
     if ( pass2 ) {
-
 #ifndef NDEBUG
+        H5C2_t * cache_ptr;
+
         cache_ptr = file_ptr->shared->cache2;
-#endif /* NDEBUG */
 
         HDassert( cache_ptr );
+#endif /* NDEBUG */
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
 
@@ -4081,26 +3804,6 @@ unpin_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/12/04
  *
- * Modifications:
- *
- *		JRM -- 1/7/05
- *		Updated for the replacement of the deleted parameter in
- *		H5C2_unprotect() with the new flags parameter.
- *
- *		JRM - 6/17/05
- *		Modified function to use the new dirtied parameter of
- *		H5C2_unprotect().
- *
- *		JRM -- 9/8/05
- *		Update for new entry size parameter in H5C2_unprotect().
- *		We don't use them here for now.
- *
- *		JRM -- 3/31/06
- *		Update for pinned entries.
- *
- *		JRM -- 4/1/07
- *		Updated for new multiple read protects.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4112,9 +3815,6 @@ unprotect_entry2(H5F_t * file_ptr,
                 unsigned int flags)
 {
     const char * fcn_name = "unprotect_entry2()";
-#ifndef NDEBUG
-    H5C2_t * cache_ptr;
-#endif /* NDEBUG */
     herr_t result;
     hbool_t verbose = FALSE;
     hbool_t pin_flag_set;
@@ -4129,12 +3829,13 @@ unprotect_entry2(H5F_t * file_ptr,
     }
 
     if ( pass2 ) {
-
 #ifndef NDEBUG
+        H5C2_t * cache_ptr;
+
         cache_ptr = file_ptr->shared->cache2;
-#endif /* NDEBUG */
 
         HDassert( cache_ptr );
+#endif /* NDEBUG */
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
 
@@ -4290,24 +3991,17 @@ unprotect_entry2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              8/31/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 unprotect_entry_with_size_change2(H5F_t * file_ptr,
-                                  int32_t type,
-                                  int32_t idx,
-                                  unsigned int flags,
-		                  size_t new_size)
+                                 int32_t type,
+                                 int32_t idx,
+                                 unsigned int flags,
+		                 size_t new_size)
 {
     /* const char * fcn_name = "unprotect_entry_with_size_change2()"; */
-#ifndef NDEBUG
-    H5C2_t * cache_ptr;
-#endif /* NDEBUG */
     herr_t result;
     hbool_t dirty_flag_set;
     hbool_t pin_flag_set;
@@ -4317,12 +4011,13 @@ unprotect_entry_with_size_change2(H5F_t * file_ptr,
     test_entry_t * entry_ptr;
 
     if ( pass2 ) {
-
 #ifndef NDEBUG
+    H5C2_t * cache_ptr;
+
         cache_ptr = file_ptr->shared->cache2;
-#endif /* NDEBUG */
 
         HDassert( cache_ptr );
+#endif /* NDEBUG */
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
 	HDassert( new_size <= entry_sizes2[type] );
@@ -4415,35 +4110,25 @@ unprotect_entry_with_size_change2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/12/04
  *
- * Modifications:
- *
- * 		JRM -- 4/4/07
- * 		Added code supporting multiple read only protects.
- * 		Note that this increased the minimum lag to 10.
- *
- * 		JRM -- 3/19/08
- * 		Added max_index parameter and supporting code to allow
- * 		us to run shorter smoke checks if needed.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 row_major_scan_forward2(H5F_t * file_ptr,
                         int32_t max_index,
-                        int32_t lag,
-                        hbool_t verbose,
-                        hbool_t reset_stats,
-                        hbool_t display_stats,
-                        hbool_t display_detailed_stats,
-                        hbool_t do_inserts,
-                        hbool_t dirty_inserts,
-                        hbool_t do_renames,
-                        hbool_t rename_to_main_addr,
-                        hbool_t do_destroys,
-		        hbool_t do_mult_ro_protects,
-                        int dirty_destroys,
-                        int dirty_unprotects)
+                       int32_t lag,
+                       hbool_t verbose,
+                       hbool_t reset_stats,
+                       hbool_t display_stats,
+                       hbool_t display_detailed_stats,
+                       hbool_t do_inserts,
+                       hbool_t dirty_inserts,
+                       hbool_t do_renames,
+                       hbool_t rename_to_main_addr,
+                       hbool_t do_destroys,
+		       hbool_t do_mult_ro_protects,
+                       int dirty_destroys,
+                       int dirty_unprotects)
 {
     const char * fcn_name = "row_major_scan_forward2";
     H5C2_t * cache_ptr;
@@ -4772,25 +4457,18 @@ row_major_scan_forward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              10/21/04
  *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 hl_row_major_scan_forward2(H5F_t * file_ptr,
-                           int32_t max_index,
-                           hbool_t verbose,
-                           hbool_t reset_stats,
-                           hbool_t display_stats,
-                           hbool_t display_detailed_stats,
-                           hbool_t do_inserts,
-                           hbool_t dirty_inserts)
+                          int32_t max_index,
+                          hbool_t verbose,
+                          hbool_t reset_stats,
+                          hbool_t display_stats,
+                          hbool_t display_detailed_stats,
+                          hbool_t do_inserts,
+                          hbool_t dirty_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_forward2";
     H5C2_t * cache_ptr;
@@ -4888,35 +4566,25 @@ hl_row_major_scan_forward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/12/04
  *
- * Modifications:
- *
- * 		JRM -- 4/4/07
- * 		Added code supporting multiple read only protects.
- * 		Note that this increased the minimum lag to 10.
- *
- * 		JRM -- 3/19/08
- * 		Added max_index parameter and supporting code to allow
- * 		us to run shorter smoke checks if needed.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 row_major_scan_backward2(H5F_t * file_ptr,
-                         int32_t max_index,
-                         int32_t lag,
-                         hbool_t verbose,
-                         hbool_t reset_stats,
-                         hbool_t display_stats,
-                         hbool_t display_detailed_stats,
-                         hbool_t do_inserts,
-                         hbool_t dirty_inserts,
-                         hbool_t do_renames,
-                         hbool_t rename_to_main_addr,
-                         hbool_t do_destroys,
-			 hbool_t do_mult_ro_protects,
-                         int dirty_destroys,
-                         int dirty_unprotects)
+                        int32_t max_index,
+                        int32_t lag,
+                        hbool_t verbose,
+                        hbool_t reset_stats,
+                        hbool_t display_stats,
+                        hbool_t display_detailed_stats,
+                        hbool_t do_inserts,
+                        hbool_t dirty_inserts,
+                        hbool_t do_renames,
+                        hbool_t rename_to_main_addr,
+                        hbool_t do_destroys,
+			hbool_t do_mult_ro_protects,
+                        int dirty_destroys,
+                        int dirty_unprotects)
 {
     const char * fcn_name = "row_major_scan_backward2";
     H5C2_t * cache_ptr;
@@ -5229,25 +4897,18 @@ row_major_scan_backward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              10/21/04
  *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 hl_row_major_scan_backward2(H5F_t * file_ptr,
-                            int32_t max_index,
-                            hbool_t verbose,
-                            hbool_t reset_stats,
-                            hbool_t display_stats,
-                            hbool_t display_detailed_stats,
-                            hbool_t do_inserts,
-                            hbool_t dirty_inserts)
+                           int32_t max_index,
+                           hbool_t verbose,
+                           hbool_t reset_stats,
+                           hbool_t display_stats,
+                           hbool_t display_detailed_stats,
+                           hbool_t do_inserts,
+                           hbool_t dirty_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_backward2";
     H5C2_t * cache_ptr;
@@ -5345,26 +5006,20 @@ hl_row_major_scan_backward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/23/04
  *
- * Modifications:
- *
- * 		JRM -- 3/19/08
- * 		Added max_index parameter and supporting code to allow
- * 		us to run shorter smoke checks if needed.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 col_major_scan_forward2(H5F_t * file_ptr,
-		        int32_t max_index,
-                        int32_t lag,
-                        hbool_t verbose,
-                        hbool_t reset_stats,
-                        hbool_t display_stats,
-                        hbool_t display_detailed_stats,
-                        hbool_t do_inserts,
-                        hbool_t dirty_inserts,
-                        int dirty_unprotects)
+		       int32_t max_index,
+                       int32_t lag,
+                       hbool_t verbose,
+                       hbool_t reset_stats,
+                       hbool_t display_stats,
+                       hbool_t display_detailed_stats,
+                       hbool_t do_inserts,
+                       hbool_t dirty_inserts,
+                       int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_forward2()";
     H5C2_t * cache_ptr;
@@ -5466,13 +5121,6 @@ col_major_scan_forward2(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              19/25/04
- *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
  *
  *-------------------------------------------------------------------------
  */
@@ -5594,26 +5242,20 @@ hl_col_major_scan_forward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/23/04
  *
- * Modifications:
- *
- * 		JRM -- 3/19/08
- * 		Added max_index parameter and supporting code to allow
- * 		us to run shorter smoke checks if needed.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 col_major_scan_backward2(H5F_t * file_ptr,
-		         int32_t max_index,
-                         int32_t lag,
-                         hbool_t verbose,
-                         hbool_t reset_stats,
-                         hbool_t display_stats,
-                         hbool_t display_detailed_stats,
-                         hbool_t do_inserts,
-                         hbool_t dirty_inserts,
-                         int dirty_unprotects)
+		        int32_t max_index,
+                        int32_t lag,
+                        hbool_t verbose,
+                        hbool_t reset_stats,
+                        hbool_t display_stats,
+                        hbool_t display_detailed_stats,
+                        hbool_t do_inserts,
+                        hbool_t dirty_inserts,
+                        int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_backward2()";
     H5C2_t * cache_ptr;
@@ -5730,26 +5372,19 @@ col_major_scan_backward2(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              10/25/04
  *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
- *
  *-------------------------------------------------------------------------
  */
 
 void
 hl_col_major_scan_backward2(H5F_t * file_ptr,
-                            int32_t max_index,
-                            hbool_t verbose,
-                            hbool_t reset_stats,
-                            hbool_t display_stats,
-                            hbool_t display_detailed_stats,
-                            hbool_t do_inserts,
-                            hbool_t dirty_inserts,
-                            int dirty_unprotects)
+                           int32_t max_index,
+                           hbool_t verbose,
+                           hbool_t reset_stats,
+                           hbool_t display_stats,
+                           hbool_t display_detailed_stats,
+                           hbool_t do_inserts,
+                           hbool_t dirty_inserts,
+                           int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_backward2()";
     H5C2_t * cache_ptr;
@@ -5867,8 +5502,6 @@ hl_col_major_scan_backward2(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              4/18/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -6003,8 +5636,6 @@ check_and_validate_cache_hit_rate(hid_t file_id,
  * Programmer:	John Mainzer
  *              4/18/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -6137,8 +5768,6 @@ check_and_validate_cache_size(hid_t file_id,
  *
  * Programmer:	John Mainzer
  *              4/14/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

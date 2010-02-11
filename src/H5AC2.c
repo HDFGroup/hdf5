@@ -532,11 +532,11 @@ H5AC2_create(H5F_t * f,
 
     FUNC_ENTER_NOAPI(H5AC2_create, FAIL)
 
-    HDassert ( f );
-    HDassert ( NULL == f->shared->cache2 );
-    HDassert ( config_ptr != NULL ) ;
-    HDassert ( NELMTS(H5AC2_entry_type_names) == H5AC2_NTYPES);
-    HDassert ( H5C2__MAX_NUM_TYPE_IDS == H5AC2_NTYPES);
+    HDassert(f);
+    HDassert(NULL == f->shared->cache2);
+    HDassert(config_ptr != NULL);
+    HDcompile_assert(NELMTS(H5AC2_entry_type_names) == H5AC2_NTYPES);
+    HDcompile_assert(H5C2__MAX_NUM_TYPE_IDS == H5AC2_NTYPES);
 
     result = H5AC2_validate_config(config_ptr);
 
@@ -1254,6 +1254,104 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_end_transaction() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_register_mdjsc_callback()
+ *
+ * Purpose:	Register a metadata journaling status change callback,
+ *              and return the index assigned to the callback in *idx_ptr.
+ *
+ *		If config_ptr is not NULL, return the current metadata
+ *		journaling configuration in *config_ptr.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              8/15/08
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_register_mdjsc_callback(const H5F_t * file_ptr,
+                              H5C2_mdj_status_change_func_t fcn_ptr,
+                              void * data_ptr,
+                              int32_t * idx_ptr,
+                              H5C2_mdj_config_t * config_ptr)
+{
+    herr_t    result;
+    herr_t    ret_value=SUCCEED;      /* Return value */
+    H5C2_t *  cache_ptr;
+#if H5AC2__TRACE_FILE_ENABLED
+    char      trace[256] = "";
+    FILE *    trace_file_ptr = NULL;
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_ENTER_NOAPI(H5AC2_register_mdjsc_callback, FAIL)
+
+    if ( ( file_ptr == NULL ) ||
+	 ( ( cache_ptr = file_ptr->shared->cache2 ) == NULL ) ||
+	 ( fcn_ptr == NULL ) ||
+	 ( idx_ptr == NULL ) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+		     "Invalid parameter(s) on entry.");
+    }
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the register metadata journaling status change callback
+     * call, fnc_ptr, data_ptr, and the returned idx are all that
+     * are needed.  Write the return value to catch occult errors.
+     */
+    if ( ( cache_ptr != NULL ) &&
+         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+
+       sprintf(trace, "H5AC2_register_mdjsc_callback 0x%lx 0x%lx ",
+               (unsigned long)(fcn_ptr), (unsigned long)(data_ptr));
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    result = H5C2_register_mdjsc_callback(cache_ptr,
+                                          fcn_ptr,
+                                          data_ptr,
+                                          idx_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_register_mdjsc_callback() failed.");
+    }
+
+    if ( config_ptr != NULL ) {
+
+        result = H5C2_get_journal_config((H5C2_t *)cache_ptr, config_ptr);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_get_journal_config() failed.");
+        }
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    if ( trace_file_ptr != NULL ) {
+
+	HDfprintf(trace_file_ptr, "%s %d %d\n",
+                  trace, *idx_ptr, (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_register_mdjsc_callback() */
 
 
 /*-------------------------------------------------------------------------
@@ -2350,104 +2448,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_protect() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC2_register_mdjsc_callback()
- *
- * Purpose:	Register a metadata journaling status change callback,
- *              and return the index assigned to the callback in *idx_ptr.
- *
- *		If config_ptr is not NULL, return the current metadata
- *		journaling configuration in *config_ptr.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/15/08
- *
- * Modifications:
- *
- *              None.
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5AC2_register_mdjsc_callback(const H5F_t * file_ptr,
-                              H5C2_mdj_status_change_func_t fcn_ptr,
-                              void * data_ptr,
-                              int32_t * idx_ptr,
-                              H5C2_mdj_config_t * config_ptr)
-{
-    herr_t    result;
-    herr_t    ret_value=SUCCEED;      /* Return value */
-    H5C2_t *  cache_ptr;
-#if H5AC2__TRACE_FILE_ENABLED
-    char      trace[256] = "";
-    FILE *    trace_file_ptr = NULL;
-#endif /* H5AC2__TRACE_FILE_ENABLED */
-
-    FUNC_ENTER_NOAPI(H5AC2_register_mdjsc_callback, FAIL)
-
-    if ( ( file_ptr == NULL ) ||
-	 ( ( cache_ptr = file_ptr->shared->cache2 ) == NULL ) ||
-	 ( fcn_ptr == NULL ) ||
-	 ( idx_ptr == NULL ) ) {
-
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-		     "Invalid parameter(s) on entry.");
-    }
-
-#if H5AC2__TRACE_FILE_ENABLED
-    /* For the register metadata journaling status change callback
-     * call, fnc_ptr, data_ptr, and the returned idx are all that
-     * are needed.  Write the return value to catch occult errors.
-     */
-    if ( ( cache_ptr != NULL ) &&
-         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
-         ( trace_file_ptr != NULL ) ) {
-
-       sprintf(trace, "H5AC2_register_mdjsc_callback 0x%lx 0x%lx ",
-               (unsigned long)(fcn_ptr), (unsigned long)(data_ptr));
-    }
-#endif /* H5AC2__TRACE_FILE_ENABLED */
-
-    result = H5C2_register_mdjsc_callback(cache_ptr,
-                                          fcn_ptr,
-                                          data_ptr,
-                                          idx_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_register_mdjsc_callback() failed.");
-    }
-
-    if ( config_ptr != NULL ) {
-
-        result = H5C2_get_journal_config((H5C2_t *)cache_ptr, config_ptr);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_get_journal_config() failed.");
-        }
-    }
-
-done:
-
-#if H5AC2__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
-	HDfprintf(trace_file_ptr, "%s %d %d\n",
-                  trace, *idx_ptr, (int)ret_value);
-    }
-#endif /* H5AC2__TRACE_FILE_ENABLED */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC2_register_mdjsc_callback() */
 
 
 /*-------------------------------------------------------------------------
@@ -3876,7 +3876,7 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
 	 */
 	name_len = HDstrlen(config_ptr->trace_file_name);
 
-	if ( name_len <= 0 ) {
+	if ( name_len == 0 ) {
 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "config_ptr->trace_file_name is empty.")
@@ -3897,7 +3897,8 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
 
     if ( ( config_ptr->evictions_enabled == FALSE ) &&
 	 ( ( config_ptr->incr_mode != H5C2_incr__off ) ||
-	   ( config_ptr->incr_mode != H5C2_decr__off ) ) ) {
+	   ( config_ptr->flash_incr_mode != H5C2_flash_incr__off ) ||
+	   ( config_ptr->decr_mode != H5C2_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "Can't disable evictions while auto-resize is enabled.")

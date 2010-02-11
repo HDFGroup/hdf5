@@ -1720,70 +1720,70 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C2__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)\
         H5C2__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,   \
-                                   fail_val)                                    \
-        if ( (head_ptr) == NULL )                                               \
-        {                                                                       \
-           (head_ptr) = (entry_ptr);                                            \
-           (tail_ptr) = (entry_ptr);                                            \
-        }                                                                       \
-        else                                                                    \
-        {                                                                       \
-           (tail_ptr)->aux_next = (entry_ptr);                                  \
-           (entry_ptr)->aux_prev = (tail_ptr);                                  \
-           (tail_ptr) = (entry_ptr);                                            \
-        }                                                                       \
-        (len)++;                                                                \
+                                   fail_val)                                   \
+        if ( (head_ptr) == NULL )                                              \
+        {                                                                      \
+           (head_ptr) = (entry_ptr);                                           \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+           (tail_ptr)->aux_next = (entry_ptr);                                 \
+           (entry_ptr)->aux_prev = (tail_ptr);                                 \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        (len)++;                                                               \
         (Size) += entry_ptr->size;
 
 #define H5C2__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fv)   \
         H5C2__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
-                                   fv)                                        \
-        if ( (head_ptr) == NULL )                                             \
-        {                                                                     \
-           (head_ptr) = (entry_ptr);                                          \
-           (tail_ptr) = (entry_ptr);                                          \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-           (head_ptr)->aux_prev = (entry_ptr);                                \
-           (entry_ptr)->aux_next = (head_ptr);                                \
-           (head_ptr) = (entry_ptr);                                          \
-        }                                                                     \
-        (len)++;                                                              \
+                                   fv)                                       \
+        if ( (head_ptr) == NULL )                                            \
+        {                                                                    \
+           (head_ptr) = (entry_ptr);                                         \
+           (tail_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        else                                                                 \
+        {                                                                    \
+           (head_ptr)->aux_prev = (entry_ptr);                               \
+           (entry_ptr)->aux_next = (head_ptr);                               \
+           (head_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        (len)++;                                                             \
         (Size) += entry_ptr->size;
 
 #define H5C2__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)    \
         H5C2__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
-                                   fv)                                        \
-        {                                                                     \
-           if ( (head_ptr) == (entry_ptr) )                                   \
-           {                                                                  \
-              (head_ptr) = (entry_ptr)->aux_next;                             \
-              if ( (head_ptr) != NULL )                                       \
-              {                                                               \
-                 (head_ptr)->aux_prev = NULL;                                 \
-              }                                                               \
-           }                                                                  \
-           else                                                               \
-           {                                                                  \
-              (entry_ptr)->aux_prev->aux_next = (entry_ptr)->aux_next;        \
-           }                                                                  \
-           if ( (tail_ptr) == (entry_ptr) )                                   \
-           {                                                                  \
-              (tail_ptr) = (entry_ptr)->aux_prev;                             \
-              if ( (tail_ptr) != NULL )                                       \
-              {                                                               \
-                 (tail_ptr)->aux_next = NULL;                                 \
-              }                                                               \
-           }                                                                  \
-           else                                                               \
-           {                                                                  \
-              (entry_ptr)->aux_next->aux_prev = (entry_ptr)->aux_prev;        \
-           }                                                                  \
-           entry_ptr->aux_next = NULL;                                        \
-           entry_ptr->aux_prev = NULL;                                        \
-           (len)--;                                                           \
-           (Size) -= entry_ptr->size;                                         \
+                                   fv)                                       \
+        {                                                                    \
+           if ( (head_ptr) == (entry_ptr) )                                  \
+           {                                                                 \
+              (head_ptr) = (entry_ptr)->aux_next;                            \
+              if ( (head_ptr) != NULL )                                      \
+              {                                                              \
+                 (head_ptr)->aux_prev = NULL;                                \
+              }                                                              \
+           }                                                                 \
+           else                                                              \
+           {                                                                 \
+              (entry_ptr)->aux_prev->aux_next = (entry_ptr)->aux_next;       \
+           }                                                                 \
+           if ( (tail_ptr) == (entry_ptr) )                                  \
+           {                                                                 \
+              (tail_ptr) = (entry_ptr)->aux_prev;                            \
+              if ( (tail_ptr) != NULL )                                      \
+              {                                                              \
+                 (tail_ptr)->aux_next = NULL;                                \
+              }                                                              \
+           }                                                                 \
+           else                                                              \
+           {                                                                 \
+              (entry_ptr)->aux_next->aux_prev = (entry_ptr)->aux_prev;       \
+           }                                                                 \
+           entry_ptr->aux_next = NULL;                                       \
+           entry_ptr->aux_prev = NULL;                                       \
+           (len)--;                                                          \
+           (Size) -= entry_ptr->size;                                        \
         }
 
 #if H5C2_DO_SANITY_CHECKS
@@ -2010,22 +2010,22 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
 
 #define H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
-	if ( cache_ptr->flush_in_progress ) {                                   \
-            ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;   \
-	}                                                                       \
-        if ( entry_ptr->flush_in_progress ) {                                   \
-            ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;   \
-	}                                                                       \
-	if ( (entry_ptr)->size < (new_size) ) {                                 \
-	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;             \
-            if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )        \
-                (cache_ptr)->max_index_size = (cache_ptr)->index_size;          \
-            if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )        \
-                (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;          \
-            if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )              \
-                (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;                \
-	} else if ( (entry_ptr)->size > (new_size) ) {                          \
-	    ((cache_ptr)->size_decreases[(entry_ptr)->type->id])++;             \
+	if ( cache_ptr->flush_in_progress ) {                                  \
+            ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;  \
+	}                                                                      \
+        if ( entry_ptr->flush_in_progress ) {                                  \
+            ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;  \
+	}                                                                      \
+	if ( (entry_ptr)->size < (new_size) ) {                                \
+	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
+            if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
+                (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
+            if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )       \
+                (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
+            if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )             \
+                (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;               \
+	} else if ( (entry_ptr)->size > (new_size) ) {                         \
+	    ((cache_ptr)->size_decreases[(entry_ptr)->type->id])++;            \
 	}
 
 #define H5C2__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr) \
@@ -2049,9 +2049,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #if H5C2_COLLECT_CACHE_ENTRY_STATS
 
 #define H5C2__RESET_CACHE_ENTRY_STATS(entry_ptr) \
-        (entry_ptr)->accesses = 0;               \
-        (entry_ptr)->clears   = 0;               \
-        (entry_ptr)->flushes  = 0;               \
+        (entry_ptr)->accesses = 0;              \
+        (entry_ptr)->clears   = 0;              \
+        (entry_ptr)->flushes  = 0;              \
 	(entry_ptr)->pins     = 0;
 
 #define H5C2__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)           \
@@ -2277,100 +2277,100 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #if H5C2_DO_SANITY_CHECKS
 
 #define H5C2__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                \
-     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||           \
-     ( (entry_ptr) == NULL ) ||                                \
-     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||              \
-     ( (entry_ptr)->ht_next != NULL ) ||                       \
-     ( (entry_ptr)->ht_prev != NULL ) ||                       \
-     ( (entry_ptr)->size <= 0 ) ||                             \
+if ( ( (cache_ptr) == NULL ) ||                               \
+     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||            \
+     ( (entry_ptr) == NULL ) ||                               \
+     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||             \
+     ( (entry_ptr)->ht_next != NULL ) ||                      \
+     ( (entry_ptr)->ht_prev != NULL ) ||                      \
+     ( (entry_ptr)->size <= 0 ) ||                            \
      ( (k = H5C2__HASH_FCN((entry_ptr)->addr)) < 0 ) ||        \
      ( k >= H5C2__HASH_TABLE_LEN ) ) {                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,               \
-               "Pre HT insert SC failed")                      \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
+               "Pre HT insert SC failed")                     \
 }
 
-#define H5C2__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                    \
+#define H5C2__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                     \
 if ( ( (cache_ptr) == NULL ) ||                                         \
-     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                    \
+     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                      \
      ( (cache_ptr)->index_len < 1 ) ||                                  \
      ( (entry_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
      ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
      ( (entry_ptr)->size <= 0 ) ||                                      \
-     ( H5C2__HASH_FCN((entry_ptr)->addr) < 0 ) ||                       \
-     ( H5C2__HASH_FCN((entry_ptr)->addr) >= H5C2__HASH_TABLE_LEN ) ||   \
-     ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))]        \
+     ( H5C2__HASH_FCN((entry_ptr)->addr) < 0 ) ||                        \
+     ( H5C2__HASH_FCN((entry_ptr)->addr) >= H5C2__HASH_TABLE_LEN ) ||     \
+     ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))]         \
        == NULL ) ||                                                     \
-     ( ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))]      \
+     ( ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))]       \
        != (entry_ptr) ) &&                                              \
        ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
-     ( ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))] ==   \
+     ( ( ((cache_ptr)->index)[(H5C2__HASH_FCN((entry_ptr)->addr))] ==    \
          (entry_ptr) ) &&                                               \
        ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
 }
 
 #define H5C2__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
-if ( ( (cache_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                         \
-     ( ! H5F_addr_defined(Addr) ) ||                                         \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                          \
+     ( ! H5F_addr_defined(Addr) ) ||                                        \
      ( H5C2__HASH_FCN(Addr) < 0 ) ||                                         \
-     ( H5C2__HASH_FCN(Addr) >= H5C2__HASH_TABLE_LEN ) ) {                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed")  \
+     ( H5C2__HASH_FCN(Addr) >= H5C2__HASH_TABLE_LEN ) ) {                     \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed") \
 }
 
 #define H5C2__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                         \
-     ( (cache_ptr)->index_len < 1 ) ||                                       \
-     ( (entry_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                      \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                           \
-     ( (entry_ptr)->size <= 0 ) ||                                           \
-     ( ((cache_ptr)->index)[k] == NULL ) ||                                  \
-     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                         \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                                 \
-     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                         \
-       ( (entry_ptr)->ht_prev != NULL ) ) ||                                 \
-     ( ( (entry_ptr)->ht_prev != NULL ) &&                                   \
-       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                 \
-     ( ( (entry_ptr)->ht_next != NULL ) &&                                   \
-       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {                \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                             \
-                "Post successful HT search SC failed")                       \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                          \
+     ( (cache_ptr)->index_len < 1 ) ||                                      \
+     ( (entry_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                     \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                          \
+     ( (entry_ptr)->size <= 0 ) ||                                          \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                                 \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                                \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                                \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                                  \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                                  \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {               \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                            \
+                "Post successful HT search SC failed")                      \
 }
 
 #define H5C2__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                         \
-     ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                      \
-     ( (entry_ptr)->ht_prev != NULL ) ) {                               \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                        \
-                "Post HT shift to front SC failed")                     \
+if ( ( (cache_ptr) == NULL ) ||                                        \
+     ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                     \
+     ( (entry_ptr)->ht_prev != NULL ) ) {                              \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                       \
+                "Post HT shift to front SC failed")                    \
 }
 
 #define H5C2__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
-if ( ( (cache_ptr) == NULL ) ||                                          \
-     ( (cache_ptr)->index_len <= 0 ) ||                                  \
-     ( (cache_ptr)->index_size <= 0 ) ||                                 \
-     ( (new_size) <= 0 ) ||                                              \
-     ( (old_size) > (cache_ptr)->index_size ) ||                         \
-     ( (new_size) <= 0 ) ||                                              \
-     ( ( (cache_ptr)->index_len == 1 ) &&                                \
-       ( (cache_ptr)->index_size != (old_size) ) ) ) {                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                             \
-                "Pre HT entry size change SC failed")                    \
+if ( ( (cache_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->index_len <= 0 ) ||                                 \
+     ( (cache_ptr)->index_size <= 0 ) ||                                \
+     ( (new_size) <= 0 ) ||                                             \
+     ( (old_size) > (cache_ptr)->index_size ) ||                        \
+     ( (new_size) <= 0 ) ||                                             \
+     ( ( (cache_ptr)->index_len == 1 ) &&                               \
+       ( (cache_ptr)->index_size != (old_size) ) ) ) {                  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                            \
+                "Pre HT entry size change SC failed")                   \
 }
 
 #define H5C2__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
-if ( ( (cache_ptr) == NULL ) ||                                           \
-     ( (cache_ptr)->index_len <= 0 ) ||                                   \
-     ( (cache_ptr)->index_size <= 0 ) ||                                  \
-     ( (new_size) > (cache_ptr)->index_size ) ||                          \
-     ( ( (cache_ptr)->index_len == 1 ) &&                                 \
-       ( (cache_ptr)->index_size != (new_size) ) ) ) {                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                              \
-                "Post HT entry size change SC failed")                    \
+if ( ( (cache_ptr) == NULL ) ||                                          \
+     ( (cache_ptr)->index_len <= 0 ) ||                                  \
+     ( (cache_ptr)->index_size <= 0 ) ||                                 \
+     ( (new_size) > (cache_ptr)->index_size ) ||                         \
+     ( ( (cache_ptr)->index_len == 1 ) &&                                \
+       ( (cache_ptr)->index_size != (new_size) ) ) ) {                   \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                             \
+                "Post HT entry size change SC failed")                   \
 }
 
 #else /* H5C2_DO_SANITY_CHECKS */
@@ -2387,30 +2387,30 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 
 #define H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val) \
-{                                                             \
-    int k;                                                    \
+{                                                            \
+    int k;                                                   \
     H5C2__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)    \
     k = H5C2__HASH_FCN((entry_ptr)->addr);                    \
-    if ( ((cache_ptr)->index)[k] == NULL )                    \
-    {                                                         \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
-    }                                                         \
-    else                                                      \
-    {                                                         \
-        (entry_ptr)->ht_next = ((cache_ptr)->index)[k];       \
-        (entry_ptr)->ht_next->ht_prev = (entry_ptr);          \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
-    }                                                         \
-    (cache_ptr)->index_len++;                                 \
-    (cache_ptr)->index_size += (entry_ptr)->size;             \
+    if ( ((cache_ptr)->index)[k] == NULL )                   \
+    {                                                        \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    else                                                     \
+    {                                                        \
+        (entry_ptr)->ht_next = ((cache_ptr)->index)[k];      \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr);         \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    (cache_ptr)->index_len++;                                \
+    (cache_ptr)->index_size += (entry_ptr)->size;            \
     H5C2__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)            \
 }
 
-#define H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)         \
+#define H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)          \
 {                                                             \
     int k;                                                    \
-    H5C2__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)              \
-    k = H5C2__HASH_FCN((entry_ptr)->addr);                    \
+    H5C2__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)               \
+    k = H5C2__HASH_FCN((entry_ptr)->addr);                     \
     if ( (entry_ptr)->ht_next )                               \
     {                                                         \
         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev; \
@@ -2427,79 +2427,79 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     (entry_ptr)->ht_prev = NULL;                              \
     (cache_ptr)->index_len--;                                 \
     (cache_ptr)->index_size -= (entry_ptr)->size;             \
-    H5C2__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)             \
+    H5C2__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)              \
 }
 
-#define H5C2__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)             \
-{                                                                            \
-    int k;                                                                   \
-    int depth = 0;                                                           \
+#define H5C2__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)              \
+{                                                                           \
+    int k;                                                                  \
+    int depth = 0;                                                          \
     H5C2__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                        \
     k = H5C2__HASH_FCN(Addr);                                                \
-    entry_ptr = ((cache_ptr)->index)[k];                                     \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )      \
-    {                                                                        \
-        (entry_ptr) = (entry_ptr)->ht_next;                                  \
-        (depth)++;                                                           \
-    }                                                                        \
-    if ( entry_ptr )                                                         \
-    {                                                                        \
+    entry_ptr = ((cache_ptr)->index)[k];                                    \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )     \
+    {                                                                       \
+        (entry_ptr) = (entry_ptr)->ht_next;                                 \
+        (depth)++;                                                          \
+    }                                                                       \
+    if ( entry_ptr )                                                        \
+    {                                                                       \
         H5C2__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                          \
-        {                                                                    \
-            if ( (entry_ptr)->ht_next )                                      \
-            {                                                                \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;        \
-            }                                                                \
-            HDassert( (entry_ptr)->ht_prev != NULL );                        \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;            \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                  \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                  \
-            (entry_ptr)->ht_prev = NULL;                                     \
-            ((cache_ptr)->index)[k] = (entry_ptr);                           \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                         \
+        {                                                                   \
+            if ( (entry_ptr)->ht_next )                                     \
+            {                                                               \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+            }                                                               \
+            HDassert( (entry_ptr)->ht_prev != NULL );                       \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;           \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                 \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                 \
+            (entry_ptr)->ht_prev = NULL;                                    \
+            ((cache_ptr)->index)[k] = (entry_ptr);                          \
             H5C2__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)  \
-        }                                                                    \
-    }                                                                        \
+        }                                                                   \
+    }                                                                       \
     H5C2__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, (entry_ptr != NULL), depth)  \
 }
 
 #define H5C2__SEARCH_INDEX_NO_STATS(cache_ptr, Addr, entry_ptr, fail_val)    \
-{                                                                            \
-    int k;                                                                   \
-    int depth = 0;                                                           \
+{                                                                           \
+    int k;                                                                  \
+    int depth = 0;                                                          \
     H5C2__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                        \
     k = H5C2__HASH_FCN(Addr);                                                \
-    entry_ptr = ((cache_ptr)->index)[k];                                     \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )      \
-    {                                                                        \
-        (entry_ptr) = (entry_ptr)->ht_next;                                  \
-        (depth)++;                                                           \
-    }                                                                        \
-    if ( entry_ptr )                                                         \
-    {                                                                        \
+    entry_ptr = ((cache_ptr)->index)[k];                                    \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )     \
+    {                                                                       \
+        (entry_ptr) = (entry_ptr)->ht_next;                                 \
+        (depth)++;                                                          \
+    }                                                                       \
+    if ( entry_ptr )                                                        \
+    {                                                                       \
         H5C2__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                          \
-        {                                                                    \
-            if ( (entry_ptr)->ht_next )                                      \
-            {                                                                \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;        \
-            }                                                                \
-            HDassert( (entry_ptr)->ht_prev != NULL );                        \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;            \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                  \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                  \
-            (entry_ptr)->ht_prev = NULL;                                     \
-            ((cache_ptr)->index)[k] = (entry_ptr);                           \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                         \
+        {                                                                   \
+            if ( (entry_ptr)->ht_next )                                     \
+            {                                                               \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+            }                                                               \
+            HDassert( (entry_ptr)->ht_prev != NULL );                       \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;           \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                 \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                 \
+            (entry_ptr)->ht_prev = NULL;                                    \
+            ((cache_ptr)->index)[k] = (entry_ptr);                          \
             H5C2__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)  \
-        }                                                                    \
-    }                                                                        \
+        }                                                                   \
+    }                                                                       \
 }
 
 #define H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
+{                                                                        \
     H5C2__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)      \
-    (cache_ptr)->index_size -= old_size;                                  \
-    (cache_ptr)->index_size += new_size;                                  \
+    (cache_ptr)->index_size -= old_size;                                 \
+    (cache_ptr)->index_size += new_size;                                 \
     H5C2__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)     \
 }
 
@@ -2566,10 +2566,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_DO_SANITY_CHECKS
 
-#define H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)            \
+#define H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                        \
     HDassert( (entry_ptr) );                                                   \
     HDassert( (entry_ptr)->size > 0 );                                         \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
@@ -2593,10 +2593,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_DO_SANITY_CHECKS */
 
-#define H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)            \
+#define H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                        \
     HDassert( (entry_ptr) );                                                   \
     HDassert( (entry_ptr)->size > 0 );                                         \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
@@ -2651,10 +2651,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *-------------------------------------------------------------------------
  */
 
-#define H5C2__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)         \
+#define H5C2__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)          \
 {                                                                   \
     HDassert( (cache_ptr) );                                        \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );           \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );             \
     HDassert( (entry_ptr) );                                        \
     HDassert( !((entry_ptr)->is_protected) );                       \
     HDassert( !((entry_ptr)->is_read_only) );                       \
@@ -2706,46 +2706,46 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 #if H5C2_DO_SANITY_CHECKS
 
 #define H5C2__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
-    HDassert( (old_size) > 0 );                                           \
-    HDassert( (new_size) > 0 );                                           \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( (cache_ptr)->slist_len > 0 );                               \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                             \
-              ( (cache_ptr)->slist_size == (old_size) ) );                \
-                                                                          \
-    (cache_ptr)->slist_size -= (old_size);                                \
-    (cache_ptr)->slist_size += (new_size);                                \
-                                                                          \
-    (cache_ptr)->slist_size_increase -= (int64_t)(old_size);              \
-    (cache_ptr)->slist_size_increase += (int64_t)(new_size);              \
-                                                                          \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
-              ( (cache_ptr)->slist_size == (new_size) ) );                \
+{                                                                        \
+    HDassert( (cache_ptr) );                                             \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (old_size) > 0 );                                          \
+    HDassert( (new_size) > 0 );                                          \
+    HDassert( (old_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( (cache_ptr)->slist_len > 0 );                              \
+    HDassert( ((cache_ptr)->slist_len > 1) ||                            \
+              ( (cache_ptr)->slist_size == (old_size) ) );               \
+                                                                         \
+    (cache_ptr)->slist_size -= (old_size);                               \
+    (cache_ptr)->slist_size += (new_size);                               \
+                                                                         \
+    (cache_ptr)->slist_size_increase -= (int64_t)(old_size);             \
+    (cache_ptr)->slist_size_increase += (int64_t)(new_size);             \
+                                                                         \
+    HDassert( (new_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                          \
+              ( (cache_ptr)->slist_size == (new_size) ) );               \
 } /* H5C2__REMOVE_ENTRY_FROM_SLIST */
 
 #else /* H5C2_DO_SANITY_CHECKS */
 
 #define H5C2__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
-    HDassert( (old_size) > 0 );                                           \
-    HDassert( (new_size) > 0 );                                           \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( (cache_ptr)->slist_len > 0 );                               \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                             \
-              ( (cache_ptr)->slist_size == (old_size) ) );                \
-                                                                          \
-    (cache_ptr)->slist_size -= (old_size);                                \
-    (cache_ptr)->slist_size += (new_size);                                \
-                                                                          \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
-              ( (cache_ptr)->slist_size == (new_size) ) );                \
+{                                                                        \
+    HDassert( (cache_ptr) );                                             \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (old_size) > 0 );                                          \
+    HDassert( (new_size) > 0 );                                          \
+    HDassert( (old_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( (cache_ptr)->slist_len > 0 );                              \
+    HDassert( ((cache_ptr)->slist_len > 1) ||                            \
+              ( (cache_ptr)->slist_size == (old_size) ) );               \
+                                                                         \
+    (cache_ptr)->slist_size -= (old_size);                               \
+    (cache_ptr)->slist_size += (new_size);                               \
+                                                                         \
+    HDassert( (new_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                          \
+              ( (cache_ptr)->slist_size == (new_size) ) );               \
 } /* H5C2__REMOVE_ENTRY_FROM_SLIST */
 
 #endif /* H5C2_DO_SANITY_CHECKS */
@@ -2801,99 +2801,99 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
 #define H5C2__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
-{                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
-    HDassert( (entry_ptr)->last_trans == 0 );                                \
-                                                                             \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
-        /* modified LRU specific code */                                     \
-                                                                             \
-        /* remove the entry from the LRU list, and re-insert it at the head. \
-	 */                                                                  \
-                                                                             \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+    HDassert( (entry_ptr)->last_trans == 0 );                               \
+                                                                            \
+    if ( ! ((entry_ptr)->is_pinned) ) {                                     \
+                                                                            \
+        /* modified LRU specific code */                                    \
+                                                                            \
+        /* remove the entry from the LRU list, and re-insert it at the head.\
+	 */                                                                 \
+                                                                            \
         H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
-                                                                             \
+                        (cache_ptr)->LRU_tail_ptr,                          \
+			(cache_ptr)->LRU_list_len,                          \
+                        (cache_ptr)->LRU_list_size, (fail_val))             \
+                                                                            \
         H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
-                         (cache_ptr)->LRU_tail_ptr,                          \
-			 (cache_ptr)->LRU_list_len,                          \
-                         (cache_ptr)->LRU_list_size, (fail_val))             \
-                                                                             \
-        /* Use the dirty flag to infer whether the entry is on the clean or  \
-         * dirty LRU list, and remove it.  Then insert it at the head of     \
-         * the same LRU list.                                                \
-         *                                                                   \
-         * At least initially, all entries should be clean.  That may        \
-         * change, so we may as well deal with both cases now.               \
-         */                                                                  \
-                                                                             \
-        if ( (entry_ptr)->is_dirty ) {                                       \
+                         (cache_ptr)->LRU_tail_ptr,                         \
+			 (cache_ptr)->LRU_list_len,                         \
+                         (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                            \
+        /* Use the dirty flag to infer whether the entry is on the clean or \
+         * dirty LRU list, and remove it.  Then insert it at the head of    \
+         * the same LRU list.                                               \
+         *                                                                  \
+         * At least initially, all entries should be clean.  That may       \
+         * change, so we may as well deal with both cases now.              \
+         */                                                                 \
+                                                                            \
+        if ( (entry_ptr)->is_dirty ) {                                      \
             H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
-                                (cache_ptr)->dLRU_tail_ptr,                  \
-                                (cache_ptr)->dLRU_list_len,                  \
-                                (cache_ptr)->dLRU_list_size, (fail_val))     \
-                                                                             \
+                                (cache_ptr)->dLRU_tail_ptr,                 \
+                                (cache_ptr)->dLRU_list_len,                 \
+                                (cache_ptr)->dLRU_list_size, (fail_val))    \
+                                                                            \
             H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
-                                 (cache_ptr)->dLRU_tail_ptr,                 \
-                                 (cache_ptr)->dLRU_list_len,                 \
-                                 (cache_ptr)->dLRU_list_size, (fail_val))    \
-        } else {                                                             \
+                                 (cache_ptr)->dLRU_tail_ptr,                \
+                                 (cache_ptr)->dLRU_list_len,                \
+                                 (cache_ptr)->dLRU_list_size, (fail_val))   \
+        } else {                                                            \
             H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
-                                (cache_ptr)->cLRU_tail_ptr,                  \
-                                (cache_ptr)->cLRU_list_len,                  \
-                                (cache_ptr)->cLRU_list_size, (fail_val))     \
-                                                                             \
+                                (cache_ptr)->cLRU_tail_ptr,                 \
+                                (cache_ptr)->cLRU_list_len,                 \
+                                (cache_ptr)->cLRU_list_size, (fail_val))    \
+                                                                            \
             H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,   \
-                                 (cache_ptr)->cLRU_tail_ptr,                 \
-                                 (cache_ptr)->cLRU_list_len,                 \
-                                 (cache_ptr)->cLRU_list_size, (fail_val))    \
-        }                                                                    \
-                                                                             \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
+                                 (cache_ptr)->cLRU_tail_ptr,                \
+                                 (cache_ptr)->cLRU_list_len,                \
+                                 (cache_ptr)->cLRU_list_size, (fail_val))   \
+        }                                                                   \
+                                                                            \
+        /* End modified LRU specific code. */                               \
+    }                                                                       \
 } /* H5C2__FAKE_RP_FOR_MOST_RECENT_ACCESS */
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #define H5C2__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
-{                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
-    HDassert( (entry_ptr)->last_trans == 0 );                                \
-                                                                             \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
-        /* modified LRU specific code */                                     \
-                                                                             \
-        /* remove the entry from the LRU list, and re-insert it at the head  \
-	 */                                                                  \
-                                                                             \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+    HDassert( (entry_ptr)->last_trans == 0 );                               \
+                                                                            \
+    if ( ! ((entry_ptr)->is_pinned) ) {                                     \
+                                                                            \
+        /* modified LRU specific code */                                    \
+                                                                            \
+        /* remove the entry from the LRU list, and re-insert it at the head \
+	 */                                                                 \
+                                                                            \
         H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
-                                                                             \
+                        (cache_ptr)->LRU_tail_ptr,                          \
+			(cache_ptr)->LRU_list_len,                          \
+                        (cache_ptr)->LRU_list_size, (fail_val))             \
+                                                                            \
         H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
-                         (cache_ptr)->LRU_tail_ptr,                          \
-			 (cache_ptr)->LRU_list_len,                          \
-                         (cache_ptr)->LRU_list_size, (fail_val))             \
-                                                                             \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
+                         (cache_ptr)->LRU_tail_ptr,                         \
+			 (cache_ptr)->LRU_list_len,                         \
+                         (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                            \
+        /* End modified LRU specific code. */                               \
+    }                                                                       \
 } /* H5C2__FAKE_RP_FOR_MOST_RECENT_ACCESS */
 
 #endif /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -2948,10 +2948,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)         \
+#define H5C2__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -2964,7 +2964,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     /* remove the entry from the LRU list. */                                \
                                                                              \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
                     (cache_ptr)->LRU_list_size, (fail_val))                  \
                                                                              \
@@ -2976,12 +2976,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     if ( (entry_ptr)->is_dirty ) {                                           \
                                                                              \
-        H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,        \
+        H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,         \
                             (cache_ptr)->dLRU_tail_ptr,                      \
                             (cache_ptr)->dLRU_list_len,                      \
                             (cache_ptr)->dLRU_list_size, (fail_val))         \
     } else {                                                                 \
-        H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,        \
+        H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,         \
                             (cache_ptr)->cLRU_tail_ptr,                      \
                             (cache_ptr)->cLRU_list_len,                      \
                             (cache_ptr)->cLRU_list_size, (fail_val))         \
@@ -2991,10 +2991,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)         \
+#define H5C2__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -3007,7 +3007,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     /* remove the entry from the LRU list. */                                \
                                                                              \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
                     (cache_ptr)->LRU_list_size, (fail_val))                  \
                                                                              \
@@ -3067,10 +3067,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)           \
+#define H5C2__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
     HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
@@ -3086,12 +3086,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	 * head.                                                            \
 	 */                                                                 \
                                                                             \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
                         (cache_ptr)->LRU_tail_ptr,                          \
 			(cache_ptr)->LRU_list_len,                          \
                         (cache_ptr)->LRU_list_size, (fail_val))             \
                                                                             \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
                          (cache_ptr)->LRU_tail_ptr,                         \
 			 (cache_ptr)->LRU_list_len,                         \
                          (cache_ptr)->LRU_list_size, (fail_val))            \
@@ -3108,18 +3108,18 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
          */                                                                 \
                                                                             \
         if ( (entry_ptr)->is_dirty ) {                                      \
-            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
+            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
                                 (cache_ptr)->dLRU_tail_ptr,                 \
                                 (cache_ptr)->dLRU_list_len,                 \
                                 (cache_ptr)->dLRU_list_size, (fail_val))    \
         } else {                                                            \
-            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,   \
+            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
                                 (cache_ptr)->cLRU_tail_ptr,                 \
                                 (cache_ptr)->cLRU_list_len,                 \
                                 (cache_ptr)->cLRU_list_size, (fail_val))    \
         }                                                                   \
                                                                             \
-        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
+        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,       \
                              (cache_ptr)->cLRU_tail_ptr,                    \
                              (cache_ptr)->cLRU_list_len,                    \
                              (cache_ptr)->cLRU_list_size, (fail_val))       \
@@ -3130,10 +3130,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)           \
+#define H5C2__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
     HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
@@ -3149,12 +3149,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	 * head.                                                            \
 	 */                                                                 \
                                                                             \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
                         (cache_ptr)->LRU_tail_ptr,                          \
 			(cache_ptr)->LRU_list_len,                          \
                         (cache_ptr)->LRU_list_size, (fail_val))             \
                                                                             \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
                          (cache_ptr)->LRU_tail_ptr,                         \
 			 (cache_ptr)->LRU_list_len,                         \
                          (cache_ptr)->LRU_list_size, (fail_val))            \
@@ -3226,10 +3226,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_read_only) );                              \
@@ -3241,7 +3241,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -3250,7 +3250,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                   \
         HDassert( (cache_ptr)->mdj_enabled );                              \
 	HDassert( (cache_ptr)->trans_in_progress );                        \
-        H5C2__DLL_PREPEND((entry_ptr),                                     \
+        H5C2__DLL_PREPEND((entry_ptr),                                      \
 		          ((cache_ptr)->jwipl_head_ptr),                   \
 		          ((cache_ptr)->jwipl_tail_ptr),                   \
 			  ((cache_ptr)->jwipl_len),                        \
@@ -3262,7 +3262,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                          (cache_ptr)->LRU_tail_ptr,                        \
 			 (cache_ptr)->LRU_list_len,                        \
                          (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3272,12 +3272,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
          */                                                                \
                                                                            \
         if ( entry_ptr->is_dirty ) {                                       \
-            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
+            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
                                  (cache_ptr)->dLRU_tail_ptr,               \
                                  (cache_ptr)->dLRU_list_len,               \
                                  (cache_ptr)->dLRU_list_size, (fail_val))  \
         } else {                                                           \
-            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
+            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
                                  (cache_ptr)->cLRU_tail_ptr,               \
                                  (cache_ptr)->cLRU_list_len,               \
                                  (cache_ptr)->cLRU_list_size, (fail_val))  \
@@ -3289,10 +3289,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_read_only) );                              \
@@ -3304,7 +3304,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -3313,7 +3313,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                   \
         HDassert( (cache_ptr)->mdj_enabled );                              \
 	HDassert( (cache_ptr)->trans_in_progress );                        \
-        H5C2__DLL_PREPEND((entry_ptr),                                     \
+        H5C2__DLL_PREPEND((entry_ptr),                                      \
 		          ((cache_ptr)->jwipl_head_ptr),                   \
 		          ((cache_ptr)->jwipl_tail_ptr),                   \
 			  ((cache_ptr)->jwipl_len),                        \
@@ -3325,7 +3325,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                          (cache_ptr)->LRU_tail_ptr,                        \
 			 (cache_ptr)->LRU_list_len,                        \
                          (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3371,11 +3371,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,  \
+#define H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,   \
 		                                   fail_val)              \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (cache_ptr)->mdj_enabled );                                 \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
@@ -3386,7 +3386,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     HDassert( (entry_ptr)->is_dirty );                                    \
     HDassert( (entry_ptr)->last_trans == 0 );                             \
 									  \
-    H5C2__DLL_REMOVE((entry_ptr),                                         \
+    H5C2__DLL_REMOVE((entry_ptr),                                          \
                      ((cache_ptr)->jwipl_head_ptr),                       \
                      ((cache_ptr)->jwipl_tail_ptr),                       \
                      ((cache_ptr)->jwipl_len),                            \
@@ -3397,7 +3397,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
     /* insert the entry at the head of the LRU list. */                   \
                                                                           \
-    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
+    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
                       (cache_ptr)->LRU_tail_ptr,                          \
                       (cache_ptr)->LRU_list_len,                          \
                       (cache_ptr)->LRU_list_size, (fail_val))             \
@@ -3407,12 +3407,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      */                                                                   \
                                                                           \
     if ( entry_ptr->is_dirty ) {                                          \
-        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
+        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,     \
                               (cache_ptr)->dLRU_tail_ptr,                 \
                               (cache_ptr)->dLRU_list_len,                 \
                               (cache_ptr)->dLRU_list_size, (fail_val))    \
     } else {                                                              \
-        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
+        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,     \
                               (cache_ptr)->cLRU_tail_ptr,                 \
                               (cache_ptr)->cLRU_list_len,                 \
                               (cache_ptr)->cLRU_list_size, (fail_val))    \
@@ -3424,11 +3424,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,  \
+#define H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,   \
 		                                   fail_val)              \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (cache_ptr)->mdj_enabled );                                 \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
@@ -3439,7 +3439,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     HDassert( (entry_ptr)->is_dirty );                                    \
     HDassert( (entry_ptr)->last_trans == 0 );                             \
 									  \
-    H5C2__DLL_REMOVE((entry_ptr),                                         \
+    H5C2__DLL_REMOVE((entry_ptr),                                          \
                      ((cache_ptr)->jwipl_head_ptr),                       \
                      ((cache_ptr)->jwipl_tail_ptr),                       \
                      ((cache_ptr)->jwipl_len),                            \
@@ -3450,7 +3450,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
     /* insert the entry at the head of the LRU list. */                   \
                                                                           \
-    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
+    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
                       (cache_ptr)->LRU_tail_ptr,                          \
                       (cache_ptr)->LRU_list_len,                          \
                       (cache_ptr)->LRU_list_size, (fail_val))             \
@@ -3497,10 +3497,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_LOAD(cache_ptr, entry_ptr, fail_val)           \
+#define H5C2__UPDATE_RP_FOR_LOAD(cache_ptr, entry_ptr, fail_val)            \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_pinned) );                                 \
@@ -3513,7 +3513,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     /* insert the entry at the head of the LRU list. */                    \
                                                                            \
-    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
+    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
                       (cache_ptr)->LRU_tail_ptr,                           \
                       (cache_ptr)->LRU_list_len,                           \
                       (cache_ptr)->LRU_list_size, (fail_val))              \
@@ -3523,12 +3523,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      */                                                                    \
                                                                            \
     if ( entry_ptr->is_dirty ) {                                           \
-        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,     \
+        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,      \
                               (cache_ptr)->dLRU_tail_ptr,                  \
                               (cache_ptr)->dLRU_list_len,                  \
                               (cache_ptr)->dLRU_list_size, (fail_val))     \
     } else {                                                               \
-        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,     \
+        H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
                               (cache_ptr)->cLRU_tail_ptr,                  \
                               (cache_ptr)->cLRU_list_len,                  \
                               (cache_ptr)->cLRU_list_size, (fail_val))     \
@@ -3539,10 +3539,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_LOAD(cache_ptr, entry_ptr, fail_val)           \
+#define H5C2__UPDATE_RP_FOR_LOAD(cache_ptr, entry_ptr, fail_val)            \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_pinned) );                                 \
@@ -3555,7 +3555,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     /* insert the entry at the head of the LRU list. */                    \
                                                                            \
-    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
+    H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,               \
                       (cache_ptr)->LRU_tail_ptr,                           \
                       (cache_ptr)->LRU_list_len,                           \
                       (cache_ptr)->LRU_list_size, (fail_val))              \
@@ -3620,10 +3620,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)       \
+#define H5C2__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -3632,7 +3632,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
@@ -3641,7 +3641,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                  \
         HDassert( (cache_ptr)->mdj_enabled );                             \
         HDassert( (entry_ptr)->is_dirty );                                \
-        H5C2__DLL_REMOVE((entry_ptr),                                     \
+        H5C2__DLL_REMOVE((entry_ptr),                                       \
                          ((cache_ptr)->jwipl_head_ptr),                   \
                          ((cache_ptr)->jwipl_tail_ptr),                   \
                          ((cache_ptr)->jwipl_len),                        \
@@ -3654,7 +3654,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         /* remove the entry from the LRU list. */                         \
                                                                           \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                         (cache_ptr)->LRU_tail_ptr,                        \
 			(cache_ptr)->LRU_list_len,                        \
                         (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3665,14 +3665,14 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         if ( (entry_ptr)->is_dirty ) {                                    \
                                                                           \
-            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
+            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
                                 (cache_ptr)->dLRU_tail_ptr,               \
                                 (cache_ptr)->dLRU_list_len,               \
                                 (cache_ptr)->dLRU_list_size, (fail_val))  \
                                                                           \
         } else {                                                          \
                                                                           \
-            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
+            H5C2__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
                                 (cache_ptr)->cLRU_tail_ptr,               \
                                 (cache_ptr)->cLRU_list_len,               \
                                 (cache_ptr)->cLRU_list_size, (fail_val))  \
@@ -3685,7 +3685,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      * pinned, now add the entry to the protected list.                   \
      */                                                                   \
                                                                           \
-    H5C2__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,               \
+    H5C2__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
                     (cache_ptr)->pl_tail_ptr,                             \
                     (cache_ptr)->pl_len,                                  \
                     (cache_ptr)->pl_size, (fail_val))                     \
@@ -3693,10 +3693,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)       \
+#define H5C2__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -3705,7 +3705,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
@@ -3714,7 +3714,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                  \
         HDassert( (cache_ptr)->mdj_enabled );                             \
         HDassert( (entry_ptr)->is_dirty );                                \
-        H5C2__DLL_REMOVE((entry_ptr),                                     \
+        H5C2__DLL_REMOVE((entry_ptr),                                      \
                          ((cache_ptr)->jwipl_head_ptr),                   \
                          ((cache_ptr)->jwipl_tail_ptr),                   \
                          ((cache_ptr)->jwipl_len),                        \
@@ -3727,7 +3727,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         /* remove the entry from the LRU list. */                         \
                                                                           \
-        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                         (cache_ptr)->LRU_tail_ptr,                        \
 			(cache_ptr)->LRU_list_len,                        \
                         (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3739,10 +3739,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      * pinned, now add the entry to the protected list.                   \
      */                                                                   \
                                                                           \
-    H5C2__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,               \
-                     (cache_ptr)->pl_tail_ptr,                            \
-                     (cache_ptr)->pl_len,                                 \
-                     (cache_ptr)->pl_size, (fail_val))                    \
+    H5C2__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+                    (cache_ptr)->pl_tail_ptr,                             \
+                    (cache_ptr)->pl_len,                                  \
+                    (cache_ptr)->pl_size, (fail_val))                     \
 } /* H5C2__UPDATE_RP_FOR_PROTECT */
 
 #endif /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3812,11 +3812,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,          \
+#define H5C2__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,           \
 		                   had_jwip, fail_val)                       \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -3837,7 +3837,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	    HDassert( (entry_ptr)->last_trans != 0 );                        \
 	    HDassert( was_dirty );                                           \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C2__DLL_REMOVE((entry_ptr),                                    \
+            H5C2__DLL_REMOVE((entry_ptr),                                     \
 	  		     ((cache_ptr)->jwipl_head_ptr),                  \
                              ((cache_ptr)->jwipl_tail_ptr),                  \
                              ((cache_ptr)->jwipl_len),                       \
@@ -3850,7 +3850,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             /* remove the entry from the LRU list */                         \
                                                                              \
-            H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
+            H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
                              (cache_ptr)->LRU_tail_ptr,                      \
 			     (cache_ptr)->LRU_list_len,                      \
                              (cache_ptr)->LRU_list_size, (fail_val))         \
@@ -3860,7 +3860,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
              */                                                              \
             if ( was_dirty ) {                                               \
                                                                              \
-                H5C2__AUX_DLL_REMOVE((entry_ptr),                            \
+                H5C2__AUX_DLL_REMOVE((entry_ptr),                             \
 				     (cache_ptr)->dLRU_head_ptr,             \
                                      (cache_ptr)->dLRU_tail_ptr,             \
                                      (cache_ptr)->dLRU_list_len,             \
@@ -3869,7 +3869,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             } else {                                                         \
                                                                              \
-                H5C2__AUX_DLL_REMOVE((entry_ptr),                            \
+                H5C2__AUX_DLL_REMOVE((entry_ptr),                             \
 				     (cache_ptr)->cLRU_head_ptr,             \
                                      (cache_ptr)->cLRU_tail_ptr,             \
                                      (cache_ptr)->cLRU_list_len,             \
@@ -3886,7 +3886,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
             HDassert( (cache_ptr)->mdj_enabled );                            \
 	    HDassert( (cache_ptr)->trans_in_progress );                      \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C2__DLL_PREPEND((entry_ptr),                                   \
+            H5C2__DLL_PREPEND((entry_ptr),                                    \
 		              ((cache_ptr)->jwipl_head_ptr),                 \
 		              ((cache_ptr)->jwipl_tail_ptr),                 \
                               ((cache_ptr)->jwipl_len),                      \
@@ -3896,7 +3896,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 		                                                             \
             /* begin modified LRU specific code */                           \
 	                                                                     \
-            H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,        \
+            H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
                               (cache_ptr)->LRU_tail_ptr,                     \
 			      (cache_ptr)->LRU_list_len,                     \
                               (cache_ptr)->LRU_list_size, (fail_val))        \
@@ -3907,7 +3907,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             if ( (entry_ptr)->is_dirty ) {                                   \
                                                                              \
-                H5C2__AUX_DLL_PREPEND((entry_ptr),                           \
+                H5C2__AUX_DLL_PREPEND((entry_ptr),                            \
 				      (cache_ptr)->dLRU_head_ptr,            \
                                       (cache_ptr)->dLRU_tail_ptr,            \
                                       (cache_ptr)->dLRU_list_len,            \
@@ -3916,7 +3916,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             } else {                                                         \
                                                                              \
-                H5C2__AUX_DLL_PREPEND((entry_ptr),                           \
+                H5C2__AUX_DLL_PREPEND((entry_ptr),                            \
 				      (cache_ptr)->cLRU_head_ptr,            \
                                       (cache_ptr)->cLRU_tail_ptr,            \
                                       (cache_ptr)->cLRU_list_len,            \
@@ -3931,11 +3931,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,          \
+#define H5C2__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,           \
 		                   had_jwip, fail_val)                       \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -3956,7 +3956,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	    HDassert( (entry_ptr)->last_trans != 0 );                        \
 	    HDassert( was_dirty );                                           \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C2__DLL_REMOVE((entry_ptr),                                    \
+            H5C2__DLL_REMOVE((entry_ptr),                                     \
 	  	             ((cache_ptr)->jwipl_head_ptr),                  \
                              ((cache_ptr)->jwipl_tail_ptr),                  \
                              ((cache_ptr)->jwipl_len),                       \
@@ -3969,7 +3969,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             /* remove the entry from the LRU list */                         \
                                                                              \
-            H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
+            H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
                              (cache_ptr)->LRU_tail_ptr,                      \
 			     (cache_ptr)->LRU_list_len,                      \
                              (cache_ptr)->LRU_list_size, (fail_val))         \
@@ -3984,7 +3984,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
             HDassert( (cache_ptr)->mdj_enabled );                            \
 	    HDassert( (cache_ptr)->trans_in_progress );                      \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C2__DLL_PREPEND((entry_ptr),                                   \
+            H5C2__DLL_PREPEND((entry_ptr),                                    \
                               ((cache_ptr)->jwipl_head_ptr),                 \
                               ((cache_ptr)->jwipl_tail_ptr),                 \
                               ((cache_ptr)->jwipl_len),                      \
@@ -3994,7 +3994,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 		                                                             \
             /* begin modified LRU specific code */                           \
 	                                                                     \
-            H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,        \
+            H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
                               (cache_ptr)->LRU_tail_ptr,                     \
 			      (cache_ptr)->LRU_list_len,                     \
                               (cache_ptr)->LRU_list_size, (fail_val))        \
@@ -4048,10 +4048,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)   \
+#define H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -4061,7 +4061,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 				  					  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,            \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,             \
 			                (cache_ptr)->pel_size,            \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4070,7 +4070,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         HDassert( (cache_ptr)->mdj_enabled );                             \
 	HDassert( (entry_ptr)->is_dirty );                                \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,          \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,           \
 			                (cache_ptr)->jwipl_size,          \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4081,7 +4081,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
 	/* Update the size of the LRU list */                             \
                                                                           \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,       \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,        \
 			                (cache_ptr)->LRU_list_size,       \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4093,14 +4093,14 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         if ( (entry_ptr)->is_dirty ) {                                    \
                                                                           \
-	    H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->dLRU_list_len,  \
+	    H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->dLRU_list_len,   \
 			                    (cache_ptr)->dLRU_list_size,  \
 			                    (entry_ptr)->size,            \
 					    (new_size));                  \
                                                                           \
         } else {                                                          \
                                                                           \
-	    H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->cLRU_list_len,  \
+	    H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->cLRU_list_len,   \
 			                    (cache_ptr)->cLRU_list_size,  \
 			                    (entry_ptr)->size,            \
 					    (new_size));                  \
@@ -4113,10 +4113,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)   \
+#define H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -4126,7 +4126,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 				  					  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,            \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,             \
 			                (cache_ptr)->pel_size,            \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4135,7 +4135,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         HDassert( (cache_ptr)->mdj_enabled );                             \
 	HDassert( (entry_ptr)->is_dirty );                                \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,          \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,           \
 			                (cache_ptr)->jwipl_size,          \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4146,7 +4146,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
 	/* Update the size of the LRU list */                             \
                                                                           \
-	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,       \
+	H5C2__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,        \
 			                (cache_ptr)->LRU_list_size,       \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4194,10 +4194,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );              \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
     HDassert( !((entry_ptr)->is_protected) );                          \
     HDassert( !((entry_ptr)->is_read_only) );                          \
@@ -4208,7 +4208,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
      */                                                                \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
                                                                        \
@@ -4217,7 +4217,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                           \
         HDassert( (cache_ptr)->mdj_enabled );                          \
         HDassert( (entry_ptr)->is_dirty );                             \
-        H5C2__DLL_PREPEND((entry_ptr),                                 \
+        H5C2__DLL_PREPEND((entry_ptr),                                  \
                           ((cache_ptr)->jwipl_head_ptr),               \
                           ((cache_ptr)->jwipl_tail_ptr),               \
                           ((cache_ptr)->jwipl_len),                    \
@@ -4229,7 +4229,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         /* insert the entry at the head of the LRU list. */            \
                                                                        \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,      \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
                          (cache_ptr)->LRU_tail_ptr,                    \
                          (cache_ptr)->LRU_list_len,                    \
                          (cache_ptr)->LRU_list_size, (fail_val))       \
@@ -4240,7 +4240,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         if ( (entry_ptr)->is_dirty ) {                                 \
                                                                        \
-            H5C2__AUX_DLL_PREPEND((entry_ptr),                         \
+            H5C2__AUX_DLL_PREPEND((entry_ptr),                          \
 			          (cache_ptr)->dLRU_head_ptr,          \
                                   (cache_ptr)->dLRU_tail_ptr,          \
                                   (cache_ptr)->dLRU_list_len,          \
@@ -4249,7 +4249,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         } else {                                                       \
                                                                        \
-            H5C2__AUX_DLL_PREPEND((entry_ptr),                         \
+            H5C2__AUX_DLL_PREPEND((entry_ptr),                          \
 			          (cache_ptr)->cLRU_head_ptr,          \
                                   (cache_ptr)->cLRU_tail_ptr,          \
                                   (cache_ptr)->cLRU_list_len,          \
@@ -4264,10 +4264,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );              \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
     HDassert( !((entry_ptr)->is_protected) );                          \
     HDassert( !((entry_ptr)->is_read_only) );                          \
@@ -4278,7 +4278,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
      */                                                                \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
                                                                        \
@@ -4287,7 +4287,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                           \
         HDassert( (cache_ptr)->mdj_enabled );                          \
         HDassert( (entry_ptr)->is_dirty );                             \
-        H5C2__DLL_PREPEND((entry_ptr),                                 \
+        H5C2__DLL_PREPEND((entry_ptr),                                  \
                           ((cache_ptr)->jwipl_head_ptr),               \
                           ((cache_ptr)->jwipl_tail_ptr),               \
                           ((cache_ptr)->jwipl_len),                    \
@@ -4299,7 +4299,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         /* insert the entry at the head of the LRU list. */            \
                                                                        \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,      \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
                          (cache_ptr)->LRU_tail_ptr,                    \
                          (cache_ptr)->LRU_list_len,                    \
                          (cache_ptr)->LRU_list_size, (fail_val))       \
@@ -4362,10 +4362,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C2__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( (entry_ptr)->is_protected);                                  \
     HDassert( (entry_ptr)->size > 0 );                                     \
@@ -4373,23 +4373,23 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
      */                                                                    \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                 \
                     (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,         \
                     (cache_ptr)->pl_size, (fail_val))                      \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
-                          (cache_ptr)->pel_tail_ptr,                       \
-                          (cache_ptr)->pel_len,                            \
-                          (cache_ptr)->pel_size, (fail_val))               \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+                         (cache_ptr)->pel_tail_ptr,                        \
+                         (cache_ptr)->pel_len,                             \
+                         (cache_ptr)->pel_size, (fail_val))                \
                                                                            \
     } else if ( (entry_ptr)->last_trans != 0 ) {                           \
                                                                            \
         /* put the entry in the jwip list */                               \
         HDassert( (cache_ptr)->mdj_enabled );                              \
         HDassert( (entry_ptr)->is_dirty );                                 \
-        H5C2__DLL_PREPEND((entry_ptr),                                     \
+        H5C2__DLL_PREPEND((entry_ptr),                                      \
                           ((cache_ptr)->jwipl_head_ptr),                   \
                           ((cache_ptr)->jwipl_tail_ptr),                   \
                           ((cache_ptr)->jwipl_len),                        \
@@ -4401,10 +4401,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
-                          (cache_ptr)->LRU_tail_ptr,                       \
-                          (cache_ptr)->LRU_list_len,                       \
-                          (cache_ptr)->LRU_list_size, (fail_val))          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+                         (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
                                                                            \
         /* Similarly, insert the entry at the head of either the clean or  \
          * dirty LRU list as appropriate.                                  \
@@ -4412,17 +4412,17 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         if ( (entry_ptr)->is_dirty ) {                                     \
                                                                            \
-            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
-                                  (cache_ptr)->dLRU_tail_ptr,              \
-                                  (cache_ptr)->dLRU_list_len,              \
-                                  (cache_ptr)->dLRU_list_size, (fail_val)) \
+            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
+                                 (cache_ptr)->dLRU_tail_ptr,               \
+                                 (cache_ptr)->dLRU_list_len,               \
+                                 (cache_ptr)->dLRU_list_size, (fail_val))  \
                                                                            \
         } else {                                                           \
                                                                            \
-            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
-                                  (cache_ptr)->cLRU_tail_ptr,              \
-                                  (cache_ptr)->cLRU_list_len,              \
-                                  (cache_ptr)->cLRU_list_size, (fail_val)) \
+            H5C2__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
+                                 (cache_ptr)->cLRU_tail_ptr,               \
+                                 (cache_ptr)->cLRU_list_len,               \
+                                 (cache_ptr)->cLRU_list_size, (fail_val))  \
         }                                                                  \
                                                                            \
         /* End modified LRU specific code. */                              \
@@ -4432,10 +4432,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C2__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)      \
+#define H5C2__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C2__H5C2_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( (entry_ptr)->is_protected);                                  \
     HDassert( (entry_ptr)->size > 0 );                                     \
@@ -4443,13 +4443,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
      */                                                                    \
-    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+    H5C2__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                 \
                     (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,         \
                     (cache_ptr)->pl_size, (fail_val))                      \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -4459,7 +4459,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                               \
         HDassert( (cache_ptr)->mdj_enabled );                              \
         HDassert( (entry_ptr)->is_dirty );                                 \
-        H5C2__DLL_PREPEND((entry_ptr),                                     \
+        H5C2__DLL_PREPEND((entry_ptr),                                      \
                           ((cache_ptr)->jwipl_head_ptr),                   \
                           ((cache_ptr)->jwipl_tail_ptr),                   \
                           ((cache_ptr)->jwipl_len),                        \
@@ -4471,10 +4471,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
-                          (cache_ptr)->LRU_tail_ptr,                       \
-                          (cache_ptr)->LRU_list_len,                       \
-                          (cache_ptr)->LRU_list_size, (fail_val))          \
+        H5C2__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+                         (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
                                                                            \
         /* End modified LRU specific code. */                              \
     }                                                                      \
