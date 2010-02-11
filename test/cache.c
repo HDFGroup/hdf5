@@ -6139,7 +6139,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 */
 	if ( pass ) {
 
-	    spec[0].flush_ops[0].flag = TRUE;
+	    spec[0].flush_ops[1].flag = TRUE;
 	    test_num = 10;
 
             check_flush_cache__flush_op_test(file_ptr,
