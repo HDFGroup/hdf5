@@ -555,6 +555,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     hid_t       ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_API(H5Oexists_by_name, FAIL)
+    H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
