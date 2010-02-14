@@ -1812,6 +1812,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
 }
 
+/* (Keep in sync w/H5C_TEST__PRE_HT_SEARCH_SC macro in test/cache_common.h -QAK) */
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
 if ( ( (cache_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
@@ -1823,6 +1824,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed") \
 }
 
+/* (Keep in sync w/H5C_TEST__POST_SUC_HT_SEARCH_SC macro in test/cache_common.h -QAK) */
 #define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
 if ( ( (cache_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
@@ -1846,6 +1848,7 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
                 "Post successful HT search SC failed")                      \
 }
 
+/* (Keep in sync w/H5C_TEST__POST_HT_SHIFT_TO_FRONT macro in test/cache_common.h -QAK) */
 #define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val) \
 if ( ( (cache_ptr) == NULL ) ||                                        \
      ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                     \

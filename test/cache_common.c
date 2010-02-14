@@ -1563,7 +1563,7 @@ entry_in_cache(H5C_t * cache_ptr,
     HDassert( entry_ptr->type == type );
     HDassert( entry_ptr == entry_ptr->self );
 
-    H5C__SEARCH_INDEX(cache_ptr, entry_ptr->addr, test_ptr)
+    H5C_TEST__SEARCH_INDEX(cache_ptr, entry_ptr->addr, test_ptr)
 
     if ( test_ptr != NULL ) {
 
