@@ -280,7 +280,7 @@ herr_t
 H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     size_t	mesg_total = 0, chunk_total = 0, gap_total = 0;
-    unsigned	*sequence;
+    unsigned	*sequence = NULL;
     unsigned	i;              /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
@@ -508,12 +508,15 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	else
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
     } /* end for */
-    sequence = (unsigned *)H5MM_xfree(sequence);
 
     if((mesg_total + gap_total) != chunk_total)
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
 
 done:
+    /* Release resources */
+    if(sequence)
+        sequence = H5MM_xfree(sequence);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_debug_real() */
 

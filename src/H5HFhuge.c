@@ -710,7 +710,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         /* Call the user's 'op' callback */
         if(op(read_buf, (size_t)obj_size, op_data) < 0) {
             /* Release buffer */
-            H5MM_xfree(read_buf);
+            read_buf = H5MM_xfree(read_buf);
 
             /* Indicate error */
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "application's callback failed")
@@ -720,7 +720,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 done:
     /* Release the buffer for reading */
     if(read_buf && read_buf != op_data)
-        H5MM_xfree(read_buf);
+        read_buf = H5MM_xfree(read_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_huge_op_real() */

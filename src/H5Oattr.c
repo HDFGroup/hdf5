@@ -234,7 +234,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
     ret_value = attr;
 
 done:
-    if(NULL == ret_value) {
+    if(NULL == ret_value)
         if(attr) {
             if(attr->shared) {
                 /* Free any dynamicly allocated items */
@@ -244,10 +244,9 @@ done:
                 /* Destroy shared attribute struct */
                 attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
             } /* end if */
-        } /* end if */
 
-        attr = H5FL_FREE(H5A_t, attr);
-    } /* end if */
+            attr = H5FL_FREE(H5A_t, attr);
+        } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_decode() */

@@ -437,6 +437,14 @@ H5O_link_copy(const void *_mesg, void *_dest)
     ret_value = dest;
 
 done:
+    if(NULL == ret_value)
+        if(dest) {
+            if(dest->name && dest->name != lnk->name)
+                dest->name = H5MM_xfree(dest->name);
+            if(NULL == _dest)
+                dest = H5FL_FREE(H5O_link_t ,dest);
+        } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_link_copy() */
 
