@@ -287,9 +287,9 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  PURPOSE
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
-    void *H5O_sdspace_copy(mesg, dest)
-	const void *mesg;	IN: Pointer to the source extent dimensionality struct
-	const void *dest;	IN: Pointer to the destination extent dimensionality struct
+    void *H5O_sdspace_copy(_mesg, _dest)
+	const void *_mesg;	IN: Pointer to the source extent dimensionality struct
+	const void *_dest;	IN: Pointer to the destination extent dimensionality struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
@@ -297,27 +297,31 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_copy(const void *mesg, void *dest)
+H5O_sdspace_copy(const void *_mesg, void *_dest)
 {
-    const H5S_extent_t	   *src = (const H5S_extent_t *) mesg;
-    H5S_extent_t	   *dst = (H5S_extent_t *) dest;
+    const H5S_extent_t	   *mesg = (const H5S_extent_t *)_mesg;
+    H5S_extent_t	   *dest = (H5S_extent_t *)_dest;
     void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_copy)
 
     /* check args */
-    HDassert(src);
-    if(!dst && NULL == (dst = H5FL_MALLOC(H5S_extent_t)))
+    HDassert(mesg);
+    if(!dest && NULL == (dest = H5FL_MALLOC(H5S_extent_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy extent information */
-    if(H5S_extent_copy(dst, src, TRUE) < 0)
+    if(H5S_extent_copy(dest, mesg, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Set return value */
-    ret_value = dst;
+    ret_value = dest;
 
 done:
+    if(NULL == ret_value)
+        if(dest && NULL != _dest)
+            dest = H5FL_FREE(H5S_extent_t, dest);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_sdspace_copy() */
 

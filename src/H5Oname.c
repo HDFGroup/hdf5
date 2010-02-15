@@ -185,12 +185,16 @@ H5O_name_copy(const void *_mesg, void *_dest)
     /* copy */
     *dest = *mesg;
     if(NULL == (dest->s = H5MM_xstrdup(mesg->s)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set return value */
     ret_value = dest;
 
 done:
+    if(NULL == ret_value)
+        if(dest && NULL == _dest)
+            dest = H5MM_xfree(dest);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_name_copy() */
 

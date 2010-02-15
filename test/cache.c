@@ -13529,8 +13529,8 @@ check_get_entry_status(void)
     hbool_t	  is_pinned;
     size_t	  entry_size;
     H5F_t *       file_ptr = NULL;
-    test_entry_t * base_addr;
-    test_entry_t * entry_ptr;
+    test_entry_t * base_addr = NULL;
+    test_entry_t * entry_ptr = NULL;
 
     TESTING("H5C_get_entry_status() functionality");
 
@@ -13543,8 +13543,18 @@ check_get_entry_status(void)
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
 
-        base_addr = entries[0];
-        entry_ptr = &(base_addr[0]);
+        if ( file_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        }
+        else {
+
+            base_addr = entries[0];
+            entry_ptr = &(base_addr[0]);
+
+        }
     }
 
     if ( pass ) {
@@ -14731,9 +14741,20 @@ check_pin_protected_entry(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
+
+        if ( file_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        }
     }
 
-    protect_entry(file_ptr, 0, 0);
+    if ( pass ) {
+
+        protect_entry(file_ptr, 0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -14857,11 +14878,20 @@ check_resize_entry(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
-        cache_ptr = file_ptr->shared->cache;
+        if ( file_ptr == NULL ) {
 
-        base_addr = entries[LARGE_ENTRY_TYPE];
-        entry_ptr = &(base_addr[0]);
-	entry_size = LARGE_ENTRY_SIZE;
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        } 
+        else  
+        {
+            cache_ptr = file_ptr->shared->cache;
+
+            base_addr = entries[LARGE_ENTRY_TYPE];
+            entry_ptr = &(base_addr[0]);
+	    entry_size = LARGE_ENTRY_SIZE;
+        }
     }
 
     if ( pass ) {
