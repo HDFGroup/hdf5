@@ -1100,7 +1100,6 @@
 ./tools/h5stat/testh5stat.sh.in
 ./tools/h5stat/testfiles/h5stat_filters.ddl
 ./tools/h5stat/testfiles/h5stat_filters-d.ddl
-./tools/h5stat/testfiles/h5stat_filters-D.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
 ./tools/h5stat/testfiles/h5stat_filters-F.ddl
 ./tools/h5stat/testfiles/h5stat_filters-file.ddl
