@@ -10,13 +10,11 @@ File information
 	# of unique other: 0
 	Max. # of links to object: 1
 	Max. # of objects in group: 16
-File space information for file metadata (in bytes):
-	Superblock extension: 0
-	User block: 0
-	Object headers: (total/unused)
-		Groups: 48/8
-		Datasets(exclude compact data): 4136/1344
-		Datatypes: 80/0
+Object header size: (total/unused)
+	Groups: 48/8
+	Datasets: 4936/1344
+	Datatypes: 80/0
+Storage information:
 	Groups:
 		B-tree/List: 1200
 		Heap: 288
@@ -24,13 +22,12 @@ File space information for file metadata (in bytes):
 		B-tree/List: 0
 		Heap: 0
 	Chunked datasets:
-		Index: 31392
-	Datasets:
-		Heap: 72
+		B-tree: 31392
 	Shared Messages:
 		Header: 0
 		B-tree/List: 0
 		Heap: 0
+	Superblock extension: 0
 Small groups:
 	Total # of small groups: 0
 Group bins:
@@ -49,8 +46,7 @@ Dataset dimension information:
 		# of datasets of size 100 - 999: 1
 		Total # of datasets: 1
 Dataset storage information:
-	Total raw data size: 8659
-	Total external raw data size: 400
+	Total raw data size: 9059
 Dataset layout information:
 	Dataset layout counts[COMPACT]: 1
 	Dataset layout counts[CONTIG]: 2
