@@ -1548,6 +1548,16 @@
 ./tools/h5diff/testfiles/h5diff_423.txt
 ./tools/h5diff/testfiles/h5diff_424.txt
 ./tools/h5diff/testfiles/h5diff_425.txt
+./tools/h5diff/testfiles/h5diff_450.txt
+./tools/h5diff/testfiles/h5diff_451.txt
+./tools/h5diff/testfiles/h5diff_452.txt
+./tools/h5diff/testfiles/h5diff_453.txt
+./tools/h5diff/testfiles/h5diff_454.txt
+./tools/h5diff/testfiles/h5diff_455.txt
+./tools/h5diff/testfiles/h5diff_456.txt
+./tools/h5diff/testfiles/h5diff_457.txt
+./tools/h5diff/testfiles/h5diff_458.txt
+./tools/h5diff/testfiles/h5diff_459.txt
 
 
 ./tools/h5diff/testfiles/h5diff_attr1.h5
@@ -1568,6 +1578,8 @@
 ./tools/h5diff/testfiles/h5diff_extlink_trg.h5
 ./tools/h5diff/testfiles/h5diff_linked_softlink.h5
 ./tools/h5diff/testfiles/h5diff_softlinks.h5
+./tools/h5diff/testfiles/h5diff_danglelinks1.h5
+./tools/h5diff/testfiles/h5diff_danglelinks2.h5
 
 
 

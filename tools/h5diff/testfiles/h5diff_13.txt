@@ -8,3 +8,4 @@ position        dset1           dset1           difference
 [ 1 1 ]          1               1.001           0.001          
 [ 2 1 ]          0               1               1              
 5 differences found
+EXIT CODE: 1

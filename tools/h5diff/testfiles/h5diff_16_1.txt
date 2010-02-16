@@ -8,3 +8,4 @@ position        dset5           dset6           difference      relative
 [ 1 1 ]          0               100             100             not comparable
 [ 2 1 ]          100             50              50              0.500000      
 5 differences found
+EXIT CODE: 1

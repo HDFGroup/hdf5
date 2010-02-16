@@ -88,6 +88,25 @@ int main(int argc, const char *argv[])
 
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
+   /*-------------------------------------------------------------------------
+    * check invalid combination of options
+    *-----------------------------------------------------------------------*/
+    /* no -q(quiet) with -v (verbose) or -r (report) */
+    if(options.m_quiet && (options.m_verbose || options.m_report))
+    {
+        parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+        options.err_stat=1;
+        goto out;
+    }
+
+    /* only allow --no-dangling-links along with --follow-links */
+    if(options.no_dangle_links && !options.follow_links)
+    {
+        parallel_print("Error: --no-dangling-links must be used along with --follow-links option.\n");
+        options.err_stat=1;
+        goto out;
+    }
+
     /*-------------------------------------------------------------------------
     * do the diff
     *-------------------------------------------------------------------------
@@ -97,6 +116,7 @@ int main(int argc, const char *argv[])
 
     print_info(&options);
 
+out:
    /*-------------------------------------------------------------------------
     * exit code
     *   1 if differences, 0 if no differences, 2 if error

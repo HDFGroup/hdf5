@@ -27,24 +27,21 @@ typedef enum toolname_t {
 /* this struct can be used to differntiate among tools if necessary */
 typedef struct {
     h5tool_toolname_t toolname;
-    int mode;
+    int msg_mode;
 } h5tool_opt_t;
 
-/* To return link's target info
+/* To return link info 
  * Functions:
- *  H5tools_get_softlink_target_info()
- *  H5tools_get_extlink_target_info()
+ *  H5tools_get_link_info()  
  * Note: this may be move to h5tools code if used by other tools
  */
 typedef struct {
-    const char *buf;      /* IN: must be allocated along with H5Lget_info[li.u.val_size] */
-    H5O_type_t  type;     /* OUT: target type */
-    const char *path;     /* OUT: target name */
-    int is_path_malloced; /* VAR: Set to TRUE if path is malloced, so can be freed by checking this later. Needed when ext-link's target is soft-link */
-    const char *extfile;  /* OUT: if external link, external filename */
-    hid_t extfile_id;     /* OUT: if external link, external file id */
-    h5tool_opt_t opt;     /* IN: options */
-} h5tool_link_trg_info_t;
+    H5O_type_t  trg_type;  /* OUT: target type */
+    const char *trg_path;  /* OUT: target obj path. This must be freed 
+                            *      when used with H5tools_get_link_info() */
+    H5L_info_t linfo;      /* OUT: link info */
+    h5tool_opt_t opt;      /* IN: options */
+} h5tool_link_info_t;
 /*
  * Debug printf macros. The prefix allows output filtering by test scripts.
  */
@@ -90,6 +87,21 @@ do_print_objname (const char *OBJ, const char *path1, const char *path2)
     parallel_print("%-7s: <%s> and <%s>\n", OBJ, path1, path2);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: print_warn
+ *
+ * Purpose: check print warning condition.
+ * Return: 
+ *    1 if verbose mode
+ *    0 if not verbos mode
+ * Programmer: Jonathan Kim
+ * Date: Feb 4, 2010
+ *-------------------------------------------------------------------------
+ */
+static int print_warn(diff_opt_t *options)
+{
+    return ((options->m_verbose))?1:0;
+}
 
 
 #ifdef H5_HAVE_PARALLEL
@@ -108,9 +120,9 @@ do_print_objname (const char *OBJ, const char *path1, const char *path2)
  */
 void phdiff_dismiss_workers(void)
 {
- int i;
- for(i=1; i<g_nTasks; i++)
-  MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+    int i;
+    for(i=1; i<g_nTasks; i++)
+        MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
 
 
@@ -130,31 +142,29 @@ void phdiff_dismiss_workers(void)
  */
 void print_manager_output(void)
 {
- /* If there was something we buffered, let's print it now */
- if( (outBuffOffset>0) && g_Parallel)
- {
-  printf("%s", outBuff);
+    /* If there was something we buffered, let's print it now */
+    if( (outBuffOffset>0) && g_Parallel)
+    {
+        printf("%s", outBuff);
 
-  if(overflow_file)
-  {
-   int     tmp;
+        if(overflow_file)
+        {
+            int     tmp;
+            rewind(overflow_file);
+            while((tmp = getc(overflow_file)) >= 0)
+                putchar(tmp);
+            fclose(overflow_file);
+            overflow_file = NULL;
+        }
 
-   rewind(overflow_file);
-   while((tmp = getc(overflow_file)) >= 0)
-    putchar(tmp);
-
-   fclose(overflow_file);
-   overflow_file = NULL;
-  }
-
-  fflush(stdout);
-  memset(outBuff, 0, OUTBUFF_SIZE);
-  outBuffOffset = 0;
- }
- else if( (outBuffOffset>0) && !g_Parallel)
- {
-  fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
- }
+        fflush(stdout);
+        memset(outBuff, 0, OUTBUFF_SIZE);
+        outBuffOffset = 0;
+    }
+    else if( (outBuffOffset>0) && !g_Parallel)
+    {
+        fprintf(stderr, "h5diff error: outBuffOffset>0, but we're not in parallel!\n");
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -174,253 +184,147 @@ void print_manager_output(void)
 
 static void print_incoming_data(void)
 {
- char data[PRINT_DATA_MAX_SIZE+1];
- int  incomingMessage;
- MPI_Status Status;
+    char data[PRINT_DATA_MAX_SIZE+1];
+    int  incomingMessage;
+    MPI_Status Status;
 
- do
- {
-  MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
-  if(incomingMessage)
-  {
-   memset(data, 0, PRINT_DATA_MAX_SIZE+1);
-   MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
+    do
+    {
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &incomingMessage, &Status);
+        if(incomingMessage)
+        {
+            memset(data, 0, PRINT_DATA_MAX_SIZE+1);
+            MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
 
-   printf("%s", data);
-  }
- } while(incomingMessage);
+            printf("%s", data);
+        }
+    } while(incomingMessage);
 }
 #endif
 
 /*-------------------------------------------------------------------------
- * Function: H5tools_get_softlink_target_info
+ * Function: H5tools_get_link_info
  *
- * Purpose: Get target object's type and path from soft-link path
+ * Purpose: Get link (soft, external) info and its target object type 
+            (dataset, group, named datatype) and path, if exist
  *
  * Patameters:
- *  - [IN]  fileid : soft-link file id
- *  - [IN]  linkpath : soft-link's source path
- *  - [IN]  h5li : soft-link's source H5L_info_t
- *  - [OUT] trg_info: returning target info (refer to struct)
+ *  - [IN]  fileid : link file id
+ *  - [IN]  linkpath : link path
+ *  - [OUT] h5li : link's info (H5L_info_t)
+ *  - [OUT] link_info: returning target object info (h5tool_link_info_t)
  *
- * Return:
- *  Success - 1 and return data via trg_info struct
- *  Fail - 0
+ * Return: 
+ *   1 : Succed to get link info.  
+ *   0 : Detected as a dangling link
+ *  -1 : H5 API failed.
  *
- * Note:
- *  trg_info->buf must be allocated along with H5Lget_info[li.u.val_size]
- *  before passing to this function.
+ * NOTE:
+ *  link_info->trg_path must be freed out of this function
  *
  * Programmer: Jonathan Kim
  *
- * Date: Jan 20, 2010
+ * Date: Feb 8, 2010
  *-------------------------------------------------------------------------*/
-static int H5tools_get_softlink_target_info(hid_t file_id, const char * linkpath, H5L_info_t h5li, h5tool_link_trg_info_t *s_trg_info)
+static int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
 {
-    H5O_type_t otype = H5O_TYPE_UNKNOWN;
-    H5O_info_t oinfo;
-    H5L_info_t linfo;
-    int ret = 0; /* init to fail */
+    int Ret = -1; /* init to fail */
+    htri_t l_ret;
+    H5O_info_t trg_oinfo;
+    hid_t fapl;
+    hid_t lapl = H5P_DEFAULT;
 
+    /* init */
+    link_info->trg_type = H5O_TYPE_UNKNOWN;
 
-    if((H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0))
+    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0)
     {
-        parallel_print("error: \"%s\" doesn't exist \n",linkpath);
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
         goto out;
     }
 
-    if(H5Lget_info(file_id, linkpath, &linfo, H5P_DEFAULT) < 0)
+    /* check if link name exist */
+    if((H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0)) 
     {
-        parallel_print("error: unable to get link info from \"%s\"\n",linkpath);
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
         goto out;
     }
 
-    /* get target name for softlink */
-    if(linfo.type == H5L_TYPE_SOFT)
+    /* trg_path must be freed out of this function when finished using */
+    link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char));
+    HDassert(link_info->trg_path);
+
+    /* get link value */
+    if(H5Lget_val(file_id, linkpath, link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0)
     {
-        /* s_trg_info->buf should be already allocated out of
-         * this function and free when done */
-        if(H5Lget_val(file_id, linkpath, s_trg_info->buf, h5li.u.val_size, H5P_DEFAULT) < 0)
-        {
-            parallel_print("error: unable to get link value from \"%s\"\n",s_trg_info->path);
-            goto out;
-        }
-        /* target path */
-        s_trg_info->path = s_trg_info->buf;
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
+        goto out;
     }
-    /* if obj is hard link, will still get the type */
-    else if (linfo.type == H5L_TYPE_HARD)
+
+    /*-----------------------------------------------------
+     * if link type is external link use different lapl to 
+     * follow object in other file
+     */
+    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
     {
-        s_trg_info->path = linkpath;
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_sec2(fapl);
+        lapl = H5Pcreate(H5P_LINK_ACCESS);
+        H5Pset_elink_fapl(lapl, fapl);
     }
 
     /*--------------------------------------------------------------
-     * if link target or object exit, get type
+     * if link's target object exist, get type
      */
-    if((H5Lexists(file_id, s_trg_info->path, H5P_DEFAULT) == TRUE))
+     /* check if target object exist */
+    l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
+    
+    /* detect dangling link */
+    if(l_ret == FALSE) 
     {
-
-        if(H5Oget_info_by_name(file_id, s_trg_info->path, &oinfo, H5P_DEFAULT) < 0)
-        {
-            parallel_print("error: unable to get object information for \"%s\"\n", s_trg_info->path);
+            Ret = 0;
             goto out;
-        }
-
-        otype = oinfo.type;
-
-
-        /* check unknown type */
-        if (otype < H5O_TYPE_GROUP || otype >=H5O_TYPE_NTYPES)
-        {
-            parallel_print("<%s> is unknown type\n", s_trg_info->path);
-            goto out;
-        }
     }
-    else
+    /* function failed */
+    else if (l_ret < 0)
     {
-        parallel_print("warn: link target \"%s\" doesn't exist \n", s_trg_info->path);
+        goto out;    
     }
+
+    /* get target object info */
+    if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) 
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
+        goto out;
+    }
+
+    /* check unknown type */
+    if (trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES)
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
+        goto out;
+    } 
 
     /* set target obj type to return */
-    s_trg_info->type = otype;
+    link_info->trg_type = trg_oinfo.type;
 
     /* succeed */
-    ret = 1;
+    Ret = 1;
 out:
-    return ret;
+    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
+    {
+        H5Pclose(fapl);
+        H5Pclose(lapl);
+    }
+
+    return Ret;
 }
 
-/*-------------------------------------------------------------------------
- * Function: H5tools_get_extlink_target_info
- *
- * Purpose: Get target object's type, path, file_id and filename from
- *          external-link
- *
- * Patameters:
- *  - [IN]  fileid : external-link source file-id
- *  - [IN]  linkpath : external-link source path
- *  - [IN]  h5li : external-link source H5L_info_t
- *  - [OUT] trg_info : returning target info (refer to struct)
- *
- * Return:
- *  Success - 1 and return data via trg_info struct
- *  Fail - 0
- *
- * Note:
- * - trg_info->buf must be allocated along with H5Lget_info[li.u.val_size]
- *   before passing to this function.
- * - if target is soft-link, trg_info->path will be malloced. so check if
- *   trg_info->is_path_malloced==TRUE, then free trg_info->path along with freeing
- *   trg_info->buf outside of this function.
- *
- * Programmer: Jonathan Kim
- *
- * Date: Jan 20, 2010
- *-------------------------------------------------------------------------*/
-static int H5tools_get_extlink_target_info(hid_t fileid, const char *linkpath, H5L_info_t h5li, h5tool_link_trg_info_t *trg_info)
-{
-
-    hid_t extfile_id;
-    const char *extlink_file;
-    const char *extlink_path;
-    h5tool_link_trg_info_t soft_trg_info;
-    H5L_info_t slinfo;
-    int ret=0; /* init to Fail */
-
-    /* init */
-    HDmemset(&soft_trg_info, 0, sizeof(h5tool_link_trg_info_t));
-    trg_info->type = H5O_TYPE_UNKNOWN;
-
-    if(H5Lget_val(fileid, linkpath, trg_info->buf, h5li.u.val_size, H5P_DEFAULT) < 0)
-    {
-        parallel_print("error: unable to get link value from \"%s\"\n",linkpath);
-        goto out;
-    }
-    /*---------------------------------------
-     * get target filename and object path
-     */
-    if(H5Lunpack_elink_val(trg_info->buf, h5li.u.val_size, NULL, &extlink_file, &extlink_path)<0)
-    {
-        parallel_print("error: unable to unpack external link value\n");
-        goto out;
-    }
-
-    /* return target filename and obj path */
-    trg_info->path = extlink_path;
-    trg_info->extfile = extlink_file;
-
-    /* ---------------------------------
-     * get file id from external file
-     * mimicked from h5diff() for Parallel code
-     * , but not sure if it's needed
-     */
-    H5E_BEGIN_TRY
-    {
-        /* open file */
-        if((extfile_id = h5tools_fopen(extlink_file, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
-        {
-            parallel_print("error: <%s>: unable to open file\n", extlink_file);
-#ifdef H5_HAVE_PARALLEL
-            if(g_Parallel)
-            /* Let tasks know that they won't be needed */
-            phdiff_dismiss_workers();
-#endif
-            goto out;
-        } /* end if */
-    } H5E_END_TRY;
-
-    /* get external file id */
-    trg_info->extfile_id = extfile_id;
-
-    /* --------------------------------------------------
-     * check if target is soft link, if so allocate buffer
-     */
-    if((H5Lexists(trg_info->extfile_id, trg_info->path, H5P_DEFAULT) <= 0))
-    {
-        parallel_print("error: \"%s\" doesn't exist \n", trg_info->path);
-        goto out;
-    }
-    if(H5Lget_info(trg_info->extfile_id, trg_info->path, &slinfo, H5P_DEFAULT) < 0)
-    {
-        parallel_print("error: unable to get link info from \"%s\"\n", trg_info->path);
-        goto out;
-    }
-
-    /* if ext-link's target is soft-link */
-    if(slinfo.type == H5L_TYPE_SOFT)
-    {
-        size_t bufsize = (h5li.u.val_size > slinfo.u.val_size)?h5li.u.val_size:slinfo.u.val_size;
-        soft_trg_info.buf = (char*)HDcalloc(bufsize, sizeof(char));
-        HDassert(trg_info->path);
-    }
-
-    /* get target obj type  */
-    if(H5tools_get_softlink_target_info(trg_info->extfile_id, trg_info->path, h5li, &soft_trg_info)==0)
-    {
-        parallel_print("error: unable to get link info from \"%s\"\n", trg_info->path);
-        goto out;
-    }
-
-    /* target obj type */
-    trg_info->type = soft_trg_info.type;
-
-    /* if ext-link's target is soft-link */
-    if(slinfo.type == H5L_TYPE_SOFT)
-    {
-        trg_info->path = HDstrdup(soft_trg_info.buf);
-        HDassert(trg_info->path);
-        /* set TRUE so this can be freed later */
-        trg_info->is_path_malloced = TRUE;
-    }
-
-    /* Success */
-    ret=1;
-out:
-    if(soft_trg_info.buf)
-        HDfree(soft_trg_info.buf);
-
-    return ret;
-}
 /*-------------------------------------------------------------------------
  * Function: h5diff
  *
@@ -451,13 +355,6 @@ hsize_t h5diff(const char *fname1,
 
     HDmemset(filenames, 0, 1024 * 2);
 
-    if(options->m_quiet && (options->m_verbose || options->m_report))
-    {
-        parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
-        options->err_stat=1;
-        return 0;
-    } /* end if */
-
     /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing
     *-------------------------------------------------------------------------
@@ -468,7 +365,7 @@ hsize_t h5diff(const char *fname1,
     {
         /* open file 1 */
 
-        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
+        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
         {
 
             parallel_print("h5diff: <%s>: unable to open file\n", fname1);
@@ -484,8 +381,8 @@ hsize_t h5diff(const char *fname1,
 
 
         /* open file 2 */
-
-        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
+        
+        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
         {
 
             parallel_print("h5diff: <%s>: unable to open file\n", fname2);
@@ -546,12 +443,10 @@ hsize_t h5diff(const char *fname1,
                               info2,
                               options);
     } /* end if */
-
    /*-------------------------------------------------------------------------
     * compare all
     *-------------------------------------------------------------------------
     */
-
     else
     {
 #ifdef H5_HAVE_PARALLEL
@@ -715,14 +610,14 @@ hsize_t diff_match(hid_t file1_id,
     * 2) the graph must match, i.e same names (absolute path)
     * 3) objects with the same name must be of the same type
     *-------------------------------------------------------------------------
-    */
-
+    */     
+       
     /* number of different objects */
     if ( info1->nused != info2->nused )
     {
         options->contents = 0;
     }
-
+    
     /* objects in one file and not the other */
     for( i = 0; i < table->nobjs; i++)
     {
@@ -733,7 +628,7 @@ hsize_t diff_match(hid_t file1_id,
     }
 
     /* objects with the same name but different HDF5 types */
-    for( i = 0; i < table->nobjs; i++)
+    for( i = 0; i < table->nobjs; i++) 
     {
         if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
         {
@@ -751,8 +646,8 @@ hsize_t diff_match(hid_t file1_id,
     *-------------------------------------------------------------------------
     */
 #ifdef H5_HAVE_PARALLEL
-{
-    char *workerTasks = HDmalloc((g_nTasks - 1) * sizeof(char));
+    {
+    char *workerTasks = (char*)HDmalloc((g_nTasks - 1) * sizeof(char));
     int n;
     int busyTasks = 0;
     struct diffs_found nFoundbyWorker;
@@ -1043,7 +938,7 @@ hsize_t diff_match(hid_t file1_id,
     h5diffdebug("done with if block\n");
 
     free(workerTasks);
-}
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* free table */
@@ -1061,9 +956,10 @@ hsize_t diff_match(hid_t file1_id,
  * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
  * Date: May 9, 2003
  *
+ * Programmer: Jonathan Kim
+ *  - add following links feature (Feb 11,2010)
  *-------------------------------------------------------------------------
  */
 
@@ -1081,30 +977,20 @@ hsize_t diff_compare(hid_t file1_id,
     int     f2 = 0;
     hsize_t nfound = 0;
     ssize_t i,j;
+    int l_ret;
+    int is_dangle_link1 = 0;
+    int is_dangle_link2 = 0;
 
     /* local variables for diff() */
-    hid_t l_fileid1=file1_id;
-    hid_t l_fileid2=file2_id;
     h5trav_type_t obj1type, obj2type;
-    const char *obj1name, *obj2name;
 
-    /* softlink info to get target name and type */
-    h5tool_link_trg_info_t softlinkinfo1;
-    h5tool_link_trg_info_t softlinkinfo2;
+    /* to get link info */
+    h5tool_link_info_t linkinfo1;
+    h5tool_link_info_t linkinfo2;
 
-    /* external link file id */
-    hid_t   extfile1_id = (-1);
-    hid_t   extfile2_id = (-1);
-    h5tool_link_trg_info_t extlinkinfo1;
-    h5tool_link_trg_info_t extlinkinfo2;
-
-    /* init softlink info */
-    HDmemset(&softlinkinfo1, 0, sizeof(h5tool_link_trg_info_t));
-    HDmemset(&softlinkinfo2, 0, sizeof(h5tool_link_trg_info_t));
-
-    /* init external link info */
-    HDmemset(&extlinkinfo1, 0, sizeof(h5tool_link_trg_info_t));
-    HDmemset(&extlinkinfo2, 0, sizeof(h5tool_link_trg_info_t));
+    /* init link info struct */
+    HDmemset(&linkinfo1, 0, sizeof(h5tool_link_info_t));
+    HDmemset(&linkinfo2, 0, sizeof(h5tool_link_info_t));
 
     i = h5trav_getindex (info1, obj1_name);
     j = h5trav_getindex (info2, obj2_name);
@@ -1128,206 +1014,220 @@ hsize_t diff_compare(hid_t file1_id,
     }
 
     /* use the name with "/" first, as obtained by iterator function */
-    obj1name = info1->paths[i].path;
-    obj2name = info2->paths[j].path;
+    obj1_name = info1->paths[i].path;
+    obj2_name = info2->paths[j].path;
 
     obj1type = info1->paths[i].type;
     obj2type = info2->paths[j].type;
 
     /*-----------------------------------------------------------------
-     * follow link option, compare with target object
+     * follow link option, compare with target object 
     */
-    if (options->linkfollow)
+    if (options->follow_links)
     {
-        H5L_info_t li1, li2;
+        /* pass how to handle printing warning to linkinfo option */
+        if(print_warn(options))
+            linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
 
         /*------------------------------------------------------------
          * Soft links
          *------------------------------------------------------------*/
 
-        /*------------------------
-         * if object1 softlink
-         */
+        /*--------------------------
+         * if object1 soft link   */
         if (obj1type == H5TRAV_TYPE_LINK)
         {
-            if(H5Lget_info(file1_id, obj1_name, &li1, H5P_DEFAULT) < 0)
+            /* get type of target object */
+            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1);
+            /* dangling link */
+            if (l_ret == 0)
             {
-                parallel_print("error: unable to get link info from \"%s\"\n",obj1_name);
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", obj1_name);
+                    options->err_stat = 1;
+                    goto out;
+                }
+                else
+                    is_dangle_link1 = 1;
+            }
+            /* fail */
+            else if(l_ret < 0)
+            {
+                options->err_stat = 1;
                 goto out;
             }
-
-            softlinkinfo1.buf = (char*)HDcalloc(li1.u.val_size, sizeof(char));
-            HDassert(softlinkinfo1.buf);
-
-            /* get type and name of target object */
-            if(H5tools_get_softlink_target_info(file1_id, obj1_name, li1, &softlinkinfo1)==0)
+            else /* OK */
             {
-                parallel_print("error: unable to get softlink info from \"%s\"\n",obj1_name);
-                goto out;
+                /* target type for diff() */
+                obj1type = linkinfo1.trg_type;
             }
-
-            /* set target name and type to pass diff() */
-            obj1type = softlinkinfo1.type;
-            obj1name = softlinkinfo1.path;
         }
-
-        /*------------------------
-         * if object2 is softlink
-         */
+        
+        /*-----------------------------
+         * if object2 is soft link   */
         if (obj2type == H5TRAV_TYPE_LINK)
         {
-            if(H5Lget_info(file2_id, obj2_name, &li2, H5P_DEFAULT) < 0)
+            /* get type target object */
+            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2);
+            /* dangling link */
+            if (l_ret == 0)
             {
-                parallel_print("error: unable to get link info from \"%s\"\n",obj2_name);
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", obj2_name);
+                    options->err_stat = 1;
+                    goto out;
+                }
+                else
+                    is_dangle_link2=1;
+            }
+            /* fail */
+            else if(l_ret < 0)
+            {
+                options->err_stat = 1;
                 goto out;
             }
-
-
-            softlinkinfo2.buf = (char*)HDcalloc(li2.u.val_size, sizeof(char));
-            HDassert(softlinkinfo2.buf);
-
-            /* get type and name of target object */
-            if(H5tools_get_softlink_target_info(file2_id, obj2_name, li2, &softlinkinfo2)==0)
+            else /* OK */
             {
-                parallel_print("error: unable to get softlink info from \"%s\"\n",obj2_name);
-                goto out;
+                /* target type for diff() */
+                obj2type = linkinfo2.trg_type;
             }
-
-            /* set target name and type to pass diff() */
-            obj2type = softlinkinfo2.type;
-            obj2name = softlinkinfo2.path;
         }
 
         /*------------------------------------------------------------
          * External links
          *------------------------------------------------------------*/
 
-        /*-------------------------------
-         * if object1 is external link
-         */
+        /*--------------------------------
+         * if object1 is external link  */
         if (obj1type == H5TRAV_TYPE_UDLINK)
         {
-            if(H5Lget_info(file1_id, obj1_name, &li1, H5P_DEFAULT) < 0)
+            /* get type and name of target object */
+            l_ret = H5tools_get_link_info(file1_id, obj1_name, &linkinfo1);
+            /* dangling link */
+            if (l_ret == 0)
             {
-                parallel_print("error: unable to get link info from \"%s\"\n",obj1_name);
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", obj1_name);
+                    options->err_stat = 1;
+                    goto out;
+                }
+                else
+                    is_dangle_link1 = 1;
+            }
+            /* fail */
+            else if(l_ret < 0)
+            {
+                options->err_stat = 1;
                 goto out;
             }
-
-            /* for external link */
-            if(li1.type == H5L_TYPE_EXTERNAL)
+            else /* OK */
             {
-                extlinkinfo1.buf = (char*)HDcalloc(li1.u.val_size, sizeof(char));
-                HDassert(extlinkinfo1.buf);
-
-                /* get type and name of target object */
-                if(H5tools_get_extlink_target_info(file1_id, obj1_name, li1, &extlinkinfo1)==0)
-                {
-                    parallel_print("error: unable to get external link info from \"%s\"\n",obj1_name);
-                    goto out;
-                }
-
-                /* if valid actual object */
-                if (extlinkinfo1.type < H5O_TYPE_GROUP || extlinkinfo1.type >= H5O_TYPE_NTYPES)
-                {
-                    if (options->m_verbose)
-                    {
-                        parallel_print("<%s> is invaild type\n", obj1_name);
-                    }
-                    goto out;
-                }
-
-                /* set target fileid, name and type to pass diff() */
-                l_fileid1 = extlinkinfo1.extfile_id;
-                obj1name = extlinkinfo1.path;
-                obj1type = extlinkinfo1.type;
+                /* for external link */
+                if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL)
+                    obj1type = linkinfo1.trg_type;
             }
         }
 
-        /*-------------------------------
-         * if object2 is external link
-         */
+        /*--------------------------------
+         * if object2 is external link  */
         if (obj2type == H5TRAV_TYPE_UDLINK)
         {
-            if(H5Lget_info(file2_id, obj2_name, &li2, H5P_DEFAULT) < 0)
+            /* get type and name of target object */
+            l_ret = H5tools_get_link_info(file2_id, obj2_name, &linkinfo2);
+            /* dangling link */
+            if (l_ret == 0)
             {
-                parallel_print("error: unable to get link info from \"%s\"\n",obj2_name);
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", obj2_name);
+                    options->err_stat = 1;
+                    goto out;
+                }
+                else
+                    is_dangle_link2 = 1;
+            }
+            /* fail */
+            else if(l_ret < 0)
+            {
+                options->err_stat = 1;
                 goto out;
             }
-            /* for external link */
-            if(li2.type == H5L_TYPE_EXTERNAL)
+            else /* OK */
             {
-                extlinkinfo2.buf = (char*)HDcalloc(li2.u.val_size, sizeof(char));
-                HDassert(extlinkinfo2.buf);
-
-                /* get type and name of target object */
-                if(H5tools_get_extlink_target_info(file2_id, obj2_name, li2, &extlinkinfo2)==0)
-                {
-                    parallel_print("error: unable to get external link info from \"%s\"\n",obj2_name);
-                    goto out;
-                }
-                /* if valid actual object */
-                if (extlinkinfo2.type < H5O_TYPE_GROUP || extlinkinfo2.type >= H5O_TYPE_NTYPES)
-                {
-                    if (options->m_verbose)
-                    {
-                        parallel_print("<%s> is invaild type\n", obj2_name);
-                    }
-                    goto out;
-                }
-
-                /* set target fileid, name and type to pass diff() */
-                l_fileid2 = extlinkinfo2.extfile_id;
-                obj2name = extlinkinfo2.path;
-                obj2type = extlinkinfo2.type;
+                /* for external link */
+                if(linkinfo2.linfo.type == H5L_TYPE_EXTERNAL)
+                    obj2type = linkinfo2.trg_type;
             }
         }
-    } /* end of linkfollow */
-
+        /* found dangling link */
+        if (is_dangle_link1 || is_dangle_link2)
+            goto out;
+    } /* end of follow_links */
+    
     /* objects are not the same type */
     if (obj1type != obj2type)
     {
         if (options->m_verbose||options->m_list_not_cmp)
         {
             parallel_print("<%s> is of type %s and <%s> is of type %s\n",
-            obj1name, get_type(obj1type), obj2name,
-            get_type(obj2type));
+            obj1_name, get_type(obj1type), 
+            obj2_name, get_type(obj2type));
         }
         options->not_cmp=1;
         goto out;
     }
 
-    nfound = diff(l_fileid1, obj1name,
-                  l_fileid2, obj2name,
+    nfound = diff(file1_id, obj1_name,
+                  file2_id, obj2_name,
                   options, obj1type);
 
 out:
-    /* free soft link buffer */
-    if (softlinkinfo1.buf)
-        HDfree(softlinkinfo1.buf);
-    if (softlinkinfo2.buf)
-        HDfree(softlinkinfo2.buf);
-    /* free external link buffer */
-    if (extlinkinfo1.buf);
+    /*-------------------------------
+     * handle dangling link(s) */
+    /* both obj1 and obj2 are dangling links */
+    if(is_dangle_link1 && is_dangle_link2)
     {
-        HDfree(extlinkinfo1.buf);
-        /* case for ext-link's target is soft-link */
-        if(extlinkinfo1.is_path_malloced)
-            HDfree(extlinkinfo1.path);
+        if(print_objname(options, nfound))
+        {
+            do_print_objname("dangling link", obj1_name, obj2_name);
+            print_found(nfound);
+        }
     }
-    if (extlinkinfo2.buf);
+    /* obj1 is dangling link */
+    else if (is_dangle_link1)
     {
-        HDfree(extlinkinfo2.buf);
-        /* case for ext-link's target is soft-link */
-        if(extlinkinfo2.is_path_malloced)
-            HDfree(extlinkinfo2.path);
+        if(options->m_verbose)
+           parallel_print("obj1 <%s> is a dangling link.\n", obj1_name);
+        nfound++;
+        if(print_objname(options, nfound))
+            print_found(nfound);
+    }
+    /* obj2 is dangling link */
+    else if (is_dangle_link2)
+    {
+        if(options->m_verbose)
+            parallel_print("obj2 <%s> is a dangling link.\n", obj2_name);
+        nfound++;
+        if(print_objname(options, nfound))
+            print_found(nfound);
     }
 
-    /* close external file */
-    H5E_BEGIN_TRY
-    {
-        H5Fclose(extfile1_id);
-        H5Fclose(extfile2_id);
-    } H5E_END_TRY;
+    /* free link info buffer */
+    if (linkinfo1.trg_path)
+        HDfree(linkinfo1.trg_path);
+    if (linkinfo2.trg_path)
+        HDfree(linkinfo2.trg_path);
 
     return nfound;
 }
@@ -1346,9 +1246,10 @@ out:
  * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
  * Date: May 9, 2003
  *
+ * Programmer: Jonathan Kim
+ *  - add following links feature (Feb 11,2010)
  *-------------------------------------------------------------------------
  */
 
@@ -1364,24 +1265,28 @@ hsize_t diff(hid_t file1_id,
     hid_t   grp1_id = (-1);
     hid_t   grp2_id = (-1);
     int     ret;
+    int     is_dangle_link1 = 0;
+    int     is_dangle_link2 = 0;
     hsize_t nfound = 0;
 
-    char *extlinkbuf1=NULL;
-    char *extlinkbuf2=NULL;
 
-    /* used in soft link case (H5TRAV_TYPE_LINK) */
-    h5tool_link_trg_info_t softlinkinfo1;
-    h5tool_link_trg_info_t softlinkinfo2;
-    /*init */
-    HDmemset(&softlinkinfo1,0,sizeof(h5tool_link_trg_info_t));
-    HDmemset(&softlinkinfo2,0,sizeof(h5tool_link_trg_info_t));
+    /* to get link info */
+    h5tool_link_info_t linkinfo1;
+    h5tool_link_info_t linkinfo2;
 
+    /*init link info struct */
+    HDmemset(&linkinfo1,0,sizeof(h5tool_link_info_t));
+    HDmemset(&linkinfo2,0,sizeof(h5tool_link_info_t));
+
+    /* pass how to handle printing warnings to linkinfo option */
+    if(print_warn(options))
+        linkinfo1.opt.msg_mode = linkinfo2.opt.msg_mode = 1;
 
     switch(type)
     {
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * H5TRAV_TYPE_DATASET
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
 			/* verbose (-v) and report (-r) mode */
@@ -1404,14 +1309,14 @@ hsize_t diff(hid_t file1_id,
                 if (!options->not_cmp && nfound)
                 {
                     do_print_objname("dataset", path1, path2);
-                    print_found(nfound);
+                    print_found(nfound);	
                 }
             }
             break;
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * H5TRAV_TYPE_NAMED_DATATYPE
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_NAMED_DATATYPE:
             if((type1_id = H5Topen2(file1_id, path1, H5P_DEFAULT)) < 0)
@@ -1432,10 +1337,11 @@ hsize_t diff(hid_t file1_id,
             if(options->m_verbose)
                 print_found(nfound);
 
-            /*-------------------------------------------------------------------------
+            /*-----------------------------------------------------------------
              * compare attributes
-             * the if condition refers to cases when the dataset is a referenced object
-             *-------------------------------------------------------------------------
+             * the if condition refers to cases when the dataset is a 
+             * referenced object
+             *-----------------------------------------------------------------
              */
             if(path1)
                 nfound += diff_attr(type1_id, type2_id, path1, path2, options);
@@ -1446,9 +1352,9 @@ hsize_t diff(hid_t file1_id,
                 goto out;
             break;
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * H5TRAV_TYPE_GROUP
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_GROUP:
             ret = HDstrcmp(path1, path2);
@@ -1468,10 +1374,11 @@ hsize_t diff(hid_t file1_id,
             if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
                 goto out;
 
-            /*-------------------------------------------------------------------------
+            /*-----------------------------------------------------------------
              * compare attributes
-             * the if condition refers to cases when the dataset is a referenced object
-             *-------------------------------------------------------------------------
+             * the if condition refers to cases when the dataset is a 
+             * referenced object
+             *-----------------------------------------------------------------
              */
             if(path1)
                 nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
@@ -1483,42 +1390,54 @@ hsize_t diff(hid_t file1_id,
             break;
 
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * H5TRAV_TYPE_LINK
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_LINK:
             {
-            H5L_info_t li1, li2;
-
-            if(H5Lget_info(file1_id, path1, &li1, H5P_DEFAULT) < 0)
+            /* get type and name of target object */
+            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1);
+            /* dangling link */
+            if (ret == 0)
             {
-                parallel_print("error: unable to get link info from \"%s\"\n", path1);
-                goto out;
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", path1);
+                    goto out;
+                }
+                else
+                    is_dangle_link1 = 1;
             }
-            if(H5Lget_info(file2_id, path2, &li2, H5P_DEFAULT) < 0)
-            {
-                parallel_print("error: unable to get link info from \"%s\"\n", path2);
+            else if (ret < 0)
                 goto out;
-            }
 
-            softlinkinfo1.buf = (char*)HDcalloc(li1.u.val_size, sizeof(char));
-            HDassert(softlinkinfo1.buf);
-            softlinkinfo2.buf = (char*)HDcalloc(li2.u.val_size, sizeof(char));
-            HDassert(softlinkinfo2.buf);
-
-            if(H5tools_get_softlink_target_info(file1_id,path1,li1,&softlinkinfo1)==0)
+            /* get type and name of target object */
+            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2);
+            /* dangling link */
+            if (ret == 0)
             {
-                parallel_print("error: unable to get softlink info from \"%s\"\n", path1);
-                goto out;
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", path2);
+                    goto out;
+                }
+                else
+                    is_dangle_link2 = 1;
             }
-            if(H5tools_get_softlink_target_info(file2_id,path2,li2,&softlinkinfo2)==0)
-            {
-                parallel_print("error: unable to get softlink info from \"%s\"\n", path2);
+            else if (ret < 0)
                 goto out;
-            }
+                
 
-            ret = HDstrcmp(softlinkinfo1.path, softlinkinfo2.path);
+            /* found dangling link */
+            if (is_dangle_link1 || is_dangle_link2)
+                goto out2;
+
+            ret = HDstrcmp(linkinfo1.trg_path, linkinfo2.trg_path);
 
             /* if the target link name is not same then the links are "different" */
             nfound = (ret != 0) ? 1 : 0;
@@ -1526,115 +1445,124 @@ hsize_t diff(hid_t file1_id,
             if(print_objname(options, nfound))
                 do_print_objname("link", path1, path2);
 
-            if (options->linkfollow)
+            if (options->follow_links)
             {
                 /* objects are not the same type */
-                if (softlinkinfo1.type != softlinkinfo2.type)
+                if (linkinfo1.trg_type != linkinfo2.trg_type)
                 {
                     if (options->m_verbose||options->m_list_not_cmp)
                     {
-                        parallel_print("<%s> is of type %d and <%s> is of type %d\n", softlinkinfo1.path, softlinkinfo1.type, softlinkinfo2.path, softlinkinfo2.type);
+                        parallel_print("<%s> is of type %s and <%s> is of type %s\n", path1, get_type(linkinfo1.trg_type), path2, get_type(linkinfo2.trg_type));
                     }
                     options->not_cmp=1;
                     goto out;
                 }
 
-                nfound += diff(file1_id, softlinkinfo1.path,
-                               file2_id, softlinkinfo2.path,
-                               options, softlinkinfo1.type);
+                /* call self to compare target object */
+                nfound += diff(file1_id, path1, 
+                               file2_id, path2, 
+                               options, linkinfo1.trg_type);
             }
 
             /* always print the number of differences found in verbose mode */
             if(options->m_verbose)
                 print_found(nfound);
 
-            HDfree(softlinkinfo1.buf);
-            HDfree(softlinkinfo2.buf);
+            /* free link info buffer */
+            HDfree(linkinfo1.trg_path);
+            HDfree(linkinfo2.trg_path);
             }
             break;
 
-       /*-------------------------------------------------------------------------
+       /*----------------------------------------------------------------------
         * H5TRAV_TYPE_UDLINK
-        *-------------------------------------------------------------------------
+        *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_UDLINK:
             {
-            H5L_info_t li1, li2;
+            /* get type and name of target object */
+            ret = H5tools_get_link_info(file1_id, path1, &linkinfo1);
+            /* dangling link */
+            if (ret == 0)
+            {
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", path1);
+                    goto out;
+                }
+                else
+                    is_dangle_link1=1;
+            }
+            else if (ret < 0)
+                goto out;
 
-            if(H5Lget_info(file1_id, path1, &li1, H5P_DEFAULT) < 0)
+            /* get type and name of target object */
+            ret = H5tools_get_link_info(file2_id, path2, &linkinfo2);
+            /* dangling link */
+            if (ret == 0)
             {
-                parallel_print("error: unable to get udlink info from \"%s\"\n", path1);
-                goto out;
+                if (options->no_dangle_links)
+                {
+                    /* gangling link is error */
+                    if(options->m_verbose)
+                        parallel_print("Warning: <%s> is a dangling link.\n", path2);
+                    goto out;
+                }
+                else
+                    is_dangle_link2=1;
             }
-            if(H5Lget_info(file2_id, path2, &li2, H5P_DEFAULT) < 0)
-            {
-                parallel_print("error: unable to get udlink info from \"%s\"\n", path2);
+            else if (ret < 0)
                 goto out;
-            }
+
+            /* found dangling link */
+            if (is_dangle_link1 || is_dangle_link2)
+                goto out2;
 
             /* Only external links will have a query function registered */
-            if(li1.type == H5L_TYPE_EXTERNAL && li2.type == H5L_TYPE_EXTERNAL)
+            if(linkinfo1.linfo.type == H5L_TYPE_EXTERNAL && linkinfo2.linfo.type == H5L_TYPE_EXTERNAL) 
             {
-
-                extlinkbuf1 = (char*)HDcalloc(li1.u.val_size, sizeof(char));
-                HDassert(extlinkbuf1);
-                extlinkbuf2 = (char*)HDcalloc(li2.u.val_size, sizeof(char));
-                HDassert(extlinkbuf2);
-
-                if(H5Lget_val(file1_id, path1, extlinkbuf1, li1.u.val_size, H5P_DEFAULT) < 0)
-                {
-                    parallel_print("error: unable to get link value from \"%s\"\n",path1);
-                    goto out;
-                } /* end if */
-                if(H5Lget_val(file2_id, path2, extlinkbuf2, li2.u.val_size, H5P_DEFAULT) < 0)
-                {
-                    parallel_print("error: unable to get link value from \"%s\"\n",path2);
-                    goto out;
-                } /* end if */
-
                 /* If the buffers are the same size, compare them */
-                if(li1.u.val_size == li2.u.val_size)
+                if(linkinfo1.linfo.u.val_size == linkinfo2.linfo.u.val_size) 
                 {
-                    ret = HDmemcmp(extlinkbuf1, extlinkbuf2, li1.u.val_size);
+                    ret = HDmemcmp(linkinfo1.trg_path, linkinfo2.trg_path, linkinfo1.linfo.u.val_size);
                 }
                 else
                     ret = 1;
 
-                /* if "extlinkbuf1" != "extlinkbuf2" then the links are "different" */
+                /* if "linkinfo1.trg_path" != "linkinfo2.trg_path" then the links
+                 * are "different" extlinkinfo#.path is combination string of 
+                 * file_name and obj_name
+                 */
                 nfound = (ret != 0) ? 1 : 0;
 
                 if(print_objname(options, nfound))
                     do_print_objname("external link", path1, path2);
 
-                if (options->linkfollow)
+                if (options->follow_links)
                 {
-                    const char *extlink_file1;
-                    const char *extlink_path1;
-                    const char *extlink_file2;
-                    const char *extlink_path2;
-
-                    /* get file name and obj path */
-                    if(H5Lunpack_elink_val(extlinkbuf1, li1.u.val_size, NULL, &extlink_file1, &extlink_path1)<0)
+                    /* objects are not the same type */
+                    if (linkinfo1.trg_type != linkinfo2.trg_type)
                     {
-                        parallel_print("error: unable to unpack external link value of obj1\n");
+                        if (options->m_verbose||options->m_list_not_cmp)
+                        {
+                            parallel_print("<%s> is of type %s and <%s> is of type %s\n", path1, get_type(linkinfo1.trg_type), path2, get_type(linkinfo2.trg_type));
+                        }
+                        options->not_cmp=1;
                         goto out;
                     }
 
-                    /* get file name and obj path */
-                    if(H5Lunpack_elink_val(extlinkbuf2, li2.u.val_size, NULL, &extlink_file2, &extlink_path2)<0)
-                    {
-                        parallel_print("error: unable to unpack external link value of obj2\n");
-                        goto out;
-                    }
+                    nfound = diff(file1_id, path1,  
+                                  file2_id, path2, 
+                                  options, linkinfo1.trg_type);
+                } 
 
-                    nfound = h5diff(extlink_file1, extlink_file2,
-                                    extlink_path1, extlink_path2, options);
-                }
-
-                HDfree(extlinkbuf1);
-                HDfree(extlinkbuf2);
+                /* free link info buffer */
+                HDfree(linkinfo1.trg_path);
+                HDfree(linkinfo2.trg_path);
             } /* end if */
-            else
+            else 
             {
                 /* If one or both of these links isn't an external link, we can only
                  * compare information from H5Lget_info since we don't have a query
@@ -1643,7 +1571,8 @@ hsize_t diff(hid_t file1_id,
                  * If the link classes or the buffer length are not the
                  * same, the links are "different"
                  */
-                if((li1.type != li2.type) || (li1.u.val_size != li2.u.val_size))
+                if((linkinfo1.linfo.type != linkinfo2.linfo.type) || 
+                   (linkinfo1.linfo.u.val_size != linkinfo2.linfo.u.val_size))
                     nfound = 1;
                 else
                     nfound = 0;
@@ -1671,17 +1600,43 @@ hsize_t diff(hid_t file1_id,
 out:
     options->err_stat = 1;
 
-    /* free buf used for softlink */
-    if (softlinkinfo1.buf)
-        HDfree(softlinkinfo1.buf);
-    if (softlinkinfo2.buf)
-        HDfree(softlinkinfo2.buf);
+out2:
+    /*-----------------------------------
+     * handle dangling link(s) 
+     */
+    /* both path1 and path2 are dangling links */
+    if(is_dangle_link1 && is_dangle_link2)
+    {
+        if(print_objname(options, nfound))
+        {
+            do_print_objname("dangling link", path1, path2);
+            print_found(nfound);
+        }
+    }
+    /* path1 is dangling link */
+    else if (is_dangle_link1)
+    {
+        if(options->m_verbose)
+           parallel_print("obj1 <%s> is a dangling link.\n", path1);
+        nfound++;
+        if(print_objname(options, nfound))
+            print_found(nfound);
+    }
+    /* path2 is dangling link */
+    else if (is_dangle_link2)
+    {
+        if(options->m_verbose)
+            parallel_print("obj2 <%s> is a dangling link.\n", path2);
+        nfound++;
+        if(print_objname(options, nfound))
+            print_found(nfound);
+    }
 
-    /* free buf used for softlink */
-    if (extlinkbuf1)
-        HDfree(extlinkbuf1);
-    if (extlinkbuf2)
-        HDfree(extlinkbuf2);
+    /* free link info buffer */
+    if (linkinfo1.trg_path)
+        HDfree(linkinfo1.trg_path);
+    if (linkinfo2.trg_path)
+        HDfree(linkinfo2.trg_path);
 
     /* close */
     /* disable error reporting */

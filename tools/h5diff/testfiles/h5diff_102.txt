@@ -7,3 +7,4 @@ position        fp1             fp2             difference
 [ 1 1 ]          0               1e-05           1e-05          
 [ 2 0 ]          1e-05           0               1e-05          
 4 differences found
+EXIT CODE: 1
