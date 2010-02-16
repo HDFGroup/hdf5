@@ -207,6 +207,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an intermittent bug in the b-tree code which could be triggered
+            by expanding and shrinking chunked datasets in certain ways.
+            (NAF - 2010/02/16)
       - H5Tdetect_class said a VL string is a string type.  But when it's
             in a compound type, it said it's a VL type (Bug #1584).  I fixed it 
             to be consistent.  It always return string type. (SLU - 2009/12/10)

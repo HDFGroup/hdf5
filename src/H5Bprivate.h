@@ -78,6 +78,13 @@ typedef enum H5B_ins_t {
     H5B_INS_REMOVE	 = 5	/*remove current node			     */
 } H5B_ins_t;
 
+/* Enum for specifying the direction of the critical key in relation to the
+ * child */
+typedef enum H5B_dir_t {
+    H5B_LEFT            = 0,    /* Critical key is to the left */
+    H5B_RIGHT           = 1     /* Critical key is to the right */
+} H5B_dir_t;
+
 /* Define the operator callback function pointer for H5B_iterate() */
 typedef int (*H5B_operator_t)(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
                                         const void *_rt_key, void *_udata);
@@ -122,6 +129,9 @@ typedef struct H5B_class_t {
     /* min insert uses min leaf, not new(), similarily for max insert */
     hbool_t	follow_min;
     hbool_t	follow_max;
+
+    /* The direction of the key that is intrinsically associated with each node */
+    H5B_dir_t   critical_key;
 
     /* remove existing data */
     H5B_ins_t	(*remove)(H5F_t*, hid_t, haddr_t, void*, hbool_t*, void*, void*,

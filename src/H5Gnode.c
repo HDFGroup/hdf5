@@ -95,6 +95,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_cmp3,		/*cmp3			*/
     H5G_node_found,		/*found			*/
     H5G_node_insert,		/*insert		*/
+    H5B_RIGHT,                  /*critical key          */
     TRUE,			/*follow min branch?	*/
     TRUE,			/*follow max branch?	*/
     H5G_node_remove,		/*remove		*/
@@ -860,14 +861,11 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         /* Remove the entry from the symbol table node */
         if(1 == sn->nsyms) {
             /*
-             * We are about to remove the only symbol in this node. Copy the left
-             * key to the right key and mark the right key as dirty.  Free this
+             * We are about to remove the only symbol in this node.  Free this
              * node and indicate that the pointer to this node in the B-tree
              * should be removed also.
              */
             HDassert(0 == idx);
-            *rt_key = *lt_key;
-            *rt_key_changed = TRUE;
             sn->nsyms = 0;
             sn_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
             ret_value = H5B_INS_REMOVE;
@@ -925,13 +923,10 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         } /* end for */
 
         /*
-         * We are about to remove all the symbols in this node. Copy the left
-         * key to the right key and mark the right key as dirty.  Free this
+         * We are about to remove all the symbols in this node.  Free this
          * node and indicate that the pointer to this node in the B-tree
          * should be removed also.
          */
-        *rt_key = *lt_key;
-        *rt_key_changed = TRUE;
         sn->nsyms = 0;
         sn_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
         ret_value = H5B_INS_REMOVE;
