@@ -995,14 +995,16 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             if(H5MF_close(f, dxpl_id) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+        } /* end if */
 
-            /* Unpin the superblock, since we're about to destroy the cache */
+        /* Unpin the superblock, since we're about to destroy the cache */
+        if(f->shared->sblock) {
             if(H5AC_unpin_entry(f->shared->sblock) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
             f->shared->sblock = NULL;
-        } /* end if */
-
+        }
+ 
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
