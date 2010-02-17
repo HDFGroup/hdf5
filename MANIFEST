@@ -1061,6 +1061,8 @@
 ./tools/h5stat/h5stat.c
 ./tools/h5stat/h5stat_gentest.c
 ./tools/h5stat/testh5stat.sh.in
+./tools/h5stat/testfiles/h5stat_filters-UT.ddl
+./tools/h5stat/testfiles/h5stat_filters-UD.ddl
 ./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1070,10 +1072,13 @@
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
+./tools/h5stat/testfiles/h5stat_newgrat-UA.ddl
+./tools/h5stat/testfiles/h5stat_newgrat-UG.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
+
 
 # h5dump
 ./tools/testfiles/family_file00000.h5
