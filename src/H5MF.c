@@ -964,6 +964,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->lf);
+    HDassert(f->shared->sblock);
 
     /* Free the space in aggregators */
     /* (for space not at EOF, it may be put into free space managers) */

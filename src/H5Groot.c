@@ -99,6 +99,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
     H5G_loc_t   root_loc;               /* Root location information */
     htri_t      stab_exists = -1;       /* Whether the symbol table exists */
     hbool_t     sblock_dirty = FALSE;   /* Whether superblock was dirtied */
+    hbool_t     path_init = FALSE;      /* Whether path was initialized */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_mkroot, FAIL)
@@ -235,6 +236,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
 
     /* Create the path names for the root group's entry */
     H5G_name_init(root_loc.path, "/");
+    path_init = TRUE;
 
     f->shared->root_grp->shared->fo_count = 1;
     /* The only other open object should be the superblock extension, if it
@@ -250,7 +252,8 @@ done:
      * allocated */
     if(ret_value < 0) {
         if(f->shared->root_grp) {
-            H5G_name_free(root_loc.path);
+            if(path_init)
+                H5G_name_free(root_loc.path);
             if(f->shared->root_grp->shared)
                 f->shared->root_grp->shared = H5FL_FREE(H5G_shared_t, f->shared->root_grp->shared);
             f->shared->root_grp = H5FL_FREE(H5G_t, f->shared->root_grp);
