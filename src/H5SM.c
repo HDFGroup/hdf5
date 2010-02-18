@@ -1876,7 +1876,7 @@ H5SM_message_encode(const H5F_t *f, uint8_t *raw, const void *_nrecord)
 
     if(message->location == H5SM_IN_HEAP) {
         UINT32ENCODE(raw, message->u.heap_loc.ref_count);
-        UINT64ENCODE(raw, message->u.heap_loc.fheap_id);
+        HDmemcpy(raw, message->u.heap_loc.fheap_id.id, (size_t)H5O_FHEAP_ID_LEN);
     } /* end if */
     else {
         HDassert(message->location == H5SM_IN_OH);
@@ -1916,7 +1916,7 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
 
     if(message->location == H5SM_IN_HEAP) {
         UINT32DECODE(raw, message->u.heap_loc.ref_count);
-        UINT64DECODE(raw, message->u.heap_loc.fheap_id);
+        HDmemcpy(message->u.heap_loc.fheap_id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
     } /* end if */
     else {
         HDassert(message->location == H5SM_IN_OH);

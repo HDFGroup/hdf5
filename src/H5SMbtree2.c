@@ -206,7 +206,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
      * message in the index, we've found the message.
      */
     if(mesg->location == H5SM_IN_HEAP && key->message.location == H5SM_IN_HEAP) {
-        if(key->message.u.heap_loc.fheap_id == mesg->u.heap_loc.fheap_id)
+        if(key->message.u.heap_loc.fheap_id.val == mesg->u.heap_loc.fheap_id.val)
             HGOTO_DONE(0);
     } /* end if */
     else if(mesg->location == H5SM_IN_OH && key->message.location == H5SM_IN_OH) {
