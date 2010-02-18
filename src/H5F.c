@@ -978,17 +978,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
-        /* Flush at this point since the file will be closed */
-        /* (Only try to flush here if the file structure was successfully
-         *      initialized (i.e., the file struct is being shutdown in an
-         *      orderly manner with the 'closing' flag set)
-         */
-        if(f->closing) {
-#if H5AC_DUMP_STATS_ON_CLOSE
-            /* Dump debugging info */
-            H5AC_stats(f);
-#endif /* H5AC_DUMP_STATS_ON_CLOSE */
-
+        /* Release objects that depend on the superblock being initialized */
+        if(f->shared->sblock) {
             /* Shutdown file free space manager(s) */
             /* (We should release the free space information now (before truncating
              *      the file and before the metadata cache is shut down) since the
@@ -1001,15 +992,13 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
             } /* end if */
-        } /* end if */
 
-        /* Unpin the superblock, since we're about to destroy the cache */
-        if(f->shared->sblock) {
+            /* Unpin the superblock, since we're about to destroy the cache */
             if(H5AC_unpin_entry(f->shared->sblock) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
             f->shared->sblock = NULL;
-        }
+        } /* end if */
  
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)

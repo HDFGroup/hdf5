@@ -759,6 +759,11 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     HDassert(f);
     HDassert(f->shared->cache);
 
+#if H5AC_DUMP_STATS_ON_CLOSE
+    /* Dump debugging info */
+    H5AC_stats(f);
+#endif /* H5AC_DUMP_STATS_ON_CLOSE */
+
 #if H5AC__TRACE_FILE_ENABLED
     if(H5AC_close_trace_file(f->shared->cache) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
