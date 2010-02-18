@@ -266,13 +266,13 @@ done:
      * allocated */
     if(ret_value < 0) {
         if(f->shared->root_grp) {
+            H5G_name_free(root_loc.path);
             if(f->shared->root_grp->shared)
                 f->shared->root_grp->shared = H5FL_FREE(H5G_shared_t, f->shared->root_grp->shared);
             f->shared->root_grp = H5FL_FREE(H5G_t, f->shared->root_grp);
         } /* end if */
         if(f->shared->sblock)
             f->shared->sblock->root_ent = (H5G_entry_t *)H5MM_xfree(f->shared->sblock->root_ent);
-        H5G_name_free(root_loc.path);
     } /* end if */
 
     /* Mark superblock dirty in cache, if necessary */
