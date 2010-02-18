@@ -328,15 +328,17 @@ TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
 # 1.7 verbose mode
 TOOLTEST h5diff_17.txt -v $FILE1 $FILE2   
 
-# 1.8 test 32-bit INFINITY
+# 1.7 test 32-bit INFINITY
 TOOLTEST h5diff_171.txt -v $FILE1 $FILE1 /g1/fp19
 
-# 1.8 test 64-bit INFINITY
+# 1.7 test 64-bit INFINITY
 TOOLTEST h5diff_172.txt -v $FILE1 $FILE1 /g1/fp20
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
 
+# 1.8 -v and -q
+TOOLTEST h5diff_18_1.txt -v -q $FILE1 $FILE2
 
 
 # ##############################################################################
@@ -653,12 +655,7 @@ TOOLTEST h5diff_450.txt  --follow-links -v $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2
 TOOLTEST h5diff_451.txt  --follow-links -v --no-dangling-links  $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2 
 
 # try --no-dangling-links without --follow-links options
-if test -n "$pmode"; then
-    # Skip this. Investigate later why act differently in pmode.
-    SKIP --no-dangling-links  $FILE13 $FILE13
-else
-    TOOLTEST h5diff_452.txt  --no-dangling-links  $FILE13 $FILE13
-fi
+TOOLTEST h5diff_452.txt  --no-dangling-links  $FILE13 $FILE13
 
 # dangling link found for soft links (FILE to FILE)
 TOOLTEST h5diff_453.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13  

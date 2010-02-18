@@ -203,6 +203,58 @@ static void print_incoming_data(void)
 #endif
 
 /*-------------------------------------------------------------------------
+ * Function: is_valid_options
+ *
+ * Purpose: check if options are valid
+ *
+ * Return: 
+ *  1 : Valid
+ *  0 : Not valid
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: Feb 17, 2010
+ *
+ *------------------------------------------------------------------------*/
+static int is_valid_options(diff_opt_t *options)
+{
+    int ret=1; /* init to valid */
+
+    /*-----------------------------------------------
+     * no -q(quiet) with -v (verbose) or -r (report) */
+    if(options->m_quiet && (options->m_verbose || options->m_report))
+    {
+        parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+        options->err_stat=1;
+        ret = 0;
+        goto out;
+    }
+
+    /* -------------------------------------------------------
+     * only allow --no-dangling-links along with --follow-links */
+    if(options->no_dangle_links && !options->follow_links)
+    {
+        parallel_print("Error: --no-dangling-links must be used along with --follow-links option.\n");
+        options->err_stat=1;
+        ret = 0;
+        goto out;
+    }
+
+out:
+    if (!ret)
+    {
+#ifdef H5_HAVE_PARALLEL
+        if(g_Parallel)
+            /* Let tasks know that they won't be needed */
+            phdiff_dismiss_workers();
+#endif
+    }
+
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function: H5tools_get_link_info
  *
  * Purpose: Get link (soft, external) info and its target object type 
@@ -237,18 +289,19 @@ static int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_li
     /* init */
     link_info->trg_type = H5O_TYPE_UNKNOWN;
 
-    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0)
-    {
-        if(link_info->opt.msg_mode==1)
-            parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
-        goto out;
-    }
-
-    /* check if link name exist */
+    /* check if link itself exist */
     if((H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0)) 
     {
         if(link_info->opt.msg_mode==1)
             parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
+        goto out;
+    }
+
+    /* get info from link */
+    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0)
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
         goto out;
     }
 
@@ -339,7 +392,6 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-
 hsize_t h5diff(const char *fname1,
                const char *fname2,
                const char *objname1,
@@ -354,6 +406,12 @@ hsize_t h5diff(const char *fname1,
     hsize_t      nfound = 0;
 
     HDmemset(filenames, 0, 1024 * 2);
+
+   /*-------------------------------------------------------------------------
+    * check invalid combination of options
+    *-----------------------------------------------------------------------*/
+    if(!is_valid_options(options))
+        goto out;
 
     /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing

@@ -1462,6 +1462,7 @@
 ./tools/h5diff/testfiles/h5diff_171.txt
 ./tools/h5diff/testfiles/h5diff_172.txt
 ./tools/h5diff/testfiles/h5diff_18.txt
+./tools/h5diff/testfiles/h5diff_18_1.txt
 ./tools/h5diff/testfiles/h5diff_19.txt
 ./tools/h5diff/testfiles/h5diff_20.txt
 ./tools/h5diff/testfiles/h5diff_21.txt

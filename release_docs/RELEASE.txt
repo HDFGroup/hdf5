@@ -393,6 +393,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: fixed incorrect behavior (hang) in parallel mode when
+                  specify invalid options (ex: -v and -q) (JKM 2010/02/17)
         - h5dump/h5ls display buffer resize fixed in tools library.  
             (ADB - 2009/07/21 - 1520)
         - Fixed many problems that could occur when using h5repack with named
