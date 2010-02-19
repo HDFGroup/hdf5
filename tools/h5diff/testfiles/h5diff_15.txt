@@ -7,3 +7,4 @@ position        dset3           dset4           difference
 [ 2 0 ]          100             80              20             
 [ 2 1 ]          100             40              60             
 4 differences found
+EXIT CODE: 1

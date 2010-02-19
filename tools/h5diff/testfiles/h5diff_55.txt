@@ -7,3 +7,4 @@ position        dset5a          dset5b          difference
 [ 2 0 ]          1               5               4              
 [ 2 1 ]          1               6               5              
 4 differences found
+EXIT CODE: 1

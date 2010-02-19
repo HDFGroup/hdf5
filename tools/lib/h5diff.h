@@ -35,6 +35,8 @@ typedef struct {
     double   percent;               /* relative error value */
     int      n;                     /* count, compare up to count */
     hsize_t  count;                 /* count value */
+    int      follow_links;          /* follow symbolic links */
+    int      no_dangle_links;       /* return error when find dangling link */
     int      err_stat;              /* an error ocurred (1, error, 0, no error) */
     int      cmn_objs;              /* do we have common objects */
     int      not_cmp;               /* are the objects comparable */

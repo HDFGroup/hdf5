@@ -1,0 +1,3 @@
+group  : </softlink3_to_slink2> and </target_group>
+1 differences found
+EXIT CODE: 1

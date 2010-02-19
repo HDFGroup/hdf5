@@ -1,0 +1,32 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /ext_link_dset1
+    x      x    /ext_link_dset2
+    x      x    /ext_link_grp1 
+    x      x    /ext_link_grp2 
+    x      x    /ext_link_noexist1
+    x      x    /ext_link_noexist2
+
+group  : </> and </>
+0 differences found
+external link: </ext_link_dset1> and </ext_link_dset1>
+dataset: </ext_link_dset1> and </ext_link_dset1>
+0 differences found
+0 differences found
+external link: </ext_link_dset2> and </ext_link_dset2>
+dataset: </ext_link_dset2> and </ext_link_dset2>
+0 differences found
+0 differences found
+external link: </ext_link_grp1> and </ext_link_grp1>
+group  : </ext_link_grp1> and </ext_link_grp1>
+0 differences found
+0 differences found
+external link: </ext_link_grp2> and </ext_link_grp2>
+group  : </ext_link_grp2> and </ext_link_grp2>
+0 differences found
+0 differences found
+Warning: </ext_link_noexist1> is a dangling link.
+Warning: </ext_link_noexist2> is a dangling link.
+EXIT CODE: 2

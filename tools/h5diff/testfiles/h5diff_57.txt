@@ -8,3 +8,4 @@ Not comparable: </dset7a> has sign H5T_SGN_2 and </dset7b> has sign H5T_SGN_NONE
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects.
+EXIT CODE: 0

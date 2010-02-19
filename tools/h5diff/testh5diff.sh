@@ -23,40 +23,37 @@
 #   Pedro Vicente Nunes:
 #    10/25/2005: Added test #9
 #    11/27/2006: Added test #10, #11
+#   Jonathan Kim:
+#    Improved to use single line
+#    Improved to check exit code (only serial mode, not necessary for parallel)
+#    Added test 400 - 425  (links with --follow-links option)
+#    Added test 450 - 459  (dangling links)
 
 
 ###############################################################################
 ## test file names 
 ###############################################################################
 
-INDIR=$srcdir/testfiles
-
-SRCFILE1=h5diff_basic1.h5
-SRCFILE2=h5diff_basic2.h5
-SRCFILE3=h5diff_types.h5
-SRCFILE4=h5diff_dtypes.h5
-SRCFILE5=h5diff_attr1.h5
-SRCFILE6=h5diff_attr2.h5
-SRCFILE7=h5diff_dset1.h5
-SRCFILE8=h5diff_dset2.h5
-SRCFILE9=h5diff_hyper1.h5
-SRCFILE10=h5diff_hyper2.h5
-SRCFILE11=h5diff_empty.h5
-SRCFILE12=h5diff_links.h5
-
-FILE1="$INDIR/$SRCFILE1"
-FILE2="$INDIR/$SRCFILE2"
-FILE3="$INDIR/$SRCFILE3"
-FILE4="$INDIR/$SRCFILE4"
-FILE5="$INDIR/$SRCFILE5"
-FILE6="$INDIR/$SRCFILE6"
-FILE7="$INDIR/$SRCFILE7"
-FILE8="$INDIR/$SRCFILE8"
-FILE9="$INDIR/$SRCFILE9"
-FILE10="$INDIR/$SRCFILE10"
-FILE11="$INDIR/$SRCFILE11"
-FILE12="$INDIR/$SRCFILE12"
-
+FILE1=h5diff_basic1.h5
+FILE2=h5diff_basic2.h5
+FILE3=h5diff_types.h5
+FILE4=h5diff_dtypes.h5
+FILE5=h5diff_attr1.h5
+FILE6=h5diff_attr2.h5
+FILE7=h5diff_dset1.h5
+FILE8=h5diff_dset2.h5
+FILE9=h5diff_hyper1.h5
+FILE10=h5diff_hyper2.h5
+FILE11=h5diff_empty.h5
+FILE12=h5diff_links.h5
+FILE13=h5diff_softlinks.h5
+FILE14=h5diff_linked_softlink.h5
+FILE15=h5diff_extlink_src.h5
+FILE16=h5diff_extlink_trg.h5
+FILE17=h5diff_ext2softlink_src.h5
+FILE18=h5diff_ext2softlink_trg.h5
+DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
+DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -202,45 +199,58 @@ TOOLTEST() {
     actual_err_sav=${actual_err}-sav
     shift
     if test -n "$pmode"; then
-	RUNCMD=$RUNPARALLEL
+        RUNCMD=$RUNPARALLEL
     else
-	RUNCMD=$RUNSERIAL
+        RUNCMD=$RUNSERIAL
     fi
 
     # Run test.
+    TESTING $H5DIFF $@
     (
 	#echo "#############################"
 	#echo "Expected output for '$H5DIFF $@'" 
 	#echo "#############################"
-	#cd $srcdir/testfiles
+	cd $srcdir/testfiles
 	eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
+    EXIT_CODE=$?
     # save actual and actual_err in case they are needed later.
     cp $actual $actual_sav
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
+    # don't add exit code check in pmode, as it causes failure. (exit code 
+    # is from mpirun not tool)
+    # if any problem occurs relate to an exit code, it will be caught in 
+    # serial mode, so the test is fullfilled.
+    if test -z "$pmode"; then
+      echo "EXIT CODE: $EXIT_CODE" >> $actual
+    fi
 
     if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
-	cp $actual $expect
+        cp $actual $expect
     elif $CMP $expect $actual; then
-	echo " PASSED"
+        echo " PASSED"
     elif test -z "$pmode"; then
-	echo "*FAILED*"
-	echo "    Expected result ($expect) differs from actual result ($actual)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result ($expect) differs from actual result ($actual)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     else
-	# parallel mode output are often of different ordering from serial
-	# output.  If the sorted expected and actual files compare the same,
-	# it is safe to assume the actual output match the expected file.
-	expect_sorted=expect_sorted
-	actual_sorted=actual_sorted
-	sort $expect -o $expect_sorted
-	sort $actual -o $actual_sorted
+	    # parallel mode output are often of different ordering from serial
+        # output.  If the sorted expected and actual files compare the same,
+        # it is safe to assume the actual output match the expected file.
+        expect_sorted=expect_sorted
+        actual_sorted=actual_sorted
+        sort $expect -o $expect_sorted
+        sort $actual -o $actual_sorted
+        # remove "EXIT CODE:" line from expect file. test for exit code
+        # is done by serial mode.
+        grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
+        mv $expect_sorted.noexit $expect_sorted
 	if $CMP $expect_sorted $actual_sorted; then
 	    echo " PASSED"
 	else
@@ -261,8 +271,8 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err $actual_sav $actual_err_sav
-	rm -f $actual_sorted $expect_sorted
+	    rm -f $actual $actual_err $actual_sav $actual_err_sav
+    	rm -f $actual_sorted $expect_sorted
     fi
 }
 
@@ -272,6 +282,7 @@ SKIP() {
 	 TESTING $H5DIFF $@
 	  echo  " -SKIP-"
 }
+
 
 
 ##############################################################################
@@ -288,57 +299,46 @@ SKIP() {
 
 
 # 1.0
-TESTING $H5DIFF -h
 TOOLTEST h5diff_10.txt -h
 
 # 1.1 normal mode
-TESTING $H5DIFF $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_11.txt  $FILE1 $FILE2 
 
 # 1.2 normal mode with objects
-TESTING $H5DIFF $SRCFILE1 $SRCFILE2 g1/dset1 g1/dset2
 TOOLTEST h5diff_12.txt  $FILE1 $FILE2  g1/dset1 g1/dset2
 
 # 1.3 report mode
-TESTING $H5DIFF -r $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_13.txt -r $FILE1 $FILE2 
 
 # 1.4 report  mode with objects
-TESTING $H5DIFF -r $SRCFILE1 $SRCFILE2 g1/dset1 g1/dset2
 TOOLTEST h5diff_14.txt  -r $FILE1 $FILE2 g1/dset1 g1/dset2
 
 # 1.5 with -d
-TESTING $H5DIFF --report --delta=5 $SRCFILE1 $SRCFILE2 g1/dset3 g1/dset4
 TOOLTEST h5diff_15.txt --report --delta=5 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 1.6.1 with -p (int)
-TESTING $H5DIFF -v -p 0.02 $SRCFILE1 $SRCFILE1 g1/dset5 g1/dset6
 TOOLTEST h5diff_16_1.txt -v -p 0.02 $FILE1 $FILE1 g1/dset5 g1/dset6
 
 # 1.6.2 with -p (unsigned long_long)
-TESTING $H5DIFF --verbose --relative=0.02 $SRCFILE1 $SRCFILE1 g1/dset7 g1/dset8
 TOOLTEST h5diff_16_2.txt --verbose --relative=0.02 $FILE1 $FILE1 g1/dset7 g1/dset8
 
 # 1.6.3 with -p (double)
-TESTING $H5DIFF -v -p 0.02 $SRCFILE1 $SRCFILE1 g1/dset9 g1/dset10
 TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
 
 # 1.7 verbose mode
-TESTING $H5DIFF -v $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_17.txt -v $FILE1 $FILE2   
 
-# 1.8 test 32-bit INFINITY
-TESTING $H5DIFF -v $SRCFILE1 $SRCFILE1 /g1/fp19
-TOOLTEST h5diff_171.txt -v $SRCFILE1 $SRCFILE1 /g1/fp19
+# 1.7 test 32-bit INFINITY
+TOOLTEST h5diff_171.txt -v $FILE1 $FILE1 /g1/fp19
 
-# 1.8 test 64-bit INFINITY
-TESTING $H5DIFF -v $SRCFILE1 $SRCFILE1 /g1/fp20
-TOOLTEST h5diff_172.txt -v $SRCFILE1 $SRCFILE1 /g1/fp20
+# 1.7 test 64-bit INFINITY
+TOOLTEST h5diff_172.txt -v $FILE1 $FILE1 /g1/fp20
 
 # 1.8 quiet mode 
-TESTING $H5DIFF -q $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
 
+# 1.8 -v and -q
+TOOLTEST h5diff_18_1.txt -v -q $FILE1 $FILE2
 
 
 # ##############################################################################
@@ -346,15 +346,12 @@ TOOLTEST h5diff_18.txt -q $FILE1 $FILE2
 # ##############################################################################
 
 # 2.0
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 dset g1
 TOOLTEST h5diff_20.txt -v $FILE3 $FILE3  dset g1
 
 # 2.1
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 dset l1
 TOOLTEST h5diff_21.txt -v $FILE3 $FILE3 dset l1
 
 # 2.2
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 dset t1
 TOOLTEST h5diff_22.txt -v  $FILE3 $FILE3 dset t1
 
 # ##############################################################################
@@ -362,27 +359,21 @@ TOOLTEST h5diff_22.txt -v  $FILE3 $FILE3 dset t1
 # ##############################################################################
 
 # 2.3
-TESTING $H5DIFF  -v $SRCFILE3 $SRCFILE3 g1 g1
 TOOLTEST h5diff_23.txt -v $FILE3 $FILE3 g1 g1
 
 # 2.4
-TESTING $H5DIFF -v  $SRCFILE3 $SRCFILE3 t1 t1
 TOOLTEST h5diff_24.txt -v $FILE3 $FILE3 t1 t1
 
 # 2.5
-TESTING $H5DIFF -v  $SRCFILE3 $SRCFILE3 l1 l1 
 TOOLTEST h5diff_25.txt -v $FILE3 $FILE3 l1 l1 
 
 # 2.6
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 g1 g2
 TOOLTEST h5diff_26.txt -v $FILE3 $FILE3 g1 g2
 
 # 2.7
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 t1 t2
 TOOLTEST h5diff_27.txt -v $FILE3 $FILE3 t1 t2
 
 # 2.8
-TESTING $H5DIFF -v $SRCFILE3 $SRCFILE3 l1 l2
 TOOLTEST h5diff_28.txt -v $FILE3 $FILE3 l1 l2
 
 
@@ -392,39 +383,30 @@ TOOLTEST h5diff_28.txt -v $FILE3 $FILE3 l1 l2
 # ##############################################################################
 
 # 5.0
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4 dset0a dset0b
 TOOLTEST h5diff_50.txt -v $FILE4 $FILE4 dset0a dset0b
 
 # 5.1
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset1a dset1b
 TOOLTEST h5diff_51.txt -v $FILE4 $FILE4 dset1a dset1b
 
 # 5.2
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset2a dset2b
 TOOLTEST h5diff_52.txt -v $FILE4 $FILE4 dset2a dset2b
 
 # 5.3
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset3a dset4b
 TOOLTEST h5diff_53.txt -v $FILE4 $FILE4 dset3a dset4b
 
 # 5.4
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset4a dset4b
 TOOLTEST h5diff_54.txt -v $FILE4 $FILE4 dset4a dset4b
 
 # 5.5
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset5a dset5b
 TOOLTEST h5diff_55.txt -v $FILE4 $FILE4 dset5a dset5b
 
 # 5.6
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset6a dset6b
 TOOLTEST h5diff_56.txt -v $FILE4 $FILE4 dset6a dset6b
 
 # 5.7
-TESTING $H5DIFF -v $SRCFILE4 $SRCFILE4  dset7a dset7b
 TOOLTEST h5diff_57.txt -v $FILE4 $FILE4 dset7a dset7b
 
 # 5.8 (region reference)
-TESTING $H5DIFF -v $SRCFILE7 $SRCFILE8  refreg
 TOOLTEST h5diff_58.txt -v $FILE7 $FILE8 refreg
 
 # ##############################################################################
@@ -433,7 +415,6 @@ TOOLTEST h5diff_58.txt -v $FILE7 $FILE8 refreg
 
 
 # 6.0: Check if the command line number of arguments is less than 3
-TESTING $H5DIFF $SRCFILE1
 TOOLTEST h5diff_600.txt $FILE1 
 
 
@@ -443,35 +424,27 @@ TOOLTEST h5diff_600.txt $FILE1
 
 
 # 6.3: negative value
-TESTING $H5DIFF  -d -4 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_603.txt -d -4 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.4: zero
-TESTING $H5DIFF  -d 0 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_604.txt -d 0 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.5: non number
-TESTING $H5DIFF -d u $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_605.txt -d u $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.6: hexadecimal
-TESTING $H5DIFF -d 0x1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_606.txt -d 0x1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.7: string
-TESTING $H5DIFF -d "1" $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_607.txt -d "1" $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.8: use system epsilon 
-TESTING $H5DIFF --use-system-epsilon $SRCFILE1 $SRCFILE2   g1/dset3 g1/dset4
 TOOLTEST h5diff_608.txt --use-system-epsilon $FILE1 $FILE2  g1/dset3 g1/dset4
 
 # 6.9: number larger than biggest difference
-TESTING $H5DIFF -d 200 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_609.txt -d 200 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.10: number smaller than smallest difference
-TESTING $H5DIFF -d 1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_610.txt -d 1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 
@@ -481,35 +454,27 @@ TOOLTEST h5diff_610.txt -d 1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 
 # 6.12: negative value
-TESTING $H5DIFF -p -4 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_612.txt -p -4 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.13: zero
-TESTING $H5DIFF -p 0 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_613.txt -p 0 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.14: non number
-TESTING $H5DIFF -p u $SRCFILE1 $SRCFILE2   g1/dset3 g1/dset4
 TOOLTEST h5diff_614.txt -p u $FILE1 $FILE2  g1/dset3 g1/dset4
 
 # 6.15: hexadecimal
-TESTING $H5DIFF -p 0x1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_615.txt -p 0x1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.16: string
-TESTING $H5DIFF -p "0.21" $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_616.txt -p "0.21" $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.17: repeated option
-TESTING $H5DIFF -p 0.21 -p 0.22 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_617.txt -p 0.21 -p 0.22 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.18: number larger than biggest difference
-TESTING $H5DIFF -p 2 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_618.txt -p 2 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.19: number smaller than smallest difference
-TESTING $H5DIFF -p 0.005 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_619.txt -p 0.005 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 
@@ -519,110 +484,199 @@ TOOLTEST h5diff_619.txt -p 0.005 $FILE1 $FILE2 g1/dset3 g1/dset4
 # ##############################################################################
 
 # 6.21: negative value
-TESTING $H5DIFF -n -4 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_621.txt -n -4 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.22: zero
-TESTING $H5DIFF -n 0 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_622.txt -n 0 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.23: non number
-TESTING $H5DIFF -n u $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_623.txt -n u $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.24: hexadecimal
-TESTING $H5DIFF -n 0x1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_624.txt -n 0x1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.25: string
-TESTING $H5DIFF -n "2" $SRCFILE1 $SRCFILE2   g1/dset3 g1/dset4
 TOOLTEST h5diff_625.txt -n "2" $FILE1 $FILE2  g1/dset3 g1/dset4
 
 # 6.26: repeated option
-TESTING $H5DIFF -n 2 -n 3 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_626.txt -n 2 -n 3 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.27: number larger than biggest difference
-TESTING $H5DIFF --count=200 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_627.txt --count=200 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.28: number smaller than smallest difference
-TESTING $H5DIFF -n 1 $SRCFILE1 $SRCFILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_628.txt -n 1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
-#TESTING $H5DIFF file1.h6 file2.h6
 #TOOLTEST h5diff_629.txt file1.h6 file2.h6
 
 # ##############################################################################
 # 7.  attributes
 # ##############################################################################
-TESTING $H5DIFF -v  $SRCFILE5 $SRCFILE6
 TOOLTEST h5diff_70.txt -v $FILE5 $FILE6 
 
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
-TESTING $H5DIFF -v  $SRCFILE7 $SRCFILE8
 TOOLTEST h5diff_80.txt -v $FILE7 $FILE8 
 
 # 9. compare a file with itself
-TESTING $H5DIFF -v  $SRCFILE2 $SRCFILE2
 TOOLTEST h5diff_90.txt -v $FILE2 $FILE2
 
 # 10. read by hyperslab, print indexes
 if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
     # skip this test which sometimes hangs in some THG machines
-    SKIP -v $SRCFILE9 $SRCFILE10
+    SKIP -v $FILE9 $FILE10
 else
-    TESTING $H5DIFF -v $SRCFILE9 $SRCFILE10
     TOOLTEST h5diff_100.txt -v $FILE9 $FILE10 
 fi
 
 # 11. floating point comparison
-TESTING $H5DIFF -v  $SRCFILE1 $SRCFILE1 g1/d1  g1/d2 
 TOOLTEST h5diff_101.txt -v $FILE1 $FILE1 g1/d1  g1/d2 
 
-TESTING $H5DIFF -v  $SRCFILE1 $SRCFILE1  g1/fp1 g1/fp2 
 TOOLTEST h5diff_102.txt -v $FILE1 $FILE1 g1/fp1 g1/fp2 
 
 
 # not comparable -c flag
-TESTING $H5DIFF $SRCFILE2 $SRCFILE2 g2/dset1  g2/dset2
 TOOLTEST h5diff_200.txt $FILE2 $FILE2 g2/dset1  g2/dset2 
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset1  g2/dset2
 TOOLTEST h5diff_201.txt -c $FILE2 $FILE2 g2/dset1  g2/dset2 
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset2  g2/dset3
 TOOLTEST h5diff_202.txt -c $FILE2 $FILE2 g2/dset2  g2/dset3
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset3  g2/dset4
 TOOLTEST h5diff_203.txt -c $FILE2 $FILE2 g2/dset3  g2/dset4
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset4  g2/dset5
 TOOLTEST h5diff_204.txt -c $FILE2 $FILE2 g2/dset4  g2/dset5
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset5  g2/dset6
 TOOLTEST h5diff_205.txt -c $FILE2 $FILE2 g2/dset5  g2/dset6
 
 
 # not comparable in compound
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset7  g2/dset8
 TOOLTEST h5diff_206.txt -c $FILE2 $FILE2 g2/dset7  g2/dset8
 
-TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset8  g2/dset9
 TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
 
-
 # ##############################################################################
-# # Links
+# # Links compare without --follow-links nor --no-dangling-links
 # ##############################################################################
 # test for bug1749
-TESTING $H5DIFF -v $SRCFILE12 $SRCFILE12 /link_g1 /link_g2
 TOOLTEST h5diff_300.txt -v $FILE12 $FILE12 /link_g1 /link_g2
 
+# ##############################################################################
+# # Links compare with --follow-links Only
+# ##############################################################################
+# soft links file to file
+TOOLTEST h5diff_400.txt --follow-links -v $FILE13 $FILE13
+
+# softlink vs dset"
+TOOLTEST h5diff_401.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /target_dset2
+
+# dset vs softlink"
+TOOLTEST h5diff_402.txt --follow-links -v $FILE13 $FILE13 /target_dset2 /softlink_dset1_1
+
+# softlink vs softlink"
+TOOLTEST h5diff_403.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
+
+# extlink vs extlink (FILE)"
+TOOLTEST h5diff_404.txt --follow-links -v $FILE15 $FILE15
+
+# extlink vs dset"
+TOOLTEST h5diff_405.txt --follow-links -v $FILE15 $FILE16 /ext_link_dset1 /target_group2/x_dset
+
+# dset vs extlink"
+TOOLTEST h5diff_406.txt --follow-links -v $FILE16 $FILE15 /target_group2/x_dset /ext_link_dset1
+
+# extlink vs extlink"
+TOOLTEST h5diff_407.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset1 /ext_link_dset2
+
+# softlink vs extlink"
+TOOLTEST h5diff_408.txt --follow-links -v $FILE13 $FILE15 /softlink_dset1_1 /ext_link_dset2
+
+# extlink vs softlink "
+TOOLTEST h5diff_409.txt --follow-links -v $FILE15 $FILE13 /ext_link_dset2 /softlink_dset1_1
+
+# linked_softlink vs linked_softlink (FILE)"
+TOOLTEST h5diff_410.txt --follow-links -v $FILE14 $FILE14
+
+# dset2 vs linked_softlink_dset1"
+TOOLTEST h5diff_411.txt --follow-links -v $FILE14 $FILE14 /target_dset2 /softlink1_to_slink2
+
+# linked_softlink_dset1 vs dset2"
+TOOLTEST h5diff_412.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /target_dset2
+
+# linked_softlink_to_dset1 vs linked_softlink_to_dset2"
+TOOLTEST h5diff_413.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /softlink2_to_slink2
+
+# group vs linked_softlink_group1"
+TOOLTEST h5diff_414.txt --follow-links -v $FILE14 $FILE14 /target_group /softlink3_to_slink2
+
+# linked_softlink_group1 vs group"
+TOOLTEST h5diff_415.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /target_group
+
+# linked_softlink_to_group1 vs linked_softlink_to_group2"
+TOOLTEST h5diff_416.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /softlink4_to_slink2
+
+# non-exist-softlink vs softlink"
+TOOLTEST h5diff_417.txt --follow-links -v $FILE13 $FILE13 /softlink_noexist /softlink_dset2
+
+# softlink vs non-exist-softlink"
+TOOLTEST h5diff_418.txt --follow-links -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
+
+# non-exist-extlink_file vs extlink"
+TOOLTEST h5diff_419.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
+
+# exlink vs non-exist-extlink_file"
+TOOLTEST h5diff_420.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
+
+# extlink vs non-exist-extlink_obj"
+TOOLTEST h5diff_421.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist1
+
+# non-exist-extlink_obj vs extlink"
+TOOLTEST h5diff_422.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist1 /ext_link_dset2
+
+# extlink_to_softlink_to_dset1 vs dset2"
+TOOLTEST h5diff_423.txt --follow-links -v $FILE17 $FILE18 /ext_link_to_slink1 /dset2
+
+# dset2 vs extlink_to_softlink_to_dset1"
+TOOLTEST h5diff_424.txt --follow-links -v $FILE18 $FILE17 /dset2 /ext_link_to_slink1
+
+# extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
+TOOLTEST h5diff_425.txt --follow-links -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_slink2
+
+
+# ##############################################################################
+# # Dangling links compare (--follow-links and --no-dangling-links)
+# ##############################################################################
+# dangling links --follow-links (FILE to FILE)
+TOOLTEST h5diff_450.txt  --follow-links -v $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2
+
+# dangling links --follow-links and --no-dangling-links (FILE to FILE)
+TOOLTEST h5diff_451.txt  --follow-links -v --no-dangling-links  $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2 
+
+# try --no-dangling-links without --follow-links options
+TOOLTEST h5diff_452.txt  --no-dangling-links  $FILE13 $FILE13
+
+# dangling link found for soft links (FILE to FILE)
+TOOLTEST h5diff_453.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13  
+
+# dangling link found for soft links (obj to obj)
+TOOLTEST h5diff_454.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_dset2 /softlink_noexist 
+
+# dangling link found for soft links (obj to obj) Both dangle links
+TOOLTEST h5diff_455.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_noexist /softlink_noexist 
+
+# dangling link found for ext links (FILE to FILE)
+TOOLTEST h5diff_456.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 
+
+# dangling link found for ext links (obj to obj). target file exist
+TOOLTEST h5diff_457.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist1 
+
+# dangling link found for ext links (obj to obj). target file NOT exist
+TOOLTEST h5diff_458.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist2  
+
+# dangling link found for ext links (obj to obj). Both dangle links
+TOOLTEST h5diff_459.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_noexist1 /ext_link_noexist2
 
 
 # ##############################################################################

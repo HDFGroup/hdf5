@@ -44,6 +44,8 @@ static struct long_options l_opts[] = {
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
+    { "follow-links", no_arg, 'l' },
+    { "no-dangling-links", no_arg, 'x' },
     { NULL, 0, '\0' }
 };
 
@@ -99,6 +101,12 @@ void parse_command_line(int argc,
             break;
         case 'r':
             options->m_report = 1;
+            break;
+        case 'l':
+            options->follow_links = 1; 
+            break;
+        case 'x':
+            options->no_dangle_links = 1;
             break;
         case 'd':
             options->d=1;
@@ -352,32 +360,68 @@ void usage(void)
  printf("  file2                    File name of the second HDF5 file\n");
  printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
  printf("  [obj2]                   Name of an HDF5 object, in absolute path\n");
-
+ printf("\n");
  printf("  OPTIONS\n");
-
- printf("   -h, --help              Print a usage message and exit\n");
- printf("   -V, --version           Print version number and exit\n");
- printf("   -r, --report            Report mode. Print differences\n");
- printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
- printf("   -q, --quiet             Quiet mode. Do not do output\n");
+ printf("   -h, --help              Print a usage message and exit.\n");
+ printf("   -V, --version           Print version number and exit.\n");
+ printf("   -r, --report            Report mode. Print differences.\n");
+ printf("   -v, --verbose           Verbose mode. Print differences, list of objects.\n");
+ printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
+ printf("   --follow-links          Follow symbolic links (soft links and external links)\n");
+ printf("                           and compare the links' target objects.\n");
+ printf("                           If symbolic link(s) with the same name exist in the\n");
+ printf("                           files being compared, then determine whether the \n");
+ printf("                           target of each link is an existing object (dataset,\n");
+ printf("                           group, or named datatype) or the link is a dangling\n");
+ printf("                           link (a soft or external link pointing to a target\n");
+ printf("                           object that does not yet exist).\n");
+ printf("                           - If both symbolic links are dangling links, they\n");
+ printf("                             are treated as being the same; by default, h5diff\n");
+ printf("                             returns an exit code of 0. If, however, \n");
+ printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             this situation is treated as an error and h5diff \n");
+ printf("                             returns an exit code of 2.\n");
+ printf("                           - If only one of the two links is a dangling link,\n");
+ printf("                             they are treated as being different and h5diff \n");
+ printf("                             returns an exit code of 1. If, however, \n");
+ printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             this situation is treated as an error and h5diff \n");
+ printf("                             returns an exit code of 2.\n");
+ printf("                           - If both symbolic links point to existing objects,\n");
+ printf("                             h5diff compares the two objects.\n");
+ printf("                           If any symbolic link specified in the call to h5diff\n");
+ printf("                           does not exist, h5diff treats it as an error and\n");
+ printf("                           returns an exit code of 2.\n");
+ printf("   --no-dangling-links     Must be used with --follow-links option;\n");
+ printf("                           otherwise, h5diff shows error message and returns\n");
+ printf("                           an exit code of 2.\n");
+ printf("                           Check for any symbolic links (soft links or external\n");
+ printf("                           links) that do not resolve to an existing object\n");
+ printf("                           (dataset, group, or named datatype).  If any\n");
+ printf("                           dangling link is found, this situation is treated as\n");
+ printf("                           an error and h5diff returns an exit code of 2.\n");
  printf("   -c, --compare           List objects that are not comparable\n");
  printf("   -N, --nan               Avoid NaNs detection\n");
- printf("   -n C, --count=C         Print differences up to C number, C is a positive integer.\n");
-
- printf("   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive number.\n");
- printf("   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive number.\n");
+ printf("   -n C, --count=C         Print differences up to C number, C is a positive\n");
+ printf("                           integer.\n");
+ printf("   -d D, --delta=D         Print difference if (|a-b| > D), D is a positive\n");
+ printf("                           number.\n");
+ printf("   -p R, --relative=R      Print difference if (|(a-b)/b| > R), R is a positive\n");
+ printf("                           number.\n");
  printf("   --use-system-epsilon    Print difference if (|a-b| > EPSILON),\n");
- printf("                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the system epsilon value. \n");
- printf("                           If the system epsilon is not defined, use the value below:\n");
+ printf("                           where EPSILON (FLT_EPSILON or FLT_EPSILON) is the\n");
+ printf("                           system epsilon value. \n");
+ printf("                           If the system epsilon is not defined, use the value\n");
+ printf("                           below:\n");
  printf("                               FLT_EPSILON = 1.19209E-07 for float\n");
  printf("                               DBL_EPSILON = 2.22045E-16 for double\n");
-
- printf("                           -d, -p, and --use-system-epsilon options are used for comparing floating point values.\n");
- printf("                           By default, strict equality is used. Use -p or -d to set specific tolerance.\n");
+ printf("                           -d, -p, and --use-system-epsilon options are used for\n");
+ printf("                           comparing floating point values.\n");
+ printf("                           By default, strict equality is used. Use -p or -d to\n");
+ printf("                           set specific tolerance.\n");
  printf("\n");
 
  printf(" Modes of output:\n");
- printf("\n");
  printf("  Default mode: print the number of differences found and where they occured\n");
  printf("  -r Report mode: print the above plus the differences\n");
  printf("  -v Verbose mode: print the above plus a list of objects and warnings\n");
@@ -386,46 +430,35 @@ void usage(void)
  printf("\n");
 
  printf(" Compare criteria\n");
- printf("\n");
- printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("   with the same absolute path in both files\n");
+ printf("  If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
+ printf("  with the same absolute path in both files\n");
  printf("\n");
 
  printf(" The compare criteria is:\n");
- printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
- printf("   3) datatypes: the return value of H5Tequal 4) links: name string difference\n");
- printf("   of the linked value\n");
-
+ printf("  1) datasets: numerical array differences\n");
+ printf("  2) groups: name string difference\n");
+ printf("  3) datatypes: the return value of H5Tequal\n");
+ printf("  4) links: name string difference of the linked value as default\n");
+ printf("            (refer to --follow-links option).\n");
  printf("\n");
-
- printf(" Return exit code:\n");
+ printf(" Exit code:\n");
+ printf("  0 if no differences, 1 if differences found, 2 if error\n");
  printf("\n");
- printf("  1 if differences found, 0 if no differences, 2 if error\n");
-
- printf("\n");
-
  printf(" Examples of use:\n");
- printf("\n");
  printf(" 1) h5diff file1 file2 /g1/dset1 /g1/dset2\n");
- printf("\n");
  printf("    Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2\n");
  printf("\n");
  printf(" 2) h5diff file1 file2 /g1/dset1\n");
- printf("\n");
  printf("    Compares object '/g1/dset1' in both files\n");
  printf("\n");
  printf(" 3) h5diff file1 file2\n");
- printf("\n");
  printf("    Compares all objects in both files\n");
  printf("\n");
- printf(" Note)  file1 and file2 can be the same file. Use\n");
+ printf(" Notes:\n");
+ printf("  file1 and file2 can be the same file.\n");
+ printf("  Use h5diff file1 file1 /g1/dset1 /g1/dset2 to compare\n");
+ printf("  '/g1/dset1' and '/g1/dset2' in the same file\n");
  printf("\n");
- printf("    h5diff file1 file1 /g1/dset1 /g1/dset2\n");
- printf("\n");
- printf("    to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
- printf("\n");
-
-
 }
 
 
