@@ -315,7 +315,7 @@ herr_t
 H5HF_man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter,
     H5HF_indirect_t *iblock, unsigned start_entry)
 {
-    H5HF_block_loc_t *new_loc;          /* Pointer to new block location */
+    H5HF_block_loc_t *new_loc = NULL;   /* Pointer to new block location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iter_start_entry)
@@ -350,6 +350,9 @@ H5HF_man_iter_start_entry(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter,
     biter->ready = TRUE;
 
 done:
+    if(ret_value < 0 && new_loc)
+        new_loc = H5FL_FREE(H5HF_block_loc_t, new_loc);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iter_start_entry() */
 
@@ -397,7 +400,7 @@ H5HF_man_iter_reset(H5HF_block_iter_t *biter)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
 
             /* Free the current location context */
-            (void)H5FL_FREE(H5HF_block_loc_t, curr_loc);
+            curr_loc = H5FL_FREE(H5HF_block_loc_t, curr_loc);
 
             /* Advance to next location */
             curr_loc = next_loc;
@@ -489,7 +492,7 @@ H5HF_man_iter_up(H5HF_block_iter_t *biter)
     up_loc = biter->curr->up;
 
     /* Release this location */
-    (void)H5FL_FREE(H5HF_block_loc_t, biter->curr);
+    biter->curr = H5FL_FREE(H5HF_block_loc_t, biter->curr);
 
     /* Point location to next location up */
     biter->curr = up_loc;
@@ -515,7 +518,7 @@ done:
 herr_t
 H5HF_man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
 {
-    H5HF_block_loc_t *down_loc;         /* Pointer to new 'down' block location */
+    H5HF_block_loc_t *down_loc = NULL;  /* Pointer to new 'down' block location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iter_down)
@@ -547,6 +550,9 @@ H5HF_man_iter_down(H5HF_block_iter_t *biter, H5HF_indirect_t *iblock)
     biter->curr = down_loc;
 
 done:
+    if(ret_value < 0 && down_loc)
+        down_loc = H5FL_FREE(H5HF_block_loc_t, down_loc);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iter_down() */
 

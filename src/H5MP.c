@@ -87,16 +87,16 @@ H5FL_DEFINE(H5MP_pool_t);
  *-------------------------------------------------------------------------
  */
 H5MP_pool_t *
-H5MP_create (size_t page_size, unsigned flags)
+H5MP_create(size_t page_size, unsigned flags)
 {
-    H5MP_pool_t *mp;                    /* New memory pool header */
+    H5MP_pool_t *mp = NULL;             /* New memory pool header */
     H5MP_pool_t *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5MP_create, NULL)
 
     /* Allocate space for the pool header */
-    if (NULL==(mp = H5FL_MALLOC(H5MP_pool_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for memory pool header")
+    if(NULL == (mp = H5FL_MALLOC(H5MP_pool_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for memory pool header")
 
     /* Assign information */
     mp->page_size = H5MP_BLOCK_ALIGN(page_size);
@@ -108,13 +108,17 @@ H5MP_create (size_t page_size, unsigned flags)
     mp->max_size = mp->page_size - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t));
 
     /* Create factory for pool pages */
-    if((mp->page_fac=H5FL_fac_init(page_size))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_CANTINIT, NULL, "can't create page factory")
+    if(NULL == (mp->page_fac = H5FL_fac_init(page_size)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't create page factory")
 
     /* Set return value */
     ret_value = mp;
 
 done:
+    if(NULL == ret_value && mp)
+        if(H5MP_close(mp) < 0)
+            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "unable to free memory pool header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MP_create() */
 
@@ -271,7 +275,7 @@ HDfprintf(stderr,"%s: request = %Zu, needed = %Zu\n", FUNC, request, needed);
 
         /* Allocate new page */
         if(NULL == (alloc_page = H5MP_new_page(mp, page_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
 
         /* Set the block to allocate from */
         alloc_free = alloc_page->free_blk;
@@ -343,7 +347,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5MP_free (H5MP_pool_t *mp, void *spc)
+H5MP_free(H5MP_pool_t *mp, void *spc)
 {
     H5MP_page_blk_t *spc_blk;           /* Block for space to free */
     H5MP_page_t *spc_page;              /* Page containing block to free */
@@ -430,7 +434,7 @@ HDfprintf(stderr,"%s: Freeing from page = %p\n", "H5MP_free", spc_page);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MP_close (H5MP_pool_t *mp)
+H5MP_close(H5MP_pool_t *mp)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -447,9 +451,9 @@ H5MP_close (H5MP_pool_t *mp)
 
             /* Free the page appropriately */
             if(page->fac_alloc)
-                H5FL_FAC_FREE(mp->page_fac,page);
+                page = H5FL_FAC_FREE(mp->page_fac, page);
             else
-                H5MM_xfree(page);
+                page = H5MM_xfree(page);
 
             page = next_page;
         } /* end while */
@@ -457,13 +461,13 @@ H5MP_close (H5MP_pool_t *mp)
 
     /* Release page factory */
     if(mp->page_fac)
-        if(H5FL_fac_term(mp->page_fac)<0)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy page factory")
-
-    /* Free the memory pool itself */
-    (void)H5FL_FREE(H5MP_pool_t, mp);
+        if(H5FL_fac_term(mp->page_fac) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy page factory")
 
 done:
+    /* Free the memory pool itself */
+    mp = H5FL_FREE(H5MP_pool_t, mp);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MP_close() */
 
