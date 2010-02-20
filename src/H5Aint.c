@@ -269,6 +269,10 @@ H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
     HDassert(udata);
     HDassert(udata->curr_attr < udata->atable->nattrs);
 
+    /* Allocate attribute for entry in the table */
+    if(NULL == (udata->atable->attrs[udata->curr_attr] = H5FL_CALLOC(H5A_t)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate attribute")
+
     /* Copy attribute information.  Share the attribute object in copying. */
     if(NULL == H5A_copy(udata->atable->attrs[udata->curr_attr], attr))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
@@ -333,16 +337,10 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     if(atable->nattrs > 0) {
         H5A_dense_bt_ud_t udata;       /* User data for iteration callback */
         H5A_attr_iter_op_t attr_op;    /* Attribute operator */
-        unsigned i;
 
         /* Allocate the table to store the attributes */
-        if((atable->attrs = (H5A_t **)H5FL_SEQ_MALLOC(H5A_t_ptr, atable->nattrs)) == NULL)
+        if((atable->attrs = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, atable->nattrs)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Allocate pointers for each entry in the table */
-        for(i=0; i<atable->nattrs; i++)
-            if((atable->attrs[i] = (H5A_t *)H5FL_CALLOC(H5A_t)) == NULL)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */
         udata.atable = atable;
@@ -638,15 +636,11 @@ done:
  * Programmer:	  Quincey Koziol
  *	          Dec 11, 2006
  *
- * Modification:  Raymond Lu
- *                4 June 2008
- *                Changed from H5A_free to H5A_close to release attributes.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5A_attr_release_table(H5A_attr_table_t *atable)
 {
-    size_t      u;               /* Local index variable */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_attr_release_table)
@@ -656,11 +650,12 @@ H5A_attr_release_table(H5A_attr_table_t *atable)
 
     /* Release attribute info, if any. */
     if(atable->nattrs > 0) {
+        size_t      u;               /* Local index variable */
+
         /* Free attribute message information */
-        for(u = 0; u < atable->nattrs; u++) {
-            if(H5A_close((atable->attrs[u])) < 0)
+        for(u = 0; u < atable->nattrs; u++)
+            if(atable->attrs[u] && H5A_close(atable->attrs[u]) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute")
-        }
     } /* end if */
     else
         HDassert(atable->attrs == NULL);
