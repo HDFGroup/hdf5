@@ -2005,10 +2005,18 @@ dump_named_datatype(hid_t tid, const char *name)
     /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
       in the datatype's create property list for attributes, then, sort by creation order, otherwise by name */
 
-    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-        H5Aiterate2(tid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
-    else
-        H5Aiterate2(tid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+        if(H5Aiterate2(tid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+            error_msg(progname, "error getting attribute information\n");
+            d_status = EXIT_FAILURE;
+        } /* end if */
+    } /* end if */
+    else {
+        if(H5Aiterate2(tid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+            error_msg(progname, "error getting attribute information\n");
+            d_status = EXIT_FAILURE;
+        } /* end if */
+    } /* end else */
 
     indent -= COL;
 
@@ -2123,10 +2131,18 @@ dump_group(hid_t gid, const char *name)
             /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group for attributes, then, sort by creation order, otherwise by name */
 
-            if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-                H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
-            else
-                H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+            if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+                if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                    error_msg(progname, "error getting attribute information\n");
+                    d_status = EXIT_FAILURE;
+                } /* end if */
+            } /* end if */
+            else {
+                if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                    error_msg(progname, "error getting attribute information\n");
+                    d_status = EXIT_FAILURE;
+                } /* end if */
+            } /* end else */
 
             /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group, then, sort by creation order, otherwise by name */
@@ -2146,10 +2162,18 @@ dump_group(hid_t gid, const char *name)
         /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
            in the group for attributes, then, sort by creation order, otherwise by name */
 
-        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-            H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
-        else
-            H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+            if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end if */
+        else {
+            if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end else */
 
          /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
             in the group, then, sort by creation order, otherwise by name */
@@ -2254,10 +2278,18 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
        /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
         in the group for attributes, then, sort by creation order, otherwise by name */
 
-        if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-            H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL);
-        else
-            H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+        if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+            if(H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end if */
+        else {
+            if(H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end else */
 
     }
 
@@ -5858,10 +5890,18 @@ xml_dump_group(hid_t gid, const char *name)
 
                 /* 1.  do all the attributes of the group */
 
-                if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-                    H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
-                else
-                    H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
+                if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+                    if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+                        error_msg(progname, "error getting attribute information\n");
+                        d_status = EXIT_FAILURE;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+                        error_msg(progname, "error getting attribute information\n");
+                        d_status = EXIT_FAILURE;
+                    } /* end if */
+                } /* end else */
 
                 if(isRoot && unamedtype) {
                     unsigned u;
@@ -5922,10 +5962,18 @@ xml_dump_group(hid_t gid, const char *name)
 
         /* 1.  do all the attributes of the group */
 
-        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-            H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
-        else
-            H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
+        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+            if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end if */
+        else {
+            if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+                error_msg(progname, "error getting attribute information\n");
+                d_status = EXIT_FAILURE;
+            } /* end if */
+        } /* end else */
 
 
         if(isRoot && unamedtype) {
@@ -6580,10 +6628,18 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 
     indent += COL;
 
-    if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-        H5Aiterate2(did, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
-    else
-        H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
+    if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+        if(H5Aiterate2(did, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+            error_msg(progname, "error getting attribute information\n");
+            d_status = EXIT_FAILURE;
+        } /* end if */
+    } /* end if */
+    else {
+        if(H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
+            error_msg(progname, "error getting attribute information\n");
+            d_status = EXIT_FAILURE;
+        } /* end if */
+    } /* end else */
 
     indent -= COL;
     tempi = H5Dget_storage_size(did);
