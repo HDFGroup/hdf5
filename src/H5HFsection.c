@@ -1372,7 +1372,7 @@ H5HF_sect_row_from_single(H5HF_hdr_t *hdr, H5HF_free_section_t *sect,
 
     /* Release single section's hold on underlying indirect block */
     if(H5HF_iblock_decr(dblock->parent) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3756,7 +3756,7 @@ static herr_t
 H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 {
     H5HF_indirect_t *par_iblock;        /* Indirect block for parent section */
-    H5HF_free_section_t *par_sect;      /* Parent indirect section */
+    H5HF_free_section_t *par_sect = NULL; /* Parent indirect section */
     unsigned par_row, par_col;          /* Row & column in parent indirect section */
     unsigned par_entry;                 /* Entry within parent indirect section */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3802,6 +3802,10 @@ H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
     par_sect->u.indirect.rc = 1;
 
 done:
+    if(ret_value < 0)
+        if(par_sect && H5HF_sect_indirect_free(par_sect) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free indirect section node")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_sect_indirect_build_parent() */
 

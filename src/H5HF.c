@@ -864,10 +864,10 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
     } /* end if */
 
-    /* Release the fractal heap wrapper */
-    (void)H5FL_FREE(H5HF_t, fh);
-
 done:
+    /* Release the fractal heap wrapper */
+    fh = H5FL_FREE(H5HF_t, fh);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_close() */
 
