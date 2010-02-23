@@ -321,9 +321,9 @@ COPY_REFERENCES()
 
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined
-    #if test -z "$HDF5_NOCLEANUP"; then
-    #    rm -f $FILEOUT
-    #fi
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $FILEOUT
+    fi
 }
 
 ##############################################################################
