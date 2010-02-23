@@ -1011,6 +1011,8 @@ static int test_soft_links(const char *fname1)
     hid_t   fid1=0;
     hid_t   gid1=0;
     hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
     herr_t  status = SUCCEED;
 
     /*-----------------------------------------------------------------------
@@ -1038,9 +1040,6 @@ static int test_soft_links(const char *fname1)
     /*-----------------------------------------------------------------------
     * Datasets
     *------------------------------------------------------------------------*/
-    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
-    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
     /* file1 */
     status = write_dset(fid1,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
     if (status == FAIL)
@@ -1144,6 +1143,8 @@ static int test_linked_softlinks(const char *fname1)
     hid_t   gid2=0;
     hid_t   gid3=0;
     hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
     herr_t  status = SUCCEED;
 
     /*-----------------------------------------------------------------------
@@ -1187,9 +1188,6 @@ static int test_linked_softlinks(const char *fname1)
     /*-----------------------------------------------------------------------
     * Datasets
     *------------------------------------------------------------------------*/
-    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
-    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
     /* file1 */
     status = write_dset(fid1,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
     if (status == FAIL)
@@ -1345,6 +1343,8 @@ static int test_external_links(const char *fname1, const char *fname2)
     hid_t   gid1=0;
     hid_t   gid2=0;
     hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
     herr_t  status = SUCCEED;
 
     /*-----------------------------------------------------------------------
@@ -1391,9 +1391,6 @@ static int test_external_links(const char *fname1, const char *fname2)
     /*-----------------------------------------------------------------------
     * Datasets
     *------------------------------------------------------------------------*/
-    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
-    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
     /*--------------
      * target file */
     status = write_dset(fid2,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
@@ -1503,6 +1500,8 @@ static int test_ext2soft_links(const char *fname1, const char *fname2)
     hid_t   fid2=0;
     hid_t   gid2=0;
     hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
     herr_t  status = SUCCEED;
 
     /*-----------------------------------------------------------------------
@@ -1541,9 +1540,6 @@ static int test_ext2soft_links(const char *fname1, const char *fname2)
     /*-----------------------------------------------------------------------
     * Datasets
     *------------------------------------------------------------------------*/
-    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
-    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
     /*--------------
      * target file */
     status = write_dset(fid2,2,dims2,"dset1",H5T_NATIVE_INT,data2);
@@ -1638,6 +1634,8 @@ static int test_dangle_links(const char *fname1, const char *fname2)
     hid_t   fid1=0;
     hid_t   fid2=0;
     hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
     herr_t  status = SUCCEED;
 
     /*-----------------------------------------------------------------------
@@ -1662,9 +1660,6 @@ static int test_dangle_links(const char *fname1, const char *fname2)
     /*-----------------------------------------------------------------------
     * Datasets
     *------------------------------------------------------------------------*/
-    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
-    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
-
     /* file1 */
     status = write_dset(fid1,2,dims2,"dset1",H5T_NATIVE_INT,data1);
     if (status == FAIL)
