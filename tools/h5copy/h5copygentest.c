@@ -18,8 +18,14 @@
  */
 #include <stdlib.h>
 #include "hdf5.h"
+#include "H5private.h"
+#include "h5tools.h"
 
-#define FILENAME                "h5copytst.h5"
+/* HDF file names */
+#define HDF_FILE1                "h5copytst.h5"
+#define HDF_FILE2                "h5copy_ref.h5"
+
+/* objects in HDF_FILE1 */
 #define DATASET_SIMPLE          "simple"
 #define DATASET_CHUNK           "chunk"
 #define DATASET_COMPACT         "compact"
@@ -30,6 +36,13 @@
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
+
+/* Obj reference */
+#define OBJ_REF_DS "Dset1"
+#define OBJ_REF_GRP "Group"
+/* Region reference */
+#define REG_REF_DS1 "Dset_REGREF"
+#define REG_REF_DS2 "Dset2"
 
 
 /*-------------------------------------------------------------------------
@@ -210,7 +223,8 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in LOC_ID
+ * Purpose:     Generate a variable lenght named datatype for a dataset in 
+                LOC_ID
  *
  *-------------------------------------------------------------------------
  */
@@ -386,6 +400,320 @@ static void gent_nested_group(hid_t loc_id)
     H5Gclose(gid);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function: gen_obj_ref
+ *
+ * Purpose: Generate object references to dataset and group
+ *
+ * Programmer: Jonathan Kim (Feb 23, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_obj_ref(hid_t loc_id)
+{
+    hid_t sid=0, tid=0, oid=0;
+    hsize_t dims1[1]={3};
+    hsize_t dims2[1]={2};
+    int data[3] = {10,20,30};
+    int status;
+    herr_t ret = SUCCEED;
+
+    /*--------------
+     * add dataset */
+    sid = H5Screate_simple(1, dims1, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    tid = H5Tcopy(H5T_NATIVE_INT);
+    if (tid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Tcopy failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    oid = H5Dcreate2 (loc_id, OBJ_REF_DS, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(oid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    H5Dclose(oid);
+    H5Tclose(tid);
+    H5Sclose(sid);
+
+    /*--------------
+     * add group  */
+     oid = H5Gcreate (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Gcreate failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+     H5Gclose(oid);
+
+    /*---------------------
+     * create obj references to the previously created objects.
+     * Passing -1 as reference is an object.*/
+     hobj_ref_t or_data[2];  /* write buffer */
+
+    status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, -1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+    status = H5Rcreate (&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, -1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    sid = H5Screate_simple (1, dims2, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    oid = H5Dcreate2 (loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, or_data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if(oid > 0)
+        H5Dclose(oid);
+    if(sid > 0)
+        H5Sclose(sid);
+    if(tid > 0)
+        H5Tclose(tid);
+
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: gen_region_ref
+ *
+ * Purpose: Generate dataset region references
+ *
+ * Programmer: Jonathan Kim (Feb 23, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_region_ref(hid_t loc_id)
+{
+    hid_t sid=0, oid1=0, oid2=0;
+    int status;
+    herr_t ret = SUCCEED;
+    char  data[3][16] = {"The quick brown", "fox jumps over ", "the 5 lazy dogs"};
+    hsize_t dims2[2] = {3,16};
+    hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
+
+    hdset_reg_ref_t  rr_data[2];
+    hsize_t start[2] = {0,0};
+    hsize_t stride[2] = {2,11};
+    hsize_t count[2] = {2,2};
+    hsize_t block[2] = {1,3};
+    hsize_t dims1[1] = {2};
+
+    sid = H5Screate_simple (2, dims2, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create normal dataset which is refered */
+    oid2 = H5Dcreate2 (loc_id, REG_REF_DS2, H5T_STD_I8LE, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid2 < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* write values to dataset */
+    status = H5Dwrite (oid2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* select elements space for reference */
+    status = H5Sselect_elements (sid, H5S_SELECT_SET, 4, coords[0]);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference from elements space */
+    status = H5Rcreate (&rr_data[0], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* select hyperslab space for reference */
+    status = H5Sselect_hyperslab (sid, H5S_SELECT_SET, start, stride, count, block);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference from hyperslab space */
+    status = H5Rcreate (&rr_data[1], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    H5Sclose (sid);
+
+    /* Create dataspace. */
+    sid = H5Screate_simple (1, dims1, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference dataset */
+    oid1 = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid1 < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* write data as region references */
+    status = H5Dwrite (oid1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if (oid1 > 0)
+        H5Dclose (oid1);
+    if (oid2 > 0)
+        H5Dclose (oid2);
+    if (sid > 0)
+        H5Sclose (sid);
+
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: Test_Obj_Copy
+ *
+ * Purpose: Testing with various objects 
+ *
+ *------------------------------------------------------------------------*/
+static void Test_Obj_Copy()
+{
+    hid_t fid=0;    
+
+    /* Create source file */
+    fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE1);
+        goto out;
+    }
+
+    gent_datasets(fid);
+    gent_empty_group(fid);
+    gent_nested_datasets(fid);
+    gent_nested_group(fid);
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *------------------------------------------------------------------------*/
+    if(fid > 0)
+        H5Fclose(fid);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: Test_Ref_Copy
+ *
+ * Purpose: Testing with various references
+ *
+ *------------------------------------------------------------------------*/
+static void Test_Ref_Copy()
+{
+    hid_t fid=0;
+    herr_t status;
+    
+    fid = H5Fcreate (HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
+        goto out;
+    }
+    
+    /* add object reference */
+    status = gen_obj_ref(fid);
+    if (status < 0)
+        fprintf(stderr, "Failed to generate object reference.\n");
+
+    /* add region reference */
+    status = gen_region_ref(fid);
+    if (status < 0)
+        fprintf(stderr, "Failed to generate region reference.\n");
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *------------------------------------------------------------------------*/
+    if(fid > 0)
+        H5Fclose(fid);
+}
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -394,15 +722,8 @@ static void gent_nested_group(hid_t loc_id)
 
 int main(void)
 {
-    hid_t fid;
-
-    /* Create source file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    gent_datasets(fid);
-    gent_empty_group(fid);
-    gent_nested_datasets(fid);
-    gent_nested_group(fid);
-    H5Fclose(fid);
+    Test_Obj_Copy();
+    Test_Ref_Copy();
 
     return 0;
 }
