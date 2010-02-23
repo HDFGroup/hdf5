@@ -23,6 +23,10 @@ TESTNAME=h5copy
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
+# Test files
+HDF_FILE1=h5copytst.h5
+HDF_FILE2=h5copy_ref.h5
+
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
 H5DIFF=h5diff               # The h5diff tool name 
@@ -30,20 +34,19 @@ H5DIFF_BIN=`pwd`/../h5diff/$H5DIFF    # The path of the h5diff tool binary
 H5LS=h5ls                   # The h5ls tool name 
 H5LS_ARGS=-Svr              # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
+CMP='cmp -s'
+DIFF='diff -c'
 
 nerrors=0
 verbose=yes
-
-SRCFILE=h5copytst.h5
-INDIR=$srcdir/testfiles
-OUTDIR=../testfiles
-CMP='cmp -s'
-DIFF='diff -c'
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
     srcdir=.
 fi
+INDIR=$srcdir/testfiles
+OUTDIR=$srcdir/testfiles
+
 test -d $OUTDIR || mkdir $OUTDIR
 
 # Print a line-line message left justified in a field of 70 characters
@@ -242,10 +245,10 @@ H5LSTEST()
 #
 # Assumed arguments:
 # <none>
-COPYOBJECTS() 
+COPY_OBJECTS() 
 {
-    TESTFILE="$INDIR/$SRCFILE"
-    FILEOUT="$OUTDIR/`basename $SRCFILE .h5`.out.h5"
+    TESTFILE="$INDIR/$HDF_FILE1"
+    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -296,11 +299,39 @@ COPYOBJECTS()
     fi
 }
 
+# Copy references in various way.
+# adding to the destination file each time compare the result
+#
+# Assumed arguments:
+# <none>
+COPY_REFERENCES() 
+{
+    TESTFILE="$INDIR/$HDF_FILE2"
+    FILEOUT="$OUTDIR/`basename $HDF_FILE2 .h5`.out.h5"
+
+    # Remove any output file left over from previous test run
+    rm -f $FILEOUT
+
+    echo "Test copying object and region references"
+    echo "TOOLTEST -f ref -i $TESTFILE -o $FILEOUT -v -s / -d /COPY"
+    TOOLTEST -f ref -i $TESTFILE -o $FILEOUT -v -s / -d /COPY
+
+    # Verify that the file created above is correct
+    H5LSTEST $FILEOUT
+
+    # Remove output file created, if the "no cleanup" environment variable is
+    #   not defined
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $FILEOUT
+    fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-COPYOBJECTS 
+COPY_OBJECTS 
+COPY_REFERENCES
 
 
 if test $nerrors -eq 0 ; then
