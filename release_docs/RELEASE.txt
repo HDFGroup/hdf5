@@ -139,6 +139,10 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
+    - Fixed a bug where fractal heap IDs for attributes and shared object
+      header messages could be incorrectly encoded in the file for files
+      created on big-endian platforms.  Please see: <put URL here> if you
+      suspect you have a file with this problem.  QAK - 2010/02/23 - 1755
     - Fixed a bug where writing and deleting many global heap objects (i.e.
       variable length data) would render the file unreadable.  Previously
       created files exhibiting this problem should now be readable.
