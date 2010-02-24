@@ -410,7 +410,7 @@ static void gent_nested_group(hid_t loc_id)
  *------------------------------------------------------------------------*/
 static herr_t gen_obj_ref(hid_t loc_id)
 {
-    hid_t sid=0, tid=0, oid=0;
+    hid_t sid=0, oid=0;
     hsize_t dims1[1]={3};
     hsize_t dims2[1]={2};
     int data[3] = {10,20,30};
@@ -427,15 +427,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
         goto out;
     }
 
-    tid = H5Tcopy(H5T_NATIVE_INT);
-    if (tid < 0)
-    {
-        fprintf(stderr, "Error: %s %d> H5Tcopy failed.\n", __FUNCTION__, __LINE__);
-        ret = FAIL;
-        goto out;
-    }
-
-    oid = H5Dcreate2 (loc_id, OBJ_REF_DS, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    oid = H5Dcreate2 (loc_id, OBJ_REF_DS, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __FUNCTION__, __LINE__);
@@ -443,7 +435,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
         goto out;
     }
 
-    status = H5Dwrite(oid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    status = H5Dwrite(oid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __FUNCTION__, __LINE__);
@@ -452,15 +444,14 @@ static herr_t gen_obj_ref(hid_t loc_id)
     }
 
     H5Dclose(oid);
-    H5Tclose(tid);
     H5Sclose(sid);
 
     /*--------------
      * add group  */
-     oid = H5Gcreate (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+     oid = H5Gcreate2 (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0)
     {
-        fprintf(stderr, "Error: %s %d> H5Gcreate failed.\n", __FUNCTION__, __LINE__);
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __FUNCTION__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -515,8 +506,6 @@ out:
         H5Dclose(oid);
     if(sid > 0)
         H5Sclose(sid);
-    if(tid > 0)
-        H5Tclose(tid);
 
     return ret;
 }
