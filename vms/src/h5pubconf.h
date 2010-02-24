@@ -323,7 +323,7 @@
 /* #undef H5_HAVE_STRUCT_VIDEOCONFIG */
 
 /* Define to 1 if you have the `symlink' function. */
-#define H5_HAVE_SYMLINK 1
+/* #define H5_HAVE_SYMLINK 1 */
 
 /* Define to 1 if you have the `system' function. */
 #define H5_HAVE_SYSTEM 1
