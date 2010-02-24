@@ -45,7 +45,7 @@ if test -z "$srcdir"; then
     srcdir=.
 fi
 INDIR=$srcdir/testfiles
-OUTDIR=$srcdir/testfiles
+OUTDIR=./testfiles
 
 test -d $OUTDIR || mkdir $OUTDIR
 
