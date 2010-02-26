@@ -36,7 +36,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -121,7 +120,7 @@ static void test_h5s_basic()
     hsize_t		tmax[4];
 
     // Output message about test being performed
-    SUBTEST("Testing Dataspace Manipulation");
+    SUBTEST("Dataspace Manipulation");
 
     try {
 	// Create simple dataspace sid1
@@ -270,7 +269,7 @@ static void test_h5s_basic()
 static void test_h5s_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Scalar Dataspace Writing");
+    SUBTEST("Scalar Dataspace Writing");
 
     try {
 	// Create file
@@ -336,7 +335,7 @@ static void test_h5s_scalar_read()
     hsize_t		tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing Scalar Dataspace Reading");
+    SUBTEST("Scalar Dataspace Reading");
 
     try {
 	// Create file
@@ -396,7 +395,7 @@ static void test_h5s_scalar_read()
 static void test_h5s_null()
 {
     // Output message about test being performed
-    SUBTEST("Testing Null Dataspace Writing");
+    SUBTEST("Null Dataspace Writing");
 
     try {
 	// Create file
@@ -451,7 +450,7 @@ static void test_h5s_null()
 static void test_h5s_compound_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Compound Dataspace Writing");
+    SUBTEST("Compound Dataspace Writing");
 
     try {
 	// Create file
@@ -526,7 +525,7 @@ static void test_h5s_compound_scalar_read()
     hsize_t		tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing Compound Dataspace Reading");
+    SUBTEST("Compound Dataspace Reading");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
@@ -594,6 +593,7 @@ extern "C"
 void test_h5s()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Dataspaces\n");
     MESSAGE(5, ("Testing Dataspaces\n"));
 
     test_h5s_basic();		// Test basic H5S code

@@ -35,7 +35,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -140,7 +139,7 @@ const H5std_string DSET1_DATA("String Dataset");
 static void test_vlstring_dataset()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL String on Datasets");
+    SUBTEST("VL String on Datasets");
 
     try {
 	// Open the file
@@ -230,7 +229,7 @@ static void test_vlstring_array_dataset()
         };   // Information to write
 
     // Output message about test being performed
-    SUBTEST("Testing VL String Array on Datasets");
+    SUBTEST("VL String Array on Datasets");
 
     H5File* file1;
     try {
@@ -327,7 +326,7 @@ static void test_vlstrings_special()
     char *rdata[SPACE1_DIM1];   // Information read in
 
     // Output message about test being performed.
-    SUBTEST("Testing Special VL Strings");
+    SUBTEST("Special VL Strings");
 
     try {
 	// Create file.
@@ -441,7 +440,7 @@ const H5std_string      VLSTR_TYPE("vl_string_type");
 static void test_vlstring_type()
 {
     // Output message about test being performed.
-    SUBTEST("Testing VL String Type");
+    SUBTEST("VL String Type");
 
     H5File* file1 = NULL;
     try {
@@ -526,7 +525,7 @@ static void test_vlstring_type()
 static void test_compact_vlstring()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL Strings on Compact Dataset");
+    SUBTEST("VL Strings on Compact Dataset");
 
     try {
 	// Create file
@@ -609,7 +608,7 @@ const H5std_string ATTRSTR_DATA("String Attribute");
 static void test_vlstring_attribute()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL String on Attributes");
+    SUBTEST("VL String on Attributes");
 
     try {
 	// Open the file
@@ -692,7 +691,7 @@ static void test_read_vl_string_attribute()
 {
 
     // Output message about test being performed
-    SUBTEST("Testing reading VL String as attributes");
+    SUBTEST("reading VL String as attributes");
 
     try {
 	// Open file
@@ -757,7 +756,7 @@ static void test_vlstring_array_attribute()
         };   // Information to write
 
     // Output message about test being performed
-    SUBTEST("Testing VL String Array on Attributes");
+    SUBTEST("VL String Array on Attributes");
 
     try {
 	// Open the file
@@ -866,7 +865,7 @@ const int REWRITE_NDATASETS = 32;
 static void test_vl_rewrite()
 {
     // Output message about test being performed
-    SUBTEST("Testing I/O on VL strings with link/unlink");
+    SUBTEST("I/O on VL strings with link/unlink");
 
     try {
 	// Create the files.
@@ -946,6 +945,7 @@ extern "C"
 void test_vlstrings()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Variable-Length Strings");
     MESSAGE(5, ("Testing Variable-Length Strings"));
 
     // These tests use the same file

@@ -37,7 +37,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -94,7 +93,7 @@ const H5std_string    FILE4("tfile4.h5");
 static void test_file_create()
 {
     // Output message about test being performed
-    SUBTEST("Testing File Creation I/O");
+    SUBTEST("File Creation I/O");
 
     // Test create with various sequences of H5F_ACC_EXCL and
     // H5F_ACC_TRUNC flags
@@ -302,7 +301,7 @@ static void test_file_create()
 static void test_file_open()
 {
     // Output message about test being performed
-    SUBTEST("Testing File Opening I/O");
+    SUBTEST("File Opening I/O");
 
     try {
 
@@ -351,7 +350,7 @@ static void test_file_open()
 static void test_file_size()
 {
     // Output message about test being performed
-    SUBTEST("Testing File Size");
+    SUBTEST("File Size");
 
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
@@ -419,7 +418,7 @@ typedef struct s1_t {
 static void test_file_name()
 {
     // Output message about test being performed
-    SUBTEST("Testing File Name");
+    SUBTEST("File Name");
 
     H5std_string file_name;
     try {
@@ -499,6 +498,7 @@ void test_file()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O operations\n"));
+    //MESSAGE("Testing File I/O operations\n");
 
     test_file_create();	// Test file creation (also creation templates)
     test_file_open();	// Test file opening
