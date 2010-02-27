@@ -852,7 +852,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_iblock_alloc_indirect2
+ * Function:	H5HF_man_iblock_alloc_row
  *
  * Purpose:	Allocate a "single" section for an object, out of a
  *              "row" section.
@@ -872,7 +872,7 @@ H5HF_man_iblock_alloc_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t **
 {
     H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
     H5HF_free_section_t *old_sec_node = *sec_node; /* Pointer to old indirect section node */
-    unsigned dblock_entry;                          /* Entry for direct block */
+    unsigned dblock_entry;              /* Entry for direct block */
     hbool_t iblock_held = FALSE;        /* Flag to indicate that indirect block is held */
     herr_t ret_value = SUCCEED;         /* Return value */
 

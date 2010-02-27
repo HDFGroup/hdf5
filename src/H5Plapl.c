@@ -158,27 +158,23 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_reg_prop)
 
     /* Register property for number of links traversed */
-    if(H5P_register(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE,
-             &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_NLINKS_NAME, H5L_ACS_NLINKS_SIZE, &nlinks, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external link prefix */
-    if(H5P_register(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE,
-             &elink_prefix, NULL, NULL, NULL, H5L_ACS_ELINK_PREFIX_DEL, H5L_ACS_ELINK_PREFIX_COPY, NULL, H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE, &elink_prefix, NULL, NULL, NULL, H5L_ACS_ELINK_PREFIX_DEL, H5L_ACS_ELINK_PREFIX_COPY, NULL, H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register fapl for link access */
-    if(H5P_register(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &def_fapl_id, NULL, NULL, NULL, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY, NULL, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &def_fapl_id, NULL, NULL, NULL, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY, NULL, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external link file access flags */
-    if(H5P_register(pclass, H5L_ACS_ELINK_FLAGS_NAME, H5L_ACS_ELINK_FLAGS_SIZE,
-             &elink_flags, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_FLAGS_NAME, H5L_ACS_ELINK_FLAGS_SIZE, &elink_flags, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external link file traversal callback */
-    if(H5P_register(pclass, H5L_ACS_ELINK_CB_NAME, H5L_ACS_ELINK_CB_SIZE,
-             &elink_cb, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_CB_NAME, H5L_ACS_ELINK_CB_SIZE, &elink_cb, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

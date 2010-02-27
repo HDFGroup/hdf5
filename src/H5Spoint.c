@@ -384,8 +384,8 @@ H5S_point_iter_release (H5S_sel_iter_t UNUSED * iter)
 static herr_t
 H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
 {
-    H5S_pnt_node_t *top, *curr, *new_node; /* Point selection nodes */
-    unsigned i;                         /* Counter */
+    H5S_pnt_node_t *top = NULL, *curr = NULL, *new_node = NULL; /* Point selection nodes */
+    unsigned u;                         /* Counter */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_point_add)
@@ -395,26 +395,27 @@ H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *co
     HDassert(coord);
     HDassert(op == H5S_SELECT_SET || op == H5S_SELECT_APPEND || op == H5S_SELECT_PREPEND);
 
-    top = curr = NULL;
-    for(i = 0; i < num_elem; i++) {
+    for(u = 0; u < num_elem; u++) {
         /* Allocate space for the new node */
         if(NULL == (new_node = H5FL_MALLOC(H5S_pnt_node_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate point node")
 
+        /* Initialize fields in node */
+        new_node->next = NULL;
         if(NULL == (new_node->pnt = (hsize_t *)H5MM_malloc(space->extent.rank * sizeof(hsize_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate coordinate information")
 
         /* Copy over the coordinates */
-        HDmemcpy(new_node->pnt, coord + (i * space->extent.rank), (space->extent.rank * sizeof(hsize_t)));
+        HDmemcpy(new_node->pnt, coord + (u * space->extent.rank), (space->extent.rank * sizeof(hsize_t)));
 
         /* Link into list */
-        new_node->next = NULL;
         if(top == NULL)
             top = new_node;
         else
             curr->next = new_node;
         curr = new_node;
     } /* end for */
+    new_node = NULL;
 
     /* Insert the list of points selected in the proper place */
     if(op == H5S_SELECT_SET || op == H5S_SELECT_PREPEND) {
@@ -426,13 +427,15 @@ H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *co
         space->select.sel_info.pnt_lst->head = top;
     } /* end if */
     else {  /* op==H5S_SELECT_APPEND */
-        new_node = space->select.sel_info.pnt_lst->head;
-        if(new_node != NULL) {
-            while(new_node->next != NULL)
-                new_node = new_node->next;
+        H5S_pnt_node_t *tmp_node;       /* Temporary point selection node */
+
+        tmp_node = space->select.sel_info.pnt_lst->head;
+        if(tmp_node != NULL) {
+            while(tmp_node->next != NULL)
+                tmp_node = tmp_node->next;
 
             /* Append new list to point selection */
-            new_node->next = top;
+            tmp_node->next = top;
         } /* end if */
         else
             space->select.sel_info.pnt_lst->head = top;
@@ -445,6 +448,20 @@ H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *co
         space->select.num_elem += num_elem;
 
 done:
+    if(ret_value < 0) {
+        /* Release possibly partially initialized new node */
+        if(new_node)
+            new_node = H5FL_FREE(H5S_pnt_node_t, new_node);
+
+        /* Release possible linked list of nodes */
+        while(top) {
+            curr = top->next; 
+            H5MM_xfree(top->pnt);
+            top = H5FL_FREE(H5S_pnt_node_t, top);
+            top = curr;
+        } /* end while */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_point_add() */
 
@@ -477,20 +494,19 @@ H5S_point_release (H5S_t *space)
     HDassert(space);
 
     /* Delete all the nodes from the list */
-    curr=space->select.sel_info.pnt_lst->head;
-    while(curr!=NULL) {
-        next=curr->next;
+    curr = space->select.sel_info.pnt_lst->head;
+    while(curr != NULL) {
+        next = curr->next;
         H5MM_xfree(curr->pnt);
-        (void)H5FL_FREE(H5S_pnt_node_t, curr);
-        curr=next;
+        curr = H5FL_FREE(H5S_pnt_node_t, curr);
+        curr = next;
     } /* end while */
 
     /* Free & reset the point list header */
-    (void)H5FL_FREE(H5S_pnt_list_t, space->select.sel_info.pnt_lst);
-    space->select.sel_info.pnt_lst=NULL;
+    space->select.sel_info.pnt_lst = H5FL_FREE(H5S_pnt_list_t, space->select.sel_info.pnt_lst);
 
     /* Reset the number of elements in the selection */
-    space->select.num_elem=0;
+    space->select.num_elem = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_point_release() */

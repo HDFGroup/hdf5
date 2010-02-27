@@ -240,7 +240,13 @@ const int transformData[ROWS][COLS] =
 
 int main(void)
 {
-    hid_t dxpl_id_c_to_f = -1, dxpl_id_c_to_f_copy = -1, dxpl_id_simple = -1, dxpl_id_polynomial = -1, dxpl_id_polynomial_copy = -1, dxpl_id_utrans_inv = -1, file_id = -1;
+    hid_t dxpl_id_c_to_f = -1;
+    hid_t dxpl_id_c_to_f_copy = 1;
+    hid_t dxpl_id_simple = -1; 
+    hid_t dxpl_id_polynomial = -1;
+    hid_t dxpl_id_polynomial_copy = -1;
+    hid_t dxpl_id_utrans_inv = -1;
+    hid_t file_id = -1;
 
     const char* c_to_f = "(9/5.0)*x + 32";
     const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
@@ -367,7 +373,11 @@ init_test(hid_t file_id)
     /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit into uchar */
     const char* utrans = "((x+100)/4)*3";
 
-    hid_t   dataspace = -1, dxpl_id_f_to_c = -1, dxpl_id_utrans = -1, cparms = -1, filespace = -1;
+    hid_t   dataspace = -1;
+    hid_t   dxpl_id_f_to_c = -1;
+    hid_t   dxpl_id_utrans = -1;
+    hid_t   cparms = -1;
+    hid_t   filespace = -1;
     hsize_t dim[2] = { ROWS, COLS };
     hsize_t offset[2] = { 0, 0 };
 

@@ -690,93 +690,100 @@ test_compact_io(hid_t fapl)
  * Purpose:     Tests compact dataset of maximal size.
  *
  * Return:      Success:        0
- *
  *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              August 8, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_max_compact(hid_t fapl)
 {
-    hid_t       file, dataset, space, plist;
+    hid_t       file = -1;
+    hid_t       dataset = -1;
+    hid_t       space = -1;
+    hid_t       plist = -1;
     hsize_t     dims[1];
-    hsize_t     compact_size;
-    herr_t      status;
-    int         *wbuf, *rbuf;
+    size_t      compact_size;
+    int        *wbuf = NULL;
+    int        *rbuf = NULL;
     char	filename[FILENAME_BUF_SIZE];
-    int         i,  n;
+    int         n;
+    size_t      u;
 
     TESTING("compact dataset of maximal size");
 
     /* Test compact dataset of size 64KB-64 */
 
     /* Initialize data */
-    compact_size = (SIXTY_FOUR_KB-64)/sizeof(int);
+    compact_size = (SIXTY_FOUR_KB - 64) / sizeof(int);
 
-    wbuf = (int*)HDmalloc(sizeof(int)*(size_t)compact_size);
-    assert(wbuf);
-    rbuf = (int*)HDmalloc(sizeof(int)*(size_t)compact_size);
-    assert(rbuf);
+    if(NULL == (wbuf = (int *)HDmalloc(sizeof(int) * compact_size)))
+        TEST_ERROR
+    if(NULL == (rbuf = (int *)HDmalloc(sizeof(int) * compact_size)))
+        TEST_ERROR
 
-    n=0;
-    for(i=0; i<(int)compact_size; i++)
-            wbuf[i] = n++;
+    n = 0;
+    for(u = 0; u < compact_size; u++)
+        wbuf[u] = n++;
 
     /* Create a small data space for compact dataset */
-    dims[0] = compact_size;
-    space = H5Screate_simple(1, dims, NULL);
-    assert(space>=0);
+    dims[0] = (hsize_t)compact_size;
+    if((space = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        goto error;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
 
     /* Create property list for compact dataset creation */
-    plist = H5Pcreate(H5P_DATASET_CREATE);
-    assert(plist >= 0);
-    status = H5Pset_layout(plist, H5D_COMPACT);
-    assert(status >= 0);
+    if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_layout(plist, H5D_COMPACT) < 0)
+        FAIL_STACK_ERROR
 
     /* Create and write to a compact dataset */
     if((dataset = H5Dcreate2(file, DSET_COMPACT_MAX_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, plist, H5P_DEFAULT)) < 0)
-        goto error;
+        FAIL_STACK_ERROR
 
     if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-        goto error;
+        FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Sclose(space) < 0) goto error;
-    if(H5Pclose(plist) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
+    if(H5Sclose(space) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(plist) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open the file and check data
      */
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        goto error;
+        FAIL_STACK_ERROR
     if((dataset = H5Dopen2(file, DSET_COMPACT_MAX_NAME, H5P_DEFAULT)) < 0)
-        goto error;
+        FAIL_STACK_ERROR
     if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        goto error;
+        FAIL_STACK_ERROR
 
     /* Check that the values read are the same as the values written */
-    for(i = 0; i < (int)compact_size; i++)
-        if(rbuf[i] != wbuf[i]) {
+    for(u = 0; u < compact_size; u++)
+        if(rbuf[u] != wbuf[u]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %d\n", i);
+            printf("    At index %u\n", (unsigned)u);
             goto error;
         } /* end if */
 
-     if(H5Dclose(dataset) < 0) goto error;
-     if(H5Fclose(file) < 0) goto error;
+     if(H5Dclose(dataset) < 0)
+         FAIL_STACK_ERROR
+     if(H5Fclose(file) < 0)
+         FAIL_STACK_ERROR
      HDfree(wbuf);
      wbuf = NULL;
      HDfree(rbuf);
@@ -785,20 +792,20 @@ test_max_compact(hid_t fapl)
      /* Test compact dataset of size 64KB */
 
      /* Create a data space for compact dataset */
-     compact_size = SIXTY_FOUR_KB/sizeof(int);
-     dims[0] = compact_size;
-     space = H5Screate_simple(1, dims, NULL);
-     assert(space>=0);
+     compact_size = SIXTY_FOUR_KB / sizeof(int);
+     dims[0] = (hsize_t)compact_size;
+     if((space = H5Screate_simple(1, dims, NULL)) < 0)
+         FAIL_STACK_ERROR
 
      /* Open file */
-     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
          goto error;
 
      /* Create property list for compact dataset creation */
-     plist = H5Pcreate(H5P_DATASET_CREATE);
-     assert(plist >= 0);
-     status = H5Pset_layout(plist, H5D_COMPACT);
-     assert(status >= 0);
+     if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+         FAIL_STACK_ERROR
+     if(H5Pset_layout(plist, H5D_COMPACT) < 0)
+         FAIL_STACK_ERROR
 
      /* Create and write to a compact dataset */
      H5E_BEGIN_TRY {
@@ -806,9 +813,12 @@ test_max_compact(hid_t fapl)
      } H5E_END_TRY;
 
      /* Close file */
-     H5Sclose(space);
-     H5Pclose(plist);
-     H5Fclose(file);
+     if(H5Sclose(space) < 0)
+         FAIL_STACK_ERROR
+     if(H5Pclose(plist) < 0)
+         FAIL_STACK_ERROR
+     if(H5Fclose(file) < 0)
+         FAIL_STACK_ERROR
 
      PASSED();
      return 0;
@@ -828,7 +838,7 @@ error:
     } H5E_END_TRY;
 
      return -1;
-}
+} /* end test_max_compact() */
 
 
 /*-------------------------------------------------------------------------
@@ -1003,10 +1013,10 @@ test_tconv(hid_t file)
     hid_t	space = -1, dataset = -1;
     int		i;
 
-    out = (char *)HDmalloc((size_t)(4 * 1000 * 1000));
-    HDassert(out);
-    in = (char *)HDmalloc((size_t)(4 * 1000 * 1000));
-    HDassert(in);
+    if ((out = (char *)HDmalloc((size_t)(4 * 1000 * 1000))) == NULL)
+        goto error;
+    if ((in = (char *)HDmalloc((size_t)(4 * 1000 * 1000))) == NULL)
+        goto error;
 
     TESTING("data type conversion");
 

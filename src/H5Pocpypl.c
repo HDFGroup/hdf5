@@ -118,8 +118,7 @@ H5P_ocpy_reg_prop(H5P_genclass_t *pclass)
     FUNC_ENTER_NOAPI(H5P_ocpy_reg_prop, FAIL)
 
     /* Register copy options property */
-    if(H5P_register(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE,
-             &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE, &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

@@ -249,8 +249,9 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
 {
-    H5P_genclass_t	*pclass;   /* Property list class to modify */
-    herr_t ret_value;     /* return value */
+    H5P_genclass_t *pclass;         /* Property list class to modify */
+    H5P_genclass_t *orig_pclass;    /* Original property class */
+    herr_t ret_value;               /* Return value */
 
     FUNC_ENTER_API(H5Pregister1, FAIL);
     H5TRACE10("e", "i*sz*xxxxxxx", cls_id, name, size, def_value, prp_create,
@@ -265,8 +266,23 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
 
     /* Create the new property list class */
-    if((ret_value = H5P_register(pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, NULL, prp_close)) < 0)
+    orig_pclass = pclass;
+    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, NULL, prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
+
+    /* Check if the property class changed and needs to be substituted in the ID */
+    if(pclass != orig_pclass) {
+        H5P_genclass_t *old_pclass;     /* Old property class */
+
+        /* Substitute the new property class in the ID */
+        if(NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
+        HDassert(old_pclass == orig_pclass);
+
+        /* Close the previous class */
+        if(H5P_close_class(orig_pclass) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close original property class after substitution")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value);

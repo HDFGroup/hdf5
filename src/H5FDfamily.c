@@ -894,45 +894,43 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_family_close(H5FD_t *_file)
 {
-    H5FD_family_t	*file = (H5FD_family_t*)_file;
-    unsigned		nerrors=0;      /* Number of errors while closing member files */
-    unsigned		u;              /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_family_t *file = (H5FD_family_t*)_file;
+    unsigned	nerrors = 0;    /* Number of errors while closing member files */
+    unsigned	u;              /* Local index variable */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_close, FAIL)
 
     /* Close as many members as possible. Use private function here to avoid clearing
      * the error stack. We need the error message to indicate wrong member file size. */
-    for (u=0; u<file->nmembs; u++) {
-        if (file->memb[u]) {
-            if (H5FD_close(file->memb[u])<0)
+    for(u = 0; u < file->nmembs; u++) {
+        if(file->memb[u]) {
+            if(H5FD_close(file->memb[u]) < 0)
                 nerrors++;
             else
                 file->memb[u] = NULL;
-        }
-    }
-    if (nerrors)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files")
+        } /* end if */
+    } /* end for */
+    if(nerrors)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files")
 
     /* Clean up other stuff */
-    if(H5I_dec_ref(file->memb_fapl_id, FALSE)<0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
-    if (file->memb)
-        H5MM_xfree(file->memb);
-    if (file->name)
-        H5MM_xfree(file->name);
+    if(H5I_dec_ref(file->memb_fapl_id, FALSE) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
+    H5MM_xfree(file->memb);
+    H5MM_xfree(file->name);
     H5MM_xfree(file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_close() */
 
 
 /*-------------------------------------------------------------------------
