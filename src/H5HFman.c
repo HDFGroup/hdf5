@@ -482,7 +482,7 @@ done:
 herr_t
 H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
-    H5HF_free_section_t *sec_node;      /* Pointer to free space section for block */
+    H5HF_free_section_t *sec_node = NULL; /* Pointer to free space section for block */
     H5HF_indirect_t *iblock = NULL;     /* Pointer to indirect block */
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     hsize_t obj_off;                    /* Object's offset in heap */
@@ -571,23 +571,28 @@ H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
         iblock = NULL;
     } /* end if */
 
-    /* Update statistics about heap */
-    hdr->man_nobjs--;
-
     /* Increase space available in heap (marks header dirty) */
     if(H5HF_hdr_adj_free(hdr, (ssize_t)obj_len) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't adjust free space for heap")
 
+    /* Update statistics about heap */
+    hdr->man_nobjs--;
+
     /* Return free space to the heap's list of space */
     if(H5HF_space_add(hdr, dxpl_id, sec_node, H5FS_ADD_RETURNED_SPACE) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add direct block free space to global list")
+    sec_node = NULL;
 
 done:
     if(ret_value < 0) {
-        /* Unlock indirect block */
-        if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
-            HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+        /* Release section node */
+        if(sec_node && H5HF_sect_single_free((H5FS_section_info_t *)sec_node) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release section node")
     } /* end if */
+
+    /* Unlock indirect block */
+    if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_remove() */

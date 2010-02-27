@@ -217,7 +217,7 @@ H5Pcreate_class(hid_t parent, const char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class")
 
     /* Create the new property list class */
-    if(NULL == (pclass = H5P_create_class(par_class, name, 0, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
+    if(NULL == (pclass = H5P_create_class(par_class, name, FALSE, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class")
 
     /* Get an atom for the class */
@@ -437,27 +437,43 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
-    H5P_genclass_t	*pclass;   /* Property list class to modify */
-    herr_t ret_value;     /* return value */
+    H5P_genclass_t *pclass;     /* Property list class to modify */
+    H5P_genclass_t *orig_pclass; /* Original property class */
+    herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Pregister2, FAIL);
+    FUNC_ENTER_API(H5Pregister2, FAIL)
     H5TRACE11("e", "i*sz*xxxxxxxx", cls_id, name, size, def_value, prp_create,
              prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close);
 
     /* Check arguments. */
     if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
-    if(size>0 && def_value==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name")
+    if(size > 0 && def_value == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default")
 
     /* Create the new property list class */
-    if((ret_value = H5P_register(pclass,name,size,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_cmp,prp_close)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
+    orig_pclass = pclass;
+    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class")
+
+    /* Check if the property class changed and needs to be substituted in the ID */
+    if(pclass != orig_pclass) {
+        H5P_genclass_t *old_pclass;     /* Old property class */
+
+        /* Substitute the new property class in the ID */
+        if(NULL == (old_pclass = (H5P_genclass_t *)H5I_subst(cls_id, pclass)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to substitute property class in ID")
+        HDassert(old_pclass == orig_pclass);
+
+        /* Close the previous class */
+        if(H5P_close_class(orig_pclass) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close original property class after substitution")
+    } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pregister2() */
 
 
@@ -1259,36 +1275,38 @@ done:
 herr_t
 H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
 {
-    void *src_obj, *dst_obj;    /* Property objects to copy between */
-    herr_t ret_value=SUCCEED;      /* return value */
+    H5I_type_t src_id_type, dst_id_type;        /* ID types */
+    herr_t ret_value = SUCCEED;     /* return value */
 
-    FUNC_ENTER_API(H5Pcopy_prop, FAIL);
+    FUNC_ENTER_API(H5Pcopy_prop, FAIL)
     H5TRACE3("e", "ii*s", dst_id, src_id, name);
 
     /* Check arguments. */
-    if((H5I_GENPROP_LST != H5I_get_type(src_id) && H5I_GENPROP_CLS != H5I_get_type(src_id))
-            || (H5I_GENPROP_LST != H5I_get_type(dst_id) && H5I_GENPROP_CLS != H5I_get_type(dst_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects");
-    if(H5I_get_type(src_id) != H5I_get_type(dst_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects");
+    if((src_id_type = H5I_get_type(src_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid source ID")
+    if((dst_id_type = H5I_get_type(dst_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid destination ID")
+    if((H5I_GENPROP_LST != src_id_type && H5I_GENPROP_CLS != src_id_type)
+            || (H5I_GENPROP_LST != dst_id_type && H5I_GENPROP_CLS != dst_id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects")
+    if(src_id_type != dst_id_type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects")
     if(!name || !*name)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
-    if(NULL == (src_obj = H5I_object(src_id)) || NULL == (dst_obj = H5I_object(dst_id)))
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
 
     /* Compare property lists */
-    if(H5I_GENPROP_LST == H5I_get_type(src_id)) {
+    if(H5I_GENPROP_LST == src_id_type) {
         if(H5P_copy_prop_plist(dst_id, src_id, name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between lists");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between lists")
     } /* end if */
     /* Must be property classes */
     else {
-        if(H5P_copy_prop_pclass((H5P_genclass_t *)dst_obj, (H5P_genclass_t *)src_obj, name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between classes");
+        if(H5P_copy_prop_pclass(dst_id, src_id, name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between classes")
     } /* end else */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pcopy_prop() */
 
 
