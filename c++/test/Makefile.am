@@ -31,15 +31,15 @@ endif
 
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TEST_PROG=dsets testhdf5
+TEST_PROG=testhdf5
 check_PROGRAMS=$(TEST_PROG)
 
 # The tests depend on the hdf5 library, test library, and the c++ library
 LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 
-dsets_SOURCES=dsets.cpp h5cpputil.cpp
-testhdf5_SOURCES=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
-	th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+testhdf5_SOURCES=testhdf5.cpp dsets.cpp tattr.cpp tcompound.cpp	\
+	tfile.cpp tfilter.cpp th5s.cpp tlinks.cpp trefer.cpp	\
+	ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.
 CXX_API=yes

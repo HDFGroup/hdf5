@@ -950,7 +950,7 @@ test_types(H5File& file)
 }   // test_types
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:	test_dset
  *
  * Purpose:	Tests the dataset interface (H5D)
  *

@@ -67,15 +67,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__EXEEXT_1 = dsets$(EXEEXT) testhdf5$(EXEEXT)
-am_dsets_OBJECTS = dsets.$(OBJEXT) h5cpputil.$(OBJEXT)
-dsets_OBJECTS = $(am_dsets_OBJECTS)
-dsets_LDADD = $(LDADD)
-dsets_DEPENDENCIES = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
-am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tattr.$(OBJEXT) \
-	tcompound.$(OBJEXT) tfile.$(OBJEXT) tfilter.$(OBJEXT) \
-	th5s.$(OBJEXT) tlinks.$(OBJEXT) trefer.$(OBJEXT) \
-	ttypes.$(OBJEXT) tvlstr.$(OBJEXT) h5cpputil.$(OBJEXT)
+am__EXEEXT_1 = testhdf5$(EXEEXT)
+am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) dsets.$(OBJEXT) \
+	tattr.$(OBJEXT) tcompound.$(OBJEXT) tfile.$(OBJEXT) \
+	tfilter.$(OBJEXT) th5s.$(OBJEXT) tlinks.$(OBJEXT) \
+	trefer.$(OBJEXT) ttypes.$(OBJEXT) tvlstr.$(OBJEXT) \
+	h5cpputil.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
@@ -92,8 +89,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(dsets_SOURCES) $(testhdf5_SOURCES)
-DIST_SOURCES = $(dsets_SOURCES) $(testhdf5_SOURCES)
+SOURCES = $(testhdf5_SOURCES)
+DIST_SOURCES = $(testhdf5_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -362,13 +359,13 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TEST_PROG = dsets testhdf5
+TEST_PROG = testhdf5
 
 # The tests depend on the hdf5 library, test library, and the c++ library
 LDADD = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
-dsets_SOURCES = dsets.cpp h5cpputil.cpp
-testhdf5_SOURCES = testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
-	th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+testhdf5_SOURCES = testhdf5.cpp dsets.cpp tattr.cpp tcompound.cpp	\
+	tfile.cpp tfilter.cpp th5s.cpp tlinks.cpp trefer.cpp	\
+	ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 
 # Tell conclude.am that these are C++ tests.
@@ -432,9 +429,6 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-dsets$(EXEEXT): $(dsets_OBJECTS) $(dsets_DEPENDENCIES) 
-	@rm -f dsets$(EXEEXT)
-	$(CXXLINK) $(dsets_OBJECTS) $(dsets_LDADD) $(LIBS)
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
 	$(CXXLINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
