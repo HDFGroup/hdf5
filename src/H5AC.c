@@ -1211,19 +1211,21 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    if ( ( aux_ptr != NULL ) &&
-         ( aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold ) ) {
+    /* Check if we should try to flush */
+    if(aux_ptr && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)) {
+        hbool_t evictions_enabled;
 
-        result = H5AC_propagate_flushed_and_still_clean_entries_list(f,
-                                                          H5AC_noblock_dxpl_id,
-                                                          f->shared->cache,
-                                                          TRUE);
-        if ( result < 0 ) {
+        /* Query if evictions are allowed */
+        if(H5C_get_evictions_enabled((const H5C_t *)f->shared->cache, &evictions_enabled) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_get_evictions_enabled() failed.")
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Can't propagate clean entries list.")
-        }
-    }
+        /* Flush if evictions are allowed */
+        if(evictions_enabled) {
+            if(H5AC_propagate_flushed_and_still_clean_entries_list(f,
+                    H5AC_noblock_dxpl_id, f->shared->cache, TRUE) < 0 )
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
+        } /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1493,19 +1495,21 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_ad
     }
 
 #ifdef H5_HAVE_PARALLEL
-    if ( ( aux_ptr != NULL ) &&
-         ( aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold ) ) {
+    /* Check if we should try to flush */
+    if(aux_ptr && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)) {
+        hbool_t evictions_enabled;
 
-        result = H5AC_propagate_flushed_and_still_clean_entries_list(f,
-                                                          H5AC_noblock_dxpl_id,
-                                                          f->shared->cache,
-                                                          TRUE);
-        if ( result < 0 ) {
+        /* Query if evictions are allowed */
+        if(H5C_get_evictions_enabled((const H5C_t *)f->shared->cache, &evictions_enabled) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_get_evictions_enabled() failed.")
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Can't propagate clean entries list.")
-        }
-    }
+        /* Flush if evictions are allowed */
+        if(evictions_enabled) {
+            if(H5AC_propagate_flushed_and_still_clean_entries_list(f,
+                    H5AC_noblock_dxpl_id, f->shared->cache, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
+        } /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -2187,20 +2191,21 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     }
 
 #ifdef H5_HAVE_PARALLEL
-    if ( ( aux_ptr != NULL ) &&
-         ( aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold ) ) {
+    /* Check if we should try to flush */
+    if(aux_ptr && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)) {
+        hbool_t evictions_enabled;
 
-        result = H5AC_propagate_flushed_and_still_clean_entries_list(f,
-                                                          H5AC_noblock_dxpl_id,
-                                                          f->shared->cache,
-                                                          TRUE);
+        /* Query if evictions are allowed */
+        if(H5C_get_evictions_enabled((const H5C_t *)f->shared->cache, &evictions_enabled) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_get_evictions_enabled() failed.")
 
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Can't propagate clean entries list.")
-        }
-    }
+        /* Flush if evictions are allowed */
+        if(evictions_enabled) {
+            if(H5AC_propagate_flushed_and_still_clean_entries_list(f,
+                    H5AC_noblock_dxpl_id, f->shared->cache, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
+        } /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
