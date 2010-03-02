@@ -32,6 +32,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted objects            */
 
 
@@ -45,9 +46,9 @@
 /****************************/
 
 /* The B-tree node as stored in memory...  */
-struct H5B_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
+typedef struct H5B_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions */
+                            /* _must_ be first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
     unsigned		nchildren;	/*number of child pointers	     */
@@ -55,7 +56,7 @@ struct H5B_t {
     haddr_t		right;		/*address of right sibling	     */
     uint8_t		*native;	/*array of keys in native format     */
     haddr_t		*child;		/*2k child pointers		     */
-};
+} H5B_t;
 
 /*****************************/
 /* Package Private Variables */
@@ -72,6 +73,7 @@ H5FL_BLK_EXTERN(native_block);
 
 /* Declare a free list to manage the H5B_t struct */
 H5FL_EXTERN(H5B_t);
+
 
 /******************************/
 /* Package Private Prototypes */

@@ -45,7 +45,6 @@
 /* Module Setup */
 /****************/
 
-#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
@@ -53,7 +52,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Bpkg.h"		/* B-link trees				*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Bprivate.h"		/* B-link trees				*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
@@ -61,11 +61,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Sprivate.h"         /* Dataspaces                           */
-#include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /****************/
@@ -135,10 +131,8 @@ static H5RC_t *H5D_istore_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
 				  haddr_t *addr_p /*out*/);
-static int H5D_istore_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			    void *_rt_key);
-static int H5D_istore_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			    void *_rt_key);
+static int H5D_istore_cmp2(void *_lt_key, void *_udata, void *_rt_key);
+static int H5D_istore_cmp3(void *_lt_key, void *_udata, void *_rt_key);
 static herr_t H5D_istore_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
 			       void *_udata);
 static H5B_ins_t H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
@@ -149,13 +143,10 @@ static H5B_ins_t H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *
 static H5B_ins_t H5D_istore_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
                   hbool_t *lt_key_changed, void *_udata, void *_rt_key,
                   hbool_t *rt_key_changed);
-static herr_t H5D_istore_decode_key(const H5F_t *f, const H5B_t *bt, const uint8_t *raw,
-				    void *_key);
-static herr_t H5D_istore_encode_key(const H5F_t *f, const H5B_t *bt, uint8_t *raw,
-				    void *_key);
-static herr_t H5D_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
-                                int indent, int fwidth, const void *key,
-                                    const void *udata);
+static herr_t H5D_istore_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
+static herr_t H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
+static herr_t H5D_istore_debug_key(FILE *stream, int indent, int fwidth,
+    const void *key, const void *udata);
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D_istore_idx_init(const H5D_chk_idx_info_t *idx_info);
@@ -252,9 +243,6 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
     HDassert(udata->mesg);
     HDassert(udata->mesg->u.chunk.btree_shared);
 
-    /* Increment reference count on B-tree info */
-    H5RC_INC(udata->mesg->u.chunk.btree_shared);
-
     /* Return the pointer to the ref-count object */
     FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.btree_shared)
 } /* end H5D_istore_get_shared() */
@@ -273,19 +261,15 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw, void *_key)
+H5D_istore_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     size_t		ndims;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_decode_key)
 
     /* check args */
-    HDassert(f);
-    HDassert(bt);
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(raw);
     HDassert(key);
@@ -315,19 +299,15 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void *_key)
+H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
-    H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    const H5D_istore_key_t	*key = (const H5D_istore_key_t *) _key;
     size_t		ndims;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_encode_key)
 
     /* check args */
-    HDassert(f);
-    HDassert(bt);
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(raw);
     HDassert(key);
@@ -358,7 +338,7 @@ H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void
  */
 /* ARGSUSED */
 static herr_t
-H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth, const void *_key,
+H5D_istore_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     const void *_udata)
 {
     const H5D_istore_key_t	*key = (const H5D_istore_key_t *)_key;
@@ -401,7 +381,7 @@ H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int in
  */
 /* ARGSUSED */
 static int
-H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata, void *_rt_key)
+H5D_istore_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
@@ -451,7 +431,7 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  */
 /* ARGSUSED */
 static int
-H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata, void *_rt_key)
+H5D_istore_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
@@ -679,7 +659,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     HDassert(rt_key);
     HDassert(new_node_p);
 
-    cmp = H5D_istore_cmp3(f, dxpl_id, lt_key, udata, rt_key);
+    cmp = H5D_istore_cmp3(lt_key, udata, rt_key);
     HDassert(cmp <= 0);
 
     if(cmp < 0) {

@@ -27,6 +27,7 @@
 
 
 #include "H5private.h"		/*generic functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/* Files				*/

@@ -237,6 +237,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     bt->nchildren = 0;
     if(NULL == (bt->rc_shared = (type->get_shared)(f, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree node buffer")
+    H5RC_INC(bt->rc_shared);
     shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     if(NULL == (bt->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys)) ||
@@ -325,7 +326,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     while(lt < rt && cmp) {
 	idx = (lt + rt) / 2;
 	/* compare */
-	if((cmp = (type->cmp3)(f, dxpl_id, H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
+	if((cmp = (type->cmp3)(H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
 	    rt = idx;
 	else
 	    lt = idx + 1;
@@ -849,7 +850,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
     while(lt < rt && cmp) {
 	idx = (lt + rt) / 2;
-	if((cmp = (type->cmp3)(f, dxpl_id, H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
+	if((cmp = (type->cmp3)(H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
 	    rt = idx;
 	else
 	    lt = idx + 1;
@@ -1039,7 +1040,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	 * The max key in the original left node must be equal to the min key
 	 * in the new node.
 	 */
-	cmp = (type->cmp2)(f, dxpl_id, H5B_NKEY(bt, shared, bt->nchildren), udata,
+	cmp = (type->cmp2)(H5B_NKEY(bt, shared, bt->nchildren), udata,
 			    H5B_NKEY(twin, shared, 0));
 	HDassert(0 == cmp);
 #endif
@@ -1297,7 +1298,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     rt = bt->nchildren;
     while(lt < rt && cmp) {
 	idx = (lt + rt) / 2;
-	if((cmp = (type->cmp3)(f, dxpl_id, H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
+	if((cmp = (type->cmp3)(H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, idx + 1))) < 0)
 	    rt = idx;
 	else
 	    lt = idx + 1;
@@ -1682,6 +1683,8 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     /* Set up the "global" information for this file's groups */
     shared->type = type;
     shared->two_k = 2 * H5F_KVALUE(f, type);
+    shared->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    shared->sizeof_len = H5F_SIZEOF_SIZE(f);
     shared->sizeof_rkey = sizeof_rkey;
     HDassert(shared->sizeof_rkey);
     shared->sizeof_keys = (shared->two_k + 1) * type->sizeof_nkey;
@@ -2051,14 +2054,14 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Left Key:");
             HDassert(H5B_NKEY(bt, shared, u));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX(0, fwidth - 6),
+	    (void)(type->debug_key)(stream, indent + 6, MAX(0, fwidth - 6),
 			      H5B_NKEY(bt, shared, u), udata);
 
             /* Decode the 'right' key & print it */
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Right Key:");
             HDassert(H5B_NKEY(bt, shared, u + 1));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX(0, fwidth - 6),
+	    (void)(type->debug_key)(stream, indent + 6, MAX(0, fwidth - 6),
 			      H5B_NKEY(bt, shared, u + 1), udata);
 	} /* end if */
     } /* end for */
@@ -2164,7 +2167,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 		tail = tmp;
 
 		/* Check that the keys are monotonically increasing */
-		cmp = (type->cmp2)(f, dxpl_id, H5B_NKEY(bt, shared, i), udata,
+		cmp = (type->cmp2)(H5B_NKEY(bt, shared, i), udata,
 				    H5B_NKEY(bt, shared, i + 1));
 		HDassert(cmp < 0);
 	    } /* end for */
