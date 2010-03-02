@@ -51,7 +51,6 @@ typedef struct H5G_node_key_t {
     size_t      offset;                 /*offset into heap for name          */
 } H5G_node_key_t;
 
-
 /* Private macros */
 
 #define H5G_NODE_SIZEOF_HDR(F) (H5_SIZEOF_MAGIC + 4)
@@ -63,10 +62,8 @@ static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
-static int H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			  void *_rt_key);
-static int H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			  void *_rt_key);
+static int H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key);
+static int H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key);
 static htri_t H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
 			     void *_udata);
 static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
@@ -77,13 +74,10 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_l
 static H5B_ins_t H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_decode_key(const H5F_t *f, const H5B_t *bt, const uint8_t *raw,
-				  void *_key);
-static herr_t H5G_node_encode_key(const H5F_t *f, const H5B_t *bt, uint8_t *raw,
-				  void *_key);
-static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
-                                    int indent, int fwidth, const void *key,
-                                    const void *udata);
+static herr_t H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
+static herr_t H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
+static herr_t H5G_node_debug_key(FILE *stream, int indent, int fwidth,
+    const void *key, const void *udata);
 
 /* H5G inherits B-tree like properties from H5B */
 H5B_class_t H5B_SNODE[1] = {{
@@ -131,18 +125,12 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
 static H5RC_t *
 H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
 {
-    H5RC_t *rc;
-
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_shared)
 
     HDassert(f);
 
-    /* Increment reference count on shared B-tree node */
-    rc = H5F_GRP_BTREE_SHARED(f);
-    H5RC_INC(rc);
-
     /* Return the pointer to the ref-count object */
-    FUNC_LEAVE_NOAPI(rc)
+    FUNC_LEAVE_NOAPI(H5F_GRP_BTREE_SHARED(f))
 } /* end H5G_node_get_shared() */
 
 
@@ -160,17 +148,17 @@ H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(const H5F_t *f, const H5B_t UNUSED *bt, const uint8_t *raw, void *_key)
+H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_decode_key)
 
-    HDassert(f);
+    HDassert(shared);
     HDassert(raw);
     HDassert(key);
 
-    H5F_DECODE_LENGTH(f, raw, key->offset);
+    H5F_DECODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_decode_key() */
@@ -190,17 +178,17 @@ H5G_node_decode_key(const H5F_t *f, const H5B_t UNUSED *bt, const uint8_t *raw, 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(const H5F_t *f, const H5B_t UNUSED *bt, uint8_t *raw, void *_key)
+H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
-    H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
+    const H5G_node_key_t *key = (const H5G_node_key_t *) _key;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_encode_key)
 
-    HDassert(f);
+    HDassert(shared);
     HDassert(raw);
     HDassert(key);
 
-    H5F_ENCODE_LENGTH(f, raw, key->offset);
+    H5F_ENCODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_encode_key() */
@@ -219,8 +207,8 @@ H5G_node_encode_key(const H5F_t *f, const H5B_t UNUSED *bt, uint8_t *raw, void *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    int indent, int fwidth, const void *_key, const void *_udata)
+H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
+    const void *_udata)
 {
     const H5G_node_key_t   *key = (const H5G_node_key_t *) _key;
     const H5G_bt_common_t   *udata = (const H5G_bt_common_t *) _udata;
@@ -368,8 +356,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5G_node_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-    void *_rt_key)
+H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_common_t	   *udata = (H5G_bt_common_t *) _udata;
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
@@ -428,8 +415,7 @@ H5G_node_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata
  *-------------------------------------------------------------------------
  */
 static int
-H5G_node_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-    void *_rt_key)
+H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_common_t	*udata = (H5G_bt_common_t *) _udata;
     H5G_node_key_t	*lt_key = (H5G_node_key_t *) _lt_key;

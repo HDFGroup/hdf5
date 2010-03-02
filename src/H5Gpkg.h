@@ -34,6 +34,7 @@
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5HFprivate.h"	/* Fractal heaps			*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
