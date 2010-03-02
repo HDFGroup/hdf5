@@ -54,9 +54,6 @@
 /* Local Prototypes */
 /********************/
 
-/* General routines */
-static herr_t H5B_serialize(const H5F_t *f, const H5B_t *bt);
-
 /* Metadata cache callbacks */
 static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
@@ -82,78 +79,6 @@ const H5AC_class_t H5AC_BT[1] = {{
 /* Local Variables */
 /*******************/
 
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B_serialize
- *
- * Purpose:     Serialize the data structure for writing to disk.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
- *              Sept. 15, 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5B_serialize(const H5F_t *f, const H5B_t *bt)
-{
-    H5B_shared_t *shared=NULL;  /* Pointer to shared B-tree info */
-    unsigned    u;
-    uint8_t    *p;              /* Pointer into raw data buffer */
-    uint8_t    *native;         /* Pointer to native keys */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B_serialize, FAIL)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(bt);
-    HDassert(bt->rc_shared);
-    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-
-    p = shared->page;
-
-    /* magic number */
-    HDmemcpy(p, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
-    p += 4;
-
-    /* node type and level */
-    *p++ = (uint8_t)shared->type->id;
-    H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);
-    *p++ = (uint8_t)bt->level;
-
-    /* entries used */
-    UINT16ENCODE(p, bt->nchildren);
-
-    /* sibling pointers */
-    H5F_addr_encode(f, &p, bt->left);
-    H5F_addr_encode(f, &p, bt->right);
-
-    /* child keys and pointers */
-    native = bt->native;
-    for(u = 0; u < bt->nchildren; ++u) {
-        /* encode the key */
-        if(shared->type->encode(f, bt, p, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
-        p += shared->sizeof_rkey;
-        native += shared->type->sizeof_nkey;
-
-        /* encode the child address */
-        H5F_addr_encode(f, &p, bt->child[u]);
-    } /* end for */
-    if(bt->nchildren > 0) {
-        /* Encode the final key */
-        if(shared->type->encode(f, bt, p, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_serialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -193,8 +118,12 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct")
     HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
+    /* Set & increment the ref-counted "shared" B-tree information for the node */
     if(NULL == (bt->rc_shared = (type->get_shared)(f, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't retrieve B-tree node buffer")
+    H5RC_INC(bt->rc_shared);
+
+    /* Get a pointer to the shared info, for convenience */
     shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
 
@@ -231,7 +160,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     native = bt->native;
     for(u = 0; u < bt->nchildren; u++) {
         /* Decode native key value */
-        if((type->decode)(f, bt, p, native) < 0)
+        if((type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
         p += shared->sizeof_rkey;
         native += type->sizeof_nkey;
@@ -243,7 +172,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     /* Decode final key */
     if(bt->nchildren > 0) {
         /* Decode native key value */
-        if((type->decode)(f, bt, p, native) < 0)
+        if((type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
     } /* end if */
 
@@ -289,8 +218,45 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, uns
     HDassert(shared->type->encode);
 
     if(bt->cache_info.is_dirty) {
-        if(H5B_serialize(f, bt) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSERIALIZE, FAIL, "unable to serialize B-tree")
+        uint8_t    *p;              /* Pointer into raw data buffer */
+        uint8_t    *native;         /* Pointer to native keys */
+        unsigned    u;              /* Local index variable */
+
+        p = shared->page;
+
+        /* magic number */
+        HDmemcpy(p, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += 4;
+
+        /* node type and level */
+        *p++ = (uint8_t)shared->type->id;
+        H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);
+        *p++ = (uint8_t)bt->level;
+
+        /* entries used */
+        UINT16ENCODE(p, bt->nchildren);
+
+        /* sibling pointers */
+        H5F_addr_encode(f, &p, bt->left);
+        H5F_addr_encode(f, &p, bt->right);
+
+        /* child keys and pointers */
+        native = bt->native;
+        for(u = 0; u < bt->nchildren; ++u) {
+            /* encode the key */
+            if(shared->type->encode(shared, p, native) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+            p += shared->sizeof_rkey;
+            native += shared->type->sizeof_nkey;
+
+            /* encode the child address */
+            H5F_addr_encode(f, &p, bt->child[u]);
+        } /* end for */
+        if(bt->nchildren > 0) {
+            /* Encode the final key */
+            if(shared->type->encode(shared, p, native) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+        } /* end if */
 
 	/*
          * Write the disk page.	We always write the header, but we don't
