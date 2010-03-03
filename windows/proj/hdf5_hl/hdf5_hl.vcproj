@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="hdf5_hl"
 	ProjectGUID="{9A124450-EC54-4813-B0B1-2CA96B695009}"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -351,7 +352,7 @@
 			<File
 				RelativePath="..\..\..\hl\src\H5TB.c"
 				>
-		</File>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="hdf5_hl_f90cstub"
 	ProjectGUID="{01DA0D22-D220-4ACE-9EB0-EA3906098C0A}"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
