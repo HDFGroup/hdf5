@@ -1,1 +1,1 @@
-The daily tests run copies of some of the scripts in this directory from another repository, notably snapshot and runtest.  The copies in this directory should work, but are not tested on a regular basis.
+The daily tests run copies of some of the scripts in this directory from another repository, notably snapshot and runtest.  The copies in this directory should work, but are not used in daily tests, though they should be tested occasionally.  
