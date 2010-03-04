@@ -62,7 +62,8 @@ $!
 $ ccc 'cobj
 $ ccc 'cobj1 
 $ library/create []hdf5
-$ library/insert []hdf5 'cobj, 'cobj1
+$ library/insert []hdf5 'cobj
+$ library/insert []hdf5 'cobj1
 $ type sys$input
 	Done
 $!
