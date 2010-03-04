@@ -65,6 +65,7 @@
 ./bin/mkinstalldirs
 ./bin/newer
 ./bin/reconfigure			_DO_NOT_DISTRIBUTE_
+./bin/README				_DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
