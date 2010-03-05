@@ -19,6 +19,9 @@
  *		This file contains tests for the cache implemented in
  *		H5C.c
  */
+
+#include <aio.h>
+
 #include "h5test.h"
 #include "H5Iprivate.h"
 #include "H5ACprivate.h"

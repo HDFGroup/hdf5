@@ -56,8 +56,9 @@ if test "X-" = "X-$cc_flags_set"; then
        && PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O//'`"
 fi
 
-# Add socket lib for the Stream Virtual File Driver
-LIBS="$LIBS -lsocket"
+# Add socket lib for the Stream Virtual File Driver and the real time
+# lib for AIO
+LIBS="$LIBS -lsocket -lrt"
 
 # The default Fortran 90 compiler
 

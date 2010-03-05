@@ -20,6 +20,8 @@
  *		implemented in H5C2.c
  */
 
+#include <aio.h>
+
 #include "H5private.h"
 
 #include "h5test.h"

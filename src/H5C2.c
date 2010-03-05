@@ -95,6 +95,8 @@
  *
  **************************************************************************/
 
+#include <aio.h>
+
 #define H5C2_PACKAGE		/*suppress error about including H5C2pkg  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 

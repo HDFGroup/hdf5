@@ -13,6 +13,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <aio.h>
+
 #define H5F_PACKAGE		/* suppress error about including H5Fpkg   */
 #define H5O_PACKAGE             /* suppress error about including H5Opkg   */
 #define H5C2_PACKAGE            /* suppress error about including H5C2pkg  */

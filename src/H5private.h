@@ -756,7 +756,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
             #define HDstat(S,B)  	stat64(S,B)
         #endif /* HDstat */
         typedef struct stat64       h5_stat_t;
+#if 1 /* Solaris */ /* JRM */
+        typedef off_t             h5_stat_size_t;
+#else /* not Solaris */ /* JRM */
         typedef off64_t             h5_stat_size_t;
+#endif /* JRM */
     #else /* H5_SIZEOF_OFF_T!=8 && ... */
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat(F,B)

@@ -20,6 +20,7 @@
  *		with the cache implemented in H5C2.c
  */
 
+#include <aio.h>
 #include "h5test.h"
 #include "H5Iprivate.h"
 #include "H5AC2private.h"

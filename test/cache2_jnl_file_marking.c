@@ -20,6 +20,8 @@
  *		features implemented in H5C2.c and friends.
  */
 
+#include <aio.h>
+
 #define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
 #include "h5test.h"
