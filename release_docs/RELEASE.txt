@@ -208,6 +208,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug where the library, when traversing an external link, would
+            reopen the source file if nothing else worked. (NAF - 2010/03/05)
       - Fixed an intermittent bug in the b-tree code which could be triggered
             by expanding and shrinking chunked datasets in certain ways.
             (NAF - 2010/02/16)

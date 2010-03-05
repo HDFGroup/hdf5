@@ -946,6 +946,7 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     H5G_name_t      new_path;                   /* Copied object group hier. path */
     H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
+    H5F_t           *cached_dst_file;           /* Cached destination file */
     hbool_t         entry_inserted=FALSE;       /* Flag to indicate that the new entry was inserted into a group */
     unsigned        cpy_option = 0;             /* Copy options */
     herr_t          ret_value = SUCCEED;        /* Return value */
@@ -972,9 +973,18 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     H5G_loc_reset(&new_loc);
     new_oloc.file = dst_loc->oloc->file;
 
+    /* Make a copy of the destination file, in case the original is changed by
+     * H5O_copy_header.  If and when oloc's point to the shared file struct,
+     * this will no longer be necessary, so this code can be removed. */
+    cached_dst_file = dst_loc->oloc->file;
+
     /* Copy the object from the source file to the destination file */
     if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id, cpy_option) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+    /* Patch dst_loc.  Again, this can be removed once oloc's point to shared
+     * file structs. */
+    dst_loc->oloc->file = cached_dst_file;
 
     /* Insert the new object in the destination file's group */
     if(H5L_link(dst_loc, dst_name, &new_loc, lcpl_id, H5P_DEFAULT, dxpl_id) < 0)

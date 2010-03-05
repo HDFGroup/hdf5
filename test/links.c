@@ -6611,6 +6611,143 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    external_copy_invalid_object
+ *
+ * Purpose:     Check that attempting to copy an object through an
+ *              external link to the source file but with an invalid
+ *              object name fails gracefully, and does not leave lingering
+ *              file ids.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, March 3, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_copy_invalid_object(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid = (-1);                     /* File ID */
+    hid_t       gid = (-1);                     /* Group ID */
+    hid_t       ocpyplid = (-1);                /* Object copy plist ID */
+    char        filename[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("copying invalid external links to the source file (w/new group format)")
+    else
+        TESTING("copying invalid external links to the source file")
+
+    /* Set up filename */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create object copy plist, set expand external flag */
+    if((ocpyplid = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+    if(H5Pset_copy_object(ocpyplid, H5O_COPY_EXPAND_EXT_LINK_FLAG) < 0) TEST_ERROR
+
+    /* Create file and group */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Create an external link in the group to the source file with an invalid
+     * object name */
+    if(H5Lcreate_external(filename, "no_object", fid, "/group1/link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Copy the group containing the external link */
+    if(H5Ocopy(fid, "group1", fid, "group2", ocpyplid, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    /* Attempt to truncate the file again.  If there is a lingering id for this
+     * file this will fail */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Close */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Pclose(ocpyplid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Fclose(fid);
+        H5Pclose(ocpyplid);
+    } H5E_END_TRY
+
+    return -1;
+} /* end external_copy_invalid_object */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_dont_fail_to_source
+ *
+ * Purpose:     Check that external links with invalid target file names
+ *              work properly and do not attempt to (re)open the source
+ *              file.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, March 3, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_dont_fail_to_source(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid = (-1);                     /* File ID */
+    hid_t       gid = (-1);                     /* Group ID */
+    hid_t       oid = (-1);                     /* Object ID */
+    char        filename[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("that invalid external links don't open the source file (w/new group format)")
+    else
+        TESTING("that invalid external links don't open the source file")
+
+    /* Set up filename */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create file and group */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+    /* Create an external link with an invalid file name, but the same object
+     * name as the group.  This way, if the external link is interpreted to
+     * refer to the source file, it will link to the group */
+    if(H5Lcreate_external("no_file", "/group", fid, "link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Attempt to open the object the link points to.  This should fail */
+    H5E_BEGIN_TRY {
+        oid = H5Oopen(fid, "link", H5P_DEFAULT);
+    } H5E_END_TRY
+    if(oid >= 0) FAIL_PUTS_ERROR("Succeeded in opening target of invalid external link")
+
+    /* Close */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Oclose(oid);
+        H5Fclose(fid);
+    } H5E_END_TRY
+
+    return -1;
+} /* end external_dont_fail_to_source */
+
+
+/*-------------------------------------------------------------------------
  * Function:    ud_hard_links
  *
  * Purpose:     Check that the functionality of hard links can be duplicated
@@ -13889,6 +14026,8 @@ main(void)
         nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
         nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
 
         /* These tests assume that external links are a form of UD links,
          * so assume that everything that passed for external links
