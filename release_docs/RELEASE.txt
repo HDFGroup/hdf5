@@ -115,6 +115,9 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Added support for H5O_COPY_EXPAND_EXT_LINK_FLAG to H5Ocopy.  External
+        links will now be expanded if this flag is set.
+        (NAF - 2010/03/05 - 1733)
     - Fixed a bug where the library, when traversing an external link, would
         reopen the source file if nothing else worked. (NAF - 2010/03/05)
     - Fixed an intermittent bug in the b-tree code which could be triggered
