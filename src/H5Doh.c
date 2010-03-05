@@ -359,6 +359,10 @@ done:
  * Programmer:  Vailin Choi
  *              July 11, 2007
  *
+ * Modification:Raymond Lu
+ *              5 February, 2010
+ *              I added the call to H5O_msg_reset after H5D_chunk_bh_info 
+ *              to free the PLINE. 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -382,6 +386,7 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Check for chunked dataset storage */
     if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout.storage)) {
         H5O_pline_t pline;              /* I/O pipeline message */
+        herr_t ret = SUCCEED;
 
         /* Check for I/O pipeline message */
         if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
@@ -393,7 +398,12 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         else
             HDmemset(&pline, 0, sizeof(pline));
 
-        if(H5D_chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
+        ret = H5D_chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size));
+
+        /* Free the PLINE after using it */
+        H5O_msg_reset(H5O_PLINE_ID, &pline);
+
+        if(ret < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
     } /* end if */
 
