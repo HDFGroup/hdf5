@@ -412,19 +412,15 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
 
         /* get last component of file_name */
         GET_LAST_DELIMITER(actual_file_name, ptr)
-        if(ptr) {
-            /* Truncate filename portion from actual file name path */
-            *ptr = '\0';
+        if(!ptr)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file, external link file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
 
-            /* Build new file name for the external file */
-            if(H5L_build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
-                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
-        } /* end if */
-        else {
-            /* Transfer ownership of actual file name to 'full_name' variable */
-            full_name = actual_file_name;
-            actual_file_name = NULL;
-        } /* end else */
+        /* Truncate filename portion from actual file name path */
+        *ptr = '\0';
+
+        /* Build new file name for the external file */
+        if(H5L_build_name(actual_file_name, temp_file_name, &full_name/*out*/) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
 
         /* Try opening with the resolved name */
         if(NULL == (ext_file = H5F_open(full_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
