@@ -171,12 +171,12 @@ H5HL_fl_deserialize(H5HL_t *heap, hsize_t free_block)
         if(fl->offset + fl->size > heap->dblk_size)
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
 
-        /* Insert node into list */
+        /* Append node onto list */
         if(tail)
             tail->next = fl;
-        tail = fl;
-        if(!heap->freelist)
+        else
             heap->freelist = fl;
+        tail = fl;
         fl = NULL;
     } /* end while */
 
