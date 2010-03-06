@@ -1274,8 +1274,6 @@ const H5Z_class2_t H5Z_CORRUPT[1] = {{
  * Programmer:	Raymond Lu
  *              Jan 14, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1283,7 +1281,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
-    void  *data;
+    void  *data = NULL;
     unsigned char  *dst = (unsigned char*)(*buf);
     unsigned int   offset;
     unsigned int   length;
@@ -1291,20 +1289,21 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts,
     size_t         ret_value = 0;
 
     if(cd_nelmts != 3 || !cd_values)
-        return 0;
+        TEST_ERROR
     offset = cd_values[0];
     length = cd_values[1];
     value  = cd_values[2];
     if(offset > nbytes || (offset + length) > nbytes || length < sizeof(unsigned int))
-        return 0;
+        TEST_ERROR
 
-    data = HDmalloc((size_t)length);
+    if(NULL == (data = HDmalloc((size_t)length))) 
+        TEST_ERROR
     HDmemset(data, (int)value, (size_t)length);
 
     if(flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
         dst += offset;
         if(HDmemcmp(data, dst, (size_t)length) != 0)
-            ret_value = 0;
+            TEST_ERROR
         else {
             *buf_size = nbytes;
             ret_value = nbytes;
@@ -1317,11 +1316,12 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts,
         ret_value = *buf_size;
     } /* end else */
 
+error:
     if(data)
         HDfree(data);
 
     return ret_value;
-}
+} /* end filter_corrupt() */
 
 
 /*-------------------------------------------------------------------------

@@ -599,7 +599,7 @@ H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
 done:
     /* Unprotect the header with appropriate flags */
-    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
 
     FUNC_LEAVE_NOAPI(SUCCEED)

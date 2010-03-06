@@ -423,11 +423,11 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 done:
     /* Free messages, if they've been read in */
     if(layout_read && H5O_msg_reset(H5O_LAYOUT_ID, &layout) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset data storage layout message")
     if(pline_read && H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
     if(efl_read && H5O_msg_reset(H5O_EFL_ID, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset external file list message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dset_bh_info() */

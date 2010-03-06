@@ -916,172 +916,189 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    break;
 
 	case 'i':
-	    if (ptr) {
-		if (vp) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
-		} else {
+	    if(ptr) {
+		if(vp)
+		    fprintf(out, "0x%lx", (unsigned long)vp);
+		else
 		    fprintf(out, "NULL");
-		}
-	    } else {
+	    } /* end if */
+            else {
 		hid_t obj = va_arg (ap, hid_t);
-		if (H5P_DEFAULT == obj) {
-		    fprintf (out, "H5P_DEFAULT");
-		} else if (obj<0) {
-		    fprintf (out, "FAIL");
-		} else {
-		    switch (H5I_TYPE(obj)) { /* Use internal H5I macro instead of function call */
+
+		if(H5P_DEFAULT == obj)
+		    fprintf(out, "H5P_DEFAULT");
+		else if(obj < 0)
+		    fprintf(out, "FAIL");
+		else {
+		    switch(H5I_TYPE(obj)) { /* Use internal H5I macro instead of function call */
                         case H5I_UNINIT:
-                            fprintf (out, "%ld (uninit - error)", (long)obj);
+                            fprintf(out, "%ld (uninit - error)", (long)obj);
                             break;
+
                         case H5I_BADID:
-                            fprintf (out, "%ld (error)", (long)obj);
+                            fprintf(out, "%ld (error)", (long)obj);
                             break;
+
                         case H5I_FILE:
                             fprintf(out, "%ld (file)", (long)obj);
                             break;
+
                         case H5I_GROUP:
                             fprintf(out, "%ld (group)", (long)obj);
                             break;
+
                         case H5I_DATATYPE:
-                            if (obj==H5T_NATIVE_SCHAR_g) {
+                            if(obj == H5T_NATIVE_SCHAR_g)
                                 fprintf(out, "H5T_NATIVE_SCHAR");
-                            } else if (obj==H5T_NATIVE_UCHAR_g) {
+                            else if(obj == H5T_NATIVE_UCHAR_g)
                                 fprintf(out, "H5T_NATIVE_UCHAR");
-                            } else if (obj==H5T_NATIVE_SHORT_g) {
+                            else if(obj == H5T_NATIVE_SHORT_g)
                                 fprintf(out, "H5T_NATIVE_SHORT");
-                            } else if (obj==H5T_NATIVE_USHORT_g) {
+                            else if(obj == H5T_NATIVE_USHORT_g)
                                 fprintf(out, "H5T_NATIVE_USHORT");
-                            } else if (obj==H5T_NATIVE_INT_g) {
+                            else if(obj == H5T_NATIVE_INT_g)
                                 fprintf(out, "H5T_NATIVE_INT");
-                            } else if (obj==H5T_NATIVE_UINT_g) {
+                            else if(obj == H5T_NATIVE_UINT_g)
                                 fprintf(out, "H5T_NATIVE_UINT");
-                            } else if (obj==H5T_NATIVE_LONG_g) {
+                            else if(obj == H5T_NATIVE_LONG_g)
                                 fprintf(out, "H5T_NATIVE_LONG");
-                            } else if (obj==H5T_NATIVE_ULONG_g) {
+                            else if(obj == H5T_NATIVE_ULONG_g)
                                 fprintf(out, "H5T_NATIVE_ULONG");
-                            } else if (obj==H5T_NATIVE_LLONG_g) {
+                            else if(obj == H5T_NATIVE_LLONG_g)
                                 fprintf(out, "H5T_NATIVE_LLONG");
-                            } else if (obj==H5T_NATIVE_ULLONG_g) {
+                            else if(obj == H5T_NATIVE_ULLONG_g)
                                 fprintf(out, "H5T_NATIVE_ULLONG");
-                            } else if (obj==H5T_NATIVE_FLOAT_g) {
+                            else if(obj == H5T_NATIVE_FLOAT_g)
                                 fprintf(out, "H5T_NATIVE_FLOAT");
-                            } else if (obj==H5T_NATIVE_DOUBLE_g) {
+                            else if(obj == H5T_NATIVE_DOUBLE_g)
                                 fprintf(out, "H5T_NATIVE_DOUBLE");
 #if H5_SIZEOF_LONG_DOUBLE !=0
-                            } else if (obj==H5T_NATIVE_LDOUBLE_g) {
+                            else if(obj == H5T_NATIVE_LDOUBLE_g)
                                 fprintf(out, "H5T_NATIVE_LDOUBLE");
 #endif
-                            } else if (obj==H5T_IEEE_F32BE_g) {
+                            else if(obj == H5T_IEEE_F32BE_g)
                                 fprintf(out, "H5T_IEEE_F32BE");
-                            } else if (obj==H5T_IEEE_F32LE_g) {
+                            else if(obj == H5T_IEEE_F32LE_g)
                                 fprintf(out, "H5T_IEEE_F32LE");
-                            } else if (obj==H5T_IEEE_F64BE_g) {
+                            else if(obj == H5T_IEEE_F64BE_g)
                                 fprintf(out, "H5T_IEEE_F64BE");
-                            } else if (obj==H5T_IEEE_F64LE_g) {
+                            else if(obj == H5T_IEEE_F64LE_g)
                                 fprintf(out, "H5T_IEEE_F64LE");
-                            } else if (obj==H5T_STD_I8BE_g) {
+                            else if(obj == H5T_STD_I8BE_g)
                                 fprintf(out, "H5T_STD_I8BE");
-                            } else if (obj==H5T_STD_I8LE_g) {
+                            else if(obj == H5T_STD_I8LE_g)
                                 fprintf(out, "H5T_STD_I8LE");
-                            } else if (obj==H5T_STD_I16BE_g) {
+                            else if(obj == H5T_STD_I16BE_g)
                                 fprintf(out, "H5T_STD_I16BE");
-                            } else if (obj==H5T_STD_I16LE_g) {
+                            else if(obj == H5T_STD_I16LE_g)
                                 fprintf(out, "H5T_STD_I16LE");
-                            } else if (obj==H5T_STD_I32BE_g) {
+                            else if(obj == H5T_STD_I32BE_g)
                                 fprintf(out, "H5T_STD_I32BE");
-                            } else if (obj==H5T_STD_I32LE_g) {
+                            else if(obj == H5T_STD_I32LE_g)
                                 fprintf(out, "H5T_STD_I32LE");
-                            } else if (obj==H5T_STD_I64BE_g) {
+                            else if(obj == H5T_STD_I64BE_g)
                                 fprintf(out, "H5T_STD_I64BE");
-                            } else if (obj==H5T_STD_I64LE_g) {
+                            else if(obj == H5T_STD_I64LE_g)
                                 fprintf(out, "H5T_STD_I64LE");
-                            } else if (obj==H5T_STD_U8BE_g) {
+                            else if(obj == H5T_STD_U8BE_g)
                                 fprintf(out, "H5T_STD_U8BE");
-                            } else if (obj==H5T_STD_U8LE_g) {
+                            else if(obj == H5T_STD_U8LE_g)
                                 fprintf(out, "H5T_STD_U8LE");
-                            } else if (obj==H5T_STD_U16BE_g) {
+                            else if(obj == H5T_STD_U16BE_g)
                                 fprintf(out, "H5T_STD_U16BE");
-                            } else if (obj==H5T_STD_U16LE_g) {
+                            else if(obj == H5T_STD_U16LE_g)
                                 fprintf(out, "H5T_STD_U16LE");
-                            } else if (obj==H5T_STD_U32BE_g) {
+                            else if(obj == H5T_STD_U32BE_g)
                                 fprintf(out, "H5T_STD_U32BE");
-                            } else if (obj==H5T_STD_U32LE_g) {
+                            else if(obj == H5T_STD_U32LE_g)
                                 fprintf(out, "H5T_STD_U32LE");
-                            } else if (obj==H5T_STD_U64BE_g) {
+                            else if(obj == H5T_STD_U64BE_g)
                                 fprintf(out, "H5T_STD_U64BE");
-                            } else if (obj==H5T_STD_U64LE_g) {
+                            else if(obj == H5T_STD_U64LE_g)
                                 fprintf(out, "H5T_STD_U64LE");
-                            } else if (obj==H5T_STD_B8BE_g) {
+                            else if(obj == H5T_STD_B8BE_g)
                                 fprintf(out, "H5T_STD_B8BE");
-                            } else if (obj==H5T_STD_B8LE_g) {
+                            else if(obj == H5T_STD_B8LE_g)
                                 fprintf(out, "H5T_STD_B8LE");
-                            } else if (obj==H5T_STD_B16BE_g) {
+                            else if(obj == H5T_STD_B16BE_g)
                                 fprintf(out, "H5T_STD_B16BE");
-                            } else if (obj==H5T_STD_B16LE_g) {
+                            else if(obj == H5T_STD_B16LE_g)
                                 fprintf(out, "H5T_STD_B16LE");
-                            } else if (obj==H5T_STD_B32BE_g) {
+                            else if(obj == H5T_STD_B32BE_g)
                                 fprintf(out, "H5T_STD_B32BE");
-                            } else if (obj==H5T_STD_B32LE_g) {
+                            else if(obj == H5T_STD_B32LE_g)
                                 fprintf(out, "H5T_STD_B32LE");
-                            } else if (obj==H5T_STD_B64BE_g) {
+                            else if(obj == H5T_STD_B64BE_g)
                                 fprintf(out, "H5T_STD_B64BE");
-                            } else if (obj==H5T_STD_B64LE_g) {
+                            else if(obj == H5T_STD_B64LE_g)
                                 fprintf(out, "H5T_STD_B64LE");
-                            } else if (obj==H5T_C_S1_g) {
+                            else if(obj == H5T_C_S1_g)
                                 fprintf(out, "H5T_C_S1");
-                            } else if (obj==H5T_FORTRAN_S1_g) {
+                            else if(obj == H5T_FORTRAN_S1_g)
                                 fprintf(out, "H5T_FORTRAN_S1");
-                            } else {
+                            else
                                 fprintf(out, "%ld (dtype)", (long)obj);
-                            }
                             break;
+
                         case H5I_DATASPACE:
                             fprintf(out, "%ld (dspace)", (long)obj);
                             /* Save the rank of simple data spaces for arrays */
                             /* This may generate recursive call to the library... -QAK */
                             {
-                                H5S_t *space = (H5S_t *)H5I_object(obj);
-                                if (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space)) {
-                                    asize[argno] = H5S_GET_EXTENT_NDIMS(space);
-                                }
+                                H5S_t *space;
+
+                                if(NULL != (space = (H5S_t *)H5I_object(obj)))
+                                    if(H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space))
+                                        asize[argno] = H5S_GET_EXTENT_NDIMS(space);
                             }
                             break;
+
                         case H5I_DATASET:
                             fprintf(out, "%ld (dset)", (long)obj);
                             break;
+
                         case H5I_ATTR:
                             fprintf(out, "%ld (attr)", (long)obj);
                             break;
+
                         case H5I_REFERENCE:
                             fprintf(out, "%ld (reference)", (long)obj);
                             break;
+
                         case H5I_VFL:
                             fprintf(out, "%ld (file driver)", (long)obj);
                             break;
+
                         case H5I_GENPROP_CLS:
                             fprintf(out, "%ld (genprop class)", (long)obj);
                             break;
+
                         case H5I_GENPROP_LST:
                             fprintf(out, "%ld (genprop list)", (long)obj);
                             break;
+
                         case H5I_ERROR_CLASS:
                             fprintf(out, "%ld (err class)", (long)obj);
                             break;
+
                         case H5I_ERROR_MSG:
                             fprintf(out, "%ld (err msg)", (long)obj);
                             break;
+
                         case H5I_ERROR_STACK:
                             fprintf(out, "%ld (err stack)", (long)obj);
                             break;
+
                         case H5I_NTYPES:
                             fprintf (out, "%ld (ntypes - error)", (long)obj);
                             break;
+
                         default:
                             fprintf(out, "%ld (unknown class)", (long)obj);
                             break;
-		    }
-		}
-	    }
+		    } /* end switch */
+		} /* end else */
+	    } /* end else */
 	    break;
 
 	case 'I':
