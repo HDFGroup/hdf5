@@ -52,6 +52,31 @@ typedef struct H5FD_core_t {
     size_t	increment;		/*multiples for mem allocation	*/
     hbool_t	backing_store;		/*write to file name on flush	*/
     int		fd;			/*backing store file descriptor	*/
+    /* Information for determining uniqueness of a file with a backing store */
+#ifndef _WIN32
+    /*
+     * On most systems the combination of device and i-node number uniquely
+     * identify a file.
+     */
+    dev_t       device;                 /*file device number            */
+#ifdef H5_VMS
+    ino_t       inode[3];               /*file i-node number            */
+#else
+    ino_t       inode;                  /*file i-node number            */
+#endif /*H5_VMS*/
+#else
+    /*
+     * On _WIN32 the low-order word of a unique identifier associated with the
+     * file and the volume serial number uniquely identify a file. This number
+     * (which, both? -rpm) may change when the system is restarted or when the
+     * file is opened. After a process opens a file, the identifier is
+     * constant until the file is closed. An application can use this
+     * identifier and the volume serial number to determine whether two
+     * handles refer to the same file.
+     */
+    DWORD fileindexlo;
+    DWORD fileindexhi;
+#endif
     hbool_t	dirty;			/*changes not saved?		*/
 } H5FD_core_t;
 
@@ -388,6 +413,10 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
+#ifdef _WIN32
+    HFILE filehandle;
+    struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+#endif
     h5_stat_t		sb;
     int			fd=-1;
     H5FD_t		*ret_value;
@@ -412,11 +441,14 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     if(H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if(H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
-    /* Open backing store.  The only case that backing store is off is when
-     * the backing_store flag is off and H5F_ACC_CREAT is on. */
+    /* Open backing store, and get stat() from file.  The only case that backing
+     * store is off is when  the backing_store flag is off and H5F_ACC_CREAT is
+     * on. */
     if(fa->backing_store || !(H5F_ACC_CREAT & flags)) {
         if(fa && (fd = HDopen(name, o_flags, 0666)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+        if(HDfstat(fd, &sb) < 0)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
     } /* end if */
 
     /* Create the new file struct */
@@ -436,13 +468,31 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     /* If save data in backing store. */
     file->backing_store = fa->backing_store;
 
+    if(fd >= 0) {
+        /* Retrieve information for determining uniqueness of file */
+#ifdef _WIN32
+        filehandle = _get_osfhandle(fd);
+        (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
+        file->fileindexhi = fileinfo.nFileIndexHigh;
+        file->fileindexlo = fileinfo.nFileIndexLow;
+#else /* _WIN32 */
+        file->device = sb.st_dev;
+#ifdef H5_VMS
+        file->inode[0] = sb.st_ino[0];
+        file->inode[1] = sb.st_ino[1];
+        file->inode[2] = sb.st_ino[2];
+#else
+        file->inode = sb.st_ino;
+#endif /* H5_VMS */
+
+#endif /* _WIN32 */
+    } /* end if */
+
     /* If an existing file is opened, load the whole file into memory. */
     if(!(H5F_ACC_CREAT & flags)) {
         size_t size;
 
-        /* stat() file to retrieve its size */
-        if(HDfstat(file->fd, &sb) < 0)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+        /* Retrieve file size */
 	size = (size_t)sb.st_size;
 
         /* Check if we should allocate the memory buffer and read in existing data */
@@ -526,6 +576,11 @@ done:
  *              Thursday, July 29, 1999
  *
  * Modifications:
+ *              Neil Fortner
+ *              Tuesday, March 9, 2010
+ *              Modified function to compare low level file information if
+ *              a backing store is opened for both files, similar to the
+ *              sec2 file driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -534,28 +589,62 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_core_t	*f1 = (const H5FD_core_t*)_f1;
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
-    int			ret_value;
+    int			ret_value = 0;
 
     FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL)
 
-    if (NULL==f1->name && NULL==f2->name) {
-        if (f1<f2)
+    if(f1->fd >= 0 && f2->fd >= 0) {
+        /* Compare low level file information for backing store */
+#ifdef _WIN32
+        if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
+        if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
+
+        if (f1->fileindexlo < f2->fileindexlo) HGOTO_DONE(-1)
+        if (f1->fileindexlo > f2->fileindexlo) HGOTO_DONE(1)
+
+#else
+#ifdef H5_DEV_T_IS_SCALAR
+        if (f1->device < f2->device) HGOTO_DONE(-1)
+        if (f1->device > f2->device) HGOTO_DONE(1)
+#else /* H5_DEV_T_IS_SCALAR */
+        /* If dev_t isn't a scalar value on this system, just use memcmp to
+         * determine if the values are the same or not.  The actual return value
+         * shouldn't really matter...
+         */
+        if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))<0) HGOTO_DONE(-1)
+        if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) HGOTO_DONE(1)
+#endif /* H5_DEV_T_IS_SCALAR */
+
+#ifndef H5_VMS
+        if (f1->inode < f2->inode) HGOTO_DONE(-1)
+        if (f1->inode > f2->inode) HGOTO_DONE(1)
+#else
+        if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) HGOTO_DONE(-1)
+        if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
+#endif /* H5_VMS */
+
+#endif /*_WIN32*/
+    } /* end if */
+    else {
+        if (NULL==f1->name && NULL==f2->name) {
+            if (f1<f2)
+                HGOTO_DONE(-1)
+            if (f1>f2)
+                HGOTO_DONE(1)
+            HGOTO_DONE(0)
+        } /* end if */
+
+        if (NULL==f1->name)
             HGOTO_DONE(-1)
-        if (f1>f2)
+        if (NULL==f2->name)
             HGOTO_DONE(1)
-        HGOTO_DONE(0)
-    }
 
-    if (NULL==f1->name)
-        HGOTO_DONE(-1)
-    if (NULL==f2->name)
-        HGOTO_DONE(1)
-
-    ret_value = HDstrcmp(f1->name, f2->name);
+        ret_value = HDstrcmp(f1->name, f2->name);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_core_cmp() */
 
 
 /*-------------------------------------------------------------------------
