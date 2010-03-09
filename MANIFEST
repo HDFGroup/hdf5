@@ -1594,6 +1594,9 @@
 ./tools/h5copy/testfiles/h5copytst.out.ls
 ./tools/h5copy/testfiles/h5copy_ref.h5
 ./tools/h5copy/testfiles/h5copy_ref.out.ls
+./tools/h5copy/testfiles/h5copy_extlinks_src.h5
+./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
+./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls

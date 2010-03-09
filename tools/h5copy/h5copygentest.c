@@ -24,6 +24,8 @@
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
 #define HDF_FILE2                "h5copy_ref.h5"
+#define HDF_EXT_SRC_FILE         "h5copy_extlinks_src.h5"
+#define HDF_EXT_TRG_FILE         "h5copy_extlinks_trg.h5"
 
 /* objects in HDF_FILE1 */
 #define DATASET_SIMPLE          "simple"
@@ -704,6 +706,182 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: gen_extlink_trg
+ *
+ * Purpose: generate target external link objs
+ *
+ * Programmer: Jonathan Kim (March 03, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_extlink_trg(hid_t loc_id)
+{
+    hid_t gid=0, tid=0;
+    int status;
+    herr_t ret = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    /*--------------
+     * target file */
+    gid = H5Gcreate2(loc_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /*--------------
+     * add dataset */
+     gent_simple(loc_id);
+
+    /*--------------------
+     * add named datatype
+     */
+     tid = H5Tcopy(H5T_NATIVE_INT);
+     status = H5Tcommit2(loc_id, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if(gid > 0)
+        H5Gclose(gid);
+    if(tid > 0)
+        H5Tclose(tid);
+
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gen_extlink_src
+ *
+ * Purpose: generate source external link objs
+ *
+ * Programmer: Jonathan Kim (March 03, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_extlink_src(hid_t loc_id)
+{
+    hid_t gid=0;
+    int status;
+    herr_t ret = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    gid = H5Gcreate2(loc_id, "/group_ext", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * External links
+    *------------------------------------------------------------------------*/
+    /* link to dataset */
+    status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/simple", gid, "extlink_dset", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* link to group */
+    status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/group", gid, "extlink_grp", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* link to datatype */
+    status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/datatype", gid, "extlink_datatype", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* dangling link - no obj*/
+    status = H5Lcreate_external(HDF_EXT_TRG_FILE, "notyet", gid, "extlink_notyet1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* dangling link - no file */
+    status = H5Lcreate_external("notyet_file.h5", "notyet", gid, "extlink_notyet2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __FUNCTION__, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if(gid > 0)
+        H5Gclose(gid);
+
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: Test_Extlink_Copy
+ *
+ * Purpose: gerenate external link files
+ *
+ *------------------------------------------------------------------------*/
+static void Test_Extlink_Copy()
+{
+    hid_t fid1=0;
+    hid_t fid2=0;
+    herr_t status;
+    
+    fid1 = H5Fcreate (HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_SRC_FILE);
+        goto out;
+    }
+
+    fid2 = H5Fcreate (HDF_EXT_TRG_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
+        goto out;
+    }
+    
+    /* add links to source external link file */
+    status = gen_extlink_src(fid1);
+    if (status < 0)
+        fprintf(stderr, "Error: %s> gen_extlink_src failed.\n", HDF_EXT_SRC_FILE);
+
+    /* add objs to target external link file */
+    status = gen_extlink_trg(fid2);
+    if (status < 0)
+        fprintf(stderr, "Error: %s> gen_extlink_trg failed.\n", HDF_EXT_TRG_FILE);
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *------------------------------------------------------------------------*/
+    if(fid1 > 0)
+        H5Fclose(fid1);
+    if(fid2 > 0)
+        H5Fclose(fid2);
+}
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -713,6 +891,7 @@ int main(void)
 {
     Test_Obj_Copy();
     Test_Ref_Copy();
+    Test_Extlink_Copy();
 
     return 0;
 }
