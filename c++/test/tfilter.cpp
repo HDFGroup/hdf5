@@ -33,7 +33,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -252,6 +251,7 @@ extern "C"
 void test_filters()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Various Filters\n");
     MESSAGE(5, ("Testing Various Filters\n"));
 
     hid_t       fapl_id;

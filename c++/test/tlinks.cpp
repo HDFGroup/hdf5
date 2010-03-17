@@ -33,7 +33,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -531,6 +530,7 @@ void test_links()
     fapl_id = h5_fileaccess();
 
     // Output message about test being performed
+    //MESSAGE("Testing Various Links\n");
     MESSAGE(5, ("Testing Various Links\n"));
     try
     {

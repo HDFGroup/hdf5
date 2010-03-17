@@ -34,7 +34,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -118,7 +117,7 @@ static void test_attr_basic_write()
     int     i;
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Attribute Writing Functions");
+    SUBTEST("Basic Attribute Writing Functions");
 
     try {
 	// Create file
@@ -237,7 +236,7 @@ static void test_attr_rename()
     int i;
 
 	// Output message about test being performed
-    SUBTEST("Testing Rename Attribute Function");
+    SUBTEST("Rename Attribute Function");
 
     try {
 	// Open file
@@ -308,7 +307,7 @@ static void test_attr_basic_read()
     int i, j;
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Attribute Reading Functions");
+    SUBTEST("Basic Attribute Reading Functions");
 
     try {
 	// Open file
@@ -375,7 +374,7 @@ static void test_attr_compound_write()
 {
 
 	// Output message about test being performed
-    SUBTEST("Testing Multiple Attribute Functions");
+    SUBTEST("Multiple Attribute Functions");
 
     try {
 	// Create file
@@ -439,7 +438,7 @@ static void test_attr_compound_read()
     int     i,j;
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Attribute Functions");
+    SUBTEST("Basic Attribute Functions");
 
     try {
 	// Open file
@@ -568,7 +567,7 @@ static void test_attr_compound_read()
 static void test_attr_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Basic Scalar Attribute Writing Functions");
+    SUBTEST("Basic Scalar Attribute Writing Functions");
 
     try {
 	// Create file
@@ -622,7 +621,7 @@ static void test_attr_scalar_write()
 static void test_attr_scalar_read()
 {
     // Output message about test being performed
-    SUBTEST("Testing Basic Scalar Attribute Reading Functions");
+    SUBTEST("Basic Scalar Attribute Reading Functions");
 
     try {
 	// Open file
@@ -666,7 +665,7 @@ static void test_attr_scalar_read()
 static void test_attr_mult_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Multiple Attribute Writing Functions");
+    SUBTEST("Multiple Attribute Writing Functions");
 
     try {
 	// Create file
@@ -743,7 +742,7 @@ static void test_attr_mult_read()
     int     i,j,k;
 
 	// Output message about test being performed
-    SUBTEST("Testing Multiple Attribute Reading Functions");
+    SUBTEST("Multiple Attribute Reading Functions");
 
     try {
 	// Open file
@@ -932,7 +931,7 @@ static void test_attr_delete()
     H5std_string  attr_name; // Buffer for attribute names
 
 	// Output message about test being performed
-    SUBTEST("Testing Removing Attribute Function");
+    SUBTEST("Removing Attribute Function");
 
     try {
 	// Open file
@@ -1032,7 +1031,7 @@ static void test_attr_dtype_shared()
     h5_stat_size_t filesize;             /* Size of file after modifications */
 
     // Output message about test being performed
-    SUBTEST("Testing Shared Datatypes with Attributes");
+    SUBTEST("Shared Datatypes with Attributes");
 
     try {
 	// Create a file
@@ -1189,7 +1188,7 @@ const int ATTR_LEN = 17;
 static void test_string_attr()
 {
     // Output message about test being performed
-    SUBTEST("Testing I/O on FL and VL String Attributes");
+    SUBTEST("I/O on FL and VL String Attributes");
 
     try {
 	// Create file
@@ -1308,6 +1307,7 @@ extern "C"
 void test_attr()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Attributes\n");
     MESSAGE(5, ("Testing Attributes\n"));
 
     test_attr_basic_write();	// Test basic H5A writing code

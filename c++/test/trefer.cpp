@@ -34,7 +34,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -82,7 +81,7 @@ static void test_reference_obj(void)
     const  H5std_string write_comment="Foo!"; // Comments for group
 
     // Output message about test being performed
-    SUBTEST("Testing Object Reference Functions");
+    SUBTEST("Object Reference Functions");
 
     H5File* file1 = NULL;
     try {
@@ -205,7 +204,7 @@ static void test_reference_obj(void)
 	dset2.read(tbuf, PredType::NATIVE_UINT);
 
 	for(tu32=(unsigned *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
-	   VERIFY(*tu32, (uint32_t)(i*3), "Data");
+	   verify_val(*tu32, (uint32_t)(i*3), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
 	// Close dereferenced dataset
 	dset2.close();
@@ -290,6 +289,7 @@ extern "C"
 void test_reference(void)
 {
     // Output message about test being performed
+    //MESSAGE("Testing References\n");
     MESSAGE(5, ("Testing References\n"));
 
     test_reference_obj();       // Test basic object reference functionality
