@@ -14,12 +14,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
-#include "h5test.h"
 #include "h5tools_utils.h"
 
 extern char  *progname;
 static int verify_layout(hid_t pid, pack_info_t *obj);
 static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
+
+/* number of members in an array */
+#ifndef NELMTS
+#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
+#endif
 
 
 /*-------------------------------------------------------------------------

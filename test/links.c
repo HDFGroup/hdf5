@@ -6214,34 +6214,19 @@ external_link_endian(hbool_t new_format)
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
     hid_t       lapl_id = (-1);                 /* Prop List ID */
-    char      * srcdir = getenv("srcdir");      /* The source directory */
-    char        pathbuf[NAME_BUF_SIZE];         /* Path to the files */
-    char        namebuf[NAME_BUF_SIZE];
+    const char  *pathbuf = H5_get_srcdir();     /* Path to the files */
+    const char  *namebuf;
 
     if(new_format)
         TESTING("endianness of external links (w/new group format)")
     else
         TESTING("endianness of external links")
 
-    /*
-     * Create the name of the file to open (in case we are using the --srcdir
-     * option and the file is in a different directory from this test).
-     */
-    if (srcdir && ((HDstrlen(srcdir) + 2) < sizeof(pathbuf)) )
-    {
-        HDstrcpy(pathbuf, srcdir);
-        HDstrcat(pathbuf, "/");
-    }
-    else
-        HDstrcpy(pathbuf, "");
-
     /* Create a link access property list with the path to the srcdir */
     if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
     if(H5Pset_elink_prefix(lapl_id, pathbuf) < 0) TEST_ERROR
 
-    if(HDstrlen(pathbuf) + HDstrlen(LE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
-    HDstrcpy(namebuf, pathbuf);
-    HDstrcat(namebuf, LE_FILENAME);
+    namebuf = H5_get_srcdir_filename(LE_FILENAME); /* Corrected test file name */
 
     /* Test LE file; try to open a group through the external link */
     if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -6255,9 +6240,7 @@ external_link_endian(hbool_t new_format)
     if(H5Gclose(gid) < 0) TEST_ERROR
     if(H5Fclose(fid) < 0) TEST_ERROR
 
-    if(HDstrlen(pathbuf) + HDstrlen(BE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
-    HDstrcpy(namebuf, pathbuf);
-    HDstrcat(namebuf, BE_FILENAME);
+    namebuf = H5_get_srcdir_filename(BE_FILENAME); /* Corrected test file name */
 
     /* Test BE file; try to open a group through the external link */
     if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -8300,8 +8283,7 @@ build_visit_file(hid_t fapl)
     hid_t did = (-1);                   /* Dataset ID */
     hid_t tid = (-1);                   /* Datatype ID */
     char filename[NAME_BUF_SIZE];
-    char pathname[1024];                /* Path of external link file */
-    char *srcdir = getenv("srcdir");    /* where the src code is located */
+    const char *pathname = H5_get_srcdir_filename(LINKED_FILE); /* Corrected test file name */
 
     h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
 
@@ -8337,14 +8319,6 @@ build_visit_file(hid_t fapl)
     if(H5Lcreate_hard(fid, "/", fid, "/Group1/Group2/hard_zero", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create external link to existing file */
-    pathname[0] = '\0';
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
-        HDstrcpy(pathname, srcdir);
-        HDstrcat(pathname, "/");
-    }
-    HDstrcat(pathname, LINKED_FILE);
-
     if(H5Lcreate_external(pathname, "/group", fid, "/ext_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create dangling external link to non-existent file */

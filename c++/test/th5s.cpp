@@ -43,6 +43,7 @@
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
+#include "H5srcdir.h"
 
 const H5std_string    TESTFILE("th5s.h5");
 const H5std_string    DATAFILE("th5s1.h5");
@@ -184,13 +185,7 @@ static void test_h5s_basic()
 	* If this test fails and the H5S_MAX_RANK variable has changed, follow
 	* the instructions in space_overflow.c for regenating the th5s.h5 file.
 	*/
-	char testfile[512]="";
-	char *srcdir = getenv("srcdir");
-	if (srcdir && ((strlen(srcdir) + strlen(TESTFILE.c_str()) + 1) < sizeof(testfile))){
-	    strcpy(testfile, srcdir);
-	    strcat(testfile, "/");
-	}
-	strcat(testfile, TESTFILE.c_str());
+        const char *testfile = H5_get_srcdir_filename(TESTFILE.c_str());
 
 	// Create file
 	H5File fid1(testfile, H5F_ACC_RDONLY);

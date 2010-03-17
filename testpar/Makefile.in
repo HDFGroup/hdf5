@@ -50,8 +50,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testph5.sh.in $(top_srcdir)/config/commence.am \
+DIST_COMMON = $(srcdir)/H5srcdir.h.in $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/testph5.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1)
 TESTS = $(check_PROGRAMS) $(am__EXEEXT_2)
@@ -62,7 +63,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testph5.sh
+CONFIG_CLEAN_FILES = H5srcdir.h testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
@@ -444,6 +445,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+H5srcdir.h: $(top_builddir)/config.status $(srcdir)/H5srcdir.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testph5.sh: $(top_builddir)/config.status $(srcdir)/testph5.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 

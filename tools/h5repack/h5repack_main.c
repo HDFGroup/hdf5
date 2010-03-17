@@ -513,18 +513,8 @@ void read_info(const char *filename,
     FILE *fp;
     char c;
     int  i, rc=1;
-    char  *srcdir = getenv("srcdir"); /* the source directory */
-    char  data_file[512]="";          /* buffer to hold name of existing file */
 
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    if (srcdir){
-        strcpy(data_file,srcdir);
-        strcat(data_file,"/");
-    }
-    strcat(data_file,filename);
-
-
-    if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
+    if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
         error_msg(progname, "cannot open options file %s\n", filename);
         exit(EXIT_FAILURE);
     }

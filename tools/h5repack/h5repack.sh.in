@@ -435,7 +435,7 @@ else
 fi
 
 #file
-arg="$FILE4 -e $INFO_FILE"
+arg="$FILE4 -e $srcdir/$INFO_FILE"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg 
 else

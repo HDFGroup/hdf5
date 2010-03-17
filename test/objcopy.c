@@ -6076,18 +6076,10 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl)
 {
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
-    char *srcdir = HDgetenv("srcdir");  /* Where the src code is located */
-    char src_filename[NAME_BUF_SIZE] = "";
+    const char *src_filename = H5_get_srcdir_filename(FILE_OLD_LAYOUT); /* Corrected test file name */
     char dst_filename[NAME_BUF_SIZE];
 
     TESTING("H5Ocopy(): dataset with old layout format");
-
-    /* Generate correct name for source file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_OLD_LAYOUT) + 1) < sizeof(src_filename))) {
-        HDstrcpy(src_filename, srcdir);
-        HDstrcat(src_filename, "/");
-    } /* end if */
-    HDstrcat(src_filename, FILE_OLD_LAYOUT);
 
     /* Initialize the destination filename */
     h5_fixname(FILENAME[1], fapl, dst_filename, sizeof dst_filename);

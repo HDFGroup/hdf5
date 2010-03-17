@@ -340,6 +340,7 @@
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
+./c++/test/H5srcdir.h.in
 ./c++/test/Makefile.am
 ./c++/test/Makefile.in
 ./c++/test/dsets.cpp
@@ -364,6 +365,7 @@
 #------------------------------------------------------------------------------
 
 ./perform/COPYING
+./perform/H5srcdir.h.in
 ./perform/Makefile.am
 ./perform/Makefile.in
 ./perform/benchpar.c
@@ -787,6 +789,7 @@
 ./src/H5win32defs.h
 
 ./test/COPYING
+./test/H5srcdir.h.in
 ./test/Makefile.am
 ./test/Makefile.in
 ./test/app_ref.c
@@ -932,6 +935,7 @@
 ./test/testfiles/error_test_2
 
 ./testpar/COPYING
+./testpar/H5srcdir.h.in
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
@@ -1026,6 +1030,7 @@
 ./tools/h5diff/testph5diff.sh
 
 # h5repack sources
+./tools/h5repack/H5srcdir.h.in
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/h5repack.sh.in
@@ -1705,6 +1710,7 @@
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
 ./hl/test/COPYING
+./hl/test/H5srcdir.h.in
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/dsdata.txt
@@ -1877,6 +1883,7 @@
 ./windows/c++/examples/writedatatestdll/writedatatestdll.vcproj
 
 # C++ Tests
+./windows/c++/test/H5srcdir.h
 ./windows/c++/test/checkcpptests.bat
 ./windows/c++/test/testhdf5_cpp/testhdf5_cpp.vcproj
 ./windows/c++/test/testhdf5_cppdll/testhdf5_cppdll.vcproj
@@ -2019,6 +2026,7 @@
 ./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.vfproj
 
 # High-Level Library Tests
+./windows/hl/test/H5srcdir.h
 ./windows/hl/test/checkhltests.bat
 ./windows/hl/test/hl_test_ds/hl_test_ds.vcproj
 ./windows/hl/test/hl_test_dsdll/hl_test_dsdll.vcproj
@@ -2045,6 +2053,7 @@
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
 
 # Performance Tests
+./windows/perform/H5srcdir.h
 ./windows/perform/checkperformtests.bat
 ./windows/perform/perf_serialdll/perf_serialdll.vcproj
 ./windows/perform/perf_serial/perf_serial.vcproj
@@ -2078,6 +2087,7 @@
 ./windows/src/H5pubconf.h
 
 # Library Test Projects
+./windows/test/H5srcdir.h
 ./windows/test/checktests.bat
 ./windows/test/testerror.bat
 ./windows/test/app_ref/app_ref.vcproj
@@ -2207,6 +2217,7 @@
 ./windows/tools/h5lsdll/h5lsdll.vcproj
 ./windows/tools/h5mkgrp/h5mkgrp.vcproj
 ./windows/tools/h5mkgrp/testh5mkgrp.bat
+./windows/tools/h5repack/H5srcdir.h
 ./windows/tools/h5repack/h5repack.vcproj
 ./windows/tools/h5repack/h5repack.bat
 ./windows/tools/h5repackdll/h5repackdll.vcproj

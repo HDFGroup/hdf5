@@ -24,6 +24,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "H5srcdir.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <signal.h>

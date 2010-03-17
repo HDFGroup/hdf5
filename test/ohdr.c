@@ -362,20 +362,7 @@ main(void)
         HDputs("Accessing objects with unknown header messages:");
         {
             hid_t file2;                    /* File ID for 'bogus' object file */
-            char testpath[512] = "";
-            char testfile[512] = "";
-            char *srcdir = HDgetenv("srcdir");
-
-            /* Build path to all test files */
-            if(srcdir && ((HDstrlen(srcdir) + 2) < sizeof(testpath))) {
-                HDstrcpy(testpath, srcdir);
-                HDstrcat(testpath, "/");
-            } /* end if */
-
-            /* Build path to test file */
-            if(srcdir && ((HDstrlen(testpath) + HDstrlen(FILE_BOGUS) + 1) < sizeof(testfile)))
-                HDstrcpy(testfile, testpath);
-            HDstrcat(testfile, FILE_BOGUS);
+            const char *testfile = H5_get_srcdir_filename(FILE_BOGUS);
 
             TESTING("object with unknown header message and no flags set");
 

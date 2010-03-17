@@ -1802,8 +1802,7 @@ test_compat(void)
         long l[ARRAY1_DIM1];
         double d;
     } s3_t;
-    char testfile[512]="";          /* Character buffer for corrected test file name */
-    char *srcdir = getenv("srcdir");    /* Pointer to the directory the source code is located within */
+    const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		tid1;       /* Array Datatype ID			*/
@@ -1831,12 +1830,6 @@ test_compat(void)
      *  changed, follow the instructions in gen_old_array.c for regenerating
      *  the tarrold.h5 file.
      */
-    /* Generate the correct name for the test file, by prepending the source path */
-    if (srcdir && ((strlen(srcdir) + strlen(TESTFILE) + 1) < sizeof(testfile))) {
-        strcpy(testfile, srcdir);
-        strcat(testfile, "/");
-    }
-    strcat(testfile, TESTFILE);
 
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);

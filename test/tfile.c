@@ -2957,7 +2957,6 @@ test_filespace_compatible(void)
     int         rdbuf[100];	/* Temporary buffer for reading in dataset data */
     uint8_t     buf[READ_OLD_BUFSIZE];	/* temporary buffer for reading */
     ssize_t 	nread;  	/* Number of bytes read in */
-    char  	*srcdir = HDgetenv("srcdir"); /* where the src code is located */
     unsigned    i, j;		    /* Local index variable */
     hssize_t	free_space;	    /* Amount of free space in the file */
     hsize_t	threshold;	    /* Free space section threshold */
@@ -2968,14 +2967,7 @@ test_filespace_compatible(void)
     MESSAGE(5, ("Testing File space compatibility for 1.6 and 1.8 files\n"));
 
     for(j = 0; j < NELMTS(OLD_FILENAME); j++) {
-        char  	filename[FILENAME_LEN] = "";  /* old test file name */
-
-	/* Generate correct name for test file by prepending the source path */
-	if(srcdir && ((HDstrlen(srcdir) + HDstrlen(OLD_FILENAME[j]) + 1) < sizeof(filename))) {
-	    HDstrcpy(filename, srcdir);
-	    HDstrcat(filename, "/");
-	}
-	HDstrcat(filename, OLD_FILENAME[j]);
+        const char *filename = H5_get_srcdir_filename(OLD_FILENAME[j]); /* Corrected test file name */
 
 	/* Copy old file into test file */
 	fd_old = HDopen(filename, O_RDONLY, 0666);

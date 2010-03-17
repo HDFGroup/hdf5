@@ -4051,10 +4051,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/Makefile
                  test/testcheck_version.sh
                  test/testerror.sh
+                 test/H5srcdir.h
                  test/testlibinfo.sh
                  testpar/Makefile
+                 testpar/H5srcdir.h
                  testpar/testph5.sh
                  perform/Makefile
+                 perform/H5srcdir.h
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
@@ -4064,6 +4067,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5diff/Makefile
                  tools/h5jam/Makefile
                  tools/h5jam/testh5jam.sh
+                 tools/h5repack/H5srcdir.h
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
@@ -4080,6 +4084,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  c++/src/Makefile
                  c++/src/h5c++
                  c++/test/Makefile
+                 c++/test/H5srcdir.h
                  c++/examples/Makefile
                  c++/examples/testh5c++.sh
                  fortran/Makefile
@@ -4092,6 +4097,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
+                 hl/test/H5srcdir.h
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/examples/Makefile

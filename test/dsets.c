@@ -2256,8 +2256,7 @@ test_missing_filter(hid_t file)
     hsize_t     dset_size;      /* Dataset size */
     size_t      i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
-    char testfile[512]="";      /* Buffer to hold name of existing test file */
-    char *srcdir = HDgetenv("srcdir");    /* The source directory, if we are using the --srcdir configure option */
+    const char *testfile = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
 
     TESTING("dataset access with missing filter");
 
@@ -2402,13 +2401,6 @@ test_missing_filter(hid_t file)
 
 
     /* Try reading existing dataset with deflate filter */
-
-    /* Compose the name of the file to open, using the srcdir, if appropriate */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_DEFLATE_NAME) + 1) < sizeof(testfile))){
-	HDstrcpy(testfile, srcdir);
-	HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, FILE_DEFLATE_NAME);
 
     /* Open existing file */
     if((fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
@@ -5935,8 +5927,7 @@ test_filters_endianess(void)
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    char      *srcdir = getenv("srcdir"); /* the source directory */
-    char      data_file[512]="";          /* buffer to hold name of existing file */
+    const char *data_file = H5_get_srcdir_filename("test_filters_le.hdf5"); /* Corrected test file name */
 
     TESTING("filters with big-endian/little-endian data");
 
@@ -5945,14 +5936,6 @@ test_filters_endianess(void)
     * step 1: open a file written on a little-endian machine
     *-------------------------------------------------------------------------
     */
-
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    HDstrcpy(data_file, "");
-    if(srcdir) {
-        HDstrcpy(data_file, srcdir);
-        HDstrcat(data_file, "/");
-    }
-    HDstrcat(data_file, "test_filters_le.hdf5");
 
     /* open */
     if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -5969,12 +5952,7 @@ test_filters_endianess(void)
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    HDstrcpy(data_file, "");
-    if(srcdir) {
-        HDstrcpy(data_file, srcdir);
-        HDstrcat(data_file, "/");
-    }
-    HDstrcat(data_file, "test_filters_be.hdf5");
+    data_file = H5_get_srcdir_filename("test_filters_be.hdf5"); /* Corrected test file name */
 
     /* open */
     if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR

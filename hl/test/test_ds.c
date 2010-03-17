@@ -2143,15 +2143,7 @@ static int test_foreign_scaleattached(const char *fileforeign)
     hid_t   fid = -1;
     hid_t   did = -1;
     hid_t   dsid = -1;
-    char  *srcdir = getenv("srcdir"); /* the source directory */
-    char  filename[512]="";          /* buffer to hold name of existing file */
-
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    if (srcdir) {
-        strcpy(filename,srcdir);
-        strcat(filename,"/");
-    }
-    strcat(filename, fileforeign);
+    const char *filename = H5_get_srcdir_filename(fileforeign);
 
     TESTING2("test_foreign_scaleattached");
 
@@ -4856,19 +4848,9 @@ static int read_data( const char* fname,
     size_t   nelms;
     FILE     *f;
     float    val;
-    char     *srcdir = getenv("srcdir");  /* the source directory */
-    char     data_file[512];              /* buffer to hold name of existing data file */
+    const char *data_file = H5_get_srcdir_filename(fname);
 
-    strcpy(data_file, "");
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    if(srcdir)
-    {
-        strcpy(data_file, srcdir);
-        strcat(data_file, "/");
-    }
     /* read first data file */
-    strcat(data_file,fname);
-
     f = fopen(data_file, "r");
     if( f == NULL )
     {

@@ -510,8 +510,7 @@ static int test_generate(void)
     int      imax, jmax, kmax;
     float    valex, xmin, xmax, value;
     FILE     *f;
-    char     *srcdir = getenv("srcdir"); /* the source directory */
-    char     data_file[512]="";          /* buffer to hold name of existing data file */
+    const char *data_file = H5_get_srcdir_filename(DATA_FILE4);
     int      i;
 
     /* create a file using default properties */
@@ -519,17 +518,6 @@ static int test_generate(void)
         goto out;
 
     printf("Testing read and process data and make indexed images\n");
-
-    /*-------------------------------------------------------------------------
-    * compose the name of the file to open, using the srcdir, if appropriate
-    *-------------------------------------------------------------------------
-    */
-    if ( srcdir )
-    {
-        strcpy(data_file, srcdir);
-        strcat(data_file, "/");
-    }
-    strcat(data_file,DATA_FILE4);
 
     /*-------------------------------------------------------------------------
     * read data; the file data format is described below
@@ -723,20 +711,7 @@ static int read_data( const char* fname, /*IN*/
     char   str[20];
     FILE   *f;
     int    w, h;
-    char   *srcdir = getenv("srcdir"); /* the source directory */
-    char   data_file[512]="";          /* buffer to hold name of existing data file */
-
-    /*-------------------------------------------------------------------------
-    * compose the name of the file to open, using "srcdir", if appropriate
-    *-------------------------------------------------------------------------
-    */
-    strcpy(data_file, "");
-    if (srcdir)
-    {
-        strcpy(data_file, srcdir);
-        strcat(data_file, "/");
-    }
-    strcat(data_file,fname);
+    const char *data_file = H5_get_srcdir_filename(fname);
 
     /*-------------------------------------------------------------------------
     * read
@@ -811,20 +786,7 @@ static int read_palette(const char* fname,
     unsigned int  green;
     unsigned int  blue;
     unsigned      nentries;
-    char          *srcdir = getenv("srcdir"); /* the source directory */
-    char          data_file[512];             /* buffer to hold name of existing data file */
-
-    /*-------------------------------------------------------------------------
-    * compose the name of the file to open, using "srcdir", if appropriate
-    *-------------------------------------------------------------------------
-    */
-    strcpy(data_file, "");
-    if (srcdir)
-    {
-        strcpy(data_file, srcdir);
-        strcat(data_file, "/");
-    }
-    strcat(data_file,fname);
+    const char *data_file = H5_get_srcdir_filename(fname);
 
     /* ensure the given palette is valid */
     if (!palette)

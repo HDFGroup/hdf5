@@ -16,8 +16,6 @@
 #include <stdio.h>
 #include "h5repack.h"
 #include "h5tools.h"
-#include "h5test.h"
-
 
 
 /*-------------------------------------------------------------------------
