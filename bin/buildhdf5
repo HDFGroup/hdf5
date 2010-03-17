@@ -305,7 +305,7 @@ if [ ! -f config.status ]; then
     CONFIGURE="$CONFIGURE $CONFIG_OP $*"
     STEP "Configure HDF5..." "$CONFIGURE" "#config"
 else
-    STEP "Confiugre Skipped" "echo Confiugre Skipped" "#config"
+    STEP "Configure Skipped" "echo Configure Skipped" "#config"
 fi
 
 if [ x-$CONFIG_ONLY = x-yes ]; then
