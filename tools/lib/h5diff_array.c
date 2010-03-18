@@ -747,7 +747,8 @@ hsize_t diff_datum(void       *_mem1,
                     NULL,
                     options);
                 else {
-                    parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>",
+                    if(options->m_verbose)
+                        parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>\n",
                         obj1, obj2);
                     options->not_cmp = 1;
                 }
