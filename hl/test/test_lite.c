@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "h5hltest.h"
+#include "H5srcdir.h"
 #include "H5LTpublic.h"
 
 #define FILE_NAME "test_lite1.h5"

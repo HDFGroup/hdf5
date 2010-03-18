@@ -20,6 +20,7 @@
  * Purpose:	Tests datasets stored in external raw files.
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"

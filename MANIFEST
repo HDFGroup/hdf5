@@ -339,6 +339,7 @@
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
+./c++/test/H5srcdir_str.h.in
 ./c++/test/Makefile.am
 ./c++/test/Makefile.in
 ./c++/test/dsets.cpp
@@ -417,6 +418,7 @@
 ./src/H5err.txt
 ./src/H5config.h.in
 ./src/H5detect.c
+./src/H5make_libsettings.c
 ./src/H5overflow.txt
 ./src/H5overflow.h
 ./src/H5private.h
@@ -761,6 +763,8 @@
 ./src/H5win32defs.h
 
 ./test/COPYING
+./test/H5srcdir.h
+./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
 ./test/app_ref.c
@@ -1666,6 +1670,7 @@
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
 ./hl/test/COPYING
+./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/dsdata.txt
@@ -1836,6 +1841,7 @@
 ./windows/c++/examples/writedatatestdll/writedatatestdll.vcproj
 
 # C++ Tests
+./windows/c++/test/H5srcdir_str.h
 ./windows/c++/test/checkcpptests.bat
 ./windows/c++/test/dsets_cpp/dsets_cpp.vcproj
 ./windows/c++/test/dsets_cppdll/dsets_cppdll.vcproj
@@ -1980,6 +1986,7 @@
 ./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.vfproj
 
 # High-Level Library Tests
+./windows/hl/test/H5srcdir_str.h
 ./windows/hl/test/checkhltests.bat
 ./windows/hl/test/hl_test_ds/hl_test_ds.vcproj
 ./windows/hl/test/hl_test_dsdll/hl_test_dsdll.vcproj
@@ -2039,6 +2046,7 @@
 ./windows/src/H5pubconf.h
 
 # Library Test Projects
+./windows/test/H5srcdir_str.h
 ./windows/test/checktests.bat
 ./windows/test/testerror.bat
 ./windows/test/app_ref/app_ref.vcproj

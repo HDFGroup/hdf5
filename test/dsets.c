@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "h5test.h"
+#include "H5srcdir.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
 #endif

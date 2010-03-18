@@ -22,6 +22,7 @@
 *************************************************************/
 
 #include "testhdf5.h"
+#include "H5srcdir.h"
 
 #include "H5private.h"
 #include "H5Bprivate.h"

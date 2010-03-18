@@ -52,9 +52,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
-	$(srcdir)/testlibinfo.sh.in $(top_srcdir)/config/commence.am \
+DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/testcheck_version.sh.in \
+	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT)
@@ -67,7 +68,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh testlibinfo.sh
+CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
+	testlibinfo.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
@@ -784,6 +786,8 @@ $(am__aclocal_m4_deps):
 testcheck_version.sh: $(top_builddir)/config.status $(srcdir)/testcheck_version.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

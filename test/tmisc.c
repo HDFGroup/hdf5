@@ -30,6 +30,7 @@
 
 #include "hdf5.h"
 #include "testhdf5.h"
+#include "H5srcdir.h"
 #include "H5Dpkg.h"		/* Datasets 				*/
 
 /* Definitions for misc. test #1 */

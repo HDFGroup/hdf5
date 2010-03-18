@@ -17,7 +17,9 @@
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 #include "H5Iprivate.h"
+
 /*
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.

@@ -23,6 +23,7 @@
  *		working properly.
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 
 const char *FILENAME[] = {
     "mtime",
