@@ -52,7 +52,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/H5srcdir.h.in $(srcdir)/Makefile.am \
+DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/testcheck_version.sh.in \
 	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
 	$(top_srcdir)/config/commence.am \
@@ -68,7 +68,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir.h \
+CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
 	testlibinfo.sh
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
@@ -801,7 +801,7 @@ testcheck_version.sh: $(top_builddir)/config.status $(srcdir)/testcheck_version.
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-H5srcdir.h: $(top_builddir)/config.status $(srcdir)/H5srcdir.h.in
+H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

@@ -4054,10 +4054,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  testpar/Makefile
-                 testpar/H5srcdir_str.h
                  testpar/testph5.sh
                  perform/Makefile
-                 perform/H5srcdir_str.h
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh

@@ -50,7 +50,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/H5srcdir.h.in $(srcdir)/Makefile.am \
+DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 
@@ -65,7 +65,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = H5srcdir.h
+CONFIG_CLEAN_FILES = H5srcdir_str.h
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = testhdf5$(EXEEXT)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) dsets.$(OBJEXT) \
@@ -420,7 +420,7 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-H5srcdir.h: $(top_builddir)/config.status $(srcdir)/H5srcdir.h.in
+H5srcdir_str.h: $(top_builddir)/config.status $(srcdir)/H5srcdir_str.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

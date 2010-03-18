@@ -365,7 +365,6 @@
 #------------------------------------------------------------------------------
 
 ./perform/COPYING
-./perform/H5srcdir_str.h.in
 ./perform/Makefile.am
 ./perform/Makefile.in
 ./perform/benchpar.c
@@ -937,7 +936,6 @@
 ./test/testfiles/error_test_2
 
 ./testpar/COPYING
-./testpar/H5srcdir_str.h.in
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
@@ -2054,7 +2052,6 @@
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
 
 # Performance Tests
-./windows/perform/H5srcdir_str.h
 ./windows/perform/checkperformtests.bat
 ./windows/perform/perf_serialdll/perf_serialdll.vcproj
 ./windows/perform/perf_serial/perf_serial.vcproj
