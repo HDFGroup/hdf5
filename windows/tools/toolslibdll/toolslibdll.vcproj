@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -189,7 +189,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\tools\lib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -262,7 +262,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\tools\lib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -323,7 +323,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -333,7 +333,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -343,7 +343,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -353,7 +353,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -367,7 +367,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -377,7 +377,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -387,7 +387,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -397,7 +397,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -411,7 +411,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -421,7 +421,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -431,7 +431,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -441,7 +441,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -455,7 +455,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -465,7 +465,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -475,7 +475,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -485,7 +485,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -499,7 +499,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -509,7 +509,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -519,7 +519,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -529,7 +529,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -543,7 +543,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -553,7 +553,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -563,7 +563,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -573,7 +573,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -587,7 +587,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -597,7 +597,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -607,7 +607,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -617,7 +617,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -631,7 +631,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -641,7 +641,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -651,7 +651,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -661,7 +661,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -675,7 +675,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -685,7 +685,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -695,7 +695,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -705,7 +705,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -719,7 +719,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -729,7 +729,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -739,7 +739,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -749,7 +749,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -763,7 +763,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -773,7 +773,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -783,7 +783,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -793,7 +793,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
@@ -807,7 +807,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -817,7 +817,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -827,7 +827,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -837,7 +837,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
 					/>
 				</FileConfiguration>
 			</File>
