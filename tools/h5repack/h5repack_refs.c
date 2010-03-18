@@ -690,23 +690,31 @@ static const char* MapIdToName(hid_t refobj_id,
                                trav_table_t *travt)
 {
     unsigned int i;
+    const char* ret = NULL;
+    H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 
     /* linear search */
     for(i = 0; i < travt->nobjs; i++)
     {
-        if(travt->objs[i].type == H5O_TYPE_DATASET)
+        if(travt->objs[i].type == H5O_TYPE_DATASET || 
+           travt->objs[i].type == H5O_TYPE_GROUP ||
+           travt->objs[i].type == H5O_TYPE_NAMED_DATATYPE)
         {
             H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 
             /* obtain information to identify the referenced object uniquely */
             if(H5Oget_info(refobj_id, &ref_oinfo) < 0)
-                return NULL;
+                goto out;
 
             if(ref_oinfo.addr == travt->objs[i].objno)
-                return(travt->objs[i].name);
+            {
+                ret = travt->objs[i].name;
+                goto out;
+            }
         }  /* end if */
     } /* i */
 
-    return NULL;
+out:
+    return ret;
 }
 
