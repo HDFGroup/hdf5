@@ -28,6 +28,7 @@
 #define H5G_TESTING
 
 #include "h5test.h"
+#include "H5srcdir.h"
 #include "H5Gpkg.h"		/* Groups 				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */

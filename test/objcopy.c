@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include "h5test.h"
+#include "H5srcdir.h"
 
 /*
  * This file needs to access private information from the H5S package.
