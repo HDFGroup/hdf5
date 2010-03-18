@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="hdf5"
 	ProjectGUID="{26346A09-C500-49E7-963A-D22A8E09AAB7}"
 	RootNamespace="hdf5"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -353,10 +354,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5Bdbg.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\H5B2dbg.c"
 				>
 			</File>
@@ -381,6 +378,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Bdbg.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5C.c"
 				>
 			</File>
@@ -394,6 +395,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5dbg.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Dbtree.c"
 				>
 			</File>
 			<File
@@ -433,11 +438,8 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5Dbtree.c"
+				RelativePath="..\..\..\src\H5Dlayout.c"
 				>
-			</File>
-			<File
-				RelativePath="..\..\..\src\H5Dlayout.c">
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dmpio.c"

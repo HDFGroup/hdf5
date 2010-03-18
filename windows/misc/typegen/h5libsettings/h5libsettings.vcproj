@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="writedatatestdll"
-	ProjectGUID="{562DA812-6FD9-424A-BC3E-044362DC93C1}"
+	Name="h5libsettings"
+	ProjectGUID="{36D1F9B2-9AF0-438B-91D1-2F651C27A640}"
+	RootNamespace="h5libsettings"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,10 +20,10 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\c++\examples\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -41,26 +42,24 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.tlb"
+				TypeLibraryName=".\Release/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\c++\src,..\..\..\..\src"
-				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE;HDF5CPP_USEDLL"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.pch"
-				AssemblerListingLocation=".\../../../../c++/examples/writedatatestdll/Release/"
-				ObjectFile=".\../../../../c++/examples/writedatatestdll/Release/"
-				ProgramDataBaseFileName=".\../../../../c++/examples/writedatatestdll/Release/"
+				PrecompiledHeaderFile=".\Release/h5libsettings.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -68,19 +67,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5dll.lib hdf5_cppdll.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\release,..\..\..\..\proj\hdf5_cppdll\release,..\..\..\..\hdf5lib\release\dll"
-				ProgramDatabaseFile=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.pdb"
+				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -106,14 +104,16 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\c++\examples\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -133,26 +133,24 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.tlb"
+				TypeLibraryName=".\Release/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\c++\src,..\..\..\..\src"
-				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE;HDF5CPP_USEDLL"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.pch"
-				AssemblerListingLocation=".\../../../../c++/examples/writedatatestdll/Release/"
-				ObjectFile=".\../../../../c++/examples/writedatatestdll/Release/"
-				ProgramDataBaseFileName=".\../../../../c++/examples/writedatatestdll/Release/"
+				PrecompiledHeaderFile=".\Release/h5libsettings.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -160,19 +158,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5dll.lib hdf5_cppdll.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\release,..\..\..\..\proj\hdf5_cppdll\release,..\..\..\..\hdf5lib\release\dll"
-				ProgramDatabaseFile=".\../../../../c++/examples/writedatatestdll/Release/writedatatestdll.pdb"
+				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -198,14 +195,16 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\c++\examples\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -224,25 +223,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.tlb"
+				TypeLibraryName=".\Debug/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\c++\src,..\..\..\..\src"
-				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE;HDF5CPP_USEDLL"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.pch"
-				AssemblerListingLocation=".\../../../../c++/examples/writedatatestdll/Debug/"
-				ObjectFile=".\../../../../c++/examples/writedatatestdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../c++/examples/writedatatestdll/Debug/"
+				PrecompiledHeaderFile=".\Debug/h5libsettings.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -250,20 +247,19 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5ddll.lib hdf5_cppddll.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\debug,..\..\..\..\proj\hdf5_cppdll\debug,..\..\..\..\hdf5lib\debug\dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.pdb"
+				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -289,14 +285,16 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\c++\examples\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -316,25 +314,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.tlb"
+				TypeLibraryName=".\Debug/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\c++\src,..\..\..\..\src"
-				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE;HDF5CPP_USEDLL"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.pch"
-				AssemblerListingLocation=".\../../../../c++/examples/writedatatestdll/Debug/"
-				ObjectFile=".\../../../../c++/examples/writedatatestdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../c++/examples/writedatatestdll/Debug/"
+				PrecompiledHeaderFile=".\Debug/h5libsettings.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -342,20 +338,19 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5ddll.lib hdf5_cppddll.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\debug,..\..\..\..\proj\hdf5_cppdll\debug,..\..\..\..\hdf5lib\debug\dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../c++/examples/writedatatestdll/Debug/writedatatestdll.pdb"
+				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -381,58 +376,33 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\..\..\c++\examples\writedata.cpp"
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
 			>
-			<FileConfiguration
-				Name="Release|Win32"
+			<File
+				RelativePath="..\..\..\..\src\H5make_libsettings.c"
 				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="2"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|x64"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="2"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="0"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-					BasicRuntimeChecks="3"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug|x64"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					Optimization="0"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;"
-					BasicRuntimeChecks="3"
-				/>
-			</FileConfiguration>
-		</File>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;fi;fd"
+			>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

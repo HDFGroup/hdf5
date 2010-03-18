@@ -16,12 +16,9 @@ rem access to either file, you may request a copy from helphdfgroup.org.
 rem File Name: hdf5build.bat
 rem This batch file is used to build HDF5 Libraries and Tools.
 rem This batch file takes the following options:
-rem .  /vs8              Build HDF5 using Visual Studio 2005
 rem .  /vs9              Build HDF5 using Visual Studio 2008
-rem .                    Note: Default is Visual Studio 2005
 rem .  /fort             Build HDF5 with Fortran libraries
 rem .  /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
-rem .  /ivf91            Note: Default is Intel Visual Fortran 9.1
 rem .  /nodebug          Note: Default is to build debug and release versions
 rem .  /useenv           Build HDF5 using compiler settings defined
 rem .                    in the environment, rather than the IDE.
@@ -57,13 +54,9 @@ rem Print a help message
     echo.
     echo.Usage: %~nx0 [OPTION]
     echo.
-    echo.   /vs8                Build HDF5 using Visual Studio 2005
     echo.   /vs9                Build HDF5 using Visual Studio 2008
-    echo.                       Note: Default is Visual Studio 2005
-    echo.   /fort               Build HDF5 with Fortran libraries using the
-    echo.                       Intel Fortran version specified, or 9.1 by default
+    echo.   /fort               Build HDF5 with Fortran libraries
     echo.   /ivf101             Build HDF5 Fortran using Intel Visual Fortran 10.1
-    echo.   /ivf91              Note: Default is Intel Visual Fortran 9.1
     echo.   /nodebug            Note: Default is to build debug and release versions
     echo.   /useenv             Build HDF5 using compiler settings defined
     echo.                       in the environment, rather than the IDE.
@@ -76,21 +69,13 @@ rem Parse through the parameters sent to file, and set appropriate variables
 :parse_params
 
     for %%a in (%*) do (
-        if "%%a"=="/vs8" (
-            rem Use Visual Studio 2005
-            set hdf5_vs2005=true
-            
-        ) else if "%%a"=="/vs9" (
+        if "%%a"=="/vs9" (
             rem Use Visual Studio .NET 2003
             set hdf5_vs2008=true
             
         ) else if "%%a"=="/fort" (
             rem Enable Fortran
             set hdf5_enablefortran=true
-            
-        ) else if "%%a"=="/ivf91" (
-            rem Enable Fortran
-            set hdf5_ivf91=true
             
         ) else if "%%a"=="/ivf101" (
             rem Enable Fortran
@@ -127,11 +112,11 @@ rem Setup our environment
     
     echo.Setting up environment
 
-    rem Make sure /vs8 and /vs9 weren't specified together
-    if "%hdf5_vs2005%%hdf5_vs2008%"=="truetrue" (
-        echo.Error: /vs8 and /vs9 should not be specified together.
-        exit /b 1
-    )
+    rem Make sure /vs10 and /vs9 weren't specified together
+    rem if "%hdf5_vs2010%%hdf5_vs2008%"=="truetrue" (
+    rem     echo.Error: /vs10 and /vs9 should not be specified together.
+    rem     exit /b 1
+    rem )
 
     rem Figure out which solution file to use based on configuration
     if defined hdf5_vs2008 (
@@ -143,15 +128,7 @@ rem Setup our environment
             set hdf5_sln="%CD%\windows\proj\all\all.sln"
         )
         
-    ) else (
-        echo.Using Visual Studio 2005
-        if defined hdf5_enablefortran (
-            echo.Building Fortran projects enabled
-            set hdf5_sln="%CD%\windows\proj\all_fortran\all_fortran.sln"
-        ) else (
-            set hdf5_sln="%CD%\windows\proj\all\all.sln"
-        )
-    )
+    ) 
     
     
     rem Make sure PROCESSOR_ARCHITECURE is set to either x86 or AMD64
@@ -173,7 +150,7 @@ rem Setup our environment
     if defined hdf5_vs2008 (
         if not defined hdf5_enablefortran (
             if defined vs90comntools (
-                rem This sets the Visual Studio 2005 path and environment variables
+                rem This sets the Visual Studio 2008 path and environment variables
                 if %hdf5_platform%==Win32 (
                     call "%vs90comntools%\..\..\VC\vcvarsall.bat" x86
                 ) else (
@@ -205,61 +182,6 @@ rem Setup our environment
             )
         )
         
-    ) else (
-        rem Assume Visual Studio 2005
-        if not defined hdf5_enablefortran (
-            if defined vs80comntools (
-                rem This sets the Visual Studio 2005 path and environment variables
-                if %hdf5_platform%==Win32 (
-                    call "%vs80comntools%\..\..\VC\vcvarsall.bat" x86
-                ) else (
-                    call "%vs80comntools%\..\..\VC\vcvarsall.bat" x86_amd64
-                )
-
-            ) else (
-                echo.Error: Cannot setup Visual Studio 2005 environment.  Please
-                echo.make sure VS80COMNTOOLS is defined in the environment.
-                exit /b 1
-            )
-            
-        ) else (
-            if not defined hdf5_ivf101 (
-                echo.with Intel Visual Fortran 9.1
-                
-                if defined ifort_compiler91 (
-                    rem This sets the Intel Fortran 9.1 environment, as well as
-                    rem setting the appropriate Visual Studio environment
-                    
-                    if %hdf5_platform%==Win32 (
-                        call "%ifort_compiler91%\IA32\Bin\ifortvars.bat"
-                    ) else (
-                        call "%ifort_compiler91%\em64t\Bin\ifortvars.bat"
-                    )
-                ) else (
-                    echo.Error: Cannot setup Intel Fortran 9.1 environment.  Please
-                    echo.make sure IFORT_COMPILER91 is defined in the environment.
-                    exit /b 1
-                )
-                
-            ) else (
-                echo.with Intel Visual Fortran 10.1
-                
-                if defined ifort_compiler10 (
-                    rem This sets the Intel Fortran 10.1 environment, as well as
-                    rem setting the appropriate Visual Studio environment
-                    
-                    if %hdf5_platform%==Win32 (
-                        call "%ifort_compiler10%\IA32\Bin\ifortvars.bat"
-                    ) else (
-                        call "%ifort_compiler10%\em64t\Bin\ifortvars.bat"
-                    )
-                ) else (
-                    echo.Error: Cannot setup Intel Fortran 10.1 environment.  Please
-                    echo.make sure IFORT_COMPILER10 is defined in the environment.
-                    exit /b 1
-                )
-            )
-        )
     )
         
     if defined hdf5_useenv (
