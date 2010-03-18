@@ -24,7 +24,7 @@
 
 #include "h5test.h"
 #include "H5Iprivate.h"
-#include "H5ACprivate.h"
+#include "H5AC2private.h"
 #include "cache2_common.h"
 
 /* private function declarations: */

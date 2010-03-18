@@ -1261,12 +1261,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                 if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5C2__SERIALIZE_RESIZED_FLAG;
+                *flags |= H5AC2__SERIALIZE_RESIZED_FLAG;
 		*new_len = write_size;
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr)) {
-		    *flags |= H5C2__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC2__SERIALIZE_RENAMED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 
@@ -1314,12 +1314,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                 if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5C2__SERIALIZE_RESIZED_FLAG;
+                *flags |= H5AC2__SERIALIZE_RESIZED_FLAG;
 		*new_len = write_size;
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr)) {
-		    *flags |= H5C2__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC2__SERIALIZE_RENAMED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 

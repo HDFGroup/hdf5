@@ -1475,7 +1475,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    bt->right = HADDR_UNDEF;
             H5_CHECK_OVERFLOW(shared->sizeof_rnode, size_t, hsize_t);
 	    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)shared->sizeof_rnode) < 0
-                    || H5AC2_unprotect(f, dxpl_id, H5AC2_BT, addr, (size_t)0, bt, bt_flags | H5C__DELETED_FLAG) < 0) {
+                    || H5AC2_unprotect(f, dxpl_id, H5AC2_BT, addr, (size_t)0, bt, bt_flags | H5AC2__DELETED_FLAG) < 0) {
 		bt = NULL;
                 bt_flags = H5AC2__NO_FLAGS_SET;
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to free B-tree node")
@@ -1712,7 +1712,7 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
 
 done:
-    if(bt && H5AC2_unprotect(f, dxpl_id, H5AC2_BT, addr, (size_t)0, bt, H5C__DELETED_FLAG) < 0)
+    if(bt && H5AC2_unprotect(f, dxpl_id, H5AC2_BT, addr, (size_t)0, bt, H5AC2__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node in cache")
 
     FUNC_LEAVE_NOAPI(ret_value)

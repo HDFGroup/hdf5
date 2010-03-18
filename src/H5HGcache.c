@@ -329,7 +329,7 @@ H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
         *new_len = heap->size;
 
         /* specify in flags that image has been resized */
-        *flags = H5C2__SERIALIZE_RESIZED_FLAG;
+        *flags = H5AC2__SERIALIZE_RESIZED_FLAG;
     } /* end if */
     else {
         /* copy the heap->chunk into the image buffer */

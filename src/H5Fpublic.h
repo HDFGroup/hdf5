@@ -21,9 +21,9 @@
 
 /* Public header files needed by this file */
 #include "H5public.h"
-#include "H5ACpublic.h"
+#include "H5AC1public.h"
 #include "H5AC2public.h"
-#include "H5Cpublic.h"
+#include "H5C1public.h"
 #include "H5Ipublic.h"
 
 /* When this header is included from a private header, don't make calls to H5check() */
@@ -142,9 +142,9 @@ H5_DLL herr_t H5Fget_jnl_config(hid_t file_id,
 H5_DLL herr_t H5Fset_jnl_config(hid_t file_id,
                                 const H5AC2_jnl_config_t *config_ptr);
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
-				H5AC_cache_config_t * config_ptr);
+				H5AC1_cache_config_t * config_ptr);
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,
-				H5AC_cache_config_t * config_ptr);
+				H5AC1_cache_config_t * config_ptr);
 H5_DLL herr_t H5Fget_mdc_hit_rate(hid_t file_id, double * hit_rate_ptr);
 H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
                               size_t * max_size_ptr,

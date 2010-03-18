@@ -117,4 +117,4 @@ fi
 
 # Use AIX supplied C++ compiler by default.
 CXX=${CXX=xlC}
-hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}

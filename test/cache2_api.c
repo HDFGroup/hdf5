@@ -156,7 +156,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch);
 
         if ( result < 0 ) {
 
@@ -179,7 +179,7 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass2 ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mod_config);
+        result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mod_config);
 
         if ( result < 0 ) {
 
@@ -194,7 +194,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch);
 
         if ( result < 0 ) {
 
@@ -322,7 +322,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch);
 
         if ( result < 0 ) {
 
@@ -386,7 +386,7 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass2 ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mod_config);
+        result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mod_config);
 
         if ( result < 0 ) {
 
@@ -491,7 +491,7 @@ check_fapl_mdc_api_calls(void)
 
         scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
 
-        result = H5Pget_mdc_config(test_fapl_id, (H5AC_cache_config_t *)&scratch);
+        result = H5Pget_mdc_config(test_fapl_id, (H5AC1_cache_config_t *)&scratch);
 
         if ( result < 0 ) {
 
@@ -763,7 +763,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 1 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_1) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_1) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fset_mdc_config() failed 1.\n";
@@ -776,7 +776,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 2 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_2) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_2) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fset_mdc_config() failed 2.\n";
@@ -789,7 +789,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 3 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_3) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_3) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fset_mdc_config() failed 3.\n";
@@ -802,7 +802,7 @@ check_file_mdc_api_calls(void)
     /* set alternate config 4 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_4) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_4) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fset_mdc_config() failed 4.\n";
@@ -1103,7 +1103,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 1 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_1)
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_1)
              < 0 ) {
 
             pass2 = FALSE;
@@ -1338,7 +1338,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 2 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_2)
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_2)
              < 0 ) {
 
             pass2 = FALSE;
@@ -1490,7 +1490,7 @@ mdc_api_call_smoke_check(void)
     /* set alternate config 3 */
     if ( pass2 ) {
 
-        if ( H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mod_config_3) < 0 ) {
+        if ( H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&mod_config_3) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fset_mdc_config() failed 3.\n";
@@ -2373,16 +2373,16 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
+    /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
-    /* enum H5C_cache_flash_incr_mode       */
+    /* enum H5C2_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ -1,
     /* double      flash_multiple         = */ 2.0,
     /* double      flash_threshold        = */ 0.5,
-    /* enum H5C_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
+    /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -2406,16 +2406,16 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
+    /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
-    /* enum H5C_cache_flash_incr_mode       */
+    /* enum H5C2_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ H5C2_flash_incr__add_space,
     /* double      flash_multiple         = */ 0.09,
     /* double      flash_threshold        = */ 0.5,
-    /* enum H5C_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
+    /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -2439,16 +2439,16 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
+    /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
-    /* enum H5C_cache_flash_incr_mode       */
+    /* enum H5C2_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ H5C2_flash_incr__add_space,
     /* double      flash_multiple         = */ 10.001,
     /* double      flash_threshold        = */ 0.5,
-    /* enum H5C_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
+    /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -2472,16 +2472,16 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
+    /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
-    /* enum H5C_cache_flash_incr_mode       */
+    /* enum H5C2_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ H5C2_flash_incr__add_space,
     /* double      flash_multiple         = */ 1.0,
     /* double      flash_threshold        = */ 0.099,
-    /* enum H5C_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
+    /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -2505,16 +2505,16 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
+    /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
-    /* enum H5C_cache_flash_incr_mode       */
+    /* enum H5C2_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ H5C2_flash_incr__add_space,
     /* double      flash_multiple         = */ 1.0,
     /* double      flash_threshold        = */ 1.001,
-    /* enum H5C_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
+    /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -3094,7 +3094,7 @@ check_fapl_mdc_api_errs(void)
     if  ( pass2 ) {
 
         H5E_BEGIN_TRY {
-	    result = H5Pget_mdc_config(-1, (H5AC_cache_config_t *)&scratch);
+	    result = H5Pget_mdc_config(-1, (H5AC1_cache_config_t *)&scratch);
 	} H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3121,7 +3121,7 @@ check_fapl_mdc_api_errs(void)
 
     scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass2 ) &&
-         ( ( H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch) < 0) ||
+         ( ( H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch) < 0) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass2 = FALSE;
@@ -3147,7 +3147,7 @@ check_fapl_mdc_api_errs(void)
     if  ( pass2 ) {
 
         H5E_BEGIN_TRY {
-            result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch);
+            result = H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3165,7 +3165,7 @@ check_fapl_mdc_api_errs(void)
     if ( pass2 ) {
 
         H5E_BEGIN_TRY {
-            result = H5Pset_mdc_config(-1, (H5AC_cache_config_t *)&default_config);
+            result = H5Pset_mdc_config(-1, (H5AC1_cache_config_t *)&default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3192,7 +3192,7 @@ check_fapl_mdc_api_errs(void)
     while ( ( pass2 ) && ( i < NUM_INVALID_CONFIGS ) )
     {
         H5E_BEGIN_TRY {
-            result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&(invalid_configs[i]));
+            result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&(invalid_configs[i]));
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3210,7 +3210,7 @@ check_fapl_mdc_api_errs(void)
      */
     scratch.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
     if ( ( pass2 ) &&
-         ( ( H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&scratch) < 0 ) ||
+         ( ( H5Pget_mdc_config(fapl_id, (H5AC1_cache_config_t *)&scratch) < 0 ) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
         pass2 = FALSE;
@@ -3317,7 +3317,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_config(-1, (H5AC_cache_config_t *)&scratch);
+            result = H5Fget_mdc_config(-1, (H5AC1_cache_config_t *)&scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3354,7 +3354,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&scratch);
+            result = H5Fget_mdc_config(file_id, (H5AC1_cache_config_t *)&scratch);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3376,7 +3376,7 @@ check_file_mdc_api_errs(void)
 	}
 
         H5E_BEGIN_TRY {
-            result = H5Fset_mdc_config(-1, (H5AC_cache_config_t *)&default_config);
+            result = H5Fset_mdc_config(-1, (H5AC1_cache_config_t *)&default_config);
         } H5E_END_TRY;
 
         if ( result >= 0 ) {
@@ -3416,7 +3416,7 @@ check_file_mdc_api_errs(void)
 
         H5E_BEGIN_TRY {
             result =
-		H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&(invalid_configs[i]));
+		H5Fset_mdc_config(file_id, (H5AC1_cache_config_t *)&(invalid_configs[i]));
         } H5E_END_TRY;
 
         if ( result >= 0 ) {

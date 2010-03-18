@@ -41,7 +41,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* Metadata cache			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -147,7 +147,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Dcreate1, loc_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate1, loc_id, H5AC2_dxpl_id, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
@@ -167,7 +167,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Build and open the new dataset */
     if(NULL == (dset = H5D_create_named(&loc, name, type_id, space,
-            H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
+            H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC2_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
@@ -210,7 +210,7 @@ H5Dopen1(hid_t loc_id, const char *name)
     H5O_loc_t    oloc;            	/* Dataset object location */
     H5O_type_t   obj_type;              /* Type of object at location */
     hbool_t      loc_found = FALSE;     /* Location at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
+    hid_t        dxpl_id = H5AC2_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
     FUNC_ENTER_API(H5Dopen1, FAIL)
@@ -284,7 +284,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
     H5D_t	*dset;
     herr_t       ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API_META(H5Dextend, dset_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Dextend, dset_id, H5AC2_dxpl_id, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */
@@ -294,7 +294,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Increase size */
-    if(H5D_extend(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D_extend(dset, size, H5AC2_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
 
 done:

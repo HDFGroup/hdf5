@@ -26,7 +26,7 @@
 
 #include "h5test.h"
 #include "H5Iprivate.h"
-#include "H5ACprivate.h"
+#include "H5AC2private.h"
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
 #include "cache2_common.h"
@@ -5838,7 +5838,7 @@ validate_mdc_config(hid_t file_id,
 
         scratch.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
 
-        if ( H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&scratch) < 0 ) {
+        if ( H5Fget_mdc_config(file_id, (H5AC1_cache_config_t *)&scratch) < 0 ) {
 
             pass2 = FALSE;
             HDsnprintf(msg, (size_t)128,

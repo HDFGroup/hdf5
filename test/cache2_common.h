@@ -21,7 +21,7 @@
  */
 #include "h5test.h"
 #include "H5Iprivate.h"
-#include "H5ACprivate.h"
+#include "H5AC2private.h"
 
 #define H5C2_PACKAGE             /*suppress error about including H5Cpkg   */
 
@@ -170,13 +170,13 @@ typedef struct flush_op
 					 * FLUSH_OP__DIRTY: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be dirtied via the
-					 *   H5C_mark_pinned_entry_dirty()
+					 *   H5C2_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RESIZE: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be resized via the
-					 *   H5C_mark_pinned_entry_dirty()
+					 *   H5C2_mark_pinned_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RENAME: TRUE iff the
@@ -588,6 +588,7 @@ struct expected_entry_status
 
 /* global variable externs: */
 
+extern haddr_t saved_actual_base_addr;
 extern hbool_t write_permitted2;
 extern hbool_t pass2; /* set to false on error */
 extern hbool_t skip_long_tests2;

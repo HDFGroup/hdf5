@@ -35,6 +35,11 @@
 #ifndef _H5C2pkg_H
 #define _H5C2pkg_H
 
+#include <aio.h>
+#include <strings.h>
+#include <unistd.h>
+
+
 /* Get package's private header */
 #include "H5C2private.h"
 
@@ -112,7 +117,7 @@ struct H5C2_jbrb_sync_q_entry_t
  *
  * magic:		Unsigned 32-bit integer always set to 
  * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to 
- *			validate pointers to instances of H5C_jbrb_t.
+ *			validate pointers to instances of H5C2_jbrb_t.
  *
  * journal_magic:	int32_t used to store a randomly selected integer
  *			used to tag both the journal file and the 

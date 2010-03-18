@@ -114,8 +114,6 @@ main(void)
             FAIL_STACK_ERROR
         if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
-            FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR
         if(ro != time_new)
@@ -131,8 +129,6 @@ main(void)
         if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
         if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
-            FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR
@@ -162,8 +158,6 @@ main(void)
                 FAIL_STACK_ERROR
         } /* end for */
         if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
-            FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
@@ -213,8 +207,6 @@ main(void)
                 FAIL_STACK_ERROR
             if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
                 FAIL_STACK_ERROR
-            if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
-                FAIL_STACK_ERROR
         } /* end for */
         PASSED();
 
@@ -242,8 +234,6 @@ main(void)
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
         if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
-            FAIL_STACK_ERROR
-        if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
             FAIL_STACK_ERROR

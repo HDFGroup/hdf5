@@ -163,4 +163,4 @@ hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_
 hdf5_cv_vsnprintf_works=${hdf5_cv_vsnprintf_works='yes'}
 hdf5_cv_fp_to_integer_overflow_works=${hdf5_cv_fp_to_integer_overflow_works='yes'}
 # mpich2 used has derived datatype errors.
-hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}

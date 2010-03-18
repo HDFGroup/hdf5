@@ -34,7 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* Metadata cache			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
@@ -196,7 +196,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
         using_mpi = TRUE;
 
         /* Use the internal "independent" DXPL */
-        my_dxpl_id = H5AC_ind_dxpl_id;
+        my_dxpl_id = H5AC2_ind_dxpl_id;
     } /* end if */
     else {
 #endif  /* H5_HAVE_PARALLEL */

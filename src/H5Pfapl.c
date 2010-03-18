@@ -34,7 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC1private.h"	/* Metadata cache			*/
 #include "H5AC2private.h"	/* Metadata cache2			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -57,8 +57,8 @@
 
 /* ========= File Access properties ============ */
 /* Definitions for the initial metadata cache resize configuration */
-#define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
-#define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
+#define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC1_cache_config_t)
+#define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC1__DEFAULT_CACHE_CONFIG
 #define H5F_ACS_JNL_INIT_CONFIG_SIZE		sizeof(H5AC2_jnl_config_t)
 #define H5F_ACS_JNL_INIT_CONFIG_DEF		H5AC2__DEFAULT_JNL_CONFIG
 /* Definitions for size of raw data chunk cache(elements) */
@@ -190,7 +190,7 @@ const H5P_libclass_t H5P_CLS_FACC[1] = {{
 static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
-    H5AC_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
+    H5AC1_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
     H5AC2_jnl_config_t initJnlCfg = H5F_ACS_JNL_INIT_CONFIG_DEF; /* Default journaling config settings */
     size_t rdcc_nelmts = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;      /* Default raw data chunk cache # of elements */
     size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
@@ -1334,7 +1334,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
+H5Pset_mdc_config(hid_t plist_id, H5AC1_cache_config_t *config_ptr)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
@@ -1347,12 +1347,12 @@ H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* validate the new configuration */
-    if(H5AC_validate_config(config_ptr) < 0)
+    if(H5AC1_validate_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid metadata cache configuration")
 
     /* set the modified config */
 
-    /* If we ever support multiple versions of H5AC_cache_config_t, we
+    /* If we ever support multiple versions of H5AC1_cache_config_t, we
      * will have to test the version and do translation here.
      */
 
@@ -1372,7 +1372,7 @@ done:
  *
  *		Observe that the function will fail if config_ptr is
  *		NULL, or if config_ptr->version specifies an unknown
- *		version of H5AC_cache_config_t.
+ *		version of H5AC1_cache_config_t.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1386,7 +1386,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
+H5Pget_mdc_config(hid_t plist_id, H5AC1_cache_config_t *config_ptr)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
@@ -1405,7 +1405,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
     if(!H5AC2_validate_cache_config_ver(config_ptr->version))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
-    /* If we ever support multiple versions of H5AC_cache_config_t, we
+    /* If we ever support multiple versions of H5AC1_cache_config_t, we
      * will have to get the cannonical version here, and then translate
      * to the version of the structure supplied.
      */
@@ -1450,7 +1450,7 @@ H5Pset_jnl_config(hid_t plist_id, const H5AC2_jnl_config_t *config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid journaling configuration")
 
     /* Set the modified config */
-    /* (If we ever support multiple versions of H5AC_jnl_config_t, we
+    /* (If we ever support multiple versions of H5AC1_jnl_config_t, we
      * will have to test the version and do translation here.)
      */
     if(H5P_set(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr) < 0)
@@ -1469,7 +1469,7 @@ done:
  *
  *		Observe that the function will fail if config_ptr is
  *		NULL, or if config_ptr->version specifies an unknown
- *		version of H5AC_jnl_config_t.
+ *		version of H5AC1_jnl_config_t.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1497,7 +1497,7 @@ H5Pget_jnl_config(hid_t plist_id, H5AC2_jnl_config_t *config_ptr)
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* If we ever support multiple versions of H5AC_jnl_config_t, we
+    /* If we ever support multiple versions of H5AC1_jnl_config_t, we
      * will have to get the cannonical version here, and then translate
      * to the version of the structure supplied.
      */

@@ -23,7 +23,7 @@
  *		H5ACprivate.h instead.
  *
  *		The one exception to this rule is testpar/t_cache.c.  The
- *		test code is easier to write if it can look at H5AC_aux_t.
+ *		test code is easier to write if it can look at H5AC2_aux_t.
  *		Indeed, this is the main reason why this file was created.
  *
  * Modifications:

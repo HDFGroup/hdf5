@@ -38,7 +38,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC1private.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
@@ -1260,8 +1260,8 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
          * we are flushing out a bunch of metadata.  Then, we block before the
          * first write and don't block for further writes in the sequence.
          */
-        if(H5P_exist_plist(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME)>0)
-            if(H5P_get(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,&block_before_meta_write)<0)
+        if(H5P_exist_plist(plist,H5AC2_BLOCK_BEFORE_META_WRITE_NAME)>0)
+            if(H5P_get(plist,H5AC2_BLOCK_BEFORE_META_WRITE_NAME,&block_before_meta_write)<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get H5AC property")
 
 #if 0 /* JRM */

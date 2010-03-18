@@ -106,7 +106,7 @@ H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve count for message type */
-    if(H5SM_get_mesg_count_test(file, H5AC_ind_dxpl_id, type_id, mesg_count) < 0)
+    if(H5SM_get_mesg_count_test(file, H5AC2_ind_dxpl_id, type_id, mesg_count) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve shared message count")
 
 done:

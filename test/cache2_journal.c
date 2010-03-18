@@ -46,7 +46,6 @@ const char *FILENAMES[] = {
         NULL
 };
 
-
 /* private function declarations: */
 
 /* utility functions */
@@ -2466,7 +2465,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( pass2 ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mdj_config);
 
         if ( result < 0 ) {
 
@@ -2567,6 +2566,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
 			  fcn_name);
             }
         }
+
+        saved_actual_base_addr = actual_base_addr;
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
@@ -2643,10 +2644,35 @@ takedown_cache_after_journaling(hid_t file_id,
 				hbool_t 
 				use_core_driver_if_avail)
 {
+    const char *fcn_name = "takedown_cache_after_journaling";
     hbool_t verbose = FALSE;
     int error;
     
     if ( file_id >= 0 ) {
+
+        if ( H5F_addr_defined(saved_actual_base_addr) ) {
+            H5F_t * file_ptr;
+
+            file_ptr = H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Can't get file_ptr.";
+
+                if ( verbose ) {
+                    HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
+                }
+            }
+
+            /* Flush the cache, so that the close call doesn't try to write to
+             * the space we free */
+            H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
+                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+            saved_actual_base_addr = HADDR_UNDEF;
+        }
 
 	if ( H5Fclose(file_id) < 0 ) {
 
@@ -10494,7 +10520,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 /***************************************************************************
  * Function: 	check_buffer_writes
  *
- * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
+ * Purpose:  	Verify the function H5C2_jb__write_to_buffer properly writes
  *              messages of varying sizes into the journal buffers, and 
  *              that the journal buffers properly flush out when filled.
  *
@@ -10831,8 +10857,8 @@ write_flush_verify(H5C2_jbrb_t * struct_ptr,
  *
  * Purpose:  	Helper function for check_buffer_writes test. Writes a 
  *              piece of data of specified size into the journal buffer
- *              multiple times, without calling H5C_jb__flush in between
- *              writes. After all writes are completed, H5C_jb__flush is 
+ *              multiple times, without calling H5C2_jb__flush in between
+ *              writes. After all writes are completed, H5C2_jb__flush is 
  *              called, and the data is read back from the journal file and
  *              verified for correctness.
  *
@@ -12541,7 +12567,7 @@ verify_journal_msg(int fd,
 /***************************************************************************
  * Function: 	check_legal_calls
  *
- * Purpose:  	Verify that all H5C_jb functions prevent use when appropriate.
+ * Purpose:  	Verify that all H5C2_jb functions prevent use when appropriate.
  *
  * Return:      void
  *

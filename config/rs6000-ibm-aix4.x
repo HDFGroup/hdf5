@@ -40,4 +40,4 @@ if test "X-" = "X-$f9x_flags_set"; then
   f9x_flags_set=yes
 fi
 # IBM MPI-IO doesn't handle complicated derived data type correctly.
-hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}

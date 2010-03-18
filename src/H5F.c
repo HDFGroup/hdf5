@@ -22,7 +22,7 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC1private.h"	/* Metadata cache			*/
 #include "H5AC2private.h"	/* Metadata cache2			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -778,7 +778,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC_ind_dxpl_id));
+    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC2_ind_dxpl_id));
 
 done:
     /* Close the file */
@@ -822,7 +822,7 @@ done:
  *
  *		J Mainzer, Jun 30, 2005
  *		Added lf parameter so the shared->lf field can be
- *		initialized prior to the call to H5AC_create() if a
+ *		initialized prior to the call to H5AC2_create() if a
  *		new instance of H5F_file_t is created.  lf should be
  *		NULL if shared isn't, and vise versa.
  *
@@ -937,7 +937,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if(SUCCEED != H5AC_create(f, &(f->shared->mdc_initCacheCfg)))
+	if(SUCCEED != H5AC1_create(f, &(f->shared->mdc_initCacheCfg)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
 	/* Create a metadata cache with modified API along side the regular
@@ -1013,10 +1013,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
          *      orderly manner with the 'closing' flag set)
          */
         if(f->closing) {
-#if H5AC_DUMP_STATS_ON_CLOSE
+#if H5AC1_DUMP_STATS_ON_CLOSE
             /* Dump debugging info */
-            H5AC_stats(f);
-#endif /* H5AC_DUMP_STATS_ON_CLOSE */
+            H5AC1_stats(f);
+#endif /* H5AC1_DUMP_STATS_ON_CLOSE */
+#if H5AC2_DUMP_STATS_ON_CLOSE
+            /* Dump debugging info */
+            H5AC2_stats(f);
+#endif /* H5AC2_DUMP_STATS_ON_CLOSE */
 
 	    /* shut down metadata journaling if it is enabled. */
 	    if(H5C2_end_journaling(f, dxpl_id, f->shared->cache2) < 0)
@@ -1051,7 +1055,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             f->shared->root_grp = NULL;
         } /* end if */
 
-        if(H5AC_dest(f, dxpl_id) < 0)
+        if(H5AC1_dest(f, dxpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         /* also destroy the new cache */
@@ -1511,7 +1515,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
-    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC2_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
@@ -1598,7 +1602,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Open the file */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     /* Get an atom for the file */
@@ -1696,7 +1700,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
     /* Flush the file */
-    if(H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
+    if(H5F_flush(f, H5AC2_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
 
 done:
@@ -1724,7 +1728,8 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */
     unsigned		i;              /* Index variable */
-    unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
+    unsigned int	H5AC1_flags;     /* translated flags for H5AC1_flush() */
+    unsigned int	H5AC2_flags;    /* translated flags for H5AC2_flush() */
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)
@@ -1759,12 +1764,15 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /* flush (and invalidate, if requested) the entire metadata cache */
-    H5AC_flags = 0;
+    H5AC1_flags = 0;
     if((flags & H5F_FLUSH_INVALIDATE) != 0 )
-        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
+        H5AC1_flags |= H5AC1__FLUSH_INVALIDATE_FLAG;
+    if(H5AC1_flush(f, dxpl_id, H5AC1_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
-    if(H5AC2_flush(f, dxpl_id, H5AC_flags) < 0)
+    H5AC2_flags = 0;
+    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
+        H5AC2_flags |= H5AC2__FLUSH_INVALIDATE_FLAG;
+    if(H5AC2_flush(f, dxpl_id, H5AC2_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache2")
 
     /*
@@ -1999,7 +2007,7 @@ H5F_try_close(H5F_t *f)
      */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5C__NO_FLAGS_SET) < 0)
+        if(H5F_flush(f, H5AC2_dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_NONE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2008,7 +2016,7 @@ H5F_try_close(H5F_t *f)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F_dest(f, H5AC_dxpl_id) < 0)
+    if(H5F_dest(f, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
 done:
@@ -2117,7 +2125,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_dxpl_id) < 0)
+	if(H5F_dest(new_file, H5AC2_dxpl_id) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -3446,7 +3454,7 @@ H5Fget_jnl_config(hid_t file_id, H5AC2_jnl_config_t *config_ptr)
 
     /* Go get the journaling configuration */
     if(H5AC2_get_jnl_config(file->shared->cache2, config_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_jnl_config() failed.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC2_get_jnl_config() failed.")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3509,7 +3517,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
+H5Fget_mdc_config(hid_t file_id, H5AC1_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;      /* Return value */
@@ -3537,7 +3545,7 @@ done:
  *
  * Purpose:     Sets the current metadata cache automatic resize
  *		configuration, using the contents of the instance of
- *		H5AC_cache_config_t pointed to by config_ptr.
+ *		H5AC1_cache_config_t pointed to by config_ptr.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -3548,7 +3556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
+H5Fset_mdc_config(hid_t file_id, H5AC1_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;     /* Return value */
@@ -3561,8 +3569,8 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* set the resize configuration  */
-    if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
+    if(H5AC1_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC1_set_cache_auto_resize_config() failed.")
 
     /* pass the resize configuration to the modified cache as well. */
     if(H5AC2_set_cache_auto_resize_config(file->shared->cache2, (H5AC2_cache_config_t *)config_ptr) < 0)
@@ -3813,12 +3821,12 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
 
     /* Check for superblock extension info */
     if(H5F_addr_defined(f->shared->extension_addr))
-        if(H5F_super_ext_size(f, H5AC_ind_dxpl_id, &finfo->super_ext_size) < 0)
+        if(H5F_super_ext_size(f, H5AC2_ind_dxpl_id, &finfo->super_ext_size) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, finfo) < 0)
+        if(H5SM_ih_size(f, H5AC2_ind_dxpl_id, finfo) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM btree & heap storage info")
 
 done:

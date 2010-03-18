@@ -36,11 +36,6 @@
  *-------------------------------------------------------------------------
  */
 
-#include <aio.h>
-#include <strings.h>
-#include <unistd.h>
-
-
 #define H5F_PACKAGE             /* suppress error about including H5Fpkg  */
 #define H5C2_PACKAGE            /* suppress error about including H5C2pkg */
 
@@ -7312,6 +7307,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->trans_tracking = NULL;
     struct_ptr->aio_ctl_blks = NULL;
     struct_ptr->aio_next_buf_offset = (off_t)0;
+/* Comment this out to work on the Mac, currently */
 #if 1
     struct_ptr->use_aio_fsync = use_aio;
 #else

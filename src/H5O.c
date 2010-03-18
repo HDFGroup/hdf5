@@ -314,12 +314,12 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location, according to the order in the index */
-    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC2_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
@@ -395,7 +395,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5G_name_reset(obj_loc.path);       /* objects opened through this routine don't have a path name */
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC2_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
@@ -436,7 +436,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5G_loc_t	obj_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Olink, obj_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Olink, obj_id, H5AC2_dxpl_id, FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -454,7 +454,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
     /* Link to the object */
-    if(H5L_link(&new_loc, new_name, &obj_loc, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_link(&new_loc, new_name, &obj_loc, lcpl_id, lapl_id, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -488,14 +488,14 @@ H5Oincr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API_META(H5Oincr_refcount, object_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Oincr_refcount, object_id, H5AC2_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
     if((oloc = H5O_get_loc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-    if(H5O_link(oloc, 1, H5AC_dxpl_id) < 0)
+    if(H5O_link(oloc, 1, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -529,14 +529,14 @@ H5Odecr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API_META(H5Odecr_refcount, object_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Odecr_refcount, object_id, H5AC2_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
     if((oloc = H5O_get_loc(object_id)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADVALUE, FAIL, "unable to get object location from ID")
 
-    if(H5O_link(oloc, -1, H5AC_dxpl_id) < 0)
+    if(H5O_link(oloc, -1, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -573,7 +573,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Retrieve the object's information */
-    if(H5G_loc_info(&loc, ".", TRUE, oinfo/*out*/, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_info(&loc, ".", TRUE, oinfo/*out*/, H5P_LINK_ACCESS_DEFAULT, H5AC2_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -617,7 +617,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Retrieve the object's information */
-    if(H5G_loc_info(&loc, name, TRUE, oinfo/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_info(&loc, name, TRUE, oinfo/*out*/, lapl_id, H5AC2_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -677,12 +677,12 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location, according to the order in the index */
-    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, H5AC2_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Retrieve the object's information */
-    if(H5O_get_info(obj_loc.oloc, H5AC_ind_dxpl_id, TRUE, oinfo) < 0)
+    if(H5O_get_info(obj_loc.oloc, H5AC2_ind_dxpl_id, TRUE, oinfo) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
 
 done:
@@ -717,7 +717,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Oset_comment, obj_id, H5AC_ind_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment, obj_id, H5AC2_ind_dxpl_id, FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
     /* Check args */
@@ -725,7 +725,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC2_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -757,7 +757,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Oset_comment_by_name, loc_id, H5AC_ind_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment_by_name, loc_id, H5AC2_ind_dxpl_id, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
@@ -772,7 +772,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* (Re)set the object's comment */
-    if(H5G_loc_set_comment(&loc, name, comment, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_set_comment(&loc, name, comment, lapl_id, H5AC2_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -810,7 +810,7 @@ H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Retrieve the object's comment */
-    if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, H5P_LINK_ACCESS_DEFAULT, H5AC2_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -856,7 +856,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Retrieve the object's comment */
-    if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC2_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -914,7 +914,7 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
     /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, H5AC2_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -980,7 +980,7 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id, H5AC2_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -1014,7 +1014,7 @@ H5Oclose(hid_t object_id)
     /* Will this ever change metadata?  No need for a transaction unless
      * it does.
      */
-    FUNC_ENTER_API_META(H5Oclose, object_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Oclose, object_id, H5AC2_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the type of the object and close it in the correct way */
@@ -1292,12 +1292,12 @@ H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id)
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    if(H5G_loc_find(loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, lapl_id, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC2_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:

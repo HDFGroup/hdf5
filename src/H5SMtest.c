@@ -26,7 +26,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access                          */
 #include "H5SMpkg.h"            /* Shared object header messages        */

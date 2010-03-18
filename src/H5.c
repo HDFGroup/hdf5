@@ -22,7 +22,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC1private.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
@@ -173,7 +173,9 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
     if(H5D_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
-    if(H5AC_init() < 0)
+    if(H5AC1_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
+    if(H5AC2_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
     if(H5L_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
@@ -261,7 +263,7 @@ H5_term_library(void)
          * that depend on them. -QAK
          */
         if(pending == 0) {
-            pending += DOWN(AC);
+            pending += DOWN(AC1);
             pending += DOWN(AC2);
             pending += DOWN(Z);
             pending += DOWN(FD);

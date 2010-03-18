@@ -682,7 +682,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( pass2 ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mdj_config);
 
         if ( result < 0 ) {
 

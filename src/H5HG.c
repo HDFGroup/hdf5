@@ -840,7 +840,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
          */
         H5_CHECK_OVERFLOW(heap->size, size_t, hsize_t);
         H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, heap->addr, (hsize_t)heap->size);
-        flags |= H5C__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
+        flags |= H5AC2__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } /* end if */
     else {
         int	i;              /* Local index variable */

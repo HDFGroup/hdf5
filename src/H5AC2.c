@@ -763,8 +763,8 @@ done:
  *		metadata cache.
  *                                                 JRM - 5/12/04
  *
- *		Abstracted the guts of the function to H5C_dest() in H5C.c,
- *		and then re-wrote the function as a wrapper for H5C_dest().
+ *		Abstracted the guts of the function to H5C2_dest() in H5C.c,
+ *		and then re-wrote the function as a wrapper for H5C2_dest().
  *
  *                                                 JRM - 6/7/04
  *
@@ -1496,9 +1496,9 @@ done:
  *
  *		Complete re-write. See above for details.  -- JRM 5/11/04
  *
- *		Abstracted the guts of the function to H5C_flush_cache()
+ *		Abstracted the guts of the function to H5C2_flush_cache()
  *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_flush_cache().
+ *		H5C2_flush_cache().
  *
  *                                                 JRM - 6/7/04
  *
@@ -1738,9 +1738,6 @@ done:
  *              exist on disk yet, but it must have an address and disk
  *              space reserved.
  *
- *              If H5AC2_DEBUG is defined then this function checks
- *              that the object being inserted isn't a protected object.
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
@@ -1763,9 +1760,9 @@ done:
  *		at the beginning of the function.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_insert_entry()
+ *		Abstracted the guts of the function to H5C2_insert_entry()
  *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_insert_entry().
+ *		H5C2_insert_entry().
  *
  *		JRM - 1/6/05
  *		Added the flags parameter.  At present, this parameter is
@@ -1773,7 +1770,7 @@ done:
  *		entry.  Since this doesn't apply to the SAP code, no change
  *		is needed there.  Thus the only change to the body of the
  *		code is to pass the flags parameter through to
- *		H5C_insert_entry().
+ *		H5C2_insert_entry().
  *
  *		JRM - 6/6/05
  *		Added code to force newly inserted entries to be dirty
@@ -2079,10 +2076,6 @@ done:
  * Purpose:     Use this function to notify the cache that an object's
  *              file address changed.
  *
- *              If H5AC2_DEBUG is defined then this function checks
- *              that the old and new addresses don't correspond to the
- *              address of a protected object.
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
@@ -2097,9 +2090,9 @@ done:
  *		Complete rewrite for the new meta-data cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_rename_entry()
+ *		Abstracted the guts of the function to H5C2_rename_entry()
  *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_rename_entry().
+ *		H5C2_rename_entry().
  *
  *              JRM - 7/5/05
  *              Added code to track dirty byte generation, and to trigger
@@ -2293,9 +2286,6 @@ done:
  *
  *              The caller must call H5AC2_unprotect() when finished with
  *              the pointer.
- *
- *              If H5AC2_DEBUG is defined then we check that the
- *              requested object isn't already protected.
  *
  * Return:      Success:        Ptr to the object.
  *
@@ -2605,10 +2595,6 @@ done:
  *              If the DELETED flag is set, then this object has been deleted
  *              from the file and should not be returned to the cache.
  *
- *              If H5AC2_DEBUG is defined then this function fails
- *              if the TYPE and ADDR arguments are not what was used when the
- *              object was protected or if the object was never protected.
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
@@ -2630,16 +2616,16 @@ done:
  *		Complete re-write for the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_unprotect()
+ *		Abstracted the guts of the function to H5C2_unprotect()
  *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_unprotect().
+ *		H5C2_unprotect().
  *
  *		JRM - 1/6/05
  *		Replaced the deleted parameter with the new flags parameter.
  *		Since the deleted parameter is not used by the FPHDF5 code,
  *		the only change in the body is to replace the deleted
  *		parameter with the flags parameter in the call to
- *		H5C_unprotect().
+ *		H5C2_unprotect().
  *
  *		JRM - 6/6/05
  *		Added the dirtied flag and supporting code.  This is
@@ -2660,7 +2646,7 @@ done:
  *
  *		JRM - 5/16/06
  *		Added code to use the new dirtied field in
- *		H5C_cache_entry_t in the test to see if the entry has
+ *		H5C2_cache_entry_t in the test to see if the entry has
  *		been dirtied.
  *
  *		JRM - 6/7/06
@@ -2872,9 +2858,9 @@ done:
  *		Re-write to support the new metadata cache.
  *
  *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_stats()
+ *		Abstracted the guts of the function to H5C2_stats()
  *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_stats().
+ *		H5C2_stats().
  *
  * 		JRM - 10/18/07
  *              Modified code in support of revised cache API needed

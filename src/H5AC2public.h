@@ -206,7 +206,7 @@ extern "C" {
  *      above, this field contains the maximum number of bytes by which the
  *      cache size can be increased in a single re-size.
  *
- * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
+ * flash_incr_mode:  Instance of the H5C2_cache_flash_incr_mode enumerated
  *      type whose value indicates whether and by which algorithm we should
  *      make flash increases in the size of the cache to accomodate insertion
  *      of large entries and large increases in the size of a single entry.
@@ -219,10 +219,10 @@ extern "C" {
  *
  *      At present, there are two possible values for the flash_incr_mode:
  *
- *      H5C_flash_incr__off:  Don't perform flash increases in the size of
+ *      H5C2_flash_incr__off:  Don't perform flash increases in the size of
  *              the cache.
  *
- *      H5C_flash_incr__add_space:  Let x be either the size of a newly
+ *      H5C2_flash_incr__add_space:  Let x be either the size of a newly
  *              newly inserted entry, or the number of bytes by which the
  *              size of an existing entry has been increased.
  *
@@ -251,14 +251,14 @@ extern "C" {
  *      expect to revisit the issue.
  *
  * flash_multiple: Double containing the multiple described above in the
- *      H5C_flash_incr__add_space section of the discussion of the
+ *      H5C2_flash_incr__add_space section of the discussion of the
  *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
- *      is H5C_flash_incr__add_space.
+ *      is H5C2_flash_incr__add_space.
  *
  * flash_threshold: Double containing the factor by which current max cache
  *      size is multiplied to obtain the size threshold for the add_space flash
  *      increment algorithm.  The field is ignored unless flash_incr_mode is
- *      H5C_flash_incr__add_space.
+ *      H5C2_flash_incr__add_space.
  *
  *
  * Cache size decrease control fields:

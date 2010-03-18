@@ -34,7 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -187,7 +187,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_API_META(H5Ocopy, dst_loc_id, H5AC_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Ocopy, dst_loc_id, H5AC2_dxpl_id, FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
 
@@ -213,7 +213,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         H5G_loc_reset(&tmp_loc);
 
         /* Check if object already exists in destination */
-        if(H5G_loc_find(&dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC_dxpl_id) >= 0) {
+        if(H5G_loc_find(&dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC2_dxpl_id) >= 0) {
             H5G_name_free(&tmp_path);
             HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "destination object already exists")
         } /* end if */
@@ -225,7 +225,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_reset(&src_loc);
 
     /* Find the source object to copy */
-    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC2_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
     loc_found = TRUE;
 
@@ -942,7 +942,7 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     hid_t ocpypl_id, hid_t lcpl_id)
 {
     H5P_genplist_t  *ocpy_plist=NULL;           /* Object copy property list created */
-    hid_t           dxpl_id=H5AC_dxpl_id;
+    hid_t           dxpl_id=H5AC2_dxpl_id;
     H5G_name_t      new_path;                   /* Copied object group hier. path */
     H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
