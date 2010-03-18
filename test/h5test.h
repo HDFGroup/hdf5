@@ -24,7 +24,6 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include "H5srcdir.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <signal.h>
@@ -142,6 +141,60 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define FLT_REL_EQUAL(X,Y,M)    (fabsf((Y-X)/X<M)
 #define DBL_REL_EQUAL(X,Y,M)    (fabs((Y-X)/X)<M)
 #define LDBL_REL_EQUAL(X,Y,M)    (fabsl((Y-X)/X)<M)
+
+/* =================================== */
+/* Support for srcdir queries in tests */
+/* =================================== */
+#include "H5srcdir.h"
+
+/* Buffer to construct path in and return pointer to */
+static char srcdir_path[1024] = "";
+
+/* Buffer to construct file in and return pointer to */
+static char srcdir_testpath[1024] = "";
+
+/* Append the test file name to the srcdir path and return the whole string */
+static const char *H5_get_srcdir_filename(const char *filename)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to test file */
+    if((HDstrlen(srcdir) + HDstrlen(filename) + 2) < sizeof(srcdir_testpath)) {
+        HDstrcpy(srcdir_testpath, srcdir);
+        HDstrcat(srcdir_testpath, "/");
+        HDstrcat(srcdir_testpath, filename);
+        return(srcdir_testpath);
+    } /* end if */
+    else
+        return(NULL);
+}
+
+/* Just return the srcdir path */
+static const char *H5_get_srcdir(void)
+{
+    const char *srcdir = HDgetenv("srcdir");
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
+
+    /* Build path to all test files */
+    if((HDstrlen(srcdir) + 2) < sizeof(srcdir_path)) {
+        HDstrcpy(srcdir_path, srcdir);
+        HDstrcat(srcdir_path, "/");
+        return(srcdir_path);
+    } /* end if */
+    else
+        return(NULL);
+}
+
+/* ========================================== */
+/* End of support for srcdir queries in tests */
+/* ========================================== */
 
 #ifdef __cplusplus
 extern "C" {
