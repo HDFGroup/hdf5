@@ -42,7 +42,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
@@ -54,7 +54,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -72,7 +72,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -135,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
@@ -147,7 +147,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -165,7 +165,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -228,7 +228,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
@@ -239,7 +239,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -257,7 +257,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -321,7 +321,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
@@ -332,7 +332,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5TESTUSEDLL_;HDF5FORTTEST_CSTUB_DLL_EXPORTS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -350,7 +350,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				Culture="1033"
 			/>
 			<Tool

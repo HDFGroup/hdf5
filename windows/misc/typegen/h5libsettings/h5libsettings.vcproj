@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="testh5repack_detect_szipdll"
-	ProjectGUID="{E75602FF-F4E6-4F45-AD0D-EA49C0C66DEF}"
-	RootNamespace="testh5repack_detect_szipdll"
+	Name="h5libsettings"
+	ProjectGUID="{B123D196-2F43-4FEB-80B5-990F06DED319}"
+	RootNamespace="h5libsettings"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -20,7 +20,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\tools\testfiles\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -42,26 +42,24 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.tlb"
+				TypeLibraryName=".\Release/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.pch"
-				AssemblerListingLocation=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
-				ObjectFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
-				ProgramDataBaseFileName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
+				PrecompiledHeaderFile=".\Release/h5libsettings.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -69,17 +67,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				ProgramDatabaseFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.pdb"
+				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -105,11 +104,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\tools\testfiles\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -132,26 +133,24 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.tlb"
+				TypeLibraryName=".\Release/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.pch"
-				AssemblerListingLocation=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
-				ObjectFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
-				ProgramDataBaseFileName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/"
+				PrecompiledHeaderFile=".\Release/h5libsettings.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -159,17 +158,18 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				ProgramDatabaseFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Release/testh5repack_detect_szipdll.pdb"
+				ProgramDatabaseFile=".\Release/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -195,11 +195,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\tools\testfiles\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -221,25 +223,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.tlb"
+				TypeLibraryName=".\Debug/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.pch"
-				AssemblerListingLocation=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
-				ObjectFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
+				PrecompiledHeaderFile=".\Debug/h5libsettings.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -247,18 +247,19 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.pdb"
+				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -284,11 +285,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\tools\testfiles\$(ProjectName)\$(ConfigurationName)"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -311,25 +314,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.tlb"
+				TypeLibraryName=".\Debug/h5libsettings.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\test,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.pch"
-				AssemblerListingLocation=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
-				ObjectFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
-				ProgramDataBaseFileName=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/"
+				PrecompiledHeaderFile=".\Debug/h5libsettings.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -337,18 +338,19 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
-				Culture="1033"
+				Culture="1028"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\../../../../tools/testfiles/testh5repack_detect_szipdll/Debug/testh5repack_detect_szipdll.pdb"
+				ProgramDatabaseFile=".\Debug/h5libsettings.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -374,16 +376,23 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Generating H5lib_settings.h"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\..\..\tools\h5repack\testh5repack_detect_szip.c"
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
 			>
-		</File>
+			<File
+				RelativePath="..\..\..\..\src\H5make_libsettings.c"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

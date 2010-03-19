@@ -26,10 +26,10 @@ copy /y fortran\src\H5f90i_gen.h ..\fortran\src > nul
 copy /y fortran\src\H5fortran_types.f90 ..\fortran\src > nul
 xcopy /s /i /y *.bat ..\ > nul
 copy /y examples\testExamples_exp_output.txt ..\examples > nul
-copy /y c++\test\H5srcdir.h ..\src > nul
-copy /y hl\test\H5srcdir.h ..\src > nul
-copy /y perform\H5srcdir.h ..\src > nul
-copy /y test\H5srcdir.h ..\src > nul
-copy /y tools\h5repack\H5srcdir.h ..\src > nul
+copy /y c++\test\H5srcdir.h ..\c++\test > nul
+copy /y hl\test\H5srcdir.h ..\hl\test > nul
+copy /y perform\H5srcdir.h ..\perform > nul
+copy /y test\H5srcdir.h ..\test > nul
+copy /y tools\h5repack\H5srcdir.h ..\tools\h5repack > nul
 
 popd
