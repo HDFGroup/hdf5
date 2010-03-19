@@ -2050,6 +2050,7 @@
 ./windows/misc/typegen/h5fortran_detect/h5fortran_detect.vfproj
 ./windows/misc/typegen/h5match_types/h5match_types.vcproj
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
+./windows/misc/typegen/h5libsettings/h5libsettings.vcproj
 
 # Performance Tests
 ./windows/perform/checkperformtests.bat

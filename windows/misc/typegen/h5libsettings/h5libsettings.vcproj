@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="h5libsettings"
-	ProjectGUID="{B123D196-2F43-4FEB-80B5-990F06DED319}"
+	ProjectGUID="{50D207BC-2B27-4BD9-B5D4-FCF8358BE757}"
 	RootNamespace="h5libsettings"
 	TargetFrameworkVersion="131072"
 	>
