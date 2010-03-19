@@ -27,6 +27,7 @@ $!
 $!
 $!                               
 $ ccc h5cpputil
+$ ccc dsets
 $ ccc tattr
 $ ccc tcompound
 $ ccc testhdf5 
@@ -39,16 +40,8 @@ $ ccc ttypes
 $ ccc tvlstr
 $ type sys$input
        Creating testhdf5
-$ cxxlink  testhdf5, h5cpputil, tattr, tcompound, tfile, tfilter, th5s, -
+$ cxxlink  testhdf5, dsets, h5cpputil, tattr, tcompound, tfile, tfilter, th5s, -
            tlinks, trefer, ttypes, tvlstr, -
-           [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$!
-$!
-$ ccc dsets
-$ type sys$input
-        Creating dsets
-$ cxxlink  dsets, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
