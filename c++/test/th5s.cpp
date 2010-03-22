@@ -108,16 +108,15 @@ struct space4_struct {
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void test_h5s_basic(void)
+static void test_h5s_basic()
 {
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
-				   SPACE2_DIM4};
-    hsize_t		dims3[H5S_MAX_RANK+1];
-    hsize_t		tmax[4];
+    hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4};
+    hsize_t dims3[H5S_MAX_RANK+1];
+    hsize_t tmax[4];
 
     // Output message about test being performed
-    SUBTEST("Testing dataspace manipulation");
+    SUBTEST("Dataspace manipulation");
     try {
 	// Create simple dataspace sid1
 	DataSpace sid1 (SPACE1_RANK, dims1 );
@@ -235,7 +234,7 @@ static void test_h5s_basic(void)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg("test_h5s_basic()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_h5s_basic", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_h5s_basic()
 
@@ -259,10 +258,10 @@ static void test_h5s_basic(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void test_h5s_scalar_write(void)
+static void test_h5s_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing scalar dataspace writing");
+    SUBTEST("Scalar dataspace writing");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
@@ -298,7 +297,7 @@ static void test_h5s_scalar_write(void)
     } // end of try block
     catch (Exception E)
     {
-	issue_fail_msg("test_h5s_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_h5s_scalar_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_h5s_scalar_write()
 
@@ -322,12 +321,12 @@ static void test_h5s_scalar_write(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void test_h5s_scalar_read(void)
+static void test_h5s_scalar_read()
 {
-    hsize_t		tdims[4];	// Dimension array to test with
+    hsize_t tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing scalar dataspace reading");
+    SUBTEST("Scalar dataspace reading");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
@@ -358,7 +357,7 @@ static void test_h5s_scalar_read(void)
     catch (Exception E)
     {
 	// all the exceptions caused by negative returned values by C APIs
-	issue_fail_msg("test_h5s_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_h5s_scalar_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
 }   // test_h5s_scalar_read()
@@ -384,10 +383,10 @@ static void test_h5s_scalar_read(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void test_h5s_compound_scalar_write(void)
+static void test_h5s_compound_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing compound dataspace writing");
+    SUBTEST("Compound dataspace writing");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
@@ -431,7 +430,7 @@ static void test_h5s_compound_scalar_write(void)
     catch (Exception E)
     {
 	// all the exceptions caused by negative returned values by C APIs
-	issue_fail_msg("test_h5s_compound_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_h5s_compound_scalar_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_h5s_compound_scalar_write()
 
@@ -456,12 +455,12 @@ static void test_h5s_compound_scalar_write(void)
  *		       with a special routine.
  *-------------------------------------------------------------------------
  */
-static void test_h5s_compound_scalar_read(void)
+static void test_h5s_compound_scalar_read()
 {
-    hsize_t		tdims[4];	// Dimension array to test with
+    hsize_t tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing compound dataspace reading");
+    SUBTEST("Compound dataspace reading");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
@@ -505,7 +504,7 @@ static void test_h5s_compound_scalar_read(void)
     catch (Exception E)
     {
 	// all the exceptions caused by negative returned values by C APIs
-	issue_fail_msg("test_h5s_compound_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_h5s_compound_scalar_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_h5s_compound_scalar_read()
 
@@ -526,7 +525,7 @@ static void test_h5s_compound_scalar_read(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_h5s(void)
+void test_h5s()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Dataspaces\n"));
@@ -556,8 +555,7 @@ void test_h5s(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_h5s(void)
+void cleanup_h5s()
 {
     HDremove(DATAFILE.c_str());
 }   // cleanup_h5s
-
