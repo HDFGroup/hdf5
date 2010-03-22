@@ -489,6 +489,7 @@ void CommonFG::removeComment(const H5std_string& name) const
 // Function:	CommonFG::getComment
 ///\brief	Retrieves comment for the specified object.
 ///\param	name  - IN: Name of the object
+///\param	bufsize - IN: Length of comment should be returned
 ///\return	Comment string
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May 2005
