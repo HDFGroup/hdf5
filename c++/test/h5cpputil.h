@@ -35,7 +35,8 @@ using std::cerr;
 using std::endl;
 #endif
 
-#define SUBTEST(WHAT)   {printf("   Subtest: %-52s",WHAT); fflush(stdout);}
+#define MESSAGE(V,A)	{if (GetTestVerbosity()>(V)) print_func A;}
+#define SUBTEST(TEST)	{printf("   Subtest: %-52s",TEST); fflush(stdout);}
 
 int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
 int test_report (int, const H5std_string&);
@@ -122,6 +123,7 @@ void test_h5s();
 void test_reference();
 void test_types();
 void test_vlstrings();
+void test_dset();
 
 /* Prototypes for the cleanup routines */
 void cleanup_attr();

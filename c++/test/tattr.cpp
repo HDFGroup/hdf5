@@ -16,7 +16,7 @@
 /*****************************************************************************
    FILE
    tattr.cpp - HDF5 C++ testing the functionalities associated with the
-        C attribute interface (H5A)
+		C attribute interface (H5A)
 
  ***************************************************************************/
 
@@ -34,7 +34,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -53,12 +52,12 @@ const int SPACE1_DIM1 = 3;
 const int SPACE1_DIM2 = 15;
 const int SPACE1_DIM3 = 13;
 
-/* Object Names */
+/* Object names */
 const H5std_string DSET1_NAME("Dataset1");
 const H5std_string GROUP1_NAME("/Group1");
 const H5std_string TYPE1_NAME("/Type");
 
-/* Attribute Names, Rank & Dimensions */
+/* Attribute names, rank & dimensions */
 const H5std_string ATTR1_NAME("Attr1");
 const int ATTR1_RANK = 1;
 const int ATTR1_DIM1 = 3;
@@ -109,7 +108,7 @@ int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
 **      Tests integer attributes on both datasets and groups
 **
 ****************************************************************/
-static void test_attr_basic_write(void)
+static void test_attr_basic_write()
 {
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t dims2[] = {ATTR1_DIM1};
@@ -118,7 +117,7 @@ static void test_attr_basic_write(void)
     int     i;
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Attribute Writing Functions");
+    SUBTEST("Basic attribute writing functions");
 
     try {
 	// Create file
@@ -151,7 +150,7 @@ static void test_attr_basic_write(void)
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
 	}
 	catch (AttributeIException E) // catching invalid creating attribute
-        {} // do nothing, exception expected
+	{} // do nothing, exception expected
 
 	// Write attribute information
 	ds_attr1.write (PredType::NATIVE_INT, attr_data1);
@@ -203,12 +202,12 @@ static void test_attr_basic_write(void)
 	// Try to create the same attribute again (should fail)
 	try {
 	    Attribute invalid_attr = group.createAttribute (ATTR2_NAME, PredType::NATIVE_INT, sid3);
-            // continuation here, that means no exception has been thrown
-            throw InvalidActionException("H5Group::createAttribute",
+	    // continuation here, that means no exception has been thrown
+	    throw InvalidActionException("H5Group::createAttribute",
 			"Attempting to create an existing attribute");
 	}
-        catch (AttributeIException E) // catching invalid creating attribute
-        {} // do nothing, exception expected
+	catch (AttributeIException E) // catching invalid creating attribute
+	{} // do nothing, exception expected
 
 	// Write attribute information
 	gr_attr.write (PredType::NATIVE_INT, attr_data2);
@@ -222,7 +221,7 @@ static void test_attr_basic_write(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_basic_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_basic_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_write()
 
@@ -231,13 +230,13 @@ static void test_attr_basic_write(void)
 **  test_attr_rename(): Test renaming attribute function.
 **
 ****************************************************************/
-static void test_attr_rename(void)
+static void test_attr_rename()
 {
     int read_data1[ATTR1_DIM1]={0}; // Buffer for reading the attribute
     int i;
 
 	// Output message about test being performed
-    SUBTEST("Testing Rename Attribute Function");
+    SUBTEST("Rename attribute function");
 
     try {
 	// Open file
@@ -267,7 +266,7 @@ static void test_attr_rename(void)
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d,read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
 	// Close attribute
-    	attr1.close();
+	attr1.close();
 
 	// Open the second attribute
 	Attribute attr2(dataset.openAttribute(ATTR1A_NAME));
@@ -294,7 +293,7 @@ static void test_attr_rename(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_rename()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_rename", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_rename()
 
@@ -303,12 +302,12 @@ static void test_attr_rename(void)
 **  test_attr_basic_read(): Test basic read attribute.
 **
 ********************************************************************/
-static void test_attr_basic_read(void)
+static void test_attr_basic_read()
 {
     int i, j;
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Attribute Reading Functions");
+    SUBTEST("Basic attribute reading functions");
 
     try {
 	// Open file
@@ -330,7 +329,7 @@ static void test_attr_basic_read(void)
 
 	// Verify values read in
 	for(i=0; i<ATTR1_DIM1; i++)
-            if(attr_data1[i]!=read_data1[i])
+	    if(attr_data1[i]!=read_data1[i])
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
 	/*
@@ -354,15 +353,15 @@ static void test_attr_basic_read(void)
 
 	// Verify values read in
 	for(i=0; i<ATTR2_DIM1; i++)
-            for(j=0; j<ATTR2_DIM2; j++)
-        	if(attr_data2[i][j]!=read_data2[i][j]) {
+	    for(j=0; j<ATTR2_DIM2; j++)
+		if(attr_data2[i][j]!=read_data2[i][j]) {
 		    TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data2[i][j]);
 		}
 	PASSED();
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_basic_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_basic_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_read()
 
@@ -371,11 +370,11 @@ static void test_attr_basic_read(void)
 **  test_attr_compound_write(): Tests compound datatype attributes
 **
 ****************************************************************/
-static void test_attr_compound_write(void)
+static void test_attr_compound_write()
 {
 
-    // Output message about test being performed
-    SUBTEST("Testing Writing Compound Attribute Functions");
+	// Output message about test being performed
+    SUBTEST("Multiple attribute functions");
 
     try {
 	// Create file
@@ -411,8 +410,8 @@ static void test_attr_compound_write(void)
 	try {
 	    Attribute invalid_attr = dataset.createAttribute (ATTR4_NAME, comp_type, sid2);
 	}
-        catch (AttributeIException E) // catching invalid creating attribute
-        {} // do nothing, exception expected
+	catch (AttributeIException E) // catching invalid creating attribute
+	{} // do nothing, exception expected
 
 	// Write complex attribute data
 	attr.write(comp_type, attr_data4);
@@ -421,7 +420,7 @@ static void test_attr_compound_write(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_compound_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_compound_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_compound_write()
 
@@ -430,7 +429,7 @@ static void test_attr_compound_write(void)
 **  test_attr_compound_read(): Test basic H5A (attribute) code.
 **
 ****************************************************************/
-static void test_attr_compound_read(void)
+static void test_attr_compound_read()
 {
     hsize_t dims[ATTR_MAX_DIMS];	// Attribute dimensions
     size_t      size;   // Attribute datatype size as stored in file
@@ -439,7 +438,7 @@ static void test_attr_compound_read(void)
     int     i,j;
 
     // Output message about test being performed
-    SUBTEST("Testing Reading Compound Attribute Functions");
+    SUBTEST("Basic attribute functions");
 
     try {
 	// Open file
@@ -467,8 +466,8 @@ static void test_attr_compound_read(void)
 	// Get the dims of the dataspace and verify them
 	int ndims = space.getSimpleExtentDims(dims);
 	if(dims[0]!=ATTR4_DIM1)
-        verify_val((long)dims[0], (long)ATTR4_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
-        verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
+	verify_val((long)dims[0], (long)ATTR4_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
+	verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
 	// Get the class of the datatype that is used by attr
 	H5T_class_t type_class = attr.getTypeClass();
@@ -491,7 +490,7 @@ static void test_attr_compound_read(void)
 	    if(!((fieldname == ATTR4_FIELDNAME1) ||
 		(fieldname == ATTR4_FIELDNAME2) ||
 		(fieldname == ATTR4_FIELDNAME3)))
-            TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,i,fieldname.c_str());
+	    TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,i,fieldname.c_str());
 	} /* end for */
 
 	offset = datatype.getMemberOffset(0);
@@ -547,7 +546,7 @@ static void test_attr_compound_read(void)
 		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
 		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
 		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
-             } /* end if */
+	    } /* end if */
 
 	// Verify name
 	H5std_string attr_name = attr.getName();
@@ -556,7 +555,7 @@ static void test_attr_compound_read(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_compound_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_compound_read()
 
@@ -565,10 +564,10 @@ static void test_attr_compound_read(void)
 **  test_attr_scalar_write(): Test scalar attribute writing functionality.
 **
 ****************************************************************/
-static void test_attr_scalar_write(void)
+static void test_attr_scalar_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Basic Scalar Attribute Writing Functions");
+    SUBTEST("Basic scalar attribute writing functions");
 
     try {
 	// Create file
@@ -601,7 +600,7 @@ static void test_attr_scalar_write(void)
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
 	}
 	catch (AttributeIException E) // catching invalid creating attribute
-        {} // do nothing, exception expected
+	{} // do nothing, exception expected
 
 	// Write attribute information
 	ds_attr.write (PredType::NATIVE_FLOAT, &attr_data5);
@@ -610,7 +609,7 @@ static void test_attr_scalar_write(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_scalar_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_write()
 
@@ -619,10 +618,10 @@ static void test_attr_scalar_write(void)
 **  test_attr_scalar_read(): Test scalar attribute reading functionality.
 **
 ****************************************************************/
-static void test_attr_scalar_read(void)
+static void test_attr_scalar_read()
 {
     // Output message about test being performed
-    SUBTEST("Testing Basic Scalar Attribute Reading Functions");
+    SUBTEST("Basic scalar attribute reading functions");
 
     try {
 	// Open file
@@ -654,7 +653,7 @@ static void test_attr_scalar_read(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_scalar_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_read()
 
@@ -663,10 +662,10 @@ static void test_attr_scalar_read(void)
 **  test_attr_mult_write(): Test multiple attributes
 **
 ****************************************************************/
-static void test_attr_mult_write(void)
+static void test_attr_mult_write()
 {
     // Output message about test being performed
-    SUBTEST("Testing Multiple Attribute Writing Functions");
+    SUBTEST("Multiple attribute writing functions");
 
     try {
 	// Create file
@@ -717,7 +716,7 @@ static void test_attr_mult_write(void)
 	    throw InvalidActionException("DataSet::createAttribute", "Attempting to create a duplicate attribute");
 	}
 	catch (AttributeIException E) // catching invalid creating attribute
-        {} // do nothing, exception expected
+	{} // do nothing, exception expected
 
 	// Write 3rd attribute information
 	ds_attr3.write (PredType::NATIVE_DOUBLE, attr_data3);
@@ -726,7 +725,7 @@ static void test_attr_mult_write(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_mult_write()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_mult_write", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_write()
 
@@ -735,7 +734,7 @@ static void test_attr_mult_write(void)
 **  test_attr_mult_read(): Test reading multiple attributes.
 **
 ****************************************************************/
-static void test_attr_mult_read(void)
+static void test_attr_mult_read()
 {
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
     int     read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}}; // Buffer for reading 2nd attribute
@@ -743,7 +742,7 @@ static void test_attr_mult_read(void)
     int     i,j,k;
 
 	// Output message about test being performed
-    SUBTEST("Testing Multiple Attribute Reading Functions");
+    SUBTEST("Multiple attribute reading functions");
 
     try {
 	// Open file
@@ -776,14 +775,14 @@ static void test_attr_mult_read(void)
 
 	/* Verify Datatype */
 
-        // Get the class of the datatype that is used by attr
-        H5T_class_t type_class = attr.getTypeClass();
+	// Get the class of the datatype that is used by attr
+	H5T_class_t type_class = attr.getTypeClass();
 
-        // Verify that the type is of integer datatype
-        verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
+	// Verify that the type is of integer datatype
+	verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
 
     	// Get the integer datatype
-        IntType i_type1 = attr.getIntType();
+	IntType i_type1 = attr.getIntType();
 
 	// Get and verify the order of this type
 	H5T_order_t order = i_type1.getOrder();
@@ -829,14 +828,14 @@ static void test_attr_mult_read(void)
 
 	/* Verify Datatype */
 
-        // Get the class of the datatype that is used by attr
-        type_class = attr.getTypeClass();
+	// Get the class of the datatype that is used by attr
+	type_class = attr.getTypeClass();
 
-        // Verify that the type is of integer datatype
-        verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
+	// Verify that the type is of integer datatype
+	verify_val(type_class, H5T_INTEGER, "Attribute::getTypeClass", __LINE__, __FILE__);
 
     	// Get the integer datatype
-        IntType i_type2 = attr.getIntType();
+	IntType i_type2 = attr.getIntType();
 
 	// Get and verify the order of this type
 	order = i_type2.getOrder();
@@ -853,8 +852,8 @@ static void test_attr_mult_read(void)
 	// Verify values read in
 	for(i=0; i<ATTR2_DIM1; i++)
 	  for(j=0; j<ATTR2_DIM2; j++)
-            if(attr_data2[i][j]!=read_data2[i][j])
-                TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
+	    if(attr_data2[i][j]!=read_data2[i][j])
+		TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
 
 	// Verify Name
 	attr_name = attr.getName();
@@ -882,14 +881,14 @@ static void test_attr_mult_read(void)
 
 	/* Verify Datatype */
 
-        // Get the class of the datatype that is used by attr
-        type_class = attr.getTypeClass();
+	// Get the class of the datatype that is used by attr
+	type_class = attr.getTypeClass();
 
-        // Verify that the type is of compound datatype
-        verify_val(type_class, H5T_FLOAT, "Attribute::getTypeClass", __LINE__, __FILE__);
+	// Verify that the type is of compound datatype
+	verify_val(type_class, H5T_FLOAT, "Attribute::getTypeClass", __LINE__, __FILE__);
 
     	// Get the double datatype
-        FloatType f_type = attr.getFloatType();
+	FloatType f_type = attr.getFloatType();
 
 	// Get and verify the order of this type
 	order = f_type.getOrder();
@@ -917,7 +916,7 @@ static void test_attr_mult_read(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_mult_read()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_mult_read", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_read()
 
@@ -927,12 +926,12 @@ static void test_attr_mult_read(void)
 **			hdf5 objects.
 **
 ****************************************************************/
-static void test_attr_delete(void)
+static void test_attr_delete()
 {
     H5std_string  attr_name; // Buffer for attribute names
 
     // Output message about test being performed
-    SUBTEST("Testing Removing Attribute Function");
+    SUBTEST("Removing attribute function");
 
     try {
 	// Open file
@@ -953,7 +952,7 @@ static void test_attr_delete(void)
 	    throw InvalidActionException("DataSet::removeAttr", "Attempting to remove non-existing attribute");
 	}
 	catch (AttributeIException E) // catching invalid removing attribute
-        {} // do nothing, exception expected
+	{} // do nothing, exception expected
 
 	// Verify the correct number of attributes
 	num_attrs = dataset.getNumAttrs();
@@ -1012,7 +1011,7 @@ static void test_attr_delete(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_delete()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_delete", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_delete()
 
@@ -1022,15 +1021,15 @@ static void test_attr_delete(void)
 **				in attributes.
 **
 ****************************************************************/
-static void test_attr_dtype_shared(void)
+static void test_attr_dtype_shared()
 {
-    int data=8;                 /* Data to write */
-    int rdata=0;                /* Read read in */
-    H5G_stat_t statbuf;         /* Object's information */
-    h5_stat_size_t filesize;             /* Size of file after modifications */
+    int data=8;			/* Data to write */
+    int rdata=0;		/* Read read in */
+    H5G_stat_t statbuf;		/* Object's information */
+    h5_stat_size_t filesize;	/* Size of file after modifications */
 
     // Output message about test being performed
-    SUBTEST("Testing Attributes with Shared Datatypes");
+    SUBTEST("Shared datatypes with attributes");
 
     try {
 	// Create a file
@@ -1043,7 +1042,7 @@ static void test_attr_dtype_shared(void)
 	h5_stat_size_t empty_filesize;       // Size of empty file
 	empty_filesize = h5_get_file_size(FILENAME.c_str());
 	if (empty_filesize < 0)
-	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
+	    TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
@@ -1148,14 +1147,14 @@ static void test_attr_dtype_shared(void)
 	fid1.close();
 
 	// Check size of file
-	filesize=h5_get_file_size(FILENAME.c_str());
+	filesize = h5_get_file_size(FILENAME.c_str());
 	verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
 
 	PASSED();
     }   // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_attr_dtype_shared", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_dtype_shared()
 
@@ -1172,10 +1171,10 @@ const H5std_string ATTR_VL_STR_NAME("String_attr");
 const H5std_string ATTRSTR_DATA("String Attribute");
 const int ATTR_LEN = 17;
 
-static void test_string_attr(void)
+static void test_string_attr()
 {
     // Output message about test being performed
-    SUBTEST("Testing I/O on FL and VL String Attributes");
+    SUBTEST("I/O on FL and VL string attributes");
 
     try {
 	// Create file
@@ -1279,7 +1278,7 @@ static void test_string_attr(void)
     } // end try block
 
     catch (Exception E) {
-	issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_string_attr", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_string_attr()
 
@@ -1291,7 +1290,7 @@ static void test_string_attr(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_attr(void)
+void test_attr()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Attributes\n"));
@@ -1324,7 +1323,7 @@ void test_attr(void)
  * Return:	none
  *
  * Programmer:	Albert Cheng
- *              July 2, 1998
+ *		July 2, 1998
  *
  * Modifications:
  *
@@ -1333,7 +1332,7 @@ void test_attr(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_attr(void)
+void cleanup_attr()
 {
     HDremove(FILENAME.c_str());
 }

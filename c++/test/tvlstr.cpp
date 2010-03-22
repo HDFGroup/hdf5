@@ -35,7 +35,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -140,8 +139,7 @@ const H5std_string DSET1_DATA("String Dataset");
 static void test_vlstring_dataset()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL String on Datasets");
-
+    SUBTEST("VL string on datasets");
     try {
 	// Open the file
 	H5File file1(FILENAME, H5F_ACC_TRUNC);
@@ -206,7 +204,7 @@ static void test_vlstring_dataset()
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg("test_vlstring_dataset()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstring_dataset", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_vlstring_dataset()
 
@@ -230,7 +228,7 @@ static void test_vlstring_array_dataset()
         };   // Information to write
 
     // Output message about test being performed
-    SUBTEST("Testing VL String Array on Datasets");
+    SUBTEST("VL string array on datasets");
 
     H5File* file1;
     try {
@@ -302,7 +300,7 @@ static void test_vlstring_array_dataset()
     // Catch all exceptions.
     catch (Exception E)
     {
-	issue_fail_msg("test_vlstring_array_dataset()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstring_array_dataset", __LINE__, __FILE__, E.getCDetailMsg());
 	delete file1;
     }
 } // end test_vlstring_array_dataset()
@@ -327,8 +325,7 @@ static void test_vlstrings_special()
     char *rdata[SPACE1_DIM1];   // Information read in
 
     // Output message about test being performed.
-    SUBTEST("Testing Special VL Strings");
-
+    SUBTEST("Special VL strings");
     try {
 	// Create file.
 	H5File file1(FILENAME, H5F_ACC_TRUNC);
@@ -421,7 +418,7 @@ static void test_vlstrings_special()
     // Catch all exceptions.
     catch (Exception E)
     {
-	issue_fail_msg("test_vlstrings_special()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstrings_special", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_vlstrings_special
 
@@ -441,7 +438,7 @@ const H5std_string      VLSTR_TYPE("vl_string_type");
 static void test_vlstring_type()
 {
     // Output message about test being performed.
-    SUBTEST("Testing VL String Type");
+    SUBTEST("VL string type");
 
     H5File* file1 = NULL;
     try {
@@ -506,7 +503,7 @@ static void test_vlstring_type()
     // Catch all exceptions.
     catch (Exception E)
     {
-        issue_fail_msg("test_vlstring_type()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_vlstring_type", __LINE__, __FILE__, E.getCDetailMsg());
 	delete file1;
     }
 } // end test_vlstring_type()
@@ -526,8 +523,7 @@ static void test_vlstring_type()
 static void test_compact_vlstring()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL Strings on Compact Dataset");
-
+    SUBTEST("VL strings on compact dataset");
     try {
 	// Create file
 	H5File file1(FILENAME, H5F_ACC_TRUNC);
@@ -583,7 +579,7 @@ static void test_compact_vlstring()
     // Catch all exceptions.
     catch (Exception E)
     {
-        issue_fail_msg("test_compact_vlstrings()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_compact_vlstrings", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compact_vlstrings
 
@@ -609,8 +605,7 @@ const H5std_string ATTRSTR_DATA("String Attribute");
 static void test_vlstring_attribute()
 {
     // Output message about test being performed
-    SUBTEST("Testing VL String on Attributes");
-
+    SUBTEST("VL string on attributes");
     try {
 	// Open the file
 	H5File file1(FILENAME, H5F_ACC_RDWR);
@@ -650,7 +645,7 @@ static void test_vlstring_attribute()
 	// Test creating a "large" sized string attribute
 	gr_attr = root.createAttribute("test_scalar_large", vlst, att_space);
 
-	char *string_att_write= (char*)HDcalloc(8192, sizeof(char));
+	string_att_write = (char*)HDcalloc(8192, sizeof(char));
 	HDmemset(string_att_write, 'A', 8191);
 
 	// Write data to the attribute, then read it back.
@@ -672,7 +667,7 @@ static void test_vlstring_attribute()
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg("test_vlstring_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstring_attribute", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_vlstring_attribute()
 
@@ -692,8 +687,7 @@ static void test_read_vl_string_attribute()
 {
 
     // Output message about test being performed
-    SUBTEST("Testing reading VL String as attributes");
-
+    SUBTEST("reading VL string as attributes");
     try {
 	// Open file
 	H5File file1(FILENAME, H5F_ACC_RDONLY);
@@ -732,7 +726,7 @@ static void test_read_vl_string_attribute()
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg("test_read_vl_string_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_read_vl_string_attribute", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_read_vl_string_attribute
 
@@ -757,8 +751,7 @@ static void test_vlstring_array_attribute()
         };   // Information to write
 
     // Output message about test being performed
-    SUBTEST("Testing VL String Array on Attributes");
-
+    SUBTEST("VL string array on attributes");
     try {
 	// Open the file
 	H5File file1(FILENAME, H5F_ACC_RDWR);
@@ -802,7 +795,7 @@ static void test_vlstring_array_attribute()
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg("test_vlstring_array_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstring_array_attribute", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_vlstring_array_attribute()
 
@@ -866,8 +859,7 @@ const int REWRITE_NDATASETS = 32;
 static void test_vl_rewrite()
 {
     // Output message about test being performed
-    SUBTEST("Testing I/O on VL strings with link/unlink");
-
+    SUBTEST("I/O on VL strings with link/unlink");
     try {
 	// Create the files.
 	H5File file1(FILENAME, H5F_ACC_TRUNC);
@@ -924,7 +916,7 @@ static void test_vl_rewrite()
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg("test_vl_rewrite()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vl_rewrite", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_vl_rewrite()
 
@@ -946,7 +938,7 @@ extern "C"
 void test_vlstrings()
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing Variable-Length Strings"));
+    MESSAGE(5, ("Testing variable-length strings"));
 
     // These tests use the same file
     // Test basic VL string datatype

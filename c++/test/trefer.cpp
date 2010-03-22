@@ -34,7 +34,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -76,13 +75,13 @@ typedef struct s1_t {
 **      Tests references to various kinds of objects
 **
 ****************************************************************/
-static void test_reference_obj(void)
+static void test_reference_obj()
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
 
     // Output message about test being performed
-    SUBTEST("Testing Object Reference Functions");
+    SUBTEST("Object reference functions");
 
     H5File* file1 = NULL;
     try {
@@ -174,7 +173,7 @@ static void test_reference_obj(void)
 	sid1.close();
 	dataset.close();
 	delete file1;
-	
+
 	// Re-open the file
 	file1 = new H5File(FILE1, H5F_ACC_RDWR);
 
@@ -182,9 +181,9 @@ static void test_reference_obj(void)
 	dataset = file1->openDataSet("/Dataset3");
 
 	// Read selection from disk
-	dataset.read(rbuf, PredType::STD_REF_OBJ); 
+	dataset.read(rbuf, PredType::STD_REF_OBJ);
 
-	// Dereference dataset object by ctor, from the location where 
+	// Dereference dataset object by ctor, from the location where
 	// 'dataset' is located
 	DataSet dset2(dataset, &rbuf[0]);
 
@@ -197,7 +196,7 @@ static void test_reference_obj(void)
 	dset2.read(tbuf, PredType::NATIVE_UINT);
 
 	for(tu32=(unsigned *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
-	   VERIFY(*tu32, (uint32_t)(i*3), "Data");
+	   verify_val(*tu32, (uint32_t)(i*3), "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
 	// Close dereferenced dataset
 	dset2.close();
@@ -209,6 +208,12 @@ static void test_reference_obj(void)
 	H5std_string read_comment1 = group.getComment(".", 10);
 	verify_val(read_comment1, write_comment, "Group::getComment", __LINE__, __FILE__);
 
+        // Test that getComment handles failures gracefully
+        try {
+            H5std_string read_comment_tmp = group.getComment(NULL);
+        }
+        catch (Exception E) {} // We expect this to fail
+
 	// Close group
 	group.close();
 
@@ -218,14 +223,15 @@ static void test_reference_obj(void)
 	verify_val(read_comment2, write_comment, "Group::getComment", __LINE__, __FILE__);
 	group.close();
 
-	// Dereference group object by ctor and using dataset to specify 
+	// Dereference group object by ctor and using dataset to specify
 	// location
 	Group new_group(dataset, &rbuf[2]);
-	H5std_string read_comment3 = new_group.getComment(".", 10);
+	H5std_string com_name("."); /* getComment(H5std_string&...) */
+	H5std_string read_comment3 = new_group.getComment(com_name, 10);
 	verify_val(read_comment3, write_comment, "Group::getComment", __LINE__, __FILE__);
 	new_group.close();
 
-	// Dereference datatype object from the location where 'dataset' 
+	// Dereference datatype object from the location where 'dataset'
 	// is located
 	dtype1.dereference(dataset, &rbuf[3]);
 
@@ -261,7 +267,7 @@ static void test_reference_obj(void)
 	PASSED();
     } // end try
     catch (Exception E) {
-	issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_reference_obj", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_reference_obj()
 
@@ -273,9 +279,10 @@ static void test_reference_obj(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_reference(void)
+void test_reference()
 {
     // Output message about test being performed
+    //MESSAGE("Testing References\n");
     MESSAGE(5, ("Testing References\n"));
 
     test_reference_obj();       // Test basic object reference functionality
@@ -291,7 +298,7 @@ void test_reference(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_reference(void)
+void cleanup_reference()
 {
     HDremove(FILE1.c_str());
 }

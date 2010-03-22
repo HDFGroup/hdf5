@@ -36,7 +36,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -51,18 +50,18 @@
 #define FILTER_CHUNK_DIM2 25
 
 // will do this function later or use it as guideline - BMR - 2007/01/26
-/*static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl, 
+static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 		int if_fletcher32, int corrupted, hsize_t *dset_size)
 {
     cerr << "do nothing right now" << endl;
     return(0);
 }
-*/
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS        305
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf); 
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_BOGUS[1] = {{
     H5Z_FILTER_BOGUS,           /* Filter id number             */
@@ -115,11 +114,10 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 // Chunk dimensions
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
 
-static void test_null_filter(void)
+static void test_null_filter()
 {
     // Output message about test being performed
-    SUBTEST("Testing 'Null' Filter");
-
+    SUBTEST("'Null' filter");
     try {
 	//hsize_t  null_size;          // Size of dataset with null filter
 
@@ -151,7 +149,7 @@ static void test_null_filter(void)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_null_filter", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }  // test_null_filter
 
@@ -181,7 +179,7 @@ void test_szip_filter(H5File& file1)
     unsigned szip_pixels_per_block=4;
 
     // Output message about test being performed
-    SUBTEST("Testing SZIP Filter (With Encoder)");
+    SUBTEST("SZIP filter (with Encoder)");
 
     if ( h5_szip_can_encode() == 1) {
     char* tconv_buf = new char [1000];
@@ -211,7 +209,7 @@ void test_szip_filter(H5File& file1)
         {
             for (j=0; j<size[1]; j++)
             {
-                points[i][j] = n++;
+                points[i][j] = (int)n++;
             }
         }
 
@@ -234,17 +232,17 @@ void test_szip_filter(H5File& file1)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_szip_filter", __LINE__, __FILE__, E.getCDetailMsg());
     }
-    } // if szip presents 
+    } // if szip presents
     else {
 	SKIPPED();
     }
 
 #else /* H5_HAVE_FILTER_SZIP */
-    SUBTEST("szip filter");
+    SUBTEST("SZIP filter");
     SKIPPED();
-    puts("    Szip filter not enabled");
+    puts("    SZIP filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP */
 }  // test_szip_filter
 
@@ -258,9 +256,10 @@ const H5std_string      FILE1("tfilters.h5");
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_filters(void)
+void test_filters()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Various Filters\n");
     MESSAGE(5, ("Testing Various Filters\n"));
 
     hid_t       fapl_id;
@@ -279,7 +278,7 @@ void test_filters(void)
     }
     catch (Exception E)
     {
-        issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_filters", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_filters()
 
@@ -300,7 +299,7 @@ void test_filters(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_filters(void)
+void cleanup_filters()
 {
     HDremove(FILE1.c_str());
 }

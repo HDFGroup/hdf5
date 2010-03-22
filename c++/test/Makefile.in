@@ -40,13 +40,14 @@ LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
 ## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
 
-TESTHDF5_SRC=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
-	th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+TESTHDF5_SRC=testhdf5.cpp dsets.cpp tattr.cpp tcompound.cpp tfile.cpp	\
+	tfilter.cpp th5s.cpp tlinks.cpp trefer.cpp ttypes.cpp		\
+	tvlstr.cpp h5cpputil.cpp
 TESTHDF5_OBJ=$(TESTHDF5_SRC:.cpp=.lo)
 
-TEST_SRC=dsets.cpp $(TESTHDF5_SRC)
+TEST_SRC=$(TESTHDF5_SRC)
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
-TEST_PROGS=dsets testhdf5
+TEST_PROGS=testhdf5
 
 
 TEST_SCRIPTS=
@@ -57,8 +58,5 @@ $(TEST_PROGS): $(LIB) $(LIBHDF5) $(LIBH5TEST)
 
 testhdf5: $(TEST_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
-
-dsets: dsets.lo h5cpputil.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dsets.lo h5cpputil.lo $(hdf5_builddir)/../test/h5test.lo $(LIB) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS) $(DEFAULT_LIBS)
 
 @CONCLUDE@

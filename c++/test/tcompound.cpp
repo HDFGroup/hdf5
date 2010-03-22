@@ -33,7 +33,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -65,10 +64,10 @@ typedef struct complex_t {
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_1(void)
+static void test_compound_1()
 {
     // Output message about test being performed
-    SUBTEST("Compound Data Types");
+    SUBTEST("Compound data types");
     try {
 	// Create an empty compound datatype
 	CompType complex_type(sizeof(complex_t));
@@ -101,7 +100,7 @@ static void test_compound_1(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_2(void)
+static void test_compound_2()
 {
     typedef struct {
 	int a, b, c[4], d, e;
@@ -118,7 +117,7 @@ static void test_compound_2(void)
     unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
 
     // Output message about test being performed
-    SUBTEST("Compound Element Reordering");
+    SUBTEST("Compound element reordering");
     try {
 	// Sizes should be the same, but be careful just in case
 	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
@@ -177,13 +176,13 @@ static void test_compound_2(void)
 		s_ptr->e    != d_ptr->e) {
 		H5_FAILED();
 		cerr << "    i=" << i << endl;
-		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b 
-		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << "," 
-		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" 
+		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
+		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
+		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
 		     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
-		cerr << "    dst={a=" << s_ptr->a << ", b=" << s_ptr->b 
-		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << "," 
-		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" 
+		cerr << "    dst={a=" << s_ptr->a << ", b=" << s_ptr->b
+		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
+		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
 		     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
 	    }
 	}
@@ -220,7 +219,7 @@ static void test_compound_2(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_3(void)
+static void test_compound_3()
 {
     typedef struct {
 	int a, b, c[4], d, e;
@@ -237,7 +236,7 @@ static void test_compound_3(void)
     unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
 
     // Output message about test being performed
-    SUBTEST("Compound Datatype Subset Conversions");
+    SUBTEST("Compound datatype subset conversions");
     try {
 	// Initialize
 	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
@@ -292,13 +291,13 @@ static void test_compound_3(void)
 		s_ptr->e    != d_ptr->e) {
 		H5_FAILED();
 		cerr << "    i=" << i << endl;
-		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b 
-		     << ", c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << "," 
-		     << s_ptr->c[2] << "," << s_ptr->c[3] << "], d=" 
+		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
+		     << ", c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
+		     << s_ptr->c[2] << "," << s_ptr->c[3] << "], d="
 		     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
 		cerr << "    dst={a=" << d_ptr->a
-		     << ", c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << "," 
-		     << d_ptr->c[2] << "," << d_ptr->c[3] << "], e=" 
+		     << ", c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
+		     << d_ptr->c[2] << "," << d_ptr->c[3] << "], e="
 		     << d_ptr->e << "}" << endl;
 	    } // if
 	} // for
@@ -336,7 +335,7 @@ static void test_compound_3(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_4(void)
+static void test_compound_4()
 {
 
     typedef struct {
@@ -358,7 +357,7 @@ static void test_compound_4(void)
     unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
 
     // Output message about test being performed
-    SUBTEST("Compound Element Shrinking & Reordering");
+    SUBTEST("Compound element shrinking & reordering");
     try {
 	// Sizes should be the same, but be careful just in case
 	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
@@ -388,7 +387,7 @@ static void test_compound_4(void)
 	st.insertMember("d", HOFFSET(src_typ_t, d), PredType::NATIVE_INT);
 	st.insertMember("e", HOFFSET(src_typ_t, e), PredType::NATIVE_INT);
 	array_dt->close();
-    
+
 	array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
 
 	// Create an empty compound datatype
@@ -399,7 +398,7 @@ static void test_compound_4(void)
 	dt.insertMember("d", HOFFSET(dst_typ_t, d), PredType::NATIVE_SHORT);
 	dt.insertMember("e", HOFFSET(dst_typ_t, e), PredType::NATIVE_INT);
 	array_dt->close();
-    
+
 	// Perform the conversion
 	st.convert(dt, (size_t)nelmts, buf, bkg);
 
@@ -418,17 +417,17 @@ static void test_compound_4(void)
 	    {
 		H5_FAILED();
 		cerr << "    i=" << i << endl;
-		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b 
-		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << "," 
-		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d=" 
+		cerr << "    src={a=" << s_ptr->a << ", b=" << s_ptr->b
+		     << "c=[" << s_ptr->c[0] << "," << s_ptr->c[1] << ","
+		     << s_ptr->c[2] << "," << s_ptr->c[3] << ", d="
 		     << s_ptr->d << ", e=" << s_ptr->e << "}" << endl;
-		cerr << "    dst={a=" << d_ptr->a << ", b=" << d_ptr->b 
-		     << "c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << "," 
-		     << d_ptr->c[2] << "," << d_ptr->c[3] << ", d=" 
+		cerr << "    dst={a=" << d_ptr->a << ", b=" << d_ptr->b
+		     << "c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
+		     << d_ptr->c[2] << "," << d_ptr->c[3] << ", d="
 		     << d_ptr->d << ", e=" << d_ptr->e << "}" << endl;
 	    } // if
 	} // for
-    
+
 	// Release resources
 	free(buf);
 	free(bkg);
@@ -463,7 +462,7 @@ static void test_compound_4(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_5(void)
+static void test_compound_5()
 {
     typedef struct {
         char    name[16];
@@ -485,16 +484,16 @@ static void test_compound_5(void)
     void        *bkg = calloc(2, sizeof(dst_typ_t));
 
     // Output message about test being performed
-    SUBTEST("Optimized Struct Converter");
+    SUBTEST("Optimized struct converter");
     try {
 	// Build datatypes
-	ArrayType* array_dt = new ArrayType(PredType::NATIVE_SHORT, 1, dims);	
+	ArrayType* array_dt = new ArrayType(PredType::NATIVE_SHORT, 1, dims);
 	CompType short_array(4*sizeof(short));
 	short_array.insertMember("_", 0, *array_dt);
 	array_dt->close();
 
 	CompType int_array(4*sizeof(int));
-	array_dt = new ArrayType(PredType::NATIVE_INT, 1, dims);	
+	array_dt = new ArrayType(PredType::NATIVE_INT, 1, dims);
 	int_array.insertMember("_", 0, *array_dt);
 	array_dt->close();
 
@@ -527,7 +526,7 @@ static void test_compound_5(void)
 	    src[1].coll_ids[0]!=dst[1].coll_ids[0] ||
 	    src[1].coll_ids[1]!=dst[1].coll_ids[1] ||
 	    src[1].coll_ids[2]!=dst[1].coll_ids[2] ||
-	    src[1].coll_ids[3]!=dst[1].coll_ids[3]) 
+	    src[1].coll_ids[3]!=dst[1].coll_ids[3])
 	{ H5_FAILED(); }
 
 	// Free memory buffers
@@ -559,7 +558,7 @@ static void test_compound_5(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_6(void)
+static void test_compound_6()
 {
     typedef struct {
 	short b;
@@ -578,7 +577,7 @@ static void test_compound_6(void)
     unsigned char *buf=NULL, *orig=NULL, *bkg=NULL;
 
     // Output message about test being performed
-    SUBTEST("Compound Element Growing");
+    SUBTEST("Compound element growing");
     try {
 	// Sizes should be the same, but be careful just in case
 	buf = (unsigned char*)malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
@@ -608,17 +607,17 @@ static void test_compound_6(void)
 	    s_ptr = ((src_typ_t*)orig) + i;
 	    d_ptr = ((dst_typ_t*)buf)  + i;
 	    if (s_ptr->b    != d_ptr->b    ||
-		s_ptr->d    != d_ptr->d) 
+		s_ptr->d    != d_ptr->d)
 	    {
 		H5_FAILED();
 		cerr << "    i=" << i << endl;
-		cerr << "    src={b=" << s_ptr->b << ", d=" << s_ptr->d 
+		cerr << "    src={b=" << s_ptr->b << ", d=" << s_ptr->d
 		     << "}" << endl;
-		cerr << "    dst={b=" << d_ptr->b << ", d=" << d_ptr->d 
+		cerr << "    dst={b=" << d_ptr->b << ", d=" << d_ptr->d
 		     << "}" << endl;
 	    } // if
 	} // for
-    
+
 	// Release resources
 	free(buf);
 	free(bkg);
@@ -650,7 +649,7 @@ static void test_compound_6(void)
  *
  *-------------------------------------------------------------------------
  */
-static void test_compound_7(void)
+static void test_compound_7()
 {
     typedef struct {
 	int a;
@@ -666,7 +665,7 @@ static void test_compound_7(void)
     } s2_typ_t;
 
     // Output message about test being performed
-    SUBTEST("Compound Element Insertion");
+    SUBTEST("Compound element insertion");
     try {
 	CompType tid1(sizeof(s1_typ_t));
 
@@ -719,7 +718,7 @@ static void test_compound_7(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_compound(void)
+void test_compound()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
@@ -748,6 +747,6 @@ void test_compound(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_compound(void)
+void cleanup_compound()
 {
 }   // cleanup_file

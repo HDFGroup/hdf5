@@ -32,10 +32,6 @@
 #include "H5File.h"
 #include "H5Alltypes.h"
 
-#include <iostream>
-    using std::cerr;
-    using std::endl;
-
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
 // - getLocId is called by all functions, that call a C API, to get
@@ -497,14 +493,15 @@ void CommonFG::removeComment(const H5std_string& name) const
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
-H5std_string CommonFG::getComment (const H5std_string& name) const
+H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 {
-   size_t bufsize = 256;        // anticipating the comment's length
+   // bufsize is default to 256
    hid_t loc_id = getLocId();   // temporary variable
 
-   // temporary C-string for the object's comment
+   // temporary C-string for the object's comment; bufsize already including
+   // null character
    char* comment_C = new char[bufsize+1];
-   herr_t ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+   herr_t ret_value = H5Gget_comment (loc_id, name, bufsize, comment_C);
 
    // if the actual length of the comment is longer than the anticipated
    // value, then call H5Gget_comment again with the correct value
@@ -513,7 +510,7 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 	bufsize = ret_value;
 	delete []comment_C;
 	comment_C = new char[bufsize+1];
-	ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+	ret_value = H5Gget_comment (loc_id, name, bufsize, comment_C);
    }
 
    // if H5Gget_comment returns SUCCEED, return the string comment,
@@ -529,33 +526,6 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getComment
-///\brief	Retrieves comment for the specified object and its comment's
-///		length.
-///\param	name  - IN: Name of the object
-///\param	bufsize - IN: Length of the comment to retrieve
-///\return	Comment string
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
-{
-   // temporary C-string for the object's comment
-   char* comment_C = new char[bufsize+1];
-
-   herr_t ret_value = H5Gget_comment( getLocId(), name, bufsize, comment_C );
-
-   // if H5Gget_comment returns SUCCEED, return the string comment
-   if( ret_value < 0 )
-   {
-      throwException("getComment", "H5Gget_comment failed");
-   }
-   H5std_string comment = H5std_string(comment_C);
-   delete []comment_C;
-   return( comment );
-}
-
-//--------------------------------------------------------------------------
-// Function:	CommonFG::getComment
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
 ///		\c H5std_string for \a name.
@@ -563,7 +533,7 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getComment( const H5std_string& name, size_t bufsize ) const
 {
-   return( getComment( name.c_str(), bufsize ));
+   return(getComment( name.c_str(), bufsize));
 }
 
 //--------------------------------------------------------------------------

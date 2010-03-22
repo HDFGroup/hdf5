@@ -50,9 +50,8 @@ class H5_DLLCPP CommonFG {
 	DataSet openDataSet(const H5std_string& name) const;
 
 	// Retrieves comment for the HDF5 object specified by its name.
-	H5std_string getComment(const H5std_string& name) const;
-	H5std_string getComment(const char* name, size_t bufsize) const;
-	H5std_string getComment(const H5std_string& name, size_t bufsize) const;
+	H5std_string getComment(const char* name, size_t bufsize=256) const;
+	H5std_string getComment(const H5std_string& name, size_t bufsize=256) const;
 
 	// Removes the comment for the HDF5 object specified by its name.
 	void removeComment(const char* name) const;

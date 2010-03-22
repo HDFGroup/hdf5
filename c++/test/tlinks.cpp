@@ -42,11 +42,10 @@
 
 #include "h5cpputil.h"  // C++ test utilility header file
 
-static const char *FILENAME[] = {
+static H5std_string FILENAME[] = {
     "link0",
     "link1",
-    "link2",
-    NULL
+    "link2"
 };
 
 
@@ -73,14 +72,13 @@ static void test_basic_links(hid_t fapl_id)
     char* tconv_buf = new char [1000];
 
     // Output message about test being performed
-    SUBTEST("Testing Basic Links");
+    SUBTEST("Basic links");
 
     // Use the file access template id to create a file access prop. list.
     FileAccPropList fapl(fapl_id);
 
-    try
-    {
-	h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+    try {
+	h5_fixname(FILENAME[0].c_str(), fapl_id, filename, sizeof filename);
 	H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
 	// Create simple dataspace
@@ -194,6 +192,5 @@ extern "C"
 #endif
 void cleanup_links()
 {
-    HDremove(FILENAME[0]);
+    HDremove(FILENAME[0].c_str());
 }
-

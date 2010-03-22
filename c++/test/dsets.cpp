@@ -38,7 +38,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -80,7 +79,7 @@ static size_t bogus(unsigned int flags, size_t cd_nelmts,
  */
 static herr_t test_create( H5File& file)
 {
-    TESTING("create, open, close");
+    SUBTEST("Create, open, close");
 
     // Setting this to NULL for cleaning up in failure situations
     DataSet *dataset = NULL;
@@ -200,7 +199,7 @@ static herr_t test_create( H5File& file)
 static herr_t test_simple_io( H5File& file)
 {
 
-    TESTING("simple I/O");
+    SUBTEST("Simple I/O");
 
     int	points[100][200];
     int	check[100][200];
@@ -290,7 +289,7 @@ static herr_t test_tconv( H5File& file)
     in = new char [4*1000000];
     //assert (in);
 
-    TESTING("data type conversion");
+    SUBTEST("Data type conversion");
 
     // Initialize the dataset
     for (int i = 0; i < 1000000; i++) {
@@ -416,7 +415,7 @@ static herr_t test_compression(H5File& file)
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
-	    points[i][j] = n++;
+	    points[i][j] = (int)n++;
 	}
     }
     char* tconv_buf = new char [1000];
@@ -440,7 +439,7 @@ static herr_t test_compression(H5File& file)
 	dscreatplist.setDeflate (6);
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-	TESTING("compression (setup)");
+	SUBTEST("Compression (setup)");
 
 	// Create the dataset
 	dataset = new DataSet (file.createDataSet
@@ -452,7 +451,7 @@ static herr_t test_compression(H5File& file)
 	* STEP 1: Read uninitialized data.  It should be zero.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (uninitialized read)");
+	SUBTEST("Compression (uninitialized read)");
 
 	dataset->read ((void*) check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
@@ -474,13 +473,13 @@ static herr_t test_compression(H5File& file)
 	* to it.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (write)");
+	SUBTEST("Compression (write)");
 
 	for (i=n=0; i<size[0]; i++)
 	{
 	    for (j=0; j<size[1]; j++)
 	    {
-		points[i][j] = n++;
+		points[i][j] = (int)n++;
 	    }
 	}
 
@@ -492,7 +491,7 @@ static herr_t test_compression(H5File& file)
 	* STEP 3: Try to read the data we just wrote.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (read)");
+	SUBTEST("Compression (read)");
 
 	// Read the dataset back
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
@@ -515,7 +514,7 @@ static herr_t test_compression(H5File& file)
 	* dataset although we rewrite the whole thing.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (modify)");
+	SUBTEST("Compression (modify)");
 
 	for (i=0; i<size[0]; i++)
 	{
@@ -546,7 +545,7 @@ static herr_t test_compression(H5File& file)
 	* object header.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (re-open)");
+	SUBTEST("Compression (re-open)");
 
 	// close this dataset to reuse the var
 	delete dataset;
@@ -572,7 +571,7 @@ static herr_t test_compression(H5File& file)
 	* boundaries (we know that case already works from above tests).
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (partial I/O)");
+	SUBTEST("Compression (partial I/O)");
 
 	const hsize_t	hs_size[2] = {4, 50};
 	const hsize_t	hs_offset[2] = {7, 30};
@@ -608,7 +607,7 @@ static herr_t test_compression(H5File& file)
 	PASSED();
 
 #else
-	TESTING("deflate filter");
+	SUBTEST("Deflate filter");
 	SKIPPED();
 	cerr << not_supported << endl;
 #endif
@@ -618,7 +617,7 @@ static herr_t test_compression(H5File& file)
 	* to write and then read the dataset.
 	*----------------------------------------------------------------------
 	*/
-	TESTING("compression (app-defined method)");
+	SUBTEST("Compression (app-defined method)");
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
 	if (H5Zregister (H5Z_FILTER_BOGUS, "bogus", bogus)<0)
@@ -694,7 +693,7 @@ static herr_t test_compression(H5File& file)
 static herr_t test_multiopen (H5File& file)
 {
 
-    TESTING("multi-open with extending");
+    SUBTEST("Multi-open with extending");
 
     DataSpace* space = NULL;
     try {
@@ -774,7 +773,7 @@ static herr_t test_multiopen (H5File& file)
  */
 static herr_t test_types(H5File& file)
 {
-    TESTING("various datatypes");
+    SUBTEST("Various datatypes");
 
     size_t		i;
     DataSet* dset = NULL;
@@ -945,7 +944,7 @@ static herr_t test_types(H5File& file)
 }   // test_types
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:	test_dset
  *
  * Purpose:	Tests the dataset interface (H5D)
  *
@@ -963,17 +962,21 @@ static herr_t test_types(H5File& file)
  *		  scope and dataset.h5 is closed.
  *	Feb 20, 05:
  *		- cleanup_dsets took care of the cleanup now.
+ *	Mar 20, 10:
+ *		- changed dsets.cpp/main() from stand-alone program to
+ *		  test_dset() to be called in testhdf5.cpp.
  *
  *-------------------------------------------------------------------------
  */
-int main(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_dset()
 {
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
-
     int		nerrors=0;	// keep track of number of failures occurr
-    try
-    {
+    try {
 	// Turn of the auto-printing when failure occurs so that we can
 	// handle the errors appropriately since sometime failures are
 	// caused deliberately and expected.
@@ -998,16 +1001,12 @@ int main(void)
     }
     catch (Exception E)
     {
-	return(test_report(nerrors, H5std_string(" Dataset")));
+	test_report(nerrors, H5std_string(" Dataset"));
     }
 
     // Clean up data file
     cleanup_dsets();
-
-    // Print out dsets test results
-    cerr << endl << endl;
-    return(test_report(nerrors, H5std_string(" Dataset")));
-}   // main
+}   // test_dset
 
 /*-------------------------------------------------------------------------
  * Function:    cleanup_dsets
@@ -1025,7 +1024,7 @@ int main(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_dsets(void)
+void cleanup_dsets()
 {
     HDremove(FILE1.c_str());
 } // cleanup_dsets

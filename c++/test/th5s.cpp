@@ -36,7 +36,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"	// C test header file
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -118,8 +117,7 @@ static void test_h5s_basic(void)
     hsize_t		tmax[4];
 
     // Output message about test being performed
-    SUBTEST("Testing Dataspace Manipulation");
-
+    SUBTEST("Testing dataspace manipulation");
     try {
 	// Create simple dataspace sid1
 	DataSpace sid1 (SPACE1_RANK, dims1 );
@@ -264,8 +262,7 @@ static void test_h5s_basic(void)
 static void test_h5s_scalar_write(void)
 {
     // Output message about test being performed
-    SUBTEST("Testing Scalar Dataspace Writing");
-
+    SUBTEST("Testing scalar dataspace writing");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
@@ -330,8 +327,7 @@ static void test_h5s_scalar_read(void)
     hsize_t		tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing Scalar Dataspace Reading");
-
+    SUBTEST("Testing scalar dataspace reading");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
@@ -391,8 +387,7 @@ static void test_h5s_scalar_read(void)
 static void test_h5s_compound_scalar_write(void)
 {
     // Output message about test being performed
-    SUBTEST("Testing Compound Dataspace Writing");
-
+    SUBTEST("Testing compound dataspace writing");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
@@ -466,7 +461,7 @@ static void test_h5s_compound_scalar_read(void)
     hsize_t		tdims[4];	// Dimension array to test with
 
     // Output message about test being performed
-    SUBTEST("Testing Compound Dataspace Reading");
+    SUBTEST("Testing compound dataspace reading");
     try {
 	// Create file
 	H5File fid1(DATAFILE, H5F_ACC_RDWR);
