@@ -23,7 +23,7 @@ pushd %~dp0
 
 copy /y fortran\src\H5fortran_types.f90 ..\fortran\src > nul
 xcopy /s /i /y *.bat ..\ > nul
-xcopy /s /i /y *.bat ..\ > nul
+xcopy /s /i /y *.h ..\ > nul
 copy /y examples\testExamples_exp_output.txt ..\examples > nul
 
 popd
