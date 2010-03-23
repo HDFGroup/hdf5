@@ -5620,6 +5620,8 @@ static herr_t gen_obj_ref(hid_t loc_id)
     hsize_t dims1[1]={3};
     hsize_t dims2[1]={3};
     int data[3] = {10,20,30};
+    hobj_ref_t objref_buf[3];  /* write buffer for obj reference */
+
     int status;
     herr_t ret = SUCCEED;
 
@@ -5678,7 +5680,6 @@ static herr_t gen_obj_ref(hid_t loc_id)
     /*---------------------------------------------------------
      * create obj references to the previously created objects.
      * Passing -1 as reference is an object.*/
-     hobj_ref_t objref_buf[3];  /* write buffer for  */
 
     /* obj ref to dataset */
     status = H5Rcreate (&objref_buf[0], loc_id, NAME_OBJ_DS, H5R_OBJECT, -1);
