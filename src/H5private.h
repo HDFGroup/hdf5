@@ -1137,7 +1137,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #ifndef HDsrandom
         #define HDsrandom(S)		HDsrand(S)
     #endif /* HDsrandom */
-    #elif H5_HAVE_RANDOM
+#elif H5_HAVE_RANDOM
     #ifndef HDsrand
         #define HDsrand(S)		srandom(S)
     #endif /* HDsrand */

@@ -87,6 +87,12 @@ typedef struct H5D_btree_it_ud_t {
     void		*udata;	                /* User data for chunk callback routine */
 } H5D_btree_it_ud_t;
 
+/* B-tree callback info for debugging */
+typedef struct H5D_btree_dbg_t {
+    H5D_chunk_common_ud_t common;               /* Common info for B-tree user data (must be first) */
+    unsigned            ndims;                  /* Number of dimensions */
+} H5D_btree_dbg_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -743,7 +749,7 @@ H5D_btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     const void *_udata)
 {
     const H5D_btree_key_t	*key = (const H5D_btree_key_t *)_key;
-    const unsigned	*ndims = (const unsigned *)_udata;
+    const H5D_btree_dbg_t	*udata = (const H5D_btree_dbg_t *)_udata;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_btree_debug_key)
@@ -753,7 +759,7 @@ H5D_btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth, "Chunk size:", (unsigned)key->nbytes);
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", key->filter_mask);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
-    for(u = 0; u < *ndims; u++)
+    for(u = 0; u < udata->ndims; u++)
         HDfprintf(stream, "%s%Hd", u?", ":"", key->offset[u]);
     HDfputs("}\n", stream);
 
@@ -1437,7 +1443,7 @@ herr_t
 H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 		 int fwidth, unsigned ndims)
 {
-    H5D_chunk_common_ud_t udata;        /* User data for B-tree callback */
+    H5D_btree_dbg_t     udata;          /* User data for B-tree callback */
     H5O_storage_chunk_t storage;        /* Storage information for B-tree callback */
     hbool_t     shared_init = FALSE;    /* Whether B-tree shared info is initialized */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1454,9 +1460,10 @@ H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent
     shared_init = TRUE;
 
     /* Set up user data for callback */
-    udata.layout = NULL;
-    udata.storage = &storage;
-    udata.offset = NULL;
+    udata.common.layout = NULL;
+    udata.common.storage = &storage;
+    udata.common.offset = NULL;
+    udata.ndims = ndims;
 
     /* Dump the records for the B-tree */
     (void)H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_BTREE, &udata);
