@@ -90,11 +90,21 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
       -V, --version      Print version number and exit\n\
       -f, --flag         Flag type\n\n\
       Flag type is one of the following strings:\n\n\
-      shallow     Copy only immediate members for groups\n\
-      soft        Expand soft links into new objects\n\
-      ext         Expand external links into new objects\n\
-      ref         Copy objects that are pointed by references\n\
-      noattr      Copy object without copying attributes\n\
+      shallow     Copy only immediate members for groups\n\n\
+      soft        Expand soft links into new objects\n\n\
+      ext         Expand external links into new objects\n\n\
+      ref         Copy references and any referenced objects, i.e., objects\n\ 
+                  that the references point to.\n\
+                    Referenced objects are copied in addition to the objects\n\ 
+                  specified on the command line and reference datasets are\n\ 
+                  populated with correct reference values. Copies of referenced\n\
+                  datasets outside the copy range specified on the command line\n\
+                  will normally have a different name from the original.\n\
+                    (Default:Without this option, reference value(s) in any\n\
+                  reference datasets are set to NULL and referenced objects are\n\
+                  not copied unless they are otherwise within the copy range\n\
+                  specified on the command line.)\n\n\
+      noattr      Copy object without copying attributes\n\n\
       allflags    Switches all flags from the default to the non-default setting\n\n\
       These flag types correspond to the following API symbols\n\n\
       H5O_COPY_SHALLOW_HIERARCHY_FLAG\n\
