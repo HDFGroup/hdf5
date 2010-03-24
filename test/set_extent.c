@@ -1353,6 +1353,54 @@ static int test_rank2( hid_t fapl,
 
 
     /*-------------------------------------------------------------------------
+    * expand then shrink to 0 in dimension 1 while expanding again in
+    * dimension 0
+    *
+    *-------------------------------------------------------------------------
+    */
+
+
+    /* expand to original dimensions for the array. */
+    if (H5Dset_extent(did , dims_o) < 0)
+    {
+        TEST_ERROR
+    }
+
+    dims_s[0] = dims_e[0];
+    dims_s[1] = 0;
+
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        TEST_ERROR
+    }
+
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        TEST_ERROR
+    }
+
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
+    {
+        TEST_ERROR
+    }
+
+    if (H5Sclose(sid) < 0)
+    {
+        TEST_ERROR
+    }
+
+    /* check dimensions */
+    for( i = 0; i < RANK2; i++ )
+    {
+        if (dims_r[i] != dims_s[i])
+            TEST_ERROR
+    }
+
+
+    /*-------------------------------------------------------------------------
     * close dataset
     *-------------------------------------------------------------------------
     */

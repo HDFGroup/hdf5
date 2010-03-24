@@ -64,6 +64,8 @@ New Features
 
     Library:
     --------
+    - Greatly improved performance of extending a dataset with early
+      allocation. (NAF - 2010/03/24 - 1637)
     - Added support for filtering densely stored groups.  Many of the API
       functions related to filters have been extended to support dense groups
       as well as datasets.  Pipeline messages can now be stored in a group's

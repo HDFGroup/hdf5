@@ -526,7 +526,7 @@ H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D_alloc_storage(H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
-    hbool_t full_overwrite);
+    hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 H5_DLL haddr_t H5D_get_offset(const H5D_t *dset);
 H5_DLL herr_t H5D_iterate(void *buf, hid_t type_id, const H5S_t *space,
@@ -608,7 +608,8 @@ H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
     const H5D_chunk_ud_t *udata, hbool_t dirty, unsigned idx_hint, void *chunk,
     uint32_t naccessed);
 H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
-H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite);
+H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id,
+    hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dims);
 #ifdef H5_HAVE_PARALLEL
