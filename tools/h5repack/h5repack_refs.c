@@ -68,6 +68,8 @@ int do_copy_refobjs(hid_t fidin,
     hsize_t   dims[H5S_MAX_RANK];     /* dimensions of dataset */
     unsigned int i, j;
     int       k;
+    named_dt_t *named_dt_head=NULL;   /* Pointer to the stack of named datatypes
+                                         copied */
 
     /*-------------------------------------------------------------------------
     * browse
@@ -220,13 +222,20 @@ int do_copy_refobjs(hid_t fidin,
                             HDfree(buf);
                         if(refbuf)
                             HDfree(refbuf);
+
+                       /*------------------------------------------------------
+                        * copy attrs
+                        *----------------------------------------------------*/
+                        if(copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
+                            goto error;
                     } /*H5T_STD_REF_OBJ*/
 
                     /*-------------------------------------------------------------------------
                     * dataset region references
                     *-------------------------------------------------------------------------
                     */
-                    else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) {
+                    else if(H5Tequal(mtype_id, H5T_STD_REF_DSETREG)) 
+                    {
                         hid_t            refobj_id;
                         hdset_reg_ref_t  *refbuf = NULL; /* input buffer for region references */
                         hdset_reg_ref_t  *buf = NULL;    /* output buffer */
@@ -305,6 +314,12 @@ int do_copy_refobjs(hid_t fidin,
                             HDfree(buf);
                         if(refbuf)
                             HDfree(refbuf);
+
+                       /*-----------------------------------------------------
+                        * copy attrs
+                        *----------------------------------------------------*/
+                        if(copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
+                            goto error;
                     } /* H5T_STD_REF_DSETREG */
                     /*-------------------------------------------------------------------------
                     * not references, open previously created object in 1st traversal
@@ -380,6 +395,12 @@ int do_copy_refobjs(hid_t fidin,
         } /* end switch */
     } /* end for */
 
+    /* Finalize (link) the stack of named datatypes (if any) 
+     * This function is paired with copy_named_datatype() which is called
+     * in copy_attr(), so need to free.
+     */
+    named_datatype_free(&named_dt_head, 0);
+
     return 0;
 
 error:
@@ -393,6 +414,7 @@ error:
         H5Tclose(ftype_id);
         H5Tclose(mtype_id);
         H5Tclose(type_in);
+        named_datatype_free(&named_dt_head, 0);
     } H5E_END_TRY;
 
     return -1;

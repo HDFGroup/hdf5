@@ -532,7 +532,7 @@ TOOLTEST $FILE15
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
 TOOLTEST1 $FILE16
 
-# test various references (bug 1814)
+# test various references (bug 1814 and 1726)
 TOOLTEST $FILE_REF
 
 if test $nerrors -eq 0 ; then
