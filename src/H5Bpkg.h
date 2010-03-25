@@ -32,6 +32,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted objects            */
 
@@ -47,8 +48,8 @@
 
 /* The B-tree node as stored in memory...  */
 typedef struct H5B_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions */
-                            /* _must_ be first field in structure */
+    H5AC_info_t        cache_info;     /* Information for H5AC cache functions */
+                                        /* _must_ be first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
     unsigned		nchildren;	/*number of child pointers	     */

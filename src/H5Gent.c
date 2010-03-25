@@ -122,8 +122,6 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     HDassert(pp);
     HDassert(ent);
 
-    ent->file = f;
-
     /* decode header */
     H5F_DECODE_LENGTH(f, *pp, ent->name_off);
     H5F_addr_decode(f, pp, &(ent->header));
@@ -424,9 +422,6 @@ H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
           HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type")
     } /* end switch */
 
-    /* Set the file for the entry */
-    ent->file = f;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_ent_convert() */
@@ -447,7 +442,7 @@ done:
  */
 herr_t
 H5G_ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
-    H5HL_t *heap)
+    const H5HL_t *heap)
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;

@@ -32,6 +32,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -58,8 +59,8 @@ typedef struct H5G_node_key_t {
  * table or group.
  */
 typedef struct H5G_node_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
+    H5AC_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
+                                /* first field in structure */
     unsigned nsyms;             /*number of symbols                  */
     H5G_entry_t *entry;         /*array of symbol table entries      */
 } H5G_node_t;
