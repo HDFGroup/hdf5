@@ -1748,7 +1748,7 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     HDassert(type);
 
     /* Allocate space for the shared structure */
-    if(NULL == (shared = H5FL_MALLOC(H5B_shared_t)))
+    if(NULL == (shared = H5FL_CALLOC(H5B_shared_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for shared B-tree info")
 
     /* Set up the "global" information for this file's groups */
@@ -2067,7 +2067,7 @@ H5B_dest(H5B_t *bt)
     HDassert(bt);
     HDassert(bt->rc_shared);
 
-    H5FL_SEQ_FREE(haddr_t, bt->child);
+    bt->child = H5FL_SEQ_FREE(haddr_t, bt->child);
     bt->native = H5FL_BLK_FREE(native_block, bt->native);
     H5RC_DEC(bt->rc_shared);
     bt = H5FL_FREE(H5B_t, bt);

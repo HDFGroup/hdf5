@@ -801,7 +801,7 @@
 
 #define H5C1__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 
-#define H5C1__H5C1_T_MAGIC	0x005CAC0E
+#define H5C1__H5C1_T_MAGIC	0x005CAC0D
 #define H5C1__MAX_NUM_TYPE_IDS	16
 #define H5C1__PREFIX_LEN		32
 

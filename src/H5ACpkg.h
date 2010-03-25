@@ -53,7 +53,7 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5AC__MIN_DIRTY_BYTES_THRESHOLD	(int32_t) \
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(int32_t) \
 						(H5C__MIN_MAX_CACHE_SIZE / 2)
 #define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
 #define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
@@ -275,7 +275,7 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-#define H5AC__H5AC_AUX_T_MAGIC        (unsigned)0x00D0A02
+#define H5AC__H5AC_AUX_T_MAGIC        (unsigned)0x00D0A01
 
 typedef struct H5AC_aux_t
 {

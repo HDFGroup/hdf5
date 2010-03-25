@@ -793,15 +793,15 @@ typedef struct H5C1_cache_entry_t
 
 enum H5C1_resize_status
 {
-    in_spec,
-    increase,
-    flash_increase,
-    decrease,
-    at_max_size,
-    at_min_size,
-    increase_disabled,
-    decrease_disabled,
-    not_full
+    in_spec1,
+    increase1,
+    flash_increase1,
+    decrease1,
+    at_max_size1,
+    at_min_size1,
+    increase_disabled1,
+    decrease_disabled1,
+    not_full1
 }; /* enum H5C1_resize_conditions */
 
 typedef void (*H5C1_auto_resize_rpt_fcn)(H5C1_t * cache_ptr,

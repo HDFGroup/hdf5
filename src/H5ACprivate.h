@@ -22,15 +22,6 @@
  * Purpose:		Constants and typedefs available to the rest of the
  *			library.
  *
- * Modifications:	JRM - 6/4/04
- *			Complete re-write for a new caching algorithm
- *			located in H5C.c
- *
- *			JRM - 10/18/07
- *			Copied H5ACprivate.h to H5ACprivate.h and reworked
- *			to use H5C instead of H5C.  All this is in support
- *			of cache API modifications needed for journaling.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -52,25 +43,25 @@
 
 /* Types of metadata objects cached */
 typedef enum {
-    H5AC_BT_ID = 0, 	  /*B-tree nodes			       */
-    H5AC_SNODE_ID,	  /*symbol table nodes			       */
-    H5AC_LHEAP_PRFX_ID,  /*local heap prefix			       */
-    H5AC_LHEAP_DBLK_ID,  /*local heap data block		       */
-    H5AC_GHEAP_ID,	  /*global heap				       */
-    H5AC_OHDR_ID,	  /*object header			       */
-    H5AC_OHDR_CHK_ID,	  /*object header chunk			       */
-    H5AC_BT2_HDR_ID,	  /*v2 B-tree header			       */
-    H5AC_BT2_INT_ID,	  /*v2 B-tree internal node		       */
-    H5AC_BT2_LEAF_ID,	  /*v2 B-tree leaf node			       */
-    H5AC_FHEAP_HDR_ID,	  /*fractal heap header			       */
-    H5AC_FHEAP_DBLOCK_ID,/*fractal heap direct block		       */
-    H5AC_FHEAP_IBLOCK_ID,/*fractal heap indirect block		       */
-    H5AC_FSPACE_HDR_ID,  /*free space header			       */
-    H5AC_FSPACE_SINFO_ID,/*free space sections			       */
-    H5AC_SOHM_TABLE_ID,  /*shared object header message master table  */
-    H5AC_SOHM_LIST_ID,   /*shared message index stored as a list      */
-    H5AC_TEST_ID,	  /*test entry -- not used for actual files    */
-    H5AC_NTYPES	  /* Number of types, must be last             */
+    H5AC_BT_ID = 0, 	/*B-tree nodes				     */
+    H5AC_SNODE_ID,	/*symbol table nodes			     */
+    H5AC_LHEAP_PRFX_ID, /*local heap prefix			     */
+    H5AC_LHEAP_DBLK_ID, /*local heap data block			     */
+    H5AC_GHEAP_ID,	/*global heap				     */
+    H5AC_OHDR_ID,	/*object header				     */
+    H5AC_OHDR_CHK_ID,	/*object header chunk			     */
+    H5AC_BT2_HDR_ID,	/*v2 B-tree header			     */
+    H5AC_BT2_INT_ID,	/*v2 B-tree internal node		     */
+    H5AC_BT2_LEAF_ID,	/*v2 B-tree leaf node			     */
+    H5AC_FHEAP_HDR_ID,	/*fractal heap header			     */
+    H5AC_FHEAP_DBLOCK_ID, /*fractal heap direct block		     */
+    H5AC_FHEAP_IBLOCK_ID, /*fractal heap indirect block		     */
+    H5AC_FSPACE_HDR_ID,	/*free space header			     */
+    H5AC_FSPACE_SINFO_ID,/*free space sections			     */
+    H5AC_SOHM_TABLE_ID, /*shared object header message master table  */
+    H5AC_SOHM_LIST_ID,  /*shared message index stored as a list      */
+    H5AC_TEST_ID,	/*test entry -- not used for actual files    */
+    H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
@@ -194,40 +185,38 @@ extern hid_t H5AC_ind_dxpl_id;
 
 /* Default cache configuration. */
 
-#define H5AC__DEFAULT_CACHE_CONFIG                                           \
+#define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
-  /* int         version                 = */                                 \
-	                                   H5AC__CURR_CACHE_CONFIG_VERSION,  \
-  /* hbool_t     rpt_fcn_enabled         = */ FALSE,                          \
-  /* hbool_t     open_trace_file         = */ FALSE,                          \
-  /* hbool_t     close_trace_file        = */ FALSE,                          \
-  /* char        trace_file_name[]       = */ "",                             \
-  /* hbool_t     evictions_enabled       = */ TRUE,                           \
-  /* hbool_t     set_initial_size        = */ TRUE,                           \
-  /* size_t      initial_size            = */ ( 1 * 1024 * 1024 ),            \
-  /* double      min_clean_fraction      = */ 0.5,                            \
-  /* size_t      max_size                = */ (16 * 1024 * 1024 ),            \
-  /* size_t      min_size                = */ ( 1 * 1024 * 1024 ),            \
-  /* long int    epoch_length            = */ 50000,                          \
-  /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,           \
-  /* double      lower_hr_threshold      = */ 0.9,                            \
-  /* double      increment               = */ 2.0,                            \
-  /* hbool_t     apply_max_increment     = */ TRUE,                           \
-  /* size_t      max_increment           = */ (4 * 1024 * 1024),              \
-  /* enum H5C_cache_flash_incr_mode       */                                 \
-  /*                    flash_incr_mode  = */ H5C_flash_incr__add_space,     \
-  /* double      flash_multiple          = */ 1.0,                            \
-  /* double      flash_threshold         = */ 0.25,                           \
-  /* enum H5C_cache_decr_mode decr_mode = */                                 \
-	                                   H5C_decr__age_out_with_threshold, \
-  /* double      upper_hr_threshold      = */ 0.999,                          \
-  /* double      decrement               = */ 0.9,                            \
-  /* hbool_t     apply_max_decrement     = */ TRUE,                           \
-  /* size_t      max_decrement           = */ (1 * 1024 * 1024),              \
-  /* int         epochs_before_eviction  = */ 3,                              \
-  /* hbool_t     apply_empty_reserve     = */ TRUE,                           \
-  /* double      empty_reserve           = */ 0.1,                            \
-  /* int	 dirty_bytes_threshold   = */ (256 * 1024)                    \
+  /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION, \
+  /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
+  /* hbool_t     open_trace_file        = */ FALSE,                           \
+  /* hbool_t     close_trace_file       = */ FALSE,                           \
+  /* char        trace_file_name[]      = */ "",                              \
+  /* hbool_t     evictions_enabled      = */ TRUE,                            \
+  /* hbool_t     set_initial_size       = */ TRUE,                            \
+  /* size_t      initial_size           = */ (1 * 1024 * 1024),               \
+  /* double      min_clean_fraction     = */ 0.5,                             \
+  /* size_t      max_size               = */ (16 * 1024 * 1024),              \
+  /* size_t      min_size               = */ (1 * 1024 * 1024),               \
+  /* long int    epoch_length           = */ 50000,                           \
+  /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
+  /* double      lower_hr_threshold     = */ 0.9,                             \
+  /* double      increment              = */ 2.0,                             \
+  /* hbool_t     apply_max_increment    = */ TRUE,                            \
+  /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
+  /* enum H5C_cache_flash_incr_mode       */                                  \
+  /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
+  /* double      flash_multiple         = */ 1.0,                             \
+  /* double      flash_threshold        = */ 0.25,                            \
+  /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold, \
+  /* double      upper_hr_threshold     = */ 0.999,                           \
+  /* double      decrement              = */ 0.9,                             \
+  /* hbool_t     apply_max_decrement    = */ TRUE,                            \
+  /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
+  /* int         epochs_before_eviction = */ 3,                               \
+  /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
+  /* double      empty_reserve          = */ 0.1,                             \
+  /* int	 dirty_bytes_threshold  = */ (256 * 1024)                     \
 }
 
 
@@ -255,15 +244,15 @@ extern hid_t H5AC_ind_dxpl_id;
  * the equivalent flags from H5Cprivate.h.
  */
 
-#define H5AC__NO_FLAGS_SET		   H5C__NO_FLAGS_SET
-#define H5AC__SET_FLUSH_MARKER_FLAG	   H5C__SET_FLUSH_MARKER_FLAG
-#define H5AC__DELETED_FLAG		   H5C__DELETED_FLAG
-#define H5AC__DIRTIED_FLAG		   H5C__DIRTIED_FLAG
-#define H5AC__SIZE_CHANGED_FLAG	   H5C__SIZE_CHANGED_FLAG
-#define H5AC__PIN_ENTRY_FLAG		   H5C__PIN_ENTRY_FLAG
-#define H5AC__UNPIN_ENTRY_FLAG		   H5C__UNPIN_ENTRY_FLAG
-#define H5AC__FLUSH_INVALIDATE_FLAG	   H5C__FLUSH_INVALIDATE_FLAG
-#define H5AC__FLUSH_CLEAR_ONLY_FLAG	   H5C__FLUSH_CLEAR_ONLY_FLAG
+#define H5AC__NO_FLAGS_SET		  H5C__NO_FLAGS_SET
+#define H5AC__SET_FLUSH_MARKER_FLAG	  H5C__SET_FLUSH_MARKER_FLAG
+#define H5AC__DELETED_FLAG		  H5C__DELETED_FLAG
+#define H5AC__DIRTIED_FLAG		  H5C__DIRTIED_FLAG
+#define H5AC__SIZE_CHANGED_FLAG		  H5C__SIZE_CHANGED_FLAG
+#define H5AC__PIN_ENTRY_FLAG		  H5C__PIN_ENTRY_FLAG
+#define H5AC__UNPIN_ENTRY_FLAG		  H5C__UNPIN_ENTRY_FLAG
+#define H5AC__FLUSH_INVALIDATE_FLAG	  H5C__FLUSH_INVALIDATE_FLAG
+#define H5AC__FLUSH_CLEAR_ONLY_FLAG	  H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG   H5C__FLUSH_MARKED_ENTRIES_FLAG
 #define H5AC__FLUSH_IGNORE_PROTECTED_FLAG H5C__FLUSH_IGNORE_PROTECTED_FLAG
 
@@ -293,8 +282,7 @@ H5_DLL herr_t H5AC_check_for_journaling(H5F_t * f,
 H5_DLL herr_t H5AC_deregister_mdjsc_callback(H5F_t * file_ptr,
                                               int32_t idx);
 
-H5_DLL herr_t H5AC_create(H5F_t *f,
-			   H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_begin_transaction(hid_t id,
                                       hbool_t * do_transaction_ptr,
@@ -312,27 +300,23 @@ H5_DLL herr_t H5AC_end_transaction(hbool_t do_transaction,
                                     uint64_t trans_num,
                                     const char * api_call_name);
 
-H5_DLL herr_t H5AC_get_entry_status(H5F_t * f, haddr_t addr,
+H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
 				    unsigned * status_ptr);
-
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-                        haddr_t addr, size_t len, void *thing,
-			unsigned int flags);
-H5_DLL herr_t H5AC_pin_protected_entry(void *  thing);
+                        haddr_t addr, size_t len, void *thing, unsigned int flags);
+H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, size_t len, void *udata,
                            H5AC_protect_t rw);
-H5_DLL herr_t H5AC_resize_pinned_entry(void *  thing,
-                                       size_t  new_size);
-H5_DLL herr_t H5AC_unpin_entry(void * thing);
+H5_DLL herr_t H5AC_resize_pinned_entry(void *thing, size_t new_size);
+H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     size_t new_size, void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5AC_mark_pinned_entry_dirty(void *  thing,
-					   hbool_t size_changed,
-                                           size_t  new_size);
-H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(void *  thing);
+H5_DLL herr_t H5AC_mark_pinned_entry_dirty(void *thing, hbool_t size_changed,
+    size_t  new_size);
+H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 
@@ -346,7 +330,7 @@ H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
-                                              H5AC_cache_config_t *config_ptr);
+                                               H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t * cache_ptr,
                                   size_t * max_size_ptr,
@@ -368,8 +352,8 @@ H5_DLL herr_t H5AC_register_mdjsc_callback(const H5F_t * file_ptr,
 
 H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t * cache_ptr);
 
-H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5C_t * cache_ptr,
-                                             H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
+                                               H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_set_jnl_config(H5F_t * f,
                                    hid_t dxpl_id,

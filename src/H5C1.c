@@ -223,7 +223,7 @@ static herr_t H5C1_epoch_marker_dest(H5F_t *f, void *thing);
 static herr_t H5C1_epoch_marker_clear(H5F_t *f, void *thing, hbool_t dest);
 static herr_t H5C1_epoch_marker_size(const H5F_t *f, const void *thing, size_t *size_ptr);
 
-const H5C1_class_t epoch_marker_class =
+const H5C1_class_t epoch_marker_class1 =
 {
     /* id    = */ H5C1__EPOCH_MARKER_TYPE,
     /* load  = */ &H5C1_epoch_marker_load,
@@ -573,7 +573,7 @@ H5C1_create(size_t		      max_cache_size,
 #endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
         ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
-        ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class;
+        ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class1;
         ((cache_ptr->epoch_markers)[i]).is_dirty	 = FALSE;
         ((cache_ptr->epoch_markers)[i]).dirtied		 = FALSE;
         ((cache_ptr->epoch_markers)[i]).is_protected	 = FALSE;

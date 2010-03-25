@@ -274,7 +274,7 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-#define H5AC1__H5AC1_AUX_T_MAGIC        (unsigned)0x00D0A01
+#define H5AC1__H5AC1_AUX_T_MAGIC        (unsigned)0x00D0A00
 
 typedef struct H5AC1_aux_t
 {

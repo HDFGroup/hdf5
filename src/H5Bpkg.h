@@ -33,6 +33,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5FLprivate.h"        /* Free Lists                           */
 
 
 /**************************/

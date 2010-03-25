@@ -55,15 +55,15 @@
  * Programmer: 		John Mainzer
  * 			2/6/10
  *
- * Purpose:		Instances of the H5C_jbrb_sync_q_entry_t structure 
+ * Purpose:		Instances of the H5C_jbrb_sync_q_entry_t structure
  *			are used to maintain a queue of pending aio_fsync()
  *			operations.
  *
  *			The basic idea is to issue a call to aio_fsync()
- *			after each transaction if that transaction has 
+ *			after each transaction if that transaction has
  *			triggered a buffer write, and place the associated
  *			AIO control block on a queue of asynchronous syncs
- *			in progress.  Then, whenever we are asked for the 
+ *			in progress.  Then, whenever we are asked for the
  *			ID of the last transaction on disk, we simply scan
  *			this queue to see what if any syncs have completed,
  *			and update the last transaction on disk accordingly.
@@ -71,18 +71,18 @@
  *			The fields of this structure are discussed below:
  *
  *
- * magic:		Unsigned 32-bit integer always set to 
- * 			H5C__H5C_JBRB_SYNC_Q_T_MAGIC.  This field is used 
- *			to validate pointers to instances of 
+ * magic:		Unsigned 32-bit integer always set to
+ * 			H5C__H5C_JBRB_SYNC_Q_T_MAGIC.  This field is used
+ *			to validate pointers to instances of
  *			H5C_jbrb_sync_q_entry_t.
  *
  * last_trans_in_sync:  ID of the last transaction that will be on disk
  *			when the associated aio_fsync() completes.
  *
- * clt_blk		Instance of aiocb used in the associated call to 
+ * clt_blk		Instance of aiocb used in the associated call to
  *			aio_fsync().
  *
- * next:		Pointer to the next instance of 
+ * next:		Pointer to the next instance of
  *			H5C_jbrb_sync_q_entry_t in the list of same,
  *			or NULL if there is no next instance.
  *
@@ -115,19 +115,19 @@ struct H5C_jbrb_sync_q_entry_t
  *			The fields of this structure are discussed below:
  *
  *
- * magic:		Unsigned 32-bit integer always set to 
- * 			H5C__H5C_JBRB_T_MAGIC.  This field is used to 
+ * magic:		Unsigned 32-bit integer always set to
+ * 			H5C__H5C_JBRB_T_MAGIC.  This field is used to
  *			validate pointers to instances of H5C_jbrb_t.
  *
  * journal_magic:	int32_t used to store a randomly selected integer
- *			used to tag both the journal file and the 
- *			mdj_config_block.  Should the journal ever be 
- *			run, we will check to see if the magic number 
- *			from the target HDF5 file matches that in the 
+ *			used to tag both the journal file and the
+ *			mdj_config_block.  Should the journal ever be
+ *			run, we will check to see if the magic number
+ *			from the target HDF5 file matches that in the
  *			journal, and refuse to run the journal if it does
  *			not.
  *
- * journal_file_fd:	File Descriptor of the journal file that is being 
+ * journal_file_fd:	File Descriptor of the journal file that is being
  * 			written to from this ring buffer.
  *
  * num_bufs:		The number of journal buffers in the ring buffer. This
@@ -136,11 +136,11 @@ struct H5C_jbrb_sync_q_entry_t
  * 			one for holding the last set of journal entries while
  *			they are being written to disk).
  *
- * buf_size:		The size of each journal buffer in the ring buffer. 
- *			This value is user specified, and will determine how 
- *			much data each journal buffer can hold before a move 
- *			to another journal buffer in the ring buffer is 
- *			necessary.  Typically, this will be a multiple of 
+ * buf_size:		The size of each journal buffer in the ring buffer.
+ *			This value is user specified, and will determine how
+ *			much data each journal buffer can hold before a move
+ *			to another journal buffer in the ring buffer is
+ *			necessary.  Typically, this will be a multiple of
  *			the block size of the underlying file system.
  *
  * bufs_in_use:		This is the current number of dirty journal buffers
@@ -153,7 +153,7 @@ struct H5C_jbrb_sync_q_entry_t
  * 			of the formatting changes of the journal file.
  *
  * get:			Number of the journal buffer that is next in line to
- * 			be written to disk. (i.e. the least recently dirtied 
+ * 			be written to disk. (i.e. the least recently dirtied
  * 			journal buffer).
  *
  * put:			Number of the journal buffer that is currently being
@@ -168,25 +168,25 @@ struct H5C_jbrb_sync_q_entry_t
  * human_readable:	Boolean flag that indicates whether the journal file
  *			is to be human readable or machine readable.
  *
- * offset_width:	If human_readable is FALSE, this field contains the 
- *			width of offsets in the HDF5 file in bytes (as 
- *			specified in the superblock -- sizeof_addr in 
+ * offset_width:	If human_readable is FALSE, this field contains the
+ *			width of offsets in the HDF5 file in bytes (as
+ *			specified in the superblock -- sizeof_addr in
  *			H5F_file_t).
  *
  *			If human_readable is TRUE, this field is undefined.
  *
  * length_width:	If human_readable is FALSE, this field contains the
- *			width of lengths in the HDF5 file in bytes (as 
- *			specified in the super block -- sizeof_size in 
+ *			width of lengths in the HDF5 file in bytes (as
+ *			specified in the super block -- sizeof_size in
  *			H5F_file_t).
  *
  * chksum_cur_msg:	Boolean flag that is only defined if human_readable
  *			is false.  It is used to indicate whether the current
- *			journal message must be checksumed.  If true, the 
+ *			journal message must be checksumed.  If true, the
  *			message checksum to date is stored in the msg_chksum
  *			(discussed below).
  *
- *			If the journal message is being checksumed, this 
+ *			If the journal message is being checksumed, this
  *			field will be set back to FALSE when the checksum
  *			of the messages is written to buffer.
  *
@@ -202,14 +202,14 @@ struct H5C_jbrb_sync_q_entry_t
  * cur_trans:		Current transaction number, used to differentiate
  *			between differing journal entries in the journal file.
  *
- * last_trans_queued:	Number of the last transaction that has been 
+ * last_trans_queued:	Number of the last transaction that has been
  *			successfully queued (i.e. the associated aio_write()
  *			call has returned without error.  At present, this
- *			field is only defined when use_aio (see above) is 
+ *			field is only defined when use_aio (see above) is
  *			TRUE, and only used when use_aio_fsync (see below)
  *			is TRUE as well.
  *
- * last_trans_written:	Number of the last transaction that has been 
+ * last_trans_written:	Number of the last transaction that has been
  *			successfully written.  At present, this field is
  *			only defined when use_aio (see above) is TRUE.
  *
@@ -219,7 +219,7 @@ struct H5C_jbrb_sync_q_entry_t
  * trans_in_prog:	Boolean flag that indicates if a transaction is in
  *			progress or not.
  *
- * jname: 		Character array containing the name of the journal 
+ * jname: 		Character array containing the name of the journal
  *			file.
  *
  * hdf5_file_name: 	Character array containing the name of the HDF5 file
@@ -234,14 +234,14 @@ struct H5C_jbrb_sync_q_entry_t
  * 			ring buffer needs to switch to writing to the next
  *			journal buffer.
  *
- * rb_space_to_rollover: The amount of space left at the end of the ring 
+ * rb_space_to_rollover: The amount of space left at the end of the ring
  *                      buffer, starting at the head pointer, and ending at
  *                      the end of the ring buffer's allocate space. This
  *                      is used to keep track of when a rollover to the start
  *                      of the ring buffer must occur.
  *
  * rb_free_space:       The amount of unused space in the ring buffer.
- * 
+ *
  * head: 		A pointer to the location in the active journal buffer
  *			that is to be written to.
  *
@@ -251,23 +251,23 @@ struct H5C_jbrb_sync_q_entry_t
  *                      is the last transaction successfully on disk.
  *
  * aio_ctl_blks		An array of size num_bufs of instances of struct
- *			aiocb, or NULL if use_aio is FALSE.  
+ *			aiocb, or NULL if use_aio is FALSE. 
  *			
- *			Each instance of struct aiocb is associated with 
+ *			Each instance of struct aiocb is associated with
  *			the buffer at the same index in buf, and is used
  *			to manage posix aio for that buffer.
- * 
+ *
  *			Note that it is said to be good practice to zero
- *			out each instance of struct aiocb before each 
+ *			out each instance of struct aiocb before each
  *			write.
  *
- * aio_next_buf_offset: Offset in the journal file at which to write the 
- *			next buffer to the journal file.  This field is 
+ * aio_next_buf_offset: Offset in the journal file at which to write the
+ *			next buffer to the journal file.  This field is
  *			undefined if use_aio is FALSE.
  *
  * use_aio_fsync:	Boolean flag indicating whether we should attempt to
  *			use aio_fsync() to sync out journal writes.  This
- *			field is initialized to TRUE whenever use_aio (see 
+ *			field is initialized to TRUE whenever use_aio (see
  *			above) is set to TRUE, and then set to FALSE
  *			if we determine that aio_fsync() is not supported
  *			on the current host.
@@ -280,11 +280,11 @@ struct H5C_jbrb_sync_q_entry_t
  *
  * aio_sync_q_len:	Number of elements on the aio sync queue.  Note that
  *			aio_sync_q_head  and aio_sync_q_tail must be NULL
- *			if this field contains zero, and may not be NULL if 
+ *			if this field contains zero, and may not be NULL if
  *			the sync queue length is greater than zero.
  *
  * buf:			Array of char pointers to each journal buffer in the
- *			ring buffer. This is allocated as a single chunk of 
+ *			ring buffer. This is allocated as a single chunk of
  * 			memory, and thus data can be written past a buffer
  * 			boundary provided it will not extend past the end
  * 			of the total area allocated for the ring buffer.
@@ -295,61 +295,61 @@ struct H5C_jbrb_sync_q_entry_t
  * stats collection fields follow:
  *
  * transactions_completed: uint64_t used to track the number of transactions
- *			completed.  This is simply the number of calls to 
+ *			completed.  This is simply the number of calls to
  *			H5C_jb__end_transaction().
  *
- * buf_writes_queued:	uint64_t used to track the number of asynchronous 
- *			buffer writes queued (via aio_write()).  
+ * buf_writes_queued:	uint64_t used to track the number of asynchronous
+ *			buffer writes queued (via aio_write()). 
  *
- * full_buf_writes_queued:	uint64_t used to track the number of 
- *			full asynchronous buffer writes queued 
- *			(via aio_write()).  
+ * full_buf_writes_queued:	uint64_t used to track the number of
+ *			full asynchronous buffer writes queued
+ *			(via aio_write()). 
  *
  * partial_buf_writes_queued;	uint64_t used to track the number of
  *			partial (i.e. writes of a buffer that isn't full)
  *			buffer writes queued (via aio_write()).
  *			
- * buf_writes_completed: uint64_t used to track the total number of 
+ * buf_writes_completed: uint64_t used to track the total number of
  *			asynchronous buffer writes (queued via aio_write())
  *			that have completed.
  *
- * buf_writes_completed_by_test: uint64_t used to track the number of 
+ * buf_writes_completed_by_test: uint64_t used to track the number of
  *			asynchronous buffer writes completed by test
- *			(i.e. the write was found to be complete in a 
+ *			(i.e. the write was found to be complete in a
  *			routine check for completed writes without any
  *			waiting.)
  *
- * buf_writes_completed_by_await: uint64_t used to track the number of 
+ * buf_writes_completed_by_await: uint64_t used to track the number of
  *			asynchronous buffer writes completed by await
- *			(i.e. the write was completed via a call to 
- *			aio_suspend()) because processing could not 
+ *			(i.e. the write was completed via a call to
+ *			aio_suspend()) because processing could not
  *			continue until the write completed.
  *
- * async_syncs_queued:  uint64_t used to track the number of asynchronous 
+ * async_syncs_queued:  uint64_t used to track the number of asynchronous
  *			syncs queued (via aio_fsync()).
  *
  *
  * async_syncs_completed: uin64_t used to track the number of asynchronous
  *			syncs completed.
  *
- * async_syncs_completed_by_test; uint64_t used to track the number of 
+ * async_syncs_completed_by_test; uint64_t used to track the number of
  *			asynchronous syncs completed by test
- *			(i.e. the sync was found to be complete in a 
+ *			(i.e. the sync was found to be complete in a
  *			routine check for completed writes without any
  *			waiting.).
  *
- * async_syncs_completed_by_await; uint64_t used to track the number of 
+ * async_syncs_completed_by_await; uint64_t used to track the number of
  *			asynchronous syncs completed by await
  *			(i.e. the sync was completed busy waiting
  *			with repeated calls to aio_error()).
  *
- * calls_to_aio_error_awaiting_sync: uint64_t used to track the number of 
- *			calls to aio_error() made while busy waiting for 
+ * calls_to_aio_error_awaiting_sync: uint64_t used to track the number of
+ *			calls to aio_error() made while busy waiting for
  *			the completion of aio_fsync()s.
  *
- * max_sync_q_len:	uint64_t used to track the maximum value of 
+ * max_sync_q_len:	uint64_t used to track the maximum value of
  *
- * calls_to_fsync:	uint64_t used to track the number of calls to 
+ * calls_to_fsync:	uint64_t used to track the number of calls to
  *			fsync().
  *
  ******************************************************************************/
@@ -368,7 +368,7 @@ struct H5C_jbrb_sync_q_entry_t
 #define H5C_JNL__OFFSET_WIDTH_TAG	"offset_width"
 #define H5C_JNL__LENGTH_WIDTH_TAG	"length_width"
 
-/* signatures and versions used to mark the beginnings of journal file 
+/* signatures and versions used to mark the beginnings of journal file
  * messages in binary journal files.
  */
 
@@ -382,7 +382,7 @@ struct H5C_jbrb_sync_q_entry_t
 #define H5C_BJNL__END_ADDR_SPACE_SIG	"eoas"
 #define H5C_BJNL__END_ADDR_SPACE_VER	((uint8_t)(0))
 
-struct H5C_jbrb_t 
+struct H5C_jbrb_t
 {
     uint32_t				magic;
     int32_t				journal_magic;
@@ -441,12 +441,12 @@ struct H5C_jbrb_t
 };
 
 
-/* With the introduction of the fractal heap, it is now possible for 
+/* With the introduction of the fractal heap, it is now possible for
  * entries to be dirtied, resized, and/or renamed in the flush callbacks.
  * As a result, on flushes, it may be necessary to make multiple passes
  * through the slist before it is empty.  The H5C__MAX_PASSES_ON_FLUSH
  * #define is used to set an upper limit on the number of passes.
- * The current value was obtained via personal communication with 
+ * The current value was obtained via personal communication with
  * Quincey.  I have applied a fudge factor of 2.
  *
  *						-- JRM
@@ -459,8 +459,8 @@ struct H5C_jbrb_t
  *
  * structure H5C_mdjsc_record_t
  *
- * A dynamically allocate array of instances of H5C_mdjsc_record_t is 
- * used to record metadata journaling status change callbacks -- of which 
+ * A dynamically allocate array of instances of H5C_mdjsc_record_t is
+ * used to record metadata journaling status change callbacks -- of which
  * there can be an arbitrary number.
  *
  * The fields in the structure are discussed individually below:
@@ -469,20 +469,20 @@ struct H5C_jbrb_t
  * 		to be called on metadata journaling start or stop.  NULL
  * 		if this record is not in use.
  *
- * 		Note that the cache must be clean when this callback 
+ * 		Note that the cache must be clean when this callback
  * 		is called.
  *
  * data_ptr:	Pointer to void.  This value is supplied on registration,
- * 		and is passed to *fcn_ptr.  NULL if this record is not 
+ * 		and is passed to *fcn_ptr.  NULL if this record is not
  * 		in use.
  *
  * fl_next:	Index of the next free entry in the metadata status change
- * 		callback table, or -1 if there is no next free entry or 
+ * 		callback table, or -1 if there is no next free entry or
  * 		if the entry is in use.
  *
  ****************************************************************************/
 
-typedef struct H5C_mdjsc_record_t 
+typedef struct H5C_mdjsc_record_t
 {
     H5C_mdj_status_change_func_t	fcn_ptr;
     void *				data_ptr;
@@ -528,11 +528,11 @@ typedef struct H5C_mdjsc_record_t
  *
  *						JRM - 9/26/05
  *
- * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  
- * 		This field is used to validate pointers to instances of 
+ * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC. 
+ * 		This field is used to validate pointers to instances of
  * 		H5C_t.
  *
- * flush_in_progress: Boolean flag indicating whether a flush is in 
+ * flush_in_progress: Boolean flag indicating whether a flush is in
  * 		progress.
  *
  * trace_file_ptr:  File pointer pointing to the trace file, which is used
@@ -541,7 +541,7 @@ typedef struct H5C_mdjsc_record_t
  *              no trace file should be recorded.
  *
  *              Since much of the code supporting the parallel metadata
- *              cache is in H5AC, we don't write the trace file from 
+ *              cache is in H5AC, we don't write the trace file from
  *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
  *
  *              When we get to using H5C in other places, we may add
@@ -614,7 +614,7 @@ typedef struct H5C_mdjsc_record_t
  * writes.  The following field is used to implement this.
  *
  * evictions_enabled:  Boolean flag that is initialized to TRUE.  When
- * 		this flag is set to FALSE, the metadata cache will not 
+ * 		this flag is set to FALSE, the metadata cache will not
  * 		attempt to evict entries to make space for newly protected
  * 		entries, and instead the will grow without limit.
  * 		
@@ -688,7 +688,7 @@ typedef struct H5C_mdjsc_record_t
  * following two fields have been added.  They are only compiled in when
  * H5C_DO_SANITY_CHECKS is TRUE.
  *
- * slist_len_increase: Number of entries that have been added to the 
+ * slist_len_increase: Number of entries that have been added to the
  * 		slist since the last time this field was set to zero.
  *
  * slist_size_increase: Total size of all entries that have been added
@@ -1011,39 +1011,39 @@ typedef struct H5C_mdjsc_record_t
  *
  * Metadata journaling fields:
  *
- * The following fields are used to support metadata journaling.  The 
+ * The following fields are used to support metadata journaling.  The
  * objective here is to journal all changes in metadata, so that we will
  * be able to re-construct a HDF5 file with a consistent set of metadata
  * in the event of a crash.
  *
- * mdj_enabled: Boolean flag used to indicate whether journaling is 
- * 		currently enabled.  In general, the values of the 
- * 		remaining fields in this section are undefined if 
+ * mdj_enabled: Boolean flag used to indicate whether journaling is
+ * 		currently enabled.  In general, the values of the
+ * 		remaining fields in this section are undefined if
  * 		mdj_enabled is FALSE.
  *
  * trans_in_progress Boolean flag used to indicate whether a metadata
- * 		transaction is in progress.  
+ * 		transaction is in progress. 
  *
- * 		For purposes of metadata journaling, a transaction is a 
- * 		sequence of operations on metadata selected such that 
- * 		the HDF5 file metadata is in a consistent state both at 
- * 		the beginning and at the end of the sequence.  
+ * 		For purposes of metadata journaling, a transaction is a
+ * 		sequence of operations on metadata selected such that
+ * 		the HDF5 file metadata is in a consistent state both at
+ * 		the beginning and at the end of the sequence. 
  *
  * 		At least to begin with, transactions will be closely tied
  * 		to user level API calls.
  *
- * trans_api_name: Array of char of length H5C__MAX_API_NAME_LEN + 1. Used 
- * 		to store the name of the API call associated with the 
+ * trans_api_name: Array of char of length H5C__MAX_API_NAME_LEN + 1. Used
+ * 		to store the name of the API call associated with the
  * 		current transaction.
  *
- * trans_num:	uint64_t containing the id assigned to the current 
- * 		transaction (if trans_in_progress is TRUE), or of the 
+ * trans_num:	uint64_t containing the id assigned to the current
+ * 		transaction (if trans_in_progress is TRUE), or of the
  * 		last transaction completed (if trans_in_progress is FALSE),
  * 		or zero if no transaction has been initiated yet.
  *
- * last_trans_on_disk:  uint64_t containing the id assigned to the 
+ * last_trans_on_disk:  uint64_t containing the id assigned to the
  * 		last transaction all of whose associated journal entries
- * 		are on disk in the journal file.  
+ * 		are on disk in the journal file. 
  *
  * 		We must track this value, as to avoid messages from the
  * 		future, we must not write a cache entry to file until
@@ -1052,21 +1052,21 @@ typedef struct H5C_mdjsc_record_t
  * 		file.
  *
  * jnl_magic:   Randomly selected int32_t used to reduce the possibility
- *              of running the wrong journal on an HDF5 file.  The basic 
- *              idea is to pick a random number, store it in both the HDF5 
- *		file and the journal file, and then refuse to run the 
+ *              of running the wrong journal on an HDF5 file.  The basic
+ *              idea is to pick a random number, store it in both the HDF5
+ *		file and the journal file, and then refuse to run the
  *		journal unless the numbers match.
  *
  * jnl_file_name_len: Length of the journal file name, or zero if the
  *		journal file name is undefined.
  *
- * jnl_file_name: Array of char of length H5C__MAX_JOURNAL_FILE_NAME_LEN 
+ * jnl_file_name: Array of char of length H5C__MAX_JOURNAL_FILE_NAME_LEN
  *		+ 1 used to store the journal file path.
  *
  * mdj_jbrb:    Instance of H5C_jbrb_t used to manage logging of journal
  * 		entries to the journal file.
  *
- * While a transaction is in progress, we must maintain a list of the 
+ * While a transaction is in progress, we must maintain a list of the
  * entries that have been modified during the transaction so we can
  * generate the appropriate journal entries.  The following fields are
  * used to maintain this list:
@@ -1077,56 +1077,56 @@ typedef struct H5C_mdjsc_record_t
  *              transaction list.
  *
  * tl_head_ptr: Pointer to the head of the doubly linked list of entries
- * 		dirtied in the current transaction.  Note that cache entries 
- * 		on this list are linked by their trans_next and trans_prev 
+ * 		dirtied in the current transaction.  Note that cache entries
+ * 		on this list are linked by their trans_next and trans_prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
  * tl_tail_ptr: Pointer to the tail of the doubly linked list of entries
- *              dirtied in the current transaction.  Note that cache entries 
- *              on this list are linked by their trans_next and trans_prev 
+ *              dirtied in the current transaction.  Note that cache entries
+ *              on this list are linked by their trans_next and trans_prev
  *              fields.
  *
  *              This field is NULL if the list is empty.
  *
- * When an entry is dirtied in a transaction, we must not flush it until 
- * all the journal entries generated by the transaction have reached disk 
+ * When an entry is dirtied in a transaction, we must not flush it until
+ * all the journal entries generated by the transaction have reached disk
  * in the journal file.
  *
  * We could just leave these entries in the LRU and skip over them when
- * we scan the list for candidates for eviction.  However, this will be 
+ * we scan the list for candidates for eviction.  However, this will be
  * costly, so we store them on the journal write in progress list instead
- * until all the journal entries for the specified transaction reaches 
+ * until all the journal entries for the specified transaction reaches
  * disk.
  *
- * jwipl_len:	Number of entries currently residing on the journal 
+ * jwipl_len:	Number of entries currently residing on the journal
  * 		entry write in progress list.
  *
  * jwipl_size:  Number of bytes of cache entries currently residing on the
  *              journal entry write in progress list.
  *
  * jwipl_head_ptr:  Pointer to the head of the doubly linked list of entries
- * 		dirtied in some transaction n, where at least some of the 
+ * 		dirtied in some transaction n, where at least some of the
  * 		journal entries generated in transaction n have not yet
  * 		made it to disk in the journal file.
  *
- * 		Entries on this list are linked by their next and prev 
+ * 		Entries on this list are linked by their next and prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
  * jwipl_tail_ptr:  Pointer to the tail of the doubly linked list of entries
- * 		dirtied in some transaction n, where at least some of the 
+ * 		dirtied in some transaction n, where at least some of the
  * 		journal entries generated in transaction n have not yet
  * 		made it to disk in the journal file.
  *
- * 		Entries on this list are linked by their next and prev 
+ * 		Entries on this list are linked by their next and prev
  * 		fields.
  *
  *              This field is NULL if the list is empty.
  *
- * It is necessary to turn off some optimization while journaling is 
+ * It is necessary to turn off some optimization while journaling is
  * in progress, so as to avoid generating dirty metadata during a flush.
  * The following fields are used to maintain a list of functions to be
  * called when journaling is enabled or disabled.  Note that the metadata
@@ -1134,15 +1134,15 @@ typedef struct H5C_mdjsc_record_t
  *
  * The metadata journaling status change callback table is initaly allocated
  * with H5C__MIN_MDJSC_CB_TBL_LEN entries.  The table size is doubled
- * whenever an entry is added to a full table, and halved whenever the 
- * active entries to total entries ratio drops below 
- * H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO and the upper half of the table is 
- * empty (Since entries are removed from the table by specifying the 
+ * whenever an entry is added to a full table, and halved whenever the
+ * active entries to total entries ratio drops below
+ * H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO and the upper half of the table is
+ * empty (Since entries are removed from the table by specifying the
  * index of the entry, we can't compress the table).
  *
  * mdjsc_cb_tbl: Base address of a dynamically allocated array of instances
- * 		of H5C_mdjsc_record_t used to record an arbitrarily long 
- * 		list of functions to call whenever journaling is enabled or 
+ * 		of H5C_mdjsc_record_t used to record an arbitrarily long
+ * 		list of functions to call whenever journaling is enabled or
  * 		disabled.
  *
  * mdjsc_cb_tbl_len: Number of entries currently allocated in *mdjsc_cb_tbl.
@@ -1154,7 +1154,7 @@ typedef struct H5C_mdjsc_record_t
  * 		or -1 if the table is full.
  *
  * mdjsc_cb_tbl_max_idx_in_use: Maximum of the indicies of metadata journaling
- * 		status change callback table entries in use, or -1 if the 
+ * 		status change callback table entries in use, or -1 if the
  * 		table is empty;
  *
  * Statistics collection fields:
@@ -1173,23 +1173,23 @@ typedef struct H5C_mdjsc_record_t
  *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been write protected 
+ * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been write protected
  * 		in the current epoch.
  *
  * 		Observe that (hits + misses) = (write_protects + read_protects).
  *
- * read_protects: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been read protected in 
+ * read_protects: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been read protected in
  * 		the current epoch.
  *
  *              Observe that (hits + misses) = (write_protects + read_protects).
  *
- * max_read_protects:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1. 
- * 		The cells are used to maximum number of simultaneous read 
- * 		protects on any entry with type id equal to the array index 
+ * max_read_protects:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to maximum number of simultaneous read
+ * 		protects on any entry with type id equal to the array index
  * 		in the current epoch.
  *
  * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -1197,9 +1197,9 @@ typedef struct H5C_mdjsc_record_t
  *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
- * pinned_insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
- * 		with type id equal to the array index has been inserted 
+ * pinned_insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
+ * 		with type id equal to the array index has been inserted
  * 		pinned into the cache in the current epoch.
  *
  * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -1222,13 +1222,13 @@ typedef struct H5C_mdjsc_record_t
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
- * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during its flush callback in the current epoch.
  *
- * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during a cache flush in the current epoch.
  *
@@ -1267,14 +1267,14 @@ typedef struct H5C_mdjsc_record_t
  *		with type id equal to the array index has decreased in
  *		size in the current epoch.
  *
- * entry_flush_size_changes:  Array of int64 of length 
- * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * entry_flush_size_changes:  Array of int64 of length
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size while in its flush callback.
  *
- * cache_flush_size_changes:  Array of int64 of length 
- * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * cache_flush_size_changes:  Array of int64 of length
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size during a cache flush
  *
  * total_ht_insertions: Number of times entries have been inserted into the
@@ -1384,10 +1384,10 @@ typedef struct H5C_mdjsc_record_t
 
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 
-#define H5C__H5C_T_MAGIC		0x005CAC0F
-#define H5C__MAX_NUM_TYPE_IDS		18
+#define H5C__H5C_T_MAGIC	0x005CAC0E
+#define H5C__MAX_NUM_TYPE_IDS	18
 #define H5C__PREFIX_LEN		32
-#define H5C__MAX_API_NAME_LEN		128
+#define H5C__MAX_API_NAME_LEN	128
 
 #define H5C__MIN_MDJSC_CB_TBL_LEN		16
 #define H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO	0.25
@@ -1417,7 +1417,7 @@ struct H5C_t
 
     int32_t                     index_len;
     size_t                      index_size;
-    H5C_cache_entry_t *	(index[H5C__HASH_TABLE_LEN]);
+    H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
 
 
     int32_t                     slist_len;
@@ -1430,37 +1430,37 @@ struct H5C_t
 
     int32_t                     pl_len;
     size_t                      pl_size;
-    H5C_cache_entry_t *	pl_head_ptr;
+    H5C_cache_entry_t *	        pl_head_ptr;
     H5C_cache_entry_t *  	pl_tail_ptr;
 
     int32_t                     pel_len;
     size_t                      pel_size;
-    H5C_cache_entry_t *        pel_head_ptr;
+    H5C_cache_entry_t *	        pel_head_ptr;
     H5C_cache_entry_t *  	pel_tail_ptr;
 
     int32_t                     LRU_list_len;
     size_t                      LRU_list_size;
-    H5C_cache_entry_t *	LRU_head_ptr;
-    H5C_cache_entry_t *	LRU_tail_ptr;
+    H5C_cache_entry_t *		LRU_head_ptr;
+    H5C_cache_entry_t *		LRU_tail_ptr;
 
     int32_t                     cLRU_list_len;
     size_t                      cLRU_list_size;
-    H5C_cache_entry_t *	cLRU_head_ptr;
-    H5C_cache_entry_t *	cLRU_tail_ptr;
+    H5C_cache_entry_t *		cLRU_head_ptr;
+    H5C_cache_entry_t *		cLRU_tail_ptr;
 
     int32_t                     dLRU_list_len;
     size_t                      dLRU_list_size;
-    H5C_cache_entry_t *	dLRU_head_ptr;
-    H5C_cache_entry_t *	dLRU_tail_ptr;
+    H5C_cache_entry_t *		dLRU_head_ptr;
+    H5C_cache_entry_t *	        dLRU_tail_ptr;
 
     hbool_t			size_increase_possible;
-    hbool_t                     flash_size_increase_possible;
-    size_t                      flash_size_increase_threshold;
+    hbool_t			flash_size_increase_possible;
+    size_t			flash_size_increase_threshold;
     hbool_t			size_decrease_possible;
     hbool_t			resize_enabled;
     hbool_t			cache_full;
     hbool_t			size_decreased;
-    H5C_auto_size_ctl_t	resize_ctl;
+    H5C_auto_size_ctl_t		resize_ctl;
 
     int32_t			epoch_markers_active;
     hbool_t			epoch_marker_active[H5C__MAX_EPOCH_MARKERS];
@@ -1472,7 +1472,7 @@ struct H5C_t
 
     int64_t			cache_hits;
     int64_t			cache_accesses;
- 
+
     hbool_t			mdj_enabled;
     hbool_t			trans_in_progress;
     char			trans_api_name[H5C__MAX_API_NAME_LEN];
@@ -1480,23 +1480,23 @@ struct H5C_t
     uint64_t			last_trans_on_disk;
     int32_t			jnl_magic;
     int32_t			jnl_file_name_len;
-    char 			jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN 
+    char 			jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN
                                               + 1];
     struct H5C_jbrb_t		mdj_jbrb;
     int32_t			tl_len;
     size_t			tl_size;
-    H5C_cache_entry_t *	tl_head_ptr;
-    H5C_cache_entry_t *	tl_tail_ptr;
+    H5C_cache_entry_t *		tl_head_ptr;
+    H5C_cache_entry_t *		tl_tail_ptr;
     int32_t			jwipl_len;
     size_t			jwipl_size;
-    H5C_cache_entry_t *	jwipl_head_ptr;
-    H5C_cache_entry_t *	jwipl_tail_ptr;
+    H5C_cache_entry_t *		jwipl_head_ptr;
+    H5C_cache_entry_t *		jwipl_tail_ptr;
     H5C_mdjsc_record_t *	mdjsc_cb_tbl;
     int32_t			mdjsc_cb_tbl_len;
     int32_t			num_mdjsc_cbs;
     int32_t			mdjsc_cb_tbl_fl_head;
     int32_t			mdjsc_cb_tbl_max_idx_in_use;
-    
+   
 #if H5C_COLLECT_CACHE_STATS
 
     /* stats fields */
@@ -1520,10 +1520,8 @@ struct H5C_t
     int64_t                     pinned_clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_increases[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     size_decreases[H5C__MAX_NUM_TYPE_IDS + 1];
-    int64_t                     entry_flush_size_changes
-	    				[H5C__MAX_NUM_TYPE_IDS + 1];
-    int64_t                     cache_flush_size_changes
-	    				[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     entry_flush_size_changes[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     cache_flush_size_changes[H5C__MAX_NUM_TYPE_IDS + 1];
 
     int64_t			total_ht_insertions;
     int64_t			total_ht_deletions;
@@ -1662,10 +1660,10 @@ struct H5C_t
  *
  *							JRM - 9/8/05
  *
- *  - Added a set of macros supporting doubly linked lists using the new 
- *    trans_next and trans_prev fields in H5C_cache_entry_t.  These 
+ *  - Added a set of macros supporting doubly linked lists using the new
+ *    trans_next and trans_prev fields in H5C_cache_entry_t.  These
  *    fields are used to maintain a list of entries that have been dirtied
- *    in the current transaction.  At the end of the transaction, this 
+ *    in the current transaction.  At the end of the transaction, this
  *    list is used to generate the needed journal entries.
  *
  *    							JRM -- 3/27/08
@@ -1861,7 +1859,7 @@ if ( ( (hd_ptr) == NULL ) ||                                                   \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "aux DLL pre remove SC failed")   \
 }
 
-#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                 \
+#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
 if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
        ( (head_ptr) != (tail_ptr) )                                         \
      ) ||                                                                   \
@@ -1881,7 +1879,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "AUX DLL sanity check failed") \
 }
 
-#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)\
+#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (entry_ptr) == NULL ) ||                                                \
      ( (entry_ptr)->aux_next != NULL ) ||                                      \
      ( (entry_ptr)->aux_prev != NULL ) ||                                      \
@@ -1914,158 +1912,143 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val)\
         H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,   \
-                                   fail_val)                                    \
-        if ( (head_ptr) == NULL )                                               \
-        {                                                                       \
-           (head_ptr) = (entry_ptr);                                            \
-           (tail_ptr) = (entry_ptr);                                            \
-        }                                                                       \
-        else                                                                    \
-        {                                                                       \
-           (tail_ptr)->aux_next = (entry_ptr);                                  \
-           (entry_ptr)->aux_prev = (tail_ptr);                                  \
-           (tail_ptr) = (entry_ptr);                                            \
-        }                                                                       \
-        (len)++;                                                                \
+                                   fail_val)                                   \
+        if ( (head_ptr) == NULL )                                              \
+        {                                                                      \
+           (head_ptr) = (entry_ptr);                                           \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+           (tail_ptr)->aux_next = (entry_ptr);                                 \
+           (entry_ptr)->aux_prev = (tail_ptr);                                 \
+           (tail_ptr) = (entry_ptr);                                           \
+        }                                                                      \
+        (len)++;                                                               \
         (Size) += entry_ptr->size;
 
 #define H5C__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fv)   \
         H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
-                                   fv)                                        \
-        if ( (head_ptr) == NULL )                                             \
-        {                                                                     \
-           (head_ptr) = (entry_ptr);                                          \
-           (tail_ptr) = (entry_ptr);                                          \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-           (head_ptr)->aux_prev = (entry_ptr);                                \
-           (entry_ptr)->aux_next = (head_ptr);                                \
-           (head_ptr) = (entry_ptr);                                          \
-        }                                                                     \
-        (len)++;                                                              \
+                                   fv)                                       \
+        if ( (head_ptr) == NULL )                                            \
+        {                                                                    \
+           (head_ptr) = (entry_ptr);                                         \
+           (tail_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        else                                                                 \
+        {                                                                    \
+           (head_ptr)->aux_prev = (entry_ptr);                               \
+           (entry_ptr)->aux_next = (head_ptr);                               \
+           (head_ptr) = (entry_ptr);                                         \
+        }                                                                    \
+        (len)++;                                                             \
         (Size) += entry_ptr->size;
 
 #define H5C__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)    \
         H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, \
-                                   fv)                                        \
-        {                                                                     \
-           if ( (head_ptr) == (entry_ptr) )                                   \
-           {                                                                  \
-              (head_ptr) = (entry_ptr)->aux_next;                             \
-              if ( (head_ptr) != NULL )                                       \
-              {                                                               \
-                 (head_ptr)->aux_prev = NULL;                                 \
-              }                                                               \
-           }                                                                  \
-           else                                                               \
-           {                                                                  \
-              (entry_ptr)->aux_prev->aux_next = (entry_ptr)->aux_next;        \
-           }                                                                  \
-           if ( (tail_ptr) == (entry_ptr) )                                   \
-           {                                                                  \
-              (tail_ptr) = (entry_ptr)->aux_prev;                             \
-              if ( (tail_ptr) != NULL )                                       \
-              {                                                               \
-                 (tail_ptr)->aux_next = NULL;                                 \
-              }                                                               \
-           }                                                                  \
-           else                                                               \
-           {                                                                  \
-              (entry_ptr)->aux_next->aux_prev = (entry_ptr)->aux_prev;        \
-           }                                                                  \
-           entry_ptr->aux_next = NULL;                                        \
-           entry_ptr->aux_prev = NULL;                                        \
-           (len)--;                                                           \
-           (Size) -= entry_ptr->size;                                         \
+                                   fv)                                       \
+        {                                                                    \
+           if ( (head_ptr) == (entry_ptr) )                                  \
+           {                                                                 \
+              (head_ptr) = (entry_ptr)->aux_next;                            \
+              if ( (head_ptr) != NULL )                                      \
+              {                                                              \
+                 (head_ptr)->aux_prev = NULL;                                \
+              }                                                              \
+           }                                                                 \
+           else                                                              \
+           {                                                                 \
+              (entry_ptr)->aux_prev->aux_next = (entry_ptr)->aux_next;       \
+           }                                                                 \
+           if ( (tail_ptr) == (entry_ptr) )                                  \
+           {                                                                 \
+              (tail_ptr) = (entry_ptr)->aux_prev;                            \
+              if ( (tail_ptr) != NULL )                                      \
+              {                                                              \
+                 (tail_ptr)->aux_next = NULL;                                \
+              }                                                              \
+           }                                                                 \
+           else                                                              \
+           {                                                                 \
+              (entry_ptr)->aux_next->aux_prev = (entry_ptr)->aux_prev;       \
+           }                                                                 \
+           entry_ptr->aux_next = NULL;                                       \
+           entry_ptr->aux_prev = NULL;                                       \
+           (len)--;                                                          \
+           (Size) -= entry_ptr->size;                                        \
         }
 
 #if H5C_DO_SANITY_CHECKS
 
 #define H5C__TRANS_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr,             \
-		                      len, Size, fv)                           \
-if ( ( (hd_ptr) == NULL ) ||                                                   \
-     ( (tail_ptr) == NULL ) ||                                                 \
-     ( (entry_ptr) == NULL ) ||                                                \
-     ( (len) <= 0 ) ||                                                         \
-     ( (Size) < (entry_ptr)->size ) ||                                         \
-     ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
+		                      len, Size, fv)                          \
+if ( ( (hd_ptr) == NULL ) ||                                                  \
+     ( (tail_ptr) == NULL ) ||                                                \
+     ( (entry_ptr) == NULL ) ||                                               \
+     ( (len) <= 0 ) ||                                                        \
+     ( (Size) < (entry_ptr)->size ) ||                                        \
+     ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||           \
      ( ( (entry_ptr)->trans_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) || \
-     ( ( (entry_ptr)->trans_next == NULL ) &&                                  \
-       ( (tail_ptr) != (entry_ptr) ) ) ||                                      \
-     ( ( (len) == 1 ) &&                                                       \
-       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
-             ( (entry_ptr)->trans_next == NULL ) &&                            \
-             ( (entry_ptr)->trans_prev == NULL ) &&                            \
-             ( (Size) == (entry_ptr)->size )                                   \
-           )                                                                   \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
-    HDfprintf(stdout, "%s: TRANS DLL pre remove SC failed.\n", FUNC); \
-    /* JRM */ /* Debugging code -- remove eventually */                  \
-    if ( (hd_ptr) == NULL ) HDfprintf(stdout, "( (hd_ptr) == NULL ).\n" );\
-    if ( (tail_ptr) == NULL ) HDfprintf(stdout, "(tail_ptr) == NULL\n");\
-    if ( (entry_ptr) == NULL ) HDfprintf(stdout, "(entry_ptr) == NULL\n");\
-    if ( (len) <= 0 ) HDfprintf(stdout, "( (len) <= 0 )\n");\
-    if ( (Size) < (entry_ptr)->size ) \
-	HDfprintf(stdout,"( (Size) < (entry_ptr)->size )\n");\
-    if ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) \
-	HDfprintf(stdout, "(((Size)==(entry_ptr)->size)&&(!((len) == 1)))\n");\
-    if ( ( (entry_ptr)->trans_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) \
-	HDfprintf(stdout,"(((entry_ptr)->trans_prev==NULL)&&((hd_ptr)!=(entry_ptr)))\n");\
-    if ( ((entry_ptr)->trans_next == NULL) && ((tail_ptr) != (entry_ptr)) ) \
-	HDfprintf(stdout,"(((entry_ptr)->trans_next==NULL)&&((tail_ptr)!=(entry_ptr)))\n"); \
-    if ( ( (len) == 1 ) &&  \
+     ( ( (entry_ptr)->trans_next == NULL ) &&                                 \
+       ( (tail_ptr) != (entry_ptr) ) ) ||                                     \
+     ( ( (len) == 1 ) &&                                                      \
+       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&  \
+             ( (entry_ptr)->trans_next == NULL ) &&                           \
+             ( (entry_ptr)->trans_prev == NULL ) &&                           \
+             ( (Size) == (entry_ptr)->size )                                  \
+           )                                                                  \
+       )                                                                      \
+     )                                                                        \
+   ) {                                                                        \
+    if ( ( (len) == 1 ) &&                                                    \
          ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) && \
-              ( (entry_ptr)->trans_next == NULL ) && \
-              ( (entry_ptr)->trans_prev == NULL ) && \
-              ( (Size) == (entry_ptr)->size ) ) ) )  \
-	HDfprintf(stdout,"long condition failed\n"); \
+              ( (entry_ptr)->trans_next == NULL ) &&                          \
+              ( (entry_ptr)->trans_prev == NULL ) &&                          \
+              ( (Size) == (entry_ptr)->size ) ) ) )                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TRANS DLL pre remove SC failed") \
 }
 
 #define H5C__TRANS_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                 \
-if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                \
-       ( (head_ptr) != (tail_ptr) )                                           \
-     ) ||                                                                     \
-     ( (len) < 0 ) ||                                                         \
-     ( (Size) < 0 ) ||                                                        \
-     ( ( (len) == 1 ) &&                                                      \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                   \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )             \
-       )                                                                      \
-     ) ||                                                                     \
-     ( ( (len) >= 1 ) &&                                                      \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->trans_prev != NULL ) ||      \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->trans_next != NULL )         \
-       )                                                                      \
-     )                                                                        \
-   ) {                                                                        \
+if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
+       ( (head_ptr) != (tail_ptr) )                                          \
+     ) ||                                                                    \
+     ( (len) < 0 ) ||                                                        \
+     ( (Size) < 0 ) ||                                                       \
+     ( ( (len) == 1 ) &&                                                     \
+       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                  \
+         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
+       )                                                                     \
+     ) ||                                                                    \
+     ( ( (len) >= 1 ) &&                                                     \
+       ( ( (head_ptr) == NULL ) || ( (head_ptr)->trans_prev != NULL ) ||     \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->trans_next != NULL )        \
+       )                                                                     \
+     )                                                                       \
+   ) {                                                                       \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TRANS DLL sanity check failed") \
 }
 
 #define H5C__TRANS_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr,             \
-		                      len, Size, fv)                           \
-if ( ( (entry_ptr) == NULL ) ||                                                \
-     ( ! ((entry_ptr)->is_dirty) ) ||                                          \
-     ( (entry_ptr)->trans_next != NULL ) ||                                    \
-     ( (entry_ptr)->trans_prev != NULL ) ||                                    \
-     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                   \
-       ( (hd_ptr) != (tail_ptr) )                                              \
-     ) ||                                                                      \
-     ( (len) < 0 ) ||                                                          \
-     ( ( (len) == 1 ) &&                                                       \
-       ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                      \
-         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (Size) )                  \
-       )                                                                       \
-     ) ||                                                                      \
-     ( ( (len) >= 1 ) &&                                                       \
-       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->trans_prev != NULL ) ||           \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->trans_next != NULL )          \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
+		                      len, Size, fv)                          \
+if ( ( (entry_ptr) == NULL ) ||                                               \
+     ( ! ((entry_ptr)->is_dirty) ) ||                                         \
+     ( (entry_ptr)->trans_next != NULL ) ||                                   \
+     ( (entry_ptr)->trans_prev != NULL ) ||                                   \
+     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                  \
+       ( (hd_ptr) != (tail_ptr) )                                             \
+     ) ||                                                                     \
+     ( (len) < 0 ) ||                                                         \
+     ( ( (len) == 1 ) &&                                                      \
+       ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                     \
+         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (Size) )                 \
+       )                                                                      \
+     ) ||                                                                     \
+     ( ( (len) >= 1 ) &&                                                      \
+       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->trans_prev != NULL ) ||          \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->trans_next != NULL )         \
+       )                                                                      \
+     )                                                                        \
+   ) {                                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "TRANS DLL pre insert SC failed") \
 }
 
@@ -2079,72 +2062,72 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 
 #define H5C__TRANS_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len,             \
-		               Size, fail_val)                                 \
+		               Size, fail_val)                                \
         H5C__TRANS_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len,      \
-			              Size, fail_val)                          \
-        if ( (head_ptr) == NULL )                                              \
-        {                                                                      \
-           (head_ptr) = (entry_ptr);                                           \
-           (tail_ptr) = (entry_ptr);                                           \
-        }                                                                      \
-        else                                                                   \
-        {                                                                      \
-           (tail_ptr)->trans_next = (entry_ptr);                               \
-           (entry_ptr)->trans_prev = (tail_ptr);                               \
-           (tail_ptr) = (entry_ptr);                                           \
-        }                                                                      \
-        (len)++;                                                               \
+			              Size, fail_val)                         \
+        if ( (head_ptr) == NULL )                                             \
+        {                                                                     \
+           (head_ptr) = (entry_ptr);                                          \
+           (tail_ptr) = (entry_ptr);                                          \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+           (tail_ptr)->trans_next = (entry_ptr);                              \
+           (entry_ptr)->trans_prev = (tail_ptr);                              \
+           (tail_ptr) = (entry_ptr);                                          \
+        }                                                                     \
+        (len)++;                                                              \
         (Size) += entry_ptr->size;
 
 #define H5C__TRANS_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fv)  \
         H5C__TRANS_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len,      \
-			              Size, fv)                                \
-        if ( (head_ptr) == NULL )                                              \
-        {                                                                      \
-           (head_ptr) = (entry_ptr);                                           \
-           (tail_ptr) = (entry_ptr);                                           \
-        }                                                                      \
-        else                                                                   \
-        {                                                                      \
-           (head_ptr)->trans_prev = (entry_ptr);                               \
-           (entry_ptr)->trans_next = (head_ptr);                               \
-           (head_ptr) = (entry_ptr);                                           \
-        }                                                                      \
-        (len)++;                                                               \
+			              Size, fv)                               \
+        if ( (head_ptr) == NULL )                                             \
+        {                                                                     \
+           (head_ptr) = (entry_ptr);                                          \
+           (tail_ptr) = (entry_ptr);                                          \
+        }                                                                     \
+        else                                                                  \
+        {                                                                     \
+           (head_ptr)->trans_prev = (entry_ptr);                              \
+           (entry_ptr)->trans_next = (head_ptr);                              \
+           (head_ptr) = (entry_ptr);                                          \
+        }                                                                     \
+        (len)++;                                                              \
         (Size) += entry_ptr->size;
 
 #define H5C__TRANS_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
         H5C__TRANS_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len,    \
-			              Size, fv)                              \
-        {                                                                    \
-           if ( (head_ptr) == (entry_ptr) )                                  \
-           {                                                                 \
-              (head_ptr) = (entry_ptr)->trans_next;                          \
-              if ( (head_ptr) != NULL )                                      \
-              {                                                              \
-                 (head_ptr)->trans_prev = NULL;                              \
-              }                                                              \
-           }                                                                 \
-           else                                                              \
-           {                                                                 \
+			              Size, fv)                             \
+        {                                                                   \
+           if ( (head_ptr) == (entry_ptr) )                                 \
+           {                                                                \
+              (head_ptr) = (entry_ptr)->trans_next;                         \
+              if ( (head_ptr) != NULL )                                     \
+              {                                                             \
+                 (head_ptr)->trans_prev = NULL;                             \
+              }                                                             \
+           }                                                                \
+           else                                                             \
+           {                                                                \
               (entry_ptr)->trans_prev->trans_next = (entry_ptr)->trans_next; \
-           }                                                                 \
-           if ( (tail_ptr) == (entry_ptr) )                                  \
-           {                                                                 \
-              (tail_ptr) = (entry_ptr)->trans_prev;                          \
-              if ( (tail_ptr) != NULL )                                      \
-              {                                                              \
-                 (tail_ptr)->trans_next = NULL;                              \
-              }                                                              \
-           }                                                                 \
-           else                                                              \
-           {                                                                 \
+           }                                                                \
+           if ( (tail_ptr) == (entry_ptr) )                                 \
+           {                                                                \
+              (tail_ptr) = (entry_ptr)->trans_prev;                         \
+              if ( (tail_ptr) != NULL )                                     \
+              {                                                             \
+                 (tail_ptr)->trans_next = NULL;                             \
+              }                                                             \
+           }                                                                \
+           else                                                             \
+           {                                                                \
               (entry_ptr)->trans_next->trans_prev = (entry_ptr)->trans_prev; \
-           }                                                                 \
-           entry_ptr->trans_next = NULL;                                     \
-           entry_ptr->trans_prev = NULL;                                     \
-           (len)--;                                                          \
-           (Size) -= entry_ptr->size;                                        \
+           }                                                                \
+           entry_ptr->trans_next = NULL;                                    \
+           entry_ptr->trans_prev = NULL;                                    \
+           (len)--;                                                         \
+           (Size) -= entry_ptr->size;                                       \
         }
 
 
@@ -2168,7 +2151,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	More pinned entry stats related updates.
  *
  * 	JRM -- 3/31/07
- * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on 
+ * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on
  * 	read and write protects.
  *
  ***********************************************************************/
@@ -2204,22 +2187,22 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
-	if ( cache_ptr->flush_in_progress ) {                                   \
-            ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;   \
-	}                                                                       \
-        if ( entry_ptr->flush_in_progress ) {                                   \
-            ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;   \
-	}                                                                       \
-	if ( (entry_ptr)->size < (new_size) ) {                                 \
-	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;             \
-            if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )        \
-                (cache_ptr)->max_index_size = (cache_ptr)->index_size;          \
-            if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )        \
-                (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;          \
-            if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )              \
-                (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;                \
-	} else if ( (entry_ptr)->size > (new_size) ) {                          \
-	    ((cache_ptr)->size_decreases[(entry_ptr)->type->id])++;             \
+	if ( cache_ptr->flush_in_progress ) {                                  \
+            ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;  \
+	}                                                                      \
+        if ( entry_ptr->flush_in_progress ) {                                  \
+            ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;  \
+	}                                                                      \
+	if ( (entry_ptr)->size < (new_size) ) {                                \
+	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
+            if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
+                (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
+            if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )       \
+                (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
+            if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )             \
+                (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;               \
+	} else if ( (entry_ptr)->size > (new_size) ) {                         \
+	    ((cache_ptr)->size_decreases[(entry_ptr)->type->id])++;            \
 	}
 
 #define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr) \
@@ -2228,7 +2211,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr) \
 	(cache_ptr)->total_ht_deletions++;
 
-#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth) \
+#define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)  \
 	if ( success ) {                                            \
 	    (cache_ptr)->successful_ht_searches++;                  \
 	    (cache_ptr)->total_successful_ht_search_depth += depth; \
@@ -2243,26 +2226,26 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) \
-        (entry_ptr)->accesses = 0;               \
-        (entry_ptr)->clears   = 0;               \
-        (entry_ptr)->flushes  = 0;               \
+        (entry_ptr)->accesses = 0;              \
+        (entry_ptr)->clears   = 0;              \
+        (entry_ptr)->flushes  = 0;              \
 	(entry_ptr)->pins     = 0;
 
-#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)           \
+#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)            \
 	(((cache_ptr)->clears)[(entry_ptr)->type->id])++;            \
         if ( (entry_ptr)->is_pinned ) {                              \
 	    (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++; \
 	}                                                            \
         ((entry_ptr)->clears)++;
 
-#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)            \
+#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)             \
 	(((cache_ptr)->flushes)[(entry_ptr)->type->id])++;            \
         if ( (entry_ptr)->is_pinned ) {                               \
 	    (((cache_ptr)->pinned_flushes)[(entry_ptr)->type->id])++; \
 	}                                                             \
         ((entry_ptr)->flushes)++;
 
-#define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)       \
+#define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)        \
 	(((cache_ptr)->evictions)[(entry_ptr)->type->id])++;        \
         if ( (entry_ptr)->accesses >                                \
              ((cache_ptr)->max_accesses)[(entry_ptr)->type->id] ) { \
@@ -2295,7 +2278,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                  = (entry_ptr)->pins;                               \
         }
 
-#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)           \
+#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)            \
 	(((cache_ptr)->insertions)[(entry_ptr)->type->id])++;            \
 	if ( (entry_ptr)->is_pinned ) {                                  \
 	    (((cache_ptr)->pinned_insertions)[(entry_ptr)->type->id])++; \
@@ -2320,7 +2303,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                  = (entry_ptr)->size;                                    \
         }
 
-#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
+#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)             \
 	if ( hit )                                                           \
             ((cache_ptr)->hits)[(entry_ptr)->type->id]++;                    \
 	else                                                                 \
@@ -2350,7 +2333,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         }                                                                    \
         ((entry_ptr)->accesses)++;
 
-#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)         \
+#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)          \
 	((cache_ptr)->pins)[(entry_ptr)->type->id]++;            \
         (entry_ptr)->pins++;                                     \
 	if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )   \
@@ -2362,13 +2345,13 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 
-#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)            \
+#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)             \
         if ( (entry_ptr)->is_pinned ) {                               \
 	    (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
 	}                                                             \
 	(((cache_ptr)->clears)[(entry_ptr)->type->id])++;
 
-#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)            \
+#define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)             \
 	(((cache_ptr)->flushes)[(entry_ptr)->type->id])++;            \
         if ( (entry_ptr)->is_pinned ) {                               \
 	    (((cache_ptr)->pinned_flushes)[(entry_ptr)->type->id])++; \
@@ -2377,7 +2360,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr) \
 	(((cache_ptr)->evictions)[(entry_ptr)->type->id])++;
 
-#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)           \
+#define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)            \
 	(((cache_ptr)->insertions)[(entry_ptr)->type->id])++;            \
 	if ( (entry_ptr)->is_pinned ) {                                  \
 	    (((cache_ptr)->pinned_insertions)[(entry_ptr)->type->id])++; \
@@ -2396,7 +2379,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
 	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;
 
-#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
+#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)             \
 	if ( hit )                                                           \
             ((cache_ptr)->hits)[(entry_ptr)->type->id]++;                    \
 	else                                                                 \
@@ -2420,7 +2403,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
             (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;
 
-#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)         \
+#define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)          \
 	((cache_ptr)->pins)[(entry_ptr)->type->id]++;            \
 	if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )   \
 	    (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;     \
@@ -2471,100 +2454,100 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #if H5C_DO_SANITY_CHECKS
 
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                \
-     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||           \
-     ( (entry_ptr) == NULL ) ||                                \
-     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||              \
-     ( (entry_ptr)->ht_next != NULL ) ||                       \
-     ( (entry_ptr)->ht_prev != NULL ) ||                       \
-     ( (entry_ptr)->size <= 0 ) ||                             \
+if ( ( (cache_ptr) == NULL ) ||                               \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||            \
+     ( (entry_ptr) == NULL ) ||                               \
+     ( ! H5F_addr_defined((entry_ptr)->addr) ) ||             \
+     ( (entry_ptr)->ht_next != NULL ) ||                      \
+     ( (entry_ptr)->ht_prev != NULL ) ||                      \
+     ( (entry_ptr)->size <= 0 ) ||                            \
      ( (k = H5C__HASH_FCN((entry_ptr)->addr)) < 0 ) ||        \
      ( k >= H5C__HASH_TABLE_LEN ) ) {                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,               \
-               "Pre HT insert SC failed")                      \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
+               "Pre HT insert SC failed")                     \
 }
 
-#define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                    \
+#define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                     \
 if ( ( (cache_ptr) == NULL ) ||                                         \
-     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                    \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                      \
      ( (cache_ptr)->index_len < 1 ) ||                                  \
      ( (entry_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
      ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
      ( (entry_ptr)->size <= 0 ) ||                                      \
-     ( H5C__HASH_FCN((entry_ptr)->addr) < 0 ) ||                       \
-     ( H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ) ||   \
-     ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]        \
+     ( H5C__HASH_FCN((entry_ptr)->addr) < 0 ) ||                        \
+     ( H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ) ||     \
+     ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]         \
        == NULL ) ||                                                     \
-     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]      \
+     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))]       \
        != (entry_ptr) ) &&                                              \
        ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
-     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))] ==   \
+     ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))] ==    \
          (entry_ptr) ) &&                                               \
        ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
 }
 
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
-if ( ( (cache_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                         \
-     ( ! H5F_addr_defined(Addr) ) ||                                         \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
+     ( ! H5F_addr_defined(Addr) ) ||                                        \
      ( H5C__HASH_FCN(Addr) < 0 ) ||                                         \
-     ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) {                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed")  \
+     ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) {                     \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val, "Pre HT search SC failed") \
 }
 
 #define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                         \
-     ( (cache_ptr)->index_len < 1 ) ||                                       \
-     ( (entry_ptr) == NULL ) ||                                              \
-     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                      \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                           \
-     ( (entry_ptr)->size <= 0 ) ||                                           \
-     ( ((cache_ptr)->index)[k] == NULL ) ||                                  \
-     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                         \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                                 \
-     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                         \
-       ( (entry_ptr)->ht_prev != NULL ) ) ||                                 \
-     ( ( (entry_ptr)->ht_prev != NULL ) &&                                   \
-       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                 \
-     ( ( (entry_ptr)->ht_next != NULL ) &&                                   \
-       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {                \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                             \
-                "Post successful HT search SC failed")                       \
+if ( ( (cache_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
+     ( (cache_ptr)->index_len < 1 ) ||                                      \
+     ( (entry_ptr) == NULL ) ||                                             \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                     \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                          \
+     ( (entry_ptr)->size <= 0 ) ||                                          \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                                 \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                                \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                        \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                                \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                                  \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||                \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                                  \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {               \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                            \
+                "Post successful HT search SC failed")                      \
 }
 
 #define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val) \
-if ( ( (cache_ptr) == NULL ) ||                                         \
-     ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                      \
-     ( (entry_ptr)->ht_prev != NULL ) ) {                               \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                        \
-                "Post HT shift to front SC failed")                     \
+if ( ( (cache_ptr) == NULL ) ||                                        \
+     ( ((cache_ptr)->index)[k] != (entry_ptr) ) ||                     \
+     ( (entry_ptr)->ht_prev != NULL ) ) {                              \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,                       \
+                "Post HT shift to front SC failed")                    \
 }
 
 #define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
-if ( ( (cache_ptr) == NULL ) ||                                          \
-     ( (cache_ptr)->index_len <= 0 ) ||                                  \
-     ( (cache_ptr)->index_size <= 0 ) ||                                 \
-     ( (new_size) <= 0 ) ||                                              \
-     ( (old_size) > (cache_ptr)->index_size ) ||                         \
-     ( (new_size) <= 0 ) ||                                              \
-     ( ( (cache_ptr)->index_len == 1 ) &&                                \
-       ( (cache_ptr)->index_size != (old_size) ) ) ) {                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                             \
-                "Pre HT entry size change SC failed")                    \
+if ( ( (cache_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->index_len <= 0 ) ||                                 \
+     ( (cache_ptr)->index_size <= 0 ) ||                                \
+     ( (new_size) <= 0 ) ||                                             \
+     ( (old_size) > (cache_ptr)->index_size ) ||                        \
+     ( (new_size) <= 0 ) ||                                             \
+     ( ( (cache_ptr)->index_len == 1 ) &&                               \
+       ( (cache_ptr)->index_size != (old_size) ) ) ) {                  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                            \
+                "Pre HT entry size change SC failed")                   \
 }
 
 #define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
-if ( ( (cache_ptr) == NULL ) ||                                           \
-     ( (cache_ptr)->index_len <= 0 ) ||                                   \
-     ( (cache_ptr)->index_size <= 0 ) ||                                  \
-     ( (new_size) > (cache_ptr)->index_size ) ||                          \
-     ( ( (cache_ptr)->index_len == 1 ) &&                                 \
-       ( (cache_ptr)->index_size != (new_size) ) ) ) {                    \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                              \
-                "Post HT entry size change SC failed")                    \
+if ( ( (cache_ptr) == NULL ) ||                                          \
+     ( (cache_ptr)->index_len <= 0 ) ||                                  \
+     ( (cache_ptr)->index_size <= 0 ) ||                                 \
+     ( (new_size) > (cache_ptr)->index_size ) ||                         \
+     ( ( (cache_ptr)->index_len == 1 ) &&                                \
+       ( (cache_ptr)->index_size != (new_size) ) ) ) {                   \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                             \
+                "Post HT entry size change SC failed")                   \
 }
 
 #else /* H5C_DO_SANITY_CHECKS */
@@ -2581,30 +2564,30 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 
 #define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val) \
-{                                                             \
-    int k;                                                    \
+{                                                            \
+    int k;                                                   \
     H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)    \
     k = H5C__HASH_FCN((entry_ptr)->addr);                    \
-    if ( ((cache_ptr)->index)[k] == NULL )                    \
-    {                                                         \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
-    }                                                         \
-    else                                                      \
-    {                                                         \
-        (entry_ptr)->ht_next = ((cache_ptr)->index)[k];       \
-        (entry_ptr)->ht_next->ht_prev = (entry_ptr);          \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
-    }                                                         \
-    (cache_ptr)->index_len++;                                 \
-    (cache_ptr)->index_size += (entry_ptr)->size;             \
+    if ( ((cache_ptr)->index)[k] == NULL )                   \
+    {                                                        \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    else                                                     \
+    {                                                        \
+        (entry_ptr)->ht_next = ((cache_ptr)->index)[k];      \
+        (entry_ptr)->ht_next->ht_prev = (entry_ptr);         \
+        ((cache_ptr)->index)[k] = (entry_ptr);               \
+    }                                                        \
+    (cache_ptr)->index_len++;                                \
+    (cache_ptr)->index_size += (entry_ptr)->size;            \
     H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)            \
 }
 
-#define H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)         \
+#define H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)          \
 {                                                             \
     int k;                                                    \
-    H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)              \
-    k = H5C__HASH_FCN((entry_ptr)->addr);                    \
+    H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)               \
+    k = H5C__HASH_FCN((entry_ptr)->addr);                     \
     if ( (entry_ptr)->ht_next )                               \
     {                                                         \
         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev; \
@@ -2621,79 +2604,79 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     (entry_ptr)->ht_prev = NULL;                              \
     (cache_ptr)->index_len--;                                 \
     (cache_ptr)->index_size -= (entry_ptr)->size;             \
-    H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)             \
+    H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)              \
 }
 
 #define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)             \
-{                                                                            \
-    int k;                                                                   \
-    int depth = 0;                                                           \
+{                                                                           \
+    int k;                                                                  \
+    int depth = 0;                                                          \
     H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                        \
     k = H5C__HASH_FCN(Addr);                                                \
-    entry_ptr = ((cache_ptr)->index)[k];                                     \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )      \
-    {                                                                        \
-        (entry_ptr) = (entry_ptr)->ht_next;                                  \
-        (depth)++;                                                           \
-    }                                                                        \
-    if ( entry_ptr )                                                         \
-    {                                                                        \
+    entry_ptr = ((cache_ptr)->index)[k];                                    \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )     \
+    {                                                                       \
+        (entry_ptr) = (entry_ptr)->ht_next;                                 \
+        (depth)++;                                                          \
+    }                                                                       \
+    if ( entry_ptr )                                                        \
+    {                                                                       \
         H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                          \
-        {                                                                    \
-            if ( (entry_ptr)->ht_next )                                      \
-            {                                                                \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;        \
-            }                                                                \
-            HDassert( (entry_ptr)->ht_prev != NULL );                        \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;            \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                  \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                  \
-            (entry_ptr)->ht_prev = NULL;                                     \
-            ((cache_ptr)->index)[k] = (entry_ptr);                           \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                         \
+        {                                                                   \
+            if ( (entry_ptr)->ht_next )                                     \
+            {                                                               \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+            }                                                               \
+            HDassert( (entry_ptr)->ht_prev != NULL );                       \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;           \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                 \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                 \
+            (entry_ptr)->ht_prev = NULL;                                    \
+            ((cache_ptr)->index)[k] = (entry_ptr);                          \
             H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)  \
-        }                                                                    \
-    }                                                                        \
+        }                                                                   \
+    }                                                                       \
     H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, (entry_ptr != NULL), depth)  \
 }
 
 #define H5C__SEARCH_INDEX_NO_STATS(cache_ptr, Addr, entry_ptr, fail_val)    \
-{                                                                            \
-    int k;                                                                   \
-    int depth = 0;                                                           \
+{                                                                           \
+    int k;                                                                  \
+    int depth = 0;                                                          \
     H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                        \
     k = H5C__HASH_FCN(Addr);                                                \
-    entry_ptr = ((cache_ptr)->index)[k];                                     \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )      \
-    {                                                                        \
-        (entry_ptr) = (entry_ptr)->ht_next;                                  \
-        (depth)++;                                                           \
-    }                                                                        \
-    if ( entry_ptr )                                                         \
-    {                                                                        \
+    entry_ptr = ((cache_ptr)->index)[k];                                    \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) )     \
+    {                                                                       \
+        (entry_ptr) = (entry_ptr)->ht_next;                                 \
+        (depth)++;                                                          \
+    }                                                                       \
+    if ( entry_ptr )                                                        \
+    {                                                                       \
         H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val) \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                          \
-        {                                                                    \
-            if ( (entry_ptr)->ht_next )                                      \
-            {                                                                \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;        \
-            }                                                                \
-            HDassert( (entry_ptr)->ht_prev != NULL );                        \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;            \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                  \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                  \
-            (entry_ptr)->ht_prev = NULL;                                     \
-            ((cache_ptr)->index)[k] = (entry_ptr);                           \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                         \
+        {                                                                   \
+            if ( (entry_ptr)->ht_next )                                     \
+            {                                                               \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;       \
+            }                                                               \
+            HDassert( (entry_ptr)->ht_prev != NULL );                       \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;           \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);                 \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                 \
+            (entry_ptr)->ht_prev = NULL;                                    \
+            ((cache_ptr)->index)[k] = (entry_ptr);                          \
             H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)  \
-        }                                                                    \
-    }                                                                        \
+        }                                                                   \
+    }                                                                       \
 }
 
 #define H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
+{                                                                        \
     H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)      \
-    (cache_ptr)->index_size -= old_size;                                  \
-    (cache_ptr)->index_size += new_size;                                  \
+    (cache_ptr)->index_size -= old_size;                                 \
+    (cache_ptr)->index_size += new_size;                                 \
     H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)     \
 }
 
@@ -2747,12 +2730,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		JRM -- 8/25/06
  *		Added the H5C_DO_SANITY_CHECKS version of the macro.
  *
- *		This version maintains the slist_len_increase and 
+ *		This version maintains the slist_len_increase and
  *		slist_size_increase fields that are used in sanity
  *		checks in the flush routines.
  *
- *		All this is needed as the fractal heap needs to be 
- *		able to dirty, resize and/or rename entries during the 
+ *		All this is needed as the fractal heap needs to be
+ *		able to dirty, resize and/or rename entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -2760,10 +2743,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_DO_SANITY_CHECKS
 
-#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)            \
+#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
     HDassert( (entry_ptr) );                                                   \
     HDassert( (entry_ptr)->size > 0 );                                         \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
@@ -2787,10 +2770,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_DO_SANITY_CHECKS */
 
-#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)            \
+#define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                        \
     HDassert( (entry_ptr) );                                                   \
     HDassert( (entry_ptr)->size > 0 );                                         \
     HDassert( H5F_addr_defined((entry_ptr)->addr) );                           \
@@ -2839,16 +2822,16 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		Switched over to using skip list routines.
  *
  *		JRM -- 3/28/07
- *		Updated sanity checks for the new is_read_only and 
+ *		Updated sanity checks for the new is_read_only and
  *		ro_ref_count fields in H5C_cache_entry_t.
  *
  *-------------------------------------------------------------------------
  */
 
-#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)         \
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)          \
 {                                                                   \
     HDassert( (cache_ptr) );                                        \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );           \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );             \
     HDassert( (entry_ptr) );                                        \
     HDassert( !((entry_ptr)->is_protected) );                       \
     HDassert( !((entry_ptr)->is_read_only) );                       \
@@ -2887,11 +2870,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		JRM -- 8/27/06
  *		Added the H5C_DO_SANITY_CHECKS version of the macro.
  *
- *		This version maintains the slist_size_increase field 
+ *		This version maintains the slist_size_increase field
  *		that are used in sanity checks in the flush routines.
  *
- *		All this is needed as the fractal heap needs to be 
- *		able to dirty, resize and/or rename entries during the 
+ *		All this is needed as the fractal heap needs to be
+ *		able to dirty, resize and/or rename entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -2900,46 +2883,46 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 #if H5C_DO_SANITY_CHECKS
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (old_size) > 0 );                                           \
-    HDassert( (new_size) > 0 );                                           \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( (cache_ptr)->slist_len > 0 );                               \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                             \
-              ( (cache_ptr)->slist_size == (old_size) ) );                \
-                                                                          \
-    (cache_ptr)->slist_size -= (old_size);                                \
-    (cache_ptr)->slist_size += (new_size);                                \
-                                                                          \
-    (cache_ptr)->slist_size_increase -= (int64_t)(old_size);              \
-    (cache_ptr)->slist_size_increase += (int64_t)(new_size);              \
-                                                                          \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
-              ( (cache_ptr)->slist_size == (new_size) ) );                \
+{                                                                        \
+    HDassert( (cache_ptr) );                                             \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (old_size) > 0 );                                          \
+    HDassert( (new_size) > 0 );                                          \
+    HDassert( (old_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( (cache_ptr)->slist_len > 0 );                              \
+    HDassert( ((cache_ptr)->slist_len > 1) ||                            \
+              ( (cache_ptr)->slist_size == (old_size) ) );               \
+                                                                         \
+    (cache_ptr)->slist_size -= (old_size);                               \
+    (cache_ptr)->slist_size += (new_size);                               \
+                                                                         \
+    (cache_ptr)->slist_size_increase -= (int64_t)(old_size);             \
+    (cache_ptr)->slist_size_increase += (int64_t)(new_size);             \
+                                                                         \
+    HDassert( (new_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                          \
+              ( (cache_ptr)->slist_size == (new_size) ) );               \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
 #else /* H5C_DO_SANITY_CHECKS */
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                         \
-    HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (old_size) > 0 );                                           \
-    HDassert( (new_size) > 0 );                                           \
-    HDassert( (old_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( (cache_ptr)->slist_len > 0 );                               \
-    HDassert( ((cache_ptr)->slist_len > 1) ||                             \
-              ( (cache_ptr)->slist_size == (old_size) ) );                \
-                                                                          \
-    (cache_ptr)->slist_size -= (old_size);                                \
-    (cache_ptr)->slist_size += (new_size);                                \
-                                                                          \
-    HDassert( (new_size) <= (cache_ptr)->slist_size );                    \
-    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                           \
-              ( (cache_ptr)->slist_size == (new_size) ) );                \
+{                                                                        \
+    HDassert( (cache_ptr) );                                             \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (old_size) > 0 );                                          \
+    HDassert( (new_size) > 0 );                                          \
+    HDassert( (old_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( (cache_ptr)->slist_len > 0 );                              \
+    HDassert( ((cache_ptr)->slist_len > 1) ||                            \
+              ( (cache_ptr)->slist_size == (old_size) ) );               \
+                                                                         \
+    (cache_ptr)->slist_size -= (old_size);                               \
+    (cache_ptr)->slist_size += (new_size);                               \
+                                                                         \
+    HDassert( (new_size) <= (cache_ptr)->slist_size );                   \
+    HDassert( ( (cache_ptr)->slist_len > 1 ) ||                          \
+              ( (cache_ptr)->slist_size == (new_size) ) );               \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
 
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -2982,7 +2965,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		to do if called for such an entry.
  *
  *		JRM -- 3/28/07
- *		Added sanity checks using the new is_read_only and 
+ *		Added sanity checks using the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM -- 3/29/08
@@ -2995,99 +2978,99 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
 #define H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
-{                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
-    HDassert( (entry_ptr)->last_trans == 0 );                                \
-                                                                             \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
-        /* modified LRU specific code */                                     \
-                                                                             \
-        /* remove the entry from the LRU list, and re-insert it at the head. \
-	 */                                                                  \
-                                                                             \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+    HDassert( (entry_ptr)->last_trans == 0 );                               \
+                                                                            \
+    if ( ! ((entry_ptr)->is_pinned) ) {                                     \
+                                                                            \
+        /* modified LRU specific code */                                    \
+                                                                            \
+        /* remove the entry from the LRU list, and re-insert it at the head.\
+	 */                                                                 \
+                                                                            \
         H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
-                                                                             \
+                        (cache_ptr)->LRU_tail_ptr,                          \
+			(cache_ptr)->LRU_list_len,                          \
+                        (cache_ptr)->LRU_list_size, (fail_val))             \
+                                                                            \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
-                         (cache_ptr)->LRU_tail_ptr,                          \
-			 (cache_ptr)->LRU_list_len,                          \
-                         (cache_ptr)->LRU_list_size, (fail_val))             \
-                                                                             \
-        /* Use the dirty flag to infer whether the entry is on the clean or  \
-         * dirty LRU list, and remove it.  Then insert it at the head of     \
-         * the same LRU list.                                                \
-         *                                                                   \
-         * At least initially, all entries should be clean.  That may        \
-         * change, so we may as well deal with both cases now.               \
-         */                                                                  \
-                                                                             \
-        if ( (entry_ptr)->is_dirty ) {                                       \
+                         (cache_ptr)->LRU_tail_ptr,                         \
+			 (cache_ptr)->LRU_list_len,                         \
+                         (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                            \
+        /* Use the dirty flag to infer whether the entry is on the clean or \
+         * dirty LRU list, and remove it.  Then insert it at the head of    \
+         * the same LRU list.                                               \
+         *                                                                  \
+         * At least initially, all entries should be clean.  That may       \
+         * change, so we may as well deal with both cases now.              \
+         */                                                                 \
+                                                                            \
+        if ( (entry_ptr)->is_dirty ) {                                      \
             H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
-                                (cache_ptr)->dLRU_tail_ptr,                  \
-                                (cache_ptr)->dLRU_list_len,                  \
-                                (cache_ptr)->dLRU_list_size, (fail_val))     \
-                                                                             \
+                                (cache_ptr)->dLRU_tail_ptr,                 \
+                                (cache_ptr)->dLRU_list_len,                 \
+                                (cache_ptr)->dLRU_list_size, (fail_val))    \
+                                                                            \
             H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
-                                 (cache_ptr)->dLRU_tail_ptr,                 \
-                                 (cache_ptr)->dLRU_list_len,                 \
-                                 (cache_ptr)->dLRU_list_size, (fail_val))    \
-        } else {                                                             \
+                                 (cache_ptr)->dLRU_tail_ptr,                \
+                                 (cache_ptr)->dLRU_list_len,                \
+                                 (cache_ptr)->dLRU_list_size, (fail_val))   \
+        } else {                                                            \
             H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
-                                (cache_ptr)->cLRU_tail_ptr,                  \
-                                (cache_ptr)->cLRU_list_len,                  \
-                                (cache_ptr)->cLRU_list_size, (fail_val))     \
-                                                                             \
+                                (cache_ptr)->cLRU_tail_ptr,                 \
+                                (cache_ptr)->cLRU_list_len,                 \
+                                (cache_ptr)->cLRU_list_size, (fail_val))    \
+                                                                            \
             H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,   \
-                                 (cache_ptr)->cLRU_tail_ptr,                 \
-                                 (cache_ptr)->cLRU_list_len,                 \
-                                 (cache_ptr)->cLRU_list_size, (fail_val))    \
-        }                                                                    \
-                                                                             \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
+                                 (cache_ptr)->cLRU_tail_ptr,                \
+                                 (cache_ptr)->cLRU_list_len,                \
+                                 (cache_ptr)->cLRU_list_size, (fail_val))   \
+        }                                                                   \
+                                                                            \
+        /* End modified LRU specific code. */                               \
+    }                                                                       \
 } /* H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS */
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 #define H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS(cache_ptr, entry_ptr, fail_val) \
-{                                                                            \
-    HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
-    HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
-    HDassert( !((entry_ptr)->is_read_only) );                                \
-    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
-    HDassert( (entry_ptr)->size > 0 );                                       \
-    HDassert( (entry_ptr)->last_trans == 0 );                                \
-                                                                             \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
-        /* modified LRU specific code */                                     \
-                                                                             \
-        /* remove the entry from the LRU list, and re-insert it at the head  \
-	 */                                                                  \
-                                                                             \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    HDassert( (entry_ptr)->size > 0 );                                      \
+    HDassert( (entry_ptr)->last_trans == 0 );                               \
+                                                                            \
+    if ( ! ((entry_ptr)->is_pinned) ) {                                     \
+                                                                            \
+        /* modified LRU specific code */                                    \
+                                                                            \
+        /* remove the entry from the LRU list, and re-insert it at the head \
+	 */                                                                 \
+                                                                            \
         H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
-                                                                             \
+                        (cache_ptr)->LRU_tail_ptr,                          \
+			(cache_ptr)->LRU_list_len,                          \
+                        (cache_ptr)->LRU_list_size, (fail_val))             \
+                                                                            \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
-                         (cache_ptr)->LRU_tail_ptr,                          \
-			 (cache_ptr)->LRU_list_len,                          \
-                         (cache_ptr)->LRU_list_size, (fail_val))             \
-                                                                             \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
+                         (cache_ptr)->LRU_tail_ptr,                         \
+			 (cache_ptr)->LRU_list_len,                         \
+                         (cache_ptr)->LRU_list_size, (fail_val))            \
+                                                                            \
+        /* End modified LRU specific code. */                               \
+    }                                                                       \
 } /* H5C__FAKE_RP_FOR_MOST_RECENT_ACCESS */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3130,7 +3113,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		be called on a pinned entry.  Added assert to verify this.
  *
  *		JRM -- 3/28/07
- *		Added sanity checks for the new is_read_only and 
+ *		Added sanity checks for the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM -- 3/29/08
@@ -3142,10 +3125,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)         \
+#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -3158,7 +3141,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     /* remove the entry from the LRU list. */                                \
                                                                              \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
                     (cache_ptr)->LRU_list_size, (fail_val))                  \
                                                                              \
@@ -3170,12 +3153,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     if ( (entry_ptr)->is_dirty ) {                                           \
                                                                              \
-        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,        \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,         \
                             (cache_ptr)->dLRU_tail_ptr,                      \
                             (cache_ptr)->dLRU_list_len,                      \
                             (cache_ptr)->dLRU_list_size, (fail_val))         \
     } else {                                                                 \
-        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,        \
+        H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,         \
                             (cache_ptr)->cLRU_tail_ptr,                      \
                             (cache_ptr)->cLRU_list_len,                      \
                             (cache_ptr)->cLRU_list_size, (fail_val))         \
@@ -3185,10 +3168,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)         \
+#define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -3201,7 +3184,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
     /* remove the entry from the LRU list. */                                \
                                                                              \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                 \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,                  \
                     (cache_ptr)->LRU_tail_ptr, (cache_ptr)->LRU_list_len,    \
                     (cache_ptr)->LRU_list_size, (fail_val))                  \
                                                                              \
@@ -3261,10 +3244,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)           \
+#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
     HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
@@ -3280,12 +3263,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	 * head.                                                            \
 	 */                                                                 \
                                                                             \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
                         (cache_ptr)->LRU_tail_ptr,                          \
 			(cache_ptr)->LRU_list_len,                          \
                         (cache_ptr)->LRU_list_size, (fail_val))             \
                                                                             \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
                          (cache_ptr)->LRU_tail_ptr,                         \
 			 (cache_ptr)->LRU_list_len,                         \
                          (cache_ptr)->LRU_list_size, (fail_val))            \
@@ -3302,18 +3285,18 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
          */                                                                 \
                                                                             \
         if ( (entry_ptr)->is_dirty ) {                                      \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
+            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
                                 (cache_ptr)->dLRU_tail_ptr,                 \
                                 (cache_ptr)->dLRU_list_len,                 \
                                 (cache_ptr)->dLRU_list_size, (fail_val))    \
         } else {                                                            \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,   \
+            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
                                 (cache_ptr)->cLRU_tail_ptr,                 \
                                 (cache_ptr)->cLRU_list_len,                 \
                                 (cache_ptr)->cLRU_list_size, (fail_val))    \
         }                                                                   \
                                                                             \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,      \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,       \
                              (cache_ptr)->cLRU_tail_ptr,                    \
                              (cache_ptr)->cLRU_list_len,                    \
                              (cache_ptr)->cLRU_list_size, (fail_val))       \
@@ -3324,10 +3307,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)           \
+#define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
     HDassert( (cache_ptr) );                                                \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
@@ -3343,12 +3326,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	 * head.                                                            \
 	 */                                                                 \
                                                                             \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
                         (cache_ptr)->LRU_tail_ptr,                          \
 			(cache_ptr)->LRU_list_len,                          \
                         (cache_ptr)->LRU_list_size, (fail_val))             \
                                                                             \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,            \
                          (cache_ptr)->LRU_tail_ptr,                         \
 			 (cache_ptr)->LRU_list_len,                         \
                          (cache_ptr)->LRU_list_size, (fail_val))            \
@@ -3397,7 +3380,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		Inserted an assert to verify this.
  *
  *		JRM - 8/9/06
- *		Not any more.  We must now allow insertion of pinned 
+ *		Not any more.  We must now allow insertion of pinned
  *		entries.  Updated macro to support this.
  *
  *		JRM - 3/28/07
@@ -3405,13 +3388,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM - 3/29/30
- *		Added sanity check that verifies that the last_trans field 
- *		of the entry matches the trans_num field of the cache.  
- *		Note that when journaling is disabled, both of these 
- *		fields should contain zero.  Also verify that either 
+ *		Added sanity check that verifies that the last_trans field
+ *		of the entry matches the trans_num field of the cache. 
+ *		Note that when journaling is disabled, both of these
+ *		fields should contain zero.  Also verify that either
  *		journaling is disabled or a transaction is in progress.
  *
- *		Added code to put the entry in the journal write in 
+ *		Added code to put the entry in the journal write in
  *		progress list if entries last_trans field is non-
  *		zero and the entry is not pinned.
  *
@@ -3420,10 +3403,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_read_only) );                              \
@@ -3435,7 +3418,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -3444,7 +3427,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                   \
         HDassert( (cache_ptr)->mdj_enabled );                              \
 	HDassert( (cache_ptr)->trans_in_progress );                        \
-        H5C__DLL_PREPEND((entry_ptr),                                     \
+        H5C__DLL_PREPEND((entry_ptr),                                      \
 		          ((cache_ptr)->jwipl_head_ptr),                   \
 		          ((cache_ptr)->jwipl_tail_ptr),                   \
 			  ((cache_ptr)->jwipl_len),                        \
@@ -3456,7 +3439,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                          (cache_ptr)->LRU_tail_ptr,                        \
 			 (cache_ptr)->LRU_list_len,                        \
                          (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3466,12 +3449,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
          */                                                                \
                                                                            \
         if ( entry_ptr->is_dirty ) {                                       \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
                                  (cache_ptr)->dLRU_tail_ptr,               \
                                  (cache_ptr)->dLRU_list_len,               \
                                  (cache_ptr)->dLRU_list_size, (fail_val))  \
         } else {                                                           \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
                                  (cache_ptr)->cLRU_tail_ptr,               \
                                  (cache_ptr)->cLRU_list_len,               \
                                  (cache_ptr)->cLRU_list_size, (fail_val))  \
@@ -3483,10 +3466,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
     HDassert( !((entry_ptr)->is_read_only) );                              \
@@ -3498,7 +3481,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -3507,7 +3490,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                   \
         HDassert( (cache_ptr)->mdj_enabled );                              \
 	HDassert( (cache_ptr)->trans_in_progress );                        \
-        H5C__DLL_PREPEND((entry_ptr),                                     \
+        H5C__DLL_PREPEND((entry_ptr),                                      \
 		          ((cache_ptr)->jwipl_head_ptr),                   \
 		          ((cache_ptr)->jwipl_tail_ptr),                   \
 			  ((cache_ptr)->jwipl_len),                        \
@@ -3519,7 +3502,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                          (cache_ptr)->LRU_tail_ptr,                        \
 			 (cache_ptr)->LRU_list_len,                        \
                          (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3535,13 +3518,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *
  * Macro:	H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE
  *
- * Purpose:     Update the replacement policy data structures for the 
- *              completion of the last pending journal write for the 
+ * Purpose:     Update the replacement policy data structures for the
+ *              completion of the last pending journal write for the
  *              specified un-pinned and un-protected cache entry.
  *
  *		If an entry with a pending journal write is not protected
- *		and is not pinned, it must be on the journal write in 
- *		progress list.  Unlink it from that list, and add it to 
+ *		and is not pinned, it must be on the journal write in
+ *		progress list.  Unlink it from that list, and add it to
  *		the data structures used by the current replacement policy.
  *
  *		At present, we only support the modified LRU policy, so
@@ -3565,11 +3548,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,  \
+#define H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,   \
 		                                   fail_val)              \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (cache_ptr)->mdj_enabled );                                 \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
@@ -3580,7 +3563,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     HDassert( (entry_ptr)->is_dirty );                                    \
     HDassert( (entry_ptr)->last_trans == 0 );                             \
 									  \
-    H5C__DLL_REMOVE((entry_ptr),                                         \
+    H5C__DLL_REMOVE((entry_ptr),                                          \
                      ((cache_ptr)->jwipl_head_ptr),                       \
                      ((cache_ptr)->jwipl_tail_ptr),                       \
                      ((cache_ptr)->jwipl_len),                            \
@@ -3591,7 +3574,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
     /* insert the entry at the head of the LRU list. */                   \
                                                                           \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
                       (cache_ptr)->LRU_tail_ptr,                          \
                       (cache_ptr)->LRU_list_len,                          \
                       (cache_ptr)->LRU_list_size, (fail_val))             \
@@ -3601,12 +3584,12 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      */                                                                   \
                                                                           \
     if ( entry_ptr->is_dirty ) {                                          \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,     \
                               (cache_ptr)->dLRU_tail_ptr,                 \
                               (cache_ptr)->dLRU_list_len,                 \
                               (cache_ptr)->dLRU_list_size, (fail_val))    \
     } else {                                                              \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
+        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,     \
                               (cache_ptr)->cLRU_tail_ptr,                 \
                               (cache_ptr)->cLRU_list_len,                 \
                               (cache_ptr)->cLRU_list_size, (fail_val))    \
@@ -3618,11 +3601,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,  \
+#define H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, entry_ptr,   \
 		                                   fail_val)              \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (cache_ptr)->mdj_enabled );                                 \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
@@ -3633,7 +3616,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     HDassert( (entry_ptr)->is_dirty );                                    \
     HDassert( (entry_ptr)->last_trans == 0 );                             \
 									  \
-    H5C__DLL_REMOVE((entry_ptr),                                         \
+    H5C__DLL_REMOVE((entry_ptr),                                          \
                      ((cache_ptr)->jwipl_head_ptr),                       \
                      ((cache_ptr)->jwipl_tail_ptr),                       \
                      ((cache_ptr)->jwipl_len),                            \
@@ -3644,7 +3627,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
     /* insert the entry at the head of the LRU list. */                   \
                                                                           \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
+    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
                       (cache_ptr)->LRU_tail_ptr,                          \
                       (cache_ptr)->LRU_list_len,                          \
                       (cache_ptr)->LRU_list_size, (fail_val))             \
@@ -3664,8 +3647,8 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		load from disk of the specified cache entry.
  *
  *		Note that we update the replacement policy for load only
- *		as a convenience -- the newly loaded entry will be 
- *		protected immediately.  If this starts to eat up a 
+ *		as a convenience -- the newly loaded entry will be
+ *		protected immediately.  If this starts to eat up a
  *		significant number of cycles, we will have to re-work
  *		the code to avoid this step.
  *
@@ -3802,7 +3785,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		maintained by the replacement policy.
  *
  *		JRM - 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM - 3/29/08
@@ -3814,10 +3797,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)       \
+#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -3826,7 +3809,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
@@ -3835,7 +3818,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                  \
         HDassert( (cache_ptr)->mdj_enabled );                             \
         HDassert( (entry_ptr)->is_dirty );                                \
-        H5C__DLL_REMOVE((entry_ptr),                                     \
+        H5C__DLL_REMOVE((entry_ptr),                                      \
                          ((cache_ptr)->jwipl_head_ptr),                   \
                          ((cache_ptr)->jwipl_tail_ptr),                   \
                          ((cache_ptr)->jwipl_len),                        \
@@ -3848,7 +3831,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         /* remove the entry from the LRU list. */                         \
                                                                           \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                         (cache_ptr)->LRU_tail_ptr,                        \
 			(cache_ptr)->LRU_list_len,                        \
                         (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3859,14 +3842,14 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         if ( (entry_ptr)->is_dirty ) {                                    \
                                                                           \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
+            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
                                 (cache_ptr)->dLRU_tail_ptr,               \
                                 (cache_ptr)->dLRU_list_len,               \
                                 (cache_ptr)->dLRU_list_size, (fail_val))  \
                                                                           \
         } else {                                                          \
                                                                           \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
+            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
                                 (cache_ptr)->cLRU_tail_ptr,               \
                                 (cache_ptr)->cLRU_list_len,               \
                                 (cache_ptr)->cLRU_list_size, (fail_val))  \
@@ -3879,7 +3862,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      * pinned, now add the entry to the protected list.                   \
      */                                                                   \
                                                                           \
-    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,               \
+    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
                     (cache_ptr)->pl_tail_ptr,                             \
                     (cache_ptr)->pl_len,                                  \
                     (cache_ptr)->pl_size, (fail_val))                     \
@@ -3887,10 +3870,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)       \
+#define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -3899,7 +3882,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
@@ -3908,7 +3891,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	                                                                  \
         HDassert( (cache_ptr)->mdj_enabled );                             \
         HDassert( (entry_ptr)->is_dirty );                                \
-        H5C__DLL_REMOVE((entry_ptr),                                     \
+        H5C__DLL_REMOVE((entry_ptr),                                      \
                          ((cache_ptr)->jwipl_head_ptr),                   \
                          ((cache_ptr)->jwipl_tail_ptr),                   \
                          ((cache_ptr)->jwipl_len),                        \
@@ -3921,7 +3904,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         /* remove the entry from the LRU list. */                         \
                                                                           \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
                         (cache_ptr)->LRU_tail_ptr,                        \
 			(cache_ptr)->LRU_list_len,                        \
                         (cache_ptr)->LRU_list_size, (fail_val))           \
@@ -3933,10 +3916,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      * pinned, now add the entry to the protected list.                   \
      */                                                                   \
                                                                           \
-    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,               \
-                     (cache_ptr)->pl_tail_ptr,                            \
-                     (cache_ptr)->pl_len,                                 \
-                     (cache_ptr)->pl_size, (fail_val))                    \
+    H5C__DLL_APPEND((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+                    (cache_ptr)->pl_tail_ptr,                             \
+                    (cache_ptr)->pl_len,                                  \
+                    (cache_ptr)->pl_size, (fail_val))                     \
 } /* H5C__UPDATE_RP_FOR_PROTECT */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3992,25 +3975,25 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		nothing to be done.
  *
  *		JRM - 3/28/07
- *		Added sanity checks using the new is_read_only and 
+ *		Added sanity checks using the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM - 3/29/08
  *		Reworked macro to handle the case in which the renamed
  *		entry has a journal write pending -- this required the
- *		addition of the had_jwip parameter.  Also added some 
- *		related sanity checks.  
+ *		addition of the had_jwip parameter.  Also added some
+ *		related sanity checks. 
  *
  *-------------------------------------------------------------------------
  */
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,          \
+#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,           \
 		                   had_jwip, fail_val)                       \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -4031,7 +4014,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	    HDassert( (entry_ptr)->last_trans != 0 );                        \
 	    HDassert( was_dirty );                                           \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C__DLL_REMOVE((entry_ptr),                                    \
+            H5C__DLL_REMOVE((entry_ptr),                                     \
 	  		     ((cache_ptr)->jwipl_head_ptr),                  \
                              ((cache_ptr)->jwipl_tail_ptr),                  \
                              ((cache_ptr)->jwipl_len),                       \
@@ -4044,7 +4027,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             /* remove the entry from the LRU list */                         \
                                                                              \
-            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
+            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
                              (cache_ptr)->LRU_tail_ptr,                      \
 			     (cache_ptr)->LRU_list_len,                      \
                              (cache_ptr)->LRU_list_size, (fail_val))         \
@@ -4054,7 +4037,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
              */                                                              \
             if ( was_dirty ) {                                               \
                                                                              \
-                H5C__AUX_DLL_REMOVE((entry_ptr),                            \
+                H5C__AUX_DLL_REMOVE((entry_ptr),                             \
 				     (cache_ptr)->dLRU_head_ptr,             \
                                      (cache_ptr)->dLRU_tail_ptr,             \
                                      (cache_ptr)->dLRU_list_len,             \
@@ -4063,7 +4046,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             } else {                                                         \
                                                                              \
-                H5C__AUX_DLL_REMOVE((entry_ptr),                            \
+                H5C__AUX_DLL_REMOVE((entry_ptr),                             \
 				     (cache_ptr)->cLRU_head_ptr,             \
                                      (cache_ptr)->cLRU_tail_ptr,             \
                                      (cache_ptr)->cLRU_list_len,             \
@@ -4080,7 +4063,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
             HDassert( (cache_ptr)->mdj_enabled );                            \
 	    HDassert( (cache_ptr)->trans_in_progress );                      \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C__DLL_PREPEND((entry_ptr),                                   \
+            H5C__DLL_PREPEND((entry_ptr),                                    \
 		              ((cache_ptr)->jwipl_head_ptr),                 \
 		              ((cache_ptr)->jwipl_tail_ptr),                 \
                               ((cache_ptr)->jwipl_len),                      \
@@ -4090,7 +4073,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 		                                                             \
             /* begin modified LRU specific code */                           \
 	                                                                     \
-            H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,        \
+            H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
                               (cache_ptr)->LRU_tail_ptr,                     \
 			      (cache_ptr)->LRU_list_len,                     \
                               (cache_ptr)->LRU_list_size, (fail_val))        \
@@ -4101,7 +4084,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             if ( (entry_ptr)->is_dirty ) {                                   \
                                                                              \
-                H5C__AUX_DLL_PREPEND((entry_ptr),                           \
+                H5C__AUX_DLL_PREPEND((entry_ptr),                            \
 				      (cache_ptr)->dLRU_head_ptr,            \
                                       (cache_ptr)->dLRU_tail_ptr,            \
                                       (cache_ptr)->dLRU_list_len,            \
@@ -4110,7 +4093,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             } else {                                                         \
                                                                              \
-                H5C__AUX_DLL_PREPEND((entry_ptr),                           \
+                H5C__AUX_DLL_PREPEND((entry_ptr),                            \
 				      (cache_ptr)->cLRU_head_ptr,            \
                                       (cache_ptr)->cLRU_tail_ptr,            \
                                       (cache_ptr)->cLRU_list_len,            \
@@ -4125,11 +4108,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,          \
+#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty,           \
 		                   had_jwip, fail_val)                       \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
@@ -4150,7 +4133,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 	    HDassert( (entry_ptr)->last_trans != 0 );                        \
 	    HDassert( was_dirty );                                           \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C__DLL_REMOVE((entry_ptr),                                    \
+            H5C__DLL_REMOVE((entry_ptr),                                     \
 	  	             ((cache_ptr)->jwipl_head_ptr),                  \
                              ((cache_ptr)->jwipl_tail_ptr),                  \
                              ((cache_ptr)->jwipl_len),                       \
@@ -4163,7 +4146,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                              \
             /* remove the entry from the LRU list */                         \
                                                                              \
-            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
+            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
                              (cache_ptr)->LRU_tail_ptr,                      \
 			     (cache_ptr)->LRU_list_len,                      \
                              (cache_ptr)->LRU_list_size, (fail_val))         \
@@ -4178,7 +4161,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
             HDassert( (cache_ptr)->mdj_enabled );                            \
 	    HDassert( (cache_ptr)->trans_in_progress );                      \
 	    HDassert( (entry_ptr)->is_dirty );                               \
-            H5C__DLL_PREPEND((entry_ptr),                                   \
+            H5C__DLL_PREPEND((entry_ptr),                                    \
                               ((cache_ptr)->jwipl_head_ptr),                 \
                               ((cache_ptr)->jwipl_tail_ptr),                 \
                               ((cache_ptr)->jwipl_len),                      \
@@ -4188,7 +4171,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 		                                                             \
             /* begin modified LRU specific code */                           \
 	                                                                     \
-            H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,        \
+            H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
                               (cache_ptr)->LRU_tail_ptr,                     \
 			      (cache_ptr)->LRU_list_len,                     \
                               (cache_ptr)->LRU_list_size, (fail_val))        \
@@ -4211,7 +4194,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		To do this, determine if the entry is pinned.  If it is,
  *		update the size of the pinned entry list.
  *
- *		If it isn't pinned, the entry must handled by the 
+ *		If it isn't pinned, the entry must handled by the
  *		replacement policy.  Update the appropriate replacement
  *		policy data structures.
  *
@@ -4227,13 +4210,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  * Modifications:
  *
  * 		JRM -- 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM -- 3/29/08
  *		Added code to deal with the journal write in progress
  *		list -- in essence, after checking to see if the entry is
- *		pinned, check to see if it is on the jwip list.  If it 
+ *		pinned, check to see if it is on the jwip list.  If it
  *		is, update the size of that list.  If not, proceed as
  *		before.
  *
@@ -4242,10 +4225,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)   \
+#define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -4255,7 +4238,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 				  					  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,            \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,             \
 			                (cache_ptr)->pel_size,            \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4264,7 +4247,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         HDassert( (cache_ptr)->mdj_enabled );                             \
 	HDassert( (entry_ptr)->is_dirty );                                \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,          \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,           \
 			                (cache_ptr)->jwipl_size,          \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4275,7 +4258,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
 	/* Update the size of the LRU list */                             \
                                                                           \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,       \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,        \
 			                (cache_ptr)->LRU_list_size,       \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4287,14 +4270,14 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         if ( (entry_ptr)->is_dirty ) {                                    \
                                                                           \
-	    H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->dLRU_list_len,  \
+	    H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->dLRU_list_len,   \
 			                    (cache_ptr)->dLRU_list_size,  \
 			                    (entry_ptr)->size,            \
 					    (new_size));                  \
                                                                           \
         } else {                                                          \
                                                                           \
-	    H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->cLRU_list_len,  \
+	    H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->cLRU_list_len,   \
 			                    (cache_ptr)->cLRU_list_size,  \
 			                    (entry_ptr)->size,            \
 					    (new_size));                  \
@@ -4307,10 +4290,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)   \
+#define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)    \
 {                                                                         \
     HDassert( (cache_ptr) );                                              \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
     HDassert( !((entry_ptr)->is_read_only) );                             \
@@ -4320,7 +4303,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 				  					  \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,            \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,             \
 			                (cache_ptr)->pel_size,            \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4329,7 +4312,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
         HDassert( (cache_ptr)->mdj_enabled );                             \
 	HDassert( (entry_ptr)->is_dirty );                                \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,          \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->jwipl_len,           \
 			                (cache_ptr)->jwipl_size,          \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4340,7 +4323,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                           \
 	/* Update the size of the LRU list */                             \
                                                                           \
-	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,       \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->LRU_list_len,        \
 			                (cache_ptr)->LRU_list_size,       \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
@@ -4376,11 +4359,11 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  * Modifications:
  *
  *		JRM -- 3/28/07
- *		Added sanity checks based on the new is_read_only and 
+ *		Added sanity checks based on the new is_read_only and
  *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *		JRM -- 3/30/08
- *		Added code to place the newly unpinned entry on the 
+ *		Added code to place the newly unpinned entry on the
  *		journal write pending list if appropriate.
  *
  *-------------------------------------------------------------------------
@@ -4388,10 +4371,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
     HDassert( !((entry_ptr)->is_protected) );                          \
     HDassert( !((entry_ptr)->is_read_only) );                          \
@@ -4402,7 +4385,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
      */                                                                \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
                                                                        \
@@ -4411,7 +4394,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                           \
         HDassert( (cache_ptr)->mdj_enabled );                          \
         HDassert( (entry_ptr)->is_dirty );                             \
-        H5C__DLL_PREPEND((entry_ptr),                                 \
+        H5C__DLL_PREPEND((entry_ptr),                                  \
                           ((cache_ptr)->jwipl_head_ptr),               \
                           ((cache_ptr)->jwipl_tail_ptr),               \
                           ((cache_ptr)->jwipl_len),                    \
@@ -4423,7 +4406,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         /* insert the entry at the head of the LRU list. */            \
                                                                        \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,      \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
                          (cache_ptr)->LRU_tail_ptr,                    \
                          (cache_ptr)->LRU_list_len,                    \
                          (cache_ptr)->LRU_list_size, (fail_val))       \
@@ -4434,7 +4417,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         if ( (entry_ptr)->is_dirty ) {                                 \
                                                                        \
-            H5C__AUX_DLL_PREPEND((entry_ptr),                         \
+            H5C__AUX_DLL_PREPEND((entry_ptr),                          \
 			          (cache_ptr)->dLRU_head_ptr,          \
                                   (cache_ptr)->dLRU_tail_ptr,          \
                                   (cache_ptr)->dLRU_list_len,          \
@@ -4443,7 +4426,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         } else {                                                       \
                                                                        \
-            H5C__AUX_DLL_PREPEND((entry_ptr),                         \
+            H5C__AUX_DLL_PREPEND((entry_ptr),                          \
 			          (cache_ptr)->cLRU_head_ptr,          \
                                   (cache_ptr)->cLRU_tail_ptr,          \
                                   (cache_ptr)->cLRU_list_len,          \
@@ -4458,10 +4441,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert( (cache_ptr) );                                           \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );              \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
     HDassert( !((entry_ptr)->is_protected) );                          \
     HDassert( !((entry_ptr)->is_read_only) );                          \
@@ -4472,7 +4455,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the \
      * pinned entry list.                                              \
      */                                                                \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,           \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
                                                                        \
@@ -4481,7 +4464,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                           \
         HDassert( (cache_ptr)->mdj_enabled );                          \
         HDassert( (entry_ptr)->is_dirty );                             \
-        H5C__DLL_PREPEND((entry_ptr),                                 \
+        H5C__DLL_PREPEND((entry_ptr),                                  \
                           ((cache_ptr)->jwipl_head_ptr),               \
                           ((cache_ptr)->jwipl_tail_ptr),               \
                           ((cache_ptr)->jwipl_len),                    \
@@ -4493,7 +4476,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                        \
         /* insert the entry at the head of the LRU list. */            \
                                                                        \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,      \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
                          (cache_ptr)->LRU_tail_ptr,                    \
                          (cache_ptr)->LRU_list_len,                    \
                          (cache_ptr)->LRU_list_size, (fail_val))       \
@@ -4548,7 +4531,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *		maintained by the replacement policy.
  *
  *		JRM - 3/30/08
- *		Modified macro to put un-pinned entries with pending 
+ *		Modified macro to put un-pinned entries with pending
  *		journal writes on the journal write in progress list.
  *
  *-------------------------------------------------------------------------
@@ -4556,10 +4539,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( (entry_ptr)->is_protected);                                  \
     HDassert( (entry_ptr)->size > 0 );                                     \
@@ -4567,13 +4550,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
      */                                                                    \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                 \
                     (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,         \
                     (cache_ptr)->pl_size, (fail_val))                      \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                           (cache_ptr)->pel_tail_ptr,                       \
                           (cache_ptr)->pel_len,                            \
                           (cache_ptr)->pel_size, (fail_val))               \
@@ -4583,7 +4566,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                               \
         HDassert( (cache_ptr)->mdj_enabled );                              \
         HDassert( (entry_ptr)->is_dirty );                                 \
-        H5C__DLL_PREPEND((entry_ptr),                                     \
+        H5C__DLL_PREPEND((entry_ptr),                                      \
                           ((cache_ptr)->jwipl_head_ptr),                   \
                           ((cache_ptr)->jwipl_tail_ptr),                   \
                           ((cache_ptr)->jwipl_len),                        \
@@ -4595,10 +4578,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
-                          (cache_ptr)->LRU_tail_ptr,                       \
-                          (cache_ptr)->LRU_list_len,                       \
-                          (cache_ptr)->LRU_list_size, (fail_val))          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+                         (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
                                                                            \
         /* Similarly, insert the entry at the head of either the clean or  \
          * dirty LRU list as appropriate.                                  \
@@ -4606,17 +4589,17 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         if ( (entry_ptr)->is_dirty ) {                                     \
                                                                            \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr, \
-                                  (cache_ptr)->dLRU_tail_ptr,              \
-                                  (cache_ptr)->dLRU_list_len,              \
-                                  (cache_ptr)->dLRU_list_size, (fail_val)) \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
+                                 (cache_ptr)->dLRU_tail_ptr,               \
+                                 (cache_ptr)->dLRU_list_len,               \
+                                 (cache_ptr)->dLRU_list_size, (fail_val))  \
                                                                            \
         } else {                                                           \
                                                                            \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr, \
-                                  (cache_ptr)->cLRU_tail_ptr,              \
-                                  (cache_ptr)->cLRU_list_len,              \
-                                  (cache_ptr)->cLRU_list_size, (fail_val)) \
+            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
+                                 (cache_ptr)->cLRU_tail_ptr,               \
+                                 (cache_ptr)->cLRU_list_len,               \
+                                 (cache_ptr)->cLRU_list_size, (fail_val))  \
         }                                                                  \
                                                                            \
         /* End modified LRU specific code. */                              \
@@ -4626,10 +4609,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)      \
+#define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert( (cache_ptr) );                                               \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( (entry_ptr)->is_protected);                                  \
     HDassert( (entry_ptr)->size > 0 );                                     \
@@ -4637,13 +4620,13 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     /* Regardless of the replacement policy, remove the entry from the     \
      * protected list.                                                     \
      */                                                                    \
-    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                \
+    H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pl_head_ptr,                 \
                     (cache_ptr)->pl_tail_ptr, (cache_ptr)->pl_len,         \
                     (cache_ptr)->pl_size, (fail_val))                      \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
@@ -4653,7 +4636,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
         /* put the entry in the jwip list */                               \
         HDassert( (cache_ptr)->mdj_enabled );                              \
         HDassert( (entry_ptr)->is_dirty );                                 \
-        H5C__DLL_PREPEND((entry_ptr),                                     \
+        H5C__DLL_PREPEND((entry_ptr),                                      \
                           ((cache_ptr)->jwipl_head_ptr),                   \
                           ((cache_ptr)->jwipl_tail_ptr),                   \
                           ((cache_ptr)->jwipl_len),                        \
@@ -4665,10 +4648,10 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
                                                                            \
         /* insert the entry at the head of the LRU list. */                \
                                                                            \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
-                          (cache_ptr)->LRU_tail_ptr,                       \
-                          (cache_ptr)->LRU_list_len,                       \
-                          (cache_ptr)->LRU_list_size, (fail_val))          \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
+                         (cache_ptr)->LRU_tail_ptr,                        \
+                         (cache_ptr)->LRU_list_len,                        \
+                         (cache_ptr)->LRU_list_size, (fail_val))           \
                                                                            \
         /* End modified LRU specific code. */                              \
     }                                                                      \
@@ -4710,7 +4693,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
  *-------------------------------------------------------------------------
  */
 
-#define H5C__INSERT_ENTRY_IN_TL(cache_ptr, entry_ptr, fail_val)       \
+#define H5C__INSERT_ENTRY_IN_TL(cache_ptr, entry_ptr, fail_val)        \
 if ( cache_ptr->mdj_enabled )                                          \
 {                                                                      \
     HDassert( cache_ptr->trans_in_progress );                          \
@@ -4718,7 +4701,7 @@ if ( cache_ptr->mdj_enabled )                                          \
                                                                        \
     entry_ptr->last_trans = cache_ptr->trans_num;                      \
                                                                        \
-    H5C__TRANS_DLL_PREPEND((entry_ptr), (cache_ptr->tl_head_ptr),     \
+    H5C__TRANS_DLL_PREPEND((entry_ptr), (cache_ptr->tl_head_ptr),      \
                             (cache_ptr->tl_tail_ptr),                  \
                             (cache_ptr->tl_len), (cache_ptr->tl_size), \
                             (fail_val));                               \
@@ -4732,7 +4715,7 @@ if ( cache_ptr->mdj_enabled )                                          \
  * Purpose:     Check to see if journaling is enabled.
  *
  *              If it is, see if the target entry is in the transaction
- *              list.  If it is, remove it from the list, and set its 
+ *              list.  If it is, remove it from the list, and set its
  *              last_trans field to zero.
  *
  * Return:      N/A
@@ -4746,7 +4729,7 @@ if ( cache_ptr->mdj_enabled )                                          \
  *-------------------------------------------------------------------------
  */
 
-#define H5C__UPDATE_TL_FOR_ENTRY_CLEAR(cache_ptr, entry_ptr, fail_val) \
+#define H5C__UPDATE_TL_FOR_ENTRY_CLEAR(cache_ptr, entry_ptr, fail_val)  \
 if ( cache_ptr->mdj_enabled )                                           \
 {                                                                       \
     HDassert( cache_ptr->trans_in_progress );                           \
@@ -4754,7 +4737,7 @@ if ( cache_ptr->mdj_enabled )                                           \
                                                                         \
     if ( entry_ptr->last_trans == cache_ptr->trans_num ) {              \
                                                                         \
-        H5C__TRANS_DLL_REMOVE((entry_ptr), (cache_ptr->tl_head_ptr),   \
+        H5C__TRANS_DLL_REMOVE((entry_ptr), (cache_ptr->tl_head_ptr),    \
                                (cache_ptr->tl_tail_ptr),                \
                                (cache_ptr->tl_len),                     \
                                (cache_ptr->tl_size), (fail_val));       \
@@ -4788,7 +4771,7 @@ if ( cache_ptr->mdj_enabled )                                           \
  *-------------------------------------------------------------------------
  */
 
-#define H5C__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, fail_val) \
+#define H5C__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, fail_val)  \
 if ( cache_ptr->mdj_enabled )                                           \
 {                                                                       \
     HDassert( cache_ptr->trans_in_progress );                           \
@@ -4796,7 +4779,7 @@ if ( cache_ptr->mdj_enabled )                                           \
                                                                         \
     if ( entry_ptr->last_trans == cache_ptr->trans_num ) {              \
                                                                         \
-        H5C__TRANS_DLL_REMOVE((entry_ptr), (cache_ptr->tl_head_ptr),   \
+        H5C__TRANS_DLL_REMOVE((entry_ptr), (cache_ptr->tl_head_ptr),    \
                                (cache_ptr->tl_tail_ptr),                \
                                (cache_ptr->tl_len),                     \
                                (cache_ptr->tl_size), (fail_val));       \
@@ -4804,7 +4787,7 @@ if ( cache_ptr->mdj_enabled )                                           \
         entry_ptr->last_trans = cache_ptr->trans_num;                   \
     }                                                                   \
                                                                         \
-    H5C__TRANS_DLL_PREPEND((entry_ptr), (cache_ptr->tl_head_ptr),      \
+    H5C__TRANS_DLL_PREPEND((entry_ptr), (cache_ptr->tl_head_ptr),       \
                             (cache_ptr->tl_tail_ptr),                   \
 		            (cache_ptr->tl_len), (cache_ptr->tl_size),  \
                             (fail_val));                                \
@@ -4815,9 +4798,9 @@ if ( cache_ptr->mdj_enabled )                                           \
  *
  * Macro:	H5C__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE
  *
- * Purpose:     Update the transaction list for a change in the size of 
+ * Purpose:     Update the transaction list for a change in the size of
  *              one of its constituents.  Note that it is the callers
- *              responsibility to verify that the entry is in the 
+ *              responsibility to verify that the entry is in the
  *              transaction list if it should be.
  *
  * Return:      N/A
@@ -4831,12 +4814,12 @@ if ( cache_ptr->mdj_enabled )                                           \
  *-------------------------------------------------------------------------
  */
 
-#define H5C__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, \
+#define H5C__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr,  \
                                               old_size, new_size)   \
 if ( ( (cache_ptr)->mdj_enabled ) &&                                \
      ( (entry_ptr)->last_trans == (cache_ptr)->trans_num ) ) {      \
     HDassert( (cache_ptr)->trans_in_progress );                     \
-    H5C__DLL_UPDATE_FOR_SIZE_CHANGE(((cache_ptr)->tl_len),         \
+    H5C__DLL_UPDATE_FOR_SIZE_CHANGE(((cache_ptr)->tl_len),          \
                                      ((cache_ptr)->tl_size),        \
                                      (old_size), (new_size));       \
 } /* H5C__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE() */
@@ -4846,8 +4829,8 @@ if ( ( (cache_ptr)->mdj_enabled ) &&                                \
  *
  * Macro:	H5C__JBRB__UPDATE_STATS_FOR* macros
  *
- * Purpose:     This set of macros exists to update the various journal 
- *		buffer ring buffer stats fields when 
+ * Purpose:     This set of macros exists to update the various journal
+ *		buffer ring buffer stats fields when
  *		H5C__JBRB__COLLECT_STATS is TRUE, and do nothing when
  *		it is false.
  *
@@ -4922,3 +4905,4 @@ if ( ( (cache_ptr)->mdj_enabled ) &&                                \
 
 #endif /* H5C__JBRB__COLLECT_STATS */
 #endif /* _H5Cpkg_H */
+

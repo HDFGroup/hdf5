@@ -25,6 +25,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5FLprivate.h"        /* Free Lists                           */
 
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */

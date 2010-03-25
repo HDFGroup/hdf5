@@ -34,7 +34,6 @@
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
 
 /**************************/
