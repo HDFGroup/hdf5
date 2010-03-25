@@ -1610,6 +1610,7 @@
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
+./tools/h5repack/testfiles/h5repack_attr_refs.h5
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
