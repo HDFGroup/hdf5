@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 !//////////////////////////////////////////////////////////
 ! main program for parallel HDF5 Fortran tests
@@ -27,8 +27,8 @@ PROGRAM parallel_test
   LOGICAL :: do_collective                        ! use collective MPI I/O
   LOGICAL :: do_chunk                             ! use chunking
   INTEGER :: nerrors = 0                          ! number of errors
-  INTEGER :: mpi_size                             ! number of processes in the group of communicator 
-  INTEGER :: mpi_rank                             ! rank of the calling process in the communicator 
+  INTEGER :: mpi_size                             ! number of processes in the group of communicator
+  INTEGER :: mpi_rank                             ! rank of the calling process in the communicator
   INTEGER :: length = 12000                       ! length of array
 
   !//////////////////////////////////////////////////////////
@@ -115,20 +115,20 @@ PROGRAM parallel_test
   !//////////////////////////////////////////////////////////
 
   IF (nerrors == 0) THEN
-     CALL mpi_finalize(mpierror)  
+     CALL mpi_finalize(mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_FINALIZE  *FAILED* Process = ", mpi_rank
      ENDIF
   ELSE
      WRITE(*,*) 'Errors detected in process ', mpi_rank
-     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)  
+     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF
   ENDIF
 
   !//////////////////////////////////////////////////////////
-  ! end main program 
+  ! end main program
   !//////////////////////////////////////////////////////////
 
 END PROGRAM parallel_test

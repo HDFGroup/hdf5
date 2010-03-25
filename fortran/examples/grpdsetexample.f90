@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! This example shows how to create a dataset in a particular group.
@@ -22,8 +22,8 @@
 
      PROGRAM GRPDSETEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=10), PARAMETER :: filename = "groupsf.h5" ! File name
@@ -31,17 +31,17 @@
      CHARACTER(LEN=13), PARAMETER :: dsetname1 = "MyGroup/dset1"  ! Dataset name
      CHARACTER(LEN=5),  PARAMETER :: dsetname2 = "dset2" ! dataset name
 
-     INTEGER(HID_T) :: file_id       ! File identifier 
-     INTEGER(HID_T) :: group_id      ! Group identifier 
-     INTEGER(HID_T) :: dataset_id    ! Dataset identifier 
-     INTEGER(HID_T) :: dataspace_id  ! Data space identifier 
+     INTEGER(HID_T) :: file_id       ! File identifier
+     INTEGER(HID_T) :: group_id      ! Group identifier
+     INTEGER(HID_T) :: dataset_id    ! Dataset identifier
+     INTEGER(HID_T) :: dataspace_id  ! Data space identifier
 
-     INTEGER     ::  i, j 
+     INTEGER     ::  i, j
      INTEGER     ::   error ! Error flag
 
-     INTEGER, DIMENSION(3,3) :: dset1_data  ! Data arrays 
+     INTEGER, DIMENSION(3,3) :: dset1_data  ! Data arrays
      INTEGER, DIMENSION(2,10) :: dset2_data !
-     
+
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Datasets dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
@@ -70,7 +70,7 @@
      !
      ! Initialize FORTRAN interface.
      !
-     CALL h5open_f(error) 
+     CALL h5open_f(error)
 
      !
      ! Open an existing file.
@@ -78,7 +78,7 @@
      CALL h5fopen_f (filename, H5F_ACC_RDWR_F, file_id, error)
 
      !
-     ! Create the data space for the first dataset. 
+     ! Create the data space for the first dataset.
      !
      CALL h5screate_simple_f(rank, dims1, dataspace_id, error)
 
@@ -111,7 +111,7 @@
      CALL h5gopen_f(file_id, groupname, group_id, error)
 
      !
-     !Create the data space for the second dataset. 
+     !Create the data space for the second dataset.
      !
      CALL h5screate_simple_f(rank, dims2, dataspace_id, error)
 
@@ -125,7 +125,7 @@
      ! Write the second dataset.
      !
      data_dims(1) = 2
-     data_dims(1) = 10 
+     data_dims(1) = 10
      CALL h5dwrite_f(dataset_id, H5T_NATIVE_INTEGER, dset2_data, data_dims, error)
 
      !
@@ -153,4 +153,4 @@
      !
      CALL h5close_f(error)
 
-     END PROGRAM GRPDSETEXAMPLE 
+     END PROGRAM GRPDSETEXAMPLE

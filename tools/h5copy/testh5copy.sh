@@ -23,6 +23,12 @@ TESTNAME=h5copy
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
+# Test files
+HDF_FILE1=h5copytst.h5
+HDF_FILE2=h5copy_ref.h5
+HDF_EXT_SRC_FILE=h5copy_extlinks_src.h5
+HDF_EXT_TRG_FILE=h5copy_extlinks_trg.h5
+
 H5COPY=h5copy               # The tool name
 H5COPY_BIN=`pwd`/$H5COPY    # The path of the tool binary
 H5DIFF=h5diff               # The h5diff tool name 
@@ -30,20 +36,26 @@ H5DIFF_BIN=`pwd`/../h5diff/$H5DIFF    # The path of the h5diff tool binary
 H5LS=h5ls                   # The h5ls tool name 
 H5LS_ARGS=-Svr              # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
+CMP='cmp -s'
+DIFF='diff -c'
 
 nerrors=0
 verbose=yes
-
-INDIR=$srcdir/testfiles
-OUTDIR=../testfiles
-CMP='cmp -s'
-DIFF='diff -c'
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
     srcdir=.
 fi
+INDIR=$srcdir/testfiles
+OUTDIR=./testfiles
+
 test -d $OUTDIR || mkdir $OUTDIR
+
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $H5COPY $@
+	  echo  " -SKIP-"
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -241,10 +253,10 @@ H5LSTEST()
 #
 # Assumed arguments:
 # <none>
-COPYOBJECTS() 
+COPY_OBJECTS() 
 {
-    TESTFILE="$INDIR/$1"
-    FILEOUT="$OUTDIR/`basename $1 .h5`.out.h5"
+    TESTFILE="$INDIR/$HDF_FILE1"
+    FILEOUT="$OUTDIR/`basename $HDF_FILE1 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
@@ -296,11 +308,90 @@ COPYOBJECTS()
     fi
 }
 
+# Copy references in various way.
+# adding to the destination file each time compare the result
+#
+# Assumed arguments:
+# <none>
+COPY_REFERENCES() 
+{
+    TESTFILE="$INDIR/$HDF_FILE2"
+    FILEOUT="$OUTDIR/`basename $HDF_FILE2 .h5`.out.h5"
+
+    # Remove any output file left over from previous test run
+    rm -f $FILEOUT
+
+    echo "Test copying object and region references"
+    TOOLTEST -f ref -i $TESTFILE -o $FILEOUT -v -s / -d /COPY
+
+    # Verify that the file created above is correct
+    H5LSTEST $FILEOUT
+
+    # Remove output file created, if the "no cleanup" environment variable is
+    #   not defined
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $FILEOUT
+    fi
+}
+
+# Copy external links.
+# adding to the destination file each time compare the result
+#
+# Assumed arguments:
+# <none>
+COPY_EXT_LINKS() 
+{
+    TESTFILE="$INDIR/$HDF_EXT_SRC_FILE"
+    FILEOUT="$OUTDIR/`basename $HDF_EXT_SRC_FILE .h5`.out.h5"
+
+    # Remove any output file left over from previous test run
+    rm -f $FILEOUT
+
+    echo "Test copying external link directly without -f ext"
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext/extlink_dset -d /copy1_dset
+
+    echo "Test copying external link directly with -f ext"
+    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_dset -d /copy2_dset
+
+    echo "Test copying dangling external link (no obj) directly without -f ext"
+    #TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+    SKIP -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+
+    echo "Test copying dangling external link (no obj) directly with -f ext"
+    #TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+    SKIP -f ext -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+
+    echo "Test copying dangling external link (no file) directly without -f ext"
+    #TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+    SKIP -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+
+    echo "Test copying dangling external link (no file) directly with -f ext"
+    #TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+    SKIP -f ext -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+
+    echo "Test copying a group contains external links without -f ext"
+    TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy1_group
+
+    echo "Test copying a group contains external links with -f ext"
+    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -f ext -s /group_ext -d /copy2_group
+
+    # Verify that the file created above is correct
+    H5LSTEST $FILEOUT
+
+    # Remove output file created, if the "no cleanup" environment variable is
+    #   not defined
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $FILEOUT
+    fi
+}
+
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
 
-COPYOBJECTS h5copytst.h5
+COPY_OBJECTS 
+COPY_REFERENCES
+COPY_EXT_LINKS
 
 # Add newline for nicer formatting
 echo " "

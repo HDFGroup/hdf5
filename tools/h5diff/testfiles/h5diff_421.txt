@@ -1,2 +1,3 @@
-error: "/no_obj" doesn't exist 
-error: unable to get external link info from "/ext_link_noexist1"
+obj2 </ext_link_noexist1> is a dangling link.
+1 differences found
+EXIT CODE: 1

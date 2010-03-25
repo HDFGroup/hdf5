@@ -1,2 +1,3 @@
-group  : </target_group> and <softlink3_to_slink1>
+group  : </target_group> and </softlink3_to_slink2>
 1 differences found
+EXIT CODE: 1

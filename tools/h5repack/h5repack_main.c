@@ -103,33 +103,33 @@ static struct long_options l_opts[] = {
  */
 int main(int argc, const char **argv)
 {
-    
+
     pack_opt_t    options;            /*the global options */
     int           ret=-1;
-    
+
     /* initialize options  */
     h5repack_init (&options, 0, 0, 0, (hsize_t)0);        
     
     parse_command_line(argc, argv, &options);
-    
+
     /* get file names if they were not yet got */
     if ( has_i_o == 0 )
     {
-        
+
         if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL )
         {
             infile = argv[ opt_ind ];
             outfile = argv[ opt_ind + 1 ];
-            
+
             if ( strcmp( infile, outfile ) == 0 )
             {
                 error_msg(progname, "file names cannot be the same\n");
                 usage(progname);
                 exit(EXIT_FAILURE);
-                
+
             }
         }
-        
+
         else
         {
             error_msg(progname, "file names missing\n");
@@ -137,14 +137,14 @@ int main(int argc, const char **argv)
             exit(EXIT_FAILURE);
         }
     }
-    
-    
+
+
     /* pack it */
     ret=h5repack(infile,outfile,&options);
-    
+
     /* free tables */
     h5repack_end(&options);
-    
+
     if (ret==-1)
         return 1;
     else
@@ -291,7 +291,7 @@ static void usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 
-static 
+static
 void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
 
@@ -513,18 +513,8 @@ void read_info(const char *filename,
     FILE *fp;
     char c;
     int  i, rc=1;
-    char  *srcdir = getenv("srcdir"); /* the source directory */
-    char  data_file[512]="";          /* buffer to hold name of existing file */
 
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    if (srcdir){
-        strcpy(data_file,srcdir);
-        strcat(data_file,"/");
-    }
-    strcat(data_file,filename);
-
-
-    if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
+    if ((fp = fopen(filename, "r")) == (FILE *)NULL) {
         error_msg(progname, "cannot open options file %s\n", filename);
         exit(EXIT_FAILURE);
     }

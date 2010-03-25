@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,7 +11,7 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
 ! In this example we iterate through the members of the groups.
@@ -20,8 +20,8 @@
 
      PROGRAM GRPITEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules 
-        
+     USE HDF5 ! This module contains all necessary modules
+
      IMPLICIT NONE
 
      CHARACTER(LEN=11), PARAMETER :: filename = "iteratef.h5" ! File name
@@ -34,12 +34,12 @@
      INTEGER :: type ! Type of the object
      INTEGER :: nmembers ! Number of group members
 
-     INTEGER(HID_T) :: file_id        ! File identifier 
-     INTEGER(HID_T) :: dataset1_id    ! Dataset1 identifier 
-     INTEGER(HID_T) :: dataset2_id    ! Dataset2 identifier 
-     INTEGER(HID_T) :: dataspace1_id  ! Data space identifier 
-     INTEGER(HID_T) :: dataspace2_id  ! Data space identifier 
-     INTEGER(HID_T) :: group1_id, group2_id ! Group identifiers     
+     INTEGER(HID_T) :: file_id        ! File identifier
+     INTEGER(HID_T) :: dataset1_id    ! Dataset1 identifier
+     INTEGER(HID_T) :: dataset2_id    ! Dataset2 identifier
+     INTEGER(HID_T) :: dataspace1_id  ! Data space identifier
+     INTEGER(HID_T) :: dataspace2_id  ! Data space identifier
+     INTEGER(HID_T) :: group1_id, group2_id ! Group identifiers
 
      INTEGER     ::  i, j
 
@@ -47,11 +47,11 @@
 
      INTEGER, DIMENSION(3,3) :: dset1_data  ! Arrays to hold data
      INTEGER, DIMENSION(2,10) :: dset2_data !
-     
-     
+
+
      INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/3,3/) ! Dataset dimensions
      INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/2,10/)!
-     INTEGER     ::   rank = 2 ! Datasets rank 
+     INTEGER     ::   rank = 2 ! Datasets rank
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
 
      !
@@ -76,11 +76,11 @@
      !
      ! Initialize FORTRAN interface.
      !
-     CALL h5open_f(error) 
+     CALL h5open_f(error)
 
      !
      ! Create a new file using default properties.
-     ! 
+     !
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
 
      !
@@ -94,7 +94,7 @@
      CALL h5gcreate_f(group1_id, groupname2, group2_id, error)
 
      !
-     ! Create the data space for the first dataset. 
+     ! Create the data space for the first dataset.
      !
      CALL h5screate_simple_f(rank, dims1, dataspace1_id, error)
 
@@ -112,7 +112,7 @@
      CALL h5dwrite_f(dataset1_id, H5T_NATIVE_INTEGER, dset1_data, data_dims, error)
 
      !
-     ! Create the data space for the second dataset. 
+     ! Create the data space for the second dataset.
      !
      CALL h5screate_simple_f(rank, dims2, dataspace2_id, error)
 
@@ -206,10 +206,10 @@
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
-     
+
      !
      ! Close FORTRAN interface.
      !
      CALL h5close_f(error)
 
-     END PROGRAM GRPITEXAMPLE 
+     END PROGRAM GRPITEXAMPLE

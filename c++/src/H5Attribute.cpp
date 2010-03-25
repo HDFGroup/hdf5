@@ -166,7 +166,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 //		Used getInMemDataSize to get attribute data size. - BMR
 //	Jul 2009
 //		Divided into specific private functions for fixed- and
-//		variable-len string data: p_read_fixed_len and 
+//		variable-len string data: p_read_fixed_len and
 //		p_read_variable_len.  This should improve readability.
 //--------------------------------------------------------------------------
 void Attribute::read(const DataType& mem_type, H5std_string& strg) const

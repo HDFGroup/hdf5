@@ -79,8 +79,8 @@ typedef struct H5FA_class_t {
 typedef struct H5FA_create_t {
     const H5FA_class_t *cls;            /* Class of Fixed Array to create */
     uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
-    uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
-					   i.e. # of bits needed to store max. # of elements 
+    uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
+					   i.e. # of bits needed to store max. # of elements
 					   in a data block page */
     hsize_t nelmts; 			/* # of elements in array */
 } H5FA_create_t;

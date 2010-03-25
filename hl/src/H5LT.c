@@ -1757,7 +1757,7 @@ out:
         sprintf(tmp_str, "\n%*s <empty>", indt + 4, "");
         strcat(str, tmp_str);
     } /* end if */
-    
+
     /* Release resources */
     if(name) {
         for(i = 0; i < nmembs; i++)

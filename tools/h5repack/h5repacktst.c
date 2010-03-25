@@ -78,6 +78,8 @@
 
 #define FNAME_UB   "ublock.bin"
 
+/* obj and region references */
+#define FNAME_REF   "h5repack_refs.h5"
 
 const char *H5REPACK_FILENAMES[] = {
     "h5repack_big_out",
@@ -99,6 +101,13 @@ int d_status = EXIT_SUCCESS;
 
 /* Size of userblock (for userblock test) */
 #define USERBLOCK_SIZE  2048
+
+/* obj and region references */
+#define NAME_OBJ_DS "Dset1"
+#define NAME_OBJ_GRP "Group"
+#define NAME_OBJ_NDTYPE "NamedDatatype"
+#define REG_REF_DS1 "Dset_REGREF"
+#define REG_REF_DS2 "Dset2"
 
 /*-------------------------------------------------------------------------
 * prototypes
@@ -132,6 +141,7 @@ static int make_userblock(void);
 static int verify_userblock( const char* filename);
 static int make_userblock_file(void);
 static int make_named_dtype(hid_t loc_id);
+static int make_references(hid_t loc_id);
 
 
 /*-------------------------------------------------------------------------
@@ -1618,10 +1628,10 @@ error:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_testfiles(void)
 {
-    hid_t  fid;  
+    hid_t  fid;
 
     /*-------------------------------------------------------------------------
     * create a file for general copy test
@@ -1812,6 +1822,16 @@ int make_testfiles(void)
     if(H5Fclose(fid) < 0)
         return -1;
 
+    /*-------------------------------------------------------------------------
+    * create a file with obj and region references 
+    *-------------------------------------------------------------------------*/
+    if((fid = H5Fcreate(FNAME_REF,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
+        return -1;
+    if (make_references(fid) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        return -1;
+
     return 0;
 
 out:
@@ -1828,7 +1848,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_all_objects(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -1836,7 +1856,7 @@ int make_all_objects(hid_t loc_id)
     hid_t   tid=-1;
     hid_t   rid=-1;
     hid_t   sid=-1;
-    hid_t   gcplid=-1;  
+    hid_t   gcplid=-1;
     hsize_t dims[1]={2};
     /* compound datatype */
     typedef struct s_t
@@ -1853,7 +1873,7 @@ int make_all_objects(hid_t loc_id)
         goto out;
     if ((did = H5Dcreate2(loc_id, "dset_referenced", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    
+
 
     /*-------------------------------------------------------------------------
     * H5G_GROUP
@@ -1862,7 +1882,7 @@ int make_all_objects(hid_t loc_id)
     if ((gid  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
     if (H5Gclose(gid) < 0)
-        goto out;    
+        goto out;
 
     /* create a group "g2" with H5P_CRT_ORDER_TRACKED set */
     if ((gcplid = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -1930,7 +1950,7 @@ int make_all_objects(hid_t loc_id)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Dclose(did);
         H5Gclose(gid);
@@ -1950,7 +1970,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_attributes(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -1966,7 +1986,7 @@ int make_attributes(hid_t loc_id)
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         goto out;
     if ((did  = H5Dcreate2(loc_id, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto out;    
+        goto out;
 
     /*-------------------------------------------------------------------------
     * H5G_GROUP
@@ -1998,11 +2018,11 @@ int make_attributes(hid_t loc_id)
         goto out;
     if (H5Sclose(sid) < 0)
         goto out;
- 
+
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Dclose(did);
         H5Gclose(gid);
@@ -2020,7 +2040,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_hlinks(hid_t loc_id)
 {
     hid_t   g1id=-1;
@@ -2068,11 +2088,11 @@ int make_hlinks(hid_t loc_id)
         goto out;
     if (H5Gclose(g3id) < 0)
         goto out;
- 
+
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Gclose(g1id);
         H5Gclose(g2id);
@@ -2091,7 +2111,7 @@ out:
 *-------------------------------------------------------------------------
 */
 #ifdef H5_HAVE_FILTER_SZIP
-static 
+static
 int make_szip(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2126,19 +2146,19 @@ int make_szip(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     /* Make sure encoding is enabled */
-    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) 
+    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1)
     {
         szip_can_encode = 1;
     }
-    if (szip_can_encode) 
+    if (szip_can_encode)
     {
         /* set szip data */
         if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
             goto out;
         if (make_dset(loc_id,"dset_szip",sid,dcpl,buf) < 0)
             goto out;
-    } 
-    else 
+    }
+    else
     {
         /* WARNING? SZIP is decoder only, can't generate test files */
     }
@@ -2168,7 +2188,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_deflate(hid_t loc_id)
 {
     hid_t      dcpl; /* dataset creation property list */
@@ -2245,7 +2265,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_shuffle(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2311,7 +2331,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_fletcher32(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2381,7 +2401,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-static 
+static
 int make_nbit(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2622,11 +2642,11 @@ int make_all_filters(hid_t loc_id)
 #endif
 
 #if defined (H5_HAVE_FILTER_SZIP)
-    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) 
+    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1)
     {
         szip_can_encode = 1;
     }
-    if (szip_can_encode) 
+    if (szip_can_encode)
     {
         /* set szip data */
         if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
@@ -2659,7 +2679,7 @@ int make_all_filters(hid_t loc_id)
 
     /* Make sure encoding is enabled */
 #if defined (H5_HAVE_FILTER_SZIP)
-    if (szip_can_encode) 
+    if (szip_can_encode)
     {
         /* remove the filters from the dcpl */
         if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
@@ -2669,7 +2689,7 @@ int make_all_filters(hid_t loc_id)
             goto out;
         if (make_dset(loc_id,"dset_szip",sid,dcpl,buf) < 0)
             goto out;
-    } else 
+    } else
     {
         /* WARNING? SZIP is decoder only, can't generate test dataset */
     }
@@ -2733,7 +2753,7 @@ int make_all_filters(hid_t loc_id)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(dcpl);
         H5Sclose(sid);
@@ -2778,7 +2798,7 @@ int make_early(void)
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         goto out;
 
-    for(i = 0; i < iter; i++) 
+    for(i = 0; i < iter; i++)
     {
         if ((fid = H5Fopen(FNAME5, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
             goto out;
@@ -2807,7 +2827,7 @@ int make_early(void)
     if ((fid = H5Fcreate(FNAME6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
-    for(i = 0; i < iter; i++) 
+    for(i = 0; i < iter; i++)
     {
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
@@ -2828,7 +2848,7 @@ int make_early(void)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Tclose(tid);
         H5Pclose(dcpl);
@@ -2937,7 +2957,7 @@ int make_layout(hid_t loc_id)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(dcpl);
         H5Sclose(sid);
@@ -3123,7 +3143,7 @@ int make_external(hid_t loc_id)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(dcpl);
         H5Sclose(sid);
@@ -3677,9 +3697,9 @@ int write_dset_in(hid_t loc_id,
     if ((tid = H5Tcopy(H5T_STD_B8LE)) < 0)
         goto out;
     if (write_dset(loc_id,2,dims2,"bitfield2D",tid,buf22) < 0)
-        goto out; 
+        goto out;
     if (H5Tclose(tid) < 0)
-        goto out; 
+        goto out;
 
     /*-------------------------------------------------------------------------
     * H5T_OPAQUE
@@ -3688,7 +3708,7 @@ int write_dset_in(hid_t loc_id,
     if ((tid = H5Tcreate(H5T_OPAQUE, (size_t)1)) < 0)
         goto out;
     if (H5Tset_tag(tid, "1-byte opaque type") < 0)
-        goto out; 
+        goto out;
     if (write_dset(loc_id,2,dims2,"opaque2D",tid,buf22) < 0)
         goto out;
     if (H5Tclose(tid) < 0)
@@ -3753,7 +3773,7 @@ int write_dset_in(hid_t loc_id,
     n = 0;
     for(i = 0; i < 3; i++)
     {
-        for(j = 0; j < 2; j++) 
+        for(j = 0; j < 2; j++)
         {
             int l;
 
@@ -3974,7 +3994,7 @@ int write_dset_in(hid_t loc_id,
     {
         for(j = 0; j < 3; j++)
         {
-            for(k = 0; k < 2; k++) 
+            for(k = 0; k < 2; k++)
             {
                 int l;
 
@@ -4002,7 +4022,7 @@ int write_dset_in(hid_t loc_id,
 
     if (H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53) < 0)
         goto out;
-  
+
     if (H5Dclose(did) < 0)
         goto out;
     if (H5Tclose(tid) < 0)
@@ -4064,7 +4084,7 @@ int write_dset_in(hid_t loc_id,
 
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(pid);
         H5Sclose(sid);
@@ -4074,7 +4094,7 @@ out:
     return -1;
 }
 
- 
+
 
 /*-------------------------------------------------------------------------
 * Function: make_dset_reg_ref
@@ -4169,7 +4189,7 @@ out:
     if(dwbuf)
         free(dwbuf);
 
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Sclose(sid1);
         H5Sclose(sid2);
@@ -4534,7 +4554,7 @@ int write_attr_in(hid_t loc_id,
 
     if(make_diffs)
     {
-        for(i = 0; i < 2; i++) 
+        for(i = 0; i < 2; i++)
         {
             buf7[i]=0;
             buf8[i]=0;
@@ -4709,9 +4729,9 @@ int write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        for (i = 0; i < 3; i++) 
+        for (i = 0; i < 3; i++)
         {
-            for (j = 0; j < 2; j++) 
+            for (j = 0; j < 2; j++)
             {
                 if (H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1) < 0)
                     goto out;
@@ -4764,9 +4784,9 @@ int write_attr_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for (i = 0; i < 3; i++) 
+    for (i = 0; i < 3; i++)
     {
-        for (j = 0; j < 2; j++) 
+        for (j = 0; j < 2; j++)
         {
             int l;
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
@@ -4861,7 +4881,7 @@ int write_attr_in(hid_t loc_id,
     *-------------------------------------------------------------------------
     */
 
-    if(make_diffs) 
+    if(make_diffs)
     {
         HDmemset(buf72, 0, sizeof buf72);
         HDmemset(buf82, 0, sizeof buf82);
@@ -4982,11 +5002,11 @@ int write_attr_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
                 if (make_diffs) buf23[i][j][k]=0;
                 else buf23[i][j][k]=n++;
@@ -5051,18 +5071,18 @@ int write_attr_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                 {
                     buf33[i][j][k].a=0;
                     buf33[i][j][k].b=0;
                 }
-                else 
+                else
                 {
                     buf33[i][j][k].a=n++;
                     buf33[i][j][k].b=n++;
@@ -5143,9 +5163,9 @@ int write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        for (i = 0; i < 4; i++) 
+        for (i = 0; i < 4; i++)
         {
-            for (j = 0; j < 3; j++) 
+            for (j = 0; j < 3; j++)
             {
                 for (k = 0; k < 2; k++)
                     if (H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1) < 0)
@@ -5161,17 +5181,17 @@ int write_attr_in(hid_t loc_id,
     *-------------------------------------------------------------------------
     */
 
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                 {
-                    buf453[i][j][k]=RED; 
+                    buf453[i][j][k]=RED;
                 }
-                else 
+                else
                 {
                     buf453[i][j][k]=GREEN;
                 }
@@ -5228,11 +5248,11 @@ int write_attr_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
                 int l;
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
@@ -5242,7 +5262,7 @@ int write_attr_in(hid_t loc_id,
                     {
                         ((int *)buf53[i][j][k].p)[l] = 0;
                     }
-                    else 
+                    else
                         ((int *)buf53[i][j][k].p)[l] = n++;
             }
         }
@@ -5287,9 +5307,9 @@ int write_attr_in(hid_t loc_id,
     *-------------------------------------------------------------------------
     */
     n=1;
-    for (i = 0; i < 24; i++) 
+    for (i = 0; i < 24; i++)
     {
-        for (j = 0; j < (int)dimarray[0]; j++) 
+        for (j = 0; j < (int)dimarray[0]; j++)
         {
             if (make_diffs) buf63[i][j]=0;
             else buf63[i][j]=n++;
@@ -5327,12 +5347,12 @@ int write_attr_in(hid_t loc_id,
         {
             for(k = 0; k < 2; k++)
             {
-                if(make_diffs) 
+                if(make_diffs)
                 {
                     buf73[i][j][k] = 0;
                     buf83[i][j][k] = 0;
                 }
-                else 
+                else
                 {
                     buf73[i][j][k] = n++;
                     buf83[i][j][k] = f++;
@@ -5365,7 +5385,7 @@ int write_attr_in(hid_t loc_id,
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Aclose(aid);
         H5Sclose(sid);
@@ -5621,7 +5641,7 @@ int make_named_dtype(hid_t loc_id)
     return 0;
 
 out:
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Tclose(tid);
         H5Aclose(aid);
@@ -5631,4 +5651,308 @@ out:
     } H5E_END_TRY;
     return -1;
 } /* end make_named_dtype() */
+
+/*-------------------------------------------------------------------------
+ * Function: gen_obj_ref
+ *
+ * Purpose: 
+ *  Generate object references to objects (dataset,group and named datatype)
+ *
+ * Note:
+ *  copied from h5copygentest.c and upate to create named datatype  
+ *
+ * Programmer: Jonathan Kim (March 18, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_obj_ref(hid_t loc_id)
+{
+    hid_t sid=0, oid=0, tid=0;
+    hsize_t dims1[1]={3};
+    hsize_t dims2[1]={3};
+    int data[3] = {10,20,30};
+    hobj_ref_t objref_buf[3];  /* write buffer for obj reference */
+
+    int status;
+    herr_t ret = SUCCEED;
+
+    /*--------------
+     * add dataset */
+    sid = H5Screate_simple(1, dims1, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    oid = H5Dcreate2 (loc_id, NAME_OBJ_DS, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(oid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    H5Dclose(oid);
+    H5Sclose(sid);
+
+    /*--------------
+     * add group  */
+     oid = H5Gcreate2 (loc_id, NAME_OBJ_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+     H5Gclose(oid);
+
+    /*----------------------
+     * add named datatype
+     */
+     tid = H5Tcopy(H5T_NATIVE_INT);
+     status = H5Tcommit2(loc_id, NAME_OBJ_NDTYPE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+     if (status < 0)
+     {
+        fprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+     }
+
+    /*---------------------------------------------------------
+     * create obj references to the previously created objects.
+     * Passing -1 as reference is an object.*/
+
+    /* obj ref to dataset */
+    status = H5Rcreate (&objref_buf[0], loc_id, NAME_OBJ_DS, H5R_OBJECT, -1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* obj ref to group */
+    status = H5Rcreate (&objref_buf[1], loc_id, NAME_OBJ_GRP, H5R_OBJECT, -1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* obj ref to named-datatype */
+    status = H5Rcreate (&objref_buf[2], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, -1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /*---------------------------------------------------------
+     * create dataset contain references 
+     */
+    sid = H5Screate_simple (1, dims2, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    oid = H5Dcreate2 (loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, objref_buf);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if(oid > 0)
+        H5Dclose(oid);
+    if(tid > 0)
+        H5Tclose(tid);
+    if(sid > 0)
+        H5Sclose(sid);
+
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: gen_region_ref
+ *
+ * Purpose: Generate dataset region references
+ *
+ * Note:
+ *  copied from h5copygentest.c 
+ *
+ * Programmer: Jonathan Kim (March 18, 2010)
+ *------------------------------------------------------------------------*/
+static herr_t gen_region_ref(hid_t loc_id)
+{
+    hid_t sid=0, oid1=0, oid2=0;
+    int status;
+    herr_t ret = SUCCEED;
+    char  data[3][16] = {"The quick brown", "fox jumps over ", "the 5 lazy dogs"};
+    hsize_t dims2[2] = {3,16};
+    hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
+
+    hdset_reg_ref_t  rr_data[2];
+    hsize_t start[2] = {0,0};
+    hsize_t stride[2] = {2,11};
+    hsize_t count[2] = {2,2};
+    hsize_t block[2] = {1,3};
+    hsize_t dims1[1] = {2};
+
+    sid = H5Screate_simple (2, dims2, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create normal dataset which is refered */
+    oid2 = H5Dcreate2 (loc_id, REG_REF_DS2, H5T_STD_I8LE, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid2 < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* write values to dataset */
+    status = H5Dwrite (oid2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* select elements space for reference */
+    status = H5Sselect_elements (sid, H5S_SELECT_SET, 4, coords[0]);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference from elements space */
+    status = H5Rcreate (&rr_data[0], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* select hyperslab space for reference */
+    status = H5Sselect_hyperslab (sid, H5S_SELECT_SET, start, stride, count, block);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference from hyperslab space */
+    status = H5Rcreate (&rr_data[1], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    H5Sclose (sid);
+
+    /* Create dataspace. */
+    sid = H5Screate_simple (1, dims1, NULL);
+    if (sid < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* create region reference dataset */
+    oid1 = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    if (oid1 < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+    /* write data as region references */
+    status = H5Dwrite (oid1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        ret = FAIL;
+        goto out;
+    }
+
+out:
+    if (oid1 > 0)
+        H5Dclose (oid1);
+    if (oid2 > 0)
+        H5Dclose (oid2);
+    if (sid > 0)
+        H5Sclose (sid);
+
+    return ret;
+}
+
+/*-------------------------------------------------------------------------
+* Function: make_references
+*
+* Purpose: create a file with obj and region references 
+*
+* Programmer: Jonathan Kim (March 18, 2010)
+*-------------------------------------------------------------------------
+*/
+static herr_t make_references(hid_t loc_id)
+{
+    herr_t ret = SUCCEED;
+    herr_t status;
+
+    /* add object reference */
+    status = gen_obj_ref(loc_id);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Failed to generate object reference.\n");
+        ret = FAIL;
+    }
+
+    /* add region reference */
+    status = gen_region_ref(loc_id);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Failed to generate region reference.\n");
+        ret = FAIL;
+    }
+
+    return ret;
+}
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="toolslibdll"
 	ProjectGUID="{832DD776-BC7F-40B5-90D0-E6448014CA5B}"
 	RootNamespace="toolslibdll"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -45,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -117,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -189,7 +190,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\tools\lib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -262,7 +263,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\tools\lib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"

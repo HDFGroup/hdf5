@@ -34,7 +34,7 @@
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {
-    "unknown",			
+    "unknown",
     "H5F_FILE_SPACE_ALL_PERSIST",
     "H5F_FILE_SPACE_ALL",
     "H5F_FILE_SPACE_AGGR_VFD",
@@ -124,7 +124,7 @@ static int        display_all = TRUE;
 static int        display_file = FALSE;		/* display file information */
 static int        display_group = FALSE;	/* display groups information */
 static int        display_dset = FALSE;		/* display datasets information */
-static int        display_dset_dtype_info = FALSE;  /* display datasets' datatype information */
+static int        display_dset_dtype_meta = FALSE;  /* display datasets' datatype information */
 static int        display_attr = FALSE;		/* display attributes information */
 static int        display_free_sections = FALSE;    /* display free space information */
 static int        display_summary = FALSE;	/* display summary of file space information */
@@ -141,72 +141,77 @@ struct handler_t {
 };
 
 
-static const char *s_opts ="aDdFfhGgsSTO:v";
+static const char *s_opts ="ADdFfhGgsSTO:V";
+/* e.g. "filemetadata" has to precedue "file"; "groupmetadata" has to precede "group" etc. */
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
     {"hel", no_arg, 'h'},
     {"he", no_arg, 'h'},
+    {"filemetadata", no_arg, 'F'},
+    {"filemetadat", no_arg, 'F'},
+    {"filemetada", no_arg, 'F'},
+    {"filemetad", no_arg, 'F'},
+    {"filemeta", no_arg, 'F'},
+    {"filemet", no_arg, 'F'},
+    {"fileme", no_arg, 'F'},
+    {"filem", no_arg, 'F'},
     {"file", no_arg, 'f'},
     {"fil", no_arg, 'f'},
     {"fi", no_arg, 'f'},
-    {"FILEmetadata", no_arg, 'F'},
-    {"FILEmetadat", no_arg, 'F'},
-    {"FILEmetada", no_arg, 'F'},
-    {"FILEmetad", no_arg, 'F'},
-    {"FILEmeta", no_arg, 'F'},
-    {"FILEmet", no_arg, 'F'},
-    {"FILEme", no_arg, 'F'},
-    {"FILEm", no_arg, 'F'},
+    {"groupmetadata", no_arg, 'G'},
+    {"groupmetadat", no_arg, 'G'},
+    {"groupmetada", no_arg, 'G'},
+    {"groupmetad", no_arg, 'G'},
+    {"groupmeta", no_arg, 'G'},
+    {"groupmet", no_arg, 'G'},
+    {"groupme", no_arg, 'G'},
+    {"groupm", no_arg, 'G'},
     {"group", no_arg, 'g'},
     {"grou", no_arg, 'g'},
     {"gro", no_arg, 'g'},
     {"gr", no_arg, 'g'},
-    {"GROUPmetadata", no_arg, 'G'},
-    {"GROUPmetadat", no_arg, 'G'},
-    {"GROUPmetada", no_arg, 'G'},
-    {"GROUPmetad", no_arg, 'G'},
-    {"GROUPmeta", no_arg, 'G'},
-    {"GROUPmet", no_arg, 'G'},
-    {"GROUPme", no_arg, 'G'},
-    {"GROUPm", no_arg, 'G'},
+    {"dsetmetadata", no_arg, 'D'},
+    {"dsetmetadat", no_arg, 'D'},
+    {"dsetmetada", no_arg, 'D'},
+    {"dsetmetad", no_arg, 'D'},
+    {"dsetmeta", no_arg, 'D'},
+    {"dsetmet", no_arg, 'D'},
+    {"dsetme", no_arg, 'D'},
+    {"dsetm", no_arg, 'D'},
     {"dset", no_arg, 'd'},
     {"dse", no_arg, 'd'},
     {"ds", no_arg, 'd'},
-    {"DSETmetadata", no_arg, 'D'},
-    {"DSETmetadat", no_arg, 'D'},
-    {"DSETmetada", no_arg, 'D'},
-    {"DSETmetad", no_arg, 'D'},
-    {"DSETmeta", no_arg, 'D'},
-    {"DSETmet", no_arg, 'D'},
-    {"DSETme", no_arg, 'D'},
-    {"DSETm", no_arg, 'D'},
-    {"DSETtypeinfo", no_arg, 'T'},
-    {"DSETtypeinf", no_arg, 'T'},
-    {"DSETtypein", no_arg, 'T'},
-    {"DSETtypei", no_arg, 'T'},
-    {"DSETtype", no_arg, 'T'},
-    {"DSETtyp", no_arg, 'T'},
-    {"DSETty", no_arg, 'T'},
-    {"DSETt", no_arg, 'T'},
+    {"dtypemetadata", no_arg, 'T'},
+    {"dtypemetadat", no_arg, 'T'},
+    {"dtypemetada", no_arg, 'T'},
+    {"dtypemetad", no_arg, 'T'},
+    {"dtypemeta", no_arg, 'T'},
+    {"dtypemet", no_arg, 'T'},
+    {"dtypeme", no_arg, 'T'},
+    {"dtypem", no_arg, 'T'},
+    {"dtype", no_arg, 'T'},
+    {"dtyp", no_arg, 'T'},
+    {"dty", no_arg, 'T'},
+    {"dt", no_arg, 'T'},
     { "object", require_arg, 'O' },
     { "objec", require_arg, 'O' },
     { "obje", require_arg, 'O' },
     { "obj", require_arg, 'O' },
     { "ob", require_arg, 'O' },
-    { "version", no_arg, 'v' },
-    { "versio", no_arg, 'v' },
-    { "versi", no_arg, 'v' },
-    { "vers", no_arg, 'v' },
-    { "ver", no_arg, 'v' },
-    { "ve", no_arg, 'v' },
-    { "attribute", no_arg, 'a' },
-    { "attribut", no_arg, 'a' },
-    { "attribu", no_arg, 'a' },
-    { "attrib", no_arg, 'a' },
-    { "attri", no_arg, 'a' },
-    { "attr", no_arg, 'a' },
-    { "att", no_arg, 'a' },
-    { "at", no_arg, 'a' },
+    { "version", no_arg, 'V' },
+    { "versio", no_arg, 'V' },
+    { "versi", no_arg, 'V' },
+    { "vers", no_arg, 'V' },
+    { "ver", no_arg, 'V' },
+    { "ve", no_arg, 'V' },
+    { "attribute", no_arg, 'A' },
+    { "attribut", no_arg, 'A' },
+    { "attribu", no_arg, 'A' },
+    { "attrib", no_arg, 'A' },
+    { "attri", no_arg, 'A' },
+    { "attr", no_arg, 'A' },
+    { "att", no_arg, 'A' },
+    { "at", no_arg, 'A' },
     { "freespace", no_arg, 's' },
     { "freespac", no_arg, 's' },
     { "freespa", no_arg, 's' },
@@ -239,15 +244,15 @@ static void usage(const char *prog)
      fprintf(stdout, "\n");
      fprintf(stdout, "      OPTIONS\n");
      fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-     fprintf(stdout, "     -v, --version         Print version number and exit\n");
+     fprintf(stdout, "     -V, --version         Print version number and exit\n");
      fprintf(stdout, "     -f, --file            Print file information\n");
-     fprintf(stdout, "     -F, --FILEmetadata    Print file space information for file's metadata\n");
+     fprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
      fprintf(stdout, "     -g, --group           Print group information\n");
-     fprintf(stdout, "     -G, --GROUPmetadata   Print file space information for groups' metadata\n");
+     fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
      fprintf(stdout, "     -d, --dset            Print dataset information\n");
-     fprintf(stdout, "     -D, --DSETmetadata    Print file space information for datasets' metadata\n");
-     fprintf(stdout, "     -T, --DSETtypeinfo    Print datasets' datatype information\n");
-     fprintf(stdout, "     -a, --attribute       Print attribute information\n");
+     fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+     fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
+     fprintf(stdout, "     -A, --attribute       Print attribute information\n");
      fprintf(stdout, "     -s, --freespace       Print free space information\n");
      fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
 }
@@ -613,12 +618,18 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 static herr_t
 datatype_stats(iter_t *iter, const H5O_info_t *oi)
 {
+    herr_t ret;
+
     /* Gather statistics about this type of object */
     iter->uniq_dtypes++;
 
     /* Get object header information */
     iter->dtype_ohdr_info.total_size += oi->hdr.space.total;
     iter->dtype_ohdr_info.free_size += oi->hdr.space.free;
+
+    /* Update attribute metadata info */
+    ret = attribute_stats(iter, oi);
+    assert(ret >= 0);
 
      return 0;
 }  /* end datatype_stats() */
@@ -781,7 +792,7 @@ freespace_stats(hid_t fid, iter_t *iter)
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
  *
- * Modifications: 
+ * Modifications:
  *	Vailin Choi; October 2009
  *	Turn on display_group_metadata, display_dset_metadata
  *	Add 'S' & 's' for printing free space info (previous checkin)
@@ -804,11 +815,10 @@ parse_command_line(int argc, const char *argv[])
                 usage(progname);
                 leave(EXIT_SUCCESS);
 
-            case 'v':
+            case 'V':
                 print_version(progname);
                 leave(EXIT_SUCCESS);
                 break;
-
 
             case 'F':
                 display_all = FALSE;
@@ -842,10 +852,10 @@ parse_command_line(int argc, const char *argv[])
 
             case 'T':
                 display_all = FALSE;
-                display_dset_dtype_info = TRUE;
+                display_dset_dtype_meta = TRUE;
                 break;
 
-            case 'a':
+            case 'A':
                 display_all = FALSE;
                 display_attr = TRUE;
                 break;
@@ -1145,15 +1155,15 @@ print_dataset_info(const iter_t *iter)
 
 
 /*-------------------------------------------------------------------------
- * Function: print_dset_dtype_info
+ * Function: print_dset_dtype_meta
  *
- * Purpose: Prints datasets' datatype information 
+ * Purpose: Prints datasets' datatype information
  *
  * Return: Success: 0
  *
  * Failure: Never fails
  *
- * Programmer: 
+ * Programmer:
  *
  * Modifications:
  *	Vailin Choi; October 2009
@@ -1162,7 +1172,7 @@ print_dataset_info(const iter_t *iter)
  *-------------------------------------------------------------------------
  */
 static herr_t
-print_dset_dtype_info(const iter_t *iter)
+print_dset_dtype_meta(const iter_t *iter)
 {
     unsigned long total;        /* Total count for various statistics */
     size_t   dtype_size;        /* Size of encoded datatype */
@@ -1175,7 +1185,7 @@ print_dset_dtype_info(const iter_t *iter)
 	for(u = 0; u < iter->dset_ntypes; u++) {
 	    H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
 	    printf("\tDataset datatype #%u:\n", u);
-	    printf("\t\tCount (total/named) = (%lu/%lu)\n", 
+	    printf("\t\tCount (total/named) = (%lu/%lu)\n",
 		iter->dset_type_info[u].count, iter->dset_type_info[u].named);
 	    printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
 		(unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
@@ -1186,7 +1196,7 @@ print_dset_dtype_info(const iter_t *iter)
     }
 
     return 0;
-} /* print_dset_dtype_info() */
+} /* print_dset_dtype_meta() */
 
 
 /*-------------------------------------------------------------------------
@@ -1281,7 +1291,7 @@ print_storage_summary(const iter_t *iter)
 
     percent = ((float)iter->free_space / (float)iter->filesize) * 100;
     HDfprintf(stdout, "  Amount/Percent of tracked free space: %Hu bytes/%3.1f%\n",
-	    iter->free_space, percent); 
+	    iter->free_space, percent);
 
     if(iter->filesize < (total_meta+iter->dset_storage_size+iter->free_space)) {
 	unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
@@ -1292,7 +1302,7 @@ print_storage_summary(const iter_t *iter)
 	HDfprintf(stdout, "  Unaccounted space: %Hu bytes\n", unaccount);
     }
 
-    HDfprintf(stdout, "Total space: %Hu bytes\n", 
+    HDfprintf(stdout, "Total space: %Hu bytes\n",
 	    total_meta+iter->dset_storage_size+iter->free_space+unaccount);
 
     if(iter->nexternal)
@@ -1329,7 +1339,7 @@ print_file_metadata(const iter_t *iter)
     HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n",
                 iter->group_ohdr_info.total_size,
 		iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", 
+    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n",
 		iter->dset_ohdr_info.total_size,
 		iter->dset_ohdr_info.free_size);
     HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n",
@@ -1366,7 +1376,7 @@ print_file_metadata(const iter_t *iter)
 /*-------------------------------------------------------------------------
  * Function: print_group_metadata
  *
- * Purpose: Prints file space information for groups' metadata 
+ * Purpose: Prints file space information for groups' metadata
  *
  * Return: Success: 0
  *
@@ -1394,7 +1404,7 @@ print_group_metadata(const iter_t *iter)
 /*-------------------------------------------------------------------------
  * Function: print_dataset_metadata
  *
- * Purpose: Prints file space information for datasets' metadata 
+ * Purpose: Prints file space information for datasets' metadata
  *
  * Return: Success: 0
  *
@@ -1446,7 +1456,7 @@ print_file_statistics(const iter_t *iter)
         display_file = TRUE;
         display_group = TRUE;
         display_dset = TRUE;
-	display_dset_dtype_info = TRUE;
+	display_dset_dtype_meta = TRUE;
         display_attr = TRUE;
 	display_free_sections = TRUE;
 	display_summary = TRUE;
@@ -1463,7 +1473,7 @@ print_file_statistics(const iter_t *iter)
     if(!display_all && display_group_metadata) 	print_group_metadata(iter);
 
     if(display_dset)          	print_dataset_info(iter);
-    if(display_dset_dtype_info) print_dset_dtype_info(iter);
+    if(display_dset_dtype_meta) print_dset_dtype_meta(iter);
     if(!display_all && display_dset_metadata) 	print_dset_metadata(iter);
 
     if(display_attr)          	print_attr_info(iter);
@@ -1558,7 +1568,7 @@ main(int argc, const char *argv[])
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
 	warn_msg(progname, "Unable to retrieve file size\n");
     assert(iter.filesize != 0);
-	
+
     /* Get storge info for file-level structures */
     if(H5Fget_info2(fid, &finfo) < 0)
 	warn_msg(progname, "Unable to retrieve file info\n");
@@ -1592,7 +1602,7 @@ main(int argc, const char *argv[])
 
         u = 0;
         while(hand[u].obj) {
-            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0) 
+            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
 		warn_msg(progname, "Unable to traverse object \"%s\"\n", hand[u].obj);
 	    else
 		print_statistics(hand[u].obj, &iter);

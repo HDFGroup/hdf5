@@ -66,13 +66,13 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
         goto done;
 
     c_dims =  malloc(sizeof(hsize_t) * (*rank ));
-    if (c_dims == NULL) 
+    if (c_dims == NULL)
         goto done;
 
     /*
     * transpose dimension arrays because of C-FORTRAN storage order
     */
-    for (i = 0; i < *rank ; i++) 
+    for (i = 0; i < *rank ; i++)
     {
         c_dims[i] =  dims[*rank - i - 1];
     }
@@ -85,7 +85,7 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
 
     ret = H5LTmake_dataset(c_loc_id, c_name, *rank, c_dims, c_type_id, buf );
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -732,7 +732,7 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
     else
         goto done;
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -788,12 +788,12 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
     */
     c_namelen = *namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
          goto done;
 
     c_attrnamelen = *attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
          goto done;
 
     /*
@@ -804,7 +804,7 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
 
     ret = H5LTset_attribute_float(c_loc_id,c_name,c_attrname,buf,c_size);
 
-    if (ret < 0) 
+    if (ret < 0)
          goto done;
 
     ret_value = 0;
@@ -861,7 +861,7 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
     */
     c_namelen = *namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = *attrnamelen;
@@ -877,7 +877,7 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
 
     ret = H5LTset_attribute_double(c_loc_id,c_name,c_attrname,buf,c_size);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -935,12 +935,12 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
     */
     c_namelen = *namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = *attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     c_buflen = *buflen;
@@ -956,7 +956,7 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
 
     ret = H5LTset_attribute_string(c_loc_id,c_name,c_attrname,c_buf);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -1013,12 +1013,12 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1035,7 +1035,7 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
     else
         goto done;
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -1091,12 +1091,12 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1106,7 +1106,7 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
 
     ret = H5LTget_attribute_float(c_loc_id,c_name,c_attrname,buf);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -1160,12 +1160,12 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1175,7 +1175,7 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
 
     ret = H5LTget_attribute_double(c_loc_id,c_name,c_attrname,buf);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -1230,12 +1230,12 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1245,7 +1245,7 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
 
     ret = H5LTget_attribute_string(c_loc_id,c_name,c_attrname,buf);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     ret_value = 0;
@@ -1299,7 +1299,7 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(name, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     /*
@@ -1309,7 +1309,7 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
 
     ret = H5LTget_dataset_ndims(c_loc_id, c_name, &c_rank);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     *rank = (int_f)c_rank;
@@ -1417,7 +1417,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(name, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     /*
@@ -1437,10 +1437,10 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
     */
 
     ret = H5LTget_dataset_ndims(c_loc_id, c_name, &c_rank);
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
-    for (i = 0; i < c_rank ; i++) 
+    for (i = 0; i < c_rank ; i++)
     {
         dims[i] = (hsize_t_f) c_dims[c_rank - i - 1];
     }
@@ -1501,7 +1501,7 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1511,7 +1511,7 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
 
     ret = H5LTget_attribute_ndims(c_loc_id,c_name,c_attrname,&c_rank);
 
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     *rank = (int_f)c_rank;
@@ -1575,12 +1575,12 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
     */
     c_namelen = (int)*namelen;
     c_name = (char *)HD5f2cstring(name, c_namelen);
-    if (c_name == NULL) 
+    if (c_name == NULL)
         goto done;
 
     c_attrnamelen = (int)*attrnamelen;
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
-    if (c_attrname == NULL) 
+    if (c_attrname == NULL)
         goto done;
 
     /*
@@ -1589,7 +1589,7 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
     c_loc_id = (hid_t)*loc_id;
 
     ret = H5LTget_attribute_info(c_loc_id,c_name,c_attrname,c_dims,&c_classtype,&c_type_size);
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
     *type_class = c_classtype;
@@ -1600,10 +1600,10 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
     */
 
     ret = H5LTget_attribute_ndims(c_loc_id,c_name,c_attrname,&c_rank);
-    if (ret < 0) 
+    if (ret < 0)
         goto done;
 
-    for (i = 0; i < c_rank ; i++) 
+    for (i = 0; i < c_rank ; i++)
     {
         dims[i] = (hsize_t_f) c_dims[c_rank - i - 1];
     }

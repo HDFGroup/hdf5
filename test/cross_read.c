@@ -22,6 +22,7 @@
  */
 
 #include "h5test.h"
+#include "H5srcdir.h"
 
 const char *FILENAME[] = {
     "vms_data",
@@ -37,8 +38,7 @@ const char *FILENAME[] = {
 
 static int read_data(char *fname)
 {
-    char        pathname[1024];
-    char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+    const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
     hid_t       file, dataset;         /* handles */
     hid_t       datatype;
     hid_t	dt;
@@ -46,14 +46,6 @@ static int read_data(char *fname)
     double      data_out[NX][NY]; /* output buffer */
     int         i, j;
     unsigned 	nerrors = 0;
-
-    pathname[0] = '\0';
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((strlen(srcdir) + strlen(fname) + 1) < sizeof(pathname))) {
-        strcpy(pathname, srcdir);
-        strcat(pathname, "/");
-    }
-    strcat(pathname, fname);
 
     /*
      * Data and output buffer initialization.

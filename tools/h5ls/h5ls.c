@@ -1544,7 +1544,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         printf("    %-10s ", "Storage:");
         switch (tclass)
         {
-            
+
         case H5T_VLEN:
             printf("information not available");
             break;
@@ -1555,20 +1555,20 @@ dataset_list2(hid_t dset, const char UNUSED *name)
                 printf("information not available");
             }
             break;
-            
+
         default:
             printf("%lu logical byte%s, %lu allocated byte%s",
                 (unsigned long)total, 1==total?"":"s",
                 (unsigned long)used, 1==used?"":"s");
-            if (used>0) 
+            if (used>0)
             {
                 utilization = (total*100.0)/used;
                 printf(", %1.2f%% utilization", utilization);
             }
-            
+
         }
-        
-       
+
+
         putchar('\n');
 
         /* Print information about external strorage */
@@ -1937,7 +1937,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
                 hbool_t orig_grp_literal = grp_literal_g;
 
                 HDfputc(' ', stdout);
-            
+
                 /* Check if we have already seen this elink */
                 if(elink_trav_visited(iter->elink_list, filename, path)) {
                     HDfputs("{Already Visited}\n", stdout);
@@ -2028,7 +2028,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
         } /* end if */
 
         /* Delay specifying the name start point so the original object name is
-         * displayed if it is a link or non-group object */ 
+         * displayed if it is a link or non-group object */
         iter->name_start = iter->base_len;
 
         /* Specified name is a group. List the complete contents of the group. */
@@ -2420,7 +2420,7 @@ main(int argc, const char *argv[])
             }
             *x = '\0';
             /* Delay specifying the name start point so the original object name
-             * is displayed if it is a link or non-group object */ 
+             * is displayed if it is a link or non-group object */
             iter.name_start = 1;
         }
         if(!oname || !*oname) {

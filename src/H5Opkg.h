@@ -25,6 +25,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */
@@ -325,7 +326,7 @@ typedef struct H5O_obj_class_t {
 
 /* Node in skip list to map addresses from one file to another during object header copy */
 typedef struct H5O_addr_map_t {
-    haddr_t     src_addr;               /* Address of object in source file */
+    H5_obj_t    src_obj_pos;            /* Location of source object */
     haddr_t     dst_addr;               /* Address of object in destination file */
     hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
     hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */

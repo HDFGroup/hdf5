@@ -149,9 +149,9 @@ int main()
 
 
 /* Default is C has 16 byte float */
-  H5_C_HAS_REAL_NATIVE_16 = 1; 
+  H5_C_HAS_REAL_NATIVE_16 = 1;
 /* Default is C has 12 byte float */
-  H5_C_HAS_REAL_NATIVE_12 = 1; 
+  H5_C_HAS_REAL_NATIVE_12 = 1;
 
   /* Write copyright, boilerplate to both files */
   initCfile();
@@ -251,7 +251,7 @@ int main()
    writeFloatTypedef("double", 12);
   else if(sizeof(float) == 12)
    writeFloatTypedef("float", 12);
-  else /*C has no 12 byte float so disable it in Fortran*/ 
+  else /*C has no 12 byte float so disable it in Fortran*/
    { printf("warning: Fortran REAL is 12 bytes, no corresponding C floating type\n");
      printf("         Disabling Fortran 12 byte REALs\n");
      H5_C_HAS_REAL_NATIVE_12 = 0;
@@ -265,7 +265,7 @@ int main()
    writeFloatTypedef("double", 16);
   else if(sizeof(float) == 16)
    writeFloatTypedef("float", 16);
-  else /*C has no 16 byte float so disable it in Fortran*/ 
+  else /*C has no 16 byte float so disable it in Fortran*/
    { printf("warning: Fortran REAL is 16 bytes, no corresponding C floating type\n");
      printf("         Disabling Fortran 16 byte REALs\n");
      H5_C_HAS_REAL_NATIVE_16 = 0;
@@ -408,7 +408,7 @@ int main()
 	    }
 	  if(flag == 0) /* No higher or lower one found, indicating an error */
 	    {
-	     return -1; 
+	     return -1;
 	    }
 	}
     }
@@ -490,7 +490,7 @@ int main()
 	    }
 	  if(flag == 0) /* No higher or lower one found, indicating an error */
 	    {
-	     return -1; 
+	     return -1;
 	    }
 	}
     }

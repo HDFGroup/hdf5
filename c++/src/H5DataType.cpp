@@ -95,7 +95,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 ///\param	ref_type - IN: Reference type - default to H5R_OBJECT
 ///\exception	H5::ReferenceException
 ///\par Description
-///		\c obj can be DataSet, Group, or named DataType, that 
+///		\c obj can be DataSet, Group, or named DataType, that
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification

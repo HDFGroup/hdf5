@@ -250,7 +250,7 @@ typedef struct s1_t {
 
 /* File 65 macros */
 #define STRATEGY	H5F_FILE_SPACE_AGGR_VFD	/* File space handling strategy */
-#define THRESHOLD10 	10    			/* Free space section threshold */ 
+#define THRESHOLD10 	10    			/* Free space section threshold */
 
 /* Declarations for gent_dataset_idx() for "FILE66" */
 #define DSET_FIXED		"dset_fixed"

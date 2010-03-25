@@ -1,4 +1,4 @@
-HDF5 version 1.9.59-FA_a4 currently under development
+HDF5 version 1.9.64-FA_a4 currently under development
 ================================================================================
 
 
@@ -64,6 +64,8 @@ New Features
 
     Library:
     --------
+    - Greatly improved performance of extending a dataset with early
+      allocation. (NAF - 2010/03/24 - 1637)
     - Added support for filtering densely stored groups.  Many of the API
       functions related to filters have been extended to support dense groups
       as well as datasets.  Pipeline messages can now be stored in a group's
@@ -142,8 +144,9 @@ New Features
 
     Tools:
     ------
-     - h5diff: Add new flag -l (--link-follow),for comparing through links 
-               (soft and external links along with hard link).
+     - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
+               (JKM - 2010/02/10) 
+     - h5diff: Add new flag --follow-links. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
 	   (JKM - 2009/11/20)
@@ -207,6 +210,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Files can now be concurrently opened more than once using the core file
+            driver, as long as the backing store is used. (NAF - 2010/03/09)
+      - Added support for H5O_COPY_EXPAND_EXT_LINK_FLAG to H5Ocopy.  External
+            links will now be expanded if this flag is set.
+            (NAF - 2010/03/05 - 1733)
+      - Fixed a bug where the library, when traversing an external link, would
+            reopen the source file if nothing else worked. (NAF - 2010/03/05)
+      - Fixed an intermittent bug in the b-tree code which could be triggered
+            by expanding and shrinking chunked datasets in certain ways.
+            (NAF - 2010/02/16)
       - H5Tdetect_class said a VL string is a string type.  But when it's
             in a compound type, it said it's a VL type (Bug #1584).  I fixed it 
             to be consistent.  It always return string type. (SLU - 2009/12/10)
@@ -389,6 +402,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: fixed incorrect behavior (hang) in parallel mode when
+                  specify invalid options (ex: -v and -q) (JKM 2010/02/17)
         - h5dump/h5ls display buffer resize fixed in tools library.  
             (ADB - 2009/07/21 - 1520)
         - Fixed many problems that could occur when using h5repack with named

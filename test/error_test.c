@@ -186,11 +186,16 @@ test_error(hid_t file)
 static herr_t
 init_error(void)
 {
-    ssize_t cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME)+1;
-    char *cls_name = (char*)HDmalloc(HDstrlen(ERR_CLS_NAME)+1);
+    ssize_t cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
     ssize_t msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
-    char *msg = (char*)HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG)+1);
-    H5E_type_t *msg_type= (H5E_type_t *)HDmalloc(sizeof(H5E_type_t));
+    char   *cls_name = NULL;
+    char   *msg = NULL;
+    H5E_type_t msg_type;
+
+    if(NULL == (cls_name = (char *)HDmalloc(HDstrlen(ERR_CLS_NAME) + 1)))
+        TEST_ERROR
+    if(NULL == (msg = (char *)HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
+        TEST_ERROR
 
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
@@ -218,24 +223,28 @@ init_error(void)
     if((ERR_MIN_GETNUM = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_GETNUM_MSG)) < 0)
         TEST_ERROR;
 
-    if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, (size_t)msg_size) + 1)
+    if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, &msg_type, msg, (size_t)msg_size) + 1)
         TEST_ERROR;
-    if(*msg_type != H5E_MINOR)
+    if(msg_type != H5E_MINOR)
         TEST_ERROR;
     if(HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
         TEST_ERROR;
-
-    HDfree(cls_name);
-    HDfree(msg);
-    HDfree(msg_type);
 
     /* Register another class for later testing. */
     if((ERR_CLS2 = H5Eregister_class(ERR_CLS2_NAME, PROG2_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
 
+    HDfree(cls_name);
+    HDfree(msg);
+
     return 0;
 
 error:
+    if(cls_name)
+        HDfree(cls_name);
+    if(msg)
+        HDfree(msg);
+
     return -1;
 } /* end init_error() */
 
@@ -586,7 +595,7 @@ main(void)
         /* Delete an error from the top of error stack */
         H5Epop(ERR_STACK, 1);
 
-        /* Make sure we can use other class's major or minor errors. */ 
+        /* Make sure we can use other class's major or minor errors. */
         H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS2, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
                 "Error stack test failed");
 

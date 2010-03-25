@@ -126,14 +126,14 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Left Key:");
             HDassert(H5B_NKEY(bt,shared,u));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX(0, fwidth - 6),
+	    (void)(type->debug_key)(stream, indent + 6, MAX(0, fwidth - 6),
 			      H5B_NKEY(bt, shared, u), udata);
 
             /* Decode the 'right' key & print it */
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                       "Right Key:");
             HDassert(H5B_NKEY(bt, shared, u + 1));
-	    (void)(type->debug_key)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth - 6),
+	    (void)(type->debug_key)(stream, indent + 6, MAX (0, fwidth - 6),
 			      H5B_NKEY(bt, shared, u + 1), udata);
 	} /* end if */
     } /* end for */
@@ -239,8 +239,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 		tail = tmp;
 
 		/* Check that the keys are monotonically increasing */
-		cmp = (type->cmp2)(f, dxpl_id, H5B_NKEY(bt, shared, i), udata,
-				    H5B_NKEY(bt, shared, i + 1));
+		cmp = (type->cmp2)(H5B_NKEY(bt, shared, i), udata, H5B_NKEY(bt, shared, i + 1));
 		HDassert(cmp < 0);
 	    } /* end for */
 	} /* end if */

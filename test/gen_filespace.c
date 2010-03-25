@@ -24,22 +24,22 @@ const char *FILENAMES[] = {
     "filespace_aggr_vfd.h5",	/* H5F_FILE_SPACE_AGGR_VFD */
     "filespace_vfd.h5",		/* H5F_FILE_SPACE_VFD */
     "filespace_threshold.h5"	/* H5F_FILE_SPACE_ALL, non-default threshold */
-}; 
+};
 
 #define DATASET		"dset"
 #define NUM_ELMTS	100
 
 /*
- * Compile and run this program in file-space branch to generate 
+ * Compile and run this program in file-space branch to generate
  * HDF5 files with different kinds of file space strategies
- * Move the HDF5 files to the 1.6 and 1.8 branch for compatibility 
+ * Move the HDF5 files to the 1.6 and 1.8 branch for compatibility
  * testing:test_filespace_compatible() will use the files
  */
 static void gen_file(void)
 {
     hid_t   	fid;
     hid_t   	fcpl;
-    hid_t       dataset, space;  
+    hid_t       dataset, space;
     hsize_t     dim[1];
     int         data[NUM_ELMTS];
     unsigned    i, j;			/* Local index variable */

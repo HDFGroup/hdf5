@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="set_extentdll"
 	ProjectGUID="{14DB1F8E-0BF6-4E9D-8372-5EA9ED48347F}"
 	RootNamespace="set_extentdll"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -48,7 +49,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\test,..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -66,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				Culture="1028"
 			/>
 			<Tool
@@ -81,6 +82,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../test/set_extentdll/Debug/set_extentdll.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -100,9 +103,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -140,7 +140,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\test,..\..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;_DEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
@@ -158,7 +158,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;_DEBUG"
 				Culture="1028"
 			/>
 			<Tool
@@ -173,6 +173,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../test/set_extentdll/Debug/set_extentdll.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -192,9 +194,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -232,7 +231,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\test,..\..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -250,7 +249,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				Culture="1028"
 			/>
 			<Tool
@@ -264,6 +263,8 @@
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\../../../test/set_extentdll/Release/set_extentdll.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -283,9 +284,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -324,7 +322,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\test,..\..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_;_HDF5TESTUSEDLL_"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -342,7 +340,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="BIND_TO_CURRENT_VCLIBS_VERSION=1;NDEBUG"
 				Culture="1028"
 			/>
 			<Tool
@@ -356,6 +354,8 @@
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\../../../test/set_extentdll/Release/set_extentdll.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -375,9 +375,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

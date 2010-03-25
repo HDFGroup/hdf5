@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="allf90examples"
 	ProjectGUID="{D493CF06-423A-4FA5-8B3F-416C2EDAFF2B}"
 	RootNamespace="allf90examples"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -124,6 +125,4 @@
 	</References>
 	<Files>
 	</Files>
-	<Globals>
-	</Globals>
 </VisualStudioProject>

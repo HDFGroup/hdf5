@@ -34,6 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
@@ -1937,9 +1938,9 @@ done:
  *              Raymond Lu
  *              4 December 2009
  *              Added a flag as a parameter to indicate whether the caller is
- *              H5Tdetect_class.  I also added the check for VL string type 
+ *              H5Tdetect_class.  I also added the check for VL string type
  *              just like the public function.  Because we want to tell users
- *              VL string is a string type but we treat it as a VL type 
+ *              VL string is a string type but we treat it as a VL type
  *              internally, H5T_detect_class needs to know where the caller
  *              is from.
  *-------------------------------------------------------------------------
@@ -1962,7 +1963,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
      */
     if(from_api && H5T_IS_VL_STRING(dt->shared))
         HGOTO_DONE(H5T_STRING == cls);
- 
+
     /* Check if this type is the correct type */
     if(dt->shared->type==cls)
         HGOTO_DONE(TRUE);
@@ -3852,7 +3853,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     /* Sanity check */
     HDassert(dt1);
     HDassert(dt2);
-    
+
     /* the easy case */
     if(dt1 == dt2)
         HGOTO_DONE(0);

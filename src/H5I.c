@@ -42,6 +42,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Ipkg.h"		/* IDs			  		*/
@@ -921,6 +922,44 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_subst
+ *
+ * Purpose:	Substitute a new object pointer for the specified ID.
+ *
+ * Return:	Success:	Non-null previsou object pointer associated
+ *				with the specified ID.
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Saturday, February 27, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5I_subst(hid_t id, const void *new_object)
+{
+    H5I_id_info_t	*id_ptr;	/* Ptr to the atom	*/
+    void		*ret_value;	/* Return value		*/
+
+    FUNC_ENTER_NOAPI(H5I_subst, NULL)
+
+    /* General lookup of the ID */
+    if(NULL == (id_ptr = H5I_find_id(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_NOTFOUND, NULL, "can't get ID ref count")
+
+    /* Get the old object pointer to return */
+    /* (Casting away const OK -QAK) */
+    ret_value = (void *)id_ptr->obj_ptr;
+
+    /* Set the new object pointer for the ID */
+    id_ptr->obj_ptr = new_object;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end if */
 
 
 /*-------------------------------------------------------------------------

@@ -17,7 +17,9 @@
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 #include "H5Iprivate.h"
+
 /*
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
@@ -48,7 +50,7 @@ const char *FILENAME[] = {
  *	Create an object header with several continuation chunks
  *	Remove a message in the last chunk
  *	The remaining message(s) in the last chunk should be moved forward into the continuation message
- *	The process will repeat when the continuation message is big enough to hold all the 
+ *	The process will repeat when the continuation message is big enough to hold all the
  *		messages in the last chunk.
  *	Result: the number of chunks should be reduced
  */
@@ -57,7 +59,7 @@ test_cont(char *filename, hid_t fapl)
 {
     hid_t	file=-1;
     H5F_t	*f = NULL;
-    H5O_hdr_info_t hdr_info;               
+    H5O_hdr_info_t hdr_info;
     H5O_loc_t	oh_locA, oh_locB;
     time_t	time_new;
     const char	*short_name = "T";
@@ -181,7 +183,7 @@ main(void)
         /* Display info about testing */
         if(b)
             HDputs("Using new file format:");
-        else	
+        else
             HDputs("Using default file format:");
 
         /* Set the format to use for the file */
@@ -362,20 +364,7 @@ main(void)
         HDputs("Accessing objects with unknown header messages:");
         {
             hid_t file2;                    /* File ID for 'bogus' object file */
-            char testpath[512] = "";
-            char testfile[512] = "";
-            char *srcdir = HDgetenv("srcdir");
-
-            /* Build path to all test files */
-            if(srcdir && ((HDstrlen(srcdir) + 2) < sizeof(testpath))) {
-                HDstrcpy(testpath, srcdir);
-                HDstrcat(testpath, "/");
-            } /* end if */
-
-            /* Build path to test file */
-            if(srcdir && ((HDstrlen(testpath) + HDstrlen(FILE_BOGUS) + 1) < sizeof(testfile)))
-                HDstrcpy(testfile, testpath);
-            HDstrcat(testfile, FILE_BOGUS);
+            const char *testfile = H5_get_srcdir_filename(FILE_BOGUS);
 
             TESTING("object with unknown header message and no flags set");
 

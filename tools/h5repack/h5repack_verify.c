@@ -14,12 +14,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
-#include "h5test.h"
 #include "h5tools_utils.h"
 
 extern char  *progname;
 static int verify_layout(hid_t pid, pack_info_t *obj);
 static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
+
+/* number of members in an array */
+#ifndef NELMTS
+#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -230,13 +234,13 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
 	goto error;
     }
 
-    /* 
-     * If the strategy option is not set, 
-     * file space handling strategy should be the same for both 
+    /*
+     * If the strategy option is not set,
+     * file space handling strategy should be the same for both
      * input & output files.
-     * If the strategy option is set,	
+     * If the strategy option is set,
      * the output file's file space handling strategy should be the same
-     * as what is set via the strategy option 
+     * as what is set via the strategy option
      */
     if(!options->fs_strategy && out_strat != in_strat) {
 	error_msg(progname, "file space strategy not set as unexpected\n");
@@ -247,11 +251,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
 	goto error;
     }
 
-    /* 
-     * If the threshold option is not set, 
-     * the free space section threshold should be the same for both 
+    /*
+     * If the threshold option is not set,
+     * the free space section threshold should be the same for both
      * input & output files.
-     * If the threshold option is set,	
+     * If the threshold option is set,
      * the output file's free space section threshold should be the same
      * as what is set via the threshold option.
      */
@@ -411,7 +415,7 @@ int h5repack_cmp_pl(const char *fname1,
     trav_table_init(&trav);
     if(h5trav_gettable(fid1, trav) < 0)
         goto error;
-  
+
    /*-------------------------------------------------------------------------
     * traverse the suppplied object list
     *-------------------------------------------------------------------------
@@ -551,7 +555,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static 
+static
 int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
     int           nfilters_dcpl;  /* number of filters in DCPL*/

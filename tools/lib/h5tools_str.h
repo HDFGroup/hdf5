@@ -35,7 +35,7 @@ extern char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fm
 extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
                                    hsize_t elmtno, unsigned ndims, hsize_t min_idx[],
                                    hsize_t max_idx[], h5tools_context_t *ctx);
-/* 
+/*
  * new functions needed to display region reference data
  */
 extern char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,

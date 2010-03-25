@@ -53,9 +53,9 @@
 
 #define H5TOOLS_DUMP_MAX_RANK     H5S_MAX_RANK
 
-/* 
- * Strings for output - these were duplicated from the h5dump.h 
- * file in order to support region reference data display 
+/*
+ * Strings for output - these were duplicated from the h5dump.h
+ * file in order to support region reference data display
  */
 #define ATTRIBUTE       "ATTRIBUTE"
 #define BLOCK           "BLOCK"
@@ -105,9 +105,9 @@
 #define BEGIN           "{"
 #define END             "}"
 
-/* 
- * dump structure for output - this was duplicated from the h5dump.h 
- * file in order to support region reference data display 
+/*
+ * dump structure for output - this was duplicated from the h5dump.h
+ * file in order to support region reference data display
  */
 typedef struct h5tools_dump_header_t {
     const char *name;
@@ -515,7 +515,7 @@ struct subset_t {
     hsize_t *block;
 };
 
-/* The following include, h5tools_str.h, must be after the 
+/* The following include, h5tools_str.h, must be after the
  * above stucts are defined. There is a dependency in the following
  * include that hasn't been identified yet. */
 
@@ -554,11 +554,11 @@ extern int      h5tools_canreadf(const char* name,
 extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
-/* 
+/*
  * new functions needed to display region reference data
  */
 void            h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
-                         h5tools_context_t *ctx/*in,out*/, hid_t type); 
+                         h5tools_context_t *ctx/*in,out*/, hid_t type);
 int             h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/, hid_t space);
 int             h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
                          const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,

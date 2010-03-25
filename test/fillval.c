@@ -20,6 +20,7 @@
  * Purpose:	Tests dataset fill values.
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 
 /*
  * Define NO_FILLING if you want to compare how this test works when there is
@@ -1974,18 +1975,9 @@ test_compatible(void)
     hsize_t    dims[2], one[2]={1,1};
     hsize_t   hs_offset[2]={3,4};
     H5D_fill_value_t status;
-    char       *srcdir = getenv("srcdir"); /*where the src code is located*/
-    char       testfile[512]="";  /* test file name */
+    const char *testfile = H5_get_srcdir_filename(FILE_COMPATIBLE); /* Corrected test file name */
 
     TESTING("contiguous dataset compatibility with v. 1.4");
-
-  /* Generate correct name for test file by prepending the source path */
-  if(srcdir && ((strlen(srcdir) + strlen(FILE_COMPATIBLE) + 1) <
-     sizeof(testfile))) {
-     HDstrcpy(testfile, srcdir);
-     HDstrcat(testfile, "/");
-  }
-  HDstrcat(testfile, FILE_COMPATIBLE);
 
   if((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
       printf("    Could not open file %s. Try set $srcdir to point at the "

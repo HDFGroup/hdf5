@@ -20,8 +20,10 @@
  * Purpose:	Tests performance of metadata
  */
 
-#include "h5test.h"
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
+#include "h5test.h"
 
 #ifdef H5_HAVE_PARALLEL
 #define MAINPROCESS	(!mpi_rank)	/* define process 0 as main process */

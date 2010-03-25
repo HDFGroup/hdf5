@@ -33,7 +33,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -524,6 +523,7 @@ extern "C"
 void test_types()
 {
     // Output message about test being performed
+    //MESSAGE("Testing Generic Data Types\n");
     MESSAGE(5, ("Testing Generic Data Types\n"));
 
     // Test basic datatypes

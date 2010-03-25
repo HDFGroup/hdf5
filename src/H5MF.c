@@ -254,7 +254,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5MF_alloc_create
  *
- * Purpose:	Create free space manager of TYPE for the file by creating 
+ * Purpose:	Create free space manager of TYPE for the file by creating
  *		a free-space structure
  *
  * Return:	Success:	non-negative
@@ -652,7 +652,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
          * Note: this drops the space to free on the floor...
          *
          */
-        if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING || 
+        if(f->shared->fs_state[fs_type] == H5F_FS_STATE_DELETING ||
 	        !H5F_HAVE_FREE_SPACE_MANAGER(f)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
@@ -991,6 +991,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->lf);
+    HDassert(f->shared->sblock);
 
     /* Free the space in aggregators */
     /* (for space not at EOF, it may be put into free space managers) */

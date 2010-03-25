@@ -873,7 +873,7 @@ test_family_compat(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(file);
-        H5Pclose(fapl); 
+        H5Pclose(fapl);
     } H5E_END_TRY;
 
     return -1;

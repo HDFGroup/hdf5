@@ -449,7 +449,7 @@ obj_list_t* parse_filter(const char *str,
    default:
        break;
 
- 
+
    };
 
    return obj_list;

@@ -186,10 +186,10 @@ dump_error(void)
 herr_t
 custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data)
 {
-    FILE		*stream  = (FILE *)client_data;
-    char                *maj;
-    char                *min;
-    const int		indent = 4;
+    FILE	*stream  = (FILE *)client_data;
+    char        *maj = NULL;
+    char        *min = NULL;
+    const int	 indent = 4;
 
     if(NULL == (min = H5Eget_minor(err_desc->min_num)))
         TEST_ERROR;
@@ -200,14 +200,21 @@ custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data)
     fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
 	     indent, "", n, err_desc->file_name,
 	     err_desc->func_name, err_desc->line);
-    fprintf(stream, "%*smajor: %s\n", indent*2, "", maj);
+    
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+
     HDfree(maj);
-    fprintf (stream, "%*sminor: %s\n", indent*2, "", min);
     HDfree(min);
 
     return 0;
 
 error:
+    if(maj)
+        HDfree(maj);
+    if(min)
+        HDfree(min);
+    
     return -1;
 }
 

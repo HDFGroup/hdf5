@@ -2,6 +2,8 @@
          HDF5 Build and Install Instructions for Cygwin
 ************************************************************************
 
+Needs Updating to latest versions
+
 Preconditions:
 --------------
 

@@ -289,10 +289,10 @@ test_genprop_iter1(hid_t id, const char *name, void *iter_data)
     struct {                /* Struct for iterations */
         int iter_count;
         const char **names;
-    } *iter_struct=iter_data;
+    } *iter_struct = iter_data;
 
     /* Shut compiler up */
-    id=id;
+    id = id;
 
     return(HDstrcmp(name,iter_struct->names[iter_struct->iter_count++]));
 }
@@ -1473,17 +1473,25 @@ test_genprop_class_addprop(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create a new class, dervied from the dataset creation property list class */
-    cid = H5Pcreate_class(H5P_DATASET_CREATE,CLASS1_NAME, NULL, NULL, NULL, NULL, NULL, NULL);
+    /* Create a new class, derived from the dataset creation property list class */
+    cid = H5Pcreate_class(H5P_DATASET_CREATE, CLASS1_NAME, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(cid, "H5Pcreate_class");
 
     /* Check existence of an original property */
-    ret = H5Pexist(cid,H5O_CRT_PIPELINE_NAME);
-    VERIFY(ret, 0, "H5Pexist");
+    ret = H5Pexist(cid, H5O_CRT_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
 
     /* Insert first property into class (with no callbacks) */
     ret = H5Pregister2(cid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(ret, "H5Pregister2");
+
+    /* Check existence of an original property */
+    ret = H5Pexist(cid, H5O_CRT_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of added property */
+    ret = H5Pexist(cid, PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
 
     /* Create a derived dataset creation property list */
     pid = H5Pcreate(cid);
@@ -1501,6 +1509,34 @@ test_genprop_class_addprop(void)
     ret = H5Pget(pid, PROP1_NAME, &prop1_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Insert second property into class (with no callbacks) */
+    ret = H5Pregister2(cid, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pregister2");
+
+    /* Check existence of an original property (in class) */
+    ret = H5Pexist(cid, H5O_CRT_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of first added property (in class) */
+    ret = H5Pexist(cid, PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of second added property (in class) */
+    ret = H5Pexist(cid, PROP2_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of an original property (in property list) */
+    ret = H5Pexist(pid, H5O_CRT_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of first added property (in property list) */
+    ret = H5Pexist(pid, PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of second added property (in property list) (should not exist) */
+    ret = H5Pexist(pid, PROP2_NAME);
+    VERIFY(ret, 0, "H5Pexist");
 
     /* Create a dataset */
     did = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);

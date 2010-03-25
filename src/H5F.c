@@ -71,7 +71,7 @@ static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);
-static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
+static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -374,8 +374,8 @@ done:
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to ssize_t to  accommadate 
- *              potential large number of objects. 
+ *              Changed the return value to ssize_t to  accommadate
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -415,8 +415,8 @@ done:
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to size_t to accommadate 
- *              potential large number of objects. 
+ *              Changed the return value to size_t to accommadate
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -447,8 +447,8 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref)
  * Modification:
  *              Raymond Lu
  *              24 September 2008
- *              Changed the return value to ssize_t and MAX_OBJTS to size_t to 
- *              accommadate potential large number of objects. 
+ *              Changed the return value to ssize_t and MAX_OBJTS to size_t to
+ *              accommadate potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -466,7 +466,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
     HDassert(oid_list);
- 
+
     /* H5F_get_objects doesn't fail */
     ret_value = (ssize_t)H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
 
@@ -489,7 +489,7 @@ done:
  *              Raymond Lu
  *              24 September 2008
  *              Changed the return value and MAX_OBJTS to size_t to accommadate
- *              potential large number of objects. 
+ *              potential large number of objects.
  *
  *-------------------------------------------------------------------------
  */
@@ -546,7 +546,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
     } /* end else */
 
     /* Search through file IDs to count the number, and put their
-     * IDs on the object list.  H5I_search returns NULL if no object 
+     * IDs on the object list.  H5I_search returns NULL if no object
      * is found, so don't return failure in this function. */
     if(types & H5F_OBJ_FILE) {
         olist.obj_type = H5I_FILE;
@@ -633,7 +633,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    	(*olist->obj_id_count)++;
 
             /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
              * preset to FALSE) because H5I_search needs the return value of FALSE
              * to continue searching. */
             if(olist->max_index>0 && olist->list_index>=olist->max_index)
@@ -686,7 +686,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             	(*olist->obj_id_count)++;
 
             /* Check if we've filled up the array.  Return TRUE only if
-             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
              * preset to FALSE) because H5I_search needs the return value of FALSE
              * to continue searching. */
             if(olist->max_index>0 && olist->list_index>=olist->max_index)
@@ -967,7 +967,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_dest(H5F_t *f, hid_t dxpl_id)
+H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 {
     herr_t	   ret_value = SUCCEED;         /* Return value */
 
@@ -978,17 +978,16 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
-        /* Flush at this point since the file will be closed */
-        /* (Only try to flush here if the file structure was successfully
-         *      initialized (i.e., the file struct is being shutdown in an
-         *      orderly manner with the 'closing' flag set)
+        /* Flush at this point since the file will be closed.
+         * Only try to flush the file if it was opened with write access, and if
+         * the caller requested a flush.
          */
-        if(f->closing) {
-#if H5AC_DUMP_STATS_ON_CLOSE
-            /* Dump debugging info */
-            H5AC_stats(f);
-#endif /* H5AC_DUMP_STATS_ON_CLOSE */
+        if((f->shared->flags & H5F_ACC_RDWR) && flush)
+            if(H5F_flush(f, dxpl_id) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
+        /* Release objects that depend on the superblock being initialized */
+        if(f->shared->sblock) {
             /* Shutdown file free space manager(s) */
             /* (We should release the free space information now (before truncating
              *      the file and before the metadata cache is shut down) since the
@@ -1008,7 +1007,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
             f->shared->sblock = NULL;
         } /* end if */
-
+ 
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
@@ -1330,7 +1329,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
 done:
     if(!ret_value && file)
-        if(H5F_dest(file, dxpl_id) < 0)
+        if(H5F_dest(file, dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1879,24 +1878,16 @@ H5F_try_close(H5F_t *f)
     if(H5F_close_mounts(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't unmount child files")
 
-    /* Flush at this point since the file will be closed.  Don't invalidate
-     * the cache, since this file might still be open using another handle.
-     * However, make sure we flush in case that handle is read-only; its
-     * copy of the cache needs to be clean.
-     * Only try to flush the file if it was opened with write access.
-     */
-    if(f->intent & H5F_ACC_RDWR) {
-        /* Flush all caches */
-        if(H5F_flush(f, H5AC_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    } /* end if */
+    /* Delay flush until the shared file struct is closed, in H5F_dest.  If the
+     * application called H5Fclose, it would have been flushed in that function
+     * (unless it will have been flushed in H5F_dest anyways). */
 
     /*
      * Destroy the H5F_t struct and decrement the reference count for the
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F_dest(f, H5AC_dxpl_id) < 0)
+    if(H5F_dest(f, H5AC_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
 done:
@@ -1928,6 +1919,8 @@ done:
 herr_t
 H5Fclose(hid_t file_id)
 {
+    H5F_t       *f = NULL;
+    int         nref;
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Fclose, FAIL)
@@ -1936,6 +1929,20 @@ H5Fclose(hid_t file_id)
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+
+    /* Flush file if this is the last reference to this id and we have write
+     * intent, unless it will be flushed by the "shared" file being closed.
+     * This is only necessary to replicate previous behaviour, and could be
+     * disabled by an option/property to improve performance. */
+    if(NULL == (f = (H5F_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
+        if(nref == 1)
+            if(H5F_flush(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
 
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
@@ -2004,7 +2011,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_dxpl_id) < 0)
+	if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -2861,7 +2868,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     /* Set version # fields */
     finfo->super.version = f->shared->sblock->super_vers;
     finfo->sohm.version = f->shared->sohm_vers;
-    finfo->free.version = HDF5_FREESPACE_VERSION; 
+    finfo->free.version = HDF5_FREESPACE_VERSION;
 
 done:
     FUNC_LEAVE_API(ret_value)

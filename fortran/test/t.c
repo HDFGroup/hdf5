@@ -52,9 +52,9 @@ nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f* fapl, _fcd full_n
      HD5packFstring(c_full_name, _fcdtocp(full_name), (size_t)*full_namelen);
 
 done:
-     if(c_base_name) 
+     if(c_base_name)
         HDfree(c_base_name);
-     if(c_full_name) 
+     if(c_full_name)
         HDfree(c_full_name);
 
      return ret_value;

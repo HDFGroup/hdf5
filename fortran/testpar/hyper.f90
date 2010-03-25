@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,11 +11,11 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
 !//////////////////////////////////////////////////////////
-! writes/reads dataset by hyperslabs 
+! writes/reads dataset by hyperslabs
 !//////////////////////////////////////////////////////////
 
 SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
@@ -26,8 +26,8 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER, INTENT(in) :: length                     ! array length
   LOGICAL, INTENT(in) :: do_collective              ! use collective I/O
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator 
-  INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator 
+  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
+  INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   INTEGER :: mpierror                               ! MPI hdferror flag
   INTEGER :: hdferror                               ! HDF hdferror flag
@@ -35,17 +35,17 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER(hsize_t), DIMENSION(1) :: cdims           ! chunk dimensions
   INTEGER, ALLOCATABLE :: wbuf(:)                   ! write buffer
   INTEGER, ALLOCATABLE :: rbuf(:)                   ! read buffer
-  INTEGER(hsize_t), DIMENSION(1) :: counti          ! hyperslab selection 
-  INTEGER(hsize_t), DIMENSION(1) :: start           ! hyperslab selection  
+  INTEGER(hsize_t), DIMENSION(1) :: counti          ! hyperslab selection
+  INTEGER(hsize_t), DIMENSION(1) :: start           ! hyperslab selection
   INTEGER(hid_t) :: fapl_id                         ! file access identifier
-  INTEGER(hid_t) :: dxpl_id                         ! dataset transfer property list 
-  INTEGER(hid_t) :: dcpl_id                         ! dataset creation property list 
+  INTEGER(hid_t) :: dxpl_id                         ! dataset transfer property list
+  INTEGER(hid_t) :: dcpl_id                         ! dataset creation property list
   INTEGER(hid_t) :: file_id                         ! file identifier
   INTEGER(hid_t) :: dset_id                         ! dataset identifier
   INTEGER(hid_t) :: fspace_id                       ! file space identifier
   INTEGER(hid_t) :: mspace_id                       ! memory space identifier
   INTEGER(hid_t) :: driver_id                       ! low-level file driver identifier
-  INTEGER        :: istart                          ! start position in array 
+  INTEGER        :: istart                          ! start position in array
   INTEGER        :: iend                            ! end position in array
   INTEGER        :: icount                          ! number of elements in array
   CHARACTER(len=80) :: filename                     ! filename
@@ -139,11 +139,11 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL check("h5dcreate_f", hdferror, nerrors)
 
   !//////////////////////////////////////////////////////////
-  ! define hyperslab 
+  ! define hyperslab
   !//////////////////////////////////////////////////////////
 
-  counti(1) = icount           
-  start(1)  = istart   
+  counti(1) = icount
+  start(1)  = istart
 
   !//////////////////////////////////////////////////////////
   ! select hyperslab in memory

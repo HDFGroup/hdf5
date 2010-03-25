@@ -411,7 +411,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     dblk_nelmts = H5EA_SBLK_DBLK_NELMTS(sblk_idx, cparam->data_blk_min_elmts);
     if(dblk_page_nelmts < dblk_nelmts)
 	H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be > # of elements in first data block from super block")
-        
+
     if(cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
 	H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be <= max. # of elements bits")
 }

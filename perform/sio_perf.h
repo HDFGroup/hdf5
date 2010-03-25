@@ -18,7 +18,6 @@
 #include "sio_timer.h"
 #ifndef STANDALONE
 #include "H5private.h"
-#include "h5test.h"
 #include "h5tools_utils.h"
 #else
 #include "sio_standalone.h"

@@ -65,6 +65,7 @@
 ./bin/mkinstalldirs
 ./bin/newer
 ./bin/reconfigure			_DO_NOT_DISTRIBUTE_
+./bin/README				_DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
@@ -339,6 +340,7 @@
 ./c++/src/header_files/image001.jpg
 ./c++/src/header_files/image002.jpg
 
+./c++/test/H5srcdir_str.h.in
 ./c++/test/Makefile.am
 ./c++/test/Makefile.in
 ./c++/test/dsets.cpp
@@ -417,6 +419,7 @@
 ./src/H5err.txt
 ./src/H5config.h.in
 ./src/H5detect.c
+./src/H5make_libsettings.c
 ./src/H5overflow.txt
 ./src/H5overflow.h
 ./src/H5private.h
@@ -790,6 +793,8 @@
 ./src/H5win32defs.h
 
 ./test/COPYING
+./test/H5srcdir.h
+./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
 ./test/app_ref.c
@@ -985,7 +990,7 @@
 ./tools/h5import/h5importtest.c
 ./tools/h5import/h5importtestutil.sh
 
-#tesfiles for h5import
+# testfiles for h5import
 ./tools/h5import/testfiles/binin32.h5
 ./tools/h5import/testfiles/binin16.h5
 ./tools/h5import/testfiles/txtfp32.txt
@@ -1053,11 +1058,13 @@
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
+# h5ls sources
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh.in
 
+# h5copy sources
 ./tools/h5copy/testh5copy.sh
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
@@ -1101,28 +1108,35 @@
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
 
+# h5stat sources
 ./tools/h5stat/Makefile.am
 ./tools/h5stat/Makefile.in
 ./tools/h5stat/h5stat.c
+
+# h5stat test files
 ./tools/h5stat/h5stat_gentest.c
 ./tools/h5stat/testh5stat.sh.in
-./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters.ddl
+./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
 ./tools/h5stat/testfiles/h5stat_filters-F.ddl
 ./tools/h5stat/testfiles/h5stat_filters-file.ddl
 ./tools/h5stat/testfiles/h5stat_filters-g.ddl
+./tools/h5stat/testfiles/h5stat_filters-UD.ddl
+./tools/h5stat/testfiles/h5stat_filters-UT.ddl
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
 ./tools/h5stat/testfiles/h5stat_idx.h5
 ./tools/h5stat/testfiles/h5stat_idx.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.ddl
+./tools/h5stat/testfiles/h5stat_newgrat-UA.ddl
+./tools/h5stat/testfiles/h5stat_newgrat-UG.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
-# h5dump
+# h5dump test files
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -1471,6 +1485,7 @@
 ./tools/h5diff/testfiles/h5diff_171.txt
 ./tools/h5diff/testfiles/h5diff_172.txt
 ./tools/h5diff/testfiles/h5diff_18.txt
+./tools/h5diff/testfiles/h5diff_18_1.txt
 ./tools/h5diff/testfiles/h5diff_19.txt
 ./tools/h5diff/testfiles/h5diff_20.txt
 ./tools/h5diff/testfiles/h5diff_21.txt
@@ -1557,6 +1572,16 @@
 ./tools/h5diff/testfiles/h5diff_423.txt
 ./tools/h5diff/testfiles/h5diff_424.txt
 ./tools/h5diff/testfiles/h5diff_425.txt
+./tools/h5diff/testfiles/h5diff_450.txt
+./tools/h5diff/testfiles/h5diff_451.txt
+./tools/h5diff/testfiles/h5diff_452.txt
+./tools/h5diff/testfiles/h5diff_453.txt
+./tools/h5diff/testfiles/h5diff_454.txt
+./tools/h5diff/testfiles/h5diff_455.txt
+./tools/h5diff/testfiles/h5diff_456.txt
+./tools/h5diff/testfiles/h5diff_457.txt
+./tools/h5diff/testfiles/h5diff_458.txt
+./tools/h5diff/testfiles/h5diff_459.txt
 ./tools/h5diff/testfiles/h5diff_idx.txt
 
 
@@ -1580,6 +1605,8 @@
 ./tools/h5diff/testfiles/h5diff_extlink_trg.h5
 ./tools/h5diff/testfiles/h5diff_linked_softlink.h5
 ./tools/h5diff/testfiles/h5diff_softlinks.h5
+./tools/h5diff/testfiles/h5diff_danglelinks1.h5
+./tools/h5diff/testfiles/h5diff_danglelinks2.h5
 
 
 
@@ -1603,7 +1630,7 @@
 ./tools/h5repack/testfiles/h5repack_ext.h5
 ./tools/h5repack/testfiles/ublock.bin
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
-
+./tools/h5repack/testfiles/h5repack_refs.h5
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
@@ -1629,6 +1656,11 @@
 # test files for h5copy
 ./tools/h5copy/testfiles/h5copytst.h5
 ./tools/h5copy/testfiles/h5copytst.out.ls
+./tools/h5copy/testfiles/h5copy_ref.h5
+./tools/h5copy/testfiles/h5copy_ref.out.ls
+./tools/h5copy/testfiles/h5copy_extlinks_src.h5
+./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
+./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
 ./tools/h5copy/testfiles/h5copytst_new.h5
 ./tools/h5copy/testfiles/h5copytst_new.out.ls
 
@@ -1700,6 +1732,7 @@
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
 ./hl/test/COPYING
+./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
 ./hl/test/dsdata.txt
@@ -1872,9 +1905,8 @@
 ./windows/c++/examples/writedatatestdll/writedatatestdll.vcproj
 
 # C++ Tests
+./windows/c++/test/H5srcdir_str.h
 ./windows/c++/test/checkcpptests.bat
-./windows/c++/test/dsets_cpp/dsets_cpp.vcproj
-./windows/c++/test/dsets_cppdll/dsets_cppdll.vcproj
 ./windows/c++/test/testhdf5_cpp/testhdf5_cpp.vcproj
 ./windows/c++/test/testhdf5_cppdll/testhdf5_cppdll.vcproj
 
@@ -2016,6 +2048,7 @@
 ./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.vfproj
 
 # High-Level Library Tests
+./windows/hl/test/H5srcdir_str.h
 ./windows/hl/test/checkhltests.bat
 ./windows/hl/test/hl_test_ds/hl_test_ds.vcproj
 ./windows/hl/test/hl_test_dsdll/hl_test_dsdll.vcproj
@@ -2040,6 +2073,7 @@
 ./windows/misc/typegen/h5fortran_detect/h5fortran_detect.vfproj
 ./windows/misc/typegen/h5match_types/h5match_types.vcproj
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
+./windows/misc/typegen/h5libsettings/h5libsettings.vcproj
 
 # Performance Tests
 ./windows/perform/checkperformtests.bat
@@ -2075,6 +2109,7 @@
 ./windows/src/H5pubconf.h
 
 # Library Test Projects
+./windows/test/H5srcdir_str.h
 ./windows/test/checktests.bat
 ./windows/test/testerror.bat
 ./windows/test/app_ref/app_ref.vcproj

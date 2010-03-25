@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	
+ * Programmer:
  *
  * Purpose:	This file contains declarations which are visible only within
  *		the H5FA package.  Source files outside the H5FA package should

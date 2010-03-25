@@ -1,6 +1,3 @@
-warn: link target "/no_obj" doesn't exist 
-</no_obj> is of type unknown type and </target_dset2> is of type H5G_DATASET
---------------------------------
-Some objects are not comparable
---------------------------------
-Use -c for a list of objects.
+obj1 </softlink_noexist> is a dangling link.
+1 differences found
+EXIT CODE: 1

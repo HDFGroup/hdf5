@@ -326,7 +326,8 @@ H5A_dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void UNUSED *ct
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_name_encode)
 
     /* Encode the record's fields */
-    UINT64ENCODE(raw, nrecord->id);
+    HDmemcpy(raw, nrecord->id.id, (size_t)H5O_FHEAP_ID_LEN);
+    raw += H5O_FHEAP_ID_LEN;
     *raw++ = nrecord->flags;
     UINT32ENCODE(raw, nrecord->corder)
     UINT32ENCODE(raw, nrecord->hash)
@@ -356,7 +357,8 @@ H5A_dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void UNUSED *ct
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_name_decode)
 
     /* Decode the record's fields */
-    UINT64DECODE(raw, nrecord->id);
+    HDmemcpy(nrecord->id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
+    raw += H5O_FHEAP_ID_LEN;
     nrecord->flags = *raw++;
     UINT32DECODE(raw, nrecord->corder)
     UINT32DECODE(raw, nrecord->hash)
@@ -388,7 +390,7 @@ H5A_dense_btree2_name_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dx
 
     HDfprintf(stream, "%*s%-*s {%016Hx, %02x, %u, %08lx}\n", indent, "", fwidth,
         "Record:",
-        (hsize_t)nrecord->id, (unsigned)nrecord->flags, (unsigned)nrecord->corder, (unsigned long)nrecord->hash);
+        (hsize_t)nrecord->id.val, (unsigned)nrecord->flags, (unsigned)nrecord->corder, (unsigned long)nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_debug() */
@@ -484,7 +486,8 @@ H5A_dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void UNUSED *
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_corder_encode)
 
     /* Encode the record's fields */
-    UINT64ENCODE(raw, nrecord->id);
+    HDmemcpy(raw, nrecord->id.id, (size_t)H5O_FHEAP_ID_LEN);
+    raw += H5O_FHEAP_ID_LEN;
     *raw++ = nrecord->flags;
     UINT32ENCODE(raw, nrecord->corder)
 
@@ -513,7 +516,8 @@ H5A_dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void UNUSED *
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_corder_decode)
 
     /* Decode the record's fields */
-    UINT64DECODE(raw, nrecord->id);
+    HDmemcpy(nrecord->id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
+    raw += H5O_FHEAP_ID_LEN;
     nrecord->flags = *raw++;
     UINT32DECODE(raw, nrecord->corder)
 
@@ -544,7 +548,7 @@ H5A_dense_btree2_corder_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED 
 
     HDfprintf(stream, "%*s%-*s {%016Hx, %02x, %u}\n", indent, "", fwidth,
         "Record:",
-        (hsize_t)nrecord->id, (unsigned)nrecord->flags, (unsigned)nrecord->corder);
+        (hsize_t)nrecord->id.val, (unsigned)nrecord->flags, (unsigned)nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_corder_debug() */

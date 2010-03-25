@@ -23,3 +23,4 @@ file1     file2
 
 group  : </> and </>
 0 differences found
+EXIT CODE: 1

@@ -38,7 +38,7 @@ static H5T_t *H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction
                                      size_t *struct_align, size_t *offset, size_t *comp_size);
 static H5T_t *H5T_get_native_float(size_t size, H5T_direction_t direction,
                                    size_t *struct_align, size_t *offset, size_t *comp_size);
-static H5T_t* H5T_get_native_bitfield(size_t prec, H5T_direction_t direction, 
+static H5T_t* H5T_get_native_bitfield(size_t prec, H5T_direction_t direction,
                                    size_t *struct_align, size_t *offset, size_t *comp_size);
 static herr_t H5T_cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size,
                          size_t nelems, size_t align, size_t *struct_align);
@@ -795,7 +795,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5T_t*
-H5T_get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_align, 
+H5T_get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_align,
                         size_t *offset, size_t *comp_size)
 {
     H5T_t       *dt;            /* Appropriate native datatype to copy */

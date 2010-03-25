@@ -199,6 +199,9 @@ while [ $# -gt 0 ] ; do
 	check-vfd)
 	    CHECKVAL=check-vfd
 	    ;;
+	yodconfigure)
+	    YODCONFIGURE=yes
+	    ;;
 	--*)
 	    OP_CONFIGURE="$OP_CONFIGURE $1"
 	    ;;
@@ -284,7 +287,14 @@ fi
 # Setup the proper configure option (--with-zlib) to use zlib library
 # provide ZLIB is non-empty.
 ZLIB=${ZLIB:+"--with-zlib="$ZLIB}
-CONFIGURE="./configure $ZLIB $OP_CONFIGURE"
+if [ -n "$YODCONFIGURE" ]; then
+    cp configure configure.yod
+    bin/yodconfigure configure.yod
+    CONFIGURE="./configure.yod"
+else
+    CONFIGURE="./configure"
+fi
+CONFIGURE="$CONFIGURE $ZLIB $OP_CONFIGURE"
 
 # Execute the requests
 snapshot=yes
@@ -460,9 +470,7 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
 	    bin/release -d $ReleaseDir $METHODS
 	    perl bin/h5vers -i
-            echo "Committing snapshot from current/bin/snapshot."
-            ls
-	    svn -q commit -m "Snapshot $RELEASE_VERSION" .
+	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
     fi

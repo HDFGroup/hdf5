@@ -23,6 +23,11 @@
 #   Pedro Vicente Nunes:
 #    10/25/2005: Added test #9
 #    11/27/2006: Added test #10, #11
+#   Jonathan Kim:
+#    Improved to use single line
+#    Improved to check exit code (only serial mode, not necessary for parallel)
+#    Added test 400 - 425  (links with --follow-links option)
+#    Added test 450 - 459  (dangling links)
 
 
 ###############################################################################
@@ -49,6 +54,8 @@ FILE17=h5diff_ext2softlink_src.h5
 FILE18=h5diff_ext2softlink_trg.h5
 FILE19=h5diff_dset_idx1.h5
 FILE20=h5diff_dset_idx2.h5
+DANGLE_LINK_FILE1=h5diff_danglelinks1.h5
+DANGLE_LINK_FILE2=h5diff_danglelinks2.h5
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -194,9 +201,9 @@ TOOLTEST() {
     actual_err_sav=${actual_err}-sav
     shift
     if test -n "$pmode"; then
-	RUNCMD=$RUNPARALLEL
+        RUNCMD=$RUNPARALLEL
     else
-	RUNCMD=$RUNSERIAL
+        RUNCMD=$RUNSERIAL
     fi
 
     # Run test.
@@ -208,32 +215,44 @@ TOOLTEST() {
 	cd $srcdir/testfiles
 	eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
+    EXIT_CODE=$?
     # save actual and actual_err in case they are needed later.
     cp $actual $actual_sav
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
+    # don't add exit code check in pmode, as it causes failure. (exit code 
+    # is from mpirun not tool)
+    # if any problem occurs relate to an exit code, it will be caught in 
+    # serial mode, so the test is fullfilled.
+    if test -z "$pmode"; then
+      echo "EXIT CODE: $EXIT_CODE" >> $actual
+    fi
 
     if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
+        # Create the expect file if it doesn't yet exist.
         echo " CREATED"
-	cp $actual $expect
+        cp $actual $expect
     elif $CMP $expect $actual; then
-	echo " PASSED"
+        echo " PASSED"
     elif test -z "$pmode"; then
-	echo "*FAILED*"
-	echo "    Expected result ($expect) differs from actual result ($actual)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        echo "    Expected result ($expect) differs from actual result ($actual)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     else
-	# parallel mode output are often of different ordering from serial
-	# output.  If the sorted expected and actual files compare the same,
-	# it is safe to assume the actual output match the expected file.
-	expect_sorted=expect_sorted
-	actual_sorted=actual_sorted
-	sort $expect -o $expect_sorted
-	sort $actual -o $actual_sorted
+	    # parallel mode output are often of different ordering from serial
+        # output.  If the sorted expected and actual files compare the same,
+        # it is safe to assume the actual output match the expected file.
+        expect_sorted=expect_sorted
+        actual_sorted=actual_sorted
+        sort $expect -o $expect_sorted
+        sort $actual -o $actual_sorted
+        # remove "EXIT CODE:" line from expect file. test for exit code
+        # is done by serial mode.
+        grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
+        mv $expect_sorted.noexit $expect_sorted
 	if $CMP $expect_sorted $actual_sorted; then
 	    echo " PASSED"
 	else
@@ -265,6 +284,7 @@ SKIP() {
 	 TESTING $H5DIFF $@
 	  echo  " -SKIP-"
 }
+
 
 
 ##############################################################################
@@ -310,15 +330,17 @@ TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
 # 1.7 verbose mode
 TOOLTEST h5diff_17.txt -v $FILE1 $FILE2   
 
-# 1.8 test 32-bit INFINITY
+# 1.7 test 32-bit INFINITY
 TOOLTEST h5diff_171.txt -v $FILE1 $FILE1 /g1/fp19
 
-# 1.8 test 64-bit INFINITY
+# 1.7 test 64-bit INFINITY
 TOOLTEST h5diff_172.txt -v $FILE1 $FILE1 /g1/fp20
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
 
+# 1.8 -v and -q
+TOOLTEST h5diff_18_1.txt -v -q $FILE1 $FILE2
 
 
 # ##############################################################################
@@ -538,133 +560,91 @@ TOOLTEST h5diff_206.txt -c $FILE2 $FILE2 g2/dset7  g2/dset8
 TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
 
 # ##############################################################################
-# # Links compare without -l (link follow)
+# # Links compare without --follow-links nor --no-dangling-links
 # ##############################################################################
 # test for bug1749
 TOOLTEST h5diff_300.txt -v $FILE12 $FILE12 /link_g1 /link_g2
 
 # ##############################################################################
-# # Links compare with -l (link follow)
+# # Links compare with --follow-links Only
 # ##############################################################################
 # soft links file to file
-TOOLTEST h5diff_400.txt -l -v $FILE13 $FILE13
+TOOLTEST h5diff_400.txt --follow-links -v $FILE13 $FILE13
 
 # softlink vs dset"
-TOOLTEST h5diff_401.txt -l -v $FILE13 $FILE13 /softlink_dset1_1 /target_dset2
-
+TOOLTEST h5diff_401.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /target_dset2
 
 # dset vs softlink"
-TOOLTEST h5diff_402.txt -l -v $FILE13 $FILE13 /target_dset2 /softlink_dset1_1
-
+TOOLTEST h5diff_402.txt --follow-links -v $FILE13 $FILE13 /target_dset2 /softlink_dset1_1
 
 # softlink vs softlink"
-TOOLTEST h5diff_403.txt -l -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
-
+TOOLTEST h5diff_403.txt --follow-links -v $FILE13 $FILE13 /softlink_dset1_1 /softlink_dset2
 
 # extlink vs extlink (FILE)"
-if test -n "$pmode"; then
-    # TODO: Skip below test due to hang in prarllel mode
-    echo  "Skip below test due to hang in prarllel mode"
-    SKIP -l -v $FILE15 $FILE15
-else
-    TOOLTEST h5diff_404.txt -l -v $FILE15 $FILE15
-fi
-
+TOOLTEST h5diff_404.txt --follow-links -v $FILE15 $FILE15
 
 # extlink vs dset"
-TOOLTEST h5diff_405.txt -l -v $FILE15 $FILE16 /ext_link_dset1 /target_group2/x_dset
-
+TOOLTEST h5diff_405.txt --follow-links -v $FILE15 $FILE16 /ext_link_dset1 /target_group2/x_dset
 
 # dset vs extlink"
-TOOLTEST h5diff_406.txt -l -v $FILE16 $FILE15 /target_group2/x_dset /ext_link_dset1
-
+TOOLTEST h5diff_406.txt --follow-links -v $FILE16 $FILE15 /target_group2/x_dset /ext_link_dset1
 
 # extlink vs extlink"
-TOOLTEST h5diff_407.txt -l -v $FILE15 $FILE15 /ext_link_dset1 /ext_link_dset2
-
+TOOLTEST h5diff_407.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset1 /ext_link_dset2
 
 # softlink vs extlink"
-TOOLTEST h5diff_408.txt -l -v $FILE13 $FILE15 /softlink_dset1_1 /ext_link_dset2
-
+TOOLTEST h5diff_408.txt --follow-links -v $FILE13 $FILE15 /softlink_dset1_1 /ext_link_dset2
 
 # extlink vs softlink "
-TOOLTEST h5diff_409.txt -l -v $FILE15 $FILE13 /ext_link_dset2 /softlink_dset1_1
-
+TOOLTEST h5diff_409.txt --follow-links -v $FILE15 $FILE13 /ext_link_dset2 /softlink_dset1_1
 
 # linked_softlink vs linked_softlink (FILE)"
-TOOLTEST h5diff_410.txt -l -v $FILE14 $FILE14
-
+TOOLTEST h5diff_410.txt --follow-links -v $FILE14 $FILE14
 
 # dset2 vs linked_softlink_dset1"
-TOOLTEST h5diff_411.txt -l -v $FILE14 $FILE14 /target_dset2 /softlink1_to_slink2
-
+TOOLTEST h5diff_411.txt --follow-links -v $FILE14 $FILE14 /target_dset2 /softlink1_to_slink2
 
 # linked_softlink_dset1 vs dset2"
-TOOLTEST h5diff_412.txt -l -v $FILE14 $FILE14 /softlink1_to_slink2 /target_dset2
-
+TOOLTEST h5diff_412.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /target_dset2
 
 # linked_softlink_to_dset1 vs linked_softlink_to_dset2"
-TOOLTEST h5diff_413.txt -l -v $FILE14 $FILE14 /softlink1_to_slink2 /softlink2_to_slink2
-
+TOOLTEST h5diff_413.txt --follow-links -v $FILE14 $FILE14 /softlink1_to_slink2 /softlink2_to_slink2
 
 # group vs linked_softlink_group1"
-TOOLTEST h5diff_414.txt -l -v $FILE14 $FILE14 /target_group /softlink3_to_slink2
-
+TOOLTEST h5diff_414.txt --follow-links -v $FILE14 $FILE14 /target_group /softlink3_to_slink2
 
 # linked_softlink_group1 vs group"
-TOOLTEST h5diff_415.txt -l -v $FILE14 $FILE14 /softlink3_to_slink2 /target_group
-
+TOOLTEST h5diff_415.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /target_group
 
 # linked_softlink_to_group1 vs linked_softlink_to_group2"
-TOOLTEST h5diff_416.txt -l -v $FILE14 $FILE14 /softlink3_to_slink2 /softlink4_to_slink2
-
+TOOLTEST h5diff_416.txt --follow-links -v $FILE14 $FILE14 /softlink3_to_slink2 /softlink4_to_slink2
 
 # non-exist-softlink vs softlink"
-TOOLTEST h5diff_417.txt -l -v $FILE13 $FILE13 /softlink_noexist /softlink_dset2
-
+TOOLTEST h5diff_417.txt --follow-links -v $FILE13 $FILE13 /softlink_noexist /softlink_dset2
 
 # softlink vs non-exist-softlink"
-TOOLTEST h5diff_418.txt -l -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
-
+TOOLTEST h5diff_418.txt --follow-links -v $FILE13 $FILE13 /softlink_dset2 /softlink_noexist
 
 # non-exist-extlink_file vs extlink"
-if test -n "$pmode"; then
-    # TODO: Skip below test due to hang in prarllel mode
-    echo  "Skip below test due to hang in prarllel mode"
-    SKIP -l -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
-else
-    TOOLTEST h5diff_419.txt -l -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
-fi
-
+TOOLTEST h5diff_419.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist2 /ext_link_dset2
 
 # exlink vs non-exist-extlink_file"
-if test -n "$pmode"; then
-    # TODO: Skip below test due to hang in prarllel mode
-    echo  "Skip below test due to hang in prarllel mode"
-    SKIP -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
-else
-    TOOLTEST h5diff_420.txt -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
-fi
-
+TOOLTEST h5diff_420.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist2
 
 # extlink vs non-exist-extlink_obj"
-TOOLTEST h5diff_421.txt -l -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist1
-
+TOOLTEST h5diff_421.txt --follow-links -v $FILE15 $FILE15 /ext_link_dset2 /ext_link_noexist1
 
 # non-exist-extlink_obj vs extlink"
-TOOLTEST h5diff_422.txt -l -v $FILE15 $FILE15 /ext_link_noexist1 /ext_link_dset2
-
+TOOLTEST h5diff_422.txt --follow-links -v $FILE15 $FILE15 /ext_link_noexist1 /ext_link_dset2
 
 # extlink_to_softlink_to_dset1 vs dset2"
-TOOLTEST h5diff_423.txt -l -v $FILE17 $FILE18 /ext_link_to_slink1 /dset2
-
+TOOLTEST h5diff_423.txt --follow-links -v $FILE17 $FILE18 /ext_link_to_slink1 /dset2
 
 # dset2 vs extlink_to_softlink_to_dset1"
-TOOLTEST h5diff_424.txt -l -v $FILE18 $FILE17 /dset2 /ext_link_to_slink1
-
+TOOLTEST h5diff_424.txt --follow-links -v $FILE18 $FILE17 /dset2 /ext_link_to_slink1
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-TOOLTEST h5diff_425.txt -l -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_slink2
+TOOLTEST h5diff_425.txt --follow-links -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_slink2
 
 # ##############################################################################
 # 19.  The comparision for the two datasets between the 2 files should be the same
@@ -672,6 +652,39 @@ TOOLTEST h5diff_425.txt -l -v $FILE17 $FILE17 /ext_link_to_slink1 /ext_link_to_s
 #		FILE20: Fixed Array indexing is used for the datasets
 # ##############################################################################
 TOOLTEST h5diff_idx.txt -v $FILE19 $FILE20 
+
+# ##############################################################################
+# # Dangling links compare (--follow-links and --no-dangling-links)
+# ##############################################################################
+# dangling links --follow-links (FILE to FILE)
+TOOLTEST h5diff_450.txt  --follow-links -v $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2
+
+# dangling links --follow-links and --no-dangling-links (FILE to FILE)
+TOOLTEST h5diff_451.txt  --follow-links -v --no-dangling-links  $DANGLE_LINK_FILE1 $DANGLE_LINK_FILE2 
+
+# try --no-dangling-links without --follow-links options
+TOOLTEST h5diff_452.txt  --no-dangling-links  $FILE13 $FILE13
+
+# dangling link found for soft links (FILE to FILE)
+TOOLTEST h5diff_453.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13  
+
+# dangling link found for soft links (obj to obj)
+TOOLTEST h5diff_454.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_dset2 /softlink_noexist 
+
+# dangling link found for soft links (obj to obj) Both dangle links
+TOOLTEST h5diff_455.txt  --follow-links -v --no-dangling-links  $FILE13 $FILE13 /softlink_noexist /softlink_noexist 
+
+# dangling link found for ext links (FILE to FILE)
+TOOLTEST h5diff_456.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 
+
+# dangling link found for ext links (obj to obj). target file exist
+TOOLTEST h5diff_457.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist1 
+
+# dangling link found for ext links (obj to obj). target file NOT exist
+TOOLTEST h5diff_458.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_dset1 /ext_link_noexist2  
+
+# dangling link found for ext links (obj to obj). Both dangle links
+TOOLTEST h5diff_459.txt  --follow-links -v --no-dangling-links  $FILE15 $FILE15 /ext_link_noexist1 /ext_link_noexist2
 
 
 # ##############################################################################

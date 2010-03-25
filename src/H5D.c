@@ -667,7 +667,7 @@ done:
  *      to the default.  The chunk cache properties in the returned list
  *      are considered to be “set”, and any use of this list will override
  *      the corresponding properties in the file’s file access property
- *      list. 
+ *      list.
  *
  *      All link access properties in the returned list will be set to the
  *      default values.
@@ -1068,20 +1068,20 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
 {
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
-    
+
     FUNC_ENTER_API(H5Dset_extent, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
-    
+
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
- 
+
     /* Private function */
     if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
-    
+
 done:
         FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */

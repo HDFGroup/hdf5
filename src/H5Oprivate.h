@@ -119,7 +119,10 @@ typedef struct H5O_t H5O_t;
 
 
 /* Fractal heap ID type for shared message & attribute heap IDs. */
-typedef uint64_t H5O_fheap_id_t;
+typedef union {
+    uint8_t id[H5O_FHEAP_ID_LEN];       /* Buffer to hold ID, for encoding/decoding */
+    uint64_t val;                       /* Value, for quick comparisons */
+} H5O_fheap_id_t;
 
 /* The object location information for an object */
 typedef struct H5O_loc_t {
@@ -622,7 +625,7 @@ typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 /*
  * Free space manager info Message.
- * Contains file space management info and 
+ * Contains file space management info and
  * addresses of free space managers for file memory
  * (Data structure in memory)
  */

@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "allexamples", "allexamples.vcproj", "{DF83A474-3C92-4797-A23F-E02645ABD405}"
 	ProjectSection(ProjectDependencies) = postProject
 		{52C50A0D-21CB-48DE-AB3C-1E67B18BCC1F} = {52C50A0D-21CB-48DE-AB3C-1E67B18BCC1F}

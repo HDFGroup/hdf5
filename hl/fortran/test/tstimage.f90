@@ -1,4 +1,4 @@
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
@@ -11,21 +11,21 @@
 !   is linked from the top-level documents page.  It can also be found at     *
 !   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
-! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! This file contains the FORTRAN90 tests for H5LT 
+! This file contains the FORTRAN90 tests for H5LT
 !
 
 program image_test
 
 call make_image1()
 
-end program image_test 
+end program image_test
 
 
 !-------------------------------------------------------------------------
-! make_image1 
+! make_image1
 !-------------------------------------------------------------------------
 
 subroutine make_image1()
@@ -39,7 +39,7 @@ character(len=8), parameter :: filename = "f1img.h5" ! file name
 character(len=4), parameter :: dsetname1 = "img1"    ! dataset name
 character(len=4), parameter :: dsetname2 = "img2"    ! dataset name
 character(len=15), parameter :: il ="INTERLACE_PIXEL"! dataset name
-integer(hid_t) :: file_id                            ! file identifier 
+integer(hid_t) :: file_id                            ! file identifier
 integer(hsize_t), parameter :: width  = 500          ! width of image
 integer(hsize_t), parameter :: height = 200          ! height of image
 integer, parameter :: pal_entries = 9                ! palette number of entries
@@ -47,39 +47,39 @@ integer, dimension(width*height) :: buf1             ! data buffer
 integer, dimension(width*height) :: bufr1            ! data buffer
 integer, dimension(width*height*3) :: buf2           ! data buffer
 integer, dimension(width*height*3) :: bufr2          ! data buffer
-integer(hsize_t) :: widthr                           ! width of image  
+integer(hsize_t) :: widthr                           ! width of image
 integer(hsize_t) :: heightr                          ! height of image
 integer(hsize_t) :: planesr                          ! color planes
 integer(hsize_t) :: npalsr                           ! palettes
-character(len=15) :: interlacer                      ! interlace 
+character(len=15) :: interlacer                      ! interlace
 integer :: errcode                                   ! error flag
 integer :: is_image                                  ! error flag
 integer :: i, j, n                                   ! general purpose integers
 !
 ! palette
-! create a 9 entry palette 
+! create a 9 entry palette
 !
 character(len=4), parameter :: pal_name = "pal1"     ! dataset name
 integer(hsize_t), dimension(2) :: pal_dims = (/pal_entries,3/) ! palette dimensions
 integer(hsize_t), dimension(2) :: pal_dims_out       ! palette dimensions
 integer, dimension(pal_entries*3) :: pal_data_out    ! data buffer
 integer(hsize_t) :: npals                            ! number of palettes
-integer          :: pal_number                       ! palette number 
-integer          :: is_palette                       ! is palette 
+integer          :: pal_number                       ! palette number
+integer          :: is_palette                       ! is palette
 integer          :: space
 integer, dimension(pal_entries*3) :: pal_data_in = (/&
- 0,0,168,&      ! dark blue 
- 0,0,252,&      ! blue 
- 0,168,252,&    ! ocean blue 
- 84,252,252,&   ! light blue 
- 168,252,168,&  ! light green 
- 0,252,168,&    ! green 
- 252,252,84,&   ! yellow 
- 252,168,0,&    ! orange 
- 252,0,0/)      ! red 
+ 0,0,168,&      ! dark blue
+ 0,0,252,&      ! blue
+ 0,168,252,&    ! ocean blue
+ 84,252,252,&   ! light blue
+ 168,252,168,&  ! light green
+ 0,252,168,&    ! green
+ 252,252,84,&   ! yellow
+ 252,168,0,&    ! orange
+ 252,0,0/)      ! red
 
 
-! create an 8bit image of 9 values divided evenly by the array 
+! create an 8bit image of 9 values divided evenly by the array
 !
 space = width*height / pal_entries;
 n = 0; j = 0;
@@ -110,7 +110,7 @@ end do
 
 ! Initialize FORTRAN predefined datatypes.
 !
-call h5open_f(errcode) 
+call h5open_f(errcode)
 
 !
 ! Create a new file using default properties.
@@ -119,17 +119,17 @@ call h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
 
 !-------------------------------------------------------------------------
-! indexed image 
+! indexed image
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read image 8bit           ')
 
 !
-! write image. 
+! write image.
 !
 call h5immake_image_8bit_f(file_id,dsetname1,width,height,buf1,errcode)
 !
-! read image. 
+! read image.
 !
 call h5imread_image_f(file_id,dsetname1,bufr1,errcode)
 !
@@ -144,7 +144,7 @@ do i = 1, width*height
 end do
 
 !
-! get image info. 
+! get image info.
 !
 call h5imget_image_info_f(file_id,dsetname1,widthr,heightr,planesr,interlacer,npalsr,errcode)
 
@@ -163,18 +163,18 @@ endif
 call passed()
 
 !-------------------------------------------------------------------------
-! true color image 
+! true color image
 !-------------------------------------------------------------------------
 
 call test_begin(' Make/Read image 24bit          ')
 
 !
-! write image. 
+! write image.
 !
 call h5immake_image_24bit_f(file_id,dsetname2,width,height,il,buf2,errcode)
 
 !
-! read image. 
+! read image.
 !
 call h5imread_image_f(file_id,dsetname2,bufr2,errcode)
 
@@ -190,7 +190,7 @@ do i = 1, width*height*3
 end do
 
 !
-! get image info. 
+! get image info.
 !
 call h5imget_image_info_f(file_id,dsetname2,widthr,heightr,planesr,interlacer,npalsr,errcode)
 
@@ -210,15 +210,15 @@ endif
 call passed()
 
 !-------------------------------------------------------------------------
-! palette 
+! palette
 !-------------------------------------------------------------------------
 
 call test_begin(' Make palette                   ')
 
 !
-! make palette. 
+! make palette.
 !
-call h5immake_palette_f(file_id,pal_name,pal_dims,pal_data_in,errcode)           
+call h5immake_palette_f(file_id,pal_name,pal_dims,pal_data_in,errcode)
 
 call passed()
 
@@ -226,13 +226,13 @@ call passed()
 call test_begin(' Link/Unlink palette            ')
 
 !
-! link palette. 
+! link palette.
 !
 call h5imlink_palette_f(file_id,dsetname1,pal_name,errcode)
 
 
 !
-! read palette. 
+! read palette.
 !
 pal_number = 0
 call h5imget_palette_f(file_id,dsetname1,pal_number,pal_data_out,errcode)
@@ -251,7 +251,7 @@ end do
 !
 ! get number of palettes
 !
-call h5imget_npalettes_f(file_id,dsetname1,npals,errcode) 
+call h5imget_npalettes_f(file_id,dsetname1,npals,errcode)
 
 if ( npals /= 1) then
  print *, 'h5imget_npalettes_f bad value'
@@ -262,7 +262,7 @@ endif
 ! get palette info
 !
 pal_number = 0
-call h5imget_palette_info_f(file_id,dsetname1,pal_number,pal_dims_out,errcode) 
+call h5imget_palette_info_f(file_id,dsetname1,pal_number,pal_dims_out,errcode)
 
 if ( (pal_dims_out(1) /= pal_dims(1)) .or. (pal_dims_out(2) /= pal_dims(2))) then
  print *, 'h5imget_palette_info_f bad value'
@@ -270,9 +270,9 @@ if ( (pal_dims_out(1) /= pal_dims(1)) .or. (pal_dims_out(2) /= pal_dims(2))) the
 endif
 
 !
-! is palette 
+! is palette
 !
-is_palette = h5imis_palette_f(file_id,pal_name) 
+is_palette = h5imis_palette_f(file_id,pal_name)
 
 if ( is_palette /= 1 ) then
  print *, 'h5imis_palette_f bad value'
@@ -280,14 +280,14 @@ if ( is_palette /= 1 ) then
 endif
 
 !
-! unlink palette. 
+! unlink palette.
 !
 call h5imunlink_palette_f(file_id,dsetname1,pal_name,errcode)
 
 !
 ! get number of palettes
 !
-call h5imget_npalettes_f(file_id,dsetname1,npals,errcode ) 
+call h5imget_npalettes_f(file_id,dsetname1,npals,errcode )
 
 if ( npals /= 0) then
  print *, 'h5imget_npalettes_f bad value'
@@ -304,7 +304,7 @@ call passed()
 
 
 !-------------------------------------------------------------------------
-! end 
+! end
 !-------------------------------------------------------------------------
 
 !
@@ -323,17 +323,17 @@ call h5close_f(errcode)
 end subroutine make_image1
 
 !-------------------------------------------------------------------------
-! test_begin 
+! test_begin
 !-------------------------------------------------------------------------
 
 subroutine test_begin(string)
 character(len=*), intent(in) :: string
 write(*, fmt = '(14a)', advance = 'no') string
-write(*, fmt = '(40x,a)', advance = 'no') ' ' 
+write(*, fmt = '(40x,a)', advance = 'no') ' '
 end subroutine test_begin
 
 !-------------------------------------------------------------------------
-! passed 
+! passed
 !-------------------------------------------------------------------------
 
 subroutine passed()

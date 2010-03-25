@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "h5hltest.h"
+#include "H5srcdir.h"
 #include "H5TBpublic.h"
 
 #define TEST_FILE_BE "test_table_be.hdf5"
@@ -123,19 +124,10 @@ static hid_t h5file_open(const char *fname, unsigned flags)
 {
 
     hid_t fid;                        /* identifier for the file */
-    char  *srcdir = getenv("srcdir"); /* the source directory */
-    char  data_file[512]="";          /* buffer to hold name of existing file */
-
-    /* compose the name of the file to open, using the srcdir, if appropriate */
-    if (srcdir)
-    {
-        strcpy(data_file,srcdir);
-        strcat(data_file,"/");
-    }
-    strcat(data_file,fname);
+    const char *data_file = H5_get_srcdir_filename(fname);
 
     /* open */
-    if ((fid = H5Fopen(data_file,flags,H5P_DEFAULT))<0) 
+    if ((fid = H5Fopen(data_file,flags,H5P_DEFAULT))<0)
     {
         fprintf(stderr,"Error: Cannot open file <%s>\n",data_file );
         exit(1);
@@ -154,7 +146,7 @@ static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
         rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi ||
         rbuf[i].pressure != wbuf[j].pressure ||
-        rbuf[i].temperature != wbuf[j].temperature ) 
+        rbuf[i].temperature != wbuf[j].temperature )
     {
         fprintf(stderr,"read and write buffers have differences\n");
         fprintf(stderr,"%s %ld %f %f %d\n",
@@ -459,7 +451,7 @@ static int test_table(hid_t fid, int do_write)
         * data= 0 1 2 3 4 5 6 7
         *-------------------------------------------------------------------------
         */
-        wstart=0; 
+        wstart=0;
         wrecords=8;
         if (H5TBwrite_records(fid,"table2",wstart,wrecords,type_size_mem,field_offset,
             field_size,wbuf)<0)

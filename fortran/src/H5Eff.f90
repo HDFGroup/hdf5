@@ -2,7 +2,7 @@
 !
 ! NAME
 !   H5E
-!  
+!
 ! FUNCTION
 !   This file contains Fortran interfaces for H5E functions.
 !
@@ -24,47 +24,47 @@
 !
 ! NOTES
 !                          *** IMPORTANT ***
-!   If you add a new H5E function you must add the function name to the 
+!   If you add a new H5E function you must add the function name to the
 !   Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
 !   This is needed for Windows based operating systems.
 !
 !*****
 
 MODULE H5E
-  
+
   USE H5GLOBAL
 
   !Turn on automatic printing of errors
   INTEGER, PARAMETER :: PRINTON = 1
-  
+
   !Turn off automatic printing of errors
   INTEGER, PARAMETER :: PRINTOFF = 0
-  
+
 CONTAINS
 
 !----------------------------------------------------------------------
 ! Name:		h5eclear_f
 !
-! Purpose:	Clears the error stack for the current thread. 
+! Purpose:	Clears the error stack for the current thread.
 !
-! Inputs:  
-! Outputs:  
-!		hdferr:		- error code		
+! Inputs:
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!		
-!	
+!
+!
 !
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  April 6, 2001 
+!			port).  April 6, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5eclear_f(hdferr)
@@ -88,25 +88,25 @@ CONTAINS
 !----------------------------------------------------------------------
 ! Name:		h5h5eprint_f
 !
-! Purpose:	Prints the error stack in a default manner. 
+! Purpose:	Prints the error stack in a default manner.
 !
-! Inputs:  
-! Outputs:  
-!		hdferr:		- error code		
+! Inputs:
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
 !		name		- name of the file that
-!				  contains print output		
+!				  contains print output
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  April 6, 2001 
+!			port).  April 6, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5eprint_f(hdferr, name)
@@ -136,36 +136,36 @@ CONTAINS
     END INTERFACE
     namelen = LEN(NAME)
     IF (PRESENT(name)) THEN
-       hdferr = h5eprint_c1(name, namelen) 
+       hdferr = h5eprint_c1(name, namelen)
     ELSE
-       hdferr = h5eprint_c2() 
+       hdferr = h5eprint_c2()
     ENDIF
   END SUBROUTINE h5eprint_f
 
 !----------------------------------------------------------------------
 ! Name:		h5eget_major_f
 !
-! Purpose:	Returns a character string describing an error specified 
-!		by a major error number. 
+! Purpose:	Returns a character string describing an error specified
+!		by a major error number.
 !
-! Inputs:  
-!		error_no	- mojor error number 
-! Outputs:  
+! Inputs:
+!		error_no	- mojor error number
+! Outputs:
 !		name		- character string describing the error
 !		namelen		- number of characters in the name buffer
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!		
+!
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  April 6, 2001 
+!			port).  April 6, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
@@ -183,40 +183,40 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER :: error_no
-         CHARACTER(LEN=*) :: name 
+         CHARACTER(LEN=*) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
        END FUNCTION h5eget_major_c
     END INTERFACE
-    
-    hdferr = h5eget_major_c(error_no, name, namelen) 
+
+    hdferr = h5eget_major_c(error_no, name, namelen)
   END SUBROUTINE h5eget_major_f
 
 !----------------------------------------------------------------------
 ! Name:		h5eget_minor_f
 !
-! Purpose:	Returns a character string describing an error specified 
-!		by a minor error number. 
+! Purpose:	Returns a character string describing an error specified
+!		by a minor error number.
 !
-! Inputs:  
-!		error_no	- minor error number 
-! Outputs:  
+! Inputs:
+!		error_no	- minor error number
+! Outputs:
 !		name		- character string describing the error
-!		hdferr:		- error code		
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!		
-!	
+!
+!
 !
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  April 6, 2001 
+!			port).  April 6, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
@@ -233,38 +233,38 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER :: error_no
-         CHARACTER(LEN=*) :: name 
+         CHARACTER(LEN=*) :: name
        END FUNCTION h5eget_minor_c
     END INTERFACE
 
-    hdferr = h5eget_minor_c(error_no, name) 
+    hdferr = h5eget_minor_c(error_no, name)
   END SUBROUTINE h5eget_minor_f
 !----------------------------------------------------------------------
 ! Name:		h5eset_auto_f
 !
 ! Purpose:	Turns automatic error printing on or off
 !
-! Inputs:  
+! Inputs:
 !		printflag	- flag to turn automatic error
 !				- Possible values are:
 !				- 1 (on), 0 (off)
-! Outputs:  
-!		hdferr:		- error code		
+! Outputs:
+!		hdferr:		- error code
 !				 	Success:  0
-!				 	Failure: -1   
+!				 	Failure: -1
 ! Optional parameters:
-!		
-!	
+!
+!
 !
 !
 ! Programmer:	Elena Pourmal
-!		August 12, 1999	
+!		August 12, 1999
 !
-! Modifications: 	Explicit Fortran interfaces were added for 
+! Modifications: 	Explicit Fortran interfaces were added for
 !			called C functions (it is needed for Windows
-!			port).  April 6, 2001 
+!			port).  April 6, 2001
 !
-! Comment:		
+! Comment:
 !----------------------------------------------------------------------
 
 
@@ -286,8 +286,8 @@ CONTAINS
        END FUNCTION h5eset_auto_c
     END INTERFACE
 
-    hdferr = h5eset_auto_c(printflag) 
+    hdferr = h5eset_auto_c(printflag)
   END SUBROUTINE h5eset_auto_f
-  
+
 END MODULE H5E
-          
+

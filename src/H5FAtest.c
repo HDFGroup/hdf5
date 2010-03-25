@@ -13,8 +13,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* 
- * Programmer:  
+/*
+ * Programmer:
  *
  * Purpose:	Fixed array testing functions.
  *

@@ -1717,7 +1717,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
      *offset = (int_f)c_offset;
      *bytes = (hsize_t_f)size;
      /* Note: if the size of the fortran buffer is larger then the returned string
-      *       from the function then we need to give HD5packFstring the fortran buffer size so 
+      *       from the function then we need to give HD5packFstring the fortran buffer size so
       *       that it fills the remaining unused characters with blanks. MSB
       */
      HD5packFstring(c_name, _fcdtocp(name), c_namelen+1);
@@ -3996,7 +3996,7 @@ nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
 
 done:
     if(c_expression)
-        HDfree(c_expression);     
+        HDfree(c_expression);
 
     return ret_value;
 }
@@ -4464,10 +4464,10 @@ nh5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  * Purpose:     Calls H5Pset_chunk_cache
  *
  * Inputs:	dapl_id            - Link creation property list identifier
- *              rdcc_nslots        - 
+ *              rdcc_nslots        -
  *              rdcc_nbytes        -
  *              rdcc_w0            -
- *              
+ *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              April 13, 2009
@@ -4495,10 +4495,10 @@ nh5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nb
  *
  * Inputs:	dapl_id            - Link creation property list identifier
  * Outputs:
- *              rdcc_nslots        - 
+ *              rdcc_nslots        -
  *              rdcc_nbytes        -
  *              rdcc_w0            -
- *              
+ *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              April 13, 2009

@@ -1574,7 +1574,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5FS_sect_try_merge
  *
- * Purpose:	Try to merge/shrink a block 
+ * Purpose:	Try to merge/shrink a block
  *
  * Return:	TRUE:		merged/shrunk
  *		FALSE: 	 	not merged/not shrunk

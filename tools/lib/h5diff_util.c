@@ -106,14 +106,14 @@ print_dimensions (int rank, hsize_t *dims)
 
     if ( rank > 0 )
     {
-        
+
         parallel_print("[" );
         for ( i = 0; i < rank-1; i++)
         {
             parallel_print(HSIZE_T_FORMAT, dims[i]);
             parallel_print("x");
         }
-        
+
         parallel_print(HSIZE_T_FORMAT,  dims[rank-1]);
         parallel_print("]" );
     }

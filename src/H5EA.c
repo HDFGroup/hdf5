@@ -560,7 +560,7 @@ if(sblock->dblk_npages)
 
                 /* Compute data block page address */
                 dblk_page_addr = sblock->dblk_addrs[dblk_idx] +
-                        H5EA_DBLOCK_PREFIX_SIZE(sblock) + 
+                        H5EA_DBLOCK_PREFIX_SIZE(sblock) +
                         (page_idx * sblock->dblk_page_size);
 #ifdef QAK
 HDfprintf(stderr, "%s: sblock->addr = %a\n", FUNC, sblock->addr);

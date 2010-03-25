@@ -661,12 +661,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     /* Insert the address mapping for the new object into the copied list */
     /* (Do this here, because "post copy" possibly checks it) */
-    addr_map->src_addr = oloc_src->addr;
+    H5F_GET_FILENO(oloc_src->file, addr_map->src_obj_pos.fileno);
+    addr_map->src_obj_pos.addr = oloc_src->addr;
     addr_map->dst_addr = oloc_dst->addr;
     addr_map->is_locked = TRUE;                 /* We've locked the object currently */
     addr_map->inc_ref_count = 0;                /* Start with no additional ref counts to add */
 
-    if(H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_addr)) < 0)
+    /* Insert into skip list */
+    if(H5SL_insert(cpy_info->map_list, addr_map, &(addr_map->src_obj_pos)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list")
 
     /* "post copy" loop over messages, to fix up any messages which require a complete
@@ -765,20 +767,27 @@ herr_t
 H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     hid_t dxpl_id, H5O_copy_t *cpy_info, hbool_t inc_depth)
 {
-    H5O_addr_map_t      *addr_map;              /* Address mapping of object copied */
+    H5O_addr_map_t      *addr_map = NULL;       /* Address mapping of object copied */
+    H5_obj_t            src_obj_pos;            /* Position of source object */
     hbool_t             inc_link;               /* Whether to increment the link count for the object */
-    herr_t             ret_value = SUCCEED;
+    herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5O_copy_header_map, FAIL)
 
     /* Sanity check */
     HDassert(oloc_src);
+    HDassert(oloc_src->file);
     HDassert(oloc_dst);
     HDassert(oloc_dst->file);
     HDassert(cpy_info);
 
-    /* Look up the address of the object to copy in the skip list */
-    addr_map = (H5O_addr_map_t *)H5SL_search(cpy_info->map_list, &(oloc_src->addr));
+    /* Create object "position" struct */
+    H5F_GET_FILENO(oloc_src->file, src_obj_pos.fileno);
+    src_obj_pos.addr = oloc_src->addr;
+
+    /* Search for the object in the skip list of copied objects */
+    addr_map = (H5O_addr_map_t *)H5SL_search(cpy_info->map_list,
+            &src_obj_pos);
 
     /* Check if address is already in list of objects copied */
     if(addr_map == NULL) {
@@ -910,7 +919,7 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         cpy_info.preserve_null = TRUE;
 
     /* Create a skip list to keep track of which objects are copied */
-    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_HADDR)) == NULL)
+    if((cpy_info.map_list = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, FAIL, "cannot make skip list")
 
     /* copy the object from the source file to the destination file */
@@ -946,6 +955,7 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     H5G_name_t      new_path;                   /* Copied object group hier. path */
     H5O_loc_t       new_oloc;                   /* Copied object object location */
     H5G_loc_t       new_loc;                    /* Group location of object copied */
+    H5F_t           *cached_dst_file;           /* Cached destination file */
     hbool_t         entry_inserted=FALSE;       /* Flag to indicate that the new entry was inserted into a group */
     unsigned        cpy_option = 0;             /* Copy options */
     herr_t          ret_value = SUCCEED;        /* Return value */
@@ -972,9 +982,18 @@ H5O_copy_obj(H5G_loc_t *src_loc, H5G_loc_t *dst_loc, const char *dst_name,
     H5G_loc_reset(&new_loc);
     new_oloc.file = dst_loc->oloc->file;
 
+    /* Make a copy of the destination file, in case the original is changed by
+     * H5O_copy_header.  If and when oloc's point to the shared file struct,
+     * this will no longer be necessary, so this code can be removed. */
+    cached_dst_file = dst_loc->oloc->file;
+
     /* Copy the object from the source file to the destination file */
     if(H5O_copy_header(src_loc->oloc, &new_oloc, dxpl_id, cpy_option) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+    /* Patch dst_loc.  Again, this can be removed once oloc's point to shared
+     * file structs. */
+    dst_loc->oloc->file = cached_dst_file;
 
     /* Insert the new object in the destination file's group */
     if(H5L_link(dst_loc, dst_name, &new_loc, lcpl_id, H5P_DEFAULT, dxpl_id) < 0)

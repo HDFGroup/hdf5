@@ -33,7 +33,6 @@
 #endif  // H5_NO_STD
 #endif
 
-#include "testhdf5.h"   // C test header file
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
@@ -484,7 +483,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 	// Verify link existence
 	if(H5Lexists(file.getId(), "dset1", H5P_DEFAULT) != TRUE)
 	    throw InvalidActionException("H5Lexists", "dset1 doesn't exist");
-	if(H5Lexists(file.getId(), "grp1/soft", H5P_DEFAULT) != TRUE) 
+	if(H5Lexists(file.getId(), "grp1/soft", H5P_DEFAULT) != TRUE)
 	    throw InvalidActionException("H5Lexists", "grp1/soft doesn't exist");
 
 	// Verify link values
@@ -531,6 +530,7 @@ void test_links()
     fapl_id = h5_fileaccess();
 
     // Output message about test being performed
+    //MESSAGE("Testing Various Links\n");
     MESSAGE(5, ("Testing Various Links\n"));
     try
     {
@@ -689,7 +689,7 @@ void test_links()
 	* called last so the reset doesn't interfere with the property lists.  This
 	* routine will delete its own file. */
 	/* nerrors += external_reset_register() < 0 ? 1 : 0;
- */ 
+ */
     }
     catch (Exception E)
     {

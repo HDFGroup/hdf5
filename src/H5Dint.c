@@ -29,6 +29,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links		  		*/
@@ -56,7 +57,8 @@ typedef struct {
 /********************/
 
 /* General stuff */
-static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
+static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite,
+    hsize_t old_dim[], hid_t dxpl_id);
 static herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating,
     hbool_t vl_type);
@@ -1305,7 +1307,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     if((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR)
             && !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
             && IS_H5FD_MPI(dataset->oloc.file)) {
-        if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE) < 0)
+        if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
 
@@ -1313,17 +1315,19 @@ done:
     if(ret_value < 0) {
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
-        if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-        if(dataset->shared->type) {
-            if(dataset->shared->type_id > 0) {
-                if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+        if(dataset->shared) {
+            if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+            if(dataset->shared->type) {
+                if(dataset->shared->type_id > 0) {
+                    if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end if */
+                else {
+                    if(H5T_close(dataset->shared->type) < 0)
+                        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+                } /* end else */
             } /* end if */
-            else {
-                if(H5T_close(dataset->shared->type) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-            } /* end else */
         } /* end if */
     } /* end if */
 
@@ -1560,7 +1564,7 @@ H5D_typeof(const H5D_t *dset)
  */
 herr_t
 H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
-    hbool_t full_overwrite)
+    hbool_t full_overwrite, hsize_t old_dim[])
 {
     H5F_t *f = dset->oloc.file;         /* The dataset's file pointer */
     H5O_layout_t *layout;               /* The dataset's layout information */
@@ -1655,7 +1659,7 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
                  * this is icky. -QAK
                  */
                 if(!(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_INCR && time_alloc == H5D_ALLOC_WRITE))
-                    if(H5D_init_storage(dset, full_overwrite, dxpl_id) < 0)
+                    if(H5D_init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
             } /* end if */
             else {
@@ -1669,7 +1673,7 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
                  * the fill value _is_ set, do that now */
                 if(dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
                         (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
-                    if(H5D_init_storage(dset, full_overwrite, dxpl_id) < 0)
+                    if(H5D_init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
                 } /* end if */
             } /* end else */
@@ -1706,7 +1710,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
+H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
+    hid_t dxpl_id)
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
 
@@ -1737,9 +1742,17 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
              * Allocate file space
              * for all chunks now and initialize each chunk with the fill value.
              */
-            if(H5D_chunk_allocate(dset, dxpl_id, full_overwrite) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
-            break;
+            {
+                hsize_t             zero_dim[H5O_LAYOUT_NDIMS] = {0};
+
+                /* Use zeros for old dimensions if not specified */
+                if(old_dim == NULL)
+                    old_dim = zero_dim;
+
+                if(H5D_chunk_allocate(dset, dxpl_id, full_overwrite, old_dim) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
+                break;
+            } /* end block */
 
         default:
             HDassert("not implemented yet" && 0);
@@ -2113,7 +2126,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataset has compact storage")
     if(H5D_CONTIGUOUS == dset->shared->layout.type && 0 == dset->shared->dcpl_cache.efl.nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "dataset has contiguous storage")
- 
+
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
     if(H5D_check_filters(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
@@ -2157,14 +2170,13 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
         /* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
-
+            if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset storage")
 
         /*-------------------------------------------------------------------------
          * Remove chunk information in the case of chunked datasets
          * This removal takes place only in case we are shrinking the dateset
-         * and if the chunks are written 
+         * and if the chunks are written
          *-------------------------------------------------------------------------
          */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type &&
@@ -2281,7 +2293,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
     } /* end if */
 
     /* Flush cached raw data for each kind of dataset layout */
-    if(dataset->shared->layout.ops->flush && 
+    if(dataset->shared->layout.ops->flush &&
             (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
 

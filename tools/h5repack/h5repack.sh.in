@@ -59,6 +59,7 @@ FILE14=h5repack_layouto.h5      # A file with an older version of the layout mes
                                 # (copy of test/tlayouto.h5)
 FILE15=h5repack_named_dtypes.h5
 FILE16=tfamily%05d.h5           # located in common testfiles folder
+FILE_REF=h5repack_refs.h5
 
 
 nerrors=0
@@ -435,7 +436,7 @@ else
 fi
 
 #file
-arg="$FILE4 -e $INFO_FILE"
+arg="$FILE4 -e $srcdir/$INFO_FILE"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg 
 else
@@ -530,6 +531,9 @@ TOOLTEST $FILE15
 
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
 TOOLTEST1 $FILE16
+
+# test various references (bug 1814)
+TOOLTEST $FILE_REF
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

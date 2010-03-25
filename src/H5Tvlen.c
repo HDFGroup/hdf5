@@ -161,7 +161,7 @@ H5T_vlen_create(const H5T_t *base)
 
     /* Build new type */
     if(NULL == (dt = H5T_alloc()))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "memory allocation failed")
     dt->shared->type = H5T_VLEN;
 
     /*
@@ -169,7 +169,8 @@ H5T_vlen_create(const H5T_t *base)
      * data, not point to the same VL sequences)
      */
     dt->shared->force_conv = TRUE;
-    dt->shared->parent = H5T_copy(base, H5T_COPY_ALL);
+    if(NULL == (dt->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy base datatype")
 
     /* Inherit encoding version from base type */
     dt->shared->version = base->shared->version;
@@ -185,6 +186,10 @@ H5T_vlen_create(const H5T_t *base)
     ret_value = dt;
 
 done:
+    if(!ret_value)
+        if(dt && H5T_close(dt) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "unable to release datatype info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_vlen_create() */
 
@@ -280,11 +285,11 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 /* Set file ID (since this VL is on disk) */
                 dt->shared->u.vlen.f = f;
                 break;
-            
+
             case H5T_LOC_BADLOC:
                 /* Allow undefined location. In H5Odtype.c, H5O_dtype_decode sets undefined
                  * location for VL type and leaves it for the caller to decide.
-                 */  
+                 */
                 break;
 
             default:

@@ -2029,3 +2029,4 @@ position        float3D of </g1> float3D of </g1> difference
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects.
+EXIT CODE: 1

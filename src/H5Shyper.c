@@ -5421,17 +5421,17 @@ H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5S_hyper_span_info_t *
-H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride,
+H5S_hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride,
     const hsize_t *count, const hsize_t *block)
 {
-    H5S_hyper_span_info_t *down;             /* Pointer to spans in next dimension down */
-    H5S_hyper_span_t      *span;             /* New hyperslab span */
-    H5S_hyper_span_t      *last_span;        /* Current position in hyperslab span list */
-    H5S_hyper_span_t      *head;             /* Head of new hyperslab span list */
-    hsize_t                stride_iter;      /* Iterator over the stride values */
-    int                    i;                /* Counters */
-    unsigned               u;                /* Counters */
-    H5S_hyper_span_info_t *ret_value = NULL;
+    H5S_hyper_span_info_t *down;            /* Pointer to spans in next dimension down */
+    H5S_hyper_span_t      *span;            /* New hyperslab span */
+    H5S_hyper_span_t      *last_span;       /* Current position in hyperslab span list */
+    H5S_hyper_span_t      *head;            /* Head of new hyperslab span list */
+    hsize_t                stride_iter;     /* Iterator over the stride values */
+    int                    i;               /* Counters */
+    unsigned               u;               /* Counters */
+    H5S_hyper_span_info_t *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_make_spans);
 
@@ -5446,6 +5446,10 @@ H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride
     down = NULL;
     for(i = (rank - 1); i >= 0; i--) {
 
+        /* Sanity check */
+        if(0 == count[i])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "count == 0 is invalid")
+
         /* Start a new list in this dimension */
         head = NULL;
         last_span = NULL;
@@ -5454,11 +5458,11 @@ H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride
         for(u = 0, stride_iter = 0; u < count[i]; u++, stride_iter += stride[i]) {
             /* Allocate a span node */
             if(NULL == (span = H5FL_MALLOC(H5S_hyper_span_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate hyperslab span")
 
             /* Set the span's basic information */
             span->low = start[i] + stride_iter;
-            span->high = span->low + (block[i]-1);
+            span->high = span->low + (block[i] - 1);
             span->nelem = block[i];
             span->pstride = stride[i];
             span->next = NULL;
@@ -5484,7 +5488,7 @@ H5S_hyper_make_spans (unsigned rank, const hsize_t *start, const hsize_t *stride
 
         /* Allocate a span info node */
         if(NULL == (down = H5FL_MALLOC(H5S_hyper_span_info_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate hyperslab span")
 
         /* Set the reference count */
         down->count = 0;
@@ -5509,17 +5513,17 @@ done:
             if(head && down)
                 if(down->head != head)
                     down = NULL;
- 
+
             do {
                 if(down) {
                     head = down->head;
-                    (void)H5FL_FREE(H5S_hyper_span_info_t, down);
+                    down = H5FL_FREE(H5S_hyper_span_info_t, down);
                 } /* end if */
                 down = head->down;
-    
+
                 while(head) {
                     last_span = head->next;
-                    (void)H5FL_FREE(H5S_hyper_span_t, head);
+                    head = H5FL_FREE(H5S_hyper_span_t, head);
                     head = last_span;
                 } /* end while */
             } while(down);
@@ -7374,74 +7378,70 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Advance the hyperslab iterator */
         /* Check if we are done */
-        if(io_bytes_left>0) {
+        if(io_bytes_left > 0) {
             /* Move to next span in fastest changing dimension */
-            curr_span=curr_span->next;
+            curr_span = curr_span->next;
 
-            if(curr_span!=NULL) {
+            if(NULL != curr_span) {
                 /* Move location offset of destination */
-                loc_off+=(curr_span->low-abs_arr[fast_dim])*elem_size;
+                loc_off += (curr_span->low - abs_arr[fast_dim]) * elem_size;
 
                 /* Move iterator for fastest changing dimension */
-                abs_arr[fast_dim]=curr_span->low;
+                abs_arr[fast_dim] = curr_span->low;
             } /* end if */
         } /* end if */
         else {
-            abs_arr[fast_dim]+=span_size/elem_size;
+            abs_arr[fast_dim] += span_size / elem_size;
 
             /* Check if we are still within the span */
-            if(abs_arr[fast_dim]<=curr_span->high) {
-                iter->u.hyp.span[fast_dim]=curr_span;
-
-                goto partial_done;      /* finished with partial span */
+            if(abs_arr[fast_dim] <= curr_span->high) {
+                iter->u.hyp.span[fast_dim] = curr_span;
             } /* end if */
             /* If we walked off that span, advance to the next span */
             else {
                 /* Advance span in this dimension */
-                curr_span=curr_span->next;
+                curr_span = curr_span->next;
 
                 /* Check if we have a valid span in this dimension still */
-                if(curr_span!=NULL) {
+                if(NULL != curr_span) {
                     /* Reset absolute position */
-                    abs_arr[fast_dim]=curr_span->low;
-                    iter->u.hyp.span[fast_dim]=curr_span;
-
-                    goto partial_done;      /* finished with partial span */
+                    abs_arr[fast_dim] = curr_span->low;
+                    iter->u.hyp.span[fast_dim] = curr_span;
                 } /* end if */
             } /* end else */
         } /* end else */
 
         /* Adjust iterator pointers */
 
-        if(curr_span==NULL) {
+        if(NULL == curr_span) {
 /* Same as code in main loop */
             /* Start at the next fastest dim */
-            curr_dim=fast_dim-1;
+            curr_dim = fast_dim - 1;
 
             /* Work back up through the dimensions */
-            while(curr_dim>=0) {
+            while(curr_dim >= 0) {
                 /* Reset the current span */
-                curr_span=iter->u.hyp.span[curr_dim];
+                curr_span = iter->u.hyp.span[curr_dim];
 
                 /* Increment absolute position */
                 abs_arr[curr_dim]++;
 
                 /* Check if we are still within the span */
-                if(abs_arr[curr_dim]<=curr_span->high) {
+                if(abs_arr[curr_dim] <= curr_span->high) {
                     break;
                 } /* end if */
                 /* If we walked off that span, advance to the next span */
                 else {
                     /* Advance span in this dimension */
-                    curr_span=curr_span->next;
+                    curr_span = curr_span->next;
 
                     /* Check if we have a valid span in this dimension still */
-                    if(curr_span!=NULL) {
+                    if(NULL != curr_span) {
                         /* Reset the span in the current dimension */
-                        ispan[curr_dim]=curr_span;
+                        ispan[curr_dim] = curr_span;
 
                         /* Reset absolute position */
-                        abs_arr[curr_dim]=curr_span->low;
+                        abs_arr[curr_dim] = curr_span->low;
 
                         break;
                     } /* end if */
@@ -7452,63 +7452,61 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
                 } /* end else */
             } /* end while */
 
-            /* Check if we are finished with the spans in the tree */
-            if(curr_dim<0) {
-                /* We had better be done with I/O or bad things are going to happen... */
-                assert(io_bytes_left==0);
-
-                goto partial_done;      /* finished with partial span */
-            } /* end if */
-            else {
+            /* Check if we have more spans in the tree */
+            if(curr_dim >= 0) {
                 /* Walk back down the iterator positions, reseting them */
-                while(curr_dim<fast_dim) {
-                    assert(curr_span);
-                    assert(curr_span->down);
-                    assert(curr_span->down->head);
+                while(curr_dim < fast_dim) {
+                    HDassert(curr_span);
+                    HDassert(curr_span->down);
+                    HDassert(curr_span->down->head);
 
                     /* Increment current dimension */
                     curr_dim++;
 
                     /* Set the new span_info & span for this dimension */
-                    iter->u.hyp.span[curr_dim]=curr_span->down->head;
+                    iter->u.hyp.span[curr_dim] = curr_span->down->head;
 
                     /* Advance span down the tree */
-                    curr_span=curr_span->down->head;
+                    curr_span = curr_span->down->head;
 
                     /* Reset the absolute offset for the dim */
-                    abs_arr[curr_dim]=curr_span->low;
+                    abs_arr[curr_dim] = curr_span->low;
                 } /* end while */
 
                 /* Verify that the curr_span points to the fastest dim */
-                assert(curr_span==iter->u.hyp.span[fast_dim]);
-            } /* end else */
+                HDassert(curr_span == iter->u.hyp.span[fast_dim]);
 
-            /* Reset the buffer offset */
-            for(i=0, loc_off=0; i<ndims; i++)
-                loc_off+=(abs_arr[i]+off_arr[i])*slab[i];
+                /* Reset the buffer offset */
+                for(i = 0, loc_off = 0; i < ndims; i++)
+                    loc_off += (abs_arr[i] + off_arr[i]) * slab[i];
+            } /* end else */
+            else
+                /* We had better be done with I/O or bad things are going to happen... */
+                HDassert(io_bytes_left == 0);
         } /* end if */
     } /* end if */
 
-partial_done:   /* Yes, goto's are evil, so sue me... :-) */
-
     /* Perform the I/O on the elements, based on the position of the iterator */
-    while(io_bytes_left>0 && curr_seq<maxseq) {
+    while(io_bytes_left > 0 && curr_seq < maxseq) {
+        /* Sanity check */
+        HDassert(curr_span);
+
         /* Adjust location offset of destination to compensate for initial increment below */
-        loc_off-=curr_span->pstride;
+        loc_off -= curr_span->pstride;
 
         /* Loop over all the spans in the fastest changing dimension */
-        while(curr_span!=NULL) {
+        while(curr_span != NULL) {
             /* Move location offset of destination */
-            loc_off+=curr_span->pstride;
+            loc_off += curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            H5_ASSIGN_OVERFLOW(span_size,curr_span->nelem,hsize_t,size_t);
+            H5_ASSIGN_OVERFLOW(span_size, curr_span->nelem, hsize_t, size_t);
 
             /* Check number of elements against upper bounds allowed */
-            if(span_size>=io_bytes_left) {
+            if(span_size >= io_bytes_left) {
                 /* Trim the number of bytes to output */
-                span_size=io_bytes_left;
-                io_bytes_left=0;
+                span_size = io_bytes_left;
+                io_bytes_left = 0;
 
 /* COMMON */
                 /* Store the I/O information for the span */

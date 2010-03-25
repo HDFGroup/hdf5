@@ -640,10 +640,11 @@ void *
 H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     size_t *buf_size)
 {
-    H5HG_heap_t	*heap = NULL;
-    size_t	size;
-    uint8_t	*p = NULL;
-    void	*ret_value;
+    H5HG_heap_t	*heap = NULL;           /* Pointer to global heap object */
+    size_t	size;                   /* Size of the heap object */
+    uint8_t	*p;                     /* Pointer to object in heap buffer */
+    void        *orig_object = object;  /* Keep a copy of the original object pointer */
+    void	*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5HG_read, NULL)
 
@@ -659,6 +660,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     HDassert(heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
     p = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR(f);
+
     /* Allocate a buffer for the object read in, if the user didn't give one */
     if(!object && NULL == (object = H5MM_malloc(size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -691,6 +693,9 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
 done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET)<0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header")
+
+    if(NULL == ret_value && NULL == orig_object && object)
+        H5MM_free(object);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_read() */

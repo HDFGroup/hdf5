@@ -43,8 +43,18 @@
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
 #define FILE11   "h5diff_empty.h5"
-#define FILE12   "h5diff_dset_idx1.h5"
-#define FILE13   "h5diff_dset_idx2.h5"
+#define FILE12   "h5diff_links.h5"
+#define FILE13   "h5diff_softlinks.h5"
+#define FILE14   "h5diff_linked_softlink.h5"
+#define FILE15   "h5diff_extlink_src.h5"
+#define FILE16   "h5diff_extlink_trg.h5"
+#define FILE17   "h5diff_ext2softlink_src.h5"
+#define FILE18   "h5diff_ext2softlink_trg.h5"
+#define FILE19   "h5diff_dset_idx1.h5"
+#define FILE20   "h5diff_dset_idx2.h5"
+#define DANGLE_LINK_FILE1   "h5diff_danglelinks1.h5"
+#define DANGLE_LINK_FILE2   "h5diff_danglelinks2.h5"
+
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
 #define GBLL    ((unsigned long long) 1024 * 1024 *1024 )
@@ -82,6 +92,13 @@ static int test_datatypes(const char *fname);
 static int test_attributes(const char *fname,int make_diffs);
 static int test_datasets(const char *fname,int make_diffs);
 static int test_hyperslab(const char *fname,int make_diffs);
+static int test_link_name(const char *fname1);
+static int test_soft_links(const char *fname1);
+static int test_linked_softlinks(const char *fname1);
+static int test_external_links(const char *fname1, const char *fname2);
+static int test_ext2soft_links(const char *fname1, const char *fname2);
+static int test_dangle_links(const char *fname1, const char *fname2);
+
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
 static void write_dset_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -122,14 +139,26 @@ int main(void)
     test_hyperslab(FILE9,0);
     test_hyperslab(FILE10,1);
 
+    test_link_name(FILE12);
+
+    test_soft_links(FILE13);
+
+    test_linked_softlinks(FILE14);
+
+    test_external_links(FILE15, FILE16);
+
+    test_ext2soft_links(FILE17, FILE18);
+
     /* 
      * Generate 2 files: FILE12 with old format; FILE13 with new format
      * 	Create 2 datasets in each file:
      *  	One dataset: chunked layout, w/o filters, fixed dimension
      *  	One dataset: chunked layout,  w/ filters, fixed dimension
      */
-    gen_dataset_idx(FILE12, 0);
-    gen_dataset_idx(FILE13, 1);
+    gen_dataset_idx(FILE19, 0);
+    gen_dataset_idx(FILE20, 1);
+
+    test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2);
 
     return 0;
 }
@@ -346,7 +375,7 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
     }
 
     /*------------------------------------------------------------------------
-     *            INFINITY values 
+     *            INFINITY values
      *------------------------------------------------------------------------
      */
     {
@@ -905,6 +934,707 @@ int test_datasets(const char *file,
 }
 
 /*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare links, one has longer name than 
+*          the other and short name is subset of long name.
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_link_name(const char *fname1)
+{
+    hid_t   fid1=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    gid1 = H5Gcreate2(fid1, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+    gid2 = H5Gcreate2(fid1, "group_longname", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Soft Links
+    *------------------------------------------------------------------------*/
+    status = H5Lcreate_soft("group", fid1, "link_g1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("group_longname", fid1, "link_g2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *------------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare soft links in various way
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_soft_links(const char *fname1)
+{
+    hid_t   fid1=0;
+    hid_t   gid1=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    gid1 = H5Gcreate2(fid1, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = write_dset(fid1,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid1,2,dims2,"target_dset2",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid1,2,dims2,"dset",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Soft Links
+    *------------------------------------------------------------------------*/
+    /* file 1 */
+    status = H5Lcreate_soft("/target_dset1", fid1, "softlink_dset1_1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/target_dset1", fid1, "softlink_dset1_2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/target_dset2", fid1, "softlink_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/target_group", fid1, "softlink_group1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/target_group", fid1, "softlink_group2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/no_obj", fid1, "softlink_noexist", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(gid1)
+        H5Gclose(gid1);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare linked soft links in various way
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_linked_softlinks(const char *fname1)
+{
+    hid_t   fid1=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    hid_t   gid3=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    gid1 = H5Gcreate2(fid1, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    gid2 = H5Gcreate2(fid1, "target_group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    gid3 = H5Gcreate2(fid1, "target_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid3 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = write_dset(fid1,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid1,2,dims2,"target_dset2",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+    status = write_dset(gid1,2,dims2,"dset",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Soft Links (Linked)
+    *------------------------------------------------------------------------*/
+    /*---------
+     * file 1 */
+    status = H5Lcreate_soft("/target_dset1", fid1, "softlink1_to_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink1_to_dset1", fid1, "softlink1_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink1_to_slink1", fid1, "softlink1_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/target_dset2", fid1, "softlink2_to_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink2_to_dset2", fid1, "softlink2_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink2_to_slink1", fid1, "softlink2_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("target_group1", fid1, "softlink3_to_group1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink3_to_group1", fid1, "softlink3_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink3_to_slink1", fid1, "softlink3_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("target_group2", fid1, "softlink4_to_group2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink4_to_group2", fid1, "softlink4_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("softlink4_to_slink1", fid1, "softlink4_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+    if(gid3)
+        H5Gclose(gid3);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare external links in various way
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_external_links(const char *fname1, const char *fname2)
+{
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   gid1=0;
+    hid_t   gid2=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    /* source file */
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* target file */
+    fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    /*--------------
+     * target file */
+    gid1 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    gid2 = H5Gcreate2(fid2, "target_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+    /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /*--------------
+     * target file */
+    status = write_dset(fid2,2,dims2,"target_dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid1,2,dims2,"x_dset",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(gid2,2,dims2,"x_dset",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * External Links
+    *------------------------------------------------------------------------*/
+    /*--------------
+    /* source file */
+    status = H5Lcreate_external(fname2, "/target_group/x_dset", fid1, "ext_link_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/target_group2/x_dset", fid1, "ext_link_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/target_group", fid1, "/ext_link_grp1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/target_group2", fid1, "/ext_link_grp2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link_noexist1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external("no_file.h5", "no_obj", fid1, "ext_link_noexist2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(gid1)
+        H5Gclose(gid1);
+    if(gid2)
+        H5Gclose(gid2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare external links which point to
+*          soft link in various way
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_ext2soft_links(const char *fname1, const char *fname2)
+{
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   gid2=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    /* source file */
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* target file */
+    fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    /* target file */
+    gid2 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /*--------------
+     * target file */
+    status = write_dset(fid2,2,dims2,"dset1",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid2,2,dims2,"dset2",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Soft Links (Linked)
+    *------------------------------------------------------------------------*/
+    /*---------------
+     * target file */
+    status = H5Lcreate_soft("/dset1", fid2, "softlink_to_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/dset2", fid2, "softlink_to_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * External Links
+    *------------------------------------------------------------------------*/
+    /*---------------
+     * source file */
+    status = H5Lcreate_external(fname2, "/target_group", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/softlink_to_dset1", fid1, "ext_link_to_slink1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/softlink_to_dset2", fid1, "ext_link_to_slink2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
+    if(gid2)
+        H5Gclose(gid2);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
 * Function: gen_dataset_idx
 *
 * Purpose: Create a file with either the new or old format
@@ -989,6 +1719,212 @@ int gen_dataset_idx(const char *file, int format)
 
     status = H5Pclose(fapl);
     assert(status >= 0);
+
+    return status;
+}
+
+/*-------------------------------------------------------------------------
+*
+* Purpose: Create test files to compare dangling links in various way
+*
+* Programmer: Jonathan Kim (Feb 17, 2010)
+*
+*-------------------------------------------------------------------------*/
+static int test_dangle_links(const char *fname1, const char *fname2)
+{
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hsize_t dims2[2] = {2,4};
+    int data1[4][2] = {{0,1},{2,3},{1,2},{3,4}};
+    int data2[4][2] = {{0,0},{0,0},{0,0},{0,0}};
+    herr_t  status = SUCCEED;
+
+    /*-----------------------------------------------------------------------
+    * Create file(s)
+    *------------------------------------------------------------------------*/
+    fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fid2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = write_dset(fid1,2,dims2,"dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid1,2,dims2,"dset2",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file2 */
+    status = write_dset(fid2,2,dims2,"dset1",H5T_NATIVE_INT,data1);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = write_dset(fid2,2,dims2,"dset2",H5T_NATIVE_INT,data2);
+    if (status == FAIL)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * Soft Links
+    *------------------------------------------------------------------------*/
+    /* file 1 */
+    status = H5Lcreate_soft("no_obj", fid1, "soft_link1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/dset1", fid1, "soft_link2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("no_obj", fid1, "soft_link3", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file 2 */
+    status = H5Lcreate_soft("no_obj", fid2, "soft_link1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("no_obj", fid2, "soft_link2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("/dset2", fid2, "soft_link3", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------------------------------------
+    * External Links
+    *------------------------------------------------------------------------*/
+    /* file1 */
+    status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "/dset1", fid1, "ext_link2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname2, "no_obj", fid1, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external("no_file1.h5", "no_obj", fid1, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* file2 */
+    status = H5Lcreate_external(fname1, "no_obj", fid2, "ext_link1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname1, "no_obj", fid2, "ext_link2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external(fname1, "/dset2", fid2, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_external("no_file2.h5", "no_obj", fid2, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
 
     return status;
 }
@@ -2486,7 +3422,7 @@ void write_dset_in(hid_t loc_id,
     n = 0;
     for(i = 0; i < 3; i++)
     {
-        for(j = 0; j < 2; j++) 
+        for(j = 0; j < 2; j++)
         {
             buf52[i][j].p = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = i + 1;
@@ -2532,7 +3468,7 @@ void write_dset_in(hid_t loc_id,
     */
 
 
-    if (make_diffs) 
+    if (make_diffs)
     {
         memset(buf72, 0, sizeof buf72);
         memset(buf82, 0, sizeof buf82);
@@ -2602,13 +3538,13 @@ void write_dset_in(hid_t loc_id,
 
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                     buf23[i][j][k]=0;
                 else buf23[i][j][k]=n++;
             }
@@ -2635,13 +3571,13 @@ void write_dset_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++) 
+    for (i = 0; i < 4; i++)
     {
-        for (j = 0; j < 3; j++) 
+        for (j = 0; j < 3; j++)
         {
-            for (k = 0; k < 2; k++) 
+            for (k = 0; k < 2; k++)
             {
-                if (make_diffs) 
+                if (make_diffs)
                 {
                     buf33[i][j][k].a=0;
                     buf33[i][j][k].b=0;
@@ -2699,7 +3635,7 @@ void write_dset_in(hid_t loc_id,
     {
         for(j = 0; j < 3; j++)
         {
-            for(k = 0; k < 2; k++) 
+            for(k = 0; k < 2; k++)
             {
                 buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = i + 1;

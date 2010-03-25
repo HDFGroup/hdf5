@@ -23,6 +23,7 @@
  *		working properly.
  */
 #include "h5test.h"
+#include "H5srcdir.h"
 
 const char *FILENAME[] = {
     "mtime",
@@ -131,14 +132,8 @@ main(void)
     TESTING("accessing old modification time messages");
 
     {
-        char testfile[512]="";
-        char *srcdir = HDgetenv("srcdir");
+        const char *testfile = H5_get_srcdir_filename(TESTFILE1); /* Corrected test file name */
 
-        if(srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE1) + 1) < sizeof(testfile))){
-            HDstrcpy(testfile, srcdir);
-            HDstrcat(testfile, "/");
-        }
-        HDstrcat(testfile, TESTFILE1);
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
             if(H5Oget_info_by_name(file, "/Dataset1", &oi1, H5P_DEFAULT) < 0)
@@ -167,14 +162,8 @@ main(void)
     TESTING("accessing new modification time messages");
 
     {
-        char testfile[512]="";
-        char *srcdir = HDgetenv("srcdir");
+        const char *testfile = H5_get_srcdir_filename(TESTFILE2); /* Corrected test file name */
 
-        if(srcdir && ((HDstrlen(srcdir) + strlen(TESTFILE2) + 1) < sizeof(testfile))){
-            HDstrcpy(testfile, srcdir);
-            HDstrcat(testfile, "/");
-        }
-        HDstrcat(testfile, TESTFILE2);
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
             if(H5Oget_info_by_name(file, "/Dataset1", &oi2, H5P_DEFAULT) < 0)

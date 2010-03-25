@@ -538,6 +538,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Oexists_by_name
+ *
+ * Purpose:	Determine if a linked-to object exists
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		February  2 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location info */
+    hid_t       ret_value = FAIL;       /* Return value */
+
+    FUNC_ENTER_API(H5Oexists_by_name, FAIL)
+    H5TRACE3("t", "i*si", loc_id, name, lapl_id);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Check if the object exists */
+    if((ret_value = H5G_loc_exists(&loc, name, lapl_id, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oexists_by_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Oget_info
  *
  * Purpose:	Retrieve information about an object.
@@ -1134,7 +1176,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if(size_hint > 4294967295)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else 
+        else
 #endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
         if(size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;

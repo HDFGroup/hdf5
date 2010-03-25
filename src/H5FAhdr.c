@@ -197,9 +197,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Check for valid parameters */
     if(cparam->raw_elmt_size == 0)
 	H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
-    if(cparam->max_dblk_page_nelmts_bits == 0)        
+    if(cparam->max_dblk_page_nelmts_bits == 0)
 	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
-    if(cparam->nelmts == 0)        
+    if(cparam->nelmts == 0)
 	H5E_THROW(H5E_BADVALUE, "# of elements must be greater than zero")
 }
 #endif /* NDEBUG */
@@ -478,7 +478,7 @@ H5FA__hdr_dest(H5FA_hdr_t *hdr))
             H5E_THROW(H5E_CANTRELEASE, "unable to destroy fixed array client callback context")
     } /* end if */
     hdr->cb_ctx = NULL;
-    
+
     /* Free the shared info itself */
     hdr = H5FL_FREE(H5FA_hdr_t, hdr);
 

@@ -1,2 +1,3 @@
 group  : </g1> and </g2>
 1 differences found
+EXIT CODE: 1

@@ -19,7 +19,7 @@
  *	test_mf_fs_*() 	  tests for file memory that interact with the free-space manager
  *	test_mf_aggr_*()  tests for file memory that interact with the aggregators
  *	test_mf_align_*() tests for file memory with alignment setting
- *	test_filespace_*() tests for file space management 
+ *	test_filespace_*() tests for file space management
  */
 
 #include "h5test.h"
@@ -3688,7 +3688,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4127,7 +4127,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         if((file_size = h5_get_file_size(filename, new_fapl)) < 0)
@@ -4335,7 +4335,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4592,7 +4592,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -4921,7 +4921,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5217,7 +5217,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5424,7 +5424,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5693,7 +5693,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio") 
+    have_alloc_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "stdio")
             && HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
     if(have_alloc_vfd) {
         /* Set the filename to use for this test (dependent on fapl) */
@@ -5993,7 +5993,7 @@ error:
 } /* test_mf_fs_persist() */
 
 /*
- * Verify that the free-space manager goes away 
+ * Verify that the free-space manager goes away
  */
 static unsigned
 test_mf_fs_gone(hid_t fapl_new, hid_t fcpl)
@@ -6365,7 +6365,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
     hid_t	file = -1;              	/* File ID */
     char	filename[FILENAME_LEN]; 	/* Filename to use */
     H5F_t	*f = NULL;              	/* Internal file object pointer */
-    H5FD_mem_t 	type, stype, btype, gtype;	/* File allocation type */	
+    H5FD_mem_t 	type, stype, btype, gtype;	/* File allocation type */
     H5FS_stat_t fs_stat;             		/* Information for free-space manager */
     haddr_t	addr1, addr2, addr3, addr4;	/* File allocation type */
     haddr_t	saddr1, saddr2, saddr3, saddr4;	/* File address for H5FD_MEM_SUPER */
@@ -6591,7 +6591,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
 		(hsize_t)TEST_BLOCK_SIZE1, (H5FS_section_info_t **)&node)) < 0)
 	    FAIL_STACK_ERROR
 	if(node_found) TEST_ERROR
-	    
+
 	if((node_found = H5FS_sect_find(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type],
 		(hsize_t)TEST_BLOCK_SIZE3, (H5FS_section_info_t **)&node)) < 0)
 	    FAIL_STACK_ERROR
@@ -6691,7 +6691,7 @@ test_mf_fs_drivers(hid_t fapl)
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) 
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	TEST_ERROR
 
     /* Test with old and new format */
@@ -6713,7 +6713,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
 
 	/* STDIO */
@@ -6727,13 +6727,13 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
 	/* CORE */
 	HDputs("Testing free-space managers with core driver");
 
 	/* create fapl to be a "core" file */
-	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0) 
+	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0)
 	    FAIL_STACK_ERROR
 	if(H5Pset_fapl_core(fapl_new, (size_t)CORE_INCREMENT, TRUE) < 0)
 	    FAIL_STACK_ERROR
@@ -6741,7 +6741,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
 	/* FAMILY */
 	HDputs("Testing free-space managers with family driver");
@@ -6753,7 +6753,7 @@ test_mf_fs_drivers(hid_t fapl)
 
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
 	/* SPLIT */
 	HDputs("Testing free-space managers with split driver");
@@ -6766,27 +6766,27 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 	ret += test_mf_fs_split(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
 	/* MULTI */
 	HDputs("Testing free-space managers with multi driver");
 
 	MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)
 
-	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0) 
+	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0)
 	    FAIL_STACK_ERROR
 	if(H5Pset_fapl_multi(fapl_new, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
 	    TEST_ERROR;
 
 	ret += test_mf_fs_multi(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);	
+	h5_cleanup(FILENAME, fapl_new);
 
     } /* end for new_format */
 
-    if (H5Pclose(fcpl) < 0) 
+    if (H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR
-    if (H5Pclose(fapl2) < 0) 
+    if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR
 
     return(ret);
@@ -6827,7 +6827,7 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 	    /* Create file-creation template */
 	    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 		FAIL_STACK_ERROR
- 
+
 	    /* Set default file space information */
 	    if(H5Pset_file_space(fcpl, fs_type, fs_threshold) < 0)
 		FAIL_STACK_ERROR
@@ -6864,14 +6864,14 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 		FAIL_STACK_ERROR
 
 	    /* Retrieve the total amount of free space and # of free-space sections */
-	    if(f->shared->fs_man[type] && 
+	    if(f->shared->fs_man[type] &&
 		H5FS_sect_stats(f->shared->fs_man[type], &saved_tot_space, &saved_tot_sect_count) < 0)
 		    FAIL_STACK_ERROR
 
 	    /* H5F_FILE_SPACE_AGGR_VFD and H5F_FILE_SPACE_VFD: should not have free-space manager */
 	    if(fs_type > H5F_FILE_SPACE_ALL && f->shared->fs_man[type])
 		TEST_ERROR
-		
+
 	    /* Close the file */
 	    if(H5Fclose(file) < 0)
 		FAIL_STACK_ERROR
@@ -6904,7 +6904,7 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 			    TEST_ERROR
 
 			/* Retrieve block #5 from H5FD_MEM_SUPER free-space manager */
-			if(HADDR_UNDEF == 
+			if(HADDR_UNDEF ==
 			        (tmp_addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE5)))
 			    FAIL_STACK_ERROR
 
@@ -6929,7 +6929,7 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 	    /* Closing */
 	    if(H5Fclose(file) < 0)
 		FAIL_STACK_ERROR
-	    if(H5Pclose(fcpl) < 0) 
+	    if(H5Pclose(fcpl) < 0)
 		FAIL_STACK_ERROR
 
 	} /* end for fs_type */
@@ -6947,7 +6947,7 @@ error:
 } /* test_filespace_strategy_threshold() */
 
 /*
- * Verify section is merged/shrunk away for 
+ * Verify section is merged/shrunk away for
  * H5F_FILE_SPACE_ALL_PERSIST and H5F_FILE_SPACE_ALL strategy.
  */
 static unsigned
@@ -7063,7 +7063,7 @@ test_filespace_gone(hid_t fapl_new)
 	if(H5Fclose(file) < 0)
 	    FAIL_STACK_ERROR
 
-	if(H5Pclose(fcpl) < 0) 
+	if(H5Pclose(fcpl) < 0)
 	    FAIL_STACK_ERROR
 
     } /* end for fs_type */
@@ -7100,7 +7100,7 @@ test_filespace_drivers(hid_t fapl)
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) 
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	TEST_ERROR
 
     /* Test with old and new format */
@@ -7141,7 +7141,7 @@ test_filespace_drivers(hid_t fapl)
 	HDputs("Testing file space management with core driver");
 
 	/* create fapl to be a "core" file */
-	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0) 
+	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0)
 	    FAIL_STACK_ERROR
 	if(H5Pset_fapl_core(fapl_new, (size_t)CORE_INCREMENT, TRUE) < 0)
 	    FAIL_STACK_ERROR
@@ -7183,7 +7183,7 @@ test_filespace_drivers(hid_t fapl)
 
 	MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)
 
-	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0) 
+	if((fapl_new = H5Pcopy(new_format?fapl2:fapl)) < 0)
 	    TEST_ERROR
 	if(H5Pset_fapl_multi(fapl_new, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
 	    TEST_ERROR;
@@ -7195,7 +7195,7 @@ test_filespace_drivers(hid_t fapl)
 
     } /* end for new_format */
 
-    if (H5Pclose(fapl2) < 0) 
+    if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR
 
     return(ret);
@@ -7294,7 +7294,7 @@ main(void)
     /* tests for file space management */
     nerrors += test_filespace_drivers(fapl);
 
-    if (H5Pclose(new_fapl) < 0) 
+    if (H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR
     h5_cleanup(FILENAME, fapl);
 

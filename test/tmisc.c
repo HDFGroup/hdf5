@@ -30,6 +30,7 @@
 
 #include "hdf5.h"
 #include "testhdf5.h"
+#include "H5srcdir.h"
 #include "H5Dpkg.h"		/* Datasets 				*/
 
 /* Definitions for misc. test #1 */
@@ -1723,19 +1724,11 @@ test_misc10(void)
     hid_t       dataset, dataset_new;   /* Dataset IDs for old & new datasets */
     hid_t       dcpl;           /* Dataset creation property list */
     hid_t       space, type;    /* Old dataset's dataspace & datatype */
-    char testfile[512]="";          /* Character buffer for corrected test file name */
-    char *srcdir = HDgetenv("srcdir");    /* Pointer to the directory the source code is located within */
+    const char *testfile = H5_get_srcdir_filename(MISC10_FILE_OLD); /* Corrected test file name */
     herr_t      ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing using old dataset creation property list\n"));
-
-    /* Generate the correct name for the test file, by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC10_FILE_OLD) + 1) < sizeof(testfile))) {
-        HDstrcpy(testfile, srcdir);
-        HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, MISC10_FILE_OLD);
 
     /*
      * Open the old file and the dataset and get old settings.
@@ -3387,8 +3380,7 @@ test_misc20(void)
     hsize_t small_dims[MISC20_SPACE_RANK]={MISC20_SPACE2_DIM0,MISC20_SPACE2_DIM1};      /* Small dimensions */
     unsigned version;   /* Version of storage layout info */
     hsize_t contig_size;        /* Size of contiguous storage size from layout into */
-    char testfile[512]="";          /* Character buffer for corrected test file name */
-    char *srcdir = HDgetenv("srcdir");    /* Pointer to the directory the source code is located within */
+    const char *testfile = H5_get_srcdir_filename(MISC20_FILE_OLD); /* Corrected test file name */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -3501,13 +3493,6 @@ test_misc20(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the storage size is computed correctly for older versions of layout info */
-
-    /* Generate the correct name for the test file, by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC20_FILE_OLD) + 1) < sizeof(testfile))) {
-        HDstrcpy(testfile, srcdir);
-        HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, MISC20_FILE_OLD);
 
     /*
      * Open the old file and the dataset and get old settings.
@@ -4630,19 +4615,11 @@ test_misc25b(void)
 {
     hid_t fid;          /* File ID */
     hid_t gid;          /* Group ID */
-    char testfile[512]="";
-    char *srcdir = HDgetenv("srcdir");
+    const char *testfile = H5_get_srcdir_filename(MISC25B_FILE); /* Corrected test file name */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Exercise null object header message bug\n"));
-
-    /* Build the name of the file, with the source directory */
-    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC25B_FILE) + 1) < sizeof(testfile))){
-	HDstrcpy(testfile, srcdir);
-	HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, MISC25B_FILE);
 
     /* Open file */
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -4895,19 +4872,11 @@ test_misc27(void)
 {
     hid_t fid;          /* File ID */
     hid_t gid;          /* Group ID */
-    char testfile[512]="";          /* Character buffer for corrected test file name */
-    char *srcdir = HDgetenv("srcdir");    /* Pointer to the directory the source code is located within */
+    const char *testfile = H5_get_srcdir_filename(MISC27_FILE); /* Corrected test file name */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Corrupt object header handling\n"));
-
-    /* Generate the correct name for the test file, by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC27_FILE) + 1) < sizeof(testfile))) {
-        HDstrcpy(testfile, srcdir);
-        HDstrcat(testfile, "/");
-    }
-    HDstrcat(testfile, MISC27_FILE);
 
     /* Open the file */
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -5132,7 +5101,7 @@ test_misc29(void)
     CHECK(ret, -1, "h5_make_local_copy");
 
     /* Open the copied file */
-    fid = H5Fopen(MISC29_COPY_FILE, H5F_ACC_RDWR, H5P_DEFAULT); 
+    fid = H5Fopen(MISC29_COPY_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Delete the last dataset */
