@@ -93,10 +93,10 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
       shallow     Copy only immediate members for groups\n\n\
       soft        Expand soft links into new objects\n\n\
       ext         Expand external links into new objects\n\n\
-      ref         Copy references and any referenced objects, i.e., objects\n\ 
+      ref         Copy references and any referenced objects, i.e., objects\n\
                   that the references point to.\n\
-                    Referenced objects are copied in addition to the objects\n\ 
-                  specified on the command line and reference datasets are\n\ 
+                    Referenced objects are copied in addition to the objects\n\
+                  specified on the command line and reference datasets are\n\
                   populated with correct reference values. Copies of referenced\n\
                   datasets outside the copy range specified on the command line\n\
                   will normally have a different name from the original.\n\
