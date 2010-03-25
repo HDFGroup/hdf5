@@ -7308,7 +7308,7 @@ H5C_jb__init(H5C_jbrb_t * struct_ptr,
     struct_ptr->aio_ctl_blks = NULL;
     struct_ptr->aio_next_buf_offset = (off_t)0;
 /* Comment this out to work on the Mac, currently */
-#if 0
+#if 1
     struct_ptr->use_aio_fsync = use_aio;
 #else
     struct_ptr->use_aio_fsync = FALSE;
