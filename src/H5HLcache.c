@@ -86,10 +86,10 @@ static herr_t H5HL_dblk_free_icr(haddr_t addr, size_t len, void *thing);
 /*********************/
 
 /*
- * H5HL prefix inherits cache-like properties from H5AC2
+ * H5HL prefix inherits cache-like properties from H5AC
  */
-const H5AC2_class_t H5AC2_LHEAP_PRFX[1] = {{
-    H5AC2_LHEAP_PRFX_ID,
+const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
+    H5AC_LHEAP_PRFX_ID,
     "local heap prefix",
     H5FD_MEM_LHEAP,
     H5HL_prfx_deserialize,
@@ -100,10 +100,10 @@ const H5AC2_class_t H5AC2_LHEAP_PRFX[1] = {{
 }};
 
 /*
- * H5HL data block inherits cache-like properties from H5AC2
+ * H5HL data block inherits cache-like properties from H5AC
  */
-const H5AC2_class_t H5AC2_LHEAP_DBLK[1] = {{
-    H5AC2_LHEAP_DBLK_ID,
+const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
+    H5AC_LHEAP_DBLK_ID,
     "local heap data block",
     H5FD_MEM_LHEAP,
     H5HL_dblk_deserialize,

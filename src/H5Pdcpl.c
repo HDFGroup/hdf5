@@ -35,7 +35,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -2106,7 +2106,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HDmemcpy(fill.buf, value, (size_t)fill.size);
 
         /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(type, type, NULL, NULL, H5AC2_ind_dxpl_id, FALSE)))
+        if(NULL == (tpath = H5T_path_find(type, type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
         /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
@@ -2118,7 +2118,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Convert the fill value */
-            if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC2_ind_dxpl_id) < 0) {
+            if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
                 if(bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
@@ -2273,7 +2273,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the fill value */
-    if(H5P_get_fill_value(plist, type, value, H5AC2_ind_dxpl_id) < 0)
+    if(H5P_get_fill_value(plist, type, value, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
 
 done:

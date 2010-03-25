@@ -27,7 +27,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 TEST_SCRIPT = testerror.sh ${srcdir}/testjnlfilemarking.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
-                cache2_jnl_file_marking.c$(EXEEXT)
+                cache_jnl_file_marking.c$(EXEEXT)
 
 
 # These are our main targets. They should be listed in the order to be
@@ -37,8 +37,8 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
 # These tests (fheap, btree2) are under development and are not used by
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache1 cache1_api cache2 cache2_api \
-           cache2_journal pool hyperslab istore bittests dt_arith \
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache1 cache1_api cache cache_api \
+           cache_journal pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
            set_extent ttsafe \
@@ -51,7 +51,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache1 cache1_api cache2 cache2_api \
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat testmeta \
-	   cache2_jnl_file_marking
+	   cache_jnl_file_marking
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -71,7 +71,7 @@ endif
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
-libh5test_la_SOURCES=h5test.c testframe.c cache1_common.c cache2_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache1_common.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
@@ -121,7 +121,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 cache2_journal*.jnl \
+            unlink_chunked.h5 btree2.h5 cache_journal*.jnl \
             objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5
 
 # Sources for testhdf5 executable

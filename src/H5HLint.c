@@ -397,7 +397,7 @@ H5HL_dblk_dest(H5HL_dblk_t *dblk)
         dblk->heap->dblk = NULL;
 
         /* Unpin the local heap prefix */
-        if(H5AC2_unpin_entry(dblk->heap->prfx) < 0)
+        if(H5AC_unpin_entry(dblk->heap->prfx) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "can't unpin local heap prefix")
 
         /* Decrement ref. count on heap data structure */

@@ -89,9 +89,9 @@ static herr_t H5B2_cache_leaf_free_icr(haddr_t addr, size_t len, void *thing);
 /* Package Variables */
 /*********************/
 
-/* H5B2 inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_BT2_HDR[1] = {{
-    H5AC2_BT2_HDR_ID,
+/* H5B2 inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_BT2_HDR[1] = {{
+    H5AC_BT2_HDR_ID,
     "v2 b-tree header",
     H5FD_MEM_BTREE,
     H5B2_cache_hdr_deserialize,
@@ -101,9 +101,9 @@ const H5AC2_class_t H5AC2_BT2_HDR[1] = {{
     NULL,
 }};
 
-/* H5B2 inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_BT2_INT[1] = {{
-    H5AC2_BT2_INT_ID,
+/* H5B2 inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_BT2_INT[1] = {{
+    H5AC_BT2_INT_ID,
     "v2 b-tree internal node",
     H5FD_MEM_BTREE,
     H5B2_cache_internal_deserialize,
@@ -113,9 +113,9 @@ const H5AC2_class_t H5AC2_BT2_INT[1] = {{
     NULL,
 }};
 
-/* H5B2 inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_BT2_LEAF[1] = {{
-    H5AC2_BT2_LEAF_ID,
+/* H5B2 inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_BT2_LEAF[1] = {{
+    H5AC_BT2_LEAF_ID,
     "v2 b-tree leaf node",
     H5FD_MEM_BTREE,
     H5B2_cache_leaf_deserialize,
@@ -175,7 +175,7 @@ H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Allocate space for the B-tree data structure */
     if(NULL == (bt2 = H5FL_MALLOC(H5B2_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&bt2->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&bt2->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Compute the size of the serialized B-tree header on disk */
     size = H5B2_HEADER_SIZE(udata->f);
@@ -398,7 +398,7 @@ H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Allocate new internal node and reset cache info */
     if(NULL == (internal = H5FL_MALLOC(H5B2_internal_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&internal->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&internal->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
     internal->shared = udata->bt2_shared;
@@ -646,7 +646,7 @@ H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
     if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&leaf->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&leaf->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common B-tree information */
     leaf->shared = udata->bt2_shared;

@@ -103,7 +103,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     cache_udata.type = type;
 
     /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC2_protect(f, dxpl_id, H5AC2_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC2_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get pointer to reference counted shared B-tree info */
@@ -115,7 +115,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
 done:
     /* Release B-tree header node */
-    if(bt2 && H5AC2_unprotect(f, dxpl_id, H5AC2_BT2_HDR, addr, (size_t)0, bt2, H5AC2__NO_FLAGS_SET) < 0)
+    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)0, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)

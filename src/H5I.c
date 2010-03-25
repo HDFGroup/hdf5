@@ -42,7 +42,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Ipkg.h"		/* IDs			  		*/
@@ -1259,7 +1259,7 @@ H5Idec_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Idec_ref, id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Idec_ref, id, H5AC_dxpl_id, FAIL)
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -1384,7 +1384,7 @@ H5Iinc_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Iinc_ref, id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Iinc_ref, id, H5AC_dxpl_id, FAIL)
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -2002,7 +2002,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     H5TRACE3("Zs", "ixz", id, name, size);
 
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(id, name, size, H5P_DEFAULT, H5AC2_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(id, name, size, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:

@@ -132,7 +132,7 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Protect the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Pin the object header */
@@ -140,7 +140,7 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Unprotect the object header */
-    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Go append message to object header */
@@ -293,7 +293,7 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Protect the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Pin the object header */
@@ -301,7 +301,7 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Unprotect the object header */
-    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Call the "real" modify routine */
@@ -500,7 +500,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
@@ -508,7 +508,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header")
 
 done:
-    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -825,14 +825,14 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     HDassert(type);
 
     /* Load the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Count the messages of the correct type */
     ret_value = H5O_msg_count_real(oh, type);
 
 done:
-    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -906,7 +906,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Load the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Call the "real" exists routine */
@@ -914,7 +914,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to verify object header message")
 
 done:
-    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1003,7 +1003,7 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
     HDassert(type);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Pin the object header */
@@ -1011,7 +1011,7 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Unprotect the object header */
-    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Call the "real" remove routine */
@@ -1063,7 +1063,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     HDassert(type);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Pin the object header */
@@ -1071,7 +1071,7 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Unprotect the object header */
-    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Call the "real" remove routine */
@@ -1262,7 +1262,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
     HDassert(op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Call the "real" iterate routine */
@@ -1270,7 +1270,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
         HERROR(H5E_OHDR, H5E_BADITER, "unable to iterate over object header messages");
 
 done:
-    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1368,7 +1368,7 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
         /* Mark object header as dirty in cache */
-        if(H5AC2_mark_pinned_or_protected_entry_dirty(oh) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 
@@ -1996,7 +1996,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
     H5O_mesg_t *idx_msg = &oh->mesg[idx];       /* Pointer to message to modify */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_copy_mesg)
@@ -2024,7 +2024,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
 
     /* Mark the message as modified */
     idx_msg->dirty = TRUE;
-    chk_flags |= H5AC2__DIRTIED_FLAG;
+    chk_flags |= H5AC__DIRTIED_FLAG;
 
     /* Release chunk */
     if(H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)

@@ -41,7 +41,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -148,7 +148,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer")
 
     /* Get the object information */
-    if(H5R_get_obj_type(loc.oloc->file, H5AC2_ind_dxpl_id, ref_type, ref, &obj_type) < 0)
+    if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, &obj_type) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
 
     /* Set return value */

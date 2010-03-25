@@ -25,7 +25,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #ifdef H5_HAVE_PARALLEL
-#include "H5AC2private.h"	/* Metadata cache		  	*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #endif /* H5_HAVE_PARALLEL */
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -2908,7 +2908,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
         using_mpi = TRUE;
 
         /* Use the internal "independent" DXPL */
-        data_dxpl_id = H5AC2_ind_dxpl_id;
+        data_dxpl_id = H5AC_ind_dxpl_id;
     } /* end if */
     else {
 #endif  /* H5_HAVE_PARALLEL */
@@ -4381,7 +4381,7 @@ done:
  *
  * Purpose:	Print raw data cache statistics to the debug stream.  If
  *		HEADERS is non-zero then print table column headers,
- *		otherwise assume that the H5AC2 layer has already printed them.
+ *		otherwise assume that the H5AC layer has already printed them.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -4414,8 +4414,8 @@ H5D_chunk_stats(const H5D_t *dset, hbool_t headers)
 #ifdef H5AC1_DEBUG
     if (H5DEBUG(AC1)) headers = TRUE;
 #endif
-#ifdef H5AC2_DEBUG
-    if (H5DEBUG(AC2)) headers = TRUE;
+#ifdef H5AC_DEBUG
+    if (H5DEBUG(AC)) headers = TRUE;
 #endif
 
     if (headers) {

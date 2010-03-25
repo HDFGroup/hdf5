@@ -37,7 +37,7 @@
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5AC1private.h"	/* Metadata cache			*/
-#include "H5AC2private.h"	/* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
@@ -109,14 +109,14 @@ typedef struct H5F_file_t {
     haddr_t	driver_addr;	/* File driver information block address*/
     haddr_t	maxaddr;	/* Maximum address for file             */
 
-    H5AC1_t      *cache;		/* The object cache			*/
-    H5AC2_t     *cache2;	/* test cache		 		*/
+    H5AC1_t     *cache1;	/* The object cache			*/
+    H5AC_t      *cache;		/* The object cache	 		*/
     H5AC1_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
-    H5AC2_jnl_config_t
+    H5AC_jnl_config_t
 	    	initJnlCfg;	/* Initial journaling configuration for */
 				/* the file.  At least in its initial   */
     				/* incarnation, this structure contains */
@@ -141,7 +141,7 @@ typedef struct H5F_file_t {
     hbool_t mdc_jnl_enabled;    /* TRUE iff journaling is in progress	*/
     int32_t mdc_jnl_magic;      /* journal file magic -- if defined     */
     size_t  mdc_jnl_file_name_len; /* journal file name length          */
-    char    mdc_jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char    mdc_jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
                                 /* journal file name -- if defined      */
 } H5F_file_t;
 

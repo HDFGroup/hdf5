@@ -22,7 +22,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		        */
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5Iprivate.h"		/* ID Functions		                */
@@ -48,7 +48,7 @@
  *
  *              John Mainzer, 6/17/05
  *              Modified the function to use the new dirtied parameter of
- *              of H5AC2_unprotect() instead of modifying the is_dirty
+ *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
  *-------------------------------------------------------------------------
@@ -73,7 +73,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if (NULL == (h = (H5HG_heap_t *)H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, addr, fwidth, f, H5AC2_READ)))
+    if (NULL == (h = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, fwidth, f, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
 
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
@@ -135,7 +135,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     }
 
 done:
-    if (h && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)0, h, H5AC2__NO_FLAGS_SET) < 0)
+    if (h && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, addr, (size_t)0, h, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);

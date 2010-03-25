@@ -15,9 +15,9 @@
 
 #include <aio.h>
 
+#define H5C_PACKAGE             /* suppress error about including H5Cpkg  */
 #define H5F_PACKAGE		/* suppress error about including H5Fpkg   */
 #define H5O_PACKAGE             /* suppress error about including H5Opkg   */
-#define H5C2_PACKAGE            /* suppress error about including H5C2pkg  */
 
 #define _XOPEN_SOURCE 500	/* for pread() & pwrite() */
 
@@ -30,9 +30,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
+#include "H5Cpkg.h"
 #include "H5Fpkg.h"
 #include "H5Opkg.h"
-#include "H5C2pkg.h"
 
 #define H5F_MAX_SUPERBLOCK_SIZE 134
 
@@ -642,7 +642,7 @@ get_sb_base_addr(int fd,
  *
  *		Note that the jnl_file_name_ptr parameter is presumed to
  *		point to a buffer of char of length at least
- *		H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1.
+ *		H5C__MAX_JOURNAL_FILE_NAME_LEN + 1.
  *
  * Return:	TRUE  if the supplied path references an HDF5 file that
  *		      is marked as having journaling in progress.
@@ -689,7 +689,7 @@ get_journaling_status(char * file_path_ptr,
     const char * fcn_name = "get_journaling_status():";
     const char * indent1 = "";
     const char * indent2 = "\t";
-    char jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t journaling_enabled = FALSE;
     hbool_t success = TRUE;
     FILE * err_file_ptr = stderr;
@@ -2210,7 +2210,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
  *
  *		Note also that jnl_file_name is presumed to point to a
  *		buffer of char of length at least
- *		H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1.
+ *		H5C__MAX_JOURNAL_FILE_NAME_LEN + 1.
  *
  *		If any errors are detected, return FALSE.
  *              In this case, *enabled_ptr, *magic_ptr and the
@@ -2238,7 +2238,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
 			  4 +	/* magic -- sizeof(int32_t) */		\
 			  4 )	/* jnl file path len -- sizeof(int32_t) */
 
-#define MAX_MDJ_MSG_LEN	(MDJ_MSG_HDR_LEN + H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1)
+#define MAX_MDJ_MSG_LEN	(MDJ_MSG_HDR_LEN + H5C__MAX_JOURNAL_FILE_NAME_LEN + 1)
 
 hbool_t
 get_mdj_msg_data(int fd,
@@ -2358,7 +2358,7 @@ get_mdj_msg_data(int fd,
             }
 
             if ( ( path_len <= 0 ) ||
-                 ( path_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) ) {
+                 ( path_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) ) {
 
                 success = FALSE;
 
@@ -3119,7 +3119,7 @@ get_jnl_header_info(char * file_path_ptr,
         version_tag = HDstrtok(&(buf[1]), " ");
 
         if ( ( version_tag == NULL ) ||
-             ( strcmp(version_tag, H5C2_JNL__VER_NUM_TAG) != 0 ) ) {
+             ( strcmp(version_tag, H5C_JNL__VER_NUM_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3156,7 +3156,7 @@ get_jnl_header_info(char * file_path_ptr,
         target_file_tag = HDstrtok(NULL, " ");
 
         if ( ( target_file_tag == NULL ) ||
-             ( strcmp(target_file_tag, H5C2_JNL__TGT_FILE_NAME_TAG) != 0 ) ) {
+             ( strcmp(target_file_tag, H5C_JNL__TGT_FILE_NAME_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3199,7 +3199,7 @@ get_jnl_header_info(char * file_path_ptr,
         journal_magic_tag = HDstrtok(NULL, " ");
 
         if ( ( journal_magic_tag == NULL ) ||
-             ( strcmp(journal_magic_tag, H5C2_JNL__JNL_MAGIC_TAG) != 0 ) ) {
+             ( strcmp(journal_magic_tag, H5C_JNL__JNL_MAGIC_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3242,7 +3242,7 @@ get_jnl_header_info(char * file_path_ptr,
         creation_date_tag = HDstrtok(NULL, " ");
 
         if ( ( creation_date_tag == NULL ) ||
-             ( strcmp(creation_date_tag, H5C2_JNL__CREATION_DATE_TAG) != 0 ) ) {
+             ( strcmp(creation_date_tag, H5C_JNL__CREATION_DATE_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3273,7 +3273,7 @@ get_jnl_header_info(char * file_path_ptr,
         human_readable_tag = HDstrtok(NULL, " ");
 
         if ( ( human_readable_tag == NULL ) ||
-             ( strcmp(human_readable_tag, H5C2_JNL__HUMAN_READABLE_TAG)
+             ( strcmp(human_readable_tag, H5C_JNL__HUMAN_READABLE_TAG)
                != 0 ) ) {
 
             success = FALSE;
@@ -3329,7 +3329,7 @@ get_jnl_header_info(char * file_path_ptr,
         offset_width_tag = HDstrtok(NULL, " ");
 
         if ( ( offset_width_tag == NULL ) ||
-             ( strcmp(offset_width_tag, H5C2_JNL__OFFSET_WIDTH_TAG) != 0 ) ) {
+             ( strcmp(offset_width_tag, H5C_JNL__OFFSET_WIDTH_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3382,7 +3382,7 @@ get_jnl_header_info(char * file_path_ptr,
         length_width_tag = HDstrtok(NULL, " ");
 
         if ( ( length_width_tag == NULL ) ||
-             ( strcmp(length_width_tag, H5C2_JNL__LENGTH_WIDTH_TAG) != 0 ) ) {
+             ( strcmp(length_width_tag, H5C_JNL__LENGTH_WIDTH_TAG) != 0 ) ) {
 
             success = FALSE;
 
@@ -3846,7 +3846,7 @@ examine_files(char * hdf5_file_name,
     /* const char * fcn_name = "examine_files()"; */
     const char * indent1 = "\t";
     const char * indent2 = "\t\t";
-    char jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
     char jnl_target_file_name[MAX_PATH_LEN + 1];
     hbool_t error = FALSE;
     hbool_t journal_can_be_run = FALSE;
@@ -4077,7 +4077,7 @@ verify_files(char * hdf5_file_name,
              hbool_t * error_ptr)
 {
     const char * fcn_name = "verify_files()";
-    char jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
     char jnl_target_file_name[MAX_PATH_LEN + 1];
     hbool_t proceed = TRUE;
     hbool_t journal_file_exists = FALSE;
@@ -4774,7 +4774,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
     hbool_t proceed = TRUE;
     hid_t fapl = -1;
     hid_t fid = -1;
-    H5AC2_jnl_config_t config; /* journaling configuration */
+    H5AC_jnl_config_t config; /* journaling configuration */
 
     if ( hdf5_file_path_ptr == NULL ) {
 
@@ -4797,7 +4797,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
 
     if ( proceed ) {
 
-        config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        config.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
         /* get H5AC1_cache_config_t configuration from fapl */
         if ( H5Pget_jnl_config(fapl, &config) == -1) {
@@ -6164,7 +6164,7 @@ bjf__load_next_msg(int fd,
                    unsigned verbosity)
 {
     const char * fcn_name = "bjf__load_next_msg()";
-    char sig_buf[H5C2_BJNL__SIG_LEN + 2];
+    char sig_buf[H5C_BJNL__SIG_LEN + 2];
     char msg_ver;
     hbool_t eof = FALSE;
     hbool_t proceed = TRUE;
@@ -6189,7 +6189,7 @@ bjf__load_next_msg(int fd,
         proceed = load_buf_from_file(fd,
                                      file_len,
                                      offset,
-                                     (size_t)(H5C2_BJNL__SIG_LEN + 1),
+                                     (size_t)(H5C_BJNL__SIG_LEN + 1),
                                      (uint8_t *)sig_buf,
                                      verbosity,
                                      fcn_name,
@@ -6214,8 +6214,8 @@ bjf__load_next_msg(int fd,
 
     if ( ( proceed ) && ( ! eof ) ) {
 
-        msg_ver = sig_buf[H5C2_BJNL__SIG_LEN];
-        sig_buf[H5C2_BJNL__SIG_LEN] = '\0';
+        msg_ver = sig_buf[H5C_BJNL__SIG_LEN];
+        sig_buf[H5C_BJNL__SIG_LEN] = '\0';
 
         if ( verbosity > 2 ) {
 
@@ -6227,24 +6227,24 @@ bjf__load_next_msg(int fd,
                       (unsigned long long)(offset));
         }
 
-        if ( HDstrncmp(sig_buf, H5C2_BJNL__BEGIN_TRANS_SIG,
-                       (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
+        if ( HDstrncmp(sig_buf, H5C_BJNL__BEGIN_TRANS_SIG,
+                       (size_t)(H5C_BJNL__SIG_LEN)) == 0 ) {
 
             proceed = bjf__load_begin_trans_msg(fd,
                                        file_len,
-                                       offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
+                                       offset + (off_t)(H5C_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
                                        msg_type_ptr,
                                        msg_ver,
                                        trans_num_ptr,
                                        verbosity);
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__JOURNAL_ENTRY_SIG,
-                              (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
+        } else if ( HDstrncmp(sig_buf, H5C_BJNL__JOURNAL_ENTRY_SIG,
+                              (size_t)(H5C_BJNL__SIG_LEN)) == 0 ) {
 
 	    proceed = bjf__load_jnl_entry_msg(fd,
                                        file_len,
-                                       offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
+                                       offset + (off_t)(H5C_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
   		                       msg_type_ptr,
                                        msg_ver,
@@ -6257,12 +6257,12 @@ bjf__load_next_msg(int fd,
                                        buf_len,
                                        verbosity);
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_TRANS_SIG,
-                              (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
+        } else if ( HDstrncmp(sig_buf, H5C_BJNL__END_TRANS_SIG,
+                              (size_t)(H5C_BJNL__SIG_LEN)) == 0 ) {
 
             proceed = bjf__load_end_trans_msg(fd,
                                        file_len,
-                                       offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
+                                       offset + (off_t)(H5C_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
                                        msg_type_ptr,
                                        msg_ver,
@@ -6270,12 +6270,12 @@ bjf__load_next_msg(int fd,
                                        verbosity);
 
 
-        } else if ( HDstrncmp(sig_buf, H5C2_BJNL__END_ADDR_SPACE_SIG,
-                              (size_t)(H5C2_BJNL__SIG_LEN)) == 0 ) {
+        } else if ( HDstrncmp(sig_buf, H5C_BJNL__END_ADDR_SPACE_SIG,
+                              (size_t)(H5C_BJNL__SIG_LEN)) == 0 ) {
 
 	    proceed = bjf__load_eoa_msg(fd,
                                        file_len,
-                                       offset + (off_t)(H5C2_BJNL__SIG_LEN + 1),
+                                       offset + (off_t)(H5C_BJNL__SIG_LEN + 1),
                                        new_offset_ptr,
 	                               msg_type_ptr,
                                        msg_ver,
@@ -6890,7 +6890,7 @@ main(int argc,
     char *           p; /* pointer */
     hbool_t          custom_name = 0; /* bool indicating custom backup name */
     hbool_t          no_copy = 0; /* bool indicating not to make backup */
-    H5AC2_jnl_config_t config; /* journaling configuration */
+    H5AC_jnl_config_t config; /* journaling configuration */
     hbool_t          check_file = 1; /* boolean indicating whether to check */
     uint8_t *        compare_buf; /* buffer to read into from hdf5 file */
     hid_t            status = -1; /* status indicator for retval checking */
@@ -7670,7 +7670,7 @@ main(int argc,
 
         } /* end if */
 
-        config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
+        config.version = 1; /* should be H5C__CURR_AUTO_SIZE_CTL_VER */
 
         /* get H5AC1_cache_config_t configuration from fapl */
         if ( H5Pget_jnl_config(fapl, &config) == -1) {

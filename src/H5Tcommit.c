@@ -25,7 +25,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
@@ -80,7 +80,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Tcommit2, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit2, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Check arguments */
@@ -113,7 +113,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Commit the type */
-    if(H5T_commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC2_dxpl_id) < 0)
+    if(H5T_commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -229,7 +229,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     H5T_t	*type = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Tcommit_anon, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit_anon, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
@@ -253,7 +253,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Commit the type */
-    if(H5T_commit(loc.oloc->file, type, tcpl_id, H5AC2_dxpl_id) < 0)
+    if(H5T_commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -492,7 +492,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC2_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;
 
     FUNC_ENTER_API(H5Topen2, FAIL)
@@ -603,7 +603,7 @@ H5Tget_create_plist(hid_t dtype_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Retrieve any object creation properties */
-        if(H5O_get_create_plist(&type->oloc, H5AC2_ind_dxpl_id, new_plist) < 0)
+        if(H5O_get_create_plist(&type->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
     } /* end if */
 

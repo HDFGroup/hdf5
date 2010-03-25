@@ -40,10 +40,10 @@
 /*****************************/
 
 /* The local heap prefix cache subclass */
-H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_PRFX[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_PRFX[1];
 
 /* The local heap data block cache subclass */
-H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_DBLK[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_DBLK[1];
 
 /* Declare extern the free list to manage the H5HL_free_t struct */
 H5FL_EXTERN(H5HL_free_t);
@@ -106,14 +106,14 @@ struct H5HL_t {
 
 /* Struct for heap data block */
 struct H5HL_dblk_t {
-    H5AC2_info_t cache_info;    /* Information for H5AC2 cache functions, _must_ be */
+    H5AC_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
                                 /* first field in structure */
     H5HL_t                 *heap;       /* Pointer to heap for data block */
 };
 
 /* Struct for heap prefix */
 struct H5HL_prfx_t {
-    H5AC2_info_t cache_info;    /* Information for H5AC2 cache functions, _must_ be */
+    H5AC_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
                                 /* first field in structure */
     H5HL_t                 *heap;       /* Pointer to heap for prefix */
 };

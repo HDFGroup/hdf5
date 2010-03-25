@@ -15,7 +15,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:     H5C2journal.c
+ * Created:     H5Cjournal.c
  *              Dec 6 2007
  *              John Mainzer
  *
@@ -37,14 +37,14 @@
  */
 
 #define H5F_PACKAGE             /* suppress error about including H5Fpkg  */
-#define H5C2_PACKAGE            /* suppress error about including H5C2pkg */
+#define H5C_PACKAGE             /* suppress error about including H5Cpkg */
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Cpkg.h"             /* Cache                                */
 #include "H5Eprivate.h"         /* Error handling                       */
-#include "H5MMprivate.h"        /* Memory management                    */
-#include "H5MFprivate.h"        /* File memory management               */
 #include "H5Fpkg.h"		/* File access                          */
-#include "H5C2pkg.h"            /* Cache                                */
+#include "H5MFprivate.h"        /* File memory management               */
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"		/* Property lists			*/
 
 /**************************************************************************/
@@ -53,165 +53,165 @@
 
 /* In the test code, it is sometimes useful to skip the check for journaling
  * in progress on open.  The check_for_journaling global is used to support
- * this.  Note that we can't tuck this variable into H5C2_t, as the test
+ * this.  Note that we can't tuck this variable into H5C_t, as the test
  * takes place before H5Fopen() returns.
  */
 
-hbool_t H5C2__check_for_journaling = TRUE;
+hbool_t H5C__check_for_journaling = TRUE;
 
 /**************************************************************************/
 /******************************* local macros *****************************/
 /**************************************************************************/
-#define H5C2__TRANS_NUM_SIZE 8
-#define H5C2__CHECKSUM_SIZE  4
+#define H5C__TRANS_NUM_SIZE 8
+#define H5C__CHECKSUM_SIZE  4
 
 /**************************************************************************/
 /***************************** local prototypes ***************************/
 /**************************************************************************/
 
-static herr_t H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
+static herr_t H5C_call_mdjsc_callbacks(H5C_t * cache_ptr,
                                         hid_t dxpl_id,
-                                        H5C2_mdj_config_t * config_ptr);
+                                        H5C_mdj_config_t * config_ptr);
 
-static herr_t H5C2_get_journaling_in_progress(const H5F_t * f,
-					      H5C2_t * cache_ptr);
+static herr_t H5C_get_journaling_in_progress(const H5F_t * f,
+					      H5C_t * cache_ptr);
 
-static herr_t H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr);
+static herr_t H5C_grow_mdjsc_callback_table(H5C_t * cache_ptr);
 
-static herr_t H5C2_jb_aio__await_buffer_write_completion(
-						H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__await_buffer_write_completion(
+						H5C_jbrb_t * struct_ptr,
                                                int buf_num);
 
-static herr_t H5C2_jb_aio__await_async_fsync_completion(
-						H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__await_async_fsync_completion(
+						H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__flush(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__flush(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__get_last_transaction_on_disk(
-					H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__get_last_transaction_on_disk(
+					H5C_jbrb_t * struct_ptr,
                                         uint64_t * trans_num_ptr);
 
-static herr_t H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__make_space_in_ring_buffer(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__note_completed_async_buffer_writes(
-						H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__note_completed_async_buffer_writes(
+						H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__note_completed_async_fsyncs(
-						H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__note_completed_async_fsyncs(
+						H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__prep_next_buf_for_use(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__prep_next_buf_for_use(H5C_jbrb_t * struct_ptr,
                                             uint64_t last_trans_in_ring_buffer);
 
-static herr_t H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__queue_async_fsync(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__queue_buffer_write(H5C_jbrb_t * struct_ptr,
                                               int buf_num,
                                               hbool_t partial_write_ok);
 
-static herr_t H5C2_jb_aio__sync_file(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__sync_file(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__sync_q__append(H5C2_jbrb_t * struct_ptr,
-                               struct H5C2_jbrb_sync_q_entry_t * entry_ptr);
+static herr_t H5C_jb_aio__sync_q__append(H5C_jbrb_t * struct_ptr,
+                               struct H5C_jbrb_sync_q_entry_t * entry_ptr);
 
-static herr_t H5C2_jb_aio__sync_q__discard_head(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_aio__sync_q__discard_head(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_aio__test_buffer_write_complete(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__test_buffer_write_complete(H5C_jbrb_t * struct_ptr,
                                                       int buf_num,
                                                       hbool_t *complete_ptr);
 
-static herr_t H5C2_jb_aio__test_next_async_fsync_complete(
-						H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_aio__test_next_async_fsync_complete(
+						H5C_jbrb_t * struct_ptr,
                                                 hbool_t *sync_complete_ptr);
 
-herr_t H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
+herr_t H5C_jb_aio__write_to_buffer(H5C_jbrb_t * struct_ptr,	
                                     size_t size,			
                                     const char * data,
                                     hbool_t is_end_trans,
                                     uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__comment(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__comment(H5C_jbrb_t * struct_ptr,
                                    const char * comment_ptr);
 
-static herr_t H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__end_transaction(H5C_jbrb_t * struct_ptr,
                                            uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__eoa(H5C_jbrb_t * struct_ptr,
                                haddr_t eoa);
 
-static herr_t H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__journal_entry(H5C_jbrb_t * struct_ptr,
                                          uint64_t trans_num,
                                          haddr_t base_addr,
                                          size_t length,
                                          const uint8_t * body);
 
-static herr_t H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__start_transaction(H5C_jbrb_t * struct_ptr,
                                              uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_buffer(H5C_jbrb_t * struct_ptr,
                                         size_t buf_size,
                                         const char * buf_ptr,
                                         hbool_t is_end_trans,
                                         uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_chksum(H5C_jbrb_t * struct_ptr,
                                         hbool_t is_end_trans,
                                         uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_length(H5C_jbrb_t * struct_ptr,
                                         size_t length,
                                         hbool_t is_end_trans, 
                                         uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_offset(H5C_jbrb_t * struct_ptr,
                                         haddr_t offset,
                                         hbool_t is_end_trans,
                                         uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_sig_and_ver(H5C_jbrb_t * struct_ptr,
                                              const char * sig_ptr,
                                              const uint8_t version,
                                              hbool_t keep_chksum,
                                              hbool_t is_end_trans,
                                              uint64_t trans_num);
 
-static herr_t H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_bjf__write_trans_num(H5C_jbrb_t * struct_ptr,
                                            hbool_t is_end_trans,
                                            uint64_t trans_num);
 
-static herr_t H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_hrjf__comment(H5C_jbrb_t * struct_ptr,
  		                    const char * comment_ptr);
 
-static herr_t H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_hrjf__end_transaction(H5C_jbrb_t * struct_ptr,
                                             uint64_t trans_num);
 
-static herr_t H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_hrjf__eoa(H5C_jbrb_t * struct_ptr,
                                 haddr_t eoa);
 
-static herr_t H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_hrjf__journal_entry(H5C_jbrb_t * struct_ptr,
                                           uint64_t trans_num,
                                           haddr_t base_addr,
                                           size_t length,
                                           const uint8_t * body);
 
-static herr_t H5C2_jb_sio__flush(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_sio__flush(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_sio__flush_full_buffers(H5C2_jbrb_t * struct_ptr);
+static herr_t H5C_jb_sio__flush_full_buffers(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_jb_sio__get_last_transaction_on_disk(
-					H5C2_jbrb_t * struct_ptr,
+static herr_t H5C_jb_sio__get_last_transaction_on_disk(
+					H5C_jbrb_t * struct_ptr,
 				        uint64_t * trans_num_ptr);
 
-static herr_t H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
+static herr_t H5C_jb_sio__write_to_buffer(H5C_jbrb_t * struct_ptr,	
                                            size_t size,			
                                            const char * data,
                                            hbool_t is_end_trans,
                                            uint64_t trans_num);
 
-herr_t H5C2_jb_stats__dump(H5C2_jbrb_t * struct_ptr);
+herr_t H5C_jb_stats__dump(H5C_jbrb_t * struct_ptr);
 
-herr_t H5C2_jb_stats__reset(H5C2_jbrb_t * struct_ptr);
+herr_t H5C_jb_stats__reset(H5C_jbrb_t * struct_ptr);
 
-static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
+static herr_t H5C_shrink_mdjsc_callback_table(H5C_t * cache_ptr);
 
 
 
@@ -220,7 +220,7 @@ static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_begin_journaling
+ * Function:    H5C_begin_journaling
  *
  * Purpose:     Setup the metadata cache to begin journaling.
  *
@@ -231,7 +231,7 @@ static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
  *              March 26, 2008
  *
  * Changes:	JRM -- 8/14/08
- *              Reworked the function to use the H5C2_mdj_config_t
+ *              Reworked the function to use the H5C_mdj_config_t
  *              structure.
  *
  *		JRM -- 8/18/08
@@ -251,17 +251,17 @@ static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
  */
 
 herr_t
-H5C2_begin_journaling(H5F_t * f,
+H5C_begin_journaling(H5F_t * f,
 		      hid_t dxpl_id,
-		      H5C2_t * cache_ptr,
-		      H5C2_mdj_config_t * config_ptr)
+		      H5C_t * cache_ptr,
+		      H5C_mdj_config_t * config_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t journal_magic;
-    H5C2_mdj_config_t config;
+    H5C_mdj_config_t config;
 
-    FUNC_ENTER_NOAPI(H5C2_begin_journaling, FAIL)
+    FUNC_ENTER_NOAPI(H5C_begin_journaling, FAIL)
 
     HDassert( f != NULL );
     HDassert( f->name != NULL );
@@ -269,7 +269,7 @@ H5C2_begin_journaling(H5F_t * f,
     HDassert( f->shared->sizeof_addr > 0 );
     HDassert( f->shared->sizeof_size > 0 );
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled == FALSE );
     HDassert( cache_ptr->trans_in_progress == FALSE );
     HDassert( cache_ptr->trans_num == 0 );
@@ -293,17 +293,17 @@ H5C2_begin_journaling(H5F_t * f,
                     "metadata journaling already enabled on entry.")
     }
 
-    result = H5C2_flush_cache(f, dxpl_id, H5C2__NO_FLAGS_SET);
+    result = H5C_flush_cache(f, dxpl_id, H5C__NO_FLAGS_SET);
 
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_flush_cache() failed.") 
+                    "H5C_flush_cache() failed.") 
     }
 
     journal_magic = (int32_t)HDrand();
 
-    result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
+    result = H5C_jb__init(&(cache_ptr->mdj_jbrb),
                            journal_magic,
 		           f->name,
 			   config_ptr->journal_file_path,
@@ -317,46 +317,46 @@ H5C2_begin_journaling(H5F_t * f,
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__init() failed.")
+                    "H5C_jb__init() failed.")
     }
 
     /* Note that this call flushes the HDF5 file in passing */
-    result = H5C2_mark_journaling_in_progress(f, dxpl_id, journal_magic,
+    result = H5C_mark_journaling_in_progress(f, dxpl_id, journal_magic,
 		                              config_ptr->journal_file_path);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_mark_journaling_in_progress() failed.")
+                    "H5C_mark_journaling_in_progress() failed.")
     }
 
     cache_ptr->mdj_enabled = TRUE;
 
-    result = H5C2_get_journal_config(cache_ptr, &config);
+    result = H5C_get_journal_config(cache_ptr, &config);
 
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_get_journal_config() failed.")
+                    "H5C_get_journal_config() failed.")
     }
 
-    result = H5C2_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
+    result = H5C_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
 
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_call_mdjsc_callbacks() failed.")
+                    "H5C_call_mdjsc_callbacks() failed.")
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_begin_journaling() */
+} /* H5C_begin_journaling() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_begin_transaction
+ * Function:    H5C_begin_transaction
  *
  * Purpose:     Handle book keeping for the beginning of a transaction, and
  *              return the transaction ID assigned to the transaction in 
@@ -372,23 +372,23 @@ done:
  */
 
 herr_t
-H5C2_begin_transaction(H5C2_t * cache_ptr,
+H5C_begin_transaction(H5C_t * cache_ptr,
                        uint64_t * trans_num_ptr,
                        const char * api_call_name)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_begin_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_begin_transaction, FAIL)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->tl_len == 0 );
     HDassert( cache_ptr->tl_size == 0 );
     HDassert( cache_ptr->tl_head_ptr == NULL );
     HDassert( cache_ptr->tl_tail_ptr == NULL );
     HDassert( trans_num_ptr != NULL );
     HDassert( api_call_name != NULL );
-    HDassert( HDstrlen(api_call_name) <= H5C2__MAX_API_NAME_LEN );
+    HDassert( HDstrlen(api_call_name) <= H5C__MAX_API_NAME_LEN );
 
     if ( cache_ptr->mdj_enabled ) {
 
@@ -399,7 +399,7 @@ H5C2_begin_transaction(H5C2_t * cache_ptr,
         }
 
 	HDstrncpy(cache_ptr->trans_api_name, api_call_name,
-                  (size_t)H5C2__MAX_API_NAME_LEN);
+                  (size_t)H5C__MAX_API_NAME_LEN);
 
         (cache_ptr->trans_num)++;
 
@@ -412,11 +412,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_begin_transaction() */
+} /* H5C_begin_transaction() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_end_journaling
+ * Function:    H5C_end_journaling
  *
  * Purpose:     Shutdown metadata journaling.
  *
@@ -446,19 +446,19 @@ done:
  */
 
 herr_t
-H5C2_end_journaling(H5F_t * f,
+H5C_end_journaling(H5F_t * f,
                     hid_t dxpl_id,
-		    H5C2_t * cache_ptr)
+		    H5C_t * cache_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
-    H5C2_mdj_config_t config;
+    H5C_mdj_config_t config;
 
-    FUNC_ENTER_NOAPI(H5C2_end_journaling, FAIL)
+    FUNC_ENTER_NOAPI(H5C_end_journaling, FAIL)
 
     HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
     if ( cache_ptr->mdj_enabled ) {
 
@@ -469,12 +469,12 @@ H5C2_end_journaling(H5F_t * f,
         HDassert( cache_ptr->tl_head_ptr == NULL );
         HDassert( cache_ptr->tl_tail_ptr == NULL );
 
-        result = H5C2_flush_cache(f, dxpl_id, H5C2__NO_FLAGS_SET);
+        result = H5C_flush_cache(f, dxpl_id, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                             "H5C2_flush_cache() failed.") 
+                             "H5C_flush_cache() failed.") 
 	}
 
 	HDassert( cache_ptr->mdj_enabled );
@@ -490,36 +490,36 @@ H5C2_end_journaling(H5F_t * f,
          * extension.  In passing, also discard the cache's copies of the 
          * metadata journaling magic, and the journal file name.
          */
-        result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
+        result = H5C_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
 
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_unmark_journaling_in_progress() failed.")
+                        "H5C_unmark_journaling_in_progress() failed.")
         }
 
-        result = H5C2_jb__takedown(&(cache_ptr->mdj_jbrb));
+        result = H5C_jb__takedown(&(cache_ptr->mdj_jbrb));
 
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__takedown() failed.")
+                        "H5C_jb__takedown() failed.")
         }
 
-        result = H5C2_get_journal_config(cache_ptr, &config);
+        result = H5C_get_journal_config(cache_ptr, &config);
 
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_get_journal_config() failed.")
+                        "H5C_get_journal_config() failed.")
         }
 
-        result = H5C2_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
+        result = H5C_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
 
         if ( result < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_call_mdjsc_callbacks() failed.")
+                        "H5C_call_mdjsc_callbacks() failed.")
         }
     }
 
@@ -527,12 +527,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_end_journaling() */
+} /* H5C_end_journaling() */
 
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_end_transaction
+ * Function:    H5C_end_transaction
  *
  * Purpose:     Handle book keeping for the end of a transaction.
  *
@@ -546,9 +546,9 @@ done:
  */
 
 herr_t
-H5C2_end_transaction(H5F_t * f,
+H5C_end_transaction(H5F_t * f,
 		     hid_t dxpl_id,
-                     H5C2_t * cache_ptr,
+                     H5C_t * cache_ptr,
                      uint64_t trans_num,
                      const char * api_call_name)
 {
@@ -556,12 +556,12 @@ H5C2_end_transaction(H5F_t * f,
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_end_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_end_transaction, FAIL)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( api_call_name != NULL );
-    HDassert( HDstrlen(api_call_name) <= H5C2__MAX_API_NAME_LEN );
+    HDassert( HDstrlen(api_call_name) <= H5C__MAX_API_NAME_LEN );
     HDassert( ( ! ( cache_ptr->mdj_enabled ) ) ||
               ( HDstrcmp(api_call_name, cache_ptr->trans_api_name) == 0 ) );
 
@@ -583,12 +583,12 @@ H5C2_end_transaction(H5F_t * f,
          */
         if ( cache_ptr->tl_len > 0 ) {
 
-            result = H5C2_journal_transaction(f, dxpl_id, cache_ptr);
+            result = H5C_journal_transaction(f, dxpl_id, cache_ptr);
 
             if ( result != SUCCEED ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                            "H5C2_journal_transaction() failed.")
+                            "H5C_journal_transaction() failed.")
             }
         }
 
@@ -599,24 +599,24 @@ H5C2_end_transaction(H5F_t * f,
          * in progress list.
          */
 
-        result = H5C2_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
+        result = H5C_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
                                                        &new_last_trans_on_disk);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__get_last_transaction_on_disk() failed.")
+                        "H5C_jb__get_last_transaction_on_disk() failed.")
         }
 
         if ( cache_ptr->last_trans_on_disk < new_last_trans_on_disk ) {
 
-            result = H5C2_update_for_new_last_trans_on_disk(cache_ptr,
+            result = H5C_update_for_new_last_trans_on_disk(cache_ptr,
 		                                        new_last_trans_on_disk);
 
 	    if ( result != SUCCEED ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                            "H5C2_update_for_new_last_trans_on_disk() failed.")
+                            "H5C_update_for_new_last_trans_on_disk() failed.")
             }
         }
     }
@@ -625,14 +625,14 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_end_transaction() */
+} /* H5C_end_transaction() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_get_journal_config
+ * Function:    H5C_get_journal_config
  *
  * Purpose:     Return the current metadata journaling status in an
- *              instance of H5C2_mdj_config_t.
+ *              instance of H5C_mdj_config_t.
  *
  *              If journaling is enabled, config_ptr->enable_journaling 
  *              is set to TRUE, and the remaining fields in *config_ptr
@@ -651,21 +651,21 @@ done:
  * Changes:
  *
  *              JRM -- 8/14/08
- *              Reworked function to use H5C2_mdj_config_t.
+ *              Reworked function to use H5C_mdj_config_t.
  *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-H5C2_get_journal_config(H5C2_t * cache_ptr,
-		        H5C2_mdj_config_t * config_ptr)
+H5C_get_journal_config(H5C_t * cache_ptr,
+		        H5C_mdj_config_t * config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_get_journal_config, FAIL)
+    FUNC_ENTER_NOAPI(H5C_get_journal_config, FAIL)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
     if ( config_ptr == NULL ) {
 
@@ -679,9 +679,9 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
 
 	HDstrncpy(&(config_ptr->journal_file_path[0]), 
 		  cache_ptr->jnl_file_name,
-		  H5C2__MAX_JOURNAL_FILE_NAME_LEN);
+		  H5C__MAX_JOURNAL_FILE_NAME_LEN);
 
-	config_ptr->journal_file_path[H5C2__MAX_JOURNAL_FILE_NAME_LEN] = '\0';
+	config_ptr->journal_file_path[H5C__MAX_JOURNAL_FILE_NAME_LEN] = '\0';
 
 	config_ptr->jbrb_buf_size = (cache_ptr->mdj_jbrb).buf_size;
 
@@ -700,11 +700,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_get_journal_config() */
+} /* H5C_get_journal_config() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_journal_post_flush()
+ * Function:    H5C_journal_post_flush()
  *
  * Purpose:     Handle any journaling activities that are necessary
  * 		after we flush the metadata cache.
@@ -735,19 +735,19 @@ done:
  */
 
 herr_t
-H5C2_journal_post_flush(H5F_t * f,
+H5C_journal_post_flush(H5F_t * f,
                         hid_t dxpl_id,
-                        H5C2_t * cache_ptr,
+                        H5C_t * cache_ptr,
 		        hbool_t cache_is_clean)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_journal_post_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5C_journal_post_flush, FAIL)
 
     HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled );
 
     if ( cache_ptr->trans_in_progress ) {
@@ -782,12 +782,12 @@ H5C2_journal_post_flush(H5F_t * f,
 		        "low level flush failed")
 	}
 
-        result = H5C2_jb__trunc(&(cache_ptr->mdj_jbrb));
+        result = H5C_jb__trunc(&(cache_ptr->mdj_jbrb));
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__trunc() failed.")
+                        "H5C_jb__trunc() failed.")
         }
         
 	cache_ptr->trans_num = (uint64_t)0;
@@ -798,11 +798,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_journal_post_flush() */
+} /* H5C_journal_post_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_journal_pre_flush()
+ * Function:    H5C_journal_pre_flush()
  *
  * Purpose:     Handle any journaling activities that are necessary
  * 		before we flush the metadata cache.
@@ -833,16 +833,16 @@ done:
  */
 
 herr_t
-H5C2_journal_pre_flush(H5C2_t * cache_ptr)
+H5C_journal_pre_flush(H5C_t * cache_ptr)
 {
     herr_t result;
     uint64_t new_last_trans_on_disk;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_journal_pre_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5C_journal_pre_flush, FAIL)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled );
 
     if ( cache_ptr->trans_in_progress ) {
@@ -851,31 +851,31 @@ H5C2_journal_pre_flush(H5C2_t * cache_ptr)
                     "Transaction in progress during flush?!?!?.")
     }
 
-    result = H5C2_jb__flush(&(cache_ptr->mdj_jbrb));
+    result = H5C_jb__flush(&(cache_ptr->mdj_jbrb));
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__flush() failed.")
+                    "H5C_jb__flush() failed.")
     }
 
-    result = H5C2_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
+    result = H5C_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
 		                                   &new_last_trans_on_disk);
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__get_last_transaction_on_disk() failed.")
+                    "H5C_jb__get_last_transaction_on_disk() failed.")
     }
 
     if ( cache_ptr->last_trans_on_disk < new_last_trans_on_disk ) {
 
-        result = H5C2_update_for_new_last_trans_on_disk(cache_ptr,
+        result = H5C_update_for_new_last_trans_on_disk(cache_ptr,
 		                                        new_last_trans_on_disk);
 
 	if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_update_for_new_last_trans_on_disk() failed.")
+                        "H5C_update_for_new_last_trans_on_disk() failed.")
         }
     }    
 
@@ -889,11 +889,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_journal_pre_flush() */
+} /* H5C_journal_pre_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_journal_transaction()
+ * Function:    H5C_journal_transaction()
  *
  * Purpose:     Generate journal messages for the current transaction.
  * 		In passing, remove all entries from the transaction list.
@@ -908,15 +908,15 @@ done:
  */
 
 herr_t
-H5C2_journal_transaction(H5F_t * f,
+H5C_journal_transaction(H5F_t * f,
 		         hid_t dxpl_id,
-		         H5C2_t * cache_ptr)
+		         H5C_t * cache_ptr)
 
 {
-    char buf[H5C2__MAX_API_NAME_LEN + 128];
+    char buf[H5C__MAX_API_NAME_LEN + 128];
     hbool_t resized;
     hbool_t renamed;
-    H5C2_cache_entry_t * entry_ptr = NULL;
+    H5C_cache_entry_t * entry_ptr = NULL;
     unsigned serialize_flags = 0;
     haddr_t new_addr;
     size_t new_len;
@@ -925,32 +925,32 @@ H5C2_journal_transaction(H5F_t * f,
     herr_t result;    
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_journal_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_journal_transaction, FAIL)
     
     HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->trans_in_progress );
     HDassert( cache_ptr->tl_len > 0 );
 
-    HDsnprintf(buf, H5C2__MAX_API_NAME_LEN + 128, "Begin transaction on %s.",
+    HDsnprintf(buf, H5C__MAX_API_NAME_LEN + 128, "Begin transaction on %s.",
                cache_ptr->trans_api_name);
 
-    result = H5C2_jb__comment(&(cache_ptr->mdj_jbrb), buf);
+    result = H5C_jb__comment(&(cache_ptr->mdj_jbrb), buf);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__comment() failed.")
+                    "H5C_jb__comment() failed.")
     }
 
-    result = H5C2_jb__start_transaction(&(cache_ptr->mdj_jbrb), 
+    result = H5C_jb__start_transaction(&(cache_ptr->mdj_jbrb), 
 		                        cache_ptr->trans_num);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__start_transaction() failed.")
+                    "H5C_jb__start_transaction() failed.")
     }
 
     entry_ptr = cache_ptr->tl_tail_ptr;
@@ -1015,9 +1015,9 @@ H5C2_journal_transaction(H5F_t * f,
 	         */
 
 	        resized = 
-		    (hbool_t)((serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) != 0);
+		    (hbool_t)((serialize_flags & H5C__SERIALIZE_RESIZED_FLAG) != 0);
 	        renamed = 
-                    (hbool_t)((serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) != 0);
+                    (hbool_t)((serialize_flags & H5C__SERIALIZE_RENAMED_FLAG) != 0);
 
 	        if ( ( renamed ) && ( ! resized ) ) {
 
@@ -1031,26 +1031,26 @@ H5C2_journal_transaction(H5F_t * f,
 		     * is irrelement, as we know that the entry is in cache,
 	             * and thus no I/O will take place.
 	             */
-	            thing = H5C2_protect(f, dxpl_id,
+	            thing = H5C_protect(f, dxpl_id,
 	                                 entry_ptr->type, entry_ptr->addr,
 				         entry_ptr->size, NULL, 
-				         H5C2__NO_FLAGS_SET);
+				         H5C__NO_FLAGS_SET);
 
                     if ( thing == NULL ) {
 
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                    "H5C2_protect() failed.")
+                                    "H5C_protect() failed.")
                     }
 
-                    result = H5C2_unprotect(f, dxpl_id,
+                    result = H5C_unprotect(f, dxpl_id,
                                             entry_ptr->type, entry_ptr->addr,
-                                            thing, H5C2__SIZE_CHANGED_FLAG, 
+                                            thing, H5C__SIZE_CHANGED_FLAG, 
 					    new_len);
 
                     if ( result < 0 ) {
 
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                    "H5C2_unprotect() failed.")
+                                    "H5C_unprotect() failed.")
                     }
 
 		    entry_ptr->image_ptr = new_image_ptr;
@@ -1058,13 +1058,13 @@ H5C2_journal_transaction(H5F_t * f,
 
 	        if ( renamed ) {
 
-                    result = H5C2_rename_entry(cache_ptr, entry_ptr->type,
+                    result = H5C_rename_entry(cache_ptr, entry_ptr->type,
 				               entry_ptr->addr, new_addr);
 
                     if ( result < 0 ) {
 
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                    "H5C2_rename_entr() failed.")
+                                    "H5C_rename_entr() failed.")
                     }
                 }
             }
@@ -1077,7 +1077,7 @@ H5C2_journal_transaction(H5F_t * f,
 	 */
 	if ( ( ! resized ) && ( ! renamed ) ) {
                 
-            result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
+            result = H5C_jb__journal_entry(&(cache_ptr->mdj_jbrb),
                                             cache_ptr->trans_num,
 					    entry_ptr->addr,
 					    entry_ptr->size,
@@ -1086,34 +1086,34 @@ H5C2_journal_transaction(H5F_t * f,
             if ( result != SUCCEED ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                            "H5C2_jb__journal_entry() failed.")
+                            "H5C_jb__journal_entry() failed.")
             }
 
-	    H5C2__TRANS_DLL_REMOVE(entry_ptr, cache_ptr->tl_head_ptr, \
+	    H5C__TRANS_DLL_REMOVE(entry_ptr, cache_ptr->tl_head_ptr, \
                                    cache_ptr->tl_tail_ptr, cache_ptr->tl_len, \
 				   cache_ptr->tl_size, FAIL);
         }
         entry_ptr = cache_ptr->tl_tail_ptr;
     }
 
-    result = H5C2_jb__end_transaction(&(cache_ptr->mdj_jbrb),
+    result = H5C_jb__end_transaction(&(cache_ptr->mdj_jbrb),
 		                      cache_ptr->trans_num);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__end_transaction() failed.")
+                    "H5C_jb__end_transaction() failed.")
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_journal_transaction() */
+} /* H5C_journal_transaction() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_update_for_new_last_trans_on_disk()
+ * Function:    H5C_update_for_new_last_trans_on_disk()
  *
  * Purpose:     Update the journal write in progress list for a change in
  * 		the last transaction on disk.
@@ -1143,17 +1143,17 @@ done:
  */
 
 herr_t
-H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
+H5C_update_for_new_last_trans_on_disk(H5C_t * cache_ptr,
 		                       uint64_t new_last_trans_on_disk)
 {
-    H5C2_cache_entry_t * entry_ptr = NULL;
-    H5C2_cache_entry_t * prev_entry_ptr = NULL;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5C_cache_entry_t * prev_entry_ptr = NULL;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_update_for_new_last_trans_on_disk, FAIL)
+    FUNC_ENTER_NOAPI(H5C_update_for_new_last_trans_on_disk, FAIL)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled );
     HDassert( cache_ptr->last_trans_on_disk <= new_last_trans_on_disk );
 
@@ -1173,7 +1173,7 @@ H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
 	    if ( entry_ptr->last_trans <= cache_ptr->last_trans_on_disk ) {
 
                 entry_ptr->last_trans = 0;
-                H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, \
+                H5C__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, \
 				                           entry_ptr, \
 		                                           FAIL)
             }
@@ -1204,7 +1204,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_update_for_new_last_trans_on_disk() */
+} /* H5C_update_for_new_last_trans_on_disk() */
 
 
 /**************************************************************************/
@@ -1212,7 +1212,7 @@ done:
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5C2_check_for_journaling()
+ * Function:	H5C_check_for_journaling()
  *
  * Purpose:	If the superblock extension of a newly opened HDF5 file
  * 		indicates that journaling is in progress, the process
@@ -1238,9 +1238,9 @@ done:
  */
 
 herr_t
-H5C2_check_for_journaling(H5F_t * f,
+H5C_check_for_journaling(H5F_t * f,
                           hid_t dxpl_id,
-			  H5C2_t * cache_ptr,
+			  H5C_t * cache_ptr,
 		          hbool_t journal_recovered)
 {
     const char * l0 =
@@ -1254,22 +1254,22 @@ H5C2_check_for_journaling(H5F_t * f,
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_check_for_journaling, FAIL)
+    FUNC_ENTER_NOAPI(H5C_check_for_journaling, FAIL)
 
     HDassert( f );
     HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->jnl_magic == 0 );
     HDassert( cache_ptr->jnl_file_name_len == 0 );
 
-    if ( H5C2__check_for_journaling ) {
+    if ( H5C__check_for_journaling ) {
 
-        result = H5C2_get_journaling_in_progress(f, cache_ptr);
+        result = H5C_get_journaling_in_progress(f, cache_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_get_journaling_in_progress() failed.")
+                        "H5C_get_journaling_in_progress() failed.")
         }
 
         if ( cache_ptr->jnl_file_name_len > 0 ) { /* journaling was in */
@@ -1282,14 +1282,14 @@ H5C2_check_for_journaling(H5F_t * f,
                  * we were.
 	         */
 
-                result = H5C2_unmark_journaling_in_progress(f, 
+                result = H5C_unmark_journaling_in_progress(f, 
                                                             dxpl_id, 
                                                             cache_ptr);
 
 	        if ( result != SUCCEED ) {
 
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                "H5C2_unmark_journaling_in_progress() failed.")
+                                "H5C_unmark_journaling_in_progress() failed.")
                 }
 	    } else {
 
@@ -1313,11 +1313,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_check_for_journaling() */
+} /* H5C_check_for_journaling() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_get_journaling_in_progress()
+ * Function:    H5C_get_journaling_in_progress()
  *
  * Purpose:     Query the HDF5 file to see if it is marked as having
  * 		journaling in progress.  Update the journaling 
@@ -1356,17 +1356,17 @@ done:
  */
 
 herr_t
-H5C2_get_journaling_in_progress(const H5F_t * f,
-				H5C2_t * cache_ptr)
+H5C_get_journaling_in_progress(const H5F_t * f,
+				H5C_t * cache_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C2_get_journaling_in_progress)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_get_journaling_in_progress)
 
     HDassert( f );
     HDassert( f->shared != NULL );
     HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->jnl_file_name_len == 0 );
 
     if ( f->shared->mdc_jnl_enabled == TRUE ) {
@@ -1378,7 +1378,7 @@ H5C2_get_journaling_in_progress(const H5F_t * f,
         }
 
         if ( f->shared->mdc_jnl_file_name_len > 
-             H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+             H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "journal file name too long?!?.")
@@ -1404,11 +1404,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_get_journaling_in_progress() */
+} /* H5C_get_journaling_in_progress() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_mark_journaling_in_progress()
+ * Function:    H5C_mark_journaling_in_progress()
  *
  * Purpose:     Modify the HDF5 file to indicate that journaling is 
  * 		in progress, and flush the file to disk.  
@@ -1439,24 +1439,24 @@ done:
  */
 
 herr_t
-H5C2_mark_journaling_in_progress(H5F_t * f,
+H5C_mark_journaling_in_progress(H5F_t * f,
                                  hid_t dxpl_id,
 				 const int32_t journal_magic,
                                  const char * journal_file_name_ptr)
 {
-    H5C2_t * cache_ptr;
+    H5C_t * cache_ptr;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
+    FUNC_ENTER_NOAPI(H5C_mark_journaling_in_progress, FAIL)
 
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
     HDassert( ! f->shared->mdc_jnl_enabled );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = f->shared->cache;
 
     HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->jnl_file_name_len == 0 );
     HDassert( journal_file_name_ptr != NULL );
 
@@ -1478,7 +1478,7 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
                     "length of journal file name is zero.")
     }
 
-    if ( cache_ptr->jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+    if ( cache_ptr->jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "journal file name too long.")
@@ -1516,11 +1516,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_mark_journaling_in_progress() */
+} /* H5C_mark_journaling_in_progress() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_unmark_journaling_in_progress()
+ * Function:    H5C_unmark_journaling_in_progress()
  *
  * Purpose:     Modify the HDF5 file to indicate that journaling is 
  * 		not in progress, and flush the file to disk.  
@@ -1552,24 +1552,24 @@ done:
  */
 
 herr_t
-H5C2_unmark_journaling_in_progress(H5F_t * f,
+H5C_unmark_journaling_in_progress(H5F_t * f,
                                    hid_t dxpl_id,
 #ifndef NDEBUG
-				   H5C2_t * cache_ptr)
+				   H5C_t * cache_ptr)
 #else /* NDEBUG */
-				   H5C2_t UNUSED * cache_ptr)
+				   H5C_t UNUSED * cache_ptr)
 #endif /* NDEBUG */
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_unmark_journaling_in_progress, FAIL)
+    FUNC_ENTER_NOAPI(H5C_unmark_journaling_in_progress, FAIL)
 
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
     HDassert( f->shared->mdc_jnl_enabled );
-    HDassert( f->shared->cache2 == cache_ptr );
+    HDassert( f->shared->cache == cache_ptr );
     HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->jnl_file_name_len > 0 );
 
 
@@ -1613,7 +1613,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_unmark_journaling_in_progress() */
+} /* H5C_unmark_journaling_in_progress() */
 
 
 /**************************************************************************/
@@ -1621,7 +1621,7 @@ done:
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_call_mdjsc_callbacks()
+ * Function:    H5C_call_mdjsc_callbacks()
  *
  * Purpose:     Call the metadata journaling status change callbacks.
  *
@@ -1635,22 +1635,22 @@ done:
  */
 
 static herr_t
-H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr, 
+H5C_call_mdjsc_callbacks(H5C_t * cache_ptr, 
 		          hid_t dxpl_id,
-		          H5C2_mdj_config_t * config_ptr)
+		          H5C_mdj_config_t * config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t i;
     int32_t funcs_called = 0;
-    H5C2_mdj_status_change_func_t func_ptr;
+    H5C_mdj_status_change_func_t func_ptr;
     void * data_ptr;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C2_call_mdjsc_callbacks)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_call_mdjsc_callbacks)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
-    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
 	      ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) );
 
@@ -1667,7 +1667,7 @@ H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
 	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
 	   cache_ptr->mdjsc_cb_tbl_len ) 
 	 ||
-	 ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) 
+	 ( cache_ptr->mdjsc_cb_tbl_len < H5C__MIN_MDJSC_CB_TBL_LEN ) 
 	 ||
          ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len )
 	   &&
@@ -1712,11 +1712,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_call_mdjsc_callbacks() */
+} /* H5C_call_mdjsc_callbacks() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_deregister_mdjsc_callback()
+ * Function:    H5C_deregister_mdjsc_callback()
  *
  * Purpose:     Deregister a metadata journaling status change callback,
  * 		shrinking the metadata journaling status callback table 
@@ -1732,17 +1732,17 @@ done:
  */
 
 herr_t
-H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
+H5C_deregister_mdjsc_callback(H5C_t * cache_ptr,
 			       int32_t idx)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t i;
     double fraction_in_use;
 
-    FUNC_ENTER_NOAPI(H5C2_deregister_mdjsc_callback, FAIL)
+    FUNC_ENTER_NOAPI(H5C_deregister_mdjsc_callback, FAIL)
 
     if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 		    "cache_ptr corrupt?!?");
@@ -1755,7 +1755,7 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
 	 ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
 	   &&
 	   ( cache_ptr->num_mdjsc_cbs != cache_ptr->mdjsc_cb_tbl_len ) ) ||
-         ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+         ( cache_ptr->mdjsc_cb_tbl_len < H5C__MIN_MDJSC_CB_TBL_LEN ) ||
          ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len ) ||
 	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) ||
 	 ( cache_ptr->num_mdjsc_cbs < 0 ) ||
@@ -1841,18 +1841,18 @@ H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
     fraction_in_use = ((double)(cache_ptr->num_mdjsc_cbs)) /
 	              ((double)(cache_ptr->mdjsc_cb_tbl_len));
 
-    if ( ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
-         ( cache_ptr->mdjsc_cb_tbl_len > H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
+    if ( ( fraction_in_use < H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
+         ( cache_ptr->mdjsc_cb_tbl_len > H5C__MIN_MDJSC_CB_TBL_LEN ) &&
          ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 
 	   (cache_ptr->mdjsc_cb_tbl_len / 2) ) ) {
         herr_t result;
 
-        result = H5C2_shrink_mdjsc_callback_table(cache_ptr);
+        result = H5C_shrink_mdjsc_callback_table(cache_ptr);
 
 	if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C2_shrink_mdjsc_callback_table() failed.");
+			"H5C_shrink_mdjsc_callback_table() failed.");
         }
     }
 
@@ -1860,11 +1860,11 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_deregister_mdjsc_callback() */
+} /* H5C_deregister_mdjsc_callback() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_grow_mdjsc_callback_table()
+ * Function:    H5C_grow_mdjsc_callback_table()
  *
  * Purpose:     Double the size of the the metadata journaling status
  * 		change callback table.  Note that the table is assumed
@@ -1880,21 +1880,21 @@ done:
  */
 
 static herr_t
-H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
+H5C_grow_mdjsc_callback_table(H5C_t * cache_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t i;
     int32_t old_mdjsc_cb_tbl_len;
     int64_t new_mdjsc_cb_tbl_len;
-    H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
-    H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
+    H5C_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
+    H5C_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C2_grow_mdjsc_callback_table)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_grow_mdjsc_callback_table)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
-    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( cache_ptr->mdjsc_cb_tbl_fl_head == -1 );
     HDassert( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len );
 
@@ -1911,8 +1911,8 @@ H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
     old_mdjsc_cb_tbl_len = cache_ptr->mdjsc_cb_tbl_len;
 
     new_mdjsc_cb_tbl_len = 2 * old_mdjsc_cb_tbl_len;
-    new_mdjsc_cb_tbl = (H5C2_mdjsc_record_t *)
-	H5MM_malloc((size_t)new_mdjsc_cb_tbl_len * sizeof(H5C2_mdjsc_record_t));
+    new_mdjsc_cb_tbl = (H5C_mdjsc_record_t *)
+	H5MM_malloc((size_t)new_mdjsc_cb_tbl_len * sizeof(H5C_mdjsc_record_t));
     if ( new_mdjsc_cb_tbl == NULL ) {
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
@@ -1936,7 +1936,7 @@ H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
     cache_ptr->mdjsc_cb_tbl_len = new_mdjsc_cb_tbl_len;
     cache_ptr->mdjsc_cb_tbl_fl_head = old_mdjsc_cb_tbl_len;
 
-    old_mdjsc_cb_tbl = (H5C2_mdjsc_record_t *)H5MM_xfree(old_mdjsc_cb_tbl);
+    old_mdjsc_cb_tbl = (H5C_mdjsc_record_t *)H5MM_xfree(old_mdjsc_cb_tbl);
 
     if ( old_mdjsc_cb_tbl != NULL ) {
 
@@ -1948,12 +1948,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_grow_mdjsc_callback_table() */
+} /* H5C_grow_mdjsc_callback_table() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C2_register_mdjsc_callback()
+ * Function:    H5C_register_mdjsc_callback()
  *
  * Purpose:     Register a metadata journaling status change callback,
  * 		growing the metadata journaling status callback table 
@@ -1969,8 +1969,8 @@ done:
  */
 
 herr_t
-H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
-		             H5C2_mdj_status_change_func_t fcn_ptr,
+H5C_register_mdjsc_callback(H5C_t * cache_ptr,
+		             H5C_mdj_status_change_func_t fcn_ptr,
 			     void * data_ptr,
 			     int32_t * idx_ptr)
 {
@@ -1978,10 +1978,10 @@ H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t i;
 
-    FUNC_ENTER_NOAPI(H5C2_register_mdjsc_callback, FAIL)
+    FUNC_ENTER_NOAPI(H5C_register_mdjsc_callback, FAIL)
 
     if ( ( cache_ptr == NULL ) ||
-         ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
+         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry");
     }
@@ -1992,7 +1992,7 @@ H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
 		    "cache_ptr->mdjsc_cb_tbl == NULL")
     }
 
-    if ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) {
+    if ( cache_ptr->mdjsc_cb_tbl_len < H5C__MIN_MDJSC_CB_TBL_LEN ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 		    "cache_ptr->mdjsc_cb_tbl_len too small")
@@ -2017,12 +2017,12 @@ H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
 
     if ( cache_ptr->mdjsc_cb_tbl_len <= cache_ptr->num_mdjsc_cbs ) {
 
-        result = H5C2_grow_mdjsc_callback_table(cache_ptr);
+        result = H5C_grow_mdjsc_callback_table(cache_ptr);
 
 	if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C2_grow_mdjsc_callback_table() failed.");
+			"H5C_grow_mdjsc_callback_table() failed.");
         }
     }
 
@@ -2071,20 +2071,20 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_register_mdjsc_callback() */
+} /* H5C_register_mdjsc_callback() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2_shrink_mdjsc_callback_table()
+ * Function:    H5C_shrink_mdjsc_callback_table()
  *
  * Purpose:     Half the size of the the metadata journaling status
  * 		change callback table.  Note that the table is assumed
  * 		to be:
  *
- * 		1) Not more than H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO * 100
+ * 		1) Not more than H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO * 100
  *                 percent full.
  *
- *              2) Of size H5C2__MIN_MDJSC_CB_TBL_LEN * 2 ** n, where
+ *              2) Of size H5C__MIN_MDJSC_CB_TBL_LEN * 2 ** n, where
  *                 n is a positive integer.
  *
  *              3) Contain no entries at index greater than or equal to
@@ -2100,7 +2100,7 @@ done:
  */
 
 static herr_t
-H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
+H5C_shrink_mdjsc_callback_table(H5C_t * cache_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
     int32_t i;
@@ -2109,15 +2109,15 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
     int32_t new_fl_head = -1;
     int32_t last_free_entry = -1;
     double fraction_in_use;
-    H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
-    H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
+    H5C_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
+    H5C_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5C2_shrink_mdjsc_callback_table)
+    FUNC_ENTER_NOAPI_NOINIT(H5C_shrink_mdjsc_callback_table)
 
     HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
-    HDassert( cache_ptr->mdjsc_cb_tbl_len > H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len > H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( cache_ptr->mdjsc_cb_tbl_fl_head >= 0);
     HDassert( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len / 2 );
 
@@ -2125,11 +2125,11 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
 	              ((double)(cache_ptr->mdjsc_cb_tbl_len));
 
     if ( ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len ) ||
-	 ( (cache_ptr->mdjsc_cb_tbl_len / 2) < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+	 ( (cache_ptr->mdjsc_cb_tbl_len / 2) < H5C__MIN_MDJSC_CB_TBL_LEN ) ||
 	 ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
 	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
 	   cache_ptr->mdjsc_cb_tbl_len / 2 ) ||
-	 ( fraction_in_use >= H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) ) {
+	 ( fraction_in_use >= H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 	            "unexpected mdjsc_cb_tbl status.");
@@ -2140,25 +2140,25 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
 
     new_mdjsc_cb_tbl_len = old_mdjsc_cb_tbl_len / 2;
 
-    while ( ( (new_mdjsc_cb_tbl_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
+    while ( ( (new_mdjsc_cb_tbl_len / 2) >= H5C__MIN_MDJSC_CB_TBL_LEN ) &&
 	    ( (((double)(cache_ptr->num_mdjsc_cbs)) / 
 	       ((double)new_mdjsc_cb_tbl_len)) <= 
-	      H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
+	      H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
 	    ( (new_mdjsc_cb_tbl_len / 2) > 
 	      cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) )
     {
 	new_mdjsc_cb_tbl_len /= 2;
     }
 
-    if ( ( new_mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+    if ( ( new_mdjsc_cb_tbl_len < H5C__MIN_MDJSC_CB_TBL_LEN ) ||
          ( new_mdjsc_cb_tbl_len < cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 	            "error in computation of new_mdjsc_cb_tbl_len?!?!");
     }
 
-    new_mdjsc_cb_tbl = (H5C2_mdjsc_record_t *)
-	H5MM_malloc((size_t)new_mdjsc_cb_tbl_len * sizeof(H5C2_mdjsc_record_t));
+    new_mdjsc_cb_tbl = (H5C_mdjsc_record_t *)
+	H5MM_malloc((size_t)new_mdjsc_cb_tbl_len * sizeof(H5C_mdjsc_record_t));
     if ( new_mdjsc_cb_tbl == NULL ) {
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
@@ -2202,7 +2202,7 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
     cache_ptr->mdjsc_cb_tbl_fl_head = new_fl_head;
     cache_ptr->mdjsc_cb_tbl_len = new_mdjsc_cb_tbl_len;
 
-    old_mdjsc_cb_tbl = ( H5C2_mdjsc_record_t *)H5MM_xfree(old_mdjsc_cb_tbl);
+    old_mdjsc_cb_tbl = ( H5C_mdjsc_record_t *)H5MM_xfree(old_mdjsc_cb_tbl);
 
     if ( old_mdjsc_cb_tbl != NULL ) {
 
@@ -2214,7 +2214,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_shrink_mdjsc_callback_table() */
+} /* H5C_shrink_mdjsc_callback_table() */
 
 
 /**************************************************************************/
@@ -2232,78 +2232,78 @@ done:
     /* remove print statements from these macros. -- JRM */
 #endif /* JRM */
 
-#define H5C2_JB_BJF__WRITE_BUFFER(struct_ptr,                             \
+#define H5C_JB_BJF__WRITE_BUFFER(struct_ptr,                             \
                                   buf_size,                               \
                                   buf_ptr,                                \
                                   is_end_trans,                           \
                                   trans_num,                              \
                                   fail_return)				  \
-if ( H5C2_jb_bjf__write_buffer((struct_ptr), (buf_size), (buf_ptr),       \
+if ( H5C_jb_bjf__write_buffer((struct_ptr), (buf_size), (buf_ptr),       \
                               (is_end_trans), (trans_num)) != SUCCEED ) { \
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_buffer() failed.");                   \
+                "H5C_jb_bjf__write_buffer() failed.");                   \
 }
 
-#define H5C2_jb_BJF__WRITE_CHKSUM(struct_ptr,                             \
+#define H5C_jb_BJF__WRITE_CHKSUM(struct_ptr,                             \
                                   is_end_trans,                           \
                                   trans_num,                              \
                                   fail_return)                            \
-if ( H5C2_jb_bjf__write_chksum((struct_ptr), (is_end_trans), (trans_num)) \
+if ( H5C_jb_bjf__write_chksum((struct_ptr), (is_end_trans), (trans_num)) \
      != SUCCEED ) {                                                       \
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_chksum() failed.");                   \
+                "H5C_jb_bjf__write_chksum() failed.");                   \
 }
 
-#define H5C2_JB_BJF__WRITE_LENGTH(struct_ptr,                             \
+#define H5C_JB_BJF__WRITE_LENGTH(struct_ptr,                             \
                                   length,                                 \
                                   is_end_trans,                           \
                                   trans_num,                              \
                                   fail_return)                            \
-if ( H5C2_jb_bjf__write_length((struct_ptr), (length), (is_end_trans),    \
+if ( H5C_jb_bjf__write_length((struct_ptr), (length), (is_end_trans),    \
                                (trans_num)) != SUCCEED ) {                \
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_length() failed.");                   \
+                "H5C_jb_bjf__write_length() failed.");                   \
 }
 
-#define H5C2_JB_BJF__WRITE_OFFSET(struct_ptr,                             \
+#define H5C_JB_BJF__WRITE_OFFSET(struct_ptr,                             \
                                   offset,                                 \
                                   is_end_trans,                           \
                                   trans_num,                              \
                                   fail_return)                            \
-if ( H5C2_jb_bjf__write_offset((struct_ptr), (offset), (is_end_trans),    \
+if ( H5C_jb_bjf__write_offset((struct_ptr), (offset), (is_end_trans),    \
                                (trans_num)) != SUCCEED ) {                \
-    HDfprintf(stdout, "%s: H5C2_jb_bjf__write_offset() failed.\n", FUNC); \
+    HDfprintf(stdout, "%s: H5C_jb_bjf__write_offset() failed.\n", FUNC); \
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_offset() failed.");                   \
+                "H5C_jb_bjf__write_offset() failed.");                   \
 }
 
-#define H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                        \
+#define H5C_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                        \
                                        sig_ptr,                           \
                                        version,                           \
                                        keep_chksum,                       \
                                        is_end_trans,                      \
                                        trans_num,                         \
                                        fail_return)                       \
-if(H5C2_jb_bjf__write_sig_and_ver((struct_ptr), (sig_ptr), (version),     \
+if(H5C_jb_bjf__write_sig_and_ver((struct_ptr), (sig_ptr), (version),     \
         (keep_chksum), (is_end_trans), (trans_num)) < 0) {                \
-    HDfprintf(stdout, "%s: H5C2_jb_bjf__write_sig_and_ver() failed.\n", FUNC); \
-    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return), "H5C2_jb_bjf__write_sig_and_ver() failed.") \
+    HDfprintf(stdout, "%s: H5C_jb_bjf__write_sig_and_ver() failed.\n", FUNC); \
+    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return), "H5C_jb_bjf__write_sig_and_ver() failed.") \
 }
 
-#define H5C2_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                          \
+#define H5C_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                          \
                                      is_end_trans,                        \
                                      trans_num,                           \
                                      fail_return)                         \
-if ( H5C2_jb_bjf__write_trans_num((struct_ptr), (is_end_trans),           \
+if ( H5C_jb_bjf__write_trans_num((struct_ptr), (is_end_trans),           \
                                   (trans_num)) != SUCCEED ) {             \
     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (fail_return),                 \
-                "H5C2_jb_bjf__write_trans_num() failed.");                \
+                "H5C_jb_bjf__write_trans_num() failed.");                \
 }
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__await_buffer_write_completion()
+ * Function:		H5C_jb_aio__await_buffer_write_completion()
  *
  * Programmer:		John Mainzer
  *
@@ -2324,7 +2324,7 @@ if ( H5C2_jb_bjf__write_trans_num((struct_ptr), (is_end_trans),           \
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__await_buffer_write_completion(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__await_buffer_write_completion(H5C_jbrb_t * struct_ptr,
 				           int buf_num)
 {
     int result;
@@ -2332,10 +2332,10 @@ H5C2_jb_aio__await_buffer_write_completion(H5C2_jbrb_t * struct_ptr,
     struct aiocb * aiocb_ptr = NULL;
     const struct aiocb * aiocb_list[1] = { NULL };
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__await_buffer_write_completion, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__await_buffer_write_completion, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->aio_ctl_blks != NULL );
     HDassert( buf_num >= 0 );
@@ -2387,7 +2387,7 @@ H5C2_jb_aio__await_buffer_write_completion(H5C2_jbrb_t * struct_ptr,
     /* TODO: Verify the number of bytes written? */
 #endif /* JRM */
 
-    H5C2__JBRB__UPDATE_STATS_FOR_BUF_WRITE_COMPLETE(struct_ptr, TRUE)
+    H5C__JBRB__UPDATE_STATS_FOR_BUF_WRITE_COMPLETE(struct_ptr, TRUE)
 
     /* mark the aio control block to indicate no write in progress */
     aiocb_ptr->aio_fildes = -1;
@@ -2396,12 +2396,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__await_buffer_write_completion() */
+} /* H5C_jb_aio__await_buffer_write_completion() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__await_async_fsync_completion()
+ * Function:		H5C_jb_aio__await_async_fsync_completion()
  *
  * Programmer:		John Mainzer
  *
@@ -2412,7 +2412,7 @@ done:
  *			Then await completion of the asynchronous fsync 
  *			at the head of the sync queue, update struct_ptr->
  *			last_trans_on_disk, remove and discard the instance
- *			of H5C2_jbrb_sync_q_entry_t at the head of the sync
+ *			of H5C_jbrb_sync_q_entry_t at the head of the sync
  *			queue, and return.
  *
  *							JRM -- 2/10/10
@@ -2422,21 +2422,21 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG 0
+#define H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG 0
 
 #if 1
 static herr_t 
-H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__await_async_fsync_completion(H5C_jbrb_t * struct_ptr)
 {
     int result;
     herr_t ret_value = SUCCEED;
-    struct H5C2_jbrb_sync_q_entry_t * head_ptr = NULL;
+    struct H5C_jbrb_sync_q_entry_t * head_ptr = NULL;
     struct aiocb * aiocb_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__await_async_fsync_completion, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__await_async_fsync_completion, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
     HDassert( struct_ptr->aio_sync_q_len > 0 );
@@ -2444,15 +2444,15 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
     head_ptr = struct_ptr->aio_sync_q_head;
 
     HDassert( head_ptr != NULL );
-    HDassert( head_ptr->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+    HDassert( head_ptr->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
 
     aiocb_ptr = &(head_ptr->ctl_blk);
 
     if ( aiocb_ptr->aio_fildes != struct_ptr->journal_file_fd ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, "%s: bad fd in ctl blk?!?\n", FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "bad fd in ctl blk?!?")
@@ -2468,17 +2468,17 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
 
         if ( ( result != 0 ) && ( result != EINPROGRESS ) ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
             HDfprintf(stdout, "%s: call to aio_error() reports error.\n", FUNC);
             HDfprintf(stdout, "%s: errno = %d (%s).\n", FUNC, errno, 
                       strerror(errno));
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
                         "aio_error() reports error.")
         }
 
-	H5C2__JBRB__UPDATE_STATS_FOR_AIO_ERROR_CALL_AWAITING_SYNC(struct_ptr)
+	H5C__JBRB__UPDATE_STATS_FOR_AIO_ERROR_CALL_AWAITING_SYNC(struct_ptr)
 
     } while ( result != 0 );
 
@@ -2487,11 +2487,11 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
 
     if ( result == -1 ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, 
                "%s: aio_return() reports something other than success.\n",
                FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
 		    "aio_return() reports something other than success.")
@@ -2505,47 +2505,47 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
     HDassert( struct_ptr->last_trans_on_disk <= head_ptr->last_trans_in_sync );
     HDassert( head_ptr->last_trans_in_sync <= struct_ptr->last_trans_written );
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
     HDfprintf(stdout, "%s: changing last trans on disk from %lld to %lld.\n",
               FUNC, struct_ptr->last_trans_on_disk, 
               head_ptr->last_trans_in_sync);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
-    H5C2__JBRB__UPDATE_STATS_FOR_ASYNC_SYNC_COMPLETED(struct_ptr, TRUE)
+    H5C__JBRB__UPDATE_STATS_FOR_ASYNC_SYNC_COMPLETED(struct_ptr, TRUE)
 
     struct_ptr->last_trans_on_disk = head_ptr->last_trans_in_sync;
     aiocb_ptr->aio_fildes = -1;
 
-    if ( H5C2_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
+    if ( H5C_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, 
-                 "%s: H5C2_jb_aio__sync_q__discard_head() failed.\n", FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+                 "%s: H5C_jb_aio__sync_q__discard_head() failed.\n", FUNC);
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__sync_q__discard_head() failed.")
+                    "H5C_jb_aio__sync_q__discard_head() failed.")
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__await_async_fsync_completion() */
+} /* H5C_jb_aio__await_async_fsync_completion() */
 #else 
 static herr_t 
-H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__await_async_fsync_completion(H5C_jbrb_t * struct_ptr)
 {
     int result;
     herr_t ret_value = SUCCEED;
-    struct H5C2_jbrb_sync_q_entry_t * head_ptr = NULL;
+    struct H5C_jbrb_sync_q_entry_t * head_ptr = NULL;
     struct aiocb * aiocb_ptr = NULL;
     const struct aiocb * aiocb_list[1] = { NULL };
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__await_async_fsync_completion, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__await_async_fsync_completion, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
     HDassert( struct_ptr->aio_sync_q_len > 0 );
@@ -2553,15 +2553,15 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
     head_ptr = struct_ptr->aio_sync_q_head;
 
     HDassert( head_ptr != NULL );
-    HDassert( head_ptr->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+    HDassert( head_ptr->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
 
     aiocb_ptr = &(head_ptr->ctl_blk);
 
     if ( aiocb_ptr->aio_fildes != struct_ptr->journal_file_fd ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, "%s: bad fd in ctl blk?!?\n", FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "bad fd in ctl blk?!?")
@@ -2573,11 +2573,11 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
 
     if ( result != 0 ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, "%s: call to aio_suspend() failed.\n", FUNC);
         HDfprintf(stdout, "%s: errno = %d (%s).\n", FUNC, errno, 
                   strerror(errno));
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
 		    "call to aio_suspend() failed.")
@@ -2588,11 +2588,11 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
 
     if ( result != 0 ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, 
                "%s: aio_error() reports error after aio_suspend() returns.\n",
                FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
                     "aio_error() reports error after aio_suspend() returns")
@@ -2602,11 +2602,11 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
     result = aio_return(aiocb_ptr);
     if ( result == -1 ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, 
                "%s: aio_return() reports something other than success.\n",
                FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
 		    "aio_return() reports something other than success.")
@@ -2620,37 +2620,37 @@ H5C2_jb_aio__await_async_fsync_completion(H5C2_jbrb_t * struct_ptr)
     HDassert( struct_ptr->last_trans_on_disk <= head_ptr->last_trans_in_sync );
     HDassert( head_ptr->last_trans_in_sync <= struct_ptr->last_trans_written );
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
     HDfprintf(stdout, "%s: changing last trans on disk from %lld to %lld.\n",
               FUNC, struct_ptr->last_trans_on_disk, 
               head_ptr->last_trans_in_sync);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
     struct_ptr->last_trans_on_disk = head_ptr->last_trans_in_sync;
     aiocb_ptr->aio_fildes = -1;
 
-    if ( H5C2_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
+    if ( H5C_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
 
-#if H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
+#if H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG
         HDfprintf(stdout, 
-                 "%s: H5C2_jb_aio__sync_q__discard_head() failed.\n", FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
+                 "%s: H5C_jb_aio__sync_q__discard_head() failed.\n", FUNC);
+#endif /* H5C_JB_AIO__AWAIT_ASYNC_FSYNC_COMPLETION__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__sync_q__discard_head() failed.")
+                    "H5C_jb_aio__sync_q__discard_head() failed.")
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__await_async_fsync_completion() */
+} /* H5C_jb_aio__await_async_fsync_completion() */
 #endif
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__await_completion_of_all_async_fsyncs
+ * Function:		H5C_jb_aio__await_completion_of_all_async_fsyncs
  *
  * Programmer:		John Mainzer
  *			2/10/10
@@ -2668,40 +2668,40 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 0
+#define H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 0
 
 herr_t 
-H5C2_jb_aio__await_completion_of_all_async_fsyncs(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__await_completion_of_all_async_fsyncs(H5C_jbrb_t * struct_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__await_completion_of_all_async_fsyncs, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__await_completion_of_all_async_fsyncs, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
 
-#if H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 
+#if H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 
     HDfprintf(stdout, "%s: entering -- aio_sync_q_len = %d.\n",
               FUNC, (int)(struct_ptr->aio_sync_q_len));
-#endif /* H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG */
 
     while ( struct_ptr->aio_sync_q_len > 0 ) {
 
-        result = H5C2_jb_aio__await_async_fsync_completion(struct_ptr);
+        result = H5C_jb_aio__await_async_fsync_completion(struct_ptr);
 
         if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 
+#if H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG 
             HDfprintf(stdout, 
-                      "H5C2_jb_aio__await_async_fsync_completion() failed.\n",
+                      "H5C_jb_aio__await_async_fsync_completion() failed.\n",
                       FUNC);
-#endif /* H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_ASYNC_FSYNCS__DEBUG */
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__await_async_fsync_completion() failed.")
+                        "H5C_jb_aio__await_async_fsync_completion() failed.")
         }
     } /* while */
 
@@ -2711,12 +2711,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__await_completion_of_all_async_fsyncs() */
+} /* H5C_jb_aio__await_completion_of_all_async_fsyncs() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__await_completion_of_all_pending_writes
+ * Function:		H5C_jb_aio__await_completion_of_all_pending_writes
  *
  * Programmer:		John Mainzer
  *			1/12/10
@@ -2736,20 +2736,20 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG 0
+#define H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG 0
 
 herr_t 
-H5C2_jb_aio__await_completion_of_all_pending_writes(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__await_completion_of_all_pending_writes(H5C_jbrb_t * struct_ptr)
 {
     hbool_t done = FALSE;
     int result;
     herr_t ret_value = SUCCEED;
     struct aiocb * aiocb_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__await_completion_of_all_pending_writes, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__await_completion_of_all_pending_writes, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
 
     if ( struct_ptr->bufs_in_use <= 0 ) {
@@ -2763,13 +2763,13 @@ H5C2_jb_aio__await_completion_of_all_pending_writes(H5C2_jbrb_t * struct_ptr)
 
         if ( aiocb_ptr->aio_fildes != -1 ) {
 
-	    result = H5C2_jb_aio__await_buffer_write_completion(struct_ptr,
+	    result = H5C_jb_aio__await_buffer_write_completion(struct_ptr,
 				                              struct_ptr->get);
 
             if ( result != SUCCEED ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C2_jb_aio__await_buffer_write_completion() failed.");
+			"H5C_jb_aio__await_buffer_write_completion() failed.");
             }
 
             /* Update the last transaction written, and then set the 
@@ -2784,12 +2784,12 @@ H5C2_jb_aio__await_completion_of_all_pending_writes(H5C2_jbrb_t * struct_ptr)
 
             (*struct_ptr->trans_tracking)[struct_ptr->get] = 0;
 
-#if H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG
+#if H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG
             HDfprintf(stdout, 
                       "%s: last_trans_written = %lld, get/put = %d/%d\n", 
                       FUNC, (long long)(struct_ptr->last_trans_written),
                       struct_ptr->get, struct_ptr->put);
-#endif /* H5C2_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG */
+#endif /* H5C_JB_AIO__AWAIT_COMPLETION_OF_ALL_PENDING_WRITES__DEBUG */
 
             /* decrement writes in progress */
             struct_ptr->writes_in_progress--;
@@ -2836,13 +2836,13 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__await_completion_of_all_pending_writes() */
+} /* H5C_jb_aio__await_completion_of_all_pending_writes() */
 
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__flush
+ * Function:		H5C_jb_aio__flush
  *
  * Programmer:		John Mainzer
  *			1/11/10
@@ -2864,21 +2864,21 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__FLUSH__DEBUG 0
+#define H5C_JB_AIO__FLUSH__DEBUG 0
 
 static herr_t 
-H5C2_jb_aio__flush(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__flush(H5C_jbrb_t * struct_ptr)
 {
     hbool_t cur_buf_was_dirty = FALSE;
     herr_t result;
     herr_t ret_value = SUCCEED;
     uint64_t last_trans_in_ring_buffer;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__flush, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__flush, FAIL)
 
     /* Check Arguments and status */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->trans_in_prog == FALSE );
     HDassert( ( ( struct_ptr->writes_in_progress == struct_ptr->bufs_in_use ) 
@@ -2907,17 +2907,17 @@ H5C2_jb_aio__flush(H5C2_jbrb_t * struct_ptr)
     /* make note of the last transaction in the ring buffer */
     last_trans_in_ring_buffer = (*struct_ptr->trans_tracking)[struct_ptr->put];
 
-#if H5C2_JB_AIO__FLUSH__DEBUG
+#if H5C_JB_AIO__FLUSH__DEBUG
     HDfprintf(stdout, "%s: trans_tracking[%d] = %lld\n", FUNC, struct_ptr->get,
               (*struct_ptr->trans_tracking)[struct_ptr->get]);
     HDfprintf(stdout, "%s: trans_tracking[%d] = %lld\n", FUNC, struct_ptr->put,
               (*struct_ptr->trans_tracking)[struct_ptr->put]);
-#endif /* H5C2_JB_AIO__FLUSH__DEBUG */
+#endif /* H5C_JB_AIO__FLUSH__DEBUG */
 
     /* if the current buffer (indicated by struct_ptr->put) is dirty,
      * but not full, queue a write of the buffer.  The dirty part should
      * be obvious.  The not full part is required, as 
-     * H5C2_jb_aio__write_to_buffer() will have already queued the write
+     * H5C_jb_aio__write_to_buffer() will have already queued the write
      * if the buffer is full.
      *
      * In passing, make note of whether the current buffer is dirty -- 
@@ -2931,38 +2931,38 @@ H5C2_jb_aio__flush(H5C2_jbrb_t * struct_ptr)
         if ( struct_ptr->cur_buf_free_space > 0 ) {
 
             /* kick off an asynchronous write of the current buffer */
-	    result = H5C2_jb_aio__queue_buffer_write(struct_ptr,
+	    result = H5C_jb_aio__queue_buffer_write(struct_ptr,
 				                     struct_ptr->put,
                                                      TRUE);
 
             if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__FLUSH__DEBUG
+#if H5C_JB_AIO__FLUSH__DEBUG
 		HDfprintf(stdout, 
-                          "%s: H5C2_jb_aio__queue_buffer_write() failed.\n", 
+                          "%s: H5C_jb_aio__queue_buffer_write() failed.\n", 
                           FUNC);
-#endif /* H5C2_JB_AIO__FLUSH__DEBUG */
+#endif /* H5C_JB_AIO__FLUSH__DEBUG */
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			    "H5C2_jb_aio__queue_buffer_write() failed.");
+			    "H5C_jb_aio__queue_buffer_write() failed.");
             }
         }
     }
 
     /* await completion of all outstanding writes */
 
-    result = H5C2_jb_aio__await_completion_of_all_pending_writes(struct_ptr);
+    result = H5C_jb_aio__await_completion_of_all_pending_writes(struct_ptr);
 
     if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__FLUSH__DEBUG
+#if H5C_JB_AIO__FLUSH__DEBUG
 	HDfprintf(stdout, 
-         "%s: H5C2_jb_aio__await_completion_of_all_pending_writes() failed.\n", 
+         "%s: H5C_jb_aio__await_completion_of_all_pending_writes() failed.\n", 
           FUNC);
-#endif /* H5C2_JB_AIO__FLUSH__DEBUG */
+#endif /* H5C_JB_AIO__FLUSH__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	    "H5C2_jb_aio__await_completion_of_all_pending_writes() failed.");
+	    "H5C_jb_aio__await_completion_of_all_pending_writes() failed.");
     }
 
     HDassert( struct_ptr->bufs_in_use == 0 );
@@ -2971,29 +2971,29 @@ H5C2_jb_aio__flush(H5C2_jbrb_t * struct_ptr)
 
     /* sync out the file */
 
-    result = H5C2_jb_aio__sync_file(struct_ptr);
+    result = H5C_jb_aio__sync_file(struct_ptr);
 
     if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__FLUSH__DEBUG
+#if H5C_JB_AIO__FLUSH__DEBUG
 	HDfprintf(stdout, 
-                  "%s: H5C2_jb_aio__sync_file() failed.\n", 
+                  "%s: H5C_jb_aio__sync_file() failed.\n", 
                   FUNC);
-#endif /* H5C2_JB_AIO__FLUSH__DEBUG */
+#endif /* H5C_JB_AIO__FLUSH__DEBUG */
 
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__sync_file() failed.");
+                    "H5C_jb_aio__sync_file() failed.");
     }
 
     /* If the current buffer was dirty on entry, it was flushed and must 
      * be prepared for use.
      *
-     * Don't call H5C2_jb_aio__prep_next_buf_for_use() for this, as 
+     * Don't call H5C_jb_aio__prep_next_buf_for_use() for this, as 
      * it assumes that the current buffer is full and dirty -- neither
      * of which is the case at present.
      *
-     * further, H5C2_jb_aio__prep_next_buf_for_use() will also 
+     * further, H5C_jb_aio__prep_next_buf_for_use() will also 
      * increment put, which will cause problems if we don't increment
      * get as well.
      */
@@ -3047,12 +3047,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__flush() */
+} /* H5C_jb_aio__flush() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__get_last_transaction_on_disk
+ * Function:		H5C_jb_aio__get_last_transaction_on_disk
  *
  * Programmer:		John Mainzer
  *			1/19/10
@@ -3079,18 +3079,18 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__get_last_transaction_on_disk(H5C_jbrb_t * struct_ptr,
                                           uint64_t * trans_num_ptr)
 {
     hbool_t ring_buffer_was_full = FALSE;
     herr_t result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__get_last_transaction_on_disk, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__get_last_transaction_on_disk, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( trans_num_ptr != NULL );
     HDassert( ( ( struct_ptr->writes_in_progress == struct_ptr->bufs_in_use ) 
@@ -3117,20 +3117,20 @@ H5C2_jb_aio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->use_aio_fsync ) {
 
-        result = H5C2_jb_aio__note_completed_async_buffer_writes(struct_ptr);
+        result = H5C_jb_aio__note_completed_async_buffer_writes(struct_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__note_completed_async_buffer_writes() failed.")
+                    "H5C_jb_aio__note_completed_async_buffer_writes() failed.")
         }
 
-        result = H5C2_jb_aio__note_completed_async_fsyncs(struct_ptr);
+        result = H5C_jb_aio__note_completed_async_fsyncs(struct_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__note_completed_async_fsyncs() failed.")
+                        "H5C_jb_aio__note_completed_async_fsyncs() failed.")
         }
     } else {
 
@@ -3144,12 +3144,12 @@ H5C2_jb_aio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
         /* await completion of all outstanding writes */
 
         result = 
-	    H5C2_jb_aio__await_completion_of_all_pending_writes(struct_ptr);
+	    H5C_jb_aio__await_completion_of_all_pending_writes(struct_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	       "H5C2_jb_aio__await_completion_of_all_pending_writes() failed.");
+	       "H5C_jb_aio__await_completion_of_all_pending_writes() failed.");
         }
 
         HDassert( struct_ptr->bufs_in_use <= 1 );
@@ -3159,12 +3159,12 @@ H5C2_jb_aio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
 
         /* sync out the file */
 
-        result = H5C2_jb_aio__sync_file(struct_ptr);
+        result = H5C_jb_aio__sync_file(struct_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__sync_file() failed.");
+                        "H5C_jb_aio__sync_file() failed.");
         }
 
 
@@ -3179,11 +3179,11 @@ H5C2_jb_aio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
          *
          * In this case, we must prepare the next buffer for use.
          *
-         * Don't call H5C2_jb_aio__prep_next_buf_for_use() for this, as 
+         * Don't call H5C_jb_aio__prep_next_buf_for_use() for this, as 
          * it assumes that the current buffer is full and dirty -- neither
          * of which is the case at present.
          *
-         * further, H5C2_jb_aio__prep_next_buf_for_use() will also 
+         * further, H5C_jb_aio__prep_next_buf_for_use() will also 
          * increment put, which will cause problems if we don't increment
          * get as well.
          */
@@ -3244,12 +3244,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__get_last_transaction_on_disk */
+} /* H5C_jb_aio__get_last_transaction_on_disk */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__make_space_in_ring_buffer()
+ * Function:		H5C_jb_aio__make_space_in_ring_buffer()
  *
  * Programmer:		John Mainzer
  *
@@ -3274,7 +3274,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__make_space_in_ring_buffer(H5C_jbrb_t * struct_ptr)
 {
     hbool_t done = FALSE;
     hbool_t buf_write_complete;
@@ -3282,10 +3282,10 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
     herr_t result;
     uint64_t last_trans_in_ring_buffer;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__make_space_in_ring_buffer, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__make_space_in_ring_buffer, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio == TRUE );
     HDassert( struct_ptr->bufs_in_use == struct_ptr->num_bufs );
     HDassert( struct_ptr->bufs_in_use == struct_ptr->writes_in_progress );
@@ -3294,7 +3294,7 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
     HDassert( struct_ptr->cur_buf_free_space == 0 );
 
     /* free up the oldest (or least recently dirtied) buffer */
-    result = H5C2_jb_aio__await_buffer_write_completion(struct_ptr,
+    result = H5C_jb_aio__await_buffer_write_completion(struct_ptr,
 				                        struct_ptr->get);
 
     if ( result != SUCCEED ) {
@@ -3302,7 +3302,7 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
         HDassert(FALSE);
 #endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__await_buffer_write_completion() failed.")
+                    "H5C_jb_aio__await_buffer_write_completion() failed.")
     }
 
     /* Update the last transaction written, and then set the transaction 
@@ -3330,13 +3330,13 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
 
     last_trans_in_ring_buffer = (*struct_ptr->trans_tracking)[struct_ptr->put];
 
-    result = H5C2_jb_aio__prep_next_buf_for_use(struct_ptr, 
+    result = H5C_jb_aio__prep_next_buf_for_use(struct_ptr, 
                                                 last_trans_in_ring_buffer);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__prep_next_buf_for_use() failed.")
+                    "H5C_jb_aio__prep_next_buf_for_use() failed.")
     }
 
     HDassert( ((struct_ptr->put + 1) % struct_ptr->num_bufs) == 
@@ -3350,14 +3350,14 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
 
 #if 1 /* JRM */
 
-    result = H5C2_jb_aio__note_completed_async_buffer_writes(struct_ptr);
+    result = H5C_jb_aio__note_completed_async_buffer_writes(struct_ptr);
 
     if ( result != SUCCEED ) {
 #if 1 /* JRM */
         HDassert(FALSE);
 #endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_aio__note_completed_async_buffer_writes() failed.")
+                    "H5C_jb_aio__note_completed_async_buffer_writes() failed.")
     }
 
 #else /* delete this branch if all goes well -- JRM */
@@ -3366,7 +3366,7 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
 
         buf_write_complete = FALSE;
 
-        result = H5C2_jb_aio__test_buffer_write_complete(struct_ptr,
+        result = H5C_jb_aio__test_buffer_write_complete(struct_ptr,
 				                         struct_ptr->get,
                                                          &buf_write_complete);
 
@@ -3375,7 +3375,7 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
             HDassert(FALSE);
 #endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__test_buffer_write_complete() failed.")
+                        "H5C_jb_aio__test_buffer_write_complete() failed.")
         }
 
         if ( buf_write_complete ) {
@@ -3430,12 +3430,12 @@ H5C2_jb_aio__make_space_in_ring_buffer(H5C2_jbrb_t * struct_ptr)
 
     if ( struct_ptr->use_aio_fsync ) {
 
-        result = H5C2_jb_aio__note_completed_async_fsyncs(struct_ptr);
+        result = H5C_jb_aio__note_completed_async_fsyncs(struct_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__note_completed_async_fsyncs() failed.")
+                        "H5C_jb_aio__note_completed_async_fsyncs() failed.")
         }
     }
 
@@ -3443,12 +3443,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__make_space_in_ring_buffer() */
+} /* H5C_jb_aio__make_space_in_ring_buffer() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__note_completed_async_buffer_writes
+ * Function:		H5C_jb_aio__note_completed_async_buffer_writes
  *
  * Programmer:		John Mainzer
  *			2/10/10
@@ -3470,37 +3470,37 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG 0
+#define H5C_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG 0
 
 static herr_t 
-H5C2_jb_aio__note_completed_async_buffer_writes(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__note_completed_async_buffer_writes(H5C_jbrb_t * struct_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;
     hbool_t write_completed = TRUE;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__note_completed_async_buffer_writes, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__note_completed_async_buffer_writes, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
 
     while ( ( struct_ptr->writes_in_progress > 0 ) &&
             ( write_completed ) ) {
 
-        result = H5C2_jb_aio__test_buffer_write_complete(struct_ptr, 
+        result = H5C_jb_aio__test_buffer_write_complete(struct_ptr, 
                                                          struct_ptr->get,
                                                          &write_completed);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__test_buffer_write_complete() failed.")
+                        "H5C_jb_aio__test_buffer_write_complete() failed.")
         }
 
         if ( write_completed ) {
 
-	    H5C2__JBRB__UPDATE_STATS_FOR_BUF_WRITE_COMPLETE(struct_ptr, FALSE)
+	    H5C__JBRB__UPDATE_STATS_FOR_BUF_WRITE_COMPLETE(struct_ptr, FALSE)
 
             /* Update the last transaction written, and then set the
              * transaction tracking array entry of the buffer whose
@@ -3531,7 +3531,7 @@ H5C2_jb_aio__note_completed_async_buffer_writes(H5C2_jbrb_t * struct_ptr)
 
             struct_ptr->get = (struct_ptr->get + 1) % (struct_ptr->num_bufs);
 
-#if H5C2_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG 
+#if H5C_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG 
             if ( ! ( ( ( struct_ptr->bufs_in_use == 0 ) 
                        &&
                        ( struct_ptr->put == struct_ptr->get ) 
@@ -3549,7 +3549,7 @@ H5C2_jb_aio__note_completed_async_buffer_writes(H5C2_jbrb_t * struct_ptr)
                              (int)(struct_ptr->put),
                              (int)(struct_ptr->get));
                } 
-#endif /* H5C2_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG */
+#endif /* H5C_JB_AIO__NOTE_COMPLETED_ASYNC_BUFFER_WRITES__DEBUG */
 
             HDassert( ( ( struct_ptr->bufs_in_use == 0 ) 
                         &&
@@ -3575,12 +3575,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__note_completed_async_buffer_writes() */
+} /* H5C_jb_aio__note_completed_async_buffer_writes() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__note_completed_async_fsyncs
+ * Function:		H5C_jb_aio__note_completed_async_fsyncs
  *
  * Programmer:		John Mainzer
  *			2/10/10
@@ -3590,7 +3590,7 @@ done:
  *
  * 			Then, if the sync queue is not empty, test to see 
  *			if the asynchronous fsync associated with the 
- *			instance of struct H5C2_jbrb_sync_q_entry_t at the 
+ *			instance of struct H5C_jbrb_sync_q_entry_t at the 
  *			head of the sync queue has completed.  
  *
  *			If it hasn't, return.
@@ -3615,16 +3615,16 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__note_completed_async_fsyncs(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__note_completed_async_fsyncs(H5C_jbrb_t * struct_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;
     hbool_t sync_completed = TRUE;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__note_completed_async_fsyncs, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__note_completed_async_fsyncs, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
 
@@ -3632,13 +3632,13 @@ H5C2_jb_aio__note_completed_async_fsyncs(H5C2_jbrb_t * struct_ptr)
             ( struct_ptr->aio_sync_q_len > struct_ptr->writes_in_progress ) &&
             ( sync_completed ) ) {
 
-        result = H5C2_jb_aio__test_next_async_fsync_complete(struct_ptr, 
+        result = H5C_jb_aio__test_next_async_fsync_complete(struct_ptr, 
                                                              &sync_completed);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__test_next_async_fsync_complete() failed.")
+                        "H5C_jb_aio__test_next_async_fsync_complete() failed.")
         }
     } /* while */
 
@@ -3646,12 +3646,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__note_completed_async_fsyncs() */
+} /* H5C_jb_aio__note_completed_async_fsyncs() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__prep_next_buf_for_use()
+ * Function:		H5C_jb_aio__prep_next_buf_for_use()
  *
  * Programmer:		John Mainzer
  *
@@ -3671,15 +3671,15 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__prep_next_buf_for_use(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__prep_next_buf_for_use(H5C_jbrb_t * struct_ptr,
                                    uint64_t last_trans_in_ring_buffer)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__prep_next_buf_for_use, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__prep_next_buf_for_use, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio == TRUE );
 
     if ( ( struct_ptr->bufs_in_use >= struct_ptr->num_bufs ) ||
@@ -3711,12 +3711,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__prep_next_buf_for_use() */
+} /* H5C_jb_aio__prep_next_buf_for_use() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__queue_async_fsync()
+ * Function:		H5C_jb_aio__queue_async_fsync()
  *
  * Programmer:		John Mainzer
  *
@@ -3725,7 +3725,7 @@ done:
  *			Verify that AIO is enabled, and that use_aio_fsync
  *			is TRUE.
  *
- *			Then allocate an instance of H5C2_jbrb_sync_q_entry_t,
+ *			Then allocate an instance of H5C_jbrb_sync_q_entry_t,
  *			load it with the last transaction queued and a 
  *			correctly configured aio control block, and attempt
  *			to queue an asynchronous fsync via aio_fsync().
@@ -3733,7 +3733,7 @@ done:
  *			If aio_fsync() is not supported, (i.e. it fails 
  *			with ENOSYS or EINVAL), set struct_ptr->use_aio_fsync 
  *			to FALSE, discard the instance of 
- *			H5C2_jbrb_sync_q_entry_t and return.
+ *			H5C_jbrb_sync_q_entry_t and return.
  *
  *			if aio_fsync() fails with EAGAIN, retry until either
  *			success, failure with some other error, or the retry
@@ -3744,13 +3744,13 @@ done:
  *			EAGAIN, EINVAL, or ENOSYS, flag an error and quit.
  *
  *			If the aio_fsync() is queued successfully, add the
- *			instance of H5C2_jbrb_sync_q_entry_t to the tail of 
+ *			instance of H5C_jbrb_sync_q_entry_t to the tail of 
  *			the aio sync queue, and then return.  
  *
- *			If the instance	of H5C2_jbrb_sync_q_entry_t is 
+ *			If the instance	of H5C_jbrb_sync_q_entry_t is 
  *			allocated, but the call to aio_fsync() fails for 
  *			any reason, discard the instance of 
- *			H5C2_jbrb_sync_q_entry_t before exiting.
+ *			H5C_jbrb_sync_q_entry_t before exiting.
  *
  *						JRM -- 2/8/10
  *
@@ -3758,11 +3758,11 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG 0
+#define H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG 0
 #define AIO_FSYNC_MAX_RETRIES	120
 
 static herr_t 
-H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__queue_async_fsync(H5C_jbrb_t * struct_ptr)
 {
     herr_t ret_value = SUCCEED;
     herr_t herr_result;
@@ -3770,18 +3770,18 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
     hbool_t sync_queued = FALSE;
     int result;
     int retries = -1;
-    struct H5C2_jbrb_sync_q_entry_t * entry_ptr = NULL;
+    struct H5C_jbrb_sync_q_entry_t * entry_ptr = NULL;
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->journal_file_fd >= 0 );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__queue_async_fsync, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__queue_async_fsync, FAIL)
 
-    entry_ptr = (struct H5C2_jbrb_sync_q_entry_t *) 
-	H5MM_malloc(sizeof(struct H5C2_jbrb_sync_q_entry_t));
+    entry_ptr = (struct H5C_jbrb_sync_q_entry_t *) 
+	H5MM_malloc(sizeof(struct H5C_jbrb_sync_q_entry_t));
 
     if ( entry_ptr == NULL ) {
 
@@ -3789,7 +3789,7 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
                     "memory allocation failed for aio sync queue entry.")
     }
 
-    entry_ptr->magic = H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC;
+    entry_ptr->magic = H5C__H5C_JBRB_SYNC_Q_T_MAGIC;
     entry_ptr->last_trans_in_sync = struct_ptr->last_trans_queued;
     bzero((void *)(&(entry_ptr->ctl_blk)), sizeof(struct aiocb));
     entry_ptr->ctl_blk.aio_fildes = struct_ptr->journal_file_fd;
@@ -3804,11 +3804,11 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
             if ( ( errno == EINVAL ) ||
                  ( errno == ENOSYS ) ) {
 
-#if H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
+#if H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
 	        HDfprintf(stdout, 
                       "%s: aio_fsync() not supported. errno = %d (%s)\n",
                       FUNC, errno, strerror(errno));
-#endif /* H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
                 HDassert( struct_ptr->aio_sync_q_len == 0 );
                 struct_ptr->use_aio_fsync = FALSE;
 
@@ -3818,11 +3818,11 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
 
                 if ( retries > AIO_FSYNC_MAX_RETRIES ) {
 
-#if H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
+#if H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
                     HDfprintf(stdout, 
 			  "%s: retry limit on calls to aio_fsync() exceeded\n",
                           FUNC);
-#endif /* H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
 
                     HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL,  \
                         "retry limit on calls to aio_fsync() exceeded.")
@@ -3837,16 +3837,16 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
                 if ( struct_ptr->aio_sync_q_len > 0 ) {
 
                     herr_result =  
-			H5C2_jb_aio__test_next_async_fsync_complete(struct_ptr,
+			H5C_jb_aio__test_next_async_fsync_complete(struct_ptr,
                                                                &sync_complete);
                 }
 	    } else {
 
-#if H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
+#if H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
 	        HDfprintf(stdout, 
                       "%s: aio_fsync() failed. errno = %d (%s)\n",
                       FUNC, errno, strerror(errno));
-#endif /* H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
 
                 HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, \
 		        "call to aio_fsync() failed.")
@@ -3857,26 +3857,26 @@ H5C2_jb_aio__queue_async_fsync(H5C2_jbrb_t * struct_ptr)
 
     if ( result == 0 ) {
 
-	herr_result = H5C2_jb_aio__sync_q__append(struct_ptr, entry_ptr);
+	herr_result = H5C_jb_aio__sync_q__append(struct_ptr, entry_ptr);
 
         if ( herr_result != SUCCEED ) {
 
              HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                         "H5C2_jb_aio__sync_q__append() failed.")
+                         "H5C_jb_aio__sync_q__append() failed.")
 
         }
 
         sync_queued = TRUE;
 
-	H5C2__JBRB__UPDATE_STATS_FOR_ASYNC_SYNCS_QUEUED(struct_ptr);
+	H5C__JBRB__UPDATE_STATS_FOR_ASYNC_SYNCS_QUEUED(struct_ptr);
 
-#if H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
+#if H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG
         HDfprintf(stdout, 
                   "%s: queued async fsync. last trans = %lld, q_len = %lld.\n",
                   FUNC, 
                   (long long)(entry_ptr->last_trans_in_sync), 
                   (long long)(struct_ptr->aio_sync_q_len));
-#endif /* H5C2_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_ASYNC_FSYNC__DEBUG */
 		
     }
 done:
@@ -3885,7 +3885,7 @@ done:
          ( ! sync_queued ) ) { /* discard *entry_ptr */
 
         entry_ptr->magic = 0;
-        entry_ptr = (struct H5C2_jbrb_sync_q_entry_t *)H5MM_xfree(entry_ptr);
+        entry_ptr = (struct H5C_jbrb_sync_q_entry_t *)H5MM_xfree(entry_ptr);
 
         if ( entry_ptr != NULL ) {
 
@@ -3896,12 +3896,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__queue_async_fsync() */
+} /* H5C_jb_aio__queue_async_fsync() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__queue_buffer_write
+ * Function:		H5C_jb_aio__queue_buffer_write
  *
  * Programmer:		John Mainzer
  *
@@ -3923,20 +3923,20 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG 0
+#define H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG 0
 #define AIO_WRITE_MAX_RETRIES	120
 
 static herr_t 
-H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__queue_buffer_write(H5C_jbrb_t * struct_ptr,
 		 	        int buf_num,
                                 hbool_t partial_write_ok)
 {
     hbool_t write_queued = FALSE;
     int result;
     int retries = -1;
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
     static int writes_queued = 0;
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
     uint64_t last_trans_in_buf;
     herr_t herr_result;
     herr_t ret_value = SUCCEED;
@@ -3945,7 +3945,7 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
     struct aiocb * aiocb_ptr = NULL;
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->buf_size > 0 );
     HDassert( struct_ptr->journal_file_fd >= 0 );
     HDassert( struct_ptr->use_aio );
@@ -3954,7 +3954,7 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
     HDassert( buf_num >= 0 );
     HDassert( buf_num < struct_ptr->num_bufs );
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__queue_buffer_write, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__queue_buffer_write, FAIL)
 
     if ( struct_ptr->cur_buf_free_space >= struct_ptr->buf_size ) {
 
@@ -3965,11 +3965,11 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
     if ( ( struct_ptr->cur_buf_free_space > 0 ) && 
          ( ! partial_write_ok ) ) {
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
 	HDfprintf(stdout, 
                   "%s: buffer not full and partial_write_ok == FALSE.\n",
                   FUNC);
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "buffer not full and partial_write_ok == FALSE.")
@@ -3986,11 +3986,11 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
 
     if ( aiocb_ptr->aio_fildes != -1 ) {
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
 	HDfprintf(stdout, 
                   "%s: AIO write alread in progress for target buffer?\n",
                   FUNC);
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "AIO write alread in progress for target buffer?")
@@ -4000,11 +4000,11 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
 
     if ( buf_ptr == NULL ) {
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
 	HDfprintf(stdout, 
                   "%s: ((*struct_ptr->buf)[buf_num]) == NULL?!?\n",
                   FUNC);
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 		    "((*struct_ptr->buf)[buf_num]) == NULL?!?")
@@ -4037,7 +4037,7 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
 
 	    } else {
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
 	        HDfprintf(stdout, 
                       "%s: aio_write(aiocb_ptr) failed. errno = %d (%s)\n",
                       FUNC, errno, strerror(errno));
@@ -4045,7 +4045,7 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
                           FUNC,
                           (long long)struct_ptr->aio_next_buf_offset,
                           (int)bytes_to_write);
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
 		        "call to aio_write() failed.")
@@ -4053,7 +4053,7 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
         }
     } while ( ( result != 0 ) && ( retries <= AIO_WRITE_MAX_RETRIES ) );
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
     if ( retries > 0 ) {
 
         HDfprintf(stdout, 
@@ -4067,36 +4067,36 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
                   (long long)struct_ptr->aio_next_buf_offset,
                   (int)bytes_to_write);
     }
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
 
     if ( ( result != 0 ) && ( retries > AIO_WRITE_MAX_RETRIES ) ) {
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
         HDfprintf(stdout, "%s: retry limit on calls to aio_write() exceeded\n",
                    FUNC);
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
                     "retry limit on calls to aio_write() exceeded.")
     }
 
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
         writes_queued++;
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
 
-    H5C2__JBRB__UPDATE_STATS_FOR_BUF_WRITE_QUEUED(struct_ptr, \
+    H5C__JBRB__UPDATE_STATS_FOR_BUF_WRITE_QUEUED(struct_ptr, \
 				(struct_ptr->cur_buf_free_space > 0 ))
 
     /* note that another write is in progress */
     struct_ptr->writes_in_progress++;
-#if H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
+#if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
     if ( struct_ptr->writes_in_progress != struct_ptr->bufs_in_use ) {
         HDfprintf(stdout, "%s: wip = %d, biu = %d.\n", FUNC,
                   struct_ptr->writes_in_progress,
                   struct_ptr->bufs_in_use);
     } 
-#endif /* H5C2_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
+#endif /* H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG */
     HDassert( struct_ptr->writes_in_progress == struct_ptr->bufs_in_use );
 
     /* update struct_ptr->last_trans_queued */
@@ -4110,12 +4110,12 @@ H5C2_jb_aio__queue_buffer_write(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->use_aio_fsync ) {
 
-        herr_result = H5C2_jb_aio__queue_async_fsync(struct_ptr);
+        herr_result = H5C_jb_aio__queue_async_fsync(struct_ptr);
 
         if ( herr_result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__queue_async_fsync() failed.")
+                        "H5C_jb_aio__queue_async_fsync() failed.")
         }
     }
 
@@ -4123,12 +4123,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__queue_buffer_write() */
+} /* H5C_jb_aio__queue_buffer_write() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__sync_file()
+ * Function:		H5C_jb_aio__sync_file()
  *
  * Programmer:		John Mainzer
  *			1/13/10
@@ -4156,26 +4156,26 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__SYNC_FILE__DEBUG 0
+#define H5C_JB_AIO__SYNC_FILE__DEBUG 0
 
 static herr_t 
-H5C2_jb_aio__sync_file(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__sync_file(H5C_jbrb_t * struct_ptr)
 {
     int result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__sync_file, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__sync_file, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->journal_file_fd >= 0 );
     HDassert( struct_ptr->use_aio );
 
     if ( struct_ptr->writes_in_progress != 0 ) {
 
-#if H5C2_JB_AIO__SYNC_FILE__DEBUG 
+#if H5C_JB_AIO__SYNC_FILE__DEBUG 
         HDfprintf(stdout, "%s: async write in progress on entry.\n", FUNC);
-#endif /* H5C2_JB_AIO__SYNC_FILE__DEBUG */
+#endif /* H5C_JB_AIO__SYNC_FILE__DEBUG */
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "async write in progress on entry")
@@ -4183,18 +4183,18 @@ H5C2_jb_aio__sync_file(H5C2_jbrb_t * struct_ptr)
 
     if ( struct_ptr->use_aio_fsync ) {
 
-        result = H5C2_jb_aio__await_completion_of_all_async_fsyncs(struct_ptr);
+        result = H5C_jb_aio__await_completion_of_all_async_fsyncs(struct_ptr);
 
         if ( result != 0 ) {
 
-#if H5C2_JB_AIO__SYNC_FILE__DEBUG 
+#if H5C_JB_AIO__SYNC_FILE__DEBUG 
             HDfprintf(stdout, 
-	    "%s: H5C2_jb_aio__await_completion_of_all_async_fsyncs() failed.\n",
+	    "%s: H5C_jb_aio__await_completion_of_all_async_fsyncs() failed.\n",
             FUNC);
-#endif /* H5C2_JB_AIO__SYNC_FILE__DEBUG */
+#endif /* H5C_JB_AIO__SYNC_FILE__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL,  \
-                "H5C2_jb_aio__await_completion_of_all_async_fsyncs() failed.");
+                "H5C_jb_aio__await_completion_of_all_async_fsyncs() failed.");
         }
     } else {
 
@@ -4202,32 +4202,32 @@ H5C2_jb_aio__sync_file(H5C2_jbrb_t * struct_ptr)
 
         if ( result != 0 ) {
 
-#if H5C2_JB_AIO__SYNC_FILE__DEBUG 
+#if H5C_JB_AIO__SYNC_FILE__DEBUG 
             HDfprintf(stdout, "%s: fsync() failed.\n", FUNC);
-#endif /* H5C2_JB_AIO__SYNC_FILE__DEBUG */
+#endif /* H5C_JB_AIO__SYNC_FILE__DEBUG */
 
             HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL,  "fsync() failed.");
         }
 
-	H5C2__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
+	H5C__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__sync_file() */
+} /* H5C_jb_aio__sync_file() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__sync_q__append()
+ * Function:		H5C_jb_aio__sync_q__append()
  *
- * Purpose:		Append an instance of H5C2_jbrb_sync_q_entry_t to
+ * Purpose:		Append an instance of H5C_jbrb_sync_q_entry_t to
  *			the sync queue.
  *
  *			Verify that AIO is enabled, and that the supplied
- *			instance of H5C2_jbrb_sync_q_entry_t has the correct
+ *			instance of H5C_jbrb_sync_q_entry_t has the correct
  *			magic value.  Then append to the end of the sync 
  *			queue.
  *							JRM -- 2/9/10
@@ -4238,18 +4238,18 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__sync_q__append(H5C2_jbrb_t * struct_ptr,
-                           struct H5C2_jbrb_sync_q_entry_t * entry_ptr)
+H5C_jb_aio__sync_q__append(H5C_jbrb_t * struct_ptr,
+                           struct H5C_jbrb_sync_q_entry_t * entry_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__sync_q__append, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__sync_q__append, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( entry_ptr != NULL );
-    HDassert( entry_ptr->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+    HDassert( entry_ptr->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
     HDassert( entry_ptr->next == NULL );
 
     /* this should be an assert, but we need to include one call to
@@ -4288,7 +4288,7 @@ H5C2_jb_aio__sync_q__append(H5C2_jbrb_t * struct_ptr,
                   )
                 );
         HDassert( struct_ptr->aio_sync_q_tail->magic == 
-                  H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+                  H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
         HDassert( struct_ptr->aio_sync_q_tail->next == NULL );
 
         struct_ptr->aio_sync_q_tail->next = entry_ptr;
@@ -4300,18 +4300,18 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__sync_q__append() */
+} /* H5C_jb_aio__sync_q__append() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__sync_q__append()
+ * Function:		H5C_jb_aio__sync_q__append()
  *
- * Purpose:		Append an instance of H5C2_jbrb_sync_q_entry_t to
+ * Purpose:		Append an instance of H5C_jbrb_sync_q_entry_t to
  *			the sync queue.
  *
  *			Verify that AIO is enabled, and that the supplied
- *			instance of H5C2_jbrb_sync_q_entry_t has the correct
+ *			instance of H5C_jbrb_sync_q_entry_t has the correct
  *			magic value.  Then append to the end of the sync 
  *			queue.
  *							JRM -- 2/9/10
@@ -4322,15 +4322,15 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__sync_q__discard_head(H5C2_jbrb_t * struct_ptr)
+H5C_jb_aio__sync_q__discard_head(H5C_jbrb_t * struct_ptr)
 {
     herr_t ret_value = SUCCEED;
-    struct H5C2_jbrb_sync_q_entry_t * head_ptr = NULL;
+    struct H5C_jbrb_sync_q_entry_t * head_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__sync_q__discard_head, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__sync_q__discard_head, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
 
@@ -4345,7 +4345,7 @@ H5C2_jb_aio__sync_q__discard_head(H5C2_jbrb_t * struct_ptr)
 
     head_ptr = struct_ptr->aio_sync_q_head;
     HDassert( head_ptr != NULL );
-    HDassert( head_ptr->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+    HDassert( head_ptr->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
 
     /* unlink *head_ptr from the queue */
 
@@ -4368,7 +4368,7 @@ H5C2_jb_aio__sync_q__discard_head(H5C2_jbrb_t * struct_ptr)
         HDassert( struct_ptr->aio_sync_q_tail != NULL );
         HDassert( struct_ptr->aio_sync_q_tail != head_ptr );
         HDassert( head_ptr->next != NULL );
-        HDassert( head_ptr->next->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+        HDassert( head_ptr->next->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
         HDassert( struct_ptr->aio_sync_q_tail->next == NULL );
 
         struct_ptr->aio_sync_q_head = head_ptr->next;
@@ -4379,7 +4379,7 @@ H5C2_jb_aio__sync_q__discard_head(H5C2_jbrb_t * struct_ptr)
     /* and then discard it */
 
     head_ptr->magic = 0;
-    head_ptr = (struct H5C2_jbrb_sync_q_entry_t *)H5MM_xfree(head_ptr);
+    head_ptr = (struct H5C_jbrb_sync_q_entry_t *)H5MM_xfree(head_ptr);
 
     if ( head_ptr != NULL ) {
 
@@ -4391,12 +4391,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__sync_q__discard_head() */
+} /* H5C_jb_aio__sync_q__discard_head() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__test_buffer_write_complete()
+ * Function:		H5C_jb_aio__test_buffer_write_complete()
  *
  * Programmer:		John Mainzer
  *
@@ -4418,7 +4418,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_aio__test_buffer_write_complete(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__test_buffer_write_complete(H5C_jbrb_t * struct_ptr,
 				        int buf_num,
                                         hbool_t *complete_ptr)
 {
@@ -4426,10 +4426,10 @@ H5C2_jb_aio__test_buffer_write_complete(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
     struct aiocb * aiocb_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__test_buffer_write_complete, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__test_buffer_write_complete, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->buf_size > 0 );
     HDassert( struct_ptr->journal_file_fd >= 0 );
     HDassert( struct_ptr->use_aio );
@@ -4488,19 +4488,19 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__test_buffer_write_complete() */
+} /* H5C_jb_aio__test_buffer_write_complete() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__test_next_async_fsync_complete()
+ * Function:		H5C_jb_aio__test_next_async_fsync_complete()
  *
  * Purpose:		Test to see if the asynchronous fsync at the head
  *			of the sync queue is complete.  
  *
  *			If it is, finish up the call to aio_fsync(), update 
  *			last_trans_on_disk, remove the associated instance of 
- *			H5C2_jbrb_sync_q_entry_t from the sync queue, set
+ *			H5C_jbrb_sync_q_entry_t from the sync queue, set
  *			*sync_complete_ptr to TRUE, and return.
  *
  *			If it isn't, set *sync_complete_ptr to FALSE, and 
@@ -4516,21 +4516,21 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 0
+#define H5C_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 0
 
 static herr_t 
-H5C2_jb_aio__test_next_async_fsync_complete(H5C2_jbrb_t * struct_ptr,
+H5C_jb_aio__test_next_async_fsync_complete(H5C_jbrb_t * struct_ptr,
                                             hbool_t *sync_complete_ptr)
 {
     int result;
     herr_t ret_value = SUCCEED;
-    struct H5C2_jbrb_sync_q_entry_t * head_ptr = NULL;
+    struct H5C_jbrb_sync_q_entry_t * head_ptr = NULL;
     struct aiocb * aiocb_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__test_next_async_fsync_complete, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__test_next_async_fsync_complete, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio );
     HDassert( struct_ptr->use_aio_fsync );
     HDassert( struct_ptr->aio_sync_q_len > 0 );
@@ -4539,7 +4539,7 @@ H5C2_jb_aio__test_next_async_fsync_complete(H5C2_jbrb_t * struct_ptr,
     head_ptr = struct_ptr->aio_sync_q_head;
 
     HDassert( head_ptr != NULL );
-    HDassert( head_ptr->magic == H5C2__H5C2_JBRB_SYNC_Q_T_MAGIC );
+    HDassert( head_ptr->magic == H5C__H5C_JBRB_SYNC_Q_T_MAGIC );
 
     aiocb_ptr = &(head_ptr->ctl_blk);
 
@@ -4575,35 +4575,35 @@ H5C2_jb_aio__test_next_async_fsync_complete(H5C2_jbrb_t * struct_ptr,
          * TRUE.
          */
 
-#if H5C2_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 
+#if H5C_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 
     HDfprintf(stdout, "%s: ltod/ltw/ltis = %lld/%lld/%lld.\n",
               FUNC, 
               (long long)(struct_ptr->last_trans_on_disk), 
               (long long)(struct_ptr->last_trans_written), 
               (long long)(head_ptr->last_trans_in_sync));
-#endif /* H5C2_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG */
+#endif /* H5C_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG */
         
         HDassert( (uint64_t)(struct_ptr->last_trans_on_disk) <= 
                       (uint64_t)(head_ptr->last_trans_in_sync) );
         HDassert( (uint64_t)(head_ptr->last_trans_in_sync) <= 
                       (uint64_t)(struct_ptr->last_trans_written) );
 
-#if H5C2_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 
+#if H5C_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG 
     HDfprintf(stdout, "%s: changing last trans on disk from %lld to %lld.\n",
               FUNC, struct_ptr->last_trans_on_disk, 
               head_ptr->last_trans_in_sync);
-#endif /* H5C2_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG */
+#endif /* H5C_JB_AIO__TEST_NEXT_ASYNC_FSYNC_COMPLETE__DEBUG */
 
-        H5C2__JBRB__UPDATE_STATS_FOR_ASYNC_SYNC_COMPLETED(struct_ptr, FALSE)
+        H5C__JBRB__UPDATE_STATS_FOR_ASYNC_SYNC_COMPLETED(struct_ptr, FALSE)
 
         aiocb_ptr->aio_fildes = -1;
 
         struct_ptr->last_trans_on_disk = head_ptr->last_trans_in_sync;
 
-        if ( H5C2_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb_aio__sync_q__discard_head(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__sync_q__discard_head() failed.")
+                        "H5C_jb_aio__sync_q__discard_head() failed.")
         }
 
         *sync_complete_ptr = TRUE;
@@ -4620,12 +4620,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__test_next_async_fsync_complete() */
+} /* H5C_jb_aio__test_next_async_fsync_complete() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_aio__write_to_buffer
+ * Function:		H5C_jb_aio__write_to_buffer
  *
  * Programmer:		John Mainzer
  *			0/09/10
@@ -4639,10 +4639,10 @@ done:
  *
  ******************************************************************************/
 
-#define H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG 0
+#define H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG 0
 
 herr_t 
-H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
+H5C_jb_aio__write_to_buffer(H5C_jbrb_t * struct_ptr,	
 			     size_t size,			
 			     const char * data,
                              hbool_t is_end_trans,
@@ -4655,11 +4655,11 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
     const char * data_remaining;
     uint64_t last_trans_in_ring_buffer;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb_aio__write_to_buffer, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_aio__write_to_buffer, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->use_aio == TRUE );
     HDassert( size > 0 );
     HDassert( data != 0 );
@@ -4691,25 +4691,25 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
      * struct_ptr->cur_buf_free_space will always be greater 
      * than zero if there is any space in the ring buffer,
      * it is sufficient to check that value and call 
-     * H5C2_jb_aio__make_space_in_ring_buffer() if it is zero.
+     * H5C_jb_aio__make_space_in_ring_buffer() if it is zero.
      */
     if ( struct_ptr->cur_buf_free_space <= 0 ) {
 
         HDassert( struct_ptr->bufs_in_use == struct_ptr->num_bufs );
         HDassert( struct_ptr->writes_in_progress == struct_ptr->bufs_in_use );
 
-        result = H5C2_jb_aio__make_space_in_ring_buffer(struct_ptr);
+        result = H5C_jb_aio__make_space_in_ring_buffer(struct_ptr);
 
         if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
             HDfprintf(stdout, 
-		      "%s: H5C2_jb_aio__make_space_in_ring_buffer(1) failed.\n",
+		      "%s: H5C_jb_aio__make_space_in_ring_buffer(1) failed.\n",
                       FUNC);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__make_space_in_ring_buffer(1) failed.")
+                        "H5C_jb_aio__make_space_in_ring_buffer(1) failed.")
         }
 
         just_called_make_space_in_ring_buffer = TRUE;
@@ -4749,30 +4749,30 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
 	    HDfprintf(stdout, "%s: set trans_tracking[%d] to %lld (1).\n",
                       FUNC, struct_ptr->put, trans_num);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
         }
 
         HDassert( struct_ptr->bufs_in_use == 
                   (struct_ptr->writes_in_progress + 1 ) );
      
         /* kick off an asynchronous write of the current buffer */
-	result = H5C2_jb_aio__queue_buffer_write(struct_ptr,
+	result = H5C_jb_aio__queue_buffer_write(struct_ptr,
 				                 struct_ptr->put,
                                                  FALSE);
 
         if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
             HDfprintf(stdout, 
-		      "%s: H5C2_jb_aio__queue_buffer_write() failed.\n",
+		      "%s: H5C_jb_aio__queue_buffer_write() failed.\n",
                       FUNC);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C2_jb_aio__queue_buffer_write() failed.");
+			"H5C_jb_aio__queue_buffer_write() failed.");
         }
 
         just_called_make_space_in_ring_buffer = FALSE;
@@ -4780,10 +4780,10 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
         HDassert( struct_ptr->bufs_in_use == struct_ptr->writes_in_progress );
 
         /* if there is another free buffer, call 
-         * H5C2_jb_aio__prep_next_buf_for_use().
+         * H5C_jb_aio__prep_next_buf_for_use().
          *
          * otherwise, if we still have data to write, call 
-         * H5C2_jb_aio__make_space_in_ring_buffer() to free up 
+         * H5C_jb_aio__make_space_in_ring_buffer() to free up 
          * space to continue the write.
          */
         if ( struct_ptr->bufs_in_use < struct_ptr->num_bufs ) {
@@ -4791,39 +4791,39 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
             last_trans_in_ring_buffer = 
 		(*struct_ptr->trans_tracking)[struct_ptr->put];
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
 	    HDfprintf(stdout, "%s: set trans_tracking[%d] to %lld (2).\n",
                       FUNC, struct_ptr->put, trans_num);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
 
-            result = H5C2_jb_aio__prep_next_buf_for_use(struct_ptr,
+            result = H5C_jb_aio__prep_next_buf_for_use(struct_ptr,
 						last_trans_in_ring_buffer);
 
             if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
             HDfprintf(stdout, 
-		      "%s: H5C2_jb_aio__prep_next_buf_for_use() failed.\n",
+		      "%s: H5C_jb_aio__prep_next_buf_for_use() failed.\n",
                       FUNC);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "H5C2_jb_aio__prep_next_buf_for_use() failed.")
+                            "H5C_jb_aio__prep_next_buf_for_use() failed.")
             }
         } else if ( size_remaining > 0 ) { 
 
-            result = H5C2_jb_aio__make_space_in_ring_buffer(struct_ptr);
+            result = H5C_jb_aio__make_space_in_ring_buffer(struct_ptr);
 
             if ( result != SUCCEED ) {
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
                 HDfprintf(stdout, 
-		       "%s: H5C2_jb_aio__make_space_in_ring_buffer() failed.\n",
+		       "%s: H5C_jb_aio__make_space_in_ring_buffer() failed.\n",
                        FUNC);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
 
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                           "H5C2_jb_aio__make_space_in_ring_buffer(2) failed.")
+                           "H5C_jb_aio__make_space_in_ring_buffer(2) failed.")
             }
             just_called_make_space_in_ring_buffer = TRUE;
         } 
@@ -4863,10 +4863,10 @@ H5C2_jb_aio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
             (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
 
-#if H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG
+#if H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG
 	    HDfprintf(stdout, "%s: set trans_tracking[%d] to %lld (3).\n",
                       FUNC, struct_ptr->put, trans_num);
-#endif /* H5C2_JB_AIO__WRITE_TO_BUFFER__DEBUG */
+#endif /* H5C_JB_AIO__WRITE_TO_BUFFER__DEBUG */
         }
     }
 
@@ -4896,13 +4896,13 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_aio__write_to_buffer */
+} /* H5C_jb_aio__write_to_buffer */
 
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__comment
+ * Function:		H5C_jb_bjf__comment
  *
  * Programmer:		John Mainzer
  *
@@ -4916,16 +4916,16 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__comment(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__comment(H5C_jbrb_t * struct_ptr,
                      const char * comment_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__comment, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__comment, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( comment_ptr != NULL );
 
     /* the following really should be an assert, but the FUNC ENTER/LEAVE
@@ -4942,12 +4942,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__comment() */
+} /* H5C_jb_bjf__comment() */
 
 
 /*****************************************************************************
  *
- * Function:		H5C2_jb_bjf__end_transaction
+ * Function:		H5C_jb_bjf__end_transaction
  *
  * Programmer:		John Mainzer
  *
@@ -4968,16 +4968,16 @@ done:
  *****************************************************************************/
 
 static herr_t
-H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__end_transaction(H5C_jbrb_t * struct_ptr,
 			     uint64_t trans_num)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__end_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__end_transaction, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->human_readable == FALSE );
 	
     /* Verify that the supplied transaction is in progress */
@@ -4998,15 +4998,15 @@ H5C2_jb_bjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Write end transaction message */
-    H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,               \
-                                   H5C2_BJNL__END_TRANS_SIG, \
-                                   H5C2_BJNL__END_TRANS_VER, \
+    H5C_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,               \
+                                   H5C_BJNL__END_TRANS_SIG, \
+                                   H5C_BJNL__END_TRANS_VER, \
                                    /* keep_chksum */ FALSE,  \
                                    /* is_end_trans */ FALSE, \
                                    trans_num,                \
                                    /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                 \
+    H5C_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                 \
                                  /* is_end_trans */ TRUE,    \
                                  trans_num,                  \
                                  /* fail_return */ FAIL)
@@ -5023,12 +5023,12 @@ done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_bjf__end_transaction */
+} /* end H5C_jb_bjf__end_transaction */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__eoa
+ * Function:		H5C_jb_bjf__eoa
  *
  * Programmer:		John Mainzer
  *
@@ -5037,7 +5037,7 @@ done:
  *
  *			Note that EOA messages are not generated by the 
  *			metadata cache, and thus are not associated with 
- *			transactions.  Since H5C2_jb__write_to_buffer()
+ *			transactions.  Since H5C_jb__write_to_buffer()
  *			expects a transaction number, we use 
  *			struct_ptr->cur_trans and pass is_end_trans
  *			as FALSE.  However, this is just a cluge to 
@@ -5050,15 +5050,15 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__eoa(H5C_jbrb_t * struct_ptr,
 		 haddr_t eoa)
 {
     herr_t ret_value = SUCCEED;
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__eoa, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__eoa, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->human_readable == FALSE );
     HDassert( struct_ptr->hdf5_file_name != NULL );
 
@@ -5067,30 +5067,30 @@ H5C2_jb_bjf__eoa(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
-        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_header_entry() failed.\n")
+                        "H5C_jb__write_header_entry() failed.\n")
         }
     } /* end if */
 
     /* Note that EOA messages are not generated by the metadata cache, and 
      * thus are not associated with transactions.  Since 
-     * H5C2_jb__write_to_buffer() expects a transaction number, we use 
+     * H5C_jb__write_to_buffer() expects a transaction number, we use 
      * struct_ptr->cur_trans and pass is_end_trans as FALSE.  However, 
      * this is just a cluge to keep pre-existing code happy.
      */
 
     /* Write EOA message */
-    H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                    \
-                                   H5C2_BJNL__END_ADDR_SPACE_SIG, \
-                                   H5C2_BJNL__END_ADDR_SPACE_VER, \
+    H5C_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                    \
+                                   H5C_BJNL__END_ADDR_SPACE_SIG, \
+                                   H5C_BJNL__END_ADDR_SPACE_VER, \
                                    /* keep_chksum */ FALSE,       \
                                    /* is_end_trans */ FALSE,      \
                                    struct_ptr->cur_trans,         \
                                    /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_OFFSET(struct_ptr,               \
+    H5C_JB_BJF__WRITE_OFFSET(struct_ptr,               \
                               eoa,                      \
                               /* is_end_trans */ FALSE, \
                               struct_ptr->cur_trans,    \
@@ -5100,12 +5100,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_bjf__eoa */
+} /* end H5C_jb_bjf__eoa */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__journal_entry
+ * Function:		H5C_jb_bjf__journal_entry
  *
  * Programmer:		John Mainzer
  *
@@ -5117,7 +5117,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__journal_entry(H5C_jbrb_t * struct_ptr,
 			   uint64_t trans_num,
 			   haddr_t base_addr,
 			   size_t length,
@@ -5125,11 +5125,11 @@ H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__journal_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__journal_entry, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->human_readable == FALSE );
 
     /* Verify that the supplied transaction is in progress */
@@ -5140,39 +5140,39 @@ H5C2_jb_bjf__journal_entry(H5C2_jbrb_t * struct_ptr,
                     "Transaction not in progress or bad transaction number.")
     } /* end if */
 
-    H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                   \
-                                   H5C2_BJNL__JOURNAL_ENTRY_SIG, \
-                                   H5C2_BJNL__JOURNAL_ENTRY_VER, \
+    H5C_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                   \
+                                   H5C_BJNL__JOURNAL_ENTRY_SIG, \
+                                   H5C_BJNL__JOURNAL_ENTRY_VER, \
                                    /* keep_chksum */ TRUE,       \
                                    /* is_end_trans */ FALSE,     \
                                    trans_num,                    \
                                    /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                     \
+    H5C_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                     \
                                  /* is_end_trans */ FALSE,       \
                                  trans_num,                      \
                                  /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_OFFSET(struct_ptr,                        \
+    H5C_JB_BJF__WRITE_OFFSET(struct_ptr,                        \
                               base_addr,                         \
                               /* is_end_trans */ FALSE,          \
                               trans_num,                         \
                               /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_LENGTH(struct_ptr,                        \
+    H5C_JB_BJF__WRITE_LENGTH(struct_ptr,                        \
                               length,                            \
                               /* is_end_trans */ FALSE,          \
                               trans_num,                         \
                               /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_BUFFER(struct_ptr,                        \
+    H5C_JB_BJF__WRITE_BUFFER(struct_ptr,                        \
                               /* buf_size */ length,             \
                               /* buf_ptr */ (const char *)body,  \
                               /* is_end_trans */ FALSE,          \
                               trans_num,                         \
                               /* fail_return */ FAIL)
 
-    H5C2_jb_BJF__WRITE_CHKSUM(struct_ptr,                        \
+    H5C_jb_BJF__WRITE_CHKSUM(struct_ptr,                        \
                               /* is_end_trans */ FALSE,          \
                               trans_num,                         \
                               /* fail_return */ FAIL)
@@ -5187,12 +5187,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__journal_entry() */
+} /* H5C_jb_bjf__journal_entry() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__start_transaction
+ * Function:		H5C_jb_bjf__start_transaction
  *
  * Programmer:		John Mainzer
  *
@@ -5209,17 +5209,17 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__start_transaction(H5C_jbrb_t * struct_ptr,
 			       uint64_t trans_num)
 
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__start_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__start_transaction, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->human_readable == FALSE );
 	
     /* Verify that there is no transaction in progress */
@@ -5241,25 +5241,25 @@ H5C2_jb_bjf__start_transaction(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
-        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_header_entry() failed.\n")
+                        "H5C_jb__write_header_entry() failed.\n")
         }
 
     } /* end if */
 
 
     /* Write start transaction message */
-    H5C2_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                 \
-                                   H5C2_BJNL__BEGIN_TRANS_SIG, \
-                                   H5C2_BJNL__BEGIN_TRANS_VER, \
+    H5C_JB_BJF__WRITE_SIG_AND_VER(struct_ptr,                 \
+                                   H5C_BJNL__BEGIN_TRANS_SIG, \
+                                   H5C_BJNL__BEGIN_TRANS_VER, \
                                    /* keep_chksum */ FALSE,    \
                                    /* is_end_trans */ FALSE,   \
                                    trans_num,                  \
                                    /* fail_return */ FAIL)
 
-    H5C2_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                   \
+    H5C_JB_BJF__WRITE_TRANS_NUM(struct_ptr,                   \
                                  /* is_end_trans */ FALSE,     \
                                  trans_num,                    \
                                  /* fail_return */ FAIL)
@@ -5272,12 +5272,12 @@ done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_bjf__start_transaction */
+} /* end H5C_jb_bjf__start_transaction */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_buf
+ * Function:		H5C_jb_bjf__write_buf
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -5292,7 +5292,7 @@ done:
  *
  *			If the supplied buffer will cross ring buffer buffer 
  *			boundaries, for now just call 
- *			H5C2_jb__write_to_buffer().
+ *			H5C_jb__write_to_buffer().
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
  *			update struct_ptr->msg_chksum.
@@ -5311,7 +5311,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__write_buffer(H5C_jbrb_t * struct_ptr,
                           size_t buf_size,
                           const char * buf_ptr,
                           hbool_t is_end_trans,
@@ -5319,10 +5319,10 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_buffer, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_buffer, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( buf_size > 0 );
     HDassert( buf_ptr != NULL );
     HDassert( trans_num > 0 ); 
@@ -5427,15 +5427,15 @@ H5C2_jb_bjf__write_buffer(H5C2_jbrb_t * struct_ptr,
 
         /* Here, handle the case where the write will reach the edge
          * of a ring buffer buffer.  This gets a bit more complex, so 
-         * for now at least, we will call H5C2_jb__write_to_buffer().  
+         * for now at least, we will call H5C_jb__write_to_buffer().  
          * If this proves too costly, further optimizations will be necessary.
          */
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, buf_size, buf_ptr,
+        if ( H5C_jb__write_to_buffer(struct_ptr, buf_size, buf_ptr,
                                       is_end_trans, trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
     }
 
@@ -5466,12 +5466,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__write_buffer() */
+} /* H5C_jb_bjf__write_buffer() */
  
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_chksum
+ * Function:		H5C_jb_bjf__write_chksum
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -5487,7 +5487,7 @@ done:
  *			fields accordingly.  
  *
  *			If the chksum will cross ring buffer buffer boundaries, 
- *			for now just call H5C2_jb__write_to_buffer().
+ *			for now just call H5C_jb__write_to_buffer().
  *
  *			Note that this function will probably prove to be
  *			a hot spot in profiling, so we should more or less
@@ -5499,18 +5499,18 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr, 
+H5C_jb_bjf__write_chksum(H5C_jbrb_t * struct_ptr, 
                           hbool_t is_end_trans,
                           uint64_t trans_num)
 {
     uint8_t *p;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_chksum, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_chksum, FAIL)
 
     /* Sanity check */
     HDassert(struct_ptr != NULL);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(trans_num > 0); 
 
     if ( ! struct_ptr->chksum_cur_msg ) {
@@ -5519,7 +5519,7 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
                     "struct_ptr->chksum_cur_msg is false?!?!.")
     }
 
-    if ( H5C2__CHECKSUM_SIZE < struct_ptr->cur_buf_free_space ) {
+    if ( H5C__CHECKSUM_SIZE < struct_ptr->cur_buf_free_space ) {
 
         /* If the checksum will fit in the current buffer with space
          * left over, just write it directly into the buffer, and 
@@ -5536,7 +5536,7 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
 
         UINT32ENCODE(p, struct_ptr->msg_chksum);
 
-        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C2__CHECKSUM_SIZE)) );
+        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C__CHECKSUM_SIZE)) );
 
         /* increment bufs_in_use as necessary -- do this differently
          * for aio and sio.
@@ -5556,19 +5556,19 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
         }
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[H5C2__CHECKSUM_SIZE]);
+        struct_ptr->head = &(struct_ptr->head[H5C__CHECKSUM_SIZE]);
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= H5C2__CHECKSUM_SIZE;
+        struct_ptr->cur_buf_free_space -= H5C__CHECKSUM_SIZE;
 
         /* update fields used only with SIO: */
         if( ! struct_ptr->use_aio ) {
 
             /* update rb_free_space */
-            struct_ptr->rb_free_space -= H5C2__CHECKSUM_SIZE;
+            struct_ptr->rb_free_space -= H5C__CHECKSUM_SIZE;
 
             /* update end of buffer space */
-            struct_ptr->rb_space_to_rollover -= H5C2__CHECKSUM_SIZE;
+            struct_ptr->rb_space_to_rollover -= H5C__CHECKSUM_SIZE;
         }
 
         if(is_end_trans)
@@ -5579,27 +5579,27 @@ H5C2_jb_bjf__write_chksum(H5C2_jbrb_t * struct_ptr,
     } /* end if */
     else {
 
-        uint8_t buf[H5C2__CHECKSUM_SIZE + 1];
+        uint8_t buf[H5C__CHECKSUM_SIZE + 1];
 
         /* Here, handle the case where the write will reach the edge
          * of a buffer.  This gets a bit more complex, so for now at 
          * least, we will construct a buffer containing a binary 
          * representation of the checksum, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * H5C_jb__write_to_buffer().  If this proves too costly, 
          * further optimizations will be necessary.
          */
         p = buf;
         UINT32ENCODE(p, struct_ptr->msg_chksum);
-        HDassert( p == &(buf[H5C2__CHECKSUM_SIZE]) );
+        HDassert( p == &(buf[H5C__CHECKSUM_SIZE]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, 
-                                      H5C2__CHECKSUM_SIZE, 
+        if ( H5C_jb__write_to_buffer(struct_ptr, 
+                                      H5C__CHECKSUM_SIZE, 
                                       (const char *)buf, 
                                       is_end_trans, 
                                       trans_num) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
     } /* end else */
 
@@ -5611,12 +5611,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__write_chksum() */
+} /* H5C_jb_bjf__write_chksum() */
  
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_length
+ * Function:		H5C_jb_bjf__write_length
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -5632,7 +5632,7 @@ done:
  *			If the binary representation of the length will 
  *			touch buffer boundaries, create a buffer containing
  *			the binary representation of the length, and then
- *			call H5C2_jb__write_to_buffer() to handle the write.
+ *			call H5C_jb__write_to_buffer() to handle the write.
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
  *			update struct_ptr->msg_chksum.
@@ -5649,7 +5649,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__write_length(H5C_jbrb_t * struct_ptr,
                           size_t length,
                           hbool_t is_end_trans,
                           uint64_t trans_num)
@@ -5658,10 +5658,10 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
     uint8_t * p;
     size_t length_width;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_length, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_length, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( trans_num > 0 ); 
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
@@ -5772,7 +5772,7 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
          * of a buffer.  This gets a bit more complex, so for now at 
          * least, we will construct a buffer containing a binary 
          * representation of the offset, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * H5C_jb__write_to_buffer().  If this proves too costly, 
          * further optimizations will be necessary.
          */
 
@@ -5801,13 +5801,13 @@ H5C2_jb_bjf__write_length(H5C2_jbrb_t * struct_ptr,
 
         HDassert( p == &(buf[length_width]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, length_width, 
+        if ( H5C_jb__write_to_buffer(struct_ptr, length_width, 
                                       (const char *)buf,
                                       is_end_trans, 
                                       trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
 
         /* Update the check sum if required */
@@ -5824,12 +5824,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__write_length() */
+} /* H5C_jb_bjf__write_length() */
  
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_offset
+ * Function:		H5C_jb_bjf__write_offset
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -5845,7 +5845,7 @@ done:
  *			If the binary representation of the offset will 
  *			touch buffer boundaries, create a buffer containing
  *			the binary representation of the offset, and then
- *			call H5C2_jb__write_to_buffer() to handle the write.
+ *			call H5C_jb__write_to_buffer() to handle the write.
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
  *			update struct_ptr->msg_chksum.
@@ -5862,7 +5862,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__write_offset(H5C_jbrb_t * struct_ptr,
                           haddr_t offset,
                           hbool_t is_end_trans,
                           uint64_t trans_num)
@@ -5871,10 +5871,10 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
     uint8_t * p;
     size_t offset_width;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_offset, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_offset, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     /* eoa messages can be written outside transactions -- so it is
      * possible that the trans_num will be 0.  Since the trans_num is 
      * not used unless is_end_trans is TRUE, we make an exception for
@@ -5990,7 +5990,7 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
          * of a buffer.  This gets a bit more complex, so for now at 
          * least, we will construct a buffer containing a binary 
          * representation of the offset, and then call 
-         * H5C2_jb__write_to_buffer().  If this proves too costly, 
+         * H5C_jb__write_to_buffer().  If this proves too costly, 
          * further optimizations will be necessary.
          */
 
@@ -6022,12 +6022,12 @@ H5C2_jb_bjf__write_offset(H5C2_jbrb_t * struct_ptr,
 
         HDassert( p == &(buf[offset_width]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, offset_width, 
+        if ( H5C_jb__write_to_buffer(struct_ptr, offset_width, 
                                       (const char *)buf,
                                       is_end_trans, trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
 
         /* Update the check sum if required */
@@ -6044,12 +6044,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__write_offset() */
+} /* H5C_jb_bjf__write_offset() */
  
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_sig_and_ver
+ * Function:		H5C_jb_bjf__write_sig_and_ver
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -6065,7 +6065,7 @@ done:
  *
  *			If the signature and version will cross buffer 
  *			boundaries, for now just call 
- *			H5C2_jb__write_to_buffer().
+ *			H5C_jb__write_to_buffer().
  *
  *			In either case, if keep_chksum is TRUE, initialize
  *			struct_ptr->msg_chksum to 0, and set struct_ptr->
@@ -6088,7 +6088,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr, 
+H5C_jb_bjf__write_sig_and_ver(H5C_jbrb_t *struct_ptr, 
                                const char *sig_ptr,
                                const uint8_t version, 
                                hbool_t keep_chksum, 
@@ -6097,12 +6097,12 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr,
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_sig_and_ver, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_sig_and_ver, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( sig_ptr != NULL );
-    HDassert( H5C2_BJNL__SIG_LEN == HDstrlen(sig_ptr) );
+    HDassert( H5C_BJNL__SIG_LEN == HDstrlen(sig_ptr) );
     HDassert( ! is_end_trans );
 
     /* eoa messages can occur outside of transactions -- and thus it is 
@@ -6113,7 +6113,7 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr,
      */
     HDassert((!is_end_trans) || (trans_num > 0));
 
-    if ( (H5C2_BJNL__SIG_LEN + 1) < struct_ptr->cur_buf_free_space ) {
+    if ( (H5C_BJNL__SIG_LEN + 1) < struct_ptr->cur_buf_free_space ) {
 
         /* If the signature and version will fit in the current buffer 
          * with space left over, just memcpy()/write it in and touch up 
@@ -6125,12 +6125,12 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr,
          */
 
 	/* write the signature into journal buffer */
-        HDmemcpy(struct_ptr->head, (const void *)sig_ptr, H5C2_BJNL__SIG_LEN);
+        HDmemcpy(struct_ptr->head, (const void *)sig_ptr, H5C_BJNL__SIG_LEN);
 
-        struct_ptr->head[H5C2_BJNL__SIG_LEN] = (char)version;
+        struct_ptr->head[H5C_BJNL__SIG_LEN] = (char)version;
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[H5C2_BJNL__SIG_LEN + 1]);
+        struct_ptr->head = &(struct_ptr->head[H5C_BJNL__SIG_LEN + 1]);
 
         /* increment bufs_in_use as necessary -- do this differently
          * for aio and sio.
@@ -6150,16 +6150,16 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr,
         }
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= H5C2_BJNL__SIG_LEN + 1;
+        struct_ptr->cur_buf_free_space -= H5C_BJNL__SIG_LEN + 1;
 
         /* update fields used only with SIO: */
         if( ! struct_ptr->use_aio ) {
 
             /* update rb_free_space */
-            struct_ptr->rb_free_space -= H5C2_BJNL__SIG_LEN + 1;
+            struct_ptr->rb_free_space -= H5C_BJNL__SIG_LEN + 1;
 
             /* update end of buffer space */
-            struct_ptr->rb_space_to_rollover -= H5C2_BJNL__SIG_LEN + 1;
+            struct_ptr->rb_space_to_rollover -= H5C_BJNL__SIG_LEN + 1;
         }
 
         /* is_end_trans must be false in this call, so just throw an 
@@ -6176,26 +6176,26 @@ H5C2_jb_bjf__write_sig_and_ver(H5C2_jbrb_t *struct_ptr,
     } /* end if */
     else {
 
-        uint8_t buf[H5C2_BJNL__SIG_LEN + 2];
+        uint8_t buf[H5C_BJNL__SIG_LEN + 2];
 
         /* Here, handle the case where the write will reach the edge
          * of a buffer.  This gets a bit more complex, so for now at 
-         * least, we will call H5C2_jb__write_to_buffer().  If this 
+         * least, we will call H5C_jb__write_to_buffer().  If this 
          * proves too costly, further optimizations will be necessary.
          */
 
-        HDmemcpy(buf, (const void *)sig_ptr, H5C2_BJNL__SIG_LEN);
+        HDmemcpy(buf, (const void *)sig_ptr, H5C_BJNL__SIG_LEN);
 
-        buf[H5C2_BJNL__SIG_LEN] = version;
+        buf[H5C_BJNL__SIG_LEN] = version;
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, 
-                                      H5C2_BJNL__SIG_LEN + 1, 
+        if ( H5C_jb__write_to_buffer(struct_ptr, 
+                                      H5C_BJNL__SIG_LEN + 1, 
                                       (const char *)buf, 
                                       is_end_trans, 
                                       trans_num) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
     } /* end else */
 
@@ -6216,12 +6216,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_bjf__write_sig_and_ver() */
+} /* end H5C_jb_bjf__write_sig_and_ver() */
  
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_bjf__write_trans_num()
+ * Function:		H5C_jb_bjf__write_trans_num()
  *
  * Programmer:		John Mainzer
  *			4/24/09
@@ -6237,7 +6237,7 @@ done:
  *			If the transaction will cross or touch buffer 
  *			boundaries, construct binary representation of the 
  *			transaction number in a buffer, and pass it to 
- *			H5C2_jb__write_to_buffer().
+ *			H5C_jb__write_to_buffer().
  *
  *			In either case, if struct_ptr->chksum_cur_msg is TRUE,
  *			update struct_ptr->msg_chksum.
@@ -6254,17 +6254,17 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
+H5C_jb_bjf__write_trans_num(H5C_jbrb_t * struct_ptr,
                              hbool_t is_end_trans,
                              uint64_t trans_num)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
     uint8_t * p;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_bjf__write_trans_num, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_bjf__write_trans_num, FAIL)
 
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( trans_num > 0 ); 
 
     /* is_end_trans must be FALSE if struct_ptr->chksum_cur_msg is TRUE.
@@ -6277,7 +6277,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
                    "is_end_trans and struct_ptr->chksum_cur_msg both true.")
     }
 
-    if ( H5C2__TRANS_NUM_SIZE < struct_ptr->cur_buf_free_space ) {
+    if ( H5C__TRANS_NUM_SIZE < struct_ptr->cur_buf_free_space ) {
 
         /* If the transaction number will fit in the current buffer with space
          * left over, just write it directly into the buffer, and touch up the 
@@ -6292,7 +6292,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         p = (uint8_t *)(struct_ptr->head);
         UINT64ENCODE(p, trans_num);
 
-        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C2__TRANS_NUM_SIZE)) );
+        HDassert( p == ((uint8_t *)(struct_ptr->head + H5C__TRANS_NUM_SIZE)) );
 
         /* increment bufs_in_use as necessary -- do this differently
          * for aio and sio.
@@ -6316,24 +6316,24 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
 
             struct_ptr->msg_chksum = 
 		H5_checksum_metadata((const void *)(struct_ptr->head), 
-                                     H5C2__TRANS_NUM_SIZE, 
+                                     H5C__TRANS_NUM_SIZE, 
                                      struct_ptr->msg_chksum);
         }
 
         /* update head pointer */
-        struct_ptr->head = &(struct_ptr->head[H5C2__TRANS_NUM_SIZE]);
+        struct_ptr->head = &(struct_ptr->head[H5C__TRANS_NUM_SIZE]);
 
         /* update current buffer usage */
-        struct_ptr->cur_buf_free_space -= H5C2__TRANS_NUM_SIZE;
+        struct_ptr->cur_buf_free_space -= H5C__TRANS_NUM_SIZE;
 
         /* update fields used only with SIO: */
         if( ! struct_ptr->use_aio ) {
 
             /* update rb_free_space */
-            struct_ptr->rb_free_space -= H5C2__TRANS_NUM_SIZE;
+            struct_ptr->rb_free_space -= H5C__TRANS_NUM_SIZE;
 
             /* update end of buffer space */
-            struct_ptr->rb_space_to_rollover -= H5C2__TRANS_NUM_SIZE;
+            struct_ptr->rb_space_to_rollover -= H5C__TRANS_NUM_SIZE;
         }
 
 
@@ -6349,26 +6349,26 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
         /* Here, handle the case where the write will reach the edge
          * of a buffer.  This gets a bit more complex, so for now at 
          * least, we will construct a buffer containing a binary representation
-         * of the transaction number, and then call H5C2_jb__write_to_buffer().
+         * of the transaction number, and then call H5C_jb__write_to_buffer().
          * If this proves too costly, further optimizations will be necessary.
          */
 
-        uint8_t buf[H5C2__TRANS_NUM_SIZE + 1];
+        uint8_t buf[H5C__TRANS_NUM_SIZE + 1];
 
         p = buf;
 
         UINT64ENCODE(p, trans_num);
 
-        HDassert( p == &(buf[H5C2__TRANS_NUM_SIZE]) );
+        HDassert( p == &(buf[H5C__TRANS_NUM_SIZE]) );
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, 
-                                      H5C2__TRANS_NUM_SIZE, 
+        if ( H5C_jb__write_to_buffer(struct_ptr, 
+                                      H5C__TRANS_NUM_SIZE, 
                                       (const char *)buf,
                                       is_end_trans, 
                                       trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.")
+                        "H5C_jb__write_to_buffer() failed.")
         }
 
         /* Update the check sum if required */
@@ -6376,7 +6376,7 @@ H5C2_jb_bjf__write_trans_num(H5C2_jbrb_t * struct_ptr,
 
             struct_ptr->msg_chksum = 
  			H5_checksum_metadata((const void *)(buf), 
-                                             H5C2__TRANS_NUM_SIZE, 
+                                             H5C__TRANS_NUM_SIZE, 
                                              struct_ptr->msg_chksum);
         }
 
@@ -6386,12 +6386,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_bjf__write_trans_num() */
+} /* H5C_jb_bjf__write_trans_num() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__bin2hex
+ * Function:		H5C_jb__bin2hex
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Tuesday, March 4, 2008
@@ -6403,7 +6403,7 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__bin2hex(const uint8_t * buf, 
+H5C_jb__bin2hex(const uint8_t * buf, 
                  char * hexdata,
                  size_t * hexlength,
                  size_t buf_size)
@@ -6413,7 +6413,7 @@ H5C2_jb__bin2hex(const uint8_t * buf,
     uint8_t        c;
     char *         t;
 	
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_jb__bin2hex)
 
     t = hexdata;
     t[0] = ' ';
@@ -6433,12 +6433,12 @@ H5C2_jb__bin2hex(const uint8_t * buf,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
-} /* end H5C2_jb__bin2hex*/
+} /* end H5C_jb__bin2hex*/
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__comment
+ * Function:		H5C_jb__comment
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -6455,38 +6455,38 @@ H5C2_jb__bin2hex(const uint8_t * buf,
  *			by struct_ptr->human_readable.  
  *
  *			The original version of this file has been renamed
- *			to H5C2_jb_hrjf__comment().
+ *			to H5C_jb_hrjf__comment().
  *
  *							JRM -- 4/2/09
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
+H5C_jb__comment(H5C_jbrb_t * struct_ptr,
 		 const char * comment_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__comment, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__comment, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( comment_ptr != NULL );
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__comment(struct_ptr, comment_ptr) != SUCCEED ) {
+        if ( H5C_jb_hrjf__comment(struct_ptr, comment_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_hrjf__comment() failed.")
+                        "H5C_jb_hrjf__comment() failed.")
         }
     } else {
 
-        if ( H5C2_jb_bjf__comment(struct_ptr, comment_ptr) != SUCCEED ) {
+        if ( H5C_jb_bjf__comment(struct_ptr, comment_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_bjf__comment() failed.")
+                        "H5C_jb_bjf__comment() failed.")
         }
     }
 
@@ -6494,12 +6494,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__comment */
+} /* end H5C_jb__comment */
 
 
 /*****************************************************************************
  *
- * Function:		H5C2_jb__end_transaction
+ * Function:		H5C_jb__end_transaction
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -6519,52 +6519,52 @@ done:
  *			by struct_ptr->human_readable.  
  *
  *			The original version of this file has been renamed
- *			to H5C2_jb_hrjf__end_transaction().
+ *			to H5C_jb_hrjf__end_transaction().
  *
  *							JRM -- 4/2/09
  *
  *****************************************************************************/
 
 herr_t
-H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb__end_transaction(H5C_jbrb_t * struct_ptr,
 			 uint64_t trans_num)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__end_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__end_transaction, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__end_transaction(struct_ptr, trans_num) != SUCCEED ) {
+        if ( H5C_jb_hrjf__end_transaction(struct_ptr, trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_hrjf__end_transaction() failed.")
+                        "H5C_jb_hrjf__end_transaction() failed.")
         }
     } else {
 
-        if ( H5C2_jb_bjf__end_transaction(struct_ptr, trans_num) != SUCCEED ) {
+        if ( H5C_jb_bjf__end_transaction(struct_ptr, trans_num) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_bjf__end_transaction() failed.")
+                        "H5C_jb_bjf__end_transaction() failed.")
         }
     }
 
-    H5C2__JBRB__UPDATE_STATS_FOR_TRANS_COMPLETED(struct_ptr);
+    H5C__JBRB__UPDATE_STATS_FOR_TRANS_COMPLETED(struct_ptr);
 	
 done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__end_transaction */
+} /* end H5C_jb__end_transaction */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__eoa
+ * Function:		H5C_jb__eoa
  *
  * Programmer:		Mike McGreevy <mamcgree@hdfgroup.org>
  *			July 29, 2008
@@ -6579,38 +6579,38 @@ done:
  *			by struct_ptr->human_readable.  
  *
  *			The original version of this file has been renamed
- *			to H5C2_jb_hrjf__eoa().
+ *			to H5C_jb_hrjf__eoa().
  *
  *							JRM -- 4/2/09
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
+H5C_jb__eoa(H5C_jbrb_t * struct_ptr,
              haddr_t eoa)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__eoa, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__eoa, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->hdf5_file_name );
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__eoa(struct_ptr, eoa) != SUCCEED ) {
+        if ( H5C_jb_hrjf__eoa(struct_ptr, eoa) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_hrjf__eoa() failed.")
+                        "H5C_jb_hrjf__eoa() failed.")
         }
     } else {
 
-        if ( H5C2_jb_bjf__eoa(struct_ptr, eoa) != SUCCEED ) {
+        if ( H5C_jb_bjf__eoa(struct_ptr, eoa) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_bjf__eoa() failed.")
+                        "H5C_jb_bjf__eoa() failed.")
         }
     }
 
@@ -6618,12 +6618,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb__eoa() */
+} /* H5C_jb__eoa() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__flush
+ * Function:		H5C_jb__flush
  *
  * Programmer:		John Mainzer -- 1/14/10
  *
@@ -6635,15 +6635,15 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
+H5C_jb__flush(H5C_jbrb_t * struct_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__flush, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__flush, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
 	
     /* Check if transaction is in progress */
 
@@ -6655,23 +6655,23 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
 
     if ( struct_ptr->use_aio ) {
 
-        ret_value = H5C2_jb_aio__flush(struct_ptr);
+        ret_value = H5C_jb_aio__flush(struct_ptr);
 
     } else {
 
-        ret_value = H5C2_jb_sio__flush(struct_ptr);
+        ret_value = H5C_jb_sio__flush(struct_ptr);
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb__flush() */
+} /* H5C_jb__flush() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__get_last_transaction_on_disk
+ * Function:		H5C_jb__get_last_transaction_on_disk
  *
  * Programmer:		JRM -- 1/20/10
  *
@@ -6684,39 +6684,39 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
+H5C_jb__get_last_transaction_on_disk(H5C_jbrb_t * struct_ptr,
 				      uint64_t * trans_num_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__get_last_transaction_on_disk, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__get_last_transaction_on_disk, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( trans_num_ptr != NULL );
 
     if ( struct_ptr->use_aio ) {
 
-        result = H5C2_jb_aio__get_last_transaction_on_disk(struct_ptr,
+        result = H5C_jb_aio__get_last_transaction_on_disk(struct_ptr,
                                                            trans_num_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_aio__get_last_transaction_on_disk failed")
+                        "H5C_jb_aio__get_last_transaction_on_disk failed")
         }
         
     } else {
 
-        result = H5C2_jb_sio__get_last_transaction_on_disk(struct_ptr,
+        result = H5C_jb_sio__get_last_transaction_on_disk(struct_ptr,
                                                            trans_num_ptr);
 
         if ( result != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C2_jb_sio__get_last_transaction_on_disk failed")
+                        "H5C_jb_sio__get_last_transaction_on_disk failed")
         }
     }
 
@@ -6724,12 +6724,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__get_last_transaction_on_disk */
+} /* end H5C_jb__get_last_transaction_on_disk */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_hrjf__comment
+ * Function:		H5C_jb_hrjf__comment
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -6740,26 +6740,26 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__comment() to H5C2_jb_hrjf__comment().  
+ * Changes:		Renamed H5C_jb__comment() to H5C_jb_hrjf__comment().  
  *
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
+H5C_jb_hrjf__comment(H5C_jbrb_t * struct_ptr,
  		      const char * comment_ptr)
 {
     char * temp = NULL;
     size_t temp_len;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_hrjf__comment, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_hrjf__comment, FAIL)
 	
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(comment_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->hdf5_file_name);
 
     /* Verify that header message is present in journal file or ring buffer. 
@@ -6767,10 +6767,10 @@ H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
-        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_header_entry() failed.\n")
+                        "H5C_jb__write_header_entry() failed.\n")
         }
 
     } /* end if */
@@ -6788,14 +6788,14 @@ H5C2_jb_hrjf__comment(H5C2_jbrb_t * struct_ptr,
 
     HDassert ( temp_len == HDstrlen(temp) );
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, 
                                   temp_len, 
                                   temp, 
                                   FALSE, 
                                   struct_ptr->cur_trans) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     }
 
 done:
@@ -6813,12 +6813,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb hrjf__comment() */
+} /* H5C_jb hrjf__comment() */
 
 
 /*****************************************************************************
  *
- * Function:		H5C2_jb_hrjf__end_transaction
+ * Function:		H5C_jb_hrjf__end_transaction
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -6832,24 +6832,24 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__end_transaction() to
- *			H5C2_jb_hrjf__end_transaction().  
+ * Changes:		Renamed H5C_jb__end_transaction() to
+ *			H5C_jb_hrjf__end_transaction().  
  *							JRM -- 5/2/09
  *
  *****************************************************************************/
 
 static herr_t
-H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb_hrjf__end_transaction(H5C_jbrb_t * struct_ptr,
 			      uint64_t trans_num)
 {
     char temp[25];
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_hrjf__end_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_hrjf__end_transaction, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
 	
     /* Verify that the supplied transaction is in progress */
     if ( ( struct_ptr->trans_in_prog != TRUE ) ||
@@ -6873,11 +6873,11 @@ H5C2_jb_hrjf__end_transaction(H5C2_jbrb_t * struct_ptr,
     HDsnprintf(temp, (size_t)25, "3 end_trans %llu\n", trans_num);
 
     /* Write end transaction message */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
 			          TRUE, trans_num ) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     } /* end if */
 
     /* reset boolean flag indicating if at least one journal entry has 
@@ -6892,12 +6892,12 @@ done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_hrjf__end_transaction */
+} /* end H5C_jb_hrjf__end_transaction */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_hrjf__eoa
+ * Function:		H5C_jb_hrjf__eoa
  *
  * Programmer:		Mike McGreevy <mamcgree@hdfgroup.org>
  *			July 29, 2008
@@ -6906,24 +6906,24 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__eoa() to H5C2_jb_hrjf__eoa().  
+ * Changes:		Renamed H5C_jb__eoa() to H5C_jb_hrjf__eoa().  
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
+H5C_jb_hrjf__eoa(H5C_jbrb_t * struct_ptr,
 		  haddr_t eoa)
 {
     char temp[41];
     size_t temp_len = 41;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_hrjf__eoa, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_hrjf__eoa, FAIL)
 	
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->hdf5_file_name);
 
     /* Verify that header message is present in journal file or ring buffer. 
@@ -6931,10 +6931,10 @@ H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
-        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_header_entry() failed.\n")
+                        "H5C_jb__write_header_entry() failed.\n")
         }
     } /* end if */
 
@@ -6943,26 +6943,26 @@ H5C2_jb_hrjf__eoa(H5C2_jbrb_t * struct_ptr,
 
     HDassert ( HDstrlen(temp) < temp_len );
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr,  
+    if ( H5C_jb__write_to_buffer(struct_ptr,  
                                   HDstrlen(temp), 
                                   temp, 
                                   FALSE, 
                                   struct_ptr->cur_trans) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_hrjf__eoa() */
+} /* H5C_jb_hrjf__eoa() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_hrjf__journal_entry
+ * Function:		H5C_jb_hrjf__journal_entry
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -6974,14 +6974,14 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__journal_entry() to 
- *			H5C2_jb_hrjf__journal_entry().  
+ * Changes:		Renamed H5C_jb__journal_entry() to 
+ *			H5C_jb_hrjf__journal_entry().  
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
+H5C_jb_hrjf__journal_entry(H5C_jbrb_t * struct_ptr,
 	   		    uint64_t trans_num,
 			    haddr_t base_addr,
 			    size_t length,
@@ -6994,11 +6994,11 @@ H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
     uint8_t * bodydata;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_hrjf__journal_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_hrjf__journal_entry, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr != NULL);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
 
     /* Make a copy of body data */
     if ( (bodydata = (uint8_t *)H5MM_malloc(length)) == NULL ) {
@@ -7037,27 +7037,27 @@ H5C2_jb_hrjf__journal_entry(H5C2_jbrb_t * struct_ptr,
 	       length, 
 	       (unsigned long)base_addr);
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, 
                                   HDstrlen(temp), 
                                   temp, 
                                   FALSE, 
                                   trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     } /* end if */
 
     /* Convert data from binary to hex */
-    H5C2_jb__bin2hex(bodydata, hexdata, &hexlength, length);
+    H5C_jb__bin2hex(bodydata, hexdata, &hexlength, length);
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, 
                                   hexlength, 
                                   hexdata, 
                                   FALSE, 
                                   trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     } /* end if */
 
     /* Indicate that at least one journal entry has been written under 
@@ -7105,12 +7105,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_hrjf__journal_entry() */
+} /* H5C_jb_hrjf__journal_entry() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_hrjf__start_transaction
+ * Function:		H5C_jb_hrjf__start_transaction
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7124,25 +7124,25 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed H5C2_jb__start_transaction() to 
- *			H5C2_jb_hrjf__start_transaction().  
+ * Changes:		Renamed H5C_jb__start_transaction() to 
+ *			H5C_jb_hrjf__start_transaction().  
  *							JRM -- 5/2/09
  *
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb_hrjf__start_transaction(H5C_jbrb_t * struct_ptr,
 			   uint64_t trans_num)
 
 {
     char temp[150];
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_hrjf__start_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_hrjf__start_transaction, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 	
     /* Verify that there is no transaction in progress */
     if ( struct_ptr->trans_in_prog != FALSE ) {
@@ -7163,10 +7163,10 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
-        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_header_entry() failed.\n")
+                        "H5C_jb__write_header_entry() failed.\n")
         }
 
     } /* end if */
@@ -7174,14 +7174,14 @@ H5C2_jb_hrjf__start_transaction(H5C2_jbrb_t * struct_ptr,
     /* Write start transaction message */
     HDsnprintf(temp, (size_t)150, "1 bgn_trans %llu\n", trans_num);
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, 
                                   HDstrlen(temp), 
                                   temp, 
 			          FALSE, 
                                   trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     } /* end if */
 		
     /* Make note of the fact that supplied transaction is in progress */
@@ -7192,17 +7192,17 @@ done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_hrjf__start_transaction() */
+} /* H5C_jb_hrjf__start_transaction() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__init
+ * Function:		H5C_jb__init
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Tuesday, February 5, 2008
  *
- * Purpose:		Initialize the supplied instance of H5C2_jbrb_t as
+ * Purpose:		Initialize the supplied instance of H5C_jbrb_t as
  *			specified by the buf_size and num_bufs fields. Open the
  *			journal file whose name is supplied in journal_file_name
  *			for either synchronous or asynchronous I/O as specified
@@ -7226,15 +7226,15 @@ done:
  *
  *			JRM -- 12/7/09
  *			Added initialization for posix aio fields in 
- *			H5C2_jbrb_t.
+ *			H5C_jbrb_t.
  *
  *			JRM -- 2/21/10
- *			Added call to H5C2_jb_stats__reset();
+ *			Added call to H5C_jb_stats__reset();
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__init(H5C2_jbrb_t * struct_ptr,  	
+H5C_jb__init(H5C_jbrb_t * struct_ptr,  	
               const int32_t journal_magic,
 	      const char * HDF5_file_name,	 	
 	      const char * journal_file_name, 	
@@ -7248,7 +7248,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     int 	i;
     herr_t 	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__init, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__init, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr );
@@ -7256,9 +7256,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     HDassert( journal_file_name );
     HDassert( buf_size > 0 );
     HDassert( num_bufs > 0 );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 
-    /* Initialize Fields of H5C2_jbrb_t structure.  Note that we will
+    /* Initialize Fields of H5C_jbrb_t structure.  Note that we will
      * overwrite some of these initializations almost immediately.
      */
     struct_ptr->journal_magic = journal_magic;
@@ -7267,7 +7267,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->buf_size = buf_size;
     struct_ptr->bufs_in_use = 0;
     struct_ptr->writes_in_progress = 0;
-    struct_ptr->jvers = H5C2__JOURNAL_VERSION;
+    struct_ptr->jvers = H5C__JOURNAL_VERSION;
     struct_ptr->get = 0;
     struct_ptr->put = 0;
     struct_ptr->jentry_written = FALSE;
@@ -7308,7 +7308,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->aio_ctl_blks = NULL;
     struct_ptr->aio_next_buf_offset = (off_t)0;
 /* Comment this out to work on the Mac, currently */
-#if 1
+#if 0
     struct_ptr->use_aio_fsync = use_aio;
 #else
     struct_ptr->use_aio_fsync = FALSE;
@@ -7414,22 +7414,22 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
         }
     }
 
-    if ( H5C2_jb_stats__reset(struct_ptr) != SUCCEED ) {
+    if ( H5C_jb_stats__reset(struct_ptr) != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_jb_stats__reset() failed.")
+                    "H5C_jb_stats__reset() failed.")
     }
 
 done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__init */
+} /* end H5C_jb__init */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__journal_entry
+ * Function:		H5C_jb__journal_entry
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7447,14 +7447,14 @@ done:
  *			by struct_ptr->human_readable.  
  *
  *			The original version of this file has been renamed
- *			to H5C2_jb_hrjf__journal_entry().
+ *			to H5C_jb_hrjf__journal_entry().
  *
  *							JRM -- 4/2/09
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
+H5C_jb__journal_entry(H5C_jbrb_t * struct_ptr,
 			uint64_t trans_num,
 			haddr_t base_addr,
 			size_t length,
@@ -7462,27 +7462,27 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__journal_entry, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__journal_entry(struct_ptr, trans_num, base_addr, 
+        if ( H5C_jb_hrjf__journal_entry(struct_ptr, trans_num, base_addr, 
                                          length, body) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_hrjf__journal_entry() failed.")
+                        "H5C_jb_hrjf__journal_entry() failed.")
         }
     } else {
 
-        if ( H5C2_jb_bjf__journal_entry(struct_ptr, trans_num, base_addr,
+        if ( H5C_jb_bjf__journal_entry(struct_ptr, trans_num, base_addr,
                                         length, body) != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_bjf__journal_entry() failed.")
+                        "H5C_jb_bjf__journal_entry() failed.")
         }
     }
 
@@ -7490,12 +7490,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb__journal_entry() */
+} /* H5C_jb__journal_entry() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_sio__flush
+ * Function:		H5C_jb_sio__flush
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7507,8 +7507,8 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Renamed function from H5C2_jb__flush() to
- *			H5C2_jb_sio__flush().  Added code to verify that 
+ * Changes:		Renamed function from H5C_jb__flush() to
+ *			H5C_jb_sio__flush().  Added code to verify that 
  *			SIO is selected.
  *
  *						JRM -- 1/14/10
@@ -7516,17 +7516,17 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_sio__flush(H5C2_jbrb_t * struct_ptr)
+H5C_jb_sio__flush(H5C_jbrb_t * struct_ptr)
 {
     int result;
     int i;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_sio__flush, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_sio__flush, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->use_aio == FALSE);
 	
     /* Check if transaction is in progress */
@@ -7613,7 +7613,7 @@ H5C2_jb_sio__flush(H5C2_jbrb_t * struct_ptr)
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Journal file sync failed.")
     }
 
-    H5C2__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
+    H5C__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
 
     /* record last transaction number that made it to disk */
     struct_ptr->last_trans_on_disk = 
@@ -7643,12 +7643,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_sio__flush */
+} /* end H5C_jb_sio__flush */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_sio__flush_full_buffers
+ * Function:		H5C_jb_sio__flush_full_buffers
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7660,20 +7660,20 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- * Changes:		Changed name from H5C2_jb__flush_full_buffers() to
- *			H5C2_jb_sio__flush_full_buffers().
+ * Changes:		Changed name from H5C_jb__flush_full_buffers() to
+ *			H5C_jb_sio__flush_full_buffers().
  *
  *							JRM -- 1/14/10
  *
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_sio__flush_full_buffers(H5C2_jbrb_t * struct_ptr)	
+H5C_jb_sio__flush_full_buffers(H5C_jbrb_t * struct_ptr)	
 {
     int result;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_sio__flush_full_buffers, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_sio__flush_full_buffers, FAIL)
 
     /* this asserts that at least one buffer is in use */
     HDassert( struct_ptr->bufs_in_use > 0 );
@@ -7772,12 +7772,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_sio__flush_full_buffers */
+} /* end H5C_jb_sio__flush_full_buffers */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_sio__get_last_transaction_on_disk
+ * Function:		H5C_jb_sio__get_last_transaction_on_disk
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7791,11 +7791,11 @@ done:
  *
  * Changes:		Renamed the function from 
  *
- *			H5C2_jb__get_last_transaction_on_disk()
+ *			H5C_jb__get_last_transaction_on_disk()
  *
  *			to 
  *
- * 			H5C2_jb_sio__get_last_transaction_on_disk()
+ * 			H5C_jb_sio__get_last_transaction_on_disk()
  *
  *			and added some additional sanity checks.
  *
@@ -7804,17 +7804,17 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_sio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
+H5C_jb_sio__get_last_transaction_on_disk(H5C_jbrb_t * struct_ptr,
 				          uint64_t * trans_num_ptr)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb_sio__get_last_transaction_on_disk, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_sio__get_last_transaction_on_disk, FAIL)
 	
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
     HDassert( trans_num_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 
     /* JRM: In machine readable version, lets check to see if a sync is 
      *      necessary, and call it only if it is.
@@ -7827,7 +7827,7 @@ H5C2_jb_sio__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
     }
 
-    H5C2__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
+    H5C__JBRB__UPDATE_STATS_FOR_CALL_TO_FSYNC(struct_ptr)
 
     * trans_num_ptr = struct_ptr->last_trans_on_disk;
 
@@ -7835,12 +7835,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_sio__get_last_transaction_on_disk */
+} /* end H5C_jb_sio__get_last_transaction_on_disk */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_sio__write_to_buffer
+ * Function:		H5C_jb_sio__write_to_buffer
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -7863,8 +7863,8 @@ done:
  * Returns:		SUCCEED on success.
  *
  * Changes:		Changed the name of the function from 
- *			H5C2_jb__write_to_buffer() to 
- *			H5C2_jb_sio__write_to_buffer().  Added assert to
+ *			H5C_jb__write_to_buffer() to 
+ *			H5C_jb_sio__write_to_buffer().  Added assert to
  *			verify that struct_ptr->use_aio is FALSE.
  *
  *						JRM -- 1/14/10
@@ -7872,7 +7872,7 @@ done:
  ******************************************************************************/
 
 static herr_t 
-H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
+H5C_jb_sio__write_to_buffer(H5C_jbrb_t * struct_ptr,	
 			     size_t size,			
 			     const char * data,
                              hbool_t is_end_trans,
@@ -7883,12 +7883,12 @@ H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
     int oldput = 0;
     int i;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb_sio__write_to_buffer, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_sio__write_to_buffer, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(data);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
     HDassert(struct_ptr->use_aio == FALSE);
     HDassert( ( struct_ptr->human_readable == FALSE ) || 
               ( HDstrlen(data) == size ) );
@@ -7946,10 +7946,10 @@ H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
             }
 
 	    /* flush buffers */
-	    if ( H5C2_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
+	    if ( H5C_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
 
 		 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                             "H5C2_jb_sio__flush_full_buffers() failed.\n")
+                             "H5C_jb_sio__flush_full_buffers() failed.\n")
             }
 
 	    /* update remaining size of data to be written */
@@ -8032,10 +8032,10 @@ H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
         } /* end if */
 
 	/* flush buffers */
-	if ( H5C2_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
+	if ( H5C_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_siok__flush_full_buffers() failed.\n")
+                        "H5C_jb_siok__flush_full_buffers() failed.\n")
         }
 
 	/* update space left at end of ring buffer */
@@ -8108,10 +8108,10 @@ H5C2_jb_sio__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
 	    } /* end else */
 
-	    if ( H5C2_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
+	    if ( H5C_jb_sio__flush_full_buffers(struct_ptr) < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                            "H5C2_jb_sio__flush_full_buffers() failed.\n")
+                            "H5C_jb_sio__flush_full_buffers() failed.\n")
             } /* end if */
 
 	    struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
@@ -8126,20 +8126,20 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb_sio__write_to_buffer */
+} /* end H5C_jb_sio__write_to_buffer */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_stats__dump
+ * Function:		H5C_jb_stats__dump
  *
  * Programmer:		JRM -- 2/21/20
  *
- * Purpose:		If H5C2__JBRB__COLLECT_STATS is TRUE, dump the 
+ * Purpose:		If H5C__JBRB__COLLECT_STATS is TRUE, dump the 
  *			contents of the journal buffer ring buffer stats
  *			fields to stdout.
  *
- *			If H5C2__JBRB__COLLECT_STATS is FALSE, do nothing. 
+ *			If H5C__JBRB__COLLECT_STATS is FALSE, do nothing. 
  *
  * Returns:		void
  *
@@ -8148,25 +8148,25 @@ done:
  ******************************************************************************/
 
 herr_t
-H5C2_jb_stats__dump(H5C2_jbrb_t * struct_ptr)
+H5C_jb_stats__dump(H5C_jbrb_t * struct_ptr)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
-#if H5C2__JBRB__COLLECT_STATS
+#if H5C__JBRB__COLLECT_STATS
     double	calls_to_aio_error_per_async_sync_await = 0.0;
-#endif /* H5C2__JBRB__COLLECT_STATS */
+#endif /* H5C__JBRB__COLLECT_STATS */
 
-    FUNC_ENTER_NOAPI(H5C2_jb_stats__dump, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_stats__dump, FAIL)
 
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
      */
     if ( ( struct_ptr == NULL ) ||
-         ( struct_ptr->magic != H5C2__H5C2_JBRB_T_MAGIC ) ) {
+         ( struct_ptr->magic != H5C__H5C_JBRB_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad struct_ptr on entry")
     }
 
-#if H5C2__JBRB__COLLECT_STATS
+#if H5C__JBRB__COLLECT_STATS
     if ( struct_ptr->async_syncs_completed_by_await > 0 ) {
 
         calls_to_aio_error_per_async_sync_await = 
@@ -8208,26 +8208,26 @@ H5C2_jb_stats__dump(H5C2_jbrb_t * struct_ptr)
 
      HDfprintf(stdout, "calls to fsync() = %lld.\n",
 	       (long long)(struct_ptr->calls_to_fsync));
-#endif /* H5C2__JBRB__COLLECT_STATS */
+#endif /* H5C__JBRB__COLLECT_STATS */
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_stats__dump() */
+} /* H5C_jb_stats__dump() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb_stats__reset
+ * Function:		H5C_jb_stats__reset
  *
  * Programmer:		JRM -- 2/21/20
  *
- * Purpose:		If H5C2__JBRB__COLLECT_STATS is TRUE, reset the 
- *			stats fields in the instance of H5C2_jbrb_t 
+ * Purpose:		If H5C__JBRB__COLLECT_STATS is TRUE, reset the 
+ *			stats fields in the instance of H5C_jbrb_t 
  *			pointed to by struct_ptr.  
  *
- *			If H5C2__JBRB__COLLECT_STATS is FALSE, do nothing. 
+ *			If H5C__JBRB__COLLECT_STATS is FALSE, do nothing. 
  *
  * Returns:		void
  *
@@ -8236,22 +8236,22 @@ done:
  ******************************************************************************/
 
 herr_t
-H5C2_jb_stats__reset(H5C2_jbrb_t * struct_ptr)
+H5C_jb_stats__reset(H5C_jbrb_t * struct_ptr)
 {
     herr_t      ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_jb_stats__reset, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb_stats__reset, FAIL)
 
     /* This would normally be an assert, but we need to use an HGOTO_ERROR
      * call to shut up the compiler.
      */
     if ( ( struct_ptr == NULL ) ||
-         ( struct_ptr->magic != H5C2__H5C2_JBRB_T_MAGIC ) ) {
+         ( struct_ptr->magic != H5C__H5C_JBRB_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad struct_ptr")
     }
 
-#if H5C2__JBRB__COLLECT_STATS
+#if H5C__JBRB__COLLECT_STATS
     struct_ptr->transactions_completed           = 0;
     struct_ptr->buf_writes_queued                = 0;
     struct_ptr->full_buf_writes_queued           = 0;
@@ -8266,18 +8266,18 @@ H5C2_jb_stats__reset(H5C2_jbrb_t * struct_ptr)
     struct_ptr->calls_to_aio_error_awaiting_sync = 0;
     struct_ptr->max_sync_q_len                   = 0;
     struct_ptr->calls_to_fsync                   = 0;
-#endif /* H5C2__JBRB__COLLECT_STATS */
+#endif /* H5C__JBRB__COLLECT_STATS */
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb_stats__reset() */
+} /* H5C_jb_stats__reset() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__start_transaction
+ * Function:		H5C_jb__start_transaction
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
@@ -8297,40 +8297,40 @@ done:
  *			by struct_ptr->human_readable.  
  *
  *			The original version of this file has been renamed
- *			to H5C2_jb_hrjf__start_transaction().
+ *			to H5C_jb_hrjf__start_transaction().
  *
  *							JRM -- 4/2/09
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
+H5C_jb__start_transaction(H5C_jbrb_t * struct_ptr,
 			   uint64_t trans_num)
 
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__start_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__start_transaction, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr != NULL );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
 
     if ( struct_ptr->human_readable ) {
 
-        if ( H5C2_jb_hrjf__start_transaction(struct_ptr, trans_num) 
+        if ( H5C_jb_hrjf__start_transaction(struct_ptr, trans_num) 
              != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_hrjf__start_transaction() failed.")
+                        "H5C_jb_hrjf__start_transaction() failed.")
         }
     } else {
 
-        if ( H5C2_jb_bjf__start_transaction(struct_ptr, trans_num) 
+        if ( H5C_jb_bjf__start_transaction(struct_ptr, trans_num) 
              != SUCCEED ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb_bjf__start_transaction() failed.")
+                        "H5C_jb_bjf__start_transaction() failed.")
         }
     }
 	
@@ -8338,12 +8338,12 @@ done:
 	
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2_jb__start_transaction() */
+} /* H5C_jb__start_transaction() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__takedown
+ * Function:		H5C_jb__takedown
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Thursday, February 7, 2008
@@ -8360,33 +8360,33 @@ done:
  *			Added code to free the aio control blocks if necessary.
  *
  *			JRM -- 2/21/10
- *			Added call to H5C2_jb_stats__dump().
+ *			Added call to H5C_jb_stats__dump().
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr)
+H5C_jb__takedown(H5C_jbrb_t * struct_ptr)
 
 {
     herr_t ret_value = SUCCEED;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb__takedown, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__takedown, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
 
     /* dump the stats before we start the takedown, as the dump
      * routine may want to look at some of *struct_ptr's regular 
      * fields, as well as the stats fields.
      */
-#if H5C2__JBRB__DUMP_STATS_ON_TAKEDOWN
-    if ( H5C2_jb_stats__dump(struct_ptr) != SUCCEED ) {
+#if H5C__JBRB__DUMP_STATS_ON_TAKEDOWN
+    if ( H5C_jb_stats__dump(struct_ptr) != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	            "H5C2_jb_stats__dump() failed.")
+	            "H5C_jb_stats__dump() failed.")
     }
-#endif /* H5C2__JBRB__DUMP_STATS_ON_TAKEDOWN */
+#endif /* H5C__JBRB__DUMP_STATS_ON_TAKEDOWN */
 	
     /* Verify that the journal buffers are empty */
     if ( struct_ptr->bufs_in_use != 0 ) {
@@ -8487,12 +8487,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__takedown */
+} /* end H5C_jb__takedown */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__trunc
+ * Function:		H5C_jb__trunc
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Thursday, February 7, 2008
@@ -8511,17 +8511,17 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
+H5C_jb__trunc(H5C_jbrb_t * struct_ptr)
 
 {
     int i;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__trunc, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__trunc, FAIL)
 
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC);
 	
     /* Verify that there is no transaction in progress */
     if ( struct_ptr->trans_in_prog != FALSE ) {
@@ -8569,12 +8569,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__trunc */
+} /* end H5C_jb__trunc */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__write_header_entry
+ * Function:		H5C_jb__write_header_entry
  *
  * Programmer:		John Mainzer
  *			2/12/09
@@ -8604,7 +8604,7 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
+H5C_jb__write_header_entry(H5C_jbrb_t * struct_ptr)
 
 {
     herr_t      ret_value = SUCCEED;
@@ -8617,11 +8617,11 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
     size_t	buf_len;
     time_t      current_date;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb__write_header_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__write_header_entry, FAIL)
 
     /* Check Arguments */
     HDassert( struct_ptr );
-    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->magic == H5C__H5C_JBRB_T_MAGIC );
     HDassert( struct_ptr->hdf5_file_name != NULL );
     HDassert( struct_ptr->header_present == FALSE );
     HDassert( struct_ptr->journal_is_empty == TRUE );
@@ -8689,15 +8689,15 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
             HDsnprintf(buf, 
                        buf_len - 1,
                        "0 %s %ld %s %s %s %d %s %10.10s %s %d\n",
-                       H5C2_JNL__VER_NUM_TAG,
+                       H5C_JNL__VER_NUM_TAG,
 	               struct_ptr->jvers, 
-                       H5C2_JNL__TGT_FILE_NAME_TAG,
+                       H5C_JNL__TGT_FILE_NAME_TAG,
 	               struct_ptr->hdf5_file_name, 
-                       H5C2_JNL__JNL_MAGIC_TAG,
+                       H5C_JNL__JNL_MAGIC_TAG,
                        (int)(struct_ptr->journal_magic),
-                       H5C2_JNL__CREATION_DATE_TAG,
+                       H5C_JNL__CREATION_DATE_TAG,
 	               time_buf,
-                       H5C2_JNL__HUMAN_READABLE_TAG,
+                       H5C_JNL__HUMAN_READABLE_TAG,
 	               struct_ptr->human_readable);
 
     } else {
@@ -8716,19 +8716,19 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
             HDsnprintf(buf, 
                        buf_len - 1,
                        "0 %s %ld %s %s %s %d %s %10.10s %s %d %s %d %s %d\n",
-                       H5C2_JNL__VER_NUM_TAG,
+                       H5C_JNL__VER_NUM_TAG,
 	               struct_ptr->jvers, 
-                       H5C2_JNL__TGT_FILE_NAME_TAG,
+                       H5C_JNL__TGT_FILE_NAME_TAG,
 	               struct_ptr->hdf5_file_name, 
-                       H5C2_JNL__JNL_MAGIC_TAG,
+                       H5C_JNL__JNL_MAGIC_TAG,
                        (int)(struct_ptr->journal_magic),
-                       H5C2_JNL__CREATION_DATE_TAG,
+                       H5C_JNL__CREATION_DATE_TAG,
 	               time_buf,
-                       H5C2_JNL__HUMAN_READABLE_TAG,
+                       H5C_JNL__HUMAN_READABLE_TAG,
 	               struct_ptr->human_readable,
-                       H5C2_JNL__OFFSET_WIDTH_TAG,
+                       H5C_JNL__OFFSET_WIDTH_TAG,
                        struct_ptr->offset_width,
-                       H5C2_JNL__LENGTH_WIDTH_TAG,
+                       H5C_JNL__LENGTH_WIDTH_TAG,
                        struct_ptr->length_width);
 
     }
@@ -8742,13 +8742,13 @@ H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
     HDassert( HDstrlen(buf) < buf_len );
 
     /* Write the header message into the ring buffer */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, FALSE, 
+    if ( H5C_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, FALSE, 
 			          (uint64_t)0) < 0) {
 #if 1 /* JRM */
-    HDfprintf(stdout, "%s: H5C2_jb__write_to_buffer() failed.\n", FUNC);
+    HDfprintf(stdout, "%s: H5C_jb__write_to_buffer() failed.\n", FUNC);
 #endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
+                    "H5C_jb__write_to_buffer() failed.\n")
     } /* end if */
 
     /* Update boolean flags */
@@ -8770,12 +8770,12 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__write_header_entry() */
+} /* end H5C_jb__write_header_entry() */
 
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__write_to_buffer
+ * Function:		H5C_jb__write_to_buffer
  *
  * Programmer:		John Mainzer
  *			1/14/10
@@ -8784,14 +8784,14 @@ done:
  *			call the appropriate version of the function.
  *
  *			At some point we may wish to replace this switch
- *			function with a function pointer in struct H5C2_jbrb_t.
+ *			function with a function pointer in struct H5C_jbrb_t.
  *
  * Returns:		SUCCEED on success.
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
+H5C_jb__write_to_buffer(H5C_jbrb_t * struct_ptr,	
 			 size_t size,			
 			 const char * data,
                          hbool_t is_end_trans,
@@ -8799,11 +8799,11 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 {
     herr_t ret_value = SUCCEED;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb__write_to_buffer, FAIL)
+    FUNC_ENTER_NOAPI(H5C_jb__write_to_buffer, FAIL)
 
     /* Check Arguments */
     if ( ( struct_ptr == NULL ) ||
-         ( struct_ptr->magic != H5C2__H5C2_JBRB_T_MAGIC ) ) {
+         ( struct_ptr->magic != H5C__H5C_JBRB_T_MAGIC ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 	     "bad struct_ptr on entry.")
@@ -8811,7 +8811,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->use_aio ) {
 
-        ret_value = H5C2_jb_aio__write_to_buffer(struct_ptr,
+        ret_value = H5C_jb_aio__write_to_buffer(struct_ptr,
                                                  size,
                                                  data,
                                                  is_end_trans,
@@ -8819,7 +8819,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 
     } else {
 
-        ret_value = H5C2_jb_sio__write_to_buffer(struct_ptr,
+        ret_value = H5C_jb_sio__write_to_buffer(struct_ptr,
                                                  size,
                                                  data,
                                                  is_end_trans,
@@ -8831,5 +8831,5 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__write_to_buffer */
+} /* end H5C_jb__write_to_buffer */
 

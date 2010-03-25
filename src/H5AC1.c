@@ -511,7 +511,7 @@ H5AC1_create(const H5F_t *f,
     FUNC_ENTER_NOAPI(H5AC1_create, FAIL)
 
     HDassert(f);
-    HDassert(NULL == f->shared->cache);
+    HDassert(NULL == f->shared->cache1);
     HDassert(config_ptr != NULL);
     HDcompile_assert(NELMTS(H5AC1_entry_type_names) == H5AC1_NTYPES);
     HDcompile_assert(H5C1__MAX_NUM_TYPE_IDS == H5AC1_NTYPES);
@@ -607,7 +607,7 @@ H5AC1_create(const H5F_t *f,
 
             if ( aux_ptr->mpi_rank == 0 ) {
 
-                f->shared->cache = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
+                f->shared->cache1 = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
                                            H5AC1__DEFAULT_MIN_CLEAN_SIZE,
                                            (H5AC1_NTYPES - 1),
                                            (const char **)H5AC1_entry_type_names,
@@ -618,7 +618,7 @@ H5AC1_create(const H5F_t *f,
 
             } else {
 
-                f->shared->cache = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
+                f->shared->cache1 = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
                                            H5AC1__DEFAULT_MIN_CLEAN_SIZE,
                                            (H5AC1_NTYPES - 1),
                                            (const char **)H5AC1_entry_type_names,
@@ -634,7 +634,7 @@ H5AC1_create(const H5F_t *f,
 
         } else {
 
-            f->shared->cache = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
+            f->shared->cache1 = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
                                           H5AC1__DEFAULT_MIN_CLEAN_SIZE,
                                           (H5AC1_NTYPES - 1),
                                           (const char **)H5AC1_entry_type_names,
@@ -649,7 +649,7 @@ H5AC1_create(const H5F_t *f,
          * overwritten shortly by the subsequent set resize config call.
          *                                             -- JRM
          */
-        f->shared->cache = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
+        f->shared->cache1 = H5C1_create(H5AC1__DEFAULT_MAX_CACHE_SIZE,
                                       H5AC1__DEFAULT_MIN_CLEAN_SIZE,
                                       (H5AC1_NTYPES - 1),
                                       (const char **)H5AC1_entry_type_names,
@@ -661,7 +661,7 @@ H5AC1_create(const H5F_t *f,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    if ( NULL == f->shared->cache ) {
+    if ( NULL == f->shared->cache1 ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -669,7 +669,7 @@ H5AC1_create(const H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
     else if ( aux_ptr != NULL ) {
 
-        result = H5C1_set_prefix(f->shared->cache, prefix);
+        result = H5C1_set_prefix(f->shared->cache1, prefix);
 
         if ( result != SUCCEED ) {
 
@@ -679,7 +679,7 @@ H5AC1_create(const H5F_t *f,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    result = H5AC1_set_cache_auto_resize_config(f->shared->cache, config_ptr);
+    result = H5AC1_set_cache_auto_resize_config(f->shared->cache1, config_ptr);
 
     if ( result != SUCCEED ) {
 
@@ -765,8 +765,8 @@ H5AC1_dest(H5F_t *f, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(H5AC1_dest, FAIL)
 
     assert(f);
-    assert(f->shared->cache);
-    cache = f->shared->cache;
+    assert(f->shared->cache1);
+    cache = f->shared->cache1;
 #ifdef H5_HAVE_PARALLEL
     aux_ptr = cache->aux_ptr;
 
@@ -789,7 +789,7 @@ H5AC1_dest(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
     }
 
-    f->shared->cache = NULL;
+    f->shared->cache1 = NULL;
 
 #ifdef H5_HAVE_PARALLEL
     if ( aux_ptr != NULL ) {
@@ -853,13 +853,13 @@ H5AC1_expunge_entry(H5F_t *f,
 
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
     HDassert(type);
     HDassert(type->clear);
     HDassert(type->dest);
     HDassert(H5F_addr_defined(addr));
 
-    cache_ptr = f->shared->cache;
+    cache_ptr = f->shared->cache1;
 
 #if H5AC1__TRACE_FILE_ENABLED
     /* For the expunge entry call, only the addr, and type id are really
@@ -996,7 +996,7 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     FUNC_ENTER_NOAPI(H5AC1_flush, FAIL)
 
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
 
 #if H5AC1__TRACE_FILE_ENABLED
     /* For the flush, only the flags are really necessary in the trace file.
@@ -1004,8 +1004,8 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-	 ( f->shared->cache != NULL ) &&
-	 ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+	 ( f->shared->cache1 != NULL ) &&
+	 ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
 	 ( trace_file_ptr != NULL ) ) {
 
 	sprintf(trace, "H5AC1_flush 0x%x", flags);
@@ -1013,7 +1013,7 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 #endif /* H5AC1__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    aux_ptr = f->shared->cache->aux_ptr;
+    aux_ptr = f->shared->cache1->aux_ptr;
 
     if ( aux_ptr != NULL ) {
 
@@ -1058,7 +1058,7 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
             status = H5C1_flush_cache(f,
                                      H5AC1_noblock_dxpl_id,
                                      H5AC1_noblock_dxpl_id,
-                                     f->shared->cache,
+                                     f->shared->cache1,
                                      init_flush_flags);
 
 	    aux_ptr->write_permitted = FALSE;
@@ -1077,7 +1077,7 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
         status = H5AC1_propagate_flushed_and_still_clean_entries_list(f,
                                                           H5AC1_noblock_dxpl_id,
-                                                          f->shared->cache,
+                                                          f->shared->cache1,
                                                           FALSE);
     } /* end if ( aux_ptr != NULL ) */
 #endif /* H5_HAVE_PARALLEL */
@@ -1085,7 +1085,7 @@ H5AC1_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     status = H5C1_flush_cache(f,
                              dxpl_id,
                              H5AC1_noblock_dxpl_id,
-                             f->shared->cache,
+                             f->shared->cache1,
                              flags);
 
     if ( status < 0 ) {
@@ -1138,7 +1138,7 @@ H5AC1_get_entry_status(H5F_t *    f,
                       haddr_t    addr,
 		      unsigned * status_ptr)
 {
-    H5C1_t      *cache_ptr = f->shared->cache;
+    H5C1_t      *cache_ptr = f->shared->cache1;
     herr_t      ret_value = SUCCEED;      /* Return value */
     herr_t	result;
     hbool_t	in_cache;
@@ -1270,7 +1270,7 @@ H5AC1_set(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr, void
     FUNC_ENTER_NOAPI(H5AC1_set, FAIL)
 
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
     HDassert(type);
     HDassert(type->flush);
     HDassert(type->size);
@@ -1287,8 +1287,8 @@ H5AC1_set(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr, void
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_set 0x%lx %d 0x%x",
@@ -1299,7 +1299,7 @@ H5AC1_set(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr, void
 #endif /* H5AC1__TRACE_FILE_ENABLED */
 
     /* Get local copy of this information */
-    cache = f->shared->cache;
+    cache = f->shared->cache1;
     info = (H5AC1_info_t *)thing;
 
     info->addr = addr;
@@ -1307,10 +1307,10 @@ H5AC1_set(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr, void
     info->is_protected = FALSE;
 
 #ifdef H5_HAVE_PARALLEL
-    if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
+    if ( NULL != (aux_ptr = f->shared->cache1->aux_ptr) ) {
 
         result = H5AC1_log_inserted_entry(f,
-                                         f->shared->cache,
+                                         f->shared->cache1,
                                          (H5AC1_info_t *)thing,
                                          type,
                                          addr);
@@ -1351,7 +1351,7 @@ H5AC1_set(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr, void
 
         result = H5AC1_propagate_flushed_and_still_clean_entries_list(f,
                                                           H5AC1_noblock_dxpl_id,
-                                                          f->shared->cache,
+                                                          f->shared->cache1,
                                                           TRUE);
         if ( result < 0 ) {
 
@@ -1403,7 +1403,7 @@ H5AC1_mark_pinned_entry_dirty(H5F_t * f,
 			     hbool_t size_changed,
                              size_t  new_size)
 {
-    H5C1_t              *cache_ptr = f->shared->cache;
+    H5C1_t              *cache_ptr = f->shared->cache1;
     herr_t		result;
     herr_t              ret_value = SUCCEED;    /* Return value */
 #if H5AC1__TRACE_FILE_ENABLED
@@ -1420,8 +1420,8 @@ H5AC1_mark_pinned_entry_dirty(H5F_t * f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_mark_pinned_entry_dirty 0x%lx %d %d",
@@ -1521,7 +1521,7 @@ herr_t
 H5AC1_mark_pinned_or_protected_entry_dirty(H5F_t * f,
                                           void *  thing)
 {
-    H5C1_t *		cache_ptr = f->shared->cache;
+    H5C1_t *		cache_ptr = f->shared->cache1;
 #ifdef H5_HAVE_PARALLEL
     H5AC1_info_t *	info_ptr;
 #endif /* H5_HAVE_PARALLEL */
@@ -1541,8 +1541,8 @@ H5AC1_mark_pinned_or_protected_entry_dirty(H5F_t * f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_mark_pinned_or_protected_entry_dirty %lx",
@@ -1657,7 +1657,7 @@ H5AC1_rename(H5F_t *f, const H5AC1_class_t *type, haddr_t old_addr, haddr_t new_
     FUNC_ENTER_NOAPI(H5AC1_rename, FAIL)
 
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
     HDassert(type);
     HDassert(H5F_addr_defined(old_addr));
     HDassert(H5F_addr_defined(new_addr));
@@ -1670,8 +1670,8 @@ H5AC1_rename(H5F_t *f, const H5AC1_class_t *type, haddr_t old_addr, haddr_t new_
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_rename %lx %lx %d",
@@ -1682,9 +1682,9 @@ H5AC1_rename(H5F_t *f, const H5AC1_class_t *type, haddr_t old_addr, haddr_t new_
 #endif /* H5AC1__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
+    if ( NULL != (aux_ptr = f->shared->cache1->aux_ptr) ) {
 
-        result = H5AC1_log_renamed_entry(f->shared->cache,
+        result = H5AC1_log_renamed_entry(f->shared->cache1,
                                         old_addr,
                                         new_addr);
 
@@ -1696,7 +1696,7 @@ H5AC1_rename(H5F_t *f, const H5AC1_class_t *type, haddr_t old_addr, haddr_t new_
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    result = H5C1_rename_entry(f->shared->cache,
+    result = H5C1_rename_entry(f->shared->cache1,
                               type,
                               old_addr,
                               new_addr);
@@ -1713,7 +1713,7 @@ H5AC1_rename(H5F_t *f, const H5AC1_class_t *type, haddr_t old_addr, haddr_t new_
 
         result = H5AC1_propagate_flushed_and_still_clean_entries_list(f,
                                                           H5AC1_noblock_dxpl_id,
-                                                          f->shared->cache,
+                                                          f->shared->cache1,
                                                           TRUE);
         if ( result < 0 ) {
 
@@ -1758,7 +1758,7 @@ herr_t
 H5AC1_pin_protected_entry(H5F_t * f,
                          void *	 thing)
 {
-    H5C1_t      *cache_ptr = f->shared->cache;
+    H5C1_t      *cache_ptr = f->shared->cache1;
     herr_t	result;
     herr_t      ret_value = SUCCEED;    /* Return value */
 #if H5AC1__TRACE_FILE_ENABLED
@@ -1774,8 +1774,8 @@ H5AC1_pin_protected_entry(H5F_t * f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_pin_protected_entry %lx",
@@ -1896,7 +1896,7 @@ H5AC1_protect(H5F_t *f,
     /* check args */
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
     HDassert(type);
     HDassert(type->flush);
     HDassert(type->load);
@@ -1914,8 +1914,8 @@ H5AC1_protect(H5F_t *f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
 	char * rw_string;
@@ -1948,7 +1948,7 @@ H5AC1_protect(H5F_t *f,
     thing = H5C1_protect(f,
                         dxpl_id,
                         H5AC1_noblock_dxpl_id,
-                        f->shared->cache,
+                        f->shared->cache1,
                         type,
                         addr,
                         udata1,
@@ -2009,7 +2009,7 @@ H5AC1_resize_pinned_entry(H5F_t * f,
                          void *  thing,
                          size_t  new_size)
 {
-    H5C1_t              *cache_ptr = f->shared->cache;
+    H5C1_t              *cache_ptr = f->shared->cache1;
     herr_t		result;
     herr_t              ret_value = SUCCEED;    /* Return value */
 #if H5AC1__TRACE_FILE_ENABLED
@@ -2026,8 +2026,8 @@ H5AC1_resize_pinned_entry(H5F_t * f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_resize_pinned_entry 0x%lx %d",
@@ -2120,7 +2120,7 @@ herr_t
 H5AC1_unpin_entry(H5F_t * f,
                  void *	 thing)
 {
-    H5C1_t      *cache_ptr = f->shared->cache;
+    H5C1_t      *cache_ptr = f->shared->cache1;
     herr_t	result;
     herr_t      ret_value = SUCCEED;    /* Return value */
 #if H5AC1__TRACE_FILE_ENABLED
@@ -2136,8 +2136,8 @@ H5AC1_unpin_entry(H5F_t * f,
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_unpin_entry %lx",
@@ -2277,7 +2277,7 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
     FUNC_ENTER_NOAPI(H5AC1_unprotect, FAIL)
 
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
     HDassert(type);
     HDassert(type->clear);
     HDassert(type->flush);
@@ -2293,8 +2293,8 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
      */
     if ( ( f != NULL ) &&
          ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C1_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( f->shared->cache1 != NULL ) &&
+         ( H5C1_get_trace_file_ptr(f->shared->cache1, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC1_unprotect %lx %d",
@@ -2329,9 +2329,9 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
 
 #ifdef H5_HAVE_PARALLEL
     if ( ( dirtied ) && ( ((H5AC1_info_t *)thing)->is_dirty == FALSE ) &&
-         ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) ) {
+         ( NULL != (aux_ptr = f->shared->cache1->aux_ptr) ) ) {
 
-        result = H5AC1_log_dirtied_entry(f->shared->cache,
+        result = H5AC1_log_dirtied_entry(f->shared->cache1,
                                         (H5AC1_info_t *)thing,
                                         addr,
                                         size_changed,
@@ -2345,10 +2345,10 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
     }
 
     if ( ( (flags & H5C1__DELETED_FLAG) != 0 ) &&
-         ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) &&
+         ( NULL != (aux_ptr = f->shared->cache1->aux_ptr) ) &&
          ( aux_ptr->mpi_rank == 0 ) ) {
 
-        result = H5AC1_log_deleted_entry(f->shared->cache,
+        result = H5AC1_log_deleted_entry(f->shared->cache1,
                                         (H5AC1_info_t *)thing,
                                         addr,
                                         flags);
@@ -2364,7 +2364,7 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
     result = H5C1_unprotect(f,
                            dxpl_id,
                            H5AC1_noblock_dxpl_id,
-                           f->shared->cache,
+                           f->shared->cache1,
                            type,
                            addr,
                            thing,
@@ -2383,7 +2383,7 @@ H5AC1_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC1_class_t *type, haddr_t addr
 
         result = H5AC1_propagate_flushed_and_still_clean_entries_list(f,
                                                           H5AC1_noblock_dxpl_id,
-                                                          f->shared->cache,
+                                                          f->shared->cache1,
                                                           TRUE);
 
         if ( result < 0 ) {
@@ -2490,10 +2490,10 @@ H5AC1_stats(const H5F_t *f)
     FUNC_ENTER_NOAPI(H5AC1_stats, FAIL)
 
     HDassert(f);
-    HDassert(f->shared->cache);
+    HDassert(f->shared->cache1);
 
     /* at present, this can't fail */
-    (void)H5C1_stats(f->shared->cache, f->name, FALSE);
+    (void)H5C1_stats(f->shared->cache1, f->name, FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3573,9 +3573,9 @@ H5AC1_check_if_write_permitted(const H5F_t UNUSED * f,
 #ifdef H5_HAVE_PARALLEL
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
-    HDassert( f->shared->cache != NULL );
+    HDassert( f->shared->cache1 != NULL );
 
-    aux_ptr = (H5AC1_aux_t *)(f->shared->cache->aux_ptr);
+    aux_ptr = (H5AC1_aux_t *)(f->shared->cache1->aux_ptr);
 
     if ( aux_ptr != NULL ) {
 

@@ -176,7 +176,7 @@ H5O_mdj_msg_decode(H5F_t *f,
     /* get the journal file path length */
     UINT32DECODE(p, path_len);
 
-    if ( path_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+    if ( path_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "path length too big.")
     }
@@ -251,7 +251,7 @@ H5O_mdj_msg_encode(H5F_t *f,
 	HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "Bad params on entry.");
     }
 
-    if ( mesg->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+    if ( mesg->mdc_jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
 
         HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
         	"Bad params on entry -- path len too long.");
@@ -315,7 +315,7 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
     /* Sanity check */
     HDassert(mesg);
 
-    if ( mesg->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+    if ( mesg->mdc_jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN ) {
 
         HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "path len too long.");
     }

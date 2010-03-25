@@ -45,7 +45,7 @@
  *
  *              John Mainzer, 6/17/05
  *              Modified the function to use the new dirtied parameter of
- *              of H5AC2_unprotect() instead of modifying the is_dirty
+ *              of H5AC_unprotect() instead of modifying the is_dirty
  *              field of the cache info.
  *
  *-------------------------------------------------------------------------
@@ -69,7 +69,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if(NULL == (h = (H5HL_t *)H5HL_protect(f, dxpl_id, addr, H5AC2_READ)))
+    if(NULL == (h = (H5HL_t *)H5HL_protect(f, dxpl_id, addr, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     fprintf(stream, "%*sLocal Heap...\n", indent, "");

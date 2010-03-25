@@ -66,9 +66,9 @@ static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
 /* Package Variables */
 /*********************/
 
-/* H5B inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_BT[1] = {{
-    H5AC2_BT_ID,
+/* H5B inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_BT[1] = {{
+    H5AC_BT_ID,
     "v1 B-tree",
     H5FD_MEM_BTREE,
     H5B_deserialize,
@@ -118,7 +118,7 @@ H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
     /* Allocate the B-tree node in memory */
     if(NULL == (bt = H5FL_MALLOC(H5B_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate B-tree struct")
-    HDmemset(&bt->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;

@@ -56,7 +56,7 @@
  *		use H5Pset_jnl_config() to replace the default journaling
  *              configuration with our own.  See the comments in the code
  *		for the particulars -- note that we must set the version
- *		field of the H5AC2_jnl_config_t struct before calling
+ *		field of the H5AC_jnl_config_t struct before calling
  *              H5Pget_jnl_config().
  *
  *		After setting up the FAPL, we create the file as usual.
@@ -75,11 +75,11 @@
  *		and re-enable it via H5Fget_jnl_config() and H5Fset_jnl_config()
  *		calls.  Note that when we re-enable journaling via the
  *		H5Fset_jnl_config() call, we don't need to set all the fields
- *		in the H5AC2_jnl_config_t struct again; we are simply re-using
+ *		in the H5AC_jnl_config_t struct again; we are simply re-using
  *		the configuration obtained via the H5Fget_jnl_config() call.
  *		(If we had originally opened the file without journaling and
  *		then wanted to enable journaling, we would have to set up the
- *		fields of the H5AC2_jnl_config_t struct in much the same way
+ *		fields of the H5AC_jnl_config_t struct in much the same way
  *		we did earlier in this example.  We would also have had to
  *		use H5Pset_libver_bounds() to set the FAPL to create the file
  *              initially with the latest HDF5 file format format.)
@@ -159,8 +159,8 @@ mdj_api_example(char * hdf5_file_name,
     hsize_t offset[2];
     hsize_t chunk_size[2];
     int data_chunk[CHUNK_SIZE][CHUNK_SIZE];
-    H5AC2_jnl_config_t jnl_config_0;
-    H5AC2_jnl_config_t jnl_config_1;
+    H5AC_jnl_config_t jnl_config_0;
+    H5AC_jnl_config_t jnl_config_1;
 
     fprintf(stdout, "running journaling example -- this may take a while:\n");
     fflush(stdout);
@@ -172,7 +172,7 @@ mdj_api_example(char * hdf5_file_name,
     }
 
     if ( ( jnl_file_name == NULL ) ||
-         ( strlen(jnl_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) )
+         ( strlen(jnl_file_name) > H5AC__MAX_JOURNAL_FILE_NAME_LEN ) )
     {
         fprintf(stderr, "bad journal file name.  Exiting...\n");
 	exit(1);
@@ -213,7 +213,7 @@ mdj_api_example(char * hdf5_file_name,
      * illustrated here shows off the H5Pget_jnl_config() call and is less
      * susceptible to API definition changes.
      */
-    jnl_config_0.version = H5AC2__CURR_JNL_CONFIG_VER;
+    jnl_config_0.version = H5AC__CURR_JNL_CONFIG_VER;
 
     status = H5Pget_jnl_config(fapl_id, &jnl_config_0);
 
@@ -359,7 +359,7 @@ mdj_api_example(char * hdf5_file_name,
      * journaling will also cause HDF5 to close and discard the
      * journal file after all metadata is on disk.
      */
-    jnl_config_1.version = H5AC2__CURR_JNL_CONFIG_VER;
+    jnl_config_1.version = H5AC__CURR_JNL_CONFIG_VER;
 
     status = H5Fget_jnl_config(file_id, &jnl_config_1);
 

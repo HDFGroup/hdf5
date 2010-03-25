@@ -17,62 +17,55 @@
  * Programmer: John Mainzer -- 4/19/06
  *
  * Purpose:     This file contains declarations which are normally visible
- *              only within the H5AC2 package (just H5AC2.c at present).
+ *              only within the H5AC package (just H5AC.c at present).
  *
  *		Source files outside the H5AC package should include
  *		H5ACprivate.h instead.
  *
  *		The one exception to this rule is testpar/t_cache.c.  The
- *		test code is easier to write if it can look at H5AC2_aux_t.
+ *		test code is easier to write if it can look at H5AC_aux_t.
  *		Indeed, this is the main reason why this file was created.
- *
- * Modifications:
- *
- *              JRM - 10/18/07
- *              Copied H5ACpkg.h to H5AC2pkg.h and reworked
- *              to use H5C2 instead of H5C.  All this is in support
- *              of cache API modifications needed for journaling.
  *
  */
 
-#ifndef H5AC2_PACKAGE
-#error "Do not include this file outside the H5AC2 package!"
+#ifndef H5AC_PACKAGE
+#error "Do not include this file outside the H5AC package!"
 #endif
 
-#ifndef _H5AC2pkg_H
-#define _H5AC2pkg_H
+#ifndef _H5ACpkg_H
+#define _H5ACpkg_H
 
 /* Get package's private header */
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 
 
 /* Get needed headers */
-#include "H5C2private.h"        /* Cache                                */
+#include "H5Cprivate.h"         /* Cache                                */
 #include "H5SLprivate.h"        /* Skip lists */
 
 
-#define H5AC2_DEBUG_DIRTY_BYTES_CREATION	0
+#define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
 
 /*-------------------------------------------------------------------------
  *  It is a bit difficult to set ranges of allowable values on the
- *  dirty_bytes_threshold field of H5AC2_aux_t.  The following are
+ *  dirty_bytes_threshold field of H5AC_aux_t.  The following are
  *  probably broader than they should be.
  *-------------------------------------------------------------------------
  */
 
-#define H5AC2__MIN_DIRTY_BYTES_THRESHOLD	(int32_t) \
-						(H5C2__MIN_MAX_CACHE_SIZE / 2)
-#define H5AC2__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
-#define H5AC2__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
-						(H5C2__MAX_MAX_CACHE_SIZE / 4)
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD	(int32_t) \
+						(H5C__MIN_MAX_CACHE_SIZE / 2)
+#define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
+#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
+						(H5C__MAX_MAX_CACHE_SIZE / 4)
 
 /****************************************************************************
  *
- * structure H5AC2_aux_t
+ * structure H5AC_aux_t
  *
- * While H5AC2 has become a wrapper for the cache implemented in H5C2.c, there
+ * While H5AC has become a wrapper for the cache implemented in H5C.c, there
  * are some features of the metadata cache that are specific to it, and which
- * therefore do not belong in the more generic H5C2 cache code.
+ * therefore do not belong in the more generic H5C cache code.
  *
  * In particular, there is the matter of synchronizing writes from the
  * metadata cache to disk in the PHDF5 case.
@@ -128,9 +121,9 @@
  * case.  However, other uses may arise in the future.
  *
  * Instance of this structure are associated with metadata caches via
- * the aux_ptr field of H5C2_t (see H5C2pkg.h).  The H5AC2 code is
+ * the aux_ptr field of H5C_t (see H5Cpkg.h).  The H5AC code is
  * responsible for allocating, maintaining, and discarding instances
- * of H5AC2_aux_t.
+ * of H5AC_aux_t.
  *
  * The remainder of this header comments documents the individual fields
  * of the structure.
@@ -138,8 +131,8 @@
  *                                              JRM - 6/27/05
  *
  * magic:       Unsigned 32 bit integer always set to
- *		H5AC2__H5AC2_AUX_T_MAGIC.  This field is used to validate
- *		pointers to instances of H5AC2_aux_t.
+ *		H5AC__H5AC_AUX_T_MAGIC.  This field is used to validate
+ *		pointers to instances of H5AC_aux_t.
  *
  * mpi_comm:	MPI communicator associated with the file for which the
  *		cache has been created.
@@ -170,49 +163,49 @@
  *		broadcast.
  *
  * dirty_bytes_propagations: This field only exists when the
- *		H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *		H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of times the cleaned list
  *		has been propagated from process 0 to the other
  *		processes.
  *
  * unprotect_dirty_bytes:  This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of dirty bytes created
  *		via unprotect operations since the last time the cleaned
  *		list was propagated.
  *
  * unprotect_dirty_bytes_updates: This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via unprotect operations since the last time
  *		the cleaned list was propagated.
  *
  * insert_dirty_bytes:  This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of dirty bytes created
  *		via insert operations since the last time the cleaned
  *		list was propagated.
  *
  * insert_dirty_bytes_updates:  This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via insert operations since the last time
  *		the cleaned list was propagated.
  *
  * rename_dirty_bytes:  This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of dirty bytes created
  *		via rename operations since the last time the cleaned
  *		list was propagated.
  *
  * rename_dirty_bytes_updates:  This field only exists when the
- *              H5AC2_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
+ *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of times dirty bytes have
  *		been created via rename operations since the last time
@@ -282,9 +275,9 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-#define H5AC2__H5AC2_AUX_T_MAGIC        (unsigned)0x00D0A02
+#define H5AC__H5AC_AUX_T_MAGIC        (unsigned)0x00D0A02
 
-typedef struct H5AC2_aux_t
+typedef struct H5AC_aux_t
 {
     uint32_t	magic;
 
@@ -300,7 +293,7 @@ typedef struct H5AC2_aux_t
 
     int32_t	dirty_bytes;
 
-#if H5AC2_DEBUG_DIRTY_BYTES_CREATION
+#if H5AC_DEBUG_DIRTY_BYTES_CREATION
 
     int32_t	dirty_bytes_propagations;
 
@@ -313,7 +306,7 @@ typedef struct H5AC2_aux_t
     int32_t     rename_dirty_bytes;
     int32_t     rename_dirty_bytes_updates;
 
-#endif /* H5AC2_DEBUG_DIRTY_BYTES_CREATION */
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
     H5SL_t *	d_slist_ptr;
 
@@ -325,9 +318,9 @@ typedef struct H5AC2_aux_t
 
     void	(* write_done)(void);
 
-} H5AC2_aux_t; /* struct H5AC2_aux_t */
+} H5AC_aux_t; /* struct H5AC_aux_t */
 
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5AC2pkg_H */
+#endif /* _H5ACpkg_H */
 

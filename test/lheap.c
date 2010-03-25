@@ -20,7 +20,7 @@
  * Purpose:	Test local heaps used by symbol tables (groups).
  */
 #include "h5test.h"
-#include "H5AC2private.h"
+#include "H5ACprivate.h"
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
 
@@ -86,7 +86,7 @@ main(void)
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC2_WRITE))) {
+    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -131,7 +131,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC2_READ))) {
+        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_READ))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;

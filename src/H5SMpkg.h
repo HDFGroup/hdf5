@@ -32,7 +32,7 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 /* Other private headers needed by this file */
-#include "H5AC2private.h"       /* Metadata Cache		  	*/
+#include "H5ACprivate.h"        /* Metadata Cache		  	*/
 #include "H5B2private.h"        /* B-trees                              */
 #include "H5HFprivate.h"        /* Fractal heaps		  	*/
 
@@ -174,7 +174,7 @@ typedef struct {
 /* Typedef for a SOHM list */
 typedef struct {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC2_info_t cache_info;
+    H5AC_info_t cache_info;
 
     H5SM_index_header_t *header;    /* Pointer to the corresponding index header */
     H5SM_sohm_t *messages;          /* Actual list, stored as an array */
@@ -184,7 +184,7 @@ typedef struct {
 /* Typedef for shared object header message master table */
 struct H5SM_master_table_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC2_info_t cache_info;
+    H5AC_info_t cache_info;
 
     unsigned num_indexes;           /* Number of indexes */
     H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
@@ -238,8 +238,8 @@ H5FL_ARR_EXTERN(H5SM_index_header_t);
 H5FL_EXTERN(H5SM_list_t);
 H5FL_ARR_EXTERN(H5SM_sohm_t);
 
-H5_DLLVAR const H5AC2_class_t H5AC2_SOHM_TABLE[1];
-H5_DLLVAR const H5AC2_class_t H5AC2_SOHM_LIST[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_TABLE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_LIST[1];
 H5_DLLVAR const H5B2_class_t H5SM_INDEX[1];
 
 /****************************/

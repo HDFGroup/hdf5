@@ -24,7 +24,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Other private headers needed by this file */
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */
@@ -246,7 +246,7 @@ typedef struct H5O_chunk_t {
 } H5O_chunk_t;
 
 struct H5O_t {
-    H5AC2_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
+    H5AC_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
                                 /* first field in structure */
 
     /* File-specific information (not stored) */
@@ -347,7 +347,7 @@ typedef struct H5O_cache_ud_t {
 
 /* Structure representing each chunk in the cache */
 typedef struct H5O_chunk_proxy_t {
-    H5AC2_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
+    H5AC_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
                                 /* first field in structure */
 
     H5O_t       *oh;                    /* Object header for this chunk */
@@ -363,11 +363,11 @@ typedef struct H5O_chk_cache_ud_t {
 } H5O_chk_cache_ud_t;
 
 
-/* H5O object header inherits cache-like properties from H5AC2 */
-H5_DLLVAR const H5AC2_class_t H5AC2_OHDR[1];
+/* H5O object header inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
 
-/* H5O object header chunk inherits cache-like properties from H5AC2 */
-H5_DLLVAR const H5AC2_class_t H5AC2_OHDR_CHK[1];
+/* H5O object header chunk inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_OHDR_CHK[1];
 
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];

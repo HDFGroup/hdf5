@@ -35,7 +35,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5AC1private.h"	/* Metadata cache			*/
-#include "H5AC2private.h"	/* Metadata cache2			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	*/
@@ -59,8 +59,8 @@
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC1_cache_config_t)
 #define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC1__DEFAULT_CACHE_CONFIG
-#define H5F_ACS_JNL_INIT_CONFIG_SIZE		sizeof(H5AC2_jnl_config_t)
-#define H5F_ACS_JNL_INIT_CONFIG_DEF		H5AC2__DEFAULT_JNL_CONFIG
+#define H5F_ACS_JNL_INIT_CONFIG_SIZE		sizeof(H5AC_jnl_config_t)
+#define H5F_ACS_JNL_INIT_CONFIG_DEF		H5AC__DEFAULT_JNL_CONFIG
 /* Definitions for size of raw data chunk cache(elements) */
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF        521
@@ -191,7 +191,7 @@ static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
     H5AC1_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
-    H5AC2_jnl_config_t initJnlCfg = H5F_ACS_JNL_INIT_CONFIG_DEF; /* Default journaling config settings */
+    H5AC_jnl_config_t initJnlCfg = H5F_ACS_JNL_INIT_CONFIG_DEF; /* Default journaling config settings */
     size_t rdcc_nelmts = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;      /* Default raw data chunk cache # of elements */
     size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
@@ -1402,7 +1402,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC1_cache_config_t *config_ptr)
     if(config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
 
-    if(!H5AC2_validate_cache_config_ver(config_ptr->version))
+    if(!H5AC_validate_cache_config_ver(config_ptr->version))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* If we ever support multiple versions of H5AC1_cache_config_t, we
@@ -1433,7 +1433,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_jnl_config(hid_t plist_id, const H5AC2_jnl_config_t *config_ptr)
+H5Pset_jnl_config(hid_t plist_id, const H5AC_jnl_config_t *config_ptr)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* return value */
@@ -1446,7 +1446,7 @@ H5Pset_jnl_config(hid_t plist_id, const H5AC2_jnl_config_t *config_ptr)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Validate the new configuration */
-    if(H5AC2_validate_jnl_config(config_ptr) < 0)
+    if(H5AC_validate_jnl_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid journaling configuration")
 
     /* Set the modified config */
@@ -1479,7 +1479,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_jnl_config(hid_t plist_id, H5AC2_jnl_config_t *config_ptr)
+H5Pget_jnl_config(hid_t plist_id, H5AC_jnl_config_t *config_ptr)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
@@ -1490,7 +1490,7 @@ H5Pget_jnl_config(hid_t plist_id, H5AC2_jnl_config_t *config_ptr)
     /* Validate the config_ptr */
     if(NULL == config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    if(!H5AC2_validate_jnl_config_ver(config_ptr->version))
+    if(!H5AC_validate_jnl_config_ver(config_ptr->version))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* Get the plist structure */

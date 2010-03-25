@@ -515,7 +515,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_journal_status_cb(const H5C2_mdj_config_t *mdj_config, hid_t dxpl_id,
+H5D_journal_status_cb(const H5C_mdj_config_t *mdj_config, hid_t dxpl_id,
     void *udata)
 {
     H5D_t *dset = (H5D_t *)udata;       /* User callback data */
@@ -887,7 +887,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     HDassert(file == dset->oloc.file);
 
     /* Get a pointer to the object header itself */
-    if(NULL == (oh = H5O_protect(oloc, dxpl_id, H5AC2_WRITE)))
+    if(NULL == (oh = H5O_protect(oloc, dxpl_id, H5AC_WRITE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
 
     /* Pin the object header */
@@ -895,7 +895,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
     /* Unprotect the object header */
-    if(H5O_unprotect(oloc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5O_unprotect(oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
 
     /* Write new fill value message */
@@ -958,7 +958,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create EFL file name heap")
 
         /* Pin the heap down in memory */
-        if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC2_WRITE)))
+        if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC_WRITE)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect EFL file name heap")
 
         /* Insert "empty" name first */
@@ -1205,7 +1205,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     new_dset->shared->fo_count = 1;
 
     /* Register callback for this dataset with cache, when journaling status changes */
-    if(H5AC2_register_mdjsc_callback(new_dset->oloc.file, H5D_journal_status_cb, new_dset, &new_dset->mdjsc_idx, NULL) < 0)
+    if(H5AC_register_mdjsc_callback(new_dset->oloc.file, H5D_journal_status_cb, new_dset, &new_dset->mdjsc_idx, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't register journal status callback")
 
     /* Success */
@@ -1298,7 +1298,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
 
         /* Register callback for this dataset with cache, when journaling status changes */
-        if(H5AC2_register_mdjsc_callback(dataset->oloc.file, H5D_journal_status_cb, dataset, &dataset->mdjsc_idx, NULL) < 0)
+        if(H5AC_register_mdjsc_callback(dataset->oloc.file, H5D_journal_status_cb, dataset, &dataset->mdjsc_idx, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't register journal status callback")
 
         /* Add the dataset to the list of opened objects in the file */
@@ -1622,13 +1622,13 @@ H5D_close(H5D_t *dataset)
 
     /* Deregister journaling status change cache callback for this dataset */
     if(dataset->mdjsc_idx >= 0)
-        if(H5AC2_deregister_mdjsc_callback(dataset->oloc.file, dataset->mdjsc_idx) < 0)
+        if(H5AC_deregister_mdjsc_callback(dataset->oloc.file, dataset->mdjsc_idx) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't deregister journal status callback")
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
         /* Flush the dataset's information */
-        if(H5D_flush_real(dataset, H5AC2_dxpl_id, H5F_FLUSH_NONE) < 0)
+        if(H5D_flush_real(dataset, H5AC_dxpl_id, H5F_FLUSH_NONE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
         /* Free the data sieve buffer, if it's been allocated */
@@ -1664,7 +1664,7 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Flush and destroy chunks in the cache */
-                if(H5D_chunk_dest(dataset->oloc.file, H5AC2_dxpl_id, dataset) < 0)
+                if(H5D_chunk_dest(dataset->oloc.file, H5AC_dxpl_id, dataset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
                 break;
 
@@ -1690,7 +1690,7 @@ H5D_close(H5D_t *dataset)
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dataset->oloc.file, H5AC2_dxpl_id, dataset->oloc.addr) < 0)
+        if(H5FO_delete(dataset->oloc.file, H5AC_dxpl_id, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
         /* Close the dataset object */
@@ -2504,7 +2504,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
         unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
 
         /* Get a pointer to the dataset's object header */
-        if((oh = H5O_protect(&dataset->oloc, dxpl_id, H5AC2_WRITE)) == NULL)
+        if((oh = H5O_protect(&dataset->oloc, dxpl_id, H5AC_WRITE)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
 
         /* Pin the object header */
@@ -2512,7 +2512,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
         /* Unprotect the object header */
-        if(H5O_unprotect(&dataset->oloc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        if(H5O_unprotect(&dataset->oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
 
         /* Update the layout on disk, if it's been changed */

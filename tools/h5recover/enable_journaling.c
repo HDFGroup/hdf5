@@ -79,10 +79,10 @@ helppage(void)
 int
 set_journal(hid_t faccpl, const char * journalname)
 {
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     /* get current journaling configuration */
-    jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+    jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
     if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
 	fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");

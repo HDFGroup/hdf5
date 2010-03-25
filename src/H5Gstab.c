@@ -121,7 +121,7 @@ H5G_stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t d
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC2_WRITE)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Insert name into the heap */
@@ -236,7 +236,7 @@ H5G_stab_insert_real(H5F_t *f, H5O_stab_t *stab, const char *name,
     HDassert(obj_lnk);
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC2_WRITE)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Initialize data to pass through B-tree */
@@ -329,7 +329,7 @@ H5G_stab_remove(H5O_loc_t *loc, hid_t dxpl_id, H5RS_str_t *grp_full_path_r,
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(loc->file, dxpl_id, stab.heap_addr, H5AC2_WRITE)))
+    if(NULL == (heap = H5HL_protect(loc->file, dxpl_id, stab.heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Initialize data to pass through B-tree */
@@ -387,7 +387,7 @@ H5G_stab_remove_by_idx(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5RS_str_t *grp_full_
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC2_WRITE)))
+    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Initialize data to pass through B-tree */
@@ -441,7 +441,7 @@ H5G_stab_delete(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab)
     HDassert(H5F_addr_defined(stab->heap_addr));
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC2_WRITE)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Set up user data for B-tree deletion */
@@ -502,7 +502,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(oloc->file, dxpl_id, stab.heap_addr, H5AC2_READ)))
+    if(NULL == (heap = H5HL_protect(oloc->file, dxpl_id, stab.heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Check on iteration order */
@@ -718,7 +718,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(oloc->file, dxpl_id, stab.heap_addr, H5AC2_READ)))
+    if(NULL == (heap = H5HL_protect(oloc->file, dxpl_id, stab.heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Remap index for decreasing iteration order */
@@ -839,7 +839,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't read message")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC2_READ)))
+    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Set up user data to pass to 'find' operation callback */
@@ -940,7 +940,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC2_READ)))
+    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Remap index for decreasing iteration order */

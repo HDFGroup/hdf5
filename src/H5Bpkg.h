@@ -32,7 +32,7 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5AC2private.h"	/* Metadata cache #2			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 
 
 /**************************/
@@ -46,7 +46,7 @@
 
 /* The B-tree node as stored in memory...  */
 typedef struct H5B_t {
-    H5AC2_info_t        cache_info;     /* Information for H5AC2 cache functions */
+    H5AC_info_t        cache_info;     /* Information for H5AC cache functions */
                                         /* _must_ be first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
@@ -68,8 +68,8 @@ typedef struct H5B_cache_ud_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5B header inherits cache-like properties from H5AC2 */
-H5_DLLVAR const H5AC2_class_t H5AC2_BT[1];
+/* H5B header inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_BT[1];
 
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_EXTERN(haddr_t);

@@ -17,7 +17,7 @@
  *              3/08
  *
  *		This file contains tests for the metadata journaling
- *		features implemented in H5C2.c and friends.
+ *		features implemented in H5C.c and friends.
  */
 
 #include <aio.h>
@@ -29,9 +29,9 @@
 #include "H5Iprivate.h"
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5MFprivate.h"
-#include "H5AC2private.h"
-#include "H5C2private.h"
-#include "cache2_common.h"
+#include "H5ACprivate.h"
+#include "H5Cprivate.h"
+#include "cache_common.h"
 #include "H5Fpkg.h"
 
 #define HDF5_FILE_NAME "HDF5.file"
@@ -50,7 +50,7 @@ const char *FILENAMES[] = {
 
 /* utility functions */
 
-static void begin_trans(H5C2_t * cache_ptr,
+static void begin_trans(H5C_t * cache_ptr,
                         hbool_t verbose,
                         uint64_t expected_trans_num,
 	                const char * trans_name);
@@ -59,16 +59,16 @@ static void copy_file(const char * input_file,
                       const char * output_file);
 
 static void end_trans(H5F_t * file_ptr,
-                      H5C2_t * cache_ptr,
+                      H5C_t * cache_ptr,
                       hbool_t verbose,
                       uint64_t trans_num,
                       const char * trans_name);
 
 static hbool_t file_exists(const char * file_path_ptr);
 
-static void flush_journal(H5C2_t * cache_ptr);
+static void flush_journal(H5C_t * cache_ptr);
 
-static void jrnl_col_major_scan_backward2(H5F_t * file_ptr,
+static void jrnl_col_major_scan_backward(H5F_t * file_ptr,
 		                          int32_t max_index,
                                           int32_t lag, 
 					  hbool_t verbose,
@@ -80,7 +80,7 @@ static void jrnl_col_major_scan_backward2(H5F_t * file_ptr,
                                           int dirty_unprotects,
 			                  uint64_t trans_num);
 
-static void jrnl_col_major_scan_forward2(H5F_t * file_ptr,
+static void jrnl_col_major_scan_forward(H5F_t * file_ptr,
 		                         int32_t max_index,
                                          int32_t lag,
                                          hbool_t verbose,
@@ -92,7 +92,7 @@ static void jrnl_col_major_scan_forward2(H5F_t * file_ptr,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
 
-static void jrnl_row_major_scan_backward2(H5F_t * file_ptr,
+static void jrnl_row_major_scan_backward(H5F_t * file_ptr,
                                           int32_t max_index,
                                           int32_t lag,
                                           hbool_t verbose,
@@ -109,7 +109,7 @@ static void jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                                           int dirty_unprotects,
 			                  uint64_t trans_num);
 
-static void jrnl_row_major_scan_forward2(H5F_t * file_ptr,
+static void jrnl_row_major_scan_forward(H5F_t * file_ptr,
                                          int32_t max_index,
                                          int32_t lag,
                                          hbool_t verbose,
@@ -130,20 +130,20 @@ static void open_existing_file_for_journaling(const char * hdf_file_name,
                                               const char * journal_file_name,
                                               hid_t * file_id_ptr,
                                               H5F_t ** file_ptr_ptr,
-                                              H5C2_t ** cache_ptr_ptr,
+                                              H5C_t ** cache_ptr_ptr,
                                               hbool_t human_readable,
                                               hbool_t use_aio); 
 
 static void open_existing_file_without_journaling(const char * hdf_file_name,
                                                   hid_t * file_id_ptr,
                                                   H5F_t ** file_ptr_ptr,
-                                                  H5C2_t ** cache_ptr_ptr);
+                                                  H5C_t ** cache_ptr_ptr);
 
 static void setup_cache_for_journaling(const char * hdf_file_name,
                                        const char * journal_file_name,
                                        hid_t * file_id_ptr,
                                        H5F_t ** file_ptr_ptr,
-                                       H5C2_t ** cache_ptr_ptr,
+                                       H5C_t ** cache_ptr_ptr,
                                        hbool_t human_readable,
                                        hbool_t use_aio,
 				       hbool_t use_core_driver_if_avail);
@@ -165,12 +165,12 @@ static void verify_journal_empty(const char * journal_file_path_ptr);
 
 static void check_buffer_writes(hbool_t use_aio);
 
-static void write_flush_verify(H5C2_jbrb_t * struct_ptr, 
+static void write_flush_verify(H5C_jbrb_t * struct_ptr, 
                                int size, 
                                char * data, 
                                FILE * readback);
 
-static void write_noflush_verify(H5C2_jbrb_t * struct_ptr, 
+static void write_noflush_verify(H5C_jbrb_t * struct_ptr, 
                                  int size, 
                                  char * data, 
                                  FILE * readback, 
@@ -180,31 +180,31 @@ static void check_superblock_extensions(void);
 
 static void check_mdjsc_callbacks(void);
 
-static herr_t test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
+static herr_t test_mdjsc_callback(const H5C_mdj_config_t * config_ptr,
                                 hid_t dxpl_id,
                                 void * data_ptr);
 
 static void deregister_mdjsc_callback(H5F_t * file_ptr,
-                                      H5C2_t * cache_ptr,
+                                      H5C_t * cache_ptr,
                                       int32_t idx);
 
 static void register_mdjsc_callback(H5F_t * file_ptr,
-                                    H5C2_t * cache_ptr,
-                                    H5C2_mdj_status_change_func_t fcn_ptr,
+                                    H5C_t * cache_ptr,
+                                    H5C_mdj_status_change_func_t fcn_ptr,
                                     void * data_ptr,
                                     int32_t * idx_ptr);
 
-static void verify_mdjsc_table_config(H5C2_t * cache_ptr,
+static void verify_mdjsc_table_config(H5C_t * cache_ptr,
                                       int32_t table_len,
                                       int32_t num_entries,
                                       int32_t max_idx_in_use,
                                       hbool_t * free_entries);
 
-static void verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
+static void verify_mdjsc_callback_deregistered(H5C_t * cache_ptr,
                                                int32_t idx);
 
-static void verify_mdjsc_callback_registered(H5C2_t * cache_ptr,
-                                         H5C2_mdj_status_change_func_t fcn_ptr,
+static void verify_mdjsc_callback_registered(H5C_t * cache_ptr,
+                                         H5C_mdj_status_change_func_t fcn_ptr,
                                          void * data_ptr,
                                          int32_t idx);
 
@@ -245,7 +245,7 @@ static void mdj_smoke_check_01(hbool_t human_readable,
 static void mdj_smoke_check_02(hbool_t human_readable,
                                hbool_t use_aio);
 
-static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
+static void write_verify_trans_num(H5C_jbrb_t * struct_ptr, 
                                    uint64_t trans_num, 
                                    uint64_t min_verify_val,
                                    uint64_t verify_val);
@@ -262,12 +262,12 @@ static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 /*-------------------------------------------------------------------------
  * Function:    begin_trans()
  *
- * Purpose:     If pass2 is true on entry, attempt to begin a transaction.
+ * Purpose:     If pass is true on entry, attempt to begin a transaction.
  * 		If the operation fails, or if it returns an unexpected
- * 		transaction number, set passw2 to FALSE, and set failure_mssg2 
+ * 		transaction number, set passw2 to FALSE, and set failure_mssg 
  *              to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -280,7 +280,7 @@ static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
  */
 
 static void
-begin_trans(H5C2_t * cache_ptr,
+begin_trans(H5C_t * cache_ptr,
             hbool_t verbose,
             uint64_t expected_trans_num,
 	    const char * trans_name)
@@ -289,19 +289,19 @@ begin_trans(H5C2_t * cache_ptr,
     herr_t result;
     uint64_t trans_num = 0; 
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        result = H5C2_begin_transaction(cache_ptr, &trans_num, trans_name);
+        result = H5C_begin_transaction(cache_ptr, &trans_num, trans_name);
 
         if ( result < 0 ) {
 
             if ( verbose ) {
 
-                HDfprintf(stdout, "%s: H5C2_begin_transaction(%s) failed.\n",
+                HDfprintf(stdout, "%s: H5C_begin_transaction(%s) failed.\n",
 			  fcn_name, trans_name);
             }
-            pass2 = FALSE;
-	    failure_mssg2 = "H5C2_begin_transaction() failed.\n";
+            pass = FALSE;
+	    failure_mssg = "H5C_begin_transaction() failed.\n";
 
         } else if ( trans_num != expected_trans_num ) {
 
@@ -311,8 +311,8 @@ begin_trans(H5C2_t * cache_ptr,
 			  fcn_name, (long long)trans_num,
                           (long long)expected_trans_num);
             }
-            pass2 = FALSE;
-	    failure_mssg2 = "begin_trans() issued unexpected trans_num.\n";
+            pass = FALSE;
+	    failure_mssg = "begin_trans() issued unexpected trans_num.\n";
         }
     }
 
@@ -324,11 +324,11 @@ begin_trans(H5C2_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:    copy_file()
  *
- * Purpose:     If pass2 is true, copy the input file to the output file.
- *              Set pass2 to FALSE and set failure_mssg2 to point to an 
+ * Purpose:     If pass is true, copy the input file to the output file.
+ *              Set pass to FALSE and set failure_mssg to point to an 
  *              appropriate error message on failure.
  *
- *              Do nothing if pass2 is false on entry.
+ *              Do nothing if pass is false on entry.
  *
  * Return:      void
  *
@@ -356,23 +356,23 @@ copy_file(const char * input_file,
     int output_file_fd = -1;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( input_file == NULL ) {
 
-            failure_mssg2 = "input_file NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "input_file NULL on entry?!?",
+            pass = FALSE;
 
 	} else if ( output_file == NULL ) {
 
-            failure_mssg2 = "output_file NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "output_file NULL on entry?!?",
+            pass = FALSE;
 
         }
     }
 
     /* get the length of the input file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(input_file, &buf) != 0 ) {
 
@@ -381,15 +381,15 @@ copy_file(const char * input_file,
 	        HDfprintf(stdout, "%s: HDstat() failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "stat() failed on journal file.";
-	    pass2 = FALSE;
+	    failure_mssg = "stat() failed on journal file.";
+	    pass = FALSE;
 
 	} else {
 
 	    if ( (buf.st_size) == 0 ) {
 
-                failure_mssg2 = "input file empty?!?";
-	        pass2 = FALSE;
+                failure_mssg = "input file empty?!?";
+	        pass = FALSE;
 
 	    } else {
                 
@@ -406,7 +406,7 @@ copy_file(const char * input_file,
     }
 
     /* open the input file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (input_file_fd = HDopen(input_file, O_RDONLY, 0777)) == -1 ) {
 
@@ -415,13 +415,13 @@ copy_file(const char * input_file,
 	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open input file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open input file.";
+	    pass = FALSE;
         }
     }
 
     /* open the output file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (output_file_fd = HDopen(output_file, O_WRONLY|O_CREAT|O_TRUNC, 0777))
              == -1 ) {
@@ -431,12 +431,12 @@ copy_file(const char * input_file,
 	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open output file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open output file.";
+	    pass = FALSE;
         }
     }
 
-    while ( ( pass2 ) &&
+    while ( ( pass ) &&
 	    ( input_remainder > 0 ) ) 
     {
         if ( input_remainder > max_buf_len ) {
@@ -460,13 +460,13 @@ copy_file(const char * input_file,
                           "%s: HDread() failed. result = %d, errno = %d.\n",
                           fcn_name, (int)result, errno);
             }
-            failure_mssg2 = "error reading input file.";
-            pass2 = FALSE;
+            failure_mssg = "error reading input file.";
+            pass = FALSE;
         }
 
         buffer[cur_buf_len] = '\0';
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             result = HDwrite(output_file_fd, buffer, cur_buf_len);
 
@@ -478,8 +478,8 @@ copy_file(const char * input_file,
                               "%s: HDwrite() failed. result = %d, errno = %d.\n",
                               fcn_name, (int)result, errno);
                 }
-                failure_mssg2 = "error writing output file.";
-                pass2 = FALSE;
+                failure_mssg = "error writing output file.";
+                pass = FALSE;
             }
         }
     }
@@ -494,10 +494,10 @@ copy_file(const char * input_file,
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close input file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close input file.";
+	        pass = FALSE;
 	    }
 	}
     }
@@ -512,10 +512,10 @@ copy_file(const char * input_file,
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close output file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close output file.";
+	        pass = FALSE;
 	    }
 	}
     }
@@ -528,12 +528,12 @@ copy_file(const char * input_file,
 /*-------------------------------------------------------------------------
  * Function:    end_trans()
  *
- * Purpose:     If pass2 is true on entry, attempt to end the current 
- * 		transaction.  If the operation fails, set pass2 to FALSE, 
- * 		and set failure_mssg2 to point to an appropriate failure 
+ * Purpose:     If pass is true on entry, attempt to end the current 
+ * 		transaction.  If the operation fails, set pass to FALSE, 
+ * 		and set failure_mssg to point to an appropriate failure 
  * 		message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -547,7 +547,7 @@ copy_file(const char * input_file,
 
 static void
 end_trans(H5F_t * file_ptr,
-          H5C2_t * cache_ptr,
+          H5C_t * cache_ptr,
           hbool_t verbose,
           uint64_t trans_num,
           const char * trans_name)
@@ -555,20 +555,20 @@ end_trans(H5F_t * file_ptr,
     const char * fcn_name = "end_trans()";
     herr_t result;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        result = H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+        result = H5C_end_transaction(file_ptr, H5AC_dxpl_id, cache_ptr, 
 			              trans_num, trans_name);
 
         if ( result < 0 ) {
 
             if ( verbose ) {
                 HDfprintf(stdout, 
-			  "%s: H5C2_end_transaction(%lld, \"%s\") failed.\n",
+			  "%s: H5C_end_transaction(%lld, \"%s\") failed.\n",
 			  fcn_name, (long long)trans_num, trans_name);
             }
-            pass2 = FALSE;
-	    failure_mssg2 = "H5C2_end_transaction() failed.\n";
+            pass = FALSE;
+	    failure_mssg = "H5C_end_transaction() failed.\n";
         }
     }
 
@@ -580,14 +580,14 @@ end_trans(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:    file_exists()
  *
- * Purpose:     If pass2 is true on entry, stat the target file, and 
+ * Purpose:     If pass is true on entry, stat the target file, and 
  * 		return TRUE if it exists, and FALSE if it does not.
  *
- * 		If any errors are detected in this process, set pass2 
- * 		to FALSE and set failure_mssg2 to point to an appropriate 
+ * 		If any errors are detected in this process, set pass 
+ * 		to FALSE and set failure_mssg to point to an appropriate 
  * 		error message.
  *
- *              Do nothing and return FALSE if pass2 is FALSE on entry.
+ *              Do nothing and return FALSE if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -607,16 +607,16 @@ file_exists(const char * file_path_ptr)
     hbool_t verbose = FALSE;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( file_path_ptr == NULL ) {
 
-            failure_mssg2 = "file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(file_path_ptr, &buf) == 0 ) {
 
@@ -645,8 +645,8 @@ file_exists(const char * file_path_ptr)
                           fcn_name, errno);
 	    }
 
-	    failure_mssg2 = "HDstat() returned unexpected value.";
-	    pass2 = FALSE;
+	    failure_mssg = "HDstat() returned unexpected value.";
+	    pass = FALSE;
 
 	} 
     }
@@ -659,11 +659,11 @@ file_exists(const char * file_path_ptr)
 /*-------------------------------------------------------------------------
  * Function:    flush_journal()
  *
- * Purpose:     If pass2 is true on entry, attempt to flush the journal.
- * 		If the operation fails, set pass2 to FALSE,  and set 
- * 		failure_mssg2 to point to an appropriate failure message.
+ * Purpose:     If pass is true on entry, attempt to flush the journal.
+ * 		If the operation fails, set pass to FALSE,  and set 
+ * 		failure_mssg to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -676,14 +676,14 @@ file_exists(const char * file_path_ptr)
  */
 
 static void
-flush_journal(H5C2_t * cache_ptr)
+flush_journal(H5C_t * cache_ptr)
 {
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__flush(&(cache_ptr->mdj_jbrb)) < 0 ) {
+        if ( H5C_jb__flush(&(cache_ptr->mdj_jbrb)) < 0 ) {
 		
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__flush() reports failure.";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__flush() reports failure.";
 	}
     }
 
@@ -693,16 +693,16 @@ flush_journal(H5C2_t * cache_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	jrnl_col_major_scan_backward2()
+ * Function:	jrnl_col_major_scan_backward()
  *
  * Purpose:	Do a sequence of inserts, protects, and unprotects
  *		broken into a sequence of transactions while scanning 
  *		backwards through the set of entries.  
  *
- *		If pass2 is false on entry, do nothing.
+ *		If pass is false on entry, do nothing.
  *
  *		Note tht this function is an adaption of 
- *		col_major_scan_backward2()
+ *		col_major_scan_backward()
  *
  * Return:	void
  *
@@ -717,7 +717,7 @@ flush_journal(H5C2_t * cache_ptr)
  */
 
 void
-jrnl_col_major_scan_backward2(H5F_t * file_ptr,
+jrnl_col_major_scan_backward(H5F_t * file_ptr,
 		              int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
@@ -729,8 +729,8 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
                               int dirty_unprotects,
 			      uint64_t trans_num)
 {
-    const char * fcn_name = "jrnl_col_major_scan_backward2()";
-    H5C2_t * cache_ptr;
+    const char * fcn_name = "jrnl_col_major_scan_backward()";
+    H5C_t * cache_ptr;
     int i;
     int mile_stone = 1;
     int32_t type;
@@ -740,22 +740,22 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-	cache_ptr = file_ptr->shared->cache2;
+	cache_ptr = file_ptr->shared->cache;
 
 	HDassert( cache_ptr != NULL );
 
         for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
         {
-            local_max_index[i] = MIN(max_index, max_indices2[i]);
+            local_max_index[i] = MIN(max_index, max_indices[i]);
         }
 
         HDassert( lag > 5 );
 
         if ( reset_stats ) {
 
-            H5C2_stats__reset(cache_ptr);
+            H5C_stats__reset(cache_ptr);
         }
 
         idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
@@ -765,7 +765,7 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
         HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
 
 
-    while ( ( pass2 ) && ( (idx + lag) >= 0 ) )
+    while ( ( pass ) && ( (idx + lag) >= 0 ) )
     {
         type = NUMBER_OF_ENTRY_TYPES - 1;
 
@@ -779,43 +779,43 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
             HDfprintf(stdout, "begin trans %lld, idx = %d.\n", trans_num, idx);
         }
 
-        while ( ( pass2 ) && ( type >= 0 ) )
+        while ( ( pass ) && ( type >= 0 ) )
         {
 	    if ( verbose ) {
 
                 HDfprintf(stdout, "%d:%d: ", type, idx);
 	    }
 	    
-            if ( ( pass2 ) && ( do_inserts) && ( (idx - lag) >= 0 ) &&
+            if ( ( pass ) && ( do_inserts) && ( (idx - lag) >= 0 ) &&
                  ( (idx - lag) <= local_max_index[type] ) &&
                  ( ((idx - lag) % 3) == 0 ) &&
-                 ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
+                 ( ! entry_in_cache(cache_ptr, type, (idx - lag)) ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
-                              H5C2__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
+                              H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass2 ) &&
+            if ( ( pass ) &&
 		 ( idx >= 0 ) && 
 		 ( idx <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                protect_entry2(file_ptr, type, idx);
+                protect_entry(file_ptr, type, idx);
             }
 
-            if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
+            if ( ( pass ) && ( (idx + lag) >= 0 ) &&
                  ( (idx + lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
-                unprotect_entry2(file_ptr, type, idx + lag,
-                                dirty_unprotects, H5C2__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, idx + lag,
+                                dirty_unprotects, H5C__NO_FLAGS_SET);
             }
 
             if ( verbose )
@@ -832,10 +832,10 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
             HDfprintf(stdout, "end trans %lld, idx = %d.\n", trans_num, idx);
         }
 
-	if ( ( verbose ) && ( ! pass2 ) ) {
+	if ( ( verbose ) && ( ! pass ) ) {
 
-	    HDfprintf(stdout, "pass2 == FALSE, failure mssg = \"%s\".\n",
-		      failure_mssg2);
+	    HDfprintf(stdout, "pass == FALSE, failure mssg = \"%s\".\n",
+		      failure_mssg);
 	}
 
         idx--;
@@ -844,9 +844,9 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
     if ( verbose ) /* 2 */
         HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
 
-    if ( ( pass2 ) && ( display_stats ) ) {
+    if ( ( pass ) && ( display_stats ) ) {
 
-        H5C2_stats(cache_ptr, "test cache", display_detailed_stats);
+        H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
     if ( verbose )
@@ -854,20 +854,20 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
 
     return;
 
-} /* jrnl_col_major_scan_backward2() */
+} /* jrnl_col_major_scan_backward() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	jrnl_col_major_scan_forward2()
+ * Function:	jrnl_col_major_scan_forward()
  *
  * Purpose:	Do a sequence of inserts, protects, and unprotects
  *		broken into a sequence of transactions while scanning 
  *		through the set of entries.  
  *
  *		Note that this function is an adaption of 
- *		col_major_scan_forward2().
+ *		col_major_scan_forward().
  *
- *		If pass2 is false on entry, do nothing.
+ *		If pass is false on entry, do nothing.
  *
  * Return:	void
  *
@@ -882,7 +882,7 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
  */
 
 void
-jrnl_col_major_scan_forward2(H5F_t * file_ptr,
+jrnl_col_major_scan_forward(H5F_t * file_ptr,
 		             int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -894,8 +894,8 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
                              int dirty_unprotects,
 			     uint64_t trans_num)
 {
-    const char * fcn_name = "jrnl_col_major_scan_forward2()";
-    H5C2_t * cache_ptr;
+    const char * fcn_name = "jrnl_col_major_scan_forward()";
+    H5C_t * cache_ptr;
     int i;
     int32_t type;
     int32_t idx;
@@ -904,15 +904,15 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        cache_ptr = file_ptr->shared->cache2;
+        cache_ptr = file_ptr->shared->cache;
 
 	HDassert( cache_ptr != NULL );
 
         for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
         {
-            local_max_index[i] = MIN(max_index, max_indices2[i]);
+            local_max_index[i] = MIN(max_index, max_indices[i]);
         }
 
         HDassert( lag > 5 );
@@ -921,13 +921,13 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
 
         if ( reset_stats ) {
 
-            H5C2_stats__reset(cache_ptr);
+            H5C_stats__reset(cache_ptr);
 	}
 
         idx = -lag;
     }
 
-    while ( ( pass2 ) && ( (idx - lag) <= MAX_ENTRIES ) )
+    while ( ( pass ) && ( (idx - lag) <= MAX_ENTRIES ) )
     {
         type = 0;
 
@@ -941,43 +941,43 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
             HDfprintf(stdout, "begin trans %lld, idx = %d.\n", trans_num, idx);
         }
 
-        while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
+        while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
         {
 	    if ( verbose ) {
 
                 HDfprintf(stdout, "%d:%d: ", type, idx);
 	    }
 	    
-            if ( ( pass2 ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
+            if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
                  ( (idx + lag) <= local_max_index[type] ) &&
                  ( ((idx + lag) % 3) == 0 ) &&
-                 ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
+                 ( ! entry_in_cache(cache_ptr, type, (idx + lag)) ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C2__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
+                              H5C__NO_FLAGS_SET);
             }
 
-            if ( ( pass2 ) && 
+            if ( ( pass ) && 
                  ( idx >= 0 ) && 
                  ( idx <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                protect_entry2(file_ptr, type, idx);
+                protect_entry(file_ptr, type, idx);
             }
 
-            if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
+            if ( ( pass ) && ( (idx - lag) >= 0 ) &&
                  ( (idx - lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
-                unprotect_entry2(file_ptr, type, idx - lag,
-                                dirty_unprotects, H5C2__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, type, idx - lag,
+                                dirty_unprotects, H5C__NO_FLAGS_SET);
             }
 
             if ( verbose )
@@ -994,36 +994,36 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
             HDfprintf(stdout, "end trans %lld, idx = %d.\n", trans_num, idx);
         }
 
-	if ( ( verbose ) && ( ! pass2 ) ) {
+	if ( ( verbose ) && ( ! pass ) ) {
 
-	    HDfprintf(stdout, "pass2 == FALSE, failure mssg = \"%s\".\n",
-		      failure_mssg2);
+	    HDfprintf(stdout, "pass == FALSE, failure mssg = \"%s\".\n",
+		      failure_mssg);
 	}
 
         idx++;
     }
 
-    if ( ( pass2 ) && ( display_stats ) ) {
+    if ( ( pass ) && ( display_stats ) ) {
 
-        H5C2_stats(cache_ptr, "test cache", display_detailed_stats);
+        H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
     return;
 
-} /* jrnl_col_major_scan_forward2() */
+} /* jrnl_col_major_scan_forward() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	jrnl_row_major_scan_backward2()
+ * Function:	jrnl_row_major_scan_backward()
  *
  * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
  *		destroys broken into transactions while scanning backwards 
  *		through the set of entries.  
  *
- *		If pass2 is false on entry, do nothing.
+ *		If pass is false on entry, do nothing.
  *
  *		Note that this function is an adaption of 
- *		row_major_scan_backward2()
+ *		row_major_scan_backward()
  *
  * Return:	void
  *
@@ -1038,7 +1038,7 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
  */
 
 void
-jrnl_row_major_scan_backward2(H5F_t * file_ptr,
+jrnl_row_major_scan_backward(H5F_t * file_ptr,
                               int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
@@ -1055,8 +1055,8 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                               int dirty_unprotects,
 			      uint64_t trans_num)
 {
-    const char * fcn_name = "jrnl_row_major_scan_backward2";
-    H5C2_t * cache_ptr;
+    const char * fcn_name = "jrnl_row_major_scan_backward";
+    H5C_t * cache_ptr;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -1066,31 +1066,31 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        cache_ptr = file_ptr->shared->cache2;
+        cache_ptr = file_ptr->shared->cache;
 
 	HDassert( cache_ptr != NULL );
         HDassert( lag >= 10 );
 
         if ( reset_stats ) {
 
-            H5C2_stats__reset(cache_ptr);
+            H5C_stats__reset(cache_ptr);
 	}
     }
 
     type = NUMBER_OF_ENTRY_TYPES - 1;
 
-    while ( ( pass2 ) && ( type >= 0 ) )
+    while ( ( pass ) && ( type >= 0 ) )
     {
-        local_max_index = MIN(max_index, max_indices2[type]);
+        local_max_index = MIN(max_index, max_indices[type]);
 
         idx = local_max_index + lag;
 
 	upper_bound = local_max_index;
 	lower_bound = upper_bound - 8;
 
-        while ( ( pass2 ) && ( idx >= -lag ) )
+        while ( ( pass ) && ( idx >= -lag ) )
         {
 	    if ( idx == ( upper_bound + lag ) ) {
 
@@ -1107,30 +1107,30 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 	            HDfprintf(stdout, "(%d, %d)\n", lower_bound, upper_bound);
 	    }
 
-	    while ( ( pass2 ) && ( idx >= lower_bound - lag ) ) 
+	    while ( ( pass ) && ( idx >= lower_bound - lag ) ) 
             {
 	        if ( verbose ) {
 
                     HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
 	        }
 	    
-                if ( ( pass2 ) && ( do_inserts ) && 
+                if ( ( pass ) && ( do_inserts ) && 
 		     ( (idx - lag) >= 0 ) &&
 		     ( (idx - lag) >= lower_bound ) &&
                      ( (idx - lag) <= local_max_index ) &&
                      ( (idx - lag) <= upper_bound ) &&
                      ( ((idx - lag) % 2) == 1 ) &&
-                     ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
+                     ( ! entry_in_cache(cache_ptr, type, (idx - lag)) ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                    insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
-                                  H5C2__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
+                                  H5C__NO_FLAGS_SET);
                 }
 
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 1) >= 0 ) &&
 		     ( (idx - lag + 1) >= lower_bound ) &&
                      ( (idx - lag + 1) <= local_max_index ) &&
@@ -1141,10 +1141,10 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(p, %d, %d) ", 
 				  type, (idx - lag + 1));
 
-                    protect_entry2(file_ptr, type, (idx - lag + 1));
+                    protect_entry(file_ptr, type, (idx - lag + 1));
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 2) >= 0 ) &&
 		     ( (idx - lag + 2) >= lower_bound ) &&
                      ( (idx - lag + 2) <= local_max_index ) &&
@@ -1155,12 +1155,12 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx - lag + 2));
 
-                    unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+2, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
 
-                if ( ( pass2 ) && ( do_renames ) && 
+                if ( ( pass ) && ( do_renames ) && 
 		     ( (idx - lag + 2) >= 0 ) &&
 		     ( (idx - lag + 2) >= lower_bound ) &&
                      ( (idx - lag + 2) <= local_max_index ) &&
@@ -1172,12 +1172,12 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 			          type, (idx - lag + 2), 
 				  (int)rename_to_main_addr);
 
-                    rename_entry2(cache_ptr, type, (idx - lag + 2),
+                    rename_entry(cache_ptr, type, (idx - lag + 2),
                                   rename_to_main_addr);
                 }
 
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 3) >= 0 ) &&
 		     ( (idx - lag + 3) >= lower_bound ) &&
                      ( (idx - lag + 3) <= local_max_index ) &&
@@ -1188,10 +1188,10 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(p, %d, %d) ", 
 				  type, (idx - lag + 3));
 
-                    protect_entry2(file_ptr, type, (idx - lag + 3));
+                    protect_entry(file_ptr, type, (idx - lag + 3));
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 5) >= 0 ) &&
 		     ( (idx - lag + 5) >= lower_bound ) &&
                      ( (idx - lag + 5) <= local_max_index ) &&
@@ -1202,13 +1202,13 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx - lag + 5));
 
-                    unprotect_entry2(file_ptr, type, idx-lag+5, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+5, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
 	        if ( do_mult_ro_protects )
 	        {
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 5) >= 0 ) &&
 		         ( (idx - lag + 5) >= lower_bound ) &&
 		         ( (idx - lag + 5) < local_max_index ) &&
@@ -1219,10 +1219,10 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				      (idx - lag + 5));
 
-		        protect_entry_ro2(file_ptr, type, (idx - lag + 5));
+		        protect_entry_ro(file_ptr, type, (idx - lag + 5));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 6) >= 0 ) &&
 		         ( (idx - lag + 6) >= lower_bound ) &&
 		         ( (idx - lag + 6) < local_max_index ) &&
@@ -1233,10 +1233,10 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				      (idx - lag + 6));
 
-		        protect_entry_ro2(file_ptr, type, (idx - lag + 6));
+		        protect_entry_ro(file_ptr, type, (idx - lag + 6));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 7) >= 0 ) &&
 		         ( (idx - lag + 7) >= lower_bound ) &&
 		         ( (idx - lag + 7) < local_max_index ) &&
@@ -1247,10 +1247,10 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				      (idx - lag + 7));
 
-		        protect_entry_ro2(file_ptr, type, (idx - lag + 7));
+		        protect_entry_ro(file_ptr, type, (idx - lag + 7));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 7) >= 0 ) &&
 		         ( (idx - lag + 7) >= lower_bound ) &&
 		         ( (idx - lag + 7) < local_max_index ) &&
@@ -1261,11 +1261,11 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 7));
 
-		        unprotect_entry2(file_ptr, type, (idx - lag + 7),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 7),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 8) >= 0 ) &&
 		         ( (idx - lag + 8) >= lower_bound ) &&
 		         ( (idx - lag + 8) < local_max_index ) &&
@@ -1276,11 +1276,11 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 8));
 
-		        unprotect_entry2(file_ptr, type, (idx - lag + 8),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 8),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx - lag + 9) >= 0 ) &&
 		         ( (idx - lag + 9) >= lower_bound ) &&
 		         ( (idx - lag + 9) < local_max_index ) &&
@@ -1291,12 +1291,12 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 9));
 
-		        unprotect_entry2(file_ptr, type, (idx - lag + 9),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 9),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 	        } /* if ( do_mult_ro_protects ) */
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( idx >= 0 ) && 
 		     ( idx >= lower_bound ) && 
 		     ( idx <= local_max_index ) &&
@@ -1305,11 +1305,11 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                    protect_entry2(file_ptr, type, idx);
+                    protect_entry(file_ptr, type, idx);
                 }
 
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 2) >= 0 ) &&
 		     ( (idx + lag - 2) >= lower_bound ) &&
                      ( (idx + lag - 2) <= local_max_index ) &&
@@ -1320,11 +1320,11 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx + lag - 2));
 
-                    unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-2, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 1) >= 0 ) &&
 		     ( (idx + lag - 1) >= lower_bound ) &&
                      ( (idx + lag - 1) <= local_max_index ) &&
@@ -1335,13 +1335,13 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "(p, %d, %d) ", 
 				  type, (idx + lag - 1));
 
-                    protect_entry2(file_ptr, type, (idx + lag - 1));
+                    protect_entry(file_ptr, type, (idx + lag - 1));
                 }
 
 
                 if ( do_destroys ) {
 
-                    if ( ( pass2 ) && 
+                    if ( ( pass ) && 
 	                 ( (idx + lag) >= 0 ) &&
 	                 ( (idx + lag) >= lower_bound ) &&
                          ( ( idx + lag) <= local_max_index ) &&
@@ -1350,43 +1350,43 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                         switch ( (idx + lag) %4 ) {
 
                             case 0:
-                                if ( (entries2[type])[idx+lag].is_dirty ) {
+                                if ( (entries[type])[idx+lag].is_dirty ) {
 
-                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                    unprotect_entry(file_ptr, type, idx + lag,
                                                      NO_CHANGE, 
-						     H5C2__NO_FLAGS_SET);
+						     H5C__NO_FLAGS_SET);
                                 } else {
 
-                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                    unprotect_entry(file_ptr, type, idx + lag,
                                                      dirty_unprotects,
-                                                     H5C2__NO_FLAGS_SET);
+                                                     H5C__NO_FLAGS_SET);
                                 }
                                 break;
 
                             case 1: /* we just did an insert */
-                                unprotect_entry2(file_ptr, type, idx + lag,
+                                unprotect_entry(file_ptr, type, idx + lag,
                                                  NO_CHANGE, 
-						 H5C2__NO_FLAGS_SET);
+						 H5C__NO_FLAGS_SET);
                                 break;
 
                             case 2:
-                                if ( (entries2[type])[idx + lag].is_dirty ) {
+                                if ( (entries[type])[idx + lag].is_dirty ) {
 
-                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                    unprotect_entry(file_ptr, type, idx + lag,
                                                      NO_CHANGE, 
-						     H5C2__DELETED_FLAG);
+						     H5C__DELETED_FLAG);
                                 } else {
 
-                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                    unprotect_entry(file_ptr, type, idx + lag,
                                                      dirty_destroys,
-                                                     H5C2__DELETED_FLAG);
+                                                     H5C__DELETED_FLAG);
                                 }
                                 break;
 
                             case 3: /* we just did an insrt */
-                                unprotect_entry2(file_ptr, type, idx + lag,
+                                unprotect_entry(file_ptr, type, idx + lag,
                                                  NO_CHANGE, 
-						 H5C2__DELETED_FLAG);
+						 H5C__DELETED_FLAG);
                                 break;
 
                             default:
@@ -1396,7 +1396,7 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                     }
                 } else {
 
-                    if ( ( pass2 ) && 
+                    if ( ( pass ) && 
 		         ( (idx + lag) >= 0 ) &&
 		         ( (idx + lag) >= lower_bound ) &&
                          ( ( idx + lag) <= local_max_index ) &&
@@ -1406,9 +1406,9 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                             HDfprintf(stdout, 
 				      "(u, %d, %d) ", type, (idx + lag));
 
-                        unprotect_entry2(file_ptr, type, idx + lag,
+                        unprotect_entry(file_ptr, type, idx + lag,
                                          dirty_unprotects, 
-					 H5C2__NO_FLAGS_SET);
+					 H5C__NO_FLAGS_SET);
                     }
                 }
 
@@ -1417,7 +1417,7 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 		if ( verbose )
 		    HDfprintf(stdout, "\n");
 
-            } /* while ( ( pass2 ) && ( idx >= lower_bound - lag ) ) */
+            } /* while ( ( pass ) && ( idx >= lower_bound - lag ) ) */
 
 	    end_trans(file_ptr, cache_ptr, verbose, trans_num, 
                       "jrnl_row_major_scan_backward inner loop");
@@ -1430,33 +1430,33 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 
 	    idx = upper_bound + lag;
 
-        } /* while ( ( pass2 ) && ( idx >= -lag ) ) */
+        } /* while ( ( pass ) && ( idx >= -lag ) ) */
 
         type--;
 
-    } /* while ( ( pass2 ) && ( type >= 0 ) ) */
+    } /* while ( ( pass ) && ( type >= 0 ) ) */
 
-    if ( ( pass2 ) && ( display_stats ) ) {
+    if ( ( pass ) && ( display_stats ) ) {
 
-        H5C2_stats(cache_ptr, "test cache", display_detailed_stats);
+        H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
     return;
 
-} /* jrnl_row_major_scan_backward2() */
+} /* jrnl_row_major_scan_backward() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	jrnl_row_major_scan_forward2()
+ * Function:	jrnl_row_major_scan_forward()
  *
  * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
  *		and destroys broken into transactions while scanning 
  *		through the set of entries. 
  *
- *		If pass2 is false on entry, do nothing.
+ *		If pass is false on entry, do nothing.
  *
  *		Note that this function is an adaption of 
- *		row_major_scan_forward2().
+ *		row_major_scan_forward().
  *
  * Return:	void
  *
@@ -1471,7 +1471,7 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
  */
 
 void
-jrnl_row_major_scan_forward2(H5F_t * file_ptr,
+jrnl_row_major_scan_forward(H5F_t * file_ptr,
                              int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -1488,8 +1488,8 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                              int dirty_unprotects,
 			     uint64_t trans_num)
 {
-    const char * fcn_name = "jrnl_row_major_scan_forward2";
-    H5C2_t * cache_ptr;
+    const char * fcn_name = "jrnl_row_major_scan_forward";
+    H5C_t * cache_ptr;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -1499,9 +1499,9 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        cache_ptr = file_ptr->shared->cache2;
+        cache_ptr = file_ptr->shared->cache;
 
 	HDassert( cache_ptr != NULL );
 	HDassert( lag >= 10 );
@@ -1510,20 +1510,20 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
         if ( reset_stats ) {
 
-            H5C2_stats__reset(cache_ptr);
+            H5C_stats__reset(cache_ptr);
 	}
     }
 
-    while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
+    while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
     {
         idx = -lag;
 
-        local_max_index = MIN(max_index, max_indices2[type]);
+        local_max_index = MIN(max_index, max_indices[type]);
 
 	lower_bound = 0;
 	upper_bound = lower_bound + 8;
 
-        while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) )
+        while ( ( pass ) && ( idx <= (local_max_index + lag) ) )
         {
 	    if ( idx == ( lower_bound - lag ) ) {
 
@@ -1540,7 +1540,7 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 	            HDfprintf(stdout, "(%d, %d)\n", lower_bound, upper_bound);
 	    }
 
-	    while ( ( pass2 ) && ( idx <= upper_bound + lag ) ) 
+	    while ( ( pass ) && ( idx <= upper_bound + lag ) ) 
             {
 	    
 	        if ( verbose ) {
@@ -1548,24 +1548,24 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                     HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
 	        }
 
-                if ( ( pass2 ) && ( do_inserts ) && 
+                if ( ( pass ) && ( do_inserts ) && 
 		     ( (idx + lag) >= 0 ) &&
 		     ( (idx + lag) >= lower_bound ) &&
                      ( (idx + lag) <= local_max_index ) &&
                      ( (idx + lag) <= upper_bound ) &&
                      ( ((idx + lag) % 2) == 0 ) &&
-                     ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
+                     ( ! entry_in_cache(cache_ptr, type, (idx + lag)) ) ) {
 
                     if ( verbose )
                         HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
 
 		    /*** insert entry idx + lag (if not already present *** */
-                    insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
-                                  H5C2__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
+                                  H5C__NO_FLAGS_SET);
                 }
 
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 1) >= 0 ) &&
 		     ( (idx + lag - 1) >= lower_bound ) &&
                      ( (idx + lag - 1) <= local_max_index ) &&
@@ -1577,10 +1577,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  "2(p, %d, %d) ", type, (idx + lag - 1));
 
 		    /*** protect entry idx + lag - 1 ***/
-                    protect_entry2(file_ptr, type, (idx + lag - 1));
+                    protect_entry(file_ptr, type, (idx + lag - 1));
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 2) >= 0 ) &&
 		     ( (idx + lag - 2) >= lower_bound ) &&
                      ( (idx + lag - 2) <= local_max_index ) &&
@@ -1592,12 +1592,12 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  type, (idx + lag - 2));
 
 		    /*** unprotect entry idx + lag - 2 ***/
-                    unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-2, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
 
-                if ( ( pass2 ) && ( do_renames ) && 
+                if ( ( pass ) && ( do_renames ) && 
 		     ( (idx + lag - 2) >= 0 ) &&
 		     ( (idx + lag - 2) >= lower_bound ) &&
                      ( (idx + lag - 2) <= local_max_index ) &&
@@ -1610,12 +1610,12 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  (int)rename_to_main_addr);
 
 		    /*** rename entry idx + lag -2 ***/
-                    rename_entry2(cache_ptr, type, (idx + lag - 2),
+                    rename_entry(cache_ptr, type, (idx + lag - 2),
                                   rename_to_main_addr);
                 }
 
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 3) >= 0 ) &&
 		     ( (idx + lag - 3) >= lower_bound ) &&
                      ( (idx + lag - 3) <= local_max_index ) &&
@@ -1627,10 +1627,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  type, (idx + lag - 3));
 
 		    /*** protect entry idx + lag - 3 ***/
-                    protect_entry2(file_ptr, type, (idx + lag - 3));
+                    protect_entry(file_ptr, type, (idx + lag - 3));
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx + lag - 5) >= 0 ) &&
 		     ( (idx + lag - 5) >= lower_bound ) &&
                      ( (idx + lag - 5) <= local_max_index ) &&
@@ -1643,13 +1643,13 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
 
 		    /*** unprotect entry idx + lag - 5 ***/
-                    unprotect_entry2(file_ptr, type, idx+lag-5, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-5, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
 	        if ( do_mult_ro_protects )
 	        {
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 5) >= 0 ) &&
 		         ( (idx + lag - 5) >= lower_bound ) &&
 		         ( (idx + lag - 5) < local_max_index ) &&
@@ -1661,10 +1661,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 5));
 
 		        /*** protect ro entry idx + lag - 5 ***/
-		        protect_entry_ro2(file_ptr, type, (idx + lag - 5));
+		        protect_entry_ro(file_ptr, type, (idx + lag - 5));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 6) >= 0 ) &&
 		         ( (idx + lag - 6) >= lower_bound ) &&
 		         ( (idx + lag - 6) < local_max_index ) &&
@@ -1676,10 +1676,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 6));
 
 		        /*** protect ro entry idx + lag - 6 ***/
-		        protect_entry_ro2(file_ptr, type, (idx + lag - 6));
+		        protect_entry_ro(file_ptr, type, (idx + lag - 6));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 7) >= 0 ) &&
 		         ( (idx + lag - 7) >= lower_bound ) &&
 		         ( (idx + lag - 7) < local_max_index ) &&
@@ -1691,10 +1691,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 7));
 
 		        /*** protect ro entry idx + lag - 7 ***/
-		        protect_entry_ro2(file_ptr, type, (idx + lag - 7));
+		        protect_entry_ro(file_ptr, type, (idx + lag - 7));
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 7) >= 0 ) &&
 		         ( (idx + lag - 7) >= lower_bound ) &&
 		         ( (idx + lag - 7) < local_max_index ) &&
@@ -1706,11 +1706,11 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 7));
 
 		        /*** unprotect ro entry idx + lag - 7 ***/
-		        unprotect_entry2(file_ptr, type, (idx + lag - 7),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 7),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 8) >= 0 ) &&
 		         ( (idx + lag - 8) >= lower_bound ) &&
 		         ( (idx + lag - 8) < local_max_index ) &&
@@ -1722,11 +1722,11 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 8));
 
 		        /*** unprotect ro entry idx + lag - 8 ***/
-		        unprotect_entry2(file_ptr, type, (idx + lag - 8),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 8),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 
-		    if ( ( pass2 ) && 
+		    if ( ( pass ) && 
 		         ( (idx + lag - 9) >= 0 ) &&
 		         ( (idx + lag - 9) >= lower_bound ) &&
 		         ( (idx + lag - 9) < local_max_index ) &&
@@ -1738,12 +1738,12 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      (idx + lag - 9));
 
 		        /*** unprotect ro entry idx + lag - 9 ***/
-		        unprotect_entry2(file_ptr, type, (idx + lag - 9),
-				         FALSE, H5C2__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 9),
+				         FALSE, H5C__NO_FLAGS_SET);
 		    }
 	        } /* if ( do_mult_ro_protects ) */
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( idx >= 0 ) && 
 		     ( idx >= lower_bound ) && 
 		     ( idx <= local_max_index ) &&
@@ -1753,10 +1753,10 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                         HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
 
 		    /*** protect entry idx ***/
-                    protect_entry2(file_ptr, type, idx);
+                    protect_entry(file_ptr, type, idx);
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 2) >= 0 ) &&
 		     ( (idx - lag + 2) >= lower_bound ) &&
                      ( (idx - lag + 2) <= local_max_index ) &&
@@ -1768,11 +1768,11 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  type, (idx - lag + 2));
 
 		    /*** unprotect entry idx - lag + 2 ***/
-                    unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                     H5C2__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+2, NO_CHANGE,
+                                     H5C__NO_FLAGS_SET);
                 }
 
-                if ( ( pass2 ) && 
+                if ( ( pass ) && 
 		     ( (idx - lag + 1) >= 0 ) &&
 		     ( (idx - lag + 1) >= lower_bound ) &&
                      ( (idx - lag + 1) <= local_max_index ) &&
@@ -1784,13 +1784,13 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				  type, (idx - lag + 1));
 
 		    /*** protect entry idx - lag + 1 ***/
-                    protect_entry2(file_ptr, type, (idx - lag + 1));
+                    protect_entry(file_ptr, type, (idx - lag + 1));
                 }
 
 
                 if ( do_destroys ) {
 
-                    if ( ( pass2 ) && 
+                    if ( ( pass ) && 
 		         ( (idx - lag) >= 0 ) &&
 		         ( (idx - lag) >= lower_bound ) &&
                          ( ( idx - lag) <= local_max_index ) &&
@@ -1805,21 +1805,21 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 					      type, (idx - lag));
 
 			        /*** unprotect entry NC idx - lag ***/
-                                unprotect_entry2(file_ptr, type, idx - lag,
-                                                 NO_CHANGE, H5C2__NO_FLAGS_SET);
+                                unprotect_entry(file_ptr, type, idx - lag,
+                                                 NO_CHANGE, H5C__NO_FLAGS_SET);
                                 break;
 
                             case 1:
-                                if ( (entries2[type])[idx-lag].is_dirty ) {
+                                if ( (entries[type])[idx-lag].is_dirty ) {
 
                                     if ( verbose )
                                         HDfprintf(stdout, "17(u, %d, %d) ", 
 						  type, (idx - lag));
 
 			            /*** unprotect entry NC idx - lag ***/
-                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                    unprotect_entry(file_ptr, type, idx - lag,
                                                      NO_CHANGE, 
-						     H5C2__NO_FLAGS_SET);
+						     H5C__NO_FLAGS_SET);
                                 } else {
 
                                     if ( verbose )
@@ -1827,9 +1827,9 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 						  type, (idx - lag));
 
 			            /*** unprotect entry idx - lag ***/
-                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                    unprotect_entry(file_ptr, type, idx - lag,
                                                      dirty_unprotects,
-                                                     H5C2__NO_FLAGS_SET);
+                                                     H5C__NO_FLAGS_SET);
                                 }
                                 break;
 
@@ -1840,21 +1840,21 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 					      type, (idx - lag));
 
 			        /*** unprotect delete idx - lag ***/
-                                unprotect_entry2(file_ptr, type, idx - lag,
-                                                 NO_CHANGE, H5C2__DELETED_FLAG);
+                                unprotect_entry(file_ptr, type, idx - lag,
+                                                 NO_CHANGE, H5C__DELETED_FLAG);
                                 break;
 
                             case 3:
-                                if ( (entries2[type])[idx-lag].is_dirty ) {
+                                if ( (entries[type])[idx-lag].is_dirty ) {
 
                                     if ( verbose )
                                         HDfprintf(stdout, "20(u-del, %d, %d) ", 
 					          type, (idx - lag));
 
 				    /*** unprotect delete idx - lag ***/
-                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                    unprotect_entry(file_ptr, type, idx - lag,
                                                      NO_CHANGE, 
-						     H5C2__DELETED_FLAG);
+						     H5C__DELETED_FLAG);
                                 } else {
 
                                     if ( verbose )
@@ -1862,9 +1862,9 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 					          type, (idx - lag));
 
 				    /*** unprotect delete idx - lag ***/
-                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                    unprotect_entry(file_ptr, type, idx - lag,
                                                      dirty_destroys,
-                                                     H5C2__DELETED_FLAG);
+                                                     H5C__DELETED_FLAG);
                                 }
                                 break;
 
@@ -1876,7 +1876,7 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
                 } else {
 
-                    if ( ( pass2 ) && 
+                    if ( ( pass ) && 
 		         ( (idx - lag) >= 0 ) &&
 		         ( (idx - lag) >= lower_bound ) &&
                          ( ( idx - lag) <= local_max_index ) &&
@@ -1887,8 +1887,8 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 				      type, (idx - lag));
 
 		        /*** unprotect idx - lag ***/
-                        unprotect_entry2(file_ptr, type, idx - lag,
-                                         dirty_unprotects, H5C2__NO_FLAGS_SET);
+                        unprotect_entry(file_ptr, type, idx - lag,
+                                         dirty_unprotects, H5C__NO_FLAGS_SET);
                     }
                 }
 
@@ -1897,7 +1897,7 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 		if ( verbose )
 		    HDfprintf(stdout, "\n");
 
-	    } /* while ( ( pass2 ) && ( idx <= upper_bound ) ) */
+	    } /* while ( ( pass ) && ( idx <= upper_bound ) ) */
 
 	    end_trans(file_ptr, cache_ptr, verbose, trans_num, 
                       "jrnl_row_major_scan_forward inner loop");
@@ -1910,34 +1910,34 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
 	    idx = lower_bound - lag;
 
-        } /* while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) ) */
+        } /* while ( ( pass ) && ( idx <= (local_max_index + lag) ) ) */
 
         type++;
 
-    } /* while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) ) */
+    } /* while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) ) */
 
-    if ( ( pass2 ) && ( display_stats ) ) {
+    if ( ( pass ) && ( display_stats ) ) {
 
-        H5C2_stats(cache_ptr, "test cache", display_detailed_stats);
+        H5C_stats(cache_ptr, "test cache", display_detailed_stats);
     }
 
     return;
 
-} /* jrnl_row_major_scan_forward2() */
+} /* jrnl_row_major_scan_forward() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    open_existing_file_for_journaling()
  *
- * Purpose:     If pass2 is true on entry, open the specified a HDF5 file 
+ * Purpose:     If pass is true on entry, open the specified a HDF5 file 
  * 		with journaling enabled and journal file with the specified 
  * 		name.  Return pointers to the cache data structure and file 
  * 		data structures, and verify that it contains the expected data.
  *
- *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              On failure, set pass to FALSE, and set failure_mssg 
  *              to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -1957,7 +1957,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
                                   const char * journal_file_name,
                                   hid_t * file_id_ptr,
                                   H5F_t ** file_ptr_ptr,
-                                  H5C2_t ** cache_ptr_ptr,
+                                  H5C_t ** cache_ptr_ptr,
                                   hbool_t human_readable,
                                   hbool_t use_aio) 
 {
@@ -1966,13 +1966,13 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     hbool_t verbose = FALSE;
     int cp = 0;
     herr_t result;
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
     hid_t fapl_id = -1;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( hdf_file_name == NULL ) ||
              ( journal_file_name == NULL ) ||
@@ -1980,14 +1980,14 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 	     ( file_ptr_ptr == NULL ) ||
 	     ( cache_ptr_ptr == NULL ) ) {
 
-            failure_mssg2 = 
+            failure_mssg = 
                "Bad param(s) on entry to open_existing_file_for_journaling().\n";
-	    pass2 = FALSE;
+	    pass = FALSE;
         }
-	else if ( HDstrlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+	else if ( HDstrlen(journal_file_name) > H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            failure_mssg2 = "journal file name too long.\n";
-	    pass2 = FALSE;
+            failure_mssg = "journal file name too long.\n";
+	    pass = FALSE;
 
         } else  if ( verbose ) {
 
@@ -2001,42 +2001,42 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access propertly list. */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) 
 		< 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pget_jnl_config() failed.\n";
         }
 
 	/* set journaling config fields to taste */
@@ -2053,14 +2053,14 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_jnl_config() failed.\n";
         }
     }
 
@@ -2071,14 +2071,14 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     /**************************************/
 
     /* open the file using fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (1).\n";
 
         } else {
 
@@ -2086,8 +2086,8 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 
             if ( file_ptr == NULL ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Can't get file_ptr.";
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
@@ -2096,7 +2096,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
         }
     }
 
-    /* At least within the context of the cache2 test code, there should be
+    /* At least within the context of the cache test code, there should be
      * no need to allocate space for test entries since we are re-opening
      * the file, and any needed space allocation should have been done at 
      * file creation.
@@ -2108,23 +2108,23 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     /* get a pointer to the files internal data structure and then 
      * to the cache structure
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( file_ptr->shared->cache2 == NULL ) {
+        if ( file_ptr->shared->cache == NULL ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+	    pass = FALSE;
+	    failure_mssg = "can't get cache pointer(1).\n";
 
 	} else {
 
-	    cache_ptr = file_ptr->shared->cache2;
+	    cache_ptr = file_ptr->shared->cache;
 	}
     }
 
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         *file_id_ptr = file_id;
 	*file_ptr_ptr = file_ptr;
@@ -2142,15 +2142,15 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 /*-------------------------------------------------------------------------
  * Function:    open_existing_file_without_journaling()
  *
- * Purpose:     If pass2 is true on entry, open the specified a HDF5 file 
+ * Purpose:     If pass is true on entry, open the specified a HDF5 file 
  * 		with journaling disabled.  Return pointers to the cache 
  * 		data structure and file data structures, and verify that 
  * 		it contains the expected data.
  *
- *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              On failure, set pass to FALSE, and set failure_mssg 
  *              to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -2166,7 +2166,7 @@ static void
 open_existing_file_without_journaling(const char * hdf_file_name,
                                       hid_t * file_id_ptr,
                                       H5F_t ** file_ptr_ptr,
-                                      H5C2_t ** cache_ptr_ptr)
+                                      H5C_t ** cache_ptr_ptr)
 {
     const char * fcn_name = "open_existing_file_without_journaling()";
     hbool_t show_progress = FALSE;
@@ -2175,18 +2175,18 @@ open_existing_file_without_journaling(const char * hdf_file_name,
     hid_t fapl_id = -1;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( hdf_file_name == NULL ) ||
 	     ( file_id_ptr == NULL ) ||
 	     ( file_ptr_ptr == NULL ) ||
 	     ( cache_ptr_ptr == NULL ) ) {
 
-            failure_mssg2 = 
+            failure_mssg = 
            "Bad param(s) on entry to open_existing_file_without_journaling().\n";
-	    pass2 = FALSE;
+	    pass = FALSE;
 
         } else {
 
@@ -2201,27 +2201,27 @@ open_existing_file_without_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access propertly list. */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
 				  H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
@@ -2233,14 +2233,14 @@ open_existing_file_without_journaling(const char * hdf_file_name,
     /**************************************/
 
     /* open the file using fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (2).\n";
 
         } else {
 
@@ -2248,8 +2248,8 @@ open_existing_file_without_journaling(const char * hdf_file_name,
 
             if ( file_ptr == NULL ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Can't get file_ptr.";
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
@@ -2258,7 +2258,7 @@ open_existing_file_without_journaling(const char * hdf_file_name,
         }
     }
 
-    /* At least within the context of the cache2 test code, there should be
+    /* At least within the context of the cache test code, there should be
      * no need to allocate space for test entries since we are re-opening
      * the file, and any needed space allocation should have been done at 
      * file creation.
@@ -2270,23 +2270,23 @@ open_existing_file_without_journaling(const char * hdf_file_name,
     /* get a pointer to the files internal data structure and then 
      * to the cache structure
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( file_ptr->shared->cache2 == NULL ) {
+        if ( file_ptr->shared->cache == NULL ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+	    pass = FALSE;
+	    failure_mssg = "can't get cache pointer(1).\n";
 
 	} else {
 
-	    cache_ptr = file_ptr->shared->cache2;
+	    cache_ptr = file_ptr->shared->cache;
 	}
     }
 
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         *file_id_ptr = file_id;
 	*file_ptr_ptr = file_ptr;
@@ -2304,15 +2304,15 @@ open_existing_file_without_journaling(const char * hdf_file_name,
 /*-------------------------------------------------------------------------
  * Function:    setup_cache_for_journaling()
  *
- * Purpose:     If pass2 is true on entry, create a HDF5 file with 
+ * Purpose:     If pass is true on entry, create a HDF5 file with 
  * 		journaling enabled and journal file with the specified name.  
  * 		Return pointers to the cache data structure and file data 
  * 		structures.  and verify that it contains the expected data.
  *
- *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              On failure, set pass to FALSE, and set failure_mssg 
  *              to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -2339,7 +2339,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
                            const char * journal_file_name,
                            hid_t * file_id_ptr,
                            H5F_t ** file_ptr_ptr,
-                           H5C2_t ** cache_ptr_ptr,
+                           H5C_t ** cache_ptr_ptr,
                            hbool_t human_readable,
                            hbool_t use_aio,
 #if USE_CORE_DRIVER
@@ -2353,9 +2353,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
     hbool_t verbose = FALSE;
     int cp = 0;
     herr_t result;
-    H5AC2_cache_config_t mdj_config =
+    H5AC_cache_config_t mdj_config =
     {
-      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* int         version                 = */ H5C__CURR_AUTO_SIZE_CTL_VER,
       /* hbool_t     rpt_fcn_enabled         = */ FALSE,
       /* hbool_t     open_trace_file         = */ FALSE,
       /* hbool_t     close_trace_file        = */ FALSE,
@@ -2367,16 +2367,16 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* size_t      max_size                = */ (16 * 1024 * 1024 ),
       /* size_t      min_size                = */ ( 8 * 1024 ),
       /* long int    epoch_length            = */ 50000,
-      /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
+      /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
       /* double      lower_hr_threshold      = */ 0.9,
       /* double      increment               = */ 2.0,
       /* hbool_t     apply_max_increment     = */ TRUE,
       /* size_t      max_increment           = */ (4 * 1024 * 1024),
-      /* enum H5C2_cache_flash_incr_mode       */
-      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* enum H5C_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C_flash_incr__off,
       /* double      flash_multiple          = */ 1.0,
       /* double      flash_threshold         = */ 0.25,
-      /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
+      /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
       /* double      upper_hr_threshold      = */ 0.999,
       /* double      decrement               = */ 0.9,
       /* hbool_t     apply_max_decrement     = */ TRUE,
@@ -2386,9 +2386,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* double      empty_reserve           = */ 0.1,
       /* int         dirty_bytes_threshold   = */ (8 * 1024)
     };
-    H5AC2_jnl_config_t jnl_config =
+    H5AC_jnl_config_t jnl_config =
     {
-      /* int         version                 = */ H5AC2__CURR_JNL_CONFIG_VER,
+      /* int         version                 = */ H5AC__CURR_JNL_CONFIG_VER,
       /* hbool_t     enable_journaling       = */ TRUE,
       /* char        journal_file_path[]     = */ "",
       /* hbool_t     journal_recovered       = */ FALSE,
@@ -2401,9 +2401,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
     hid_t file_id = -1;
     haddr_t actual_base_addr;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( hdf_file_name == NULL ) ||
              ( journal_file_name == NULL ) ||
@@ -2411,14 +2411,14 @@ setup_cache_for_journaling(const char * hdf_file_name,
 	     ( file_ptr_ptr == NULL ) ||
 	     ( cache_ptr_ptr == NULL ) ) {
 
-            failure_mssg2 = 
+            failure_mssg = 
                 "Bad param(s) on entry to setup_cache_for_journaling().\n";
-	    pass2 = FALSE;
+	    pass = FALSE;
         }
-	else if ( HDstrlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN )
+	else if ( HDstrlen(journal_file_name) > H5AC__MAX_JOURNAL_FILE_NAME_LEN )
 	{
-            failure_mssg2 = "journal file name too long.\n";
-	    pass2 = FALSE;
+            failure_mssg = "journal file name too long.\n";
+	    pass = FALSE;
 
         } else {
 
@@ -2437,46 +2437,46 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access propertly list. */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
 				  H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mdj_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         jnl_config.jbrb_human_readable = human_readable;
         jnl_config.jbrb_use_aio        = use_aio;
@@ -2485,20 +2485,20 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 #if USE_CORE_DRIVER
-    if ( ( pass2 ) && ( use_core_driver_if_avail ) ) {
+    if ( ( pass ) && ( use_core_driver_if_avail ) ) {
 
         if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5P_set_fapl_core() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5P_set_fapl_core() failed.\n";
         }
     }
 #endif /* USE_CORE_DRIVER */
@@ -2511,14 +2511,14 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /**************************************/
 
     /* create the file using fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.\n";
 
         } else {
 
@@ -2526,8 +2526,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
             if ( file_ptr == NULL ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Can't get file_ptr.";
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
@@ -2538,15 +2538,15 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) { /* allocate space for test entries */
+    if ( pass ) { /* allocate space for test entries */
 
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
                                       (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5MF_alloc() failed.";
+            pass = FALSE;
+            failure_mssg = "H5MF_alloc() failed.";
 
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
@@ -2558,8 +2558,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
              * actual_base_addr is <= BASE_ADDR.  This should only happen
              * if the size of the superblock is increase.
              */
-            pass2 = FALSE;
-            failure_mssg2 = "actual_base_addr > BASE_ADDR";
+            pass = FALSE;
+            failure_mssg = "actual_base_addr > BASE_ADDR";
 
             if ( verbose ) {
                 HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", 
@@ -2575,38 +2575,38 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /* get a pointer to the files internal data structure and then 
      * to the cache structure
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( file_ptr->shared->cache2 == NULL ) {
+        if ( file_ptr->shared->cache == NULL ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+	    pass = FALSE;
+	    failure_mssg = "can't get cache pointer(1).\n";
 
 	} else {
 
-	    cache_ptr = file_ptr->shared->cache2;
+	    cache_ptr = file_ptr->shared->cache;
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    reset_entries2();
+    reset_entries();
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the fapl */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Pclose(fapl_id) < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "error closing fapl.\n";
+	    pass = FALSE;
+	    failure_mssg = "error closing fapl.\n";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         *file_id_ptr = file_id;
 	*file_ptr_ptr = file_ptr;
@@ -2657,8 +2657,8 @@ takedown_cache_after_journaling(hid_t file_id,
 
             if ( file_ptr == NULL ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Can't get file_ptr.";
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
@@ -2676,10 +2676,10 @@ takedown_cache_after_journaling(hid_t file_id,
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "file close failed.";
+                pass = FALSE;
+	        failure_mssg = "file close failed.";
 	    }
 	} else if ( ( ( ! USE_CORE_DRIVER ) || ( ! use_core_driver_if_avail ) ) &&
                     ( ( error = HDremove(filename) ) != 0 ) ) {
@@ -2690,10 +2690,10 @@ takedown_cache_after_journaling(hid_t file_id,
 		  filename, error, errno, strerror(errno));
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "HDremove() failed (1).\n";
+                pass = FALSE;
+                failure_mssg = "HDremove() failed (1).\n";
             }
         }
     }
@@ -2708,13 +2708,13 @@ takedown_cache_after_journaling(hid_t file_id,
 /*-------------------------------------------------------------------------
  * Function:    verify_journal_contents()
  *
- * Purpose:     If pass2 is true on entry, verify that the contents of the 
+ * Purpose:     If pass is true on entry, verify that the contents of the 
  * 		journal file matches that of the expected file.  If 
  * 		differences are detected, or if any other error is detected,
- * 		set pass2 to FALSE and set failure_mssg2 to point to an 
+ * 		set pass to FALSE and set failure_mssg to point to an 
  * 		appropriate error message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -2752,22 +2752,22 @@ verify_journal_contents(const char * journal_file_path_ptr,
     int expected_file_fd = -1;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( journal_file_path_ptr == NULL ) {
 
-            failure_mssg2 = "journal_file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "journal_file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 
 	} else if ( expected_file_path_ptr == NULL ) {
 
-            failure_mssg2 = "expected_file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "expected_file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 
         }
     }
 
-    if ( ( pass2 ) && ( verbose ) ) {
+    if ( ( pass ) && ( verbose ) ) {
 
         HDfprintf(stdout, "%s: *journal_file_path_ptr = \"%s\"\n",
                   fcn_name, journal_file_path_ptr);
@@ -2776,7 +2776,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
     }
 
     /* get the actual length of the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(journal_file_path_ptr, &buf) != 0 ) {
 
@@ -2785,15 +2785,15 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	        HDfprintf(stdout, "%s: HDstat(j) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "stat() failed on journal file.";
-	    pass2 = FALSE;
+	    failure_mssg = "stat() failed on journal file.";
+	    pass = FALSE;
 
 	} else {
 
 	    if ( (buf.st_size) == 0 ) {
 
-                failure_mssg2 = "Journal file empty?!?";
-	        pass2 = FALSE;
+                failure_mssg = "Journal file empty?!?";
+	        pass = FALSE;
 
 	    } else {
                 
@@ -2809,7 +2809,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
     }
 
     /* get the actual length of the expected file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(expected_file_path_ptr, &buf) != 0 ) {
 
@@ -2818,15 +2818,15 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	        HDfprintf(stdout, "%s: HDstat(e) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "stat() failed on expected file.";
-	    pass2 = FALSE;
+	    failure_mssg = "stat() failed on expected file.";
+	    pass = FALSE;
 
 	} else {
 
 	    if ( (buf.st_size) == 0 ) {
 
-                failure_mssg2 = "Expected file empty?!?";
-	        pass2 = FALSE;
+                failure_mssg = "Expected file empty?!?";
+	        pass = FALSE;
 
 	    } else {
                 
@@ -2842,7 +2842,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
     }
 
     /* open the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (journal_file_fd = HDopen(journal_file_path_ptr, O_RDONLY, 0777)) 
 	     == -1 ) {
@@ -2852,13 +2852,13 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	        HDfprintf(stdout, "%s: HDopen(j) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open journal file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open journal file.";
+	    pass = FALSE;
         }
     }
 
     /* open the expected file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (expected_file_fd = HDopen(expected_file_path_ptr, O_RDONLY, 0777)) 
 	     == -1 ) {
@@ -2868,8 +2868,8 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	        HDfprintf(stdout, "%s: HDopen(e) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open expected file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open expected file.";
+	    pass = FALSE;
         }
     }
 
@@ -2882,7 +2882,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
      * newline.  This is very inefficient, but this is test code, and the 
      * first line can't be very long.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         first_line_len = 1;
 	read_result = HDread(journal_file_fd, &ch, 1);
@@ -2897,13 +2897,13 @@ verify_journal_contents(const char * journal_file_path_ptr,
 
 	if ( ch != '\n' ) {
 	
-	    failure_mssg2 = "error skipping first line of journal file.";
-	    pass2 = FALSE;
+	    failure_mssg = "error skipping first line of journal file.";
+	    pass = FALSE;
 
 	} else if ( first_line_len > journal_len ) {
 
-            failure_mssg2 = "first_line_len > journal_len?!?";
-	    pass2 = FALSE;
+            failure_mssg = "first_line_len > journal_len?!?";
+	    pass = FALSE;
 
 	} else {
 
@@ -2911,7 +2911,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         first_line_len = 1;
 	read_result = HDread(expected_file_fd, &ch, 1);
@@ -2926,13 +2926,13 @@ verify_journal_contents(const char * journal_file_path_ptr,
 
 	if ( ch != '\n' ) {
 	
-	    failure_mssg2 = "error skipping first line of expected file.";
-	    pass2 = FALSE;
+	    failure_mssg = "error skipping first line of expected file.";
+	    pass = FALSE;
 
 	} else if ( first_line_len > expected_len ) {
 
-            failure_mssg2 = "first_line_len > expected_len?!?";
-	    pass2 = FALSE;
+            failure_mssg = "first_line_len > expected_len?!?";
+	    pass = FALSE;
 
 	} else {
 
@@ -2940,12 +2940,12 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( journal_remainder_len != expected_remainder_len ) {
 
-	    failure_mssg2 = "Unexpected journal file contents(1).";
-	    pass2 = FALSE;
+	    failure_mssg = "Unexpected journal file contents(1).";
+	    pass = FALSE;
 	}
     }
 
@@ -2953,7 +2953,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
      * and expected files (after skipping the first line) are identical.
      * Thus we have to go and compare the actual data.
      */
-    while ( ( pass2 ) &&
+    while ( ( pass ) &&
 	    ( journal_remainder_len > 0 ) ) 
     {
         HDassert( journal_remainder_len == expected_remainder_len );
@@ -2981,13 +2981,13 @@ verify_journal_contents(const char * journal_file_path_ptr,
                           "%s: HDread(j) failed. result = %d, errno = %d.\n",
                           fcn_name, (int)read_result, errno);
             }
-            failure_mssg2 = "error reading journal file.";
-            pass2 = FALSE;
+            failure_mssg = "error reading journal file.";
+            pass = FALSE;
         }
 
         journal_buf[cur_buf_len] = '\0';
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             read_result = HDread(expected_file_fd, expected_buf, cur_buf_len);
 
@@ -2999,14 +2999,14 @@ verify_journal_contents(const char * journal_file_path_ptr,
                               "%s: HDread(e) failed. result = %d, errno = %d.\n",
                               fcn_name, (int)read_result, errno);
                 }
-                failure_mssg2 = "error reading expected file.";
-                pass2 = FALSE;
+                failure_mssg = "error reading expected file.";
+                pass = FALSE;
             }
 
             expected_buf[cur_buf_len] = '\0';
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( human_readable ) {
 
@@ -3020,16 +3020,16 @@ verify_journal_contents(const char * journal_file_path_ptr,
                                   "journal_buf  = \"%s\"\n", journal_buf);
                     }
 
-                    failure_mssg2 = "Unexpected journal file contents(2).";
-                    pass2 = FALSE;
+                    failure_mssg = "Unexpected journal file contents(2).";
+                    pass = FALSE;
                 }
             } else { /* binary journal file -- can't use strcmp() */
 
                 if ( HDmemcmp(journal_buf, expected_buf, (size_t)cur_buf_len)
                      != 0 ) {
 
-                    failure_mssg2 = "Unexpected journal file contents(2b).";
-                    pass2 = FALSE;
+                    failure_mssg = "Unexpected journal file contents(2b).";
+                    pass = FALSE;
                 }
             }
 	}
@@ -3045,10 +3045,10 @@ verify_journal_contents(const char * journal_file_path_ptr,
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close journal file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close journal file.";
+	        pass = FALSE;
 	    }
 	}
     }
@@ -3063,10 +3063,10 @@ verify_journal_contents(const char * journal_file_path_ptr,
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close expected file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close expected file.";
+	        pass = FALSE;
 	    }
 	}
     }
@@ -3079,14 +3079,14 @@ verify_journal_contents(const char * journal_file_path_ptr,
 /*-------------------------------------------------------------------------
  * Function:    verify_journal_deleted()
  *
- * Purpose:     If pass2 is true on entry, stat the target journal file,
+ * Purpose:     If pass is true on entry, stat the target journal file,
  * 		and verify that it does not exist.  If it does, set
- * 		pass2 to FALSE, and set failure_mssg2 to point to an 
+ * 		pass to FALSE, and set failure_mssg to point to an 
  * 		appropriate failure message.  Similarly, if any errors 
- * 		are detected in this process, set pass2 to FALSE and set
- * 		failure_mssg2 to point to an appropriate error message.
+ * 		are detected in this process, set pass to FALSE and set
+ * 		failure_mssg to point to an appropriate error message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -3105,16 +3105,16 @@ verify_journal_deleted(const char * journal_file_path_ptr)
     hbool_t verbose = FALSE;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( journal_file_path_ptr == NULL ) {
 
-            failure_mssg2 = "journal_file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "journal_file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(journal_file_path_ptr, &buf) == 0 ) {
 
@@ -3124,8 +3124,8 @@ verify_journal_deleted(const char * journal_file_path_ptr)
 			  journal_file_path_ptr);
 	    }
 
-	    failure_mssg2 = "journal file not deleted(1).";
-	    pass2 = FALSE;
+	    failure_mssg = "journal file not deleted(1).";
+	    pass = FALSE;
 
         } else if ( errno != ENOENT ) {
 
@@ -3135,8 +3135,8 @@ verify_journal_deleted(const char * journal_file_path_ptr)
 			  "%s: HDstat() failed with unexpected errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "journal file not deleted(2).";
-	    pass2 = FALSE;
+	    failure_mssg = "journal file not deleted(2).";
+	    pass = FALSE;
 
 	} 
     }
@@ -3149,14 +3149,14 @@ verify_journal_deleted(const char * journal_file_path_ptr)
 /*-------------------------------------------------------------------------
  * Function:    verify_journal_empty()
  *
- * Purpose:     If pass2 is true on entry, stat the target journal file,
+ * Purpose:     If pass is true on entry, stat the target journal file,
  * 		and verify that it has length zero.  If it is not, set
- * 		pass2 to FALSE, and set failure_mssg2 to point to an 
+ * 		pass to FALSE, and set failure_mssg to point to an 
  * 		appropriate failure message.  Similarly, if any errors 
- * 		are detected in this process, set pass2 to FALSE and set
- * 		failure_mssg2 to point to an appropriate error message.
+ * 		are detected in this process, set pass to FALSE and set
+ * 		failure_mssg to point to an appropriate error message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -3175,16 +3175,16 @@ verify_journal_empty(const char * journal_file_path_ptr)
     hbool_t verbose = FALSE;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( journal_file_path_ptr == NULL ) {
 
-            failure_mssg2 = "journal_file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "journal_file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(journal_file_path_ptr, &buf) != 0 ) {
 
@@ -3193,15 +3193,15 @@ verify_journal_empty(const char * journal_file_path_ptr)
 	        HDfprintf(stdout, "%s: HDstat() failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "stat() failed on journal file.";
-	    pass2 = FALSE;
+	    failure_mssg = "stat() failed on journal file.";
+	    pass = FALSE;
 
 	} else {
 
 	    if ( (buf.st_size) > 0 ) {
 
-                failure_mssg2 = "Empty journal file expected.";
-	        pass2 = FALSE;
+                failure_mssg = "Empty journal file expected.";
+	        pass = FALSE;
             }
 	} 
     }
@@ -3269,53 +3269,53 @@ mdj_smoke_check_00(hbool_t human_readable,
     const char * fcn_name = "mdj_smoke_check_00()";
     const char * human_readable_testfiles[] = 
     {
-        "testfiles/cache2_journal_sc00_000.jnl",
-        "testfiles/cache2_journal_sc00_001.jnl",
-        "testfiles/cache2_journal_sc00_002.jnl",
-        "testfiles/cache2_journal_sc00_003.jnl",
-        "testfiles/cache2_journal_sc00_004.jnl",
-        "testfiles/cache2_journal_sc00_005.jnl",
-        "testfiles/cache2_journal_sc00_006.jnl",
-        "testfiles/cache2_journal_sc00_007.jnl",
-        "testfiles/cache2_journal_sc00_008.jnl",
-        "testfiles/cache2_journal_sc00_009.jnl",
-        "testfiles/cache2_journal_sc00_010.jnl",
-        "testfiles/cache2_journal_sc00_011.jnl",
-        "testfiles/cache2_journal_sc00_012.jnl",
-        "testfiles/cache2_journal_sc00_013.jnl",
-        "testfiles/cache2_journal_sc00_014.jnl",
-        "testfiles/cache2_journal_sc00_015.jnl",
-        "testfiles/cache2_journal_sc00_016.jnl",
-        "testfiles/cache2_journal_sc00_017.jnl",
-        "testfiles/cache2_journal_sc00_018.jnl",
+        "testfiles/cache_journal_sc00_000.jnl",
+        "testfiles/cache_journal_sc00_001.jnl",
+        "testfiles/cache_journal_sc00_002.jnl",
+        "testfiles/cache_journal_sc00_003.jnl",
+        "testfiles/cache_journal_sc00_004.jnl",
+        "testfiles/cache_journal_sc00_005.jnl",
+        "testfiles/cache_journal_sc00_006.jnl",
+        "testfiles/cache_journal_sc00_007.jnl",
+        "testfiles/cache_journal_sc00_008.jnl",
+        "testfiles/cache_journal_sc00_009.jnl",
+        "testfiles/cache_journal_sc00_010.jnl",
+        "testfiles/cache_journal_sc00_011.jnl",
+        "testfiles/cache_journal_sc00_012.jnl",
+        "testfiles/cache_journal_sc00_013.jnl",
+        "testfiles/cache_journal_sc00_014.jnl",
+        "testfiles/cache_journal_sc00_015.jnl",
+        "testfiles/cache_journal_sc00_016.jnl",
+        "testfiles/cache_journal_sc00_017.jnl",
+        "testfiles/cache_journal_sc00_018.jnl",
 	NULL
     };
     const char * binary_testfiles[] = 
     {
-        "testfiles/cache2_journal_bsc00_000.jnl",
-        "testfiles/cache2_journal_bsc00_001.jnl",
-        "testfiles/cache2_journal_bsc00_002.jnl",
-        "testfiles/cache2_journal_bsc00_003.jnl",
-        "testfiles/cache2_journal_bsc00_004.jnl",
-        "testfiles/cache2_journal_bsc00_005.jnl",
-        "testfiles/cache2_journal_bsc00_006.jnl",
-        "testfiles/cache2_journal_bsc00_007.jnl",
-        "testfiles/cache2_journal_bsc00_008.jnl",
-        "testfiles/cache2_journal_bsc00_009.jnl",
-        "testfiles/cache2_journal_bsc00_010.jnl",
-        "testfiles/cache2_journal_bsc00_011.jnl",
-        "testfiles/cache2_journal_bsc00_012.jnl",
-        "testfiles/cache2_journal_bsc00_013.jnl",
-        "testfiles/cache2_journal_bsc00_014.jnl",
-        "testfiles/cache2_journal_bsc00_015.jnl",
-        "testfiles/cache2_journal_bsc00_016.jnl",
-        "testfiles/cache2_journal_bsc00_017.jnl",
-        "testfiles/cache2_journal_bsc00_018.jnl",
+        "testfiles/cache_journal_bsc00_000.jnl",
+        "testfiles/cache_journal_bsc00_001.jnl",
+        "testfiles/cache_journal_bsc00_002.jnl",
+        "testfiles/cache_journal_bsc00_003.jnl",
+        "testfiles/cache_journal_bsc00_004.jnl",
+        "testfiles/cache_journal_bsc00_005.jnl",
+        "testfiles/cache_journal_bsc00_006.jnl",
+        "testfiles/cache_journal_bsc00_007.jnl",
+        "testfiles/cache_journal_bsc00_008.jnl",
+        "testfiles/cache_journal_bsc00_009.jnl",
+        "testfiles/cache_journal_bsc00_010.jnl",
+        "testfiles/cache_journal_bsc00_011.jnl",
+        "testfiles/cache_journal_bsc00_012.jnl",
+        "testfiles/cache_journal_bsc00_013.jnl",
+        "testfiles/cache_journal_bsc00_014.jnl",
+        "testfiles/cache_journal_bsc00_015.jnl",
+        "testfiles/cache_journal_bsc00_016.jnl",
+        "testfiles/cache_journal_bsc00_017.jnl",
+        "testfiles/cache_journal_bsc00_018.jnl",
 	NULL
     };
     const char **testfiles;
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
@@ -3324,8 +3324,8 @@ mdj_smoke_check_00(hbool_t human_readable,
     int cp = 0;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
-    H5AC2_jnl_config_t jnl_config;
+    H5C_t * cache_ptr = NULL;
+    H5AC_jnl_config_t jnl_config;
     
     if ( human_readable ) {
 
@@ -3357,49 +3357,49 @@ mdj_smoke_check_00(hbool_t human_readable,
         }
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /***********************************************************************/
     /* 1) Create a file with cache configuration set to enable journaling. */
     /***********************************************************************/
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
 				            == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
 	else if ( HDstrlen(journal_filename) >= 
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
@@ -3413,7 +3413,7 @@ mdj_smoke_check_00(hbool_t human_readable,
                                use_aio, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
  
 
     /********************************************************************/
@@ -3427,11 +3427,11 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
 
-    insert_entry2(file_ptr, 0, 1, FALSE, H5C2__NO_FLAGS_SET); 
+    insert_entry(file_ptr, 0, 1, FALSE, H5C__NO_FLAGS_SET); 
 
-    protect_entry2(file_ptr, 0, 0);
+    protect_entry(file_ptr, 0, 0);
 
-    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
 
@@ -3451,12 +3451,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* b) Verify that a sequence of cache operation that do not dirty
@@ -3465,19 +3465,19 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.1");
 
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 0);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 1);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 0);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
 
-    protect_entry_ro2(file_ptr, TINY_ENTRY_TYPE, 3);
-    protect_entry_ro2(file_ptr, TINY_ENTRY_TYPE, 3);
-    protect_entry_ro2(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C2__NO_FLAGS_SET);
+    protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
+    protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
+    protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.1");
 
@@ -3486,7 +3486,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* c) Verify that the most recently dirtied entry get to the head of 
@@ -3496,22 +3496,22 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.1");
 
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 0);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 1);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 4);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 4, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 5);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 5, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, TINY_ENTRY_TYPE, 1);
-    unprotect_entry2(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 0);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 4);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 4, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 5);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 5, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.1");
 
@@ -3531,12 +3531,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* d) Mix up some protect/unprotect calls with renames.  Do this with
@@ -3545,21 +3545,21 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.2");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, TRUE, H5C__NO_FLAGS_SET);
 
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 2, FALSE);
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 3, FALSE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, FALSE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, FALSE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.2");
 
@@ -3583,21 +3583,21 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.2");
 
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 3, TRUE);
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 2, TRUE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, TRUE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, TRUE);
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.2");
 
@@ -3618,7 +3618,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
 
@@ -3626,26 +3626,26 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.2");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 6);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 7);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C2__PIN_ENTRY_FLAG);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 8);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C2__NO_FLAGS_SET);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 9);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 7);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C__PIN_ENTRY_FLAG);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 8);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 9);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.2");
 
@@ -3666,39 +3666,39 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
-    /* e-2) ... then use the H5C2_mark_pinned_or_protected_entry_dirty()
+    /* e-2) ... then use the H5C_mark_pinned_or_protected_entry_dirty()
      *      call to mark a variety of protected, pinned, and pinned and 
      *      protected entries dirty.  Also rename some pinned entries.
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)4, "transaction 4.2");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 6);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 7);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 8);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 9);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 7);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 8);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 9);
 
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 0);
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 1);
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 3);
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 6);
-    mark_pinned_or_protected_entry_dirty2(file_ptr, MICRO_ENTRY_TYPE, 7);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 0);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 1);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 2);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 3);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 6);
+    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 7);
 
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
 
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C2__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)4, "transaction 4.2");
 
@@ -3719,7 +3719,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* e-3) ...finally, upin all the pinned entries, with an undo of the
@@ -3728,16 +3728,16 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)5, "transaction 5.2");
 
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 4);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
 
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 4, TRUE);
-    rename_entry2(cache_ptr, MICRO_ENTRY_TYPE, 5, TRUE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, TRUE);
+    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, TRUE);
 
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 6);
-    unpin_entry2(file_ptr, MICRO_ENTRY_TYPE, 7);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
+    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 7);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)5, "transaction 5.2");
 
@@ -3758,37 +3758,37 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
 
     /* f-1) Pin a bunch more entries -- make them variable size, as we need
      *      to test resizing.  In passing, pin some of the entries using 
-     *      the H5C2_pin_ptrotected_entry() call.
+     *      the H5C_pin_ptrotected_entry() call.
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)6, "transaction 6.2");
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 6);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 7);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
 
-    pin_protected_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    pin_protected_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    pin_protected_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    pin_protected_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
 
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE, H5C2__NO_FLAGS_SET);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE, H5C2__PIN_ENTRY_FLAG);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE, H5C2__PIN_ENTRY_FLAG);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE, H5C2__PIN_ENTRY_FLAG);
-    unprotect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE, H5C2__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE, H5C__PIN_ENTRY_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)6, "transaction 6.2");
 
@@ -3809,48 +3809,48 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
 
     /* f-2) Now resize a selection of pinned and unpinned entries via 
-     *      protect/unprotect pairs, H5C2_resize_pinned_entry() and 
-     *      H5C2_mark_pinned_entry_dirty().
+     *      protect/unprotect pairs, H5C_resize_pinned_entry() and 
+     *      H5C_mark_pinned_entry_dirty().
      */
 
 
     begin_trans(cache_ptr, verbose, (uint64_t)7, "transaction 7.2");
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 16) * 15));
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-		                      H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
+		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 16) * 14));
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 16) * 13));
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-		                      H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 16) * 12));
 
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
 		         ((VARIABLE_ENTRY_SIZE / 16) * 11));
 
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
 		         ((VARIABLE_ENTRY_SIZE / 16) * 10));
 
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE,
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE,
 		             ((VARIABLE_ENTRY_SIZE / 16) * 9));
 
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
 		             ((VARIABLE_ENTRY_SIZE / 16) * 8));
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)7, "transaction 7.2");
@@ -3872,7 +3872,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     
 
@@ -3881,42 +3881,42 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)8, "transaction 8.2");
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                    H5C2__SIZE_CHANGED_FLAG, 
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+		                    H5C__SIZE_CHANGED_FLAG, 
 				    VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 1, FALSE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-		                      H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, FALSE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
+		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 3, FALSE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-		                      H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, FALSE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 5, FALSE);
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, FALSE);
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
 		             VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
 		             VARIABLE_ENTRY_SIZE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)8, "transaction 8.2");
@@ -3938,7 +3938,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
     
     
     
@@ -3948,46 +3948,46 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)9, "transaction 9.2");
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 0, TRUE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                    H5C2__SIZE_CHANGED_FLAG, VARIABLE_ENTRY_SIZE);
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, TRUE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+		                    H5C__SIZE_CHANGED_FLAG, VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-                                      H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
+                                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 	                              VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 2, TRUE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                    H5C2__SIZE_CHANGED_FLAG|H5C2__UNPIN_ENTRY_FLAG, 
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, TRUE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
+		                    H5C__SIZE_CHANGED_FLAG|H5C__UNPIN_ENTRY_FLAG, 
 				    VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE);
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-	        H5C2__SIZE_CHANGED_FLAG|H5C2__DIRTIED_FLAG|H5C2__UNPIN_ENTRY_FLAG,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE);
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+	        H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG|H5C__UNPIN_ENTRY_FLAG,
                 VARIABLE_ENTRY_SIZE);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
-    unpin_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 4);
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
+    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
-    resize_pinned_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
-    unpin_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 5);
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
+    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
 		             VARIABLE_ENTRY_SIZE);
-    unpin_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 6);
+    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
 
-    rename_entry2(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
-    mark_pinned_entry_dirty2(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
+    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
 		             VARIABLE_ENTRY_SIZE);
-    unpin_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 7);
+    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)9, "transaction 9.2");
 
@@ -4008,14 +4008,14 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
     
     
     
@@ -4029,19 +4029,19 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.3");
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 4) * 1));
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 4) * 2));
 
-    protect_entry2(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-    unprotect_entry_with_size_change2(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-		                      H5C2__SIZE_CHANGED_FLAG,
+    protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
+    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
+		                      H5C__SIZE_CHANGED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 4) * 3));
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.3");
@@ -4091,47 +4091,47 @@ mdj_smoke_check_00(hbool_t human_readable,
      *
      */
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 20, 
+    add_flush_op(MICRO_ENTRY_TYPE, 20, 
 		  FLUSH_OP__DIRTY, MICRO_ENTRY_TYPE, 30, FALSE, 0);
 
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 10, FALSE, VARIABLE_ENTRY_SIZE);
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 10, FALSE, 0);
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 10, FALSE, 0);
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 13, FALSE, VARIABLE_ENTRY_SIZE/4);
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 13, FALSE, 0);
-    add_flush_op2(MICRO_ENTRY_TYPE, 21,
+    add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 13, FALSE, 0);
 
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 22,
+    add_flush_op(MICRO_ENTRY_TYPE, 22,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 11, FALSE, VARIABLE_ENTRY_SIZE);
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 22,
+    add_flush_op(MICRO_ENTRY_TYPE, 22,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 12, FALSE, VARIABLE_ENTRY_SIZE);
 
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 23,
+    add_flush_op(MICRO_ENTRY_TYPE, 23,
 	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 10, TRUE, 0);
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 23,
+    add_flush_op(MICRO_ENTRY_TYPE, 23,
 	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 13, TRUE, 0);
 
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 24,
+    add_flush_op(MICRO_ENTRY_TYPE, 24,
 	  FLUSH_OP__DIRTY, MICRO_ENTRY_TYPE, 21, FALSE, 0);
 
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 25,
+    add_flush_op(MICRO_ENTRY_TYPE, 25,
 	  FLUSH_OP__DIRTY, MICRO_ENTRY_TYPE, 22, FALSE, 0);
 
-    add_flush_op2(MICRO_ENTRY_TYPE, 25,
+    add_flush_op(MICRO_ENTRY_TYPE, 25,
 	  FLUSH_OP__DIRTY, MICRO_ENTRY_TYPE, 23, FALSE, 0);
 
 
@@ -4142,8 +4142,8 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.3");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 20);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 20, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 20);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 20, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.3");
 
@@ -4171,8 +4171,8 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.3");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 24);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 24, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 24);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 24, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.3");
 
@@ -4202,8 +4202,8 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)4, "transaction 4.3");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 25);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 25, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 25);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 25, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)4, "transaction 4.3");
 
@@ -4223,12 +4223,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
     
 
 
@@ -4243,21 +4243,21 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.4");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 39);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 39, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 39);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 39, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.4");
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.4");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 40);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 40, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 40);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 40, TRUE, H5C__NO_FLAGS_SET);
 
-    expunge_entry2(file_ptr, MICRO_ENTRY_TYPE, 40);
+    expunge_entry(file_ptr, MICRO_ENTRY_TYPE, 40);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.4");
 
@@ -4278,17 +4278,17 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
     
 
 
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.4");
 
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 41);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 41, TRUE, H5C2__NO_FLAGS_SET);
-    expunge_entry2(file_ptr, MICRO_ENTRY_TYPE, 41);
-    protect_entry2(file_ptr, MICRO_ENTRY_TYPE, 42);
-    unprotect_entry2(file_ptr, MICRO_ENTRY_TYPE, 42, TRUE, H5C2__NO_FLAGS_SET);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 41);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 41, TRUE, H5C__NO_FLAGS_SET);
+    expunge_entry(file_ptr, MICRO_ENTRY_TYPE, 41);
+    protect_entry(file_ptr, MICRO_ENTRY_TYPE, 42);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 42, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.4");
 
@@ -4309,7 +4309,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /************************************************************/
@@ -4320,12 +4320,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     /************************************************************/
 
     /* a) Close the hdf5 file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "temporary H5Fclose() failed.\n";
+	    pass = FALSE;
+	    failure_mssg = "temporary H5Fclose() failed.\n";
 
 	} else {
 	    file_id = -1;
@@ -4335,14 +4335,14 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* b) Verify that the journal file has been deleted. */
     verify_journal_deleted(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* c) Re-open the hdf5 file. */
@@ -4351,16 +4351,16 @@ mdj_smoke_check_00(hbool_t human_readable,
                                       use_aio);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* d) do a transaction or to to verify that journaling is working. */
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
 
-    insert_entry2(file_ptr, 0, 1, FALSE, H5C2__NO_FLAGS_SET); 
-    protect_entry2(file_ptr, 0, 0);
-    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+    insert_entry(file_ptr, 0, 1, FALSE, H5C__NO_FLAGS_SET); 
+    protect_entry(file_ptr, 0, 0);
+    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
 
@@ -4380,22 +4380,22 @@ mdj_smoke_check_00(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     /**************************************************************/
     /* 4) Close the file, and verify that the journal is deleted. */
     /**************************************************************/
 
     /* Close the hdf5 file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "temporary H5Fclose() failed.\n";
+	    pass = FALSE;
+	    failure_mssg = "temporary H5Fclose() failed.\n";
 
 	} else {
 	    file_id = -1;
@@ -4405,14 +4405,14 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* b) Verify that the journal file has been deleted. */
     verify_journal_deleted(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /************************************************************/
@@ -4427,7 +4427,7 @@ mdj_smoke_check_00(hbool_t human_readable,
                                           &file_ptr, &cache_ptr);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
     /* do a transaction to verify that journaling is disabled.  
@@ -4439,23 +4439,23 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
 
-    insert_entry2(file_ptr, 0, 10, FALSE, H5C2__NO_FLAGS_SET); 
-    protect_entry2(file_ptr, 0, 0);
-    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+    insert_entry(file_ptr, 0, 10, FALSE, H5C__NO_FLAGS_SET); 
+    protect_entry(file_ptr, 0, 0);
+    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    if ( ( pass2 ) && ( cache_ptr->mdj_enabled ) ) {
+    if ( ( pass ) && ( cache_ptr->mdj_enabled ) ) {
 
-        pass2 = FALSE;
-        failure_mssg2 = "journaling is enabled?!?!(1).\n";
+        pass = FALSE;
+        failure_mssg = "journaling is enabled?!?!(1).\n";
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     /* note that flush_journal() will throw an exception if journaling
      * is not enabled, so we don't call it here.  Instead, just call
@@ -4465,7 +4465,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     verify_journal_deleted(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
  
     /************************************************************/
@@ -4474,16 +4474,16 @@ mdj_smoke_check_00(hbool_t human_readable,
     /************************************************************/
 
     /* now enable journaling */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -4499,29 +4499,29 @@ mdj_smoke_check_00(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = H5Fset_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     /* do a transaction or to to verify that journaling is working. */
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
 
-    insert_entry2(file_ptr, 0, 20, FALSE, H5C2__NO_FLAGS_SET); 
-    protect_entry2(file_ptr, 0, 0);
-    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+    insert_entry(file_ptr, 0, 20, FALSE, H5C__NO_FLAGS_SET); 
+    protect_entry(file_ptr, 0, 0);
+    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
 
@@ -4541,10 +4541,10 @@ mdj_smoke_check_00(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
  
     /************************************************************/
@@ -4553,7 +4553,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     /************************************************************/
 
     /* disable journaling */
-    if ( pass2 ) {
+    if ( pass ) {
 
         jnl_config.enable_journaling       = FALSE;
 
@@ -4561,30 +4561,30 @@ mdj_smoke_check_00(hbool_t human_readable,
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     verify_journal_deleted(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
  
     /*********************************/
     /* 8) Close and delete the file. */
     /*********************************/
  
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5Fclose(file_id) failed.\n";
+            pass = FALSE;
+	    failure_mssg = "H5Fclose(file_id) failed.\n";
 
 	}
     }
@@ -4592,9 +4592,9 @@ mdj_smoke_check_00(hbool_t human_readable,
     HDremove(filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 ) { 
+    if ( pass ) { 
 	    
         PASSED(); 
 
@@ -4608,11 +4608,11 @@ mdj_smoke_check_00(hbool_t human_readable,
         H5_FAILED(); 
     }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
     return;
@@ -4623,7 +4623,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 /*-------------------------------------------------------------------------
  * Function:    mdj_smoke_check_01()
  *
- * Purpose:     Run a cut down version of smoke_check_1 in cache2.c, with
+ * Purpose:     Run a cut down version of smoke_check_1 in cache.c, with
  * 		journaling enabled.  Check the journal files generated,
  * 		and verify that the journal output matches the architype
  * 		test files.  Skip the comparison and generate a warning
@@ -4651,25 +4651,25 @@ mdj_smoke_check_01(hbool_t human_readable,
     const char * fcn_name = "mdj_smoke_check_01()";
     const char * human_readable_testfiles[] = 
     {
-        "testfiles/cache2_journal_sc01_000.jnl",
-        "testfiles/cache2_journal_sc01_001.jnl",
-        "testfiles/cache2_journal_sc01_002.jnl",
-        "testfiles/cache2_journal_sc01_003.jnl",
-        "testfiles/cache2_journal_sc01_004.jnl",
+        "testfiles/cache_journal_sc01_000.jnl",
+        "testfiles/cache_journal_sc01_001.jnl",
+        "testfiles/cache_journal_sc01_002.jnl",
+        "testfiles/cache_journal_sc01_003.jnl",
+        "testfiles/cache_journal_sc01_004.jnl",
 	NULL
     };
     const char * binary_testfiles[] = 
     {
-        "testfiles/cache2_journal_bsc01_000.jnl",
-        "testfiles/cache2_journal_bsc01_001.jnl",
-        "testfiles/cache2_journal_bsc01_002.jnl",
-        "testfiles/cache2_journal_bsc01_003.jnl",
-        "testfiles/cache2_journal_bsc01_004.jnl",
+        "testfiles/cache_journal_bsc01_000.jnl",
+        "testfiles/cache_journal_bsc01_001.jnl",
+        "testfiles/cache_journal_bsc01_002.jnl",
+        "testfiles/cache_journal_bsc01_003.jnl",
+        "testfiles/cache_journal_bsc01_004.jnl",
 	NULL
     };
     const char **testfiles;
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t dirty_inserts = FALSE;
@@ -4684,7 +4684,7 @@ mdj_smoke_check_01(hbool_t human_readable,
     uint64_t trans_num = 0;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     if ( human_readable ) {
 
@@ -4701,49 +4701,49 @@ mdj_smoke_check_01(hbool_t human_readable,
         TESTING("b mdj smoke check 01 -- jnl clean ins, prot, unprot, del, ren");
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /********************************************************************/
     /* Create a file with cache configuration set to enable journaling. */
     /********************************************************************/
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
 				            == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
 	else if ( HDstrlen(journal_filename) >= 
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
@@ -4769,7 +4769,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                use_aio, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
  
 
     /******************************************/
@@ -4778,7 +4778,7 @@ mdj_smoke_check_01(hbool_t human_readable,
 
     trans_num = 0;
 
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -4796,7 +4796,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -4814,16 +4814,16 @@ mdj_smoke_check_01(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_row_major_scan_backward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_backward(/* file_ptr               */ file_ptr,
                                   /* max_index              */ max_index,
                                   /* lag                    */ lag,
                                   /* verbose                */ verbose,
@@ -4841,7 +4841,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                   /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -4859,16 +4859,16 @@ mdj_smoke_check_01(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -4886,7 +4886,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -4904,16 +4904,16 @@ mdj_smoke_check_01(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     trans_num = 0;
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_col_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_col_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -4926,7 +4926,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -4944,16 +4944,16 @@ mdj_smoke_check_01(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_col_major_scan_backward2(/* file_ptr               */ file_ptr,
+    jrnl_col_major_scan_backward(/* file_ptr               */ file_ptr,
                                   /* max_index              */ max_index,
                                   /* lag                    */ lag,
                                   /* verbose                */ verbose,
@@ -4966,7 +4966,7 @@ mdj_smoke_check_01(hbool_t human_readable,
                                   /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -4985,7 +4985,7 @@ mdj_smoke_check_01(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     /****************************************************/
     /* Close and discard the file and the journal file. */
@@ -4994,15 +4994,15 @@ mdj_smoke_check_01(hbool_t human_readable,
     takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    verify_clean2();
-    verify_unprotected2();
+    verify_clean();
+    verify_unprotected();
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 ) { 
+    if ( pass ) { 
 	    
         PASSED(); 
 
@@ -5016,11 +5016,11 @@ mdj_smoke_check_01(hbool_t human_readable,
         H5_FAILED(); 
     }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
     return;
@@ -5031,7 +5031,7 @@ mdj_smoke_check_01(hbool_t human_readable,
 /*-------------------------------------------------------------------------
  * Function:    mdj_smoke_check_02()
  *
- * Purpose:     Run a cut down version of smoke_check_2 in cache2.c, with
+ * Purpose:     Run a cut down version of smoke_check_2 in cache.c, with
  * 		journaling enabled.  Check the journal files generated,
  * 		and verify that the journal output matches the architype
  * 		test files.  Skip the comparison and generate a warning
@@ -5059,25 +5059,25 @@ mdj_smoke_check_02(hbool_t human_readable,
     const char * fcn_name = "mdj_smoke_check_02()";
     const char * human_readable_testfiles[] = 
     {
-        "testfiles/cache2_journal_sc02_000.jnl",
-        "testfiles/cache2_journal_sc02_001.jnl",
-        "testfiles/cache2_journal_sc02_002.jnl",
-        "testfiles/cache2_journal_sc02_003.jnl",
-        "testfiles/cache2_journal_sc02_004.jnl",
+        "testfiles/cache_journal_sc02_000.jnl",
+        "testfiles/cache_journal_sc02_001.jnl",
+        "testfiles/cache_journal_sc02_002.jnl",
+        "testfiles/cache_journal_sc02_003.jnl",
+        "testfiles/cache_journal_sc02_004.jnl",
 	NULL
     };
     const char * binary_testfiles[] = 
     {
-        "testfiles/cache2_journal_bsc02_000.jnl",
-        "testfiles/cache2_journal_bsc02_001.jnl",
-        "testfiles/cache2_journal_bsc02_002.jnl",
-        "testfiles/cache2_journal_bsc02_003.jnl",
-        "testfiles/cache2_journal_bsc02_004.jnl",
+        "testfiles/cache_journal_bsc02_000.jnl",
+        "testfiles/cache_journal_bsc02_001.jnl",
+        "testfiles/cache_journal_bsc02_002.jnl",
+        "testfiles/cache_journal_bsc02_003.jnl",
+        "testfiles/cache_journal_bsc02_004.jnl",
 	NULL
     };
     const char **testfiles;
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t dirty_inserts = TRUE;
@@ -5092,7 +5092,7 @@ mdj_smoke_check_02(hbool_t human_readable,
     uint64_t trans_num = 0;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     if ( human_readable ) {
 
@@ -5109,46 +5109,46 @@ mdj_smoke_check_02(hbool_t human_readable,
         TESTING("b mdj smoke check 02 -- jnl dirty ins, prot, unprot, del, ren");
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /********************************************************************/
     /* Create a file with cache configuration set to enable journaling. */
     /********************************************************************/
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
-	else if ( HDstrlen(journal_filename) >= H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+	else if ( HDstrlen(journal_filename) >= H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     if ( verbose ) { 
         HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
@@ -5174,7 +5174,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                use_aio, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
  
 
     /******************************************/
@@ -5183,7 +5183,7 @@ mdj_smoke_check_02(hbool_t human_readable,
 
     trans_num = 0;
 
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -5201,7 +5201,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -5219,16 +5219,16 @@ mdj_smoke_check_02(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_row_major_scan_backward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_backward(/* file_ptr               */ file_ptr,
                                   /* max_index              */ max_index,
                                   /* lag                    */ lag,
                                   /* verbose                */ verbose,
@@ -5246,7 +5246,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                   /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -5264,16 +5264,16 @@ mdj_smoke_check_02(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_row_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -5291,7 +5291,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -5309,16 +5309,16 @@ mdj_smoke_check_02(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     trans_num = 0;
 
     verify_journal_empty(journal_filename);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_col_major_scan_forward2(/* file_ptr               */ file_ptr,
+    jrnl_col_major_scan_forward(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
                                  /* verbose                */ verbose,
@@ -5331,7 +5331,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -5349,16 +5349,16 @@ mdj_smoke_check_02(hbool_t human_readable,
     	testfile_missing = TRUE;
     }
 
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+    flush_cache(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     verify_journal_empty(journal_filename);
 
     trans_num = 0;
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    jrnl_col_major_scan_backward2(/* file_ptr               */ file_ptr,
+    jrnl_col_major_scan_backward(/* file_ptr               */ file_ptr,
                                   /* max_index              */ max_index,
                                   /* lag                    */ lag,
                                   /* verbose                */ verbose,
@@ -5371,7 +5371,7 @@ mdj_smoke_check_02(hbool_t human_readable,
                                   /* trans_num              */ trans_num);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     flush_journal(cache_ptr);
 
@@ -5390,7 +5390,7 @@ mdj_smoke_check_02(hbool_t human_readable,
     }
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
     /****************************************************/
     /* Close and discard the file and the journal file. */
@@ -5399,15 +5399,15 @@ mdj_smoke_check_02(hbool_t human_readable,
     takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    verify_clean2();
-    verify_unprotected2();
+    verify_clean();
+    verify_unprotected();
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 ) { 
+    if ( pass ) { 
 	    
         PASSED(); 
 
@@ -5421,11 +5421,11 @@ mdj_smoke_check_02(hbool_t human_readable,
         H5_FAILED(); 
     }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
     return;
@@ -5449,7 +5449,7 @@ mdj_smoke_check_02(hbool_t human_readable,
  * 		We begin by creating an hdf5 file with journaling enabled.
  *
  * 		The inital calls to TESTING(), SKIPPED(), h5_fixname(),
- * 		HDremove(), the initialization of pass2, and the like are all 
+ * 		HDremove(), the initialization of pass, and the like are all 
  * 		part of the HDF5 test framework, and may be largely ignored.
  * 		In your application, the only point here is that you will
  * 		have to set up the paths to your data file and journal 
@@ -5470,7 +5470,7 @@ mdj_smoke_check_02(hbool_t human_readable,
  *		H5Pset_jnl_config() to replace the default with our 
  *		configuration.  See the comments in the code for the 
  *		particulars -- note that we must set the version field of
- *		the H5AC2_jnl_config_t before we call H5Pget_jnl_config().
+ *		the H5AC_jnl_config_t before we call H5Pget_jnl_config().
  *
  *		After setting up the FAPL, we create the file as usual.
  *		Journaling will be enabled with configuration as specified.
@@ -5486,11 +5486,11 @@ mdj_smoke_check_02(hbool_t human_readable,
  *		and then re-enable it via the H5Fget_jnl_config() and 
  *		H5Fset_jnl_config() calls.  Note that when we re-enable 
  *		journaling via the H5Fset_jnl_config() call, we don't need
- *		to set all the fields in the H5AC2_jnl_config_t, since we 
+ *		to set all the fields in the H5AC_jnl_config_t, since we 
  *		are re-using the configuration we obtained via the 
  *		H5Fget_jnl_config() call.  If we had opened the file without
  *		journaling, and then wanted to enable journaling, we would 
- *		have had to set up the fields of the H5AC2_jnl_config_t in 
+ *		have had to set up the fields of the H5AC_jnl_config_t in 
  *		much the same way we did earlier in the example.  We would 
  *		also have had to create the file initially with the latest 
  *		format (using H5Pset_libver_bounds()).
@@ -5559,7 +5559,7 @@ mdj_api_example_test(hbool_t human_readable,
 {
     const char * fcn_name = "mdj_api_example_test()";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t valid_chunk;
     hbool_t report_progress = FALSE;
     hid_t fapl_id = -1;
@@ -5578,8 +5578,8 @@ mdj_api_example_test(hbool_t human_readable,
     hsize_t offset[2];
     hsize_t chunk_size[2];
     int data_chunk[CHUNK_SIZE][CHUNK_SIZE];
-    H5AC2_jnl_config_t jnl_config_0;
-    H5AC2_jnl_config_t jnl_config_1;
+    H5AC_jnl_config_t jnl_config_0;
+    H5AC_jnl_config_t jnl_config_1;
 
 
     if ( human_readable ) {
@@ -5604,7 +5604,7 @@ mdj_api_example_test(hbool_t human_readable,
         }
     }
 
-    if ( skip_long_tests2 > 0 ) {
+    if ( skip_long_tests > 0 ) {
 
         SKIPPED();
 
@@ -5613,49 +5613,49 @@ mdj_api_example_test(hbool_t human_readable,
         return;
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* Open a file with journaling enabled. */
 
 
     /* setup the hdf5 file name */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nSetting up file name ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
         }
     }
 
 
     /* setup the journal file name */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nSetting up journal file name ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( HDstrlen(journal_filename) >=
-                  H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+                  H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
@@ -5663,7 +5663,7 @@ mdj_api_example_test(hbool_t human_readable,
     /* clean out any existing journal file -- must do this as 
      * HDF5 will refuse to overwrite an existing journal file.
      */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nRemoving any existing journal file ... ");
         HDfflush(stdout);
@@ -5673,38 +5673,38 @@ mdj_api_example_test(hbool_t human_readable,
 
 
     /* create a file access propertly list. */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nCreating a FAPL ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
 
     /* need latest version of file format to use journaling */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nCalling H5Pset_libver_bounds() on FAPL ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
                                   H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
@@ -5715,22 +5715,22 @@ mdj_api_example_test(hbool_t human_readable,
      * H5Pget_jnl_config() call, and is less suceptible to API definition
      * changes.
      */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "\nCalling H5Pget_jnl_config() on FAPL ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-	jnl_config_0.version = H5AC2__CURR_JNL_CONFIG_VER;
+	jnl_config_0.version = H5AC__CURR_JNL_CONFIG_VER;
 
 	status = H5Pget_jnl_config(fapl_id, &jnl_config_0);
 
 	if ( status < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+	    pass = FALSE;
+	    failure_mssg = "H5Pset_mdc_config() failed.\n";
 	}
     }
 
@@ -5739,14 +5739,14 @@ mdj_api_example_test(hbool_t human_readable,
      * journaling as desired, and then write the revised configuration
      * back to the FAPL.
      */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,
 	         "\nRevising config & calling H5Pset_jnl_config() on FAPL ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         jnl_config_0.enable_journaling = TRUE;
 
@@ -5788,28 +5788,28 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
 
     /* Now open the file using the FAPL we have created. */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,
 	         "\nCreating the HDF5 file using the new FAPL ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.\n";
 
         }
     }
@@ -5817,17 +5817,17 @@ mdj_api_example_test(hbool_t human_readable,
 
     /* create the datasets */
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nCreating datasets ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         i = 0;
 
-        while ( ( pass2 ) && ( i < NUM_DSETS ) )
+        while ( ( pass ) && ( i < NUM_DSETS ) )
         {
             /* create a dataspace for the chunked dataset */
             dims[0] = DSET_SIZE;
@@ -5836,15 +5836,15 @@ mdj_api_example_test(hbool_t human_readable,
 
             if ( dataspace_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Screate_simple() failed.";
+                pass = FALSE;
+                failure_mssg = "H5Screate_simple() failed.";
             }
 
             /* set the dataset creation plist to specify that the raw data is
              * to be partioned into 10X10 element chunks.
              */
 
-            if ( pass2 ) {
+            if ( pass ) {
 
                 chunk_size[0] = CHUNK_SIZE;
                 chunk_size[1] = CHUNK_SIZE;
@@ -5852,22 +5852,22 @@ mdj_api_example_test(hbool_t human_readable,
 
                 if ( properties < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5Pcreate() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5Pcreate() failed.";
                 }
             }
 
-            if ( pass2 ) {
+            if ( pass ) {
 
                 if ( H5Pset_chunk(properties, 2, chunk_size) < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5Pset_chunk() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5Pset_chunk() failed.";
                 }
             }
 
             /* create the dataset */
-            if ( pass2 ) {
+            if ( pass ) {
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
@@ -5876,20 +5876,20 @@ mdj_api_example_test(hbool_t human_readable,
 
                 if ( dataset_ids[i] < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5Dcreate() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5Dcreate() failed.";
                 }
             }
 
             /* get the file space ID */
-            if ( pass2 ) {
+            if ( pass ) {
 
                 filespace_ids[i] = H5Dget_space(dataset_ids[i]);
 
                 if ( filespace_ids[i] < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5Dget_space() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5Dget_space() failed.";
                 }
             }
 
@@ -5904,27 +5904,27 @@ mdj_api_example_test(hbool_t human_readable,
      * journaling will also cause us to close and discard the 
      * journal file after all metadata is on disk.
      */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,
 	         "\nTurning off journaling ... ");
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-	jnl_config_1.version = H5AC2__CURR_JNL_CONFIG_VER;
+	jnl_config_1.version = H5AC__CURR_JNL_CONFIG_VER;
 
 	status = H5Fget_jnl_config(file_id, &jnl_config_1);
 
 	if ( status < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+	    pass = FALSE;
+	    failure_mssg = "H5Fget_mdc_config() failed.\n";
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         jnl_config_1.enable_journaling = FALSE;
 
@@ -5932,8 +5932,8 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_mdc_config() failed.\n";
         }
     }
 
@@ -5947,13 +5947,13 @@ mdj_api_example_test(hbool_t human_readable,
      * via the H5Fget_jnl_config() call, and H5Fset_mdc_config()
      * doesn't change the values of any fields.
      */
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,
 	         "\nTurning journaling back on ... ");
         HDfflush(stdout);
     }
-    if ( pass2 ) {
+    if ( pass ) {
 
         jnl_config_1.enable_journaling = TRUE;
 
@@ -5961,14 +5961,14 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_mdc_config() failed.\n";
         }
     }
 
 
     /* create the mem space to be used to read and write chunks */
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = CHUNK_SIZE;
         dims[1] = CHUNK_SIZE;
@@ -5976,13 +5976,13 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( memspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Screate_simple() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     /* select in memory hyperslab */
-    if ( pass2 ) {
+    if ( pass ) {
 
         offset[0] = 0;  /*offset of hyperslab in memory*/
         offset[1] = 0;
@@ -5993,12 +5993,12 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Sselect_hyperslab() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Sselect_hyperslab() failed.";
         }
     }
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Done.\n");
         HDfflush(stdout);
@@ -6008,19 +6008,19 @@ mdj_api_example_test(hbool_t human_readable,
     i = 0;
     progress_counter = 0;
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Initializing datasets ");
         HDfflush(stdout);
     }
 
-    while ( ( pass2 ) && ( i < DSET_SIZE ) )
+    while ( ( pass ) && ( i < DSET_SIZE ) )
     {
         j = 0;
-        while ( ( pass2 ) && ( j < DSET_SIZE ) )
+        while ( ( pass ) && ( j < DSET_SIZE ) )
         {
             m = 0;
-            while ( ( pass2 ) && ( m < NUM_DSETS ) )
+            while ( ( pass ) && ( m < NUM_DSETS ) )
             {
                 /* initialize the slab */
                 for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -6042,8 +6042,8 @@ mdj_api_example_test(hbool_t human_readable,
 
                 if ( status < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "disk H5Sselect_hyperslab() failed.";
+                    pass = FALSE;
+                    failure_mssg = "disk H5Sselect_hyperslab() failed.";
                 }
 
                 /* write the chunk to file */
@@ -6052,8 +6052,8 @@ mdj_api_example_test(hbool_t human_readable,
 
                 if ( status < 0 ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5Dwrite() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5Dwrite() failed.";
                 }
                 m++;
             }
@@ -6062,7 +6062,7 @@ mdj_api_example_test(hbool_t human_readable,
 
         i += CHUNK_SIZE;
 
-        if ( ( pass2 ) && ( report_progress ) ) {
+        if ( ( pass ) && ( report_progress ) ) {
 
 	    progress_counter += CHUNK_SIZE;
 
@@ -6090,13 +6090,13 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fflush() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Fflush() failed.";
         }
 #endif
     }
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout," Done.\n"); /* initializing data sets */
         HDfflush(stdout);
@@ -6105,7 +6105,7 @@ mdj_api_example_test(hbool_t human_readable,
 
     /* do random reads on all datasets */
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Doing random reads on all datasets ");
         HDfflush(stdout);
@@ -6113,7 +6113,7 @@ mdj_api_example_test(hbool_t human_readable,
 
     n = 0;
     progress_counter = 0;
-    while ( ( pass2 ) && ( n < NUM_RANDOM_ACCESSES ) )
+    while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         m = rand() % NUM_DSETS;
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
@@ -6129,25 +6129,25 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-           pass2 = FALSE;
-           failure_mssg2 = "disk hyperslab create failed.";
+           pass = FALSE;
+           failure_mssg = "disk hyperslab create failed.";
         }
 
         /* read the chunk from file */
-        if ( pass2 ) {
+        if ( pass ) {
 
             status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
                              filespace_ids[m], H5P_DEFAULT, data_chunk);
 
             if ( status < 0 ) {
 
-               pass2 = FALSE;
-               failure_mssg2 = "disk hyperslab create failed.";
+               pass = FALSE;
+               failure_mssg = "disk hyperslab create failed.";
             }
         }
 
         /* validate the slab */
-        if ( pass2 ) {
+        if ( pass ) {
 
             valid_chunk = TRUE;
             for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -6176,8 +6176,8 @@ mdj_api_example_test(hbool_t human_readable,
 
             if ( ! valid_chunk ) {
 #if 1
-                pass2 = FALSE;
-                failure_mssg2 = "slab validation failed.";
+                pass = FALSE;
+                failure_mssg = "slab validation failed.";
 #else /* as above */
                 fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
@@ -6187,7 +6187,7 @@ mdj_api_example_test(hbool_t human_readable,
 
         n++;
 
-        if ( ( pass2 ) && ( report_progress ) ) {
+        if ( ( pass ) && ( report_progress ) ) {
 
 	    progress_counter++;
 
@@ -6200,7 +6200,7 @@ mdj_api_example_test(hbool_t human_readable,
 	}
     }
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, " Done.\n"); /* random reads on all data sets */
         HDfflush(stdout);
@@ -6209,12 +6209,12 @@ mdj_api_example_test(hbool_t human_readable,
 
     /* close the file spaces we are done with */
     i = 1;
-    while ( ( pass2 ) && ( i < NUM_DSETS ) )
+    while ( ( pass ) && ( i < NUM_DSETS ) )
     {
         if ( H5Sclose(filespace_ids[i]) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Sclose() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Sclose() failed.";
         }
         i++;
     }
@@ -6222,12 +6222,12 @@ mdj_api_example_test(hbool_t human_readable,
 
     /* close the datasets we are done with */
     i = 1;
-    while ( ( pass2 ) && ( i < NUM_DSETS ) )
+    while ( ( pass ) && ( i < NUM_DSETS ) )
     {
         if ( H5Dclose(dataset_ids[i]) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dclose() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dclose() failed.";
         }
         i++;
     }
@@ -6235,7 +6235,7 @@ mdj_api_example_test(hbool_t human_readable,
 
     /* do random reads on data set 0 only */
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Doing random reads on dataset 0 ");
         HDfflush(stdout);
@@ -6244,7 +6244,7 @@ mdj_api_example_test(hbool_t human_readable,
     m = 0;
     n = 0;
     progress_counter = 0;
-    while ( ( pass2 ) && ( n < NUM_RANDOM_ACCESSES ) )
+    while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
@@ -6259,25 +6259,25 @@ mdj_api_example_test(hbool_t human_readable,
 
         if ( status < 0 ) {
 
-           pass2 = FALSE;
-           failure_mssg2 = "disk hyperslab create failed.";
+           pass = FALSE;
+           failure_mssg = "disk hyperslab create failed.";
         }
 
         /* read the chunk from file */
-        if ( pass2 ) {
+        if ( pass ) {
 
             status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
                              filespace_ids[m], H5P_DEFAULT, data_chunk);
 
             if ( status < 0 ) {
 
-               pass2 = FALSE;
-               failure_mssg2 = "disk hyperslab create failed.";
+               pass = FALSE;
+               failure_mssg = "disk hyperslab create failed.";
             }
         }
 
         /* validate the slab */
-        if ( pass2 ) {
+        if ( pass ) {
 
             valid_chunk = TRUE;
             for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -6302,8 +6302,8 @@ mdj_api_example_test(hbool_t human_readable,
 
             if ( ! valid_chunk ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "slab validation failed.";
+                pass = FALSE;
+                failure_mssg = "slab validation failed.";
 #if 0 /* as above */
                 fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
@@ -6313,7 +6313,7 @@ mdj_api_example_test(hbool_t human_readable,
 
         n++;
 
-        if ( ( pass2 ) && ( report_progress ) ) {
+        if ( ( pass ) && ( report_progress ) ) {
 
 	    progress_counter++;
 
@@ -6326,14 +6326,14 @@ mdj_api_example_test(hbool_t human_readable,
 	}
     }
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, " Done.\n"); /* random reads data set 0 */
         HDfflush(stdout);
     }
 
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Shutting down ... ");
         HDfflush(stdout);
@@ -6341,75 +6341,75 @@ mdj_api_example_test(hbool_t human_readable,
 
 
     /* close file space 0 */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Sclose(filespace_ids[0]) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Sclose(filespace_ids[0]) failed.";
+            pass = FALSE;
+            failure_mssg = "H5Sclose(filespace_ids[0]) failed.";
         }
     }
 
     /* close the data space */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Sclose(dataspace_id) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Sclose(dataspace) failed.";
+            pass = FALSE;
+            failure_mssg = "H5Sclose(dataspace) failed.";
         }
     }
 
     /* close the mem space */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Sclose(memspace_id) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Sclose(memspace_id) failed.";
+            pass = FALSE;
+            failure_mssg = "H5Sclose(memspace_id) failed.";
         }
     }
 
     /* close dataset 0 */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Dclose(dataset_ids[0]) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dclose(dataset_ids[0]) failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dclose(dataset_ids[0]) failed.";
         }
     }
 
     /* close the file and delete it */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0  ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5Fclose() failed.\n";
+            pass = FALSE;
+	    failure_mssg = "H5Fclose() failed.\n";
 
         }
         else if ( HDremove(filename) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "HDremove() failed.\n";
+            pass = FALSE;
+	    failure_mssg = "HDremove() failed.\n";
         }
     }
 
-    if ( ( pass2 ) && ( report_progress ) ) {
+    if ( ( pass ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Done.\n"); /* shutting down */
         HDfflush(stdout);
     }
 
 
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
     return;
@@ -6438,7 +6438,7 @@ mdj_api_example_test(hbool_t human_readable,
  *-------------------------------------------------------------------------
  */
 
-extern hbool_t H5C2__check_for_journaling;
+extern hbool_t H5C__check_for_journaling;
 
 static void
 check_superblock_extensions(void)
@@ -6458,7 +6458,7 @@ check_superblock_extensions(void)
 
     TESTING("superblock extensions");
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* Verify that the journaling superblock extension performs as 
      * expected.  Note that this test will have to be re-written
@@ -6511,54 +6511,54 @@ check_superblock_extensions(void)
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[2], H5P_DEFAULT, filename, sizeof(filename))
 				            == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access propertly list */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
                                   H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create the file using fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.\n";
         }
     }
 
@@ -6567,19 +6567,19 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is disabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (1).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (1).\n";
 
         } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling enabled on file creation.\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling enabled on file creation.\n";
 	}
     }
 
@@ -6589,7 +6589,7 @@ check_superblock_extensions(void)
     /* 2) create a dataset in the file, and then close the file */
     /************************************************************/
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = 4;
         dims[1] = 6;
@@ -6597,14 +6597,14 @@ check_superblock_extensions(void)
 
 	if ( dataspace_id < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5Screate_simple() failed.";
+	    pass = FALSE;
+	    failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Create the dataset. */
         dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, dataspace_id,
@@ -6612,22 +6612,22 @@ check_superblock_extensions(void)
 
 	if ( dataspace_id < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5Dcreate2() failed.";
+	    pass = FALSE;
+	    failure_mssg = "H5Dcreate2() failed.";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* close the data set, the data space, and the file */
 	if ( ( H5Dclose(dataset_id) < 0 ) ||
 	     ( H5Sclose(dataspace_id) < 0 ) ||
 	     ( H5Fclose(file_id) < 0 ) ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "data set, data space, or file close failed.";
+            pass = FALSE;
+	    failure_mssg = "data set, data space, or file close failed.";
 	}
     }
 
@@ -6639,14 +6639,14 @@ check_superblock_extensions(void)
     /****************************************************************/
 
     /* open the file r/w using the default FAPL */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (4).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (4).\n";
         }
     }
 
@@ -6655,19 +6655,19 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is disabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (2).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (2).\n";
 
         } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling enabled on file open (1).\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling enabled on file open (1).\n";
 	}
     }
 
@@ -6684,7 +6684,7 @@ check_superblock_extensions(void)
      * of the super block to taste.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 123;
@@ -6707,20 +6707,20 @@ check_superblock_extensions(void)
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5F_super_write_mdj_msg failed (1).";
+            pass = FALSE;
+	    failure_mssg = "H5F_super_write_mdj_msg failed (1).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file again. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (1).";
+            pass = FALSE;
+	    failure_mssg = "file close failed (1).";
 	}
     }
 
@@ -6735,16 +6735,16 @@ check_superblock_extensions(void)
     /* open the file r/w using the default FAPL -- turn off journaling
      * in progress check during the open.
      * */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	H5C2__check_for_journaling = FALSE;
+	H5C__check_for_journaling = FALSE;
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
-	H5C2__check_for_journaling = TRUE;
+	H5C__check_for_journaling = TRUE;
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (5).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (5).\n";
         }
     }
 
@@ -6753,38 +6753,38 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is enabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (3).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (3).\n";
 
         } else if ( ! file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling disabled on file open (1).\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling disabled on file open (1).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_magic != 123 ) {
 	
-	    pass2 = FALSE;
+	    pass = FALSE;
 	    HDfprintf(stdout, "%s: mdc_jnl_magic = %d (%d).\n",
 		      fcn_name, (int)(file_ptr->shared->mdc_jnl_magic),
 		      123);
-	    failure_mssg2 = "unexpected mdc_jnl_magic(1).\n";
+	    failure_mssg = "unexpected mdc_jnl_magic(1).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
 		    (size_t)HDstrlen("abc") ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (1).\n";
+	    pass = FALSE;
+	    failure_mssg = "unexpected mdc_jnl_file_name_len (1).\n";
 
 	} else if ( HDstrcmp(file_ptr->shared->mdc_jnl_file_name, "abc") != 0 ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jnl_file_name (1).\n";
+	    pass = FALSE;
+	    failure_mssg = "unexpected mdc_jnl_file_name (1).\n";
 
         }
     }
@@ -6796,26 +6796,26 @@ check_superblock_extensions(void)
     /*    is not being journaled, and close the file again.          */
     /*****************************************************************/
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5F_super_write_mdj_msg failed (2).";
+            pass = FALSE;
+	    failure_mssg = "H5F_super_write_mdj_msg failed (2).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file again. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (2).";
+            pass = FALSE;
+	    failure_mssg = "file close failed (2).";
 	}
     }
 
@@ -6828,14 +6828,14 @@ check_superblock_extensions(void)
     /*******************************************************************/
 
     /* open the file r/w using the default FAPL */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (6).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (6).\n";
         }
     }
 
@@ -6844,19 +6844,19 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is disabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (4).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (4).\n";
 
         } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling enabled on file open (2).\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling enabled on file open (2).\n";
 	}
     }
 
@@ -6869,7 +6869,7 @@ check_superblock_extensions(void)
     /*     still marks the file as being journaled.  Close the file.   */
     /*******************************************************************/
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 456;
@@ -6880,14 +6880,14 @@ check_superblock_extensions(void)
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5F_super_write_mdj_msg failed (3).";
+            pass = FALSE;
+	    failure_mssg = "H5F_super_write_mdj_msg failed (3).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr->shared->mdc_jnl_enabled       = TRUE;
         file_ptr->shared->mdc_jnl_magic         = 789;
@@ -6898,20 +6898,20 @@ check_superblock_extensions(void)
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5F_super_write_mdj_msg failed (4).";
+            pass = FALSE;
+	    failure_mssg = "H5F_super_write_mdj_msg failed (4).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file again. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (3).";
+            pass = FALSE;
+	    failure_mssg = "file close failed (3).";
 	}
     }
 
@@ -6926,16 +6926,16 @@ check_superblock_extensions(void)
     /* open the file r/w using the default FAPL -- turn off journaling
      * in progress check during the open.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	H5C2__check_for_journaling = FALSE;
+	H5C__check_for_journaling = FALSE;
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
-	H5C2__check_for_journaling = TRUE;
+	H5C__check_for_journaling = TRUE;
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (7).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (7).\n";
         }
     }
 
@@ -6944,38 +6944,38 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is enabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (5).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (5).\n";
 
         } else if ( ! file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling disabled on file open (2).\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling disabled on file open (2).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_magic != 789 ) {
 	
-	    pass2 = FALSE;
+	    pass = FALSE;
 	    HDfprintf(stdout, "%s: mdc_jnl_magic = %d (%d).\n",
 		      fcn_name, (int)(file_ptr->shared->mdc_jnl_magic),
 		      789);
-	    failure_mssg2 = "unexpected mdc_jnl_magic(2).\n";
+	    failure_mssg = "unexpected mdc_jnl_magic(2).\n";
 
 	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
 		    (size_t)HDstrlen("z") ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (2).\n";
+	    pass = FALSE;
+	    failure_mssg = "unexpected mdc_jnl_file_name_len (2).\n";
 
 	} else if ( HDstrcmp(file_ptr->shared->mdc_jnl_file_name, "z") != 0 ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jnl_file_name (2).\n";
+	    pass = FALSE;
+	    failure_mssg = "unexpected mdc_jnl_file_name (2).\n";
 
         }
     }
@@ -6988,26 +6988,26 @@ check_superblock_extensions(void)
     /*     not in progress.  Close the file.                          */
     /******************************************************************/
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5F_super_write_mdj_msg failed (5).";
+            pass = FALSE;
+	    failure_mssg = "H5F_super_write_mdj_msg failed (5).";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file again. */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (4).";
+            pass = FALSE;
+	    failure_mssg = "file close failed (4).";
 	}
     }
 
@@ -7020,14 +7020,14 @@ check_superblock_extensions(void)
     /*************************************************************/
 
     /* open the file r/w using the default FAPL */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (8).\n";
+            pass = FALSE;
+            failure_mssg = "H5Fopen() failed (8).\n";
         }
     }
 
@@ -7036,19 +7036,19 @@ check_superblock_extensions(void)
     /* get a pointer to the files internal data structure and then 
      * verify that journaling is disabled.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (6).\n";
+            pass = FALSE;
+            failure_mssg = "Can't get file_ptr (6).\n";
 
         } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journaling enabled on file open (3).\n";
+	    pass = FALSE;
+	    failure_mssg = "Journaling enabled on file open (3).\n";
 	}
     }
 
@@ -7059,29 +7059,29 @@ check_superblock_extensions(void)
     /* 12) Close the file and delete it. */
     /*************************************/
     
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Fclose(file_id) < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (5).";
+            pass = FALSE;
+	    failure_mssg = "file close failed (5).";
 
         } else if ( HDremove(filename) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "HDremove() failed.\n";
+            pass = FALSE;
+            failure_mssg = "HDremove() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
 } /* check_superblock_extensions() */
@@ -7098,7 +7098,7 @@ check_superblock_extensions(void)
  *		they should be, and that the cache is clean when the 
  *		callback is called.
  *
- *              On failure, set pass2 to false, and failure_mssg2 to an
+ *              On failure, set pass to false, and failure_mssg to an
  *              appropriate error string.
  *
  * Return:      void
@@ -7121,13 +7121,13 @@ check_mdjsc_callbacks(void)
 
     verify_mdjsc_callback_error_rejection();
 
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
     }
 
     return;
@@ -7149,7 +7149,7 @@ check_mdjsc_callbacks(void)
  * 
  **************************************************************************/
 
-static H5C2_t * callback_test_cache_ptr        = NULL;
+static H5C_t * callback_test_cache_ptr        = NULL;
 static hbool_t callback_test_invalid_cache_ptr = FALSE;
 static hbool_t callback_test_null_config_ptr   = FALSE;
 static hbool_t callback_test_invalid_config    = FALSE;
@@ -7158,7 +7158,7 @@ static hbool_t callback_test_cache_is_dirty    = FALSE;
 static int callback_test_null_data_ptr_count   = 0;
 
 static herr_t 
-test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
+test_mdjsc_callback(const H5C_mdj_config_t * config_ptr,
                     hid_t UNUSED dxpl_id,
                     void * data_ptr)
 {
@@ -7168,7 +7168,7 @@ test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
     }
     
     if ( ( callback_test_cache_ptr == NULL ) ||
-         ( callback_test_cache_ptr->magic != H5C2__H5C2_T_MAGIC ) )
+         ( callback_test_cache_ptr->magic != H5C__H5C_T_MAGIC ) )
     {
         callback_test_invalid_cache_ptr = TRUE;
     }
@@ -7206,10 +7206,10 @@ test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
  * 		callback with the supplied index, and verify that the 
  * 		deregistration took place.
  *
- * 		If any error is detected, set pass2 t FALSE, and set the
- * 		failure_mssg2 to the appropriate error message.
+ * 		If any error is detected, set pass t FALSE, and set the
+ * 		failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7220,31 +7220,31 @@ test_mdjsc_callback(const H5C2_mdj_config_t * config_ptr,
 
 static void
 deregister_mdjsc_callback(H5F_t * file_ptr,
-		          H5C2_t * cache_ptr,
+		          H5C_t * cache_ptr,
                           int32_t idx)
 {
     herr_t result;
 
-    if ( pass2 ) 
+    if ( pass ) 
     {
         if ( ( file_ptr == NULL ) ||
 	     ( cache_ptr == NULL ) ||
-	     ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) )
+	     ( cache_ptr->magic != H5C__H5C_T_MAGIC ) )
         {
-	    pass2 = FALSE;
-            failure_mssg2 = 
+	    pass = FALSE;
+            failure_mssg = 
 		"deregister_mdjsc_callback(): bad param(s) on entry.";
 	}
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-	result = H5AC2_deregister_mdjsc_callback(file_ptr, idx);
+	result = H5AC_deregister_mdjsc_callback(file_ptr, idx);
 
 	if ( result < 0 ) 
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5AC2_deregister_mdjsc_callback() failed.";
+	    pass = FALSE;
+	    failure_mssg = "H5AC_deregister_mdjsc_callback() failed.";
 	}
 
 	verify_mdjsc_callback_deregistered(cache_ptr, idx);
@@ -7263,10 +7263,10 @@ deregister_mdjsc_callback(H5F_t * file_ptr,
  * 		status change callback, and verify that the registration
  * 		took.
  *
- * 		If any error is detected, set pass2 t FALSE, and set the
- * 		failure_mssg2 to the appropriate error message.
+ * 		If any error is detected, set pass t FALSE, and set the
+ * 		failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7277,41 +7277,41 @@ deregister_mdjsc_callback(H5F_t * file_ptr,
 
 static void
 register_mdjsc_callback(H5F_t * file_ptr,
-		        H5C2_t * cache_ptr,
-		        H5C2_mdj_status_change_func_t fcn_ptr,
+		        H5C_t * cache_ptr,
+		        H5C_mdj_status_change_func_t fcn_ptr,
                         void * data_ptr,
                         int32_t * idx_ptr)
 {
     herr_t result;
-    H5C2_mdj_config_t init_config;
+    H5C_mdj_config_t init_config;
 
-    if ( pass2 ) 
+    if ( pass ) 
     {
         if ( ( file_ptr == NULL ) ||
 	     ( cache_ptr == NULL ) ||
-	     ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ||
+	     ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
 	     ( fcn_ptr == NULL ) ||
 	     ( idx_ptr == NULL ) )
         {
-	    pass2 = FALSE;
-            failure_mssg2 = "register_mdjsc_callback(): bad param(s) on entry.";
+	    pass = FALSE;
+            failure_mssg = "register_mdjsc_callback(): bad param(s) on entry.";
 	}
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-	result = H5AC2_register_mdjsc_callback(file_ptr, fcn_ptr, data_ptr,
+	result = H5AC_register_mdjsc_callback(file_ptr, fcn_ptr, data_ptr,
 			                       idx_ptr, &init_config);
 
 	if ( result < 0 ) 
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5AC2_register_mdjsc_callback() failed.";
+	    pass = FALSE;
+	    failure_mssg = "H5AC_register_mdjsc_callback() failed.";
 	}
 	else if ( init_config.enable_journaling != cache_ptr->mdj_enabled )
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = 
+	    pass = FALSE;
+	    failure_mssg = 
 	        "init_config.enable_journaling != cache_ptr->mdj_enabled";
 	}
 
@@ -7335,10 +7335,10 @@ register_mdjsc_callback(H5F_t * file_ptr,
  *
  *		If all is as it should be, do nothing.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7348,7 +7348,7 @@ register_mdjsc_callback(H5F_t * file_ptr,
  **************************************************************************/
 
 static void
-verify_mdjsc_table_config(H5C2_t * cache_ptr,
+verify_mdjsc_table_config(H5C_t * cache_ptr,
                           int32_t table_len,
                           int32_t num_entries,
                           int32_t max_idx_in_use,
@@ -7359,62 +7359,62 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
     int cp = 0;
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) 
         {
-            pass2 = FALSE;
-            failure_mssg2 = "bad cache_ptr.";
+            pass = FALSE;
+            failure_mssg = "bad cache_ptr.";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( cache_ptr->mdjsc_cb_tbl == NULL )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+            pass = FALSE;
+            failure_mssg = "cache_ptr->mdjsc_cb_tbl == NULL.";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( cache_ptr->mdjsc_cb_tbl_len != table_len )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "mdjsc callback table len mismatch";
+            pass = FALSE;
+            failure_mssg = "mdjsc callback table len mismatch";
         }
         else if ( cache_ptr->num_mdjsc_cbs != num_entries )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "mdjsc callback table num entries mismatch";
+            pass = FALSE;
+            failure_mssg = "mdjsc callback table num entries mismatch";
         }
         else if ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != max_idx_in_use )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "mdjsc callback table max idx in use mismatch";
+            pass = FALSE;
+            failure_mssg = "mdjsc callback table max idx in use mismatch";
         }
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
-    if ( ( pass2 ) && ( free_entries ) )
+    if ( ( pass ) && ( free_entries ) )
     {
         int32_t i = 0;
         int32_t j;
-        H5C2_mdjsc_record_t * record_ptr = NULL;
+        H5C_mdjsc_record_t * record_ptr = NULL;
 
-        while ( ( pass2 ) && ( i < table_len ) )
+        while ( ( pass ) && ( i < table_len ) )
         {
             if ( free_entries[i] )
             {
@@ -7423,8 +7423,8 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
                      (((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr != NULL)
                    )
                 {
-                    pass2 = FALSE;
-                    failure_mssg2 = 
+                    pass = FALSE;
+                    failure_mssg = 
                         "mdjsc callback table entry in use that should be free";
                 }
             } 
@@ -7435,8 +7435,8 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
 		 */
                 if ( ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr == NULL )
                 {
-                    pass2 = FALSE;
-                    failure_mssg2 = 
+                    pass = FALSE;
+                    failure_mssg = 
                         "mdjsc callback table entry free that shoult be in use";
                 }
             }
@@ -7445,12 +7445,12 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
         }
 
         if ( show_progress ) 
-            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
         i = 0;
         j = cache_ptr->mdjsc_cb_tbl_fl_head;
 
-        while ( ( pass2 ) && 
+        while ( ( pass ) && 
                 ( i < (table_len - num_entries) ) && 
                 ( j >= 0 ) &&
                 ( j < table_len ) )
@@ -7460,8 +7460,8 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
             if ( ( record_ptr->fcn_ptr != NULL ) ||
                  ( record_ptr->data_ptr != NULL ) )
             {
-                pass2 = FALSE;
-                failure_mssg2 = "mdjsc callback table free list entry in use.";
+                pass = FALSE;
+                failure_mssg = "mdjsc callback table free list entry in use.";
             }
             
             i++;
@@ -7469,21 +7469,21 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
         }
 
         if ( show_progress ) 
-            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass, cp++);
 
-        if ( pass2 )
+        if ( pass )
         {
             if ( i != (table_len - num_entries) ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = 
+                pass = FALSE;
+                failure_mssg = 
                     "mdjsc callback table free list shorter than expected.";
 
             } else if ( ( record_ptr != NULL ) &&
 			( record_ptr->fl_next != -1 ) ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = 
+                pass = FALSE;
+                failure_mssg = 
                     "mdjsc callback table free list longer than expected.";
 
             }
@@ -7491,7 +7491,7 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
     }
 
     if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d: %d -- done.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d: %d -- done.\n", fcn_name, pass, cp++);
 
     return;
 
@@ -7508,10 +7508,10 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
  *
  *		If all is as it should be, do nothing.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7521,39 +7521,39 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
  **************************************************************************/
 
 static void
-verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
+verify_mdjsc_callback_deregistered(H5C_t * cache_ptr,
                                    int32_t idx)
 {
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) 
         {
-            pass2 = FALSE;
-            failure_mssg2 = "bad cache_ptr.";
+            pass = FALSE;
+            failure_mssg = "bad cache_ptr.";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( cache_ptr->mdjsc_cb_tbl == NULL )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+            pass = FALSE;
+            failure_mssg = "cache_ptr->mdjsc_cb_tbl == NULL.";
         }
     }
 
-    if ( ( pass2 ) && ( idx < cache_ptr->mdjsc_cb_tbl_len ) )
+    if ( ( pass ) && ( idx < cache_ptr->mdjsc_cb_tbl_len ) )
     {
         if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr != NULL )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "fcn_ptr mismatch";
+            pass = FALSE;
+            failure_mssg = "fcn_ptr mismatch";
         }
         else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr != NULL )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "data_ptr mismatch";
+            pass = FALSE;
+            failure_mssg = "data_ptr mismatch";
         }
     }
 
@@ -7572,10 +7572,10 @@ verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
  *
  *		If all is as it should be, do nothing.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7585,65 +7585,65 @@ verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
  **************************************************************************/
 
 static void
-verify_mdjsc_callback_registered(H5C2_t * cache_ptr,
-                                 H5C2_mdj_status_change_func_t fcn_ptr,
+verify_mdjsc_callback_registered(H5C_t * cache_ptr,
+                                 H5C_mdj_status_change_func_t fcn_ptr,
                                  void * data_ptr,
                                  int32_t idx)
 {
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) 
         {
-            pass2 = FALSE;
-            failure_mssg2 = "bad cache_ptr.";
+            pass = FALSE;
+            failure_mssg = "bad cache_ptr.";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( fcn_ptr == NULL ) ||
              ( idx < 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "bad fcn_ptr and/or negative idx.";
+            pass = FALSE;
+            failure_mssg = "bad fcn_ptr and/or negative idx.";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( cache_ptr->mdjsc_cb_tbl == NULL )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+            pass = FALSE;
+            failure_mssg = "cache_ptr->mdjsc_cb_tbl == NULL.";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( cache_ptr->mdjsc_cb_tbl_len <= idx )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "idx out of range.";
+            pass = FALSE;
+            failure_mssg = "idx out of range.";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr != fcn_ptr )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "fcn_ptr mismatch";
+            pass = FALSE;
+            failure_mssg = "fcn_ptr mismatch";
         }
         else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr != data_ptr )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "data_ptr mismatch";
+            pass = FALSE;
+            failure_mssg = "data_ptr mismatch";
         }
         else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next != -1 )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "fl_next != -1";
+            pass = FALSE;
+            failure_mssg = "fl_next != -1";
         }
     }
 
@@ -7661,10 +7661,10 @@ verify_mdjsc_callback_registered(H5C2_t * cache_ptr,
  *		de-registration routines will fail on obviously 
  *		invalid input.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -7678,22 +7678,22 @@ verify_mdjsc_callback_error_rejection(void)
 {
     const char * fcn_name = "verify_mdjsc_callback_error_rejection():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
-    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
-    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     int i;
     int expected_num_entries = 0;
-    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_table_len = H5C__MIN_MDJSC_CB_TBL_LEN;
     int expected_max_idx = -1;
-    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
-    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int32_t indicies[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
     int cp = 0;
     herr_t result;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     for ( i = 0; i < max_callbacks; i++ )
     {
@@ -7725,19 +7725,19 @@ verify_mdjsc_callback_error_rejection(void)
      */
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
         HDfflush(stdout);
     }
 
@@ -7747,25 +7747,25 @@ verify_mdjsc_callback_error_rejection(void)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( HDstrlen(journal_filename) >=
-                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+                        H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -7782,7 +7782,7 @@ verify_mdjsc_callback_error_rejection(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -7792,9 +7792,9 @@ verify_mdjsc_callback_error_rejection(void)
      *    All attempts should fail.
      */
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_register_mdjsc_callback(NULL,
+        result = H5AC_register_mdjsc_callback(NULL,
 				               test_mdjsc_callback, 
 					       NULL, 
 					       &(indicies[0]),
@@ -7802,15 +7802,15 @@ verify_mdjsc_callback_error_rejection(void)
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_register_mdjsc_callback() succeeded with NULL file_ptr";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_register_mdjsc_callback() succeeded with NULL file_ptr";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_register_mdjsc_callback(file_ptr,
+        result = H5AC_register_mdjsc_callback(file_ptr,
 				               NULL, 
 					       NULL, 
 					       &(indicies[0]),
@@ -7818,15 +7818,15 @@ verify_mdjsc_callback_error_rejection(void)
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_register_mdjsc_callback() succeeded with NULL fcn_ptr";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_register_mdjsc_callback() succeeded with NULL fcn_ptr";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_register_mdjsc_callback(file_ptr,
+        result = H5AC_register_mdjsc_callback(file_ptr,
 				               test_mdjsc_callback, 
 					       NULL, 
 					       NULL,
@@ -7834,9 +7834,9 @@ verify_mdjsc_callback_error_rejection(void)
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_register_mdjsc_callback() succeeded with NULL idx_ptr";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_register_mdjsc_callback() succeeded with NULL idx_ptr";
         }
     }
 
@@ -7845,27 +7845,27 @@ verify_mdjsc_callback_error_rejection(void)
      *    Should fail
      */
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(NULL, 0);
+        result = H5AC_deregister_mdjsc_callback(NULL, 0);
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	      "H5AC2_deregister_mdjsc_callback() succeeded with NULL file_ptr";
+	    pass = FALSE;
+	    failure_mssg = 
+	      "H5AC_deregister_mdjsc_callback() succeeded with NULL file_ptr";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(file_ptr, 0);
+        result = H5AC_deregister_mdjsc_callback(file_ptr, 0);
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(1)";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_deregister_mdjsc_callback() succeeded with invld idx(1)";
         }
     }
 
@@ -7895,27 +7895,27 @@ verify_mdjsc_callback_error_rejection(void)
                               free_entries);
 
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(file_ptr, 3);
+        result = H5AC_deregister_mdjsc_callback(file_ptr, 3);
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(2)";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_deregister_mdjsc_callback() succeeded with invld idx(2)";
         }
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(file_ptr, -1);
+        result = H5AC_deregister_mdjsc_callback(file_ptr, -1);
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(3)";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_deregister_mdjsc_callback() succeeded with invld idx(3)";
         }
     }
 
@@ -7924,15 +7924,15 @@ verify_mdjsc_callback_error_rejection(void)
                               free_entries);
 
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(file_ptr, 1);
+        result = H5AC_deregister_mdjsc_callback(file_ptr, 1);
 
         if ( result != SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_deregister_mdjsc_callback() failed with valid idx";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_deregister_mdjsc_callback() failed with valid idx";
         }
         else
 	{
@@ -7946,15 +7946,15 @@ verify_mdjsc_callback_error_rejection(void)
 	}
     }
 
-    if ( pass2 )
+    if ( pass )
     {
-        result = H5AC2_deregister_mdjsc_callback(file_ptr, -1);
+        result = H5AC_deregister_mdjsc_callback(file_ptr, -1);
 
         if ( result == SUCCEED )
         {
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(4)";
+	    pass = FALSE;
+	    failure_mssg = 
+	        "H5AC_deregister_mdjsc_callback() succeeded with invld idx(4)";
         }
     }
 
@@ -7979,18 +7979,18 @@ verify_mdjsc_callback_error_rejection(void)
     /* Close the file, and tidy up.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Fclose(file_id) < 0 ) {
 
-	    pass2 = FALSE;
-            failure_mssg2 = "H5Fclose() failed.";
+	    pass = FALSE;
+            failure_mssg = "H5Fclose() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8002,7 +8002,7 @@ verify_mdjsc_callback_error_rejection(void)
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d done.\n", 
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8020,10 +8020,10 @@ verify_mdjsc_callback_error_rejection(void)
  *		at the correct time, and that the expected data is passed 
  *		to the callback function.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -8037,15 +8037,15 @@ verify_mdjsc_callback_execution(void)
 {
     const char * fcn_name = "verify_mdjsc_callback_execution():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
-    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
-    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     int i;
     int expected_num_entries = 0;
-    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_table_len = H5C__MIN_MDJSC_CB_TBL_LEN;
     int expected_max_idx = -1;
-    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
-    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int32_t indicies[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
     int cp = 0;
@@ -8054,9 +8054,9 @@ verify_mdjsc_callback_execution(void)
     hid_t dataspace_id = -1;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
     hsize_t dims[2];
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     for ( i = 0; i < max_callbacks; i++ )
     {
@@ -8119,19 +8119,19 @@ verify_mdjsc_callback_execution(void)
      */
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8141,25 +8141,25 @@ verify_mdjsc_callback_execution(void)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( HDstrlen(journal_filename) >=
-                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+                        H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8176,7 +8176,7 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8197,7 +8197,7 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8206,16 +8206,16 @@ verify_mdjsc_callback_execution(void)
      *    at time of call.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8224,11 +8224,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         counters[0]                       = 0;
         callback_test_cache_ptr           = cache_ptr;
@@ -8243,28 +8243,28 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( counters[0] != 1 )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(1).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(1).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(1).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(1).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
@@ -8272,14 +8272,14 @@ verify_mdjsc_callback_execution(void)
                   ( callback_test_null_data_ptr ) ||
 		  ( callback_test_null_data_ptr_count != 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(1).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(1).";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8289,16 +8289,16 @@ verify_mdjsc_callback_execution(void)
      *     is clear at time of call.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8316,11 +8316,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         counters[0]                       = 0;
         callback_test_cache_ptr           = cache_ptr;
@@ -8336,48 +8336,48 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( counters[0] != 1 )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(2).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(2).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(2).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(2).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) ||
                   ( callback_test_null_data_ptr ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(2).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(2).";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
     /* 5) Perform some writes to the file. */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = 4;
         dims[1] = 6;
@@ -8385,18 +8385,18 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Screate_simple() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Create the dataset. */
         dataset_id = H5Dcreate2(file_id, "/dset0", H5T_STD_I32BE,
@@ -8405,34 +8405,34 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dcreate2() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dcreate2() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* close the data set, and the data space */
         if ( ( H5Dclose(dataset_id) < 0 ) ||
              ( H5Sclose(dataspace_id) < 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "data set, or data space close failed.";
+            pass = FALSE;
+            failure_mssg = "data set, or data space close failed.";
         }
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( cache_ptr->slist_len <= 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "cache isnt' dirty?!?";
+            pass = FALSE;
+            failure_mssg = "cache isnt' dirty?!?";
         }
     }
 
@@ -8442,16 +8442,16 @@ verify_mdjsc_callback_execution(void)
      *     clean at time of call.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8460,11 +8460,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         counters[0]                     = 0;
         callback_test_cache_ptr         = cache_ptr;
@@ -8478,49 +8478,49 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( counters[0] != 1 )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(3).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(3).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(3).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(3).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) ||
                   ( callback_test_null_data_ptr ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(3).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(3).";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
     /*  7) Perform some more writes to the file.  */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = 6;
         dims[1] = 8;
@@ -8528,18 +8528,18 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Screate_simple() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Create the dataset. */
         dataset_id = H5Dcreate2(file_id, "/dset1", H5T_STD_I32BE,
@@ -8548,34 +8548,34 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dcreate2() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dcreate2() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* close the data set, and the data space */
         if ( ( H5Dclose(dataset_id) < 0 ) ||
              ( H5Sclose(dataspace_id) < 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "data set, or data space close failed.";
+            pass = FALSE;
+            failure_mssg = "data set, or data space close failed.";
         }
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( cache_ptr->slist_len <= 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "cache isnt' dirty?!?";
+            pass = FALSE;
+            failure_mssg = "cache isnt' dirty?!?";
         }
     }
 
@@ -8585,16 +8585,16 @@ verify_mdjsc_callback_execution(void)
      *     is clear at time of call.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8612,11 +8612,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         counters[0]                       = 0;
         callback_test_cache_ptr           = cache_ptr;
@@ -8631,42 +8631,42 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( counters[0] != 1 )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(4).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(4).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(4).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(4).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) ||
                   ( callback_test_null_data_ptr ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(4).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(4).";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8691,17 +8691,17 @@ verify_mdjsc_callback_execution(void)
 
         if ( H5Fclose(file_id) < 0 ) {
 
-            if ( pass2 ) {
+            if ( pass ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "file close failed.";
+                pass = FALSE;
+                failure_mssg = "file close failed.";
             }
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d *cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d *cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8736,16 +8736,16 @@ verify_mdjsc_callback_execution(void)
 
     /* 11) Enable journaling.  Verify that the callbacks are called. */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8763,11 +8763,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         counters[0]                       = 0;
         callback_test_cache_ptr           = cache_ptr;
@@ -8783,57 +8783,57 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( ( counters[0] != 1 ) && 
 	     ( counters[1] != 0 ) && 
 	     ( counters[2] != 1 ) &&
 	     ( counters[3] != 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(5).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(5).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(5).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(5).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(5).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(5).";
         }
 	else if ( ( ! callback_test_null_data_ptr ) ||
                   ( callback_test_null_data_ptr_count != 1 ) )
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = "incorrect null data_ptr callbacks.(5)";
+	    pass = FALSE;
+	    failure_mssg = "incorrect null data_ptr callbacks.(5)";
 	}
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
     /* 12) Perform some writes to the file. */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = 8;
         dims[1] = 10;
@@ -8841,18 +8841,18 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Screate_simple() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Create the dataset. */
         dataset_id = H5Dcreate2(file_id, "/dset2", H5T_STD_I32BE,
@@ -8861,40 +8861,40 @@ verify_mdjsc_callback_execution(void)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dcreate2() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dcreate2() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* close the data set, and the data space */
         if ( ( H5Dclose(dataset_id) < 0 ) ||
              ( H5Sclose(dataspace_id) < 0 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "data set, or data space close failed.";
+            pass = FALSE;
+            failure_mssg = "data set, or data space close failed.";
         }
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( cache_ptr->slist_len <= 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "cache isnt' dirty?!?";
+            pass = FALSE;
+            failure_mssg = "cache isnt' dirty?!?";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -8903,7 +8903,7 @@ verify_mdjsc_callback_execution(void)
 
     for ( i = 3; i < max_callbacks; i++ )
     {
-	if ( ( pass2 ) && ( free_entries[i] ) )
+	if ( ( pass ) && ( free_entries[i] ) )
 	{
             register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                    &(counters[i]), &(indicies[i]));
@@ -8935,23 +8935,23 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
     /* 14) Disable journaling.  Verify that the callbacks are called. */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -8960,11 +8960,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	for ( i = 0; i < max_callbacks; i++ )
 	{
@@ -8982,18 +8982,18 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 	int max_counter = 0;
 	int counter_sum = 0;
 
@@ -9010,32 +9010,32 @@ verify_mdjsc_callback_execution(void)
 	     ( max_counter != 1 ) ||
 	     ( counter_sum != max_callbacks - 1 ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(6).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(6).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(6).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(6).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(6).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(6).";
         }
 	else if ( ( ! callback_test_null_data_ptr ) ||
                   ( callback_test_null_data_ptr_count != 1 ) )
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = "incorrect null data_ptr callbacks.(6)";
+	    pass = FALSE;
+	    failure_mssg = "incorrect null data_ptr callbacks.(6)";
 	}
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9048,7 +9048,7 @@ verify_mdjsc_callback_execution(void)
 
     for ( i = max_callbacks - 1;  i >= 0;  i-- )
     {
-        if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 8) != 0 ) )
+        if ( ( pass ) && ( ! free_entries[i] ) && ( (i % 8) != 0 ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -9072,10 +9072,10 @@ verify_mdjsc_callback_execution(void)
 	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
 	                &&
 	                ( fraction_in_use < 
-			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			  H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		        &&
 		        ( (expected_table_len / 2) >= 
-			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+			  H5C__MIN_MDJSC_CB_TBL_LEN )
 		      )
                 {
 	            expected_table_len /= 2;
@@ -9096,7 +9096,7 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9105,16 +9105,16 @@ verify_mdjsc_callback_execution(void)
      *     called.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+        jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
         result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
@@ -9132,11 +9132,11 @@ verify_mdjsc_callback_execution(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	for ( i = 0; i < max_callbacks; i++ )
 	{
@@ -9154,18 +9154,18 @@ verify_mdjsc_callback_execution(void)
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 	int max_counter = 0;
 	int counter_sum = 0;
 
@@ -9181,32 +9181,32 @@ verify_mdjsc_callback_execution(void)
         if ( ( max_counter != 1 ) ||
 	     ( counter_sum != ( max_callbacks / 8 ) ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "incorrect number of callback calls(7).";
+            pass = FALSE;
+            failure_mssg = "incorrect number of callback calls(7).";
 	}
         else if ( callback_test_cache_is_dirty )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "callback found dirty cache(7).";
+            pass = FALSE;
+            failure_mssg = "callback found dirty cache(7).";
         }
         else if ( ( callback_test_invalid_cache_ptr ) ||
                   ( callback_test_null_config_ptr ) ||
                   ( callback_test_invalid_config ) )
         {
-            pass2 = FALSE;
-            failure_mssg2 = "Bad parameter(s) to callback(7).";
+            pass = FALSE;
+            failure_mssg = "Bad parameter(s) to callback(7).";
         }
 	else if ( ( callback_test_null_data_ptr ) ||
                   ( callback_test_null_data_ptr_count != 0 ) )
 	{
-	    pass2 = FALSE;
-	    failure_mssg2 = "incorrect null data_ptr callbacks.(6)";
+	    pass = FALSE;
+	    failure_mssg = "incorrect null data_ptr callbacks.(6)";
 	}
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9217,7 +9217,7 @@ verify_mdjsc_callback_execution(void)
 
     for ( i = max_callbacks - 1;  i >= 0;  i-- )
     {
-        if ( ( pass2 ) && ( ! free_entries[i] ) )
+        if ( ( pass ) && ( ! free_entries[i] ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -9241,10 +9241,10 @@ verify_mdjsc_callback_execution(void)
 	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
 	                &&
 	                ( fraction_in_use < 
-			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			  H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		        &&
 		        ( (expected_table_len / 2) >= 
-			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+			  H5C__MIN_MDJSC_CB_TBL_LEN )
 		      )
                 {
 	            expected_table_len /= 2;
@@ -9260,12 +9260,12 @@ verify_mdjsc_callback_execution(void)
 
     HDassert( expected_num_entries == 0 );
     HDassert( expected_max_idx == -1 );
-    HDassert( expected_table_len == H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len == H5C__MIN_MDJSC_CB_TBL_LEN );
 
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9273,18 +9273,18 @@ verify_mdjsc_callback_execution(void)
     /* Close the file, and tidy up.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Fclose(file_id) < 0 ) {
 
-	    pass2 = FALSE;
-            failure_mssg2 = "H5Fclose() failed.";
+	    pass = FALSE;
+            failure_mssg = "H5Fclose() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9296,7 +9296,7 @@ verify_mdjsc_callback_execution(void)
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d done.\n", 
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9315,10 +9315,10 @@ verify_mdjsc_callback_execution(void)
  *
  *		If all tests pass, do nothing.
  *
- *		If anything is not as it should be, set pass2 to FALSE,
- *              and set failure_mssg2 to the appropriate error message.
+ *		If anything is not as it should be, set pass to FALSE,
+ *              and set failure_mssg to the appropriate error message.
  *
- *              Do nothing and return if pass2 is false on entry.
+ *              Do nothing and return if pass is false on entry.
  *
  * Return:      void
  *
@@ -9333,22 +9333,22 @@ verify_mdjsc_callback_registration_deregistration(void)
     const char * fcn_name = 
         "verify_mdjsc_callback_registration_deregistration():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
-    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
-    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     int i;
     int j;
     int expected_num_entries = 0;
-    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_table_len = H5C__MIN_MDJSC_CB_TBL_LEN;
     int expected_max_idx = -1;
-    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
-    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int32_t indicies[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C__MIN_MDJSC_CB_TBL_LEN];
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
     int cp = 0;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     for ( i = 0; i < max_callbacks; i++ )
     {
@@ -9367,9 +9367,9 @@ verify_mdjsc_callback_registration_deregistration(void)
      *  3) Deregister the callback.  Verify that it is deleted correctly
      *     from the metadata journaling status change callback table.
      *
-     *  4) Register H5C2__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
+     *  4) Register H5C__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
      *     they are all correctly added to the table, and that the table
-     *     is of size H5C2__MIN_MDJSC_CB_TBL_LEN, and that it contains
+     *     is of size H5C__MIN_MDJSC_CB_TBL_LEN, and that it contains
      *     the expected number of entries.
      *
      *  5) Register one more entry.  Verify that it is registered
@@ -9378,19 +9378,19 @@ verify_mdjsc_callback_registration_deregistration(void)
      *  6) Register another entry.  Verify that is is correctly registered,
      *     that the table has doubled in size.
      *
-     *  7) In LIFO order, deregister (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1
+     *  7) In LIFO order, deregister (H5C__MIN_MDJSC_CB_TBL_LEN / 2) + 1
      *     callbacks in LIFO order.  Verify that the entries are deregistered,
      *     and that the table has not changed size.
      * 
      *  8) Again, in LIFO order, deregister another callback.  Verify that
      *     the callback is deregistered, and that the table has been reduced
-     *     in size to H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *     in size to H5C__MIN_MDJSC_CB_TBL_LEN.
      *
      *  9) Deregister all callbacks.  Verify that the table is empty.
      *
-     * 10) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     * 10) Register 8 * H5C__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
      *     that all callbacks are registered, and that the table lenght grows
-     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *     to 16 * H5C__MIN_MDJSC_CB_TBL_LEN.
      *
      * 11) Deregister all callbacks with even indicies.  Verify the 
      *     deregistrations.  Verify that the table does not shrink.
@@ -9402,21 +9402,21 @@ verify_mdjsc_callback_registration_deregistration(void)
      *     Verify the deregistrations, and also verify that the table 
      *     does not shrink until the last callback is de-registered.
      *
-     * 14) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     * 14) Register 8 * H5C__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
      *     that all callbacks are registered, and that the table length grows
-     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *     to 16 * H5C__MIN_MDJSC_CB_TBL_LEN.
      *
      * 15) Starting with the highest index, deregister all entries with 
-     *     index not divisible by H5C2__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
+     *     index not divisible by H5C__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
      *     that the callbacks are de-registers, and that the table does
      *     not shrink
      *
-     * 16) Register H5C2__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
+     * 16) Register H5C__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
      *     they are placed in slots freed by the dergistrations in 15) above.
      *
      * 17) Starting with the lowest index, deregister all entries with 
-     *     index with index >= H5C2__MIN_MDJSC_CB_TBL_LEN and not divisible 
-     *     by H5C2__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
+     *     index with index >= H5C__MIN_MDJSC_CB_TBL_LEN and not divisible 
+     *     by H5C__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
      *     deregistered, and that the table does not shrink.
      *
      * 18) Register a callback.  Verify that it is place in one of the 
@@ -9437,19 +9437,19 @@ verify_mdjsc_callback_registration_deregistration(void)
      */
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9459,25 +9459,25 @@ verify_mdjsc_callback_registration_deregistration(void)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( HDstrlen(journal_filename) >=
-                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+                        H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9513,7 +9513,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9535,17 +9535,17 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
-    /* 4) Register H5C2__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
+    /* 4) Register H5C__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
      *    they are all correctly added to the table, and that the table
-     *    is of size H5C2__MIN_MDJSC_CB_TBL_LEN, and that it contains
+     *    is of size H5C__MIN_MDJSC_CB_TBL_LEN, and that it contains
      *    the expected number of entries.
      */
-    for ( i = 0; i < H5C2__MIN_MDJSC_CB_TBL_LEN - 1; i++ )
+    for ( i = 0; i < H5C__MIN_MDJSC_CB_TBL_LEN - 1; i++ )
     {
         register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                &(counters[j]), &(indicies[j]));
@@ -9563,7 +9563,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9577,7 +9577,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9587,7 +9587,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9599,14 +9599,14 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( ( pass2 ) && ( expected_num_entries != expected_table_len ) )
+    if ( ( pass ) && ( expected_num_entries != expected_table_len ) )
     {
-	pass2 = FALSE;
-	failure_mssg2 = "Unexpected table len(1)";
+	pass = FALSE;
+	failure_mssg = "Unexpected table len(1)";
     }
 
 
@@ -9630,17 +9630,17 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
-    /* 7) In LIFO order, deregister (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1
+    /* 7) In LIFO order, deregister (H5C__MIN_MDJSC_CB_TBL_LEN / 2) + 1
      *    callbacks in LIFO order.  Verify that the entries are deregistered,
      *    and that the table has not changed size.
      */
 
-    for ( i = 0; i < (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1; i++ )
+    for ( i = 0; i < (H5C__MIN_MDJSC_CB_TBL_LEN / 2) + 1; i++ )
     {
         j--;
 
@@ -9657,14 +9657,14 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
     /* 8) Again, in LIFO order, deregister another callback.  Verify that
      *    the callback is deregistered, and that the table has been reduced
-     *    in size to H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *    in size to H5C__MIN_MDJSC_CB_TBL_LEN.
      */
 
     j--;
@@ -9682,7 +9682,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9707,17 +9707,17 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
-    /* 10) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+    /* 10) Register 8 * H5C__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
      *     that all callbacks are registered, and that the table length grows
-     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *     to 16 * H5C__MIN_MDJSC_CB_TBL_LEN.
      */
 
-    for ( i = 0; i < ((8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
+    for ( i = 0; i < ((8 * H5C__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
     {
         register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                &(counters[i]), &(indicies[i]));
@@ -9738,13 +9738,13 @@ verify_mdjsc_callback_registration_deregistration(void)
                                   free_entries);
     }
 
-    HDassert( expected_table_len == 16 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len == 16 * H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( expected_table_len < 1024 );
-    HDassert( expected_max_idx == 8 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_max_idx == 8 * H5C__MIN_MDJSC_CB_TBL_LEN );
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
@@ -9753,7 +9753,7 @@ verify_mdjsc_callback_registration_deregistration(void)
      *     deregistrations.  Verify that the table does not shrink.
      */
 
-    for ( i = 0; i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; i += 2 )
+    for ( i = 0; i < (8 * H5C__MIN_MDJSC_CB_TBL_LEN) + 1; i += 2 )
     {
         deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -9773,7 +9773,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9785,10 +9785,10 @@ verify_mdjsc_callback_registration_deregistration(void)
     /* The index assigned to the new callback is determined by the 
      * free list management algorithm.  In the present implementation
      * freed entries are added to the head of the free list, so the
-     * next index issues will be 8 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     * next index issues will be 8 * H5C__MIN_MDJSC_CB_TBL_LEN.
      */
 
-    j = 8 * H5C2__MIN_MDJSC_CB_TBL_LEN;
+    j = 8 * H5C__MIN_MDJSC_CB_TBL_LEN;
 
     register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
                             &(counters[j]), &(indicies[j]));
@@ -9808,7 +9808,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -9818,7 +9818,7 @@ verify_mdjsc_callback_registration_deregistration(void)
      *     does not shrink until the last callback is de-registered.
      */
 
-    for ( i = 0; i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; i++ )
+    for ( i = 0; i < (8 * H5C__MIN_MDJSC_CB_TBL_LEN) + 1; i++ )
     {
 	if ( ! free_entries[i] ) 
 	{
@@ -9831,7 +9831,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    if ( i == expected_max_idx ) 
 	    {
                 expected_max_idx = -1;
-		expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+		expected_table_len = H5C__MIN_MDJSC_CB_TBL_LEN;
 	    }
 
             verify_mdjsc_table_config(cache_ptr, expected_table_len, 
@@ -9842,17 +9842,17 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
 
-    /* 14) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+    /* 14) Register 8 * H5C__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
      *     that all callbacks are registered, and that the table length grows
-     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *     to 16 * H5C__MIN_MDJSC_CB_TBL_LEN.
      */
 
-    for ( i = 0; i < ((8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
+    for ( i = 0; i < ((8 * H5C__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
     {
         register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                &(counters[i]), &(indicies[i]));
@@ -9873,27 +9873,27 @@ verify_mdjsc_callback_registration_deregistration(void)
                                   free_entries);
     }
 
-    HDassert( expected_table_len == 16 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len == 16 * H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( expected_table_len < 1024 );
-    HDassert( expected_max_idx == 8 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_max_idx == 8 * H5C__MIN_MDJSC_CB_TBL_LEN );
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
 
     /* 15) Starting with the highest index, deregister all entries with 
-     *     index not divisible by H5C2__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
+     *     index not divisible by H5C__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
      *     that the callbacks are de-registers, and that the table does
      *     not shrink
      */
 
-    for ( i = (8 * H5C2__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
+    for ( i = (8 * H5C__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
     {
 	if ( ( ! free_entries[i] ) &&
-	     ( (i % (H5C2__MIN_MDJSC_CB_TBL_LEN /2)) != 0 ) )
+	     ( (i % (H5C__MIN_MDJSC_CB_TBL_LEN /2)) != 0 ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -9914,12 +9914,12 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
 
-    /* 16) Register H5C2__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
+    /* 16) Register H5C__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
      *     they are placed in slots freed by the dergistrations in 15) above.
      */
 
@@ -9931,7 +9931,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     j = 1;
 
-    for ( i = 0; i < H5C2__MIN_MDJSC_CB_TBL_LEN / 2; i++ )
+    for ( i = 0; i < H5C__MIN_MDJSC_CB_TBL_LEN / 2; i++ )
     {
         while ( ! free_entries[j] )
 	{
@@ -9955,27 +9955,27 @@ verify_mdjsc_callback_registration_deregistration(void)
                                   free_entries);
     }
 
-    HDassert( j == (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1 );
+    HDassert( j == (H5C__MIN_MDJSC_CB_TBL_LEN / 2) + 1 );
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
 
     /* 17) Starting with the lowest index, deregister all entries with 
-     *     index with index >= H5C2__MIN_MDJSC_CB_TBL_LEN and not divisible 
-     *     by H5C2__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
+     *     index with index >= H5C__MIN_MDJSC_CB_TBL_LEN and not divisible 
+     *     by H5C__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
      *     deregistered, and that the table does not shrink.
      */
 
-    for ( i = H5C2__MIN_MDJSC_CB_TBL_LEN; 
-          i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; 
+    for ( i = H5C__MIN_MDJSC_CB_TBL_LEN; 
+          i < (8 * H5C__MIN_MDJSC_CB_TBL_LEN) + 1; 
 	  i++ )
     {
 	if ( ( ! free_entries[i] ) &&
-	     ( (i % H5C2__MIN_MDJSC_CB_TBL_LEN) != 0 ) )
+	     ( (i % H5C__MIN_MDJSC_CB_TBL_LEN) != 0 ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -9996,7 +9996,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
@@ -10008,11 +10008,11 @@ verify_mdjsc_callback_registration_deregistration(void)
     /* The index assigned to the new callback is determined by the 
      * free list management algorithm.  In the present implementation
      * freed entries are added to the head of the free list, so the
-     * next index issues will be (7 * H5C2__MIN_MDJSC_CB_TBL_LEN) +
-     * (H5C2__MIN_MDJSC_CB_TBL_LEN / 2).
+     * next index issues will be (7 * H5C__MIN_MDJSC_CB_TBL_LEN) +
+     * (H5C__MIN_MDJSC_CB_TBL_LEN / 2).
      */
 
-    j = (7 * H5C2__MIN_MDJSC_CB_TBL_LEN) + (H5C2__MIN_MDJSC_CB_TBL_LEN / 2);
+    j = (7 * H5C__MIN_MDJSC_CB_TBL_LEN) + (H5C__MIN_MDJSC_CB_TBL_LEN / 2);
 
     register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
                             &(counters[j]), &(indicies[j]));
@@ -10032,7 +10032,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10041,9 +10041,9 @@ verify_mdjsc_callback_registration_deregistration(void)
      *     Verify that the table shrinks as expected.
      */
 
-    for ( i = (8 * H5C2__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
+    for ( i = (8 * H5C__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
     {
-	if ( ( pass2 ) && ( ! free_entries[i] ) )
+	if ( ( pass ) && ( ! free_entries[i] ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10067,9 +10067,9 @@ verify_mdjsc_callback_registration_deregistration(void)
 
 		if ( ( expected_max_idx < (expected_table_len / 2) ) 
 		     &&
-		     ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		     ( fraction_in_use < H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		     &&
-		     ( (expected_table_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN )
+		     ( (expected_table_len / 2) >= H5C__MIN_MDJSC_CB_TBL_LEN )
 		   )
 		{
 		    expected_table_len /= 2;
@@ -10084,7 +10084,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
      
@@ -10122,7 +10122,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10132,7 +10132,7 @@ verify_mdjsc_callback_registration_deregistration(void)
      */
     for ( i = (3 * max_callbacks / 8); i >= max_callbacks / 8; i-- )
     {
-	if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 2) == 1 ) )
+	if ( ( pass ) && ( ! free_entries[i] ) && ( (i % 2) == 1 ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10156,9 +10156,9 @@ verify_mdjsc_callback_registration_deregistration(void)
 
 		if ( ( expected_max_idx < (expected_table_len / 2) ) 
 		     &&
-		     ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		     ( fraction_in_use < H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		     &&
-		     ( (expected_table_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN )
+		     ( (expected_table_len / 2) >= H5C__MIN_MDJSC_CB_TBL_LEN )
 		   )
 		{
 		    expected_table_len /= 2;
@@ -10173,7 +10173,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10186,7 +10186,7 @@ verify_mdjsc_callback_registration_deregistration(void)
      
     for ( i = (max_callbacks / 8); i <= (3 * max_callbacks / 8); i++ )
     {
-	if ( ( pass2 ) && ( free_entries[i] ) && ( (i % 2) == 1 ) )
+	if ( ( pass ) && ( free_entries[i] ) && ( (i % 2) == 1 ) )
 	{
             register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                    &(counters[i]), &(indicies[i]));
@@ -10217,7 +10217,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10225,7 +10225,7 @@ verify_mdjsc_callback_registration_deregistration(void)
      
     for ( i = (max_callbacks / 2); i < max_callbacks; i++ )
     {
-	if ( ( pass2 ) && ( free_entries[i] ) )
+	if ( ( pass ) && ( free_entries[i] ) )
 	{
             register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
 		                    &(counters[i]), &(indicies[i]));
@@ -10257,7 +10257,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10267,7 +10267,7 @@ verify_mdjsc_callback_registration_deregistration(void)
     {
         for ( j = i; ( ( i < j + 200 ) && ( j < max_callbacks ) ); j++ )
 	{
-	    if ( ( pass2 ) && ( ! free_entries[i] ) )
+	    if ( ( pass ) && ( ! free_entries[i] ) )
 	    {
                 deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10291,10 +10291,10 @@ verify_mdjsc_callback_registration_deregistration(void)
 		    if ( ( expected_max_idx < (expected_table_len / 2) ) 
 		         &&
 		         ( fraction_in_use < 
-			   H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			   H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		         &&
 		         ( (expected_table_len / 2) >= 
-			   H5C2__MIN_MDJSC_CB_TBL_LEN )
+			   H5C__MIN_MDJSC_CB_TBL_LEN )
 		       )
 		    {
 		        expected_table_len /= 2;
@@ -10311,7 +10311,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10322,7 +10322,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     for ( i = max_callbacks - 1;  i >= 0;  i-- )
     {
-        if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 3) != 0 ) )
+        if ( ( pass ) && ( ! free_entries[i] ) && ( (i % 3) != 0 ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10346,10 +10346,10 @@ verify_mdjsc_callback_registration_deregistration(void)
 	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
 	                &&
 	                ( fraction_in_use < 
-			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			  H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		        &&
 		        ( (expected_table_len / 2) >= 
-			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+			  H5C__MIN_MDJSC_CB_TBL_LEN )
 		      )
                 {
 	            expected_table_len /= 2;
@@ -10365,7 +10365,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10376,7 +10376,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     for ( i = (max_callbacks / 8);  i < max_callbacks;  i++ )
     {
-        if ( ( pass2 ) && ( ! free_entries[i] ) )
+        if ( ( pass ) && ( ! free_entries[i] ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10400,10 +10400,10 @@ verify_mdjsc_callback_registration_deregistration(void)
 	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
 	                &&
 	                ( fraction_in_use < 
-			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			  H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		        &&
 		        ( (expected_table_len / 2) >= 
-			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+			  H5C__MIN_MDJSC_CB_TBL_LEN )
 		      )
                 {
 	            expected_table_len /= 2;
@@ -10421,7 +10421,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10430,7 +10430,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 
     for ( i = (max_callbacks / 8);  i >= 0;  i-- )
     {
-        if ( ( pass2 ) && ( ! free_entries[i] ) )
+        if ( ( pass ) && ( ! free_entries[i] ) )
 	{
             deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
 
@@ -10454,10 +10454,10 @@ verify_mdjsc_callback_registration_deregistration(void)
 	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
 	                &&
 	                ( fraction_in_use < 
-			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+			  H5C__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
 		        &&
 		        ( (expected_table_len / 2) >= 
-			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+			  H5C__MIN_MDJSC_CB_TBL_LEN )
 		      )
                 {
 	            expected_table_len /= 2;
@@ -10471,13 +10471,13 @@ verify_mdjsc_callback_registration_deregistration(void)
 	}
     }
 
-    HDassert( expected_table_len == H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len == H5C__MIN_MDJSC_CB_TBL_LEN );
     HDassert( expected_num_entries == 0 );
     HDassert( expected_max_idx  == -1 );
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10485,18 +10485,18 @@ verify_mdjsc_callback_registration_deregistration(void)
     /* Close the file, and tidy up.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Fclose(file_id) < 0 ) {
 
-	    pass2 = FALSE;
-            failure_mssg2 = "H5Fclose() failed.";
+	    pass = FALSE;
+            failure_mssg = "H5Fclose() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10508,7 +10508,7 @@ verify_mdjsc_callback_registration_deregistration(void)
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d done.\n", 
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -10520,7 +10520,7 @@ verify_mdjsc_callback_registration_deregistration(void)
 /***************************************************************************
  * Function: 	check_buffer_writes
  *
- * Purpose:  	Verify the function H5C2_jb__write_to_buffer properly writes
+ * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
  *              messages of varying sizes into the journal buffers, and 
  *              that the journal buffers properly flush out when filled.
  *
@@ -10531,7 +10531,7 @@ verify_mdjsc_callback_registration_deregistration(void)
  *
  * Changes:	John Mainzer -- 4/16/09
  *		Updated for the addition of new parameters to 
- *		H5C2_jb__init().
+ *		H5C_jb__init().
  * 
  **************************************************************************/
 
@@ -10542,7 +10542,7 @@ check_buffer_writes(hbool_t use_aio)
     char filename[512];
     int i;
     herr_t result;
-    H5C2_jbrb_t jbrb_struct;
+    H5C_jbrb_t jbrb_struct;
     FILE * readback;
     hbool_t show_progress = FALSE;
     int32_t checkpoint = 1;
@@ -10558,7 +10558,7 @@ check_buffer_writes(hbool_t use_aio)
         TESTING("metadata buffer & file sio writes");
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* Initialize data to get written as tests */
     HDmemcpy(filldata[0], "abcdefghijklmn\n", 16);
@@ -10592,20 +10592,20 @@ check_buffer_writes(hbool_t use_aio)
     HDassert(HDstrlen(filldata[11]) == 97);
 
     /* Give structure its magic number */
-    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+    jbrb_struct.magic = H5C__H5C_JBRB_T_MAGIC;
 	
     if ( show_progress ) /* 1 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
              == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed";
 
         } /* end if */
 
@@ -10613,16 +10613,16 @@ check_buffer_writes(hbool_t use_aio)
 	
     if ( show_progress ) /* 2 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -10635,47 +10635,47 @@ check_buffer_writes(hbool_t use_aio)
 
         if ( result != 0) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 1";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 1";
 
        	} /* end if */
 
     } /* end if */
 
     /* generate the header message manually */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__write_header_entry failed";
         }
     }
 	
     if ( show_progress ) /* 3 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush and truncate journal file to get rid of the header
      * message for subsequent tests. */
-    if ( pass2 ) {
+    if ( pass ) {
 	
-	if ( H5C2_jb__flush(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__flush(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb_flush failed";
+            pass = FALSE;
+	    failure_mssg = "H5C_jb_flush failed";
 
 	} /* end if */	
 
     } /* end if */
 	
     /* Truncate journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_trunc failed";
 
 	} /* end if */
 
@@ -10683,7 +10683,7 @@ check_buffer_writes(hbool_t use_aio)
 
     if ( show_progress ) /* 4 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* open journal file for reading */
     readback = fopen(filename, "r");
@@ -10703,7 +10703,7 @@ check_buffer_writes(hbool_t use_aio)
 
 	if ( show_progress )
 	    HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		      checkpoint++, (int)pass2);
+		      checkpoint++, (int)pass);
 
     } /* end for */
 
@@ -10711,7 +10711,7 @@ check_buffer_writes(hbool_t use_aio)
      * calls write specific lengths of data into the journal buffers 
      * multiple times, but only flushes at the end of the set of writes. 
      * This tests to ensure that the automatic flush calls in 
-     * H5C2_jb__write_to_buffer are working properly. The routine then 
+     * H5C_jb__write_to_buffer are working properly. The routine then 
      * ensures that what makes it it disk is as expected 
      */
 
@@ -10740,7 +10740,7 @@ check_buffer_writes(hbool_t use_aio)
         
 	if ( show_progress )
 	    HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		      checkpoint++, (int)pass2);
+		      checkpoint++, (int)pass);
 
     } /* end for */
     
@@ -10748,37 +10748,37 @@ check_buffer_writes(hbool_t use_aio)
     fclose(readback);
 
     /* Truncate the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed";
+		pass = FALSE;
+		failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* take down the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+	if (H5C_jb__takedown(&jbrb_struct) != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
 
     }
 
@@ -10803,44 +10803,44 @@ check_buffer_writes(hbool_t use_aio)
  * 
  **************************************************************************/
 static void 
-write_flush_verify(H5C2_jbrb_t * struct_ptr, 
+write_flush_verify(H5C_jbrb_t * struct_ptr, 
 		   int size, 
 		   char * data, 
 		   FILE * readback)
 {
     char verify[150];
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, 
+	if ( H5C_jb__write_to_buffer(struct_ptr, (size_t)size, 
 				      data, 0, (uint64_t)0) != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__write_to_buffer failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__write_to_buffer failed";
 
 	} /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
+	if ( H5C_jb__flush(struct_ptr) != SUCCEED ) {
 
-	    pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_flush failed";
+	    pass = FALSE;
+            failure_mssg = "H5C_jb_flush failed";
 
         } /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	fgets(verify, size+10, readback);
 		
 	if (HDstrcmp(verify, data) != 0) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journal entry not written correctly";
+	    pass = FALSE;
+	    failure_mssg = "Journal entry not written correctly";
 
 	} /* end if */
 
@@ -10857,8 +10857,8 @@ write_flush_verify(H5C2_jbrb_t * struct_ptr,
  *
  * Purpose:  	Helper function for check_buffer_writes test. Writes a 
  *              piece of data of specified size into the journal buffer
- *              multiple times, without calling H5C2_jb__flush in between
- *              writes. After all writes are completed, H5C2_jb__flush is 
+ *              multiple times, without calling H5C_jb__flush in between
+ *              writes. After all writes are completed, H5C_jb__flush is 
  *              called, and the data is read back from the journal file and
  *              verified for correctness.
  *
@@ -10869,7 +10869,7 @@ write_flush_verify(H5C2_jbrb_t * struct_ptr,
  * 
  **************************************************************************/
 static void 
-write_noflush_verify(H5C2_jbrb_t * struct_ptr, 
+write_noflush_verify(H5C_jbrb_t * struct_ptr, 
 		     int size, 
 		     char * data, 
 		     FILE * readback, 
@@ -10880,13 +10880,13 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
     for (i=0; i<repeats; i++) {
 
-        if ( pass2 ) {
+        if ( pass ) {
 	
-            if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, 
+            if ( H5C_jb__write_to_buffer(struct_ptr, (size_t)size, 
 				          data, 0, (uint64_t)0) != SUCCEED ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5C2_jb__write_to_buffer failed";
+                pass = FALSE;
+                failure_mssg = "H5C_jb__write_to_buffer failed";
 
             } /* end if */
 
@@ -10894,12 +10894,12 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
     } /* end for */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
+        if ( H5C_jb__flush(struct_ptr) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_flush failed";
 
 	} /* end if */	
 
@@ -10907,12 +10907,12 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
     for (i=0; i<repeats; i++) {
 
-        if ( pass2 ) {
+        if ( pass ) {
             fgets(verify, size+10, readback);
             if (HDstrcmp(verify, data) != 0) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Journal entry not written correctly";
+                pass = FALSE;
+                failure_mssg = "Journal entry not written correctly";
 
             } /* end if */
 
@@ -10943,7 +10943,7 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
  *
  * 		JRM -- 4/16/09
  *		Updated for the addition of new parameters to 
- *		H5C2_jb__init().
+ *		H5C_jb__init().
  * 
  **************************************************************************/
 static void 
@@ -10960,37 +10960,37 @@ check_message_format(void)
     int i;
     herr_t result;
     FILE * readback;
-    H5C2_jbrb_t jbrb_struct;
+    H5C_jbrb_t jbrb_struct;
     time_t current_date;
 
     TESTING("journal file message format");
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
              == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed";
 
         } /* end if */
 
     } /* end if */
 
     /* Give structure its magic number */
-    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+    jbrb_struct.magic = H5C__H5C_JBRB_T_MAGIC;
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */          123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -11003,8 +11003,8 @@ check_message_format(void)
 
         if ( result != 0) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 2";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 2";
 
        	} /* end if */
 
@@ -11012,17 +11012,17 @@ check_message_format(void)
 
     if ( show_progress ) /* 1 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -11030,20 +11030,20 @@ check_message_format(void)
 
     if ( show_progress ) /* 2 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)0, 
                                     /* data length  */  1, 
                                     /* data         */  (const uint8_t *)"A") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11051,20 +11051,20 @@ check_message_format(void)
 
     if ( show_progress ) /* 3 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)1, 
                                     /* data length  */  2, 
                                     /* data         */  (const uint8_t *)"AB") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11072,20 +11072,20 @@ check_message_format(void)
 
     if ( show_progress ) /* 4 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)3, 
                                     /* data length  */  4, 
                                     /* data         */  (const uint8_t *)"CDEF") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11093,16 +11093,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 5 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed";
             
         } /* end if */
 
@@ -11110,17 +11110,17 @@ check_message_format(void)
 
     if ( show_progress ) /* 6 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -11128,20 +11128,20 @@ check_message_format(void)
 
     if ( show_progress ) /* 7 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)2, 
                                     /* base address */  (haddr_t)285, 
                                     /* data length  */  11, 
                                     /* data         */  (const uint8_t *)"Test Data?!") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11149,16 +11149,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 8 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed";
             
         } /* end if */
 
@@ -11166,22 +11166,22 @@ check_message_format(void)
 
     if ( show_progress ) /* 9 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         current_date = time(NULL);
 
@@ -11192,8 +11192,8 @@ check_message_format(void)
 
         if ( (p = HDctime(&current_date)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "HDctime() failed";
+            pass = FALSE;
+            failure_mssg = "HDctime() failed";
 
         } else {
 
@@ -11225,9 +11225,9 @@ check_message_format(void)
 
     if ( show_progress ) /* 10 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Fill out verify array with expected messages */
         sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 1\n", time_buf);
@@ -11244,7 +11244,7 @@ check_message_format(void)
         readback = fopen(filename, "r");
         for (i = 0; i < 9; i++) {
 
-            if ( pass2) {
+            if ( pass) {
 
                 fgets(from_journal[i], 300, readback);
 
@@ -11258,8 +11258,8 @@ check_message_format(void)
                                   i, from_journal[i]);
                     }
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "journal file not written correctly 1";
+                    pass = FALSE;
+                    failure_mssg = "journal file not written correctly 1";
 
                 } /* end if */
 
@@ -11271,12 +11271,12 @@ check_message_format(void)
     }
 
     /* Truncate the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed";
+		pass = FALSE;
+		failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
@@ -11284,17 +11284,17 @@ check_message_format(void)
 
     if ( show_progress ) /* 11 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -11302,20 +11302,20 @@ check_message_format(void)
 
     if ( show_progress ) /* 12 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)3, 
                                     /* base address */  (haddr_t)28591, 
                                     /* data length  */  6, 
                                     /* data         */  (const uint8_t *)"#1nN`}") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11323,16 +11323,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 13 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed";
             
         } /* end if */
 
@@ -11340,16 +11340,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 14 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Add a comment */
-    if ( pass2 ) {
-        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__comment(/* H5C_jbrb_t     */  &jbrb_struct, 
                               /* comment message */  "This is a comment!") 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__comment failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__comment failed";
             
         } /* end if */
 
@@ -11357,16 +11357,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 14 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Add a comment */
-    if ( pass2 ) {
-        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__comment(/* H5C_jbrb_t     */  &jbrb_struct, 
                               /* comment message */  "This is another comment!") 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__comment failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__comment failed";
             
         } /* end if */
 
@@ -11374,22 +11374,22 @@ check_message_format(void)
 
     if ( show_progress ) /* 14 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         current_date = time(NULL);
 
@@ -11401,8 +11401,8 @@ check_message_format(void)
 
         if ( (p = HDctime(&current_date)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "HDctime() failed";
+            pass = FALSE;
+            failure_mssg = "HDctime() failed";
 
         } else {
 
@@ -11434,9 +11434,9 @@ check_message_format(void)
 
     if ( show_progress ) /* 15 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Fill out verify array with expected messages */
         sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 1\n", time_buf);
@@ -11450,7 +11450,7 @@ check_message_format(void)
         readback = fopen(filename, "r");
         for (i = 0; i < 6; i++) {
 
-            if ( pass2) {
+            if ( pass) {
 
                 fgets(from_journal[i], 300, readback);
 
@@ -11464,8 +11464,8 @@ check_message_format(void)
                                   i, from_journal[i]);
                     }
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "journal file not written correctly 2";
+                    pass = FALSE;
+                    failure_mssg = "journal file not written correctly 2";
 
                 } /* end if */
 
@@ -11477,24 +11477,24 @@ check_message_format(void)
     }
 
     /* Truncate the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed";
+		pass = FALSE;
+		failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* take down the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+	if (H5C_jb__takedown(&jbrb_struct) != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -11502,16 +11502,16 @@ check_message_format(void)
 
     if ( show_progress ) /* 16 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
 
     }
 
@@ -11551,37 +11551,37 @@ check_binary_message_format(void)
     int i;
     int fd;
     herr_t result;
-    H5C2_jbrb_t jbrb_struct;
+    H5C_jbrb_t jbrb_struct;
     time_t current_date;
 
     TESTING("binary journal file message format");
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
              == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed";
 
         } /* end if */
 
     } /* end if */
 
     /* Give structure its magic number */
-    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+    jbrb_struct.magic = H5C__H5C_JBRB_T_MAGIC;
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */          123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -11594,8 +11594,8 @@ check_binary_message_format(void)
 
         if ( result != 0) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 2";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 2";
 
        	} /* end if */
 
@@ -11603,17 +11603,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 1 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -11621,20 +11621,20 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 2 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)0, 
                                     /* data length  */  1, 
                                     /* data         */  (const uint8_t *)"A") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11642,17 +11642,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 3 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write an eoa message */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */  &jbrb_struct, 
+        if ( H5C_jb__eoa(/* H5C_jbrb_t */  &jbrb_struct, 
                           /* eoa         */  (haddr_t)0x01020304)
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__eoa failed(1)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__eoa failed(1)";
 
         } /* end if */
 
@@ -11660,20 +11660,20 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 4 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)1, 
                                     /* data length  */  2, 
                                     /* data         */  (const uint8_t *)"AB") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11681,20 +11681,20 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 5 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)3, 
                                     /* data length  */  4, 
                                     /* data         */  (const uint8_t *)"CDEF") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11702,16 +11702,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 6 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
  
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed (1)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed (1)";
             
         } /* end if */
 
@@ -11719,17 +11719,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 7 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write an eoa message */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */  &jbrb_struct, 
+        if ( H5C_jb__eoa(/* H5C_jbrb_t */  &jbrb_struct, 
                           /* eoa         */  (haddr_t)0x0102030405)
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__eoa failed(2)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__eoa failed(2)";
 
         } /* end if */
 
@@ -11737,17 +11737,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 8 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -11755,20 +11755,20 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 9 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)2, 
                                     /* base address */  (haddr_t)285, 
                                     /* data length  */  11, 
                                     /* data         */  (const uint8_t *)"Test Data?!") 
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -11776,16 +11776,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 10 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed (2)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed (2)";
             
         } /* end if */
 
@@ -11793,22 +11793,22 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 11 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         current_date = time(NULL);
 
@@ -11819,8 +11819,8 @@ check_binary_message_format(void)
 
         if ( (p = HDctime(&current_date)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "HDctime() failed";
+            pass = FALSE;
+            failure_mssg = "HDctime() failed";
 
         } else {
 
@@ -11852,9 +11852,9 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 12 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         char expected_header[256];
         int expected_header_len;
@@ -11972,12 +11972,12 @@ check_binary_message_format(void)
 
         if ( (fd = HDopen(filename, O_RDONLY, 0777)) == -1 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't open journal file for test (1).";
+            pass = FALSE;
+            failure_mssg = "Can't open journal file for test (1).";
  
         } 
         
-        if ( pass2 ) {
+        if ( pass ) {
 
             verify_journal_msg(
 		/* fd                   */ fd, 
@@ -12091,19 +12091,19 @@ check_binary_message_format(void)
 
             if ( HDclose(fd) != 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Unable to close journal file (1).";
+                pass = FALSE;
+                failure_mssg = "Unable to close journal file (1).";
             }
         }
     }
 
     /* Truncate the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed";
+		pass = FALSE;
+		failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
@@ -12111,17 +12111,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 13 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write an eoa message */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */ &jbrb_struct, 
+        if ( H5C_jb__eoa(/* H5C_jbrb_t */ &jbrb_struct, 
                           /* eoa         */ (haddr_t)0x010203040506)
              != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__eoa failed(3)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__eoa failed(3)";
 
         } /* end if */
 
@@ -12129,17 +12129,17 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 14 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Start a transaction */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                         /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
     
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
         } /* end if */
 
@@ -12147,20 +12147,20 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 15 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Write a journal entry */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+        if ( H5C_jb__journal_entry(/* H5C_jbrb_t  */  &jbrb_struct, 
                                  /* trans number */  (uint64_t)3, 
                                  /* base address */  (haddr_t)28591, 
                                  /* data length  */  6, 
                                  /* data         */  (const uint8_t *)"#1nN`}" )
              != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry failed";
 
         } /* end if */
 
@@ -12168,16 +12168,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 16 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* End transaction */
-    if ( pass2 ) {
-        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__end_transaction(/* H5C_jbrb_t  */  &jbrb_struct, 
                                       /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction failed (3)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction failed (3)";
             
         } /* end if */
 
@@ -12185,16 +12185,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 17 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Add a comment */
-    if ( pass2 ) {
-        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__comment(/* H5C_jbrb_t     */  &jbrb_struct, 
                               /* comment message */  "This is a comment!") 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__comment failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__comment failed";
             
         } /* end if */
 
@@ -12202,16 +12202,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 18 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Add a comment */
-    if ( pass2 ) {
-        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+    if ( pass ) {
+        if ( H5C_jb__comment(/* H5C_jbrb_t     */  &jbrb_struct, 
                               /* comment message */  "This is another comment!") 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__comment failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__comment failed";
             
         } /* end if */
 
@@ -12219,22 +12219,22 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 19 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         current_date = time(NULL);
 
@@ -12246,8 +12246,8 @@ check_binary_message_format(void)
 
         if ( (p = HDctime(&current_date)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "HDctime() failed";
+            pass = FALSE;
+            failure_mssg = "HDctime() failed";
 
         } else {
 
@@ -12279,9 +12279,9 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 20 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         char expected_header[256];
         int expected_header_len;
@@ -12332,12 +12332,12 @@ check_binary_message_format(void)
 
         if ( (fd = HDopen(filename, O_RDONLY, 0777)) == -1 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "Can't open journal file for test (2).";
+            pass = FALSE;
+            failure_mssg = "Can't open journal file for test (2).";
  
         } 
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             verify_journal_msg(
 		/* fd                   */ fd, 
@@ -12392,31 +12392,31 @@ check_binary_message_format(void)
 
             if ( HDclose(fd) != 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Unable to close journal file (1).";
+                pass = FALSE;
+                failure_mssg = "Unable to close journal file (1).";
             }
         }
     }
 
     /* Truncate the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+	if ( H5C_jb__trunc(&jbrb_struct) != SUCCEED ) {
 
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed";
+		pass = FALSE;
+		failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* take down the journal file */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+	if (H5C_jb__takedown(&jbrb_struct) != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -12424,16 +12424,16 @@ check_binary_message_format(void)
 
     if ( show_progress ) /* 20 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
+		  checkpoint++, (int)pass);
 
     /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
 
     }
 
@@ -12449,10 +12449,10 @@ check_binary_message_format(void)
  *		the next in the message in the indicated journal file.
  *
  *		Do nothing it the expected message matches the file
- *		contents.  If there is a mismatch, set pass2 to false
+ *		contents.  If there is a mismatch, set pass to false
  *		and set the failure message as specified.
  *
- *		Exit without any action if pass2 is false on entry.
+ *		Exit without any action if pass is false on entry.
  *
  * Return:      void
  *
@@ -12478,7 +12478,7 @@ verify_journal_msg(int fd,
     int i = 0;
     ssize_t ret_val;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( ( fd < 0 ) ||
              ( expected_msg == NULL ) ||
@@ -12488,12 +12488,12 @@ verify_journal_msg(int fd,
              ( eof_failure_msg == NULL ) ||
              ( ( last_msg) && ( not_last_msg_msg == NULL ) ) ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "verify_journal_msg(): Bad params on entry.";
+            pass = FALSE;
+            failure_mssg = "verify_journal_msg(): Bad params on entry.";
         }
     }
 
-    while ( ( pass2 ) && ( i < expected_msg_len ) ) 
+    while ( ( pass ) && ( i < expected_msg_len ) ) 
     {
         ret_val = read(fd, (void *)(&ch), (size_t)1);
 
@@ -12501,8 +12501,8 @@ verify_journal_msg(int fd,
 
             if ( ch != expected_msg[i] ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = mismatch_failure_msg;
+                pass = FALSE;
+	        failure_mssg = mismatch_failure_msg;
             }
 
         } else if ( ret_val == -1 ) {
@@ -12513,8 +12513,8 @@ verify_journal_msg(int fd,
                           fcn_name, errno, strerror(errno));
             }
 
-            pass2 = FALSE;
-            failure_mssg2 = mismatch_failure_msg;
+            pass = FALSE;
+            failure_mssg = mismatch_failure_msg;
 
         } else if ( ret_val == 0 ) {
 
@@ -12523,8 +12523,8 @@ verify_journal_msg(int fd,
                 HDfprintf(stdout, "%s: unexpected EOF.\n", fcn_name);
             }
 
-            pass2 = FALSE;
-            failure_mssg2 = eof_failure_msg;
+            pass = FALSE;
+            failure_mssg = eof_failure_msg;
 
         } else {
 
@@ -12534,8 +12534,8 @@ verify_journal_msg(int fd,
                           fcn_name, (int)ret_val);
             }
 
-            pass2 = FALSE;
-            failure_mssg2 = "read returned unexpected value.";
+            pass = FALSE;
+            failure_mssg = "read returned unexpected value.";
 
         }
 
@@ -12543,7 +12543,7 @@ verify_journal_msg(int fd,
             
     }
 
-    if ( ( pass2 ) && ( last_msg ) ) {
+    if ( ( pass ) && ( last_msg ) ) {
 
         ret_val = read(fd, (void *)(&ch), (size_t)1);
 
@@ -12554,8 +12554,8 @@ verify_journal_msg(int fd,
                 HDfprintf(stdout, "%s: msg not at eof as expected.\n", fcn_name);
             }
 
-            pass2 = FALSE;
-            failure_mssg2 = not_last_msg_msg;
+            pass = FALSE;
+            failure_mssg = not_last_msg_msg;
         }
     }
 
@@ -12567,7 +12567,7 @@ verify_journal_msg(int fd,
 /***************************************************************************
  * Function: 	check_legal_calls
  *
- * Purpose:  	Verify that all H5C2_jb functions prevent use when appropriate.
+ * Purpose:  	Verify that all H5C_jb functions prevent use when appropriate.
  *
  * Return:      void
  *
@@ -12576,7 +12576,7 @@ verify_journal_msg(int fd,
  *
  * Changes:	JRM -- 4/16/09
  *		Updated for the addition of new parameters to 
- *		H5C2_jb__init().
+ *		H5C_jb__init().
  * 
  **************************************************************************/
 
@@ -12586,25 +12586,25 @@ check_legal_calls(void)
     const char * fcn_name = "check_legal_calls(): ";
     char filename[512];
     herr_t result;
-    H5C2_jbrb_t jbrb_struct;
+    H5C_jbrb_t jbrb_struct;
     hbool_t show_progress = FALSE;
     int32_t checkpoint = 1;
 
     TESTING("journaling routine compatibility");
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* Give structure its magic number */
-    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+    jbrb_struct.magic = H5C__H5C_JBRB_T_MAGIC;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
              == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed";
 
         } /* end if */
 
@@ -12612,16 +12612,16 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 1 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
-    /* Initialize H5C2_jbrb_t structure. This call should SUCCEED. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. This call should SUCCEED. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -12634,8 +12634,8 @@ check_legal_calls(void)
 
         if ( result != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 3";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 3";
 
        	} /* end if */
 
@@ -12643,7 +12643,7 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 2 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 #if 0
     /* Start transaction 2. This should FAIL because transaction 1 has
        not occurred yet. Ensure that it fails, and flag an error if it 
@@ -12652,14 +12652,14 @@ check_legal_calls(void)
      * increasing -- thus this is not an error any more.
      *                                                    -- JRM
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__start_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                         /* Transaction # */  (uint64_t)2)
            == SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction should have failed";
 
 	} /* end if */
 
@@ -12667,19 +12667,19 @@ check_legal_calls(void)
 #endif
     if ( show_progress ) /* 3 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* End transaction 1. This should FAIL because transaction 1 has
        not started yet. Ensure that it fails, and flag an error if it 
        does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__end_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                       /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
         
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__end_transaction should have failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__end_transaction should have failed";
  
 	} /* end if */
 
@@ -12687,22 +12687,22 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 4 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to write a journal entry before transaction has started..
        This should FAIL because transaction 1 has not started yet. Ensure 
        that it fails, and flag an error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
            == SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__journal_entry should have failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__journal_entry should have failed";
 
 	} /* end if */
 
@@ -12710,17 +12710,17 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 5 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Start transaction 1. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__start_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                         /* Transaction # */  (uint64_t)1)
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__start_transaction failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__start_transaction failed";
 
 	} /* end if */
 
@@ -12728,19 +12728,19 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 6 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to start transaction 1 again. This should FAIL because 
        transaction 1 is already open. Ensure that it fails, and flag an
        error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__start_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                         /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__start_transaction should have failed";
 
 	} /* end if */
 
@@ -12748,18 +12748,18 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 7 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to end transaction 1. This should FAIL because no 
        journal entry has been written under this transaction. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__end_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                       /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__end_transaction should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__end_transaction should have failed";
 
 	} /* end if */
 
@@ -12767,22 +12767,22 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 8 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to write a journal entry into the wrong transaction number.
        This should FAIL because specified transaction number isn't in 
        progress. Ensure that it fails, and flag an error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
            == SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__journal_entry should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__journal_entry should have failed";
 
 	} /* end if */
 
@@ -12790,20 +12790,20 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 9 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write a journal entry during transaction 1. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 1.")
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__journal_entry failed";
 
 	} /* end if */
 
@@ -12811,18 +12811,18 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 10 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to flush buffers. This should FAIL because a transaction
        is still in progress. Ensure that it fails, and flag an error
        if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
              == SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__flush should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__flush should have failed";
 
 	} /* end if */
 
@@ -12830,17 +12830,17 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 11 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* End transaction 1. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__end_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                       /* Transaction # */  (uint64_t)1)
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__end_transaction failed";
 
 	} /* end if */
 
@@ -12848,19 +12848,19 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 12 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to start transaction 1 again. This should FAIL because
        transaction 1 has already occurred. Ensure that it fails, and flag
        an error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__start_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                         /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__start_transaction should have failed";
 
 	} /* end if */
 
@@ -12868,17 +12868,17 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 13 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Start transaction 2. This should SUCCEED.*/
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__start_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                         /* Transaction # */  (uint64_t)2)
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__start_transaction failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__start_transaction failed";
 
 	} /* end if */
 
@@ -12886,20 +12886,20 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 14 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write a journal entry during transaction 2. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)7465, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 2!")
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__journal_entry failed";
 
 	} /* end if */
 
@@ -12907,20 +12907,20 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 15 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write a journal entry during transaction 2. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  60, 
                                     /* Body          */  (const uint8_t *)"... And here's your second transaction during transaction 2.")
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__journal_entry failed";
  
 	} /* end if */
 
@@ -12928,17 +12928,17 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 16 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* End transaction 2. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+	if ( H5C_jb__end_transaction(/* H5C_jbrb_t   */  &jbrb_struct, 
                                       /* Transaction # */  (uint64_t)2)
            != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__end_transaction failed";
   
 	} /* end if */
 
@@ -12946,18 +12946,18 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 17 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to truncate the journal file. This should FAIL because the
        journal buffers have not been flushed yet. Ensure that it fails, and
        flag and error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            == SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc should have failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc should have failed";
 
 	} /* end if */
 
@@ -12965,18 +12965,18 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 18 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to take down the ring buffer. This should FAIL because the 
        journal buffers have not been flushed yet. Ensure that it fails, and
        flag and error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            == SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown should have failed";
 
 	} /* end if */
 
@@ -12984,16 +12984,16 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 19 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
@@ -13001,18 +13001,18 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 20 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Attempt to take down the ring buffer. This should FAIL because the 
        journal file has not been truncated. Ensure that it fails, and
        flag and error if it does not. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            == SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown should have failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown should have failed";
 
 	} /* end if */
 
@@ -13020,16 +13020,16 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 21 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Truncate the journal file. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
@@ -13037,16 +13037,16 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 22 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Take down the journal file. This should SUCCEED. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
  
 	} /* end if */
 
@@ -13054,16 +13054,16 @@ check_legal_calls(void)
 
     if ( show_progress ) /* 23 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
 
     }
 
@@ -13086,7 +13086,7 @@ check_legal_calls(void)
  *
  * Changes:	JRM -- 4/16/09
  *		Updated for the addition of new parameters to 
- *		H5C2_jb__init().
+ *		H5C_jb__init().
  * 
  **************************************************************************/
 static void 
@@ -13096,7 +13096,7 @@ check_transaction_tracking(hbool_t use_aio)
     char filename[512];
     int i;
     herr_t result;
-    H5C2_jbrb_t jbrb_struct;
+    H5C_jbrb_t jbrb_struct;
     hbool_t show_progress = FALSE;
     int32_t checkpoint = 1;
     int expected_tval[12];
@@ -13110,16 +13110,16 @@ check_transaction_tracking(hbool_t use_aio)
         TESTING("sio journal file transaction tracking");
     }
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
              == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed";
 
         } /* end if */
 
@@ -13127,10 +13127,10 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 1 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Give structure its magic number */
-    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+    jbrb_struct.magic = H5C__H5C_JBRB_T_MAGIC;
 
     /* ===================================================
      * First ring buffer configuration.
@@ -13143,14 +13143,14 @@ check_transaction_tracking(hbool_t use_aio)
      *       of the ring buffer.
      * =================================================== */
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -13163,41 +13163,41 @@ check_transaction_tracking(hbool_t use_aio)
 
         if ( result != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 4";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 4";
 
        	} /* end if */
 
     } /* end if */
 
 
-    /* H5C2_jb__init() no longer generates the header message -- instead
+    /* H5C_jb__init() no longer generates the header message -- instead
      * it is generated by the first real journal entry.  This causes 
      * problems in this test, so generate the header message manually
      * and then flush it.
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__write_header_entry failed";
         }
     }
 
 
     if ( show_progress ) /* 2 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
@@ -13205,7 +13205,7 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 3 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write journal entries and verify that the transactions that get to
        disk are accurately reported after each write. The following test the
@@ -13230,7 +13230,7 @@ check_transaction_tracking(hbool_t use_aio)
        the expected_tval array */
     for (i = 1; i < 11; i++) {
 
-        write_verify_trans_num(/* H5C2_jbrb_t   */ &jbrb_struct, 
+        write_verify_trans_num(/* H5C_jbrb_t   */ &jbrb_struct, 
                        /* transaction num */ (uint64_t)i, 
                        /* min expected trans */ (uint64_t)expected_tval[i - 1],
                        /* expected trans */ (uint64_t)expected_tval[i]);
@@ -13239,42 +13239,42 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 4 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Truncate the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Take down the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -13282,7 +13282,7 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 5 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* ===================================================
      * Second ring buffer configuration
@@ -13293,14 +13293,14 @@ check_transaction_tracking(hbool_t use_aio)
      *       boundaries.
      * =================================================== */
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -13313,31 +13313,31 @@ check_transaction_tracking(hbool_t use_aio)
 
         if ( result != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 5";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 5";
 
        	} /* end if */
 
     } /* end if */
 
     /* generate the header message manually */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__write_header_entry failed";
         }
     }
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
@@ -13345,7 +13345,7 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 6 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write journal entries and verify that the transactions that get to
        disk are accurately reported after each write. The following tests the
@@ -13353,7 +13353,7 @@ check_transaction_tracking(hbool_t use_aio)
        ring buffer. */
     for (i=1; i<20; i++) {
 
-        write_verify_trans_num(/* H5C2_ujbrb_t */&jbrb_struct, 
+        write_verify_trans_num(/* H5C_ujbrb_t */&jbrb_struct, 
                            /* transaction num */(uint64_t)i, 
                            /* min expected trans on disk */ (uint64_t)(i - 1),
                            /* expected trans on disk */ (uint64_t)i);
@@ -13362,42 +13362,42 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 7 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Truncate the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Take down the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -13416,14 +13416,14 @@ check_transaction_tracking(hbool_t use_aio)
      *       transaction messages.
      * =================================================== */
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -13436,36 +13436,36 @@ check_transaction_tracking(hbool_t use_aio)
 
         if ( result != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 6";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 6";
 
        	} /* end if */
 
     } /* end if */
 
     /* generate the header message manually */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__write_header_entry failed";
         }
     }
 
 
     if ( show_progress ) /* 8 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
@@ -13473,7 +13473,7 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 9 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write journal entries and verify that the transactions that get to
        disk are accurately reported after each write. The following tests the
@@ -13492,7 +13492,7 @@ check_transaction_tracking(hbool_t use_aio)
 		           (uint64_t)3, 
                            (uint64_t)1,
 			   (uint64_t)3); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    H5C_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
     write_verify_trans_num(&jbrb_struct, 
 		           (uint64_t)4, 
                            (uint64_t)3,
@@ -13505,7 +13505,7 @@ check_transaction_tracking(hbool_t use_aio)
 		           (uint64_t)6, 
                            (uint64_t)5,
 			   (uint64_t)5); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    H5C_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
     write_verify_trans_num(&jbrb_struct, 
 		           (uint64_t)7, 
                            (uint64_t)5,
@@ -13518,7 +13518,7 @@ check_transaction_tracking(hbool_t use_aio)
 		           (uint64_t)9, 
                            (uint64_t)7,
 			   (uint64_t)8); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    H5C_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
     write_verify_trans_num(&jbrb_struct, 
 		           (uint64_t)10, 
                            (uint64_t)8,
@@ -13534,42 +13534,42 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 10 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Truncate the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Take down the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -13587,14 +13587,14 @@ check_transaction_tracking(hbool_t use_aio)
      *       transaction message.
      * =================================================== */
 
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
+    /* Initialize H5C_jbrb_t structure. */
+    if ( pass ) {
 
         /* Note that the sizeof_addr & sizeof_size parameters are 
          * ignored when human_readable is TRUE.
          */
 
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+       	result = H5C_jb__init(/* H5C_jbrb_t */            &jbrb_struct, 
 			       /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
@@ -13607,32 +13607,32 @@ check_transaction_tracking(hbool_t use_aio)
 
         if ( result != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed, check 7";
+            pass = FALSE;
+            failure_mssg = "H5C_jb_init failed, check 7";
 
        	} /* end if */
 
     } /* end if */
 
     /* generate the header message manually */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+        if ( H5C_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__write_header_entry failed";
         }
     }
 
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
@@ -13640,7 +13640,7 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 11 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Write journal entries and verify that the transactions that get to
        disk are accurately reported after each write. The following tests the
@@ -13648,7 +13648,7 @@ check_transaction_tracking(hbool_t use_aio)
        ensures that the trans_tracking array is properly propogated */
     for (i=1; i<5; i++) {
 
-        write_verify_trans_num(/* H5C2_jbrb_t */  &jbrb_struct, 
+        write_verify_trans_num(/* H5C_jbrb_t */  &jbrb_struct, 
                            /* transaction num */  (uint64_t)i, 
                            /* min expected returned trans */  (uint64_t)(i - 1),
                            /* expected returned trans */  (uint64_t)i);
@@ -13657,42 +13657,42 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 12 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* Flush the journal buffers. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__flush(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__flush failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__flush failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Truncate the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if ( H5C_jb__trunc(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__trunc failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__trunc failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Take down the journal file. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+	if (H5C_jb__takedown(/* H5C_jbrb_t */  &jbrb_struct) 
            != SUCCEED) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__takedown failed";
 
 	} /* end if */
 
@@ -13700,16 +13700,16 @@ check_transaction_tracking(hbool_t use_aio)
 
     if ( show_progress ) /* 13 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-                  checkpoint++, (int)pass2);
+                  checkpoint++, (int)pass);
 
     /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
+	failures++;
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
 
     }
 
@@ -13755,7 +13755,7 @@ check_transaction_tracking(hbool_t use_aio)
  * 
  **************************************************************************/
 static void
-write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
+write_verify_trans_num(H5C_jbrb_t * struct_ptr, 
                        uint64_t trans_num, 
                        uint64_t min_verify_val,
                        uint64_t verify_val)
@@ -13772,29 +13772,29 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
      * into hex, so reducing input by one character reduces journal entry 
      * by three (two hex characters and a space).
      */  
-    if ( pass2 ) {
+    if ( pass ) {
         
-       	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  struct_ptr, 
+       	if ( H5C_jb__start_transaction(/* H5C_jbrb_t  */  struct_ptr, 
                                         /* trans number */  trans_num)
            != SUCCEED) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__start_transaction failed";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__start_transaction failed";
 
        	} /* end if */
 
 
         if (trans_num < 10) {
 
-	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+	        if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  9, 
                                             /* Body          */  (const uint8_t *)"XXXXXXXXX")
                    != SUCCEED ) {
 
-	            pass2 = FALSE;
-	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+	            pass = FALSE;
+	            failure_mssg = "H5C_jb__journal_entry failed";
 
 	        } /* end if */
 
@@ -13802,15 +13802,15 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 
         else if (trans_num < 100) {
 
-	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+	        if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  8, 
                                             /* Body          */  (const uint8_t *)"XXXXXXXX")
                    != SUCCEED ) {
 
-	            pass2 = FALSE;
-	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+	            pass = FALSE;
+	            failure_mssg = "H5C_jb__journal_entry failed";
 
 	        } /* end if */
 
@@ -13818,41 +13818,41 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 
         else {
 
-	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+	        if ( H5C_jb__journal_entry(/* H5C_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  7, 
                                             /* Body          */  (const uint8_t *)"XXXXXXX")
                    != SUCCEED ) {
 
-	            pass2 = FALSE;
-	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+	            pass = FALSE;
+	            failure_mssg = "H5C_jb__journal_entry failed";
 
 	        } /* end if */
 
         } /* end else */
 
-	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  struct_ptr, 
+	if ( H5C_jb__end_transaction(/* H5C_jbrb_t   */  struct_ptr, 
                                       /* Transaction # */  trans_num)
              != SUCCEED ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+	    pass = FALSE;
+	    failure_mssg = "H5C_jb__end_transaction failed";
 
 	} /* end if */
 
     } /* end if */
 
     /* Make sure the last transaction that's on disk is as expected. */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( H5C2_jb__get_last_transaction_on_disk(
-                                              /* H5C2_jbrb_t  */  struct_ptr,
+        if ( H5C_jb__get_last_transaction_on_disk(
+                                              /* H5C_jbrb_t  */  struct_ptr,
                                               /* trans number */  &trans_verify)
            != SUCCEED ) {
             
-            pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk failed(1)";
+            pass = FALSE;
+            failure_mssg = "H5C_jb__get_last_transaction_on_disk failed(1)";
 
         } /* end if */
 
@@ -13861,51 +13861,51 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
             if ( ( trans_verify < min_verify_val ) ||
                  ( verify_val < trans_verify ) ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk returned initial value that is out of range.";
+                pass = FALSE;
+                failure_mssg = "H5C_jb__get_last_transaction_on_disk returned initial value that is out of range.";
             }
 
             /* we must wait until the async writes and syncs complete
              * before the expected value will be returned by 
-             * H5C2_jb__get_last_transaction_on_disk().
+             * H5C_jb__get_last_transaction_on_disk().
              */
 
-            if ( ( pass2 ) && ( verify_val != trans_verify ) ) {
+            if ( ( pass ) && ( verify_val != trans_verify ) ) {
 
-                if ( H5C2_jb_aio__await_completion_of_all_pending_writes(
+                if ( H5C_jb_aio__await_completion_of_all_pending_writes(
 						  struct_ptr) != SUCCEED ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5C2_jb_aio__await_completion_of_all_pending_writes() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5C_jb_aio__await_completion_of_all_pending_writes() failed.";
                 }
             }
 
-            if ( ( pass2 ) && ( verify_val != trans_verify ) ) {
+            if ( ( pass ) && ( verify_val != trans_verify ) ) {
 
-                if ( H5C2_jb_aio__await_completion_of_all_async_fsyncs(
+                if ( H5C_jb_aio__await_completion_of_all_async_fsyncs(
 						  struct_ptr) != SUCCEED ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5C2_jb_aio__await_completion_of_all_async_fsyncs() failed.";
+                    pass = FALSE;
+                    failure_mssg = "H5C_jb_aio__await_completion_of_all_async_fsyncs() failed.";
                 }
             }
                 
-            if ( ( pass2 ) && ( verify_val != trans_verify ) ) {
+            if ( ( pass ) && ( verify_val != trans_verify ) ) {
 
-                if ( H5C2_jb__get_last_transaction_on_disk(
-                                              /* H5C2_jbrb_t  */  struct_ptr,
+                if ( H5C_jb__get_last_transaction_on_disk(
+                                              /* H5C_jbrb_t  */  struct_ptr,
                                               /* trans number */  &trans_verify)
                      != SUCCEED ) {
             
-                    pass2 = FALSE;
-                    failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk failed(2)";
+                    pass = FALSE;
+                    failure_mssg = "H5C_jb__get_last_transaction_on_disk failed(2)";
 
                 } /* end if */
             } /* end if
 
-            if ( ( pass2 ) && ( trans_verify != verify_val ) ) {
+            if ( ( pass ) && ( trans_verify != verify_val ) ) {
 
-                pass2 = FALSE;
+                pass = FALSE;
 
                 if ( verbose ) {
 
@@ -13915,14 +13915,14 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
                               (long long)verify_val);
                 }
 
-                failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk returned the wrong transaction number!(1)";
+                failure_mssg = "H5C_jb__get_last_transaction_on_disk returned the wrong transaction number!(1)";
 
             }
         } else {
             if ( trans_verify != verify_val) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk returned the wrong transaction number!(2)";
+                pass = FALSE;
+                failure_mssg = "H5C_jb__get_last_transaction_on_disk returned the wrong transaction number!(2)";
 
             } /* end if */
         } /* end if */
@@ -13936,7 +13936,7 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	Run tests on the cache code contained in H5C2.c
+ * Purpose:	Run tests on the cache code contained in H5C.c
  *
  * Return:	Success:
  *
@@ -13955,19 +13955,19 @@ main(void)
 {
     int express_test;
 
-    failures2 = 0;
+    failures = 0;
 
     H5open();
 
     express_test = GetTestExpress();
 
-    if ( express_test2 >= 3 ) {
+    if ( express_test >= 3 ) {
 
-        skip_long_tests2 = TRUE;
+        skip_long_tests = TRUE;
 
     } else {
 
-        skip_long_tests2 = FALSE;
+        skip_long_tests = FALSE;
 
     }
     
@@ -14060,7 +14060,7 @@ main(void)
     check_mdjsc_callbacks();
 #endif
 
-    return(failures2);
+    return(failures);
 
 } /* main() */
 

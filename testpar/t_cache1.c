@@ -3272,7 +3272,7 @@ setup_cache_for_test(hid_t * fid_ptr,
                       world_mpi_rank, fcn_name);
         }
     } else {
-        cache_ptr = file_ptr->shared->cache;
+        cache_ptr = file_ptr->shared->cache1;
     }
 
     if ( cache_ptr == NULL ) {
@@ -5283,7 +5283,7 @@ trace_file_check(void)
     const char * expected_output[] =
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
-      "H5AC1_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
+      "H5AC1_set_cache_auto_resize_config 1 0 1 0 \"t_cache1_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
       "H5AC1_set 0x0 15 0x0 2 0\n",
       "H5AC1_set 0x2 15 0x0 2 0\n",
       "H5AC1_set 0x4 15 0x0 4 0\n",
@@ -5376,7 +5376,7 @@ trace_file_check(void)
             } else {
 
                 config.open_trace_file = TRUE;
-		strcpy(config.trace_file_name, "t_cache_trace.txt");
+		strcpy(config.trace_file_name, "t_cache1_trace.txt");
 
                 if ( H5AC1_set_cache_auto_resize_config(cache_ptr, &config)
                      != SUCCEED ) {
@@ -5501,7 +5501,7 @@ trace_file_check(void)
 
         if ( nerrors == 0 ) {
 
-	    sprintf(trace_file_name, "t_cache_trace.txt.%d",
+	    sprintf(trace_file_name, "t_cache1_trace.txt.%d",
 		    (int)file_mpi_rank);
 
 	    if ( (trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL ) {

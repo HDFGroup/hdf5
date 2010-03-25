@@ -83,7 +83,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
@@ -177,7 +177,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Gcreate2, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate2, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -208,7 +208,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Create the new group & get its ID */
-    if(NULL == (grp = H5G_create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC2_dxpl_id)))
+    if(NULL == (grp = H5G_create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
@@ -317,7 +317,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_t	   *grp = NULL;
     hid_t	    ret_value;
 
-    FUNC_ENTER_API_META(H5Gcreate_anon, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate_anon, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -339,7 +339,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Create the new group & get its ID */
-    if(NULL == (grp = H5G_create(loc.oloc->file, gcpl_id, H5AC2_dxpl_id)))
+    if(NULL == (grp = H5G_create(loc.oloc->file, gcpl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
@@ -394,7 +394,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Open the group */
-    if((grp = H5G_open_name(&loc, name, gapl_id, H5AC2_dxpl_id)) == NULL)
+    if((grp = H5G_open_name(&loc, name, gapl_id, H5AC_dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the group */
@@ -454,17 +454,17 @@ H5Gget_create_plist(hid_t group_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
-    if(H5O_get_create_plist(&grp->oloc, H5AC2_ind_dxpl_id, new_plist) < 0)
+    if(H5O_get_create_plist(&grp->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Check for the group having a group info message */
-    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, H5AC2_ind_dxpl_id)) < 0)
+    if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(ginfo_exists) {
         H5O_ginfo_t ginfo;		/* Group info message            */
 
         /* Read the group info */
-        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, &ginfo, H5AC2_ind_dxpl_id))
+        if(NULL == H5O_msg_read(&(grp->oloc), H5O_GINFO_ID, &ginfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get group info")
 
         /* Set the group info for the property list */
@@ -473,13 +473,13 @@ H5Gget_create_plist(hid_t group_id)
     } /* end if */
 
     /* Check for the group having a link info message */
-    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, H5AC2_ind_dxpl_id)) < 0)
+    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists) {
         H5O_linfo_t linfo;		/* Link info message            */
 
         /* Read the link info */
-        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC2_ind_dxpl_id))
+        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Set the link info for the property list */
@@ -535,7 +535,7 @@ H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Retrieve the group's information */
-    if(H5G_obj_info(loc.oloc, grp_info/*out*/, H5AC2_ind_dxpl_id) < 0)
+    if(H5G_obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -589,12 +589,12 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
     H5G_loc_reset(&grp_loc);
 
     /* Find the group object */
-    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, lapl_id, H5AC2_ind_dxpl_id) < 0)
+    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Retrieve the group's information */
-    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC2_ind_dxpl_id) < 0)
+    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -657,12 +657,12 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_reset(&grp_loc);
 
     /* Find the object's location, according to the order in the index */
-    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &grp_loc/*out*/, lapl_id, H5AC2_ind_dxpl_id) < 0)
+    if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &grp_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Retrieve the group's information */
-    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC2_ind_dxpl_id) < 0)
+    if(H5G_obj_info(grp_loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -693,7 +693,7 @@ H5Gclose(hid_t group_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     /* Can this change metadata?  If not, no need for a transaction. */
-    FUNC_ENTER_API_META(H5Gclose, group_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Gclose, group_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */
@@ -1270,7 +1270,7 @@ H5G_close(H5G_t *grp)
         /* Remove the group from the list of opened objects in the file */
         if(H5FO_top_decr(grp->oloc.file, grp->oloc.addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(grp->oloc.file, H5AC2_dxpl_id, grp->oloc.addr) < 0)
+        if(H5FO_delete(grp->oloc.file, H5AC_dxpl_id, grp->oloc.addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
         if(H5O_close(&(grp->oloc)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")

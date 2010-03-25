@@ -17,7 +17,7 @@
  *              3/08
  *
  *		This file contains tests for the metadata journaling
- *		features implemented in H5C2.c and friends.
+ *		features implemented in H5C.c and friends.
  */
 
 #include <aio.h>
@@ -29,8 +29,8 @@
 #include "H5Iprivate.h"
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5MFprivate.h"
-#include "H5AC2private.h"
-#include "cache2_common.h"
+#include "H5ACprivate.h"
+#include "cache_common.h"
 #include "H5Fpkg.h"
 
 #define HDF5_FILE_NAME "HDF5.file"
@@ -61,7 +61,7 @@ static void setup_cache_for_journaling(const char * hdf_file_name,
                                        const char * journal_file_name,
                                        hid_t * file_id_ptr,
                                        H5F_t ** file_ptr_ptr,
-                                       H5C2_t ** cache_ptr_ptr,
+                                       H5C_t ** cache_ptr_ptr,
 				       hbool_t use_core_driver_if_avail);
 
 static void usage(void);
@@ -98,15 +98,15 @@ static void check_mdj_file_unmarking_on_recovery_test(hbool_t verbose);
 /*-------------------------------------------------------------------------
  * Function:    check_test_in_progress()
  *
- * Purpose:     If pass2 is true on entry, test to see if the test in
- *		progress file exists.  If it does not, set pass2 to FALSE
+ * Purpose:     If pass is true on entry, test to see if the test in
+ *		progress file exists.  If it does not, set pass to FALSE
  *		and set a failure message.
  *
  *		If the test in progress file does exist, check to see if
  *		its contents matches the supplied string.  It it does not,
- *		set pass2 to FALSE and set the appropriate failure message.
+ *		set pass to FALSE and set the appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -135,46 +135,46 @@ check_test_in_progress(const char * str)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( ( str == NULL ) ||
              ( strlen(str) <= 0 ) ||
              ( strlen(str) >= 512 ) ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "bad str on entry to check_test_in_progress().";
+            pass = FALSE;
+            failure_mssg = "bad str on entry to check_test_in_progress().";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
         }
         else if ( strlen(filename) >= 512 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "test in progress file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "test in progress file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -183,15 +183,15 @@ check_test_in_progress(const char * str)
 	HDfflush(stdout);
     }
 
-    if ( ( pass2 ) && ( ! file_exists(filename) ) ) {
+    if ( ( pass ) && ( ! file_exists(filename) ) ) {
 
-        pass2 = FALSE;
-        failure_mssg2 = "test not in progress?!?";
+        pass = FALSE;
+        failure_mssg = "test not in progress?!?";
     }
 
 
     /* get the length of the test in progress file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(filename, &buf) != 0 ) {
 
@@ -200,20 +200,20 @@ check_test_in_progress(const char * str)
 	        HDfprintf(stdout, "%s: HDstat() failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-	    failure_mssg2 = "stat() failed on test in progress file.";
-	    pass2 = FALSE;
+	    failure_mssg = "stat() failed on test in progress file.";
+	    pass = FALSE;
 
 	} else {
 
 	    if ( (buf.st_size) == 0 ) {
 
-                failure_mssg2 = "test in progress file empty?!?";
-	        pass2 = FALSE;
+                failure_mssg = "test in progress file empty?!?";
+	        pass = FALSE;
 
             } else if ( (buf.st_size) >= 512 ) {
 
-                failure_mssg2 = "test in progress file too big?!?";
-	        pass2 = FALSE;
+                failure_mssg = "test in progress file too big?!?";
+	        pass = FALSE;
 
 	    } else {
 
@@ -229,7 +229,7 @@ check_test_in_progress(const char * str)
     }
 
     /* open the test in progress file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (fd = HDopen(filename, O_RDONLY, 0777)) == -1 ) {
 
@@ -238,13 +238,13 @@ check_test_in_progress(const char * str)
 	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open test in progress file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open test in progress file.";
+	    pass = FALSE;
         }
     }
 
     /* read the contents of the test in progress file */
-    if ( pass2 )
+    if ( pass )
     {
         result = HDread(fd, buffer, input_len);
 
@@ -256,8 +256,8 @@ check_test_in_progress(const char * str)
                           "%s: HDread() failed. result = %d, errno = %d.\n",
                           fcn_name, (int)result, errno);
             }
-            failure_mssg2 = "error reading test in progress file.";
-            pass2 = FALSE;
+            failure_mssg = "error reading test in progress file.";
+            pass = FALSE;
         }
 
         buffer[input_len] = '\0';
@@ -273,17 +273,17 @@ check_test_in_progress(const char * str)
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close test in progress file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close test in progress file.";
+	        pass = FALSE;
 	    }
 	}
     }
 
     HDremove(filename);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( strcmp(str, buffer) != 0 ) {
 
@@ -294,8 +294,8 @@ check_test_in_progress(const char * str)
                           fcn_name, str, buffer);
 	    }
 
-            pass2 = FALSE;
-            failure_mssg2 = "Unexpected test in progress?!?";
+            pass = FALSE;
+            failure_mssg = "Unexpected test in progress?!?";
         }
     }
 
@@ -307,14 +307,14 @@ check_test_in_progress(const char * str)
 /*-------------------------------------------------------------------------
  * Function:    file_exists()
  *
- * Purpose:     If pass2 is true on entry, stat the target file, and
+ * Purpose:     If pass is true on entry, stat the target file, and
  * 		return TRUE if it exists, and FALSE if it does not.
  *
- * 		If any errors are detected in this process, set pass2
- * 		to FALSE and set failure_mssg2 to point to an appropriate
+ * 		If any errors are detected in this process, set pass
+ * 		to FALSE and set failure_mssg to point to an appropriate
  * 		error message.
  *
- *              Do nothing and return FALSE if pass2 is FALSE on entry.
+ *              Do nothing and return FALSE if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -334,16 +334,16 @@ file_exists(const char * file_path_ptr)
     hbool_t verbose = FALSE;
     h5_stat_t buf;
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( file_path_ptr == NULL ) {
 
-            failure_mssg2 = "file_path_ptr NULL on entry?!?",
-            pass2 = FALSE;
+            failure_mssg = "file_path_ptr NULL on entry?!?",
+            pass = FALSE;
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( HDstat(file_path_ptr, &buf) == 0 ) {
 
@@ -372,8 +372,8 @@ file_exists(const char * file_path_ptr)
                           fcn_name, errno);
 	    }
 
-	    failure_mssg2 = "HDstat() returned unexpected value.";
-	    pass2 = FALSE;
+	    failure_mssg = "HDstat() returned unexpected value.";
+	    pass = FALSE;
 
 	}
     }
@@ -386,16 +386,16 @@ file_exists(const char * file_path_ptr)
 /*-------------------------------------------------------------------------
  * Function:    mark_test_in_progress()
  *
- * Purpose:     If pass2 is true on entry, test to see if the test in
- *		progress file exists.  If it does, set pass2 to FALSE
+ * Purpose:     If pass is true on entry, test to see if the test in
+ *		progress file exists.  If it does, set pass to FALSE
  *		and set a failure message.
  *
  *		If the test in progress file doesn't exist, create it,
  *		open it, write the supplied string to it, and then close
- *		it.  If any errors are detected, set pass2 to FALSE, and
+ *		it.  If any errors are detected, set pass to FALSE, and
  *		set the appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -421,45 +421,45 @@ mark_test_in_progress(const char * str)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( ( str == NULL ) ||
              ( strlen(str) >= 512 ) ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "bad str on entry to mark_test_in_progress().";
+            pass = FALSE;
+            failure_mssg = "bad str on entry to mark_test_in_progress().";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[4], H5P_DEFAULT, filename,
                         sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed.\n";
         }
         else if ( strlen(filename) >= 512 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "test in progress file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "test in progress file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -468,14 +468,14 @@ mark_test_in_progress(const char * str)
 	HDfflush(stdout);
     }
 
-    if ( ( pass2 ) && ( file_exists(filename) ) ) {
+    if ( ( pass ) && ( file_exists(filename) ) ) {
 
-        pass2 = FALSE;
-        failure_mssg2 = "test already in progress?!?";
+        pass = FALSE;
+        failure_mssg = "test already in progress?!?";
     }
 
     /* open the test in progress file */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( (fd = HDopen(filename, O_WRONLY|O_CREAT|O_TRUNC, 0777))
              == -1 ) {
@@ -485,12 +485,12 @@ mark_test_in_progress(const char * str)
 	        HDfprintf(stdout, "%s: HDopen(i) failed with errno = %d.\n",
                           fcn_name, errno);
 	    }
-            failure_mssg2 = "Can't open test in progress file.";
-	    pass2 = FALSE;
+            failure_mssg = "Can't open test in progress file.";
+	    pass = FALSE;
         }
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = HDwrite(fd, str, strlen(str));
 
@@ -502,8 +502,8 @@ mark_test_in_progress(const char * str)
                           "%s: HDwrite() failed. result = %d, errno = %d.\n",
                           fcn_name, (int)result, errno);
             }
-            failure_mssg2 = "error writing test in progress file.";
-            pass2 = FALSE;
+            failure_mssg = "error writing test in progress file.";
+            pass = FALSE;
         }
     }
 
@@ -517,10 +517,10 @@ mark_test_in_progress(const char * str)
                           fcn_name, errno);
 	    }
 
-	    if ( pass2 ) {
+	    if ( pass ) {
 
-                failure_mssg2 = "Can't close test in progress file.";
-	        pass2 = FALSE;
+                failure_mssg = "Can't close test in progress file.";
+	        pass = FALSE;
 	    }
 	}
     }
@@ -533,15 +533,15 @@ mark_test_in_progress(const char * str)
 /*-------------------------------------------------------------------------
  * Function:    setup_cache_for_journaling()
  *
- * Purpose:     If pass2 is true on entry, create a HDF5 file with
+ * Purpose:     If pass is true on entry, create a HDF5 file with
  * 		journaling enabled and journal file with the specified name.
  * 		Return pointers to the cache data structure and file data
  * 		structures.  and verify that it contains the expected data.
  *
- *              On failure, set pass2 to FALSE, and set failure_mssg2
+ *              On failure, set pass to FALSE, and set failure_mssg
  *              to point to an appropriate failure message.
  *
- *              Do nothing if pass2 is FALSE on entry.
+ *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
  *
@@ -558,7 +558,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
                            const char * journal_file_name,
                            hid_t * file_id_ptr,
                            H5F_t ** file_ptr_ptr,
-                           H5C2_t ** cache_ptr_ptr,
+                           H5C_t ** cache_ptr_ptr,
 #if USE_CORE_DRIVER
 			   hbool_t use_core_driver_if_avail)
 #else /* USE_CORE_DRIVER */
@@ -570,9 +570,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
     hbool_t verbose = FALSE;
     int cp = 0;
     herr_t result;
-    H5AC2_cache_config_t mdj_config =
+    H5AC_cache_config_t mdj_config =
     {
-      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* int         version                 = */ H5C__CURR_AUTO_SIZE_CTL_VER,
       /* hbool_t     rpt_fcn_enabled         = */ FALSE,
       /* hbool_t     open_trace_file         = */ FALSE,
       /* hbool_t     close_trace_file        = */ FALSE,
@@ -584,16 +584,16 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* size_t      max_size                = */ (16 * 1024 * 1024 ),
       /* size_t      min_size                = */ ( 8 * 1024 ),
       /* long int    epoch_length            = */ 50000,
-      /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
+      /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
       /* double      lower_hr_threshold      = */ 0.9,
       /* double      increment               = */ 2.0,
       /* hbool_t     apply_max_increment     = */ TRUE,
       /* size_t      max_increment           = */ (4 * 1024 * 1024),
-      /* enum H5C2_cache_flash_incr_mode       */
-      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* enum H5C_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C_flash_incr__off,
       /* double      flash_multiple          = */ 1.0,
       /* double      flash_threshold         = */ 0.25,
-      /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
+      /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
       /* double      upper_hr_threshold      = */ 0.999,
       /* double      decrement               = */ 0.9,
       /* hbool_t     apply_max_decrement     = */ TRUE,
@@ -603,9 +603,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* double      empty_reserve           = */ 0.1,
       /* int         dirty_bytes_threshold   = */ (8 * 1024)
     };
-    H5AC2_jnl_config_t jnl_config =
+    H5AC_jnl_config_t jnl_config =
     {
-      /* int         version                 = */ H5AC2__CURR_JNL_CONFIG_VER,
+      /* int         version                 = */ H5AC__CURR_JNL_CONFIG_VER,
       /* hbool_t     enable_journaling       = */ TRUE,
       /* char        journal_file_path[]     = */ "",
       /* hbool_t     journal_recovered       = */ FALSE,
@@ -618,9 +618,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
     hid_t file_id = -1;
     haddr_t actual_base_addr;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
-    if ( pass2 )
+    if ( pass )
     {
         if ( ( hdf_file_name == NULL ) ||
              ( journal_file_name == NULL ) ||
@@ -628,14 +628,14 @@ setup_cache_for_journaling(const char * hdf_file_name,
 	     ( file_ptr_ptr == NULL ) ||
 	     ( cache_ptr_ptr == NULL ) ) {
 
-            failure_mssg2 =
+            failure_mssg =
                 "Bad param(s) on entry to setup_cache_for_journaling().\n";
-	    pass2 = FALSE;
+	    pass = FALSE;
         }
-	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN )
+	else if ( strlen(journal_file_name) > H5AC__MAX_JOURNAL_FILE_NAME_LEN )
 	{
-            failure_mssg2 = "journal file name too long.\n";
-	    pass2 = FALSE;
+            failure_mssg = "journal file name too long.\n";
+	    pass = FALSE;
 
         } else {
 
@@ -654,65 +654,65 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create a file access propertly list. */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				  H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = H5Pset_mdc_config(fapl_id, (H5AC1_cache_config_t *)&mdj_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 #if USE_CORE_DRIVER
-    if ( ( pass2 ) && ( use_core_driver_if_avail ) ) {
+    if ( ( pass ) && ( use_core_driver_if_avail ) ) {
 
         if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5P_set_fapl_core() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5P_set_fapl_core() failed.\n";
         }
     }
 #endif /* USE_CORE_DRIVER */
@@ -725,14 +725,14 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /**************************************/
 
     /* create the file using fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Fcreate() failed.\n";
 
         } else {
 
@@ -740,8 +740,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
             if ( file_ptr == NULL ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "Can't get file_ptr.";
+                pass = FALSE;
+                failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
                     HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
@@ -752,15 +752,15 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) { /* allocate space for test entries */
+    if ( pass ) { /* allocate space for test entries */
 
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
                                       (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5MF_alloc() failed.";
+            pass = FALSE;
+            failure_mssg = "H5MF_alloc() failed.";
 
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
@@ -772,8 +772,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
              * actual_base_addr is <= BASE_ADDR.  This should only happen
              * if the size of the superblock is increase.
              */
-            pass2 = FALSE;
-            failure_mssg2 = "actual_base_addr > BASE_ADDR";
+            pass = FALSE;
+            failure_mssg = "actual_base_addr > BASE_ADDR";
 
             if ( verbose ) {
                 HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
@@ -787,38 +787,38 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /* get a pointer to the files internal data structure and then
      * to the cache structure
      */
-    if ( pass2 ) {
+    if ( pass ) {
 
-        if ( file_ptr->shared->cache2 == NULL ) {
+        if ( file_ptr->shared->cache == NULL ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+	    pass = FALSE;
+	    failure_mssg = "can't get cache pointer(1).\n";
 
 	} else {
 
-	    cache_ptr = file_ptr->shared->cache2;
+	    cache_ptr = file_ptr->shared->cache;
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    reset_entries2();
+    reset_entries();
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the fapl */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Pclose(fapl_id) < 0 ) {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "error closing fapl.\n";
+	    pass = FALSE;
+	    failure_mssg = "error closing fapl.\n";
 	}
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         *file_id_ptr = file_id;
 	*file_ptr_ptr = file_ptr;
@@ -855,28 +855,28 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_on_create_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     uint64_t trans_num;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -886,26 +886,26 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d.\n",
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -915,7 +915,7 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* clean out any existing journal file */
         HDremove(journal_filename);
@@ -924,33 +924,33 @@ setup_mdj_file_marking_on_create_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* run a dummy transaction to fource metadata journaling
          * initialization.
          */
-        H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr,
+        H5C_begin_transaction(cache_ptr, &trans_num, "dummy");
+        H5C_end_transaction(file_ptr, H5AC_dxpl_id, cache_ptr,
 			     trans_num, "dummy");
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( ( verbose ) && ( ! pass2 ) ) {
+        if ( ( verbose ) && ( ! pass ) ) {
             HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
-		      fcn_name, pass2, failure_mssg2);
+		      fcn_name, pass, failure_mssg);
 	    HDfflush(stdout);
         }
 
         if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s%d cp = %d child exiting.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
 	}
 
@@ -991,7 +991,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_on_create_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t file_id = -1;
@@ -1000,19 +1000,19 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
     check_test_in_progress("mdj_file_marking_on_create_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1022,25 +1022,25 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1050,45 +1050,45 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s:%d: cp = %d  child exited as expected.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -1098,7 +1098,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 	 * in progress.
 	 */
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -1108,14 +1108,14 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 
 	    if ( file_id >= 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fopen() succeeded - 1.";
+                pass = FALSE;
+                failure_mssg = "H5Fopen() succeeded - 1.";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -1127,7 +1127,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d parent done.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
     }
@@ -1155,7 +1155,7 @@ check_mdj_file_marking_on_create_test(hbool_t verbose)
  *
  *              4) exiting without closing the file.
  *
- *              set pass2 to FALSE and set a failure message if errors
+ *              set pass to FALSE and set a failure message if errors
  *              are detected.
  *
  * Return:      void
@@ -1170,7 +1170,7 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_after_open_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     herr_t result;
     int cp = 0;
@@ -1179,50 +1179,50 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
     hid_t dataset_id = -1;
     hid_t dataspace_id = -1;
     hsize_t dims[2];
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     if ( verbose ) {
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1232,58 +1232,58 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+            HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
 	/* open the file with a fapl indicating latest version of
 	 * the file format.
 	 */
-        if ( pass2 ) {
+        if ( pass ) {
 
             file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
             if ( file_id < 0 ) {
 
-	        pass2 = FALSE;
-                failure_mssg2 = "H5Fcreate() failed.\n";
+	        pass = FALSE;
+                failure_mssg = "H5Fcreate() failed.\n";
 	    }
 	}
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             dims[0] = 4;
             dims[1] = 6;
@@ -1291,18 +1291,18 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 
             if ( dataspace_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Screate_simple() failed.";
+                pass = FALSE;
+                failure_mssg = "H5Screate_simple() failed.";
             }
         }
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             /* Create the dataset. */
             dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
@@ -1311,28 +1311,28 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 
             if ( dataspace_id < 0 ) {
 
-	        pass2 = FALSE;
-	        failure_mssg2 = "H5Dcreate2() failed.";
+	        pass = FALSE;
+	        failure_mssg = "H5Dcreate2() failed.";
             }
         }
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* now enable journaling */
-        if ( pass2 ) {
+        if ( pass ) {
 
-            jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+            jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
             result = H5Fget_jnl_config(file_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Fget_jnl_config() failed.\n";
             }
 
             /* set journaling config fields to taste */
@@ -1349,37 +1349,37 @@ setup_mdj_file_marking_after_open_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             result = H5Fset_jnl_config(file_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Fset_jnl_config() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( ( verbose ) && ( ! pass2 ) ) {
+        if ( ( verbose ) && ( ! pass ) ) {
             HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
-		      fcn_name, pass2, failure_mssg2);
+		      fcn_name, pass, failure_mssg);
 	    HDfflush(stdout);
         }
 
         if ( show_progress ) {
 
            HDfprintf(stdout, "%s%d cp = %d exiting.\n",
-	             fcn_name, (int)pass2, cp++);
+	             fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -1420,7 +1420,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_after_open_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t file_id = -1;
@@ -1429,19 +1429,19 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
     check_test_in_progress("mdj_file_marking_after_open_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1451,26 +1451,26 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d.\n",
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1480,40 +1480,40 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
 	    HDfprintf(stdout, "%s:%d cp = %d.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
 	    HDfprintf(stdout, "%s%d cp = %d.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -1523,7 +1523,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 	 * in progress.
 	 */
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -1533,15 +1533,15 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 
 	    if ( file_id >= 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fopen() succeeded - 2.";
+                pass = FALSE;
+                failure_mssg = "H5Fopen() succeeded - 2.";
 	    }
 	}
 
         if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d: cp = %d.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
             HDfflush(stdout);
         }
 
@@ -1553,7 +1553,7 @@ check_mdj_file_marking_after_open_test(hbool_t verbose)
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d parent done.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
 	}
     }
@@ -1595,7 +1595,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_marking_on_open_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     herr_t result;
     int cp = 0;
@@ -1605,22 +1605,22 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
     hid_t dataspace_id = -1;
     hsize_t dims[2];
     H5F_t * file_ptr = NULL;
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1630,26 +1630,26 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
         HDfprintf(stdout, "%s%d cp = %d.\n",
-		  fcn_name, (int)pass2, cp++);
+		  fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -1659,7 +1659,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 #if 0 /* JRM */
         /* Quincey:
@@ -1687,69 +1687,69 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 	 *                              JRM -- 7/9/08
 	 */
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 		                H5P_DEFAULT);
 
             if ( file_id < 0 ) {
 
-	        pass2 = FALSE;
-                failure_mssg2 = "H5Fcreate() failed.\n";
+	        pass = FALSE;
+                failure_mssg = "H5Fcreate() failed.\n";
 	    }
         }
 #else /* JRM */
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         /* open the file with a fapl indicating latest version of
          * the file format.
          */
-        if ( pass2 ) {
+        if ( pass ) {
 
             file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
             if ( file_id < 0 ) {
 
-	        pass2 = FALSE;
-                failure_mssg2 = "H5Fcreate() failed.\n";
+	        pass = FALSE;
+                failure_mssg = "H5Fcreate() failed.\n";
 	    }
         }
 #endif /* JRM */
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             dims[0] = 4;
             dims[1] = 6;
@@ -1757,18 +1757,18 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
             if ( dataspace_id < 0 ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Screate_simple() failed.";
+                pass = FALSE;
+	        failure_mssg = "H5Screate_simple() failed.";
             }
         }
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             /* Create the dataset. */
             dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
@@ -1777,18 +1777,18 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
 	    if ( dataspace_id < 0 ) {
 
-	        pass2 = FALSE;
-	        failure_mssg2 = "H5Dcreate2() failed.";
+	        pass = FALSE;
+	        failure_mssg = "H5Dcreate2() failed.";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             /* close the data set, the data space, and the file */
 	    if ( ( H5Dclose(dataset_id) < 0 ) ||
@@ -1796,62 +1796,62 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
                  ( H5Pclose(fapl_id) < 0 ) ||
 	         ( H5Fclose(file_id) < 0 ) ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "data set, data space, or file close failed.";
+                pass = FALSE;
+	        failure_mssg = "data set, data space, or file close failed.";
 	    }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
-            jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+            jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
             result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pget_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pget_jnl_config() failed.\n";
             }
 
             /* set journaling config fields to taste */
@@ -1868,36 +1868,36 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_jnl_config() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* open the file using fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
             if ( file_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fopen() failed (9).\n";
+                pass = FALSE;
+                failure_mssg = "H5Fopen() failed (9).\n";
 
             } else {
 
@@ -1905,8 +1905,8 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
                 if ( file_ptr == NULL ) {
 
-                    pass2 = FALSE;
-                    failure_mssg2 = "Can't get file_ptr.";
+                    pass = FALSE;
+                    failure_mssg = "Can't get file_ptr.";
 
                     if ( verbose ) {
 
@@ -1918,21 +1918,21 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( ( verbose ) && ( ! pass2 ) ) {
+        if ( ( verbose ) && ( ! pass ) ) {
 
             HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
-		      fcn_name, pass2, failure_mssg2);
+		      fcn_name, pass, failure_mssg);
 	    HDfflush(stdout);
         }
 
         if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d exiting.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -1974,7 +1974,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_marking_on_open_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t file_id = -1;
@@ -1983,19 +1983,19 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
     check_test_in_progress("mdj_file_marking_on_open_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2005,25 +2005,25 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2033,38 +2033,38 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -2074,7 +2074,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 	 * in progress.
 	 */
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -2084,14 +2084,14 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 
 	    if ( file_id >= 0 ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Fopen() succeeded - 3.";
+                pass = FALSE;
+	        failure_mssg = "H5Fopen() succeeded - 3.";
 	    }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -2103,7 +2103,7 @@ check_mdj_file_marking_on_open_test(hbool_t verbose)
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d done.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
     }
@@ -2142,7 +2142,7 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_unmarking_on_file_close_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t file_id = -1;
@@ -2150,28 +2150,28 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     hid_t dataspace_id = -1;
     hsize_t dims[2];
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d -- entering.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d -- entering.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2181,25 +2181,25 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2209,7 +2209,7 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* clean out any existing journal file */
         setup_cache_for_journaling(filename, journal_filename, &file_id,
@@ -2218,12 +2218,12 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
     /* create a data set so as to force a bit of journaling */
-    if ( pass2 ) {
+    if ( pass ) {
 
         dims[0] = 4;
         dims[1] = 6;
@@ -2231,18 +2231,18 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Screate_simple() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Screate_simple() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* Create the dataset. */
         dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
@@ -2251,33 +2251,33 @@ setup_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 
         if ( dataspace_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Dcreate2() failed.";
+            pass = FALSE;
+            failure_mssg = "H5Dcreate2() failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
     /* now close the file... */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
 	if ( ( H5Dclose(dataset_id) < 0 ) ||
 	     ( H5Sclose(dataspace_id) < 0 ) ||
 	     ( H5Fclose(file_id) < 0 ) ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "dataset, dataspace, or file close failed.";
+            pass = FALSE;
+            failure_mssg = "dataset, dataspace, or file close failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -2313,7 +2313,7 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_unmarking_on_file_close_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t fapl_id = -1;
@@ -2321,26 +2321,26 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d -- entering.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d -- entering.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
     check_test_in_progress("mdj_file_unmarking_on_file_close_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2350,25 +2350,25 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2381,37 +2381,37 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
     /* attempt to re-open file created by setup.  Should succeed */
 
     /* create a file access propertly list. */
-    if ( pass2 ) {
+    if ( pass ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pcreate() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
     /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
                                   H5F_LIBVER_LATEST) < 0 ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+            pass = FALSE;
+            failure_mssg = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -2419,38 +2419,38 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
      * shutdown journaling.
      */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
 	if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5Fopen() failed (10).";
+            pass = FALSE;
+	    failure_mssg = "H5Fopen() failed (10).";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
     /* close the file and fapl */
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( ( H5Pclose(fapl_id) < 0 ) ||
              ( H5Fclose(file_id) < 0 ) ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "fapl or file close failed.";
+                pass = FALSE;
+                failure_mssg = "fapl or file close failed.";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -2462,7 +2462,7 @@ check_mdj_file_unmarking_on_file_close_test(hbool_t verbose)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
         HDfflush(stdout);
     }
 
@@ -2504,7 +2504,7 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     const char * fcn_name =
 	    "setup_mdj_file_unmarking_on_journaling_shutdown_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     herr_t result;
     int cp = 0;
@@ -2513,23 +2513,23 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     hid_t dataspace_id = -1;
     hsize_t dims[2];
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
-    H5AC2_jnl_config_t jnl_config;
+    H5C_t * cache_ptr = NULL;
+    H5AC_jnl_config_t jnl_config;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2539,25 +2539,25 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2567,7 +2567,7 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* clean out any existing journal file */
         setup_cache_for_journaling(filename, journal_filename, &file_id,
@@ -2575,12 +2575,12 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* create a data set so as to force a bit of journaling */
-        if ( pass2 ) {
+        if ( pass ) {
 
             dims[0] = 4;
             dims[1] = 6;
@@ -2588,18 +2588,18 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 
             if ( dataspace_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Screate_simple() failed.";
+                pass = FALSE;
+                failure_mssg = "H5Screate_simple() failed.";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             /* Create the dataset. */
             dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE,
@@ -2608,28 +2608,28 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 
             if ( dataspace_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Dcreate2() failed.";
+                pass = FALSE;
+                failure_mssg = "H5Dcreate2() failed.";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* now dis-able journaling */
-        if ( pass2 ) {
+        if ( pass ) {
 
-            jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+            jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
             result = H5Fget_jnl_config(file_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Fget_jnl_config() failed.\n";
             }
 
             jnl_config.enable_journaling       = FALSE;
@@ -2637,37 +2637,37 @@ setup_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             result = H5Fset_jnl_config(file_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Fset_jnl_config() failed.\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( ( verbose ) && ( ! pass2 ) ) {
+        if ( ( verbose ) && ( ! pass ) ) {
             HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
-                     fcn_name, pass2, failure_mssg2);
+                     fcn_name, pass, failure_mssg);
             HDfflush(stdout);
         }
 
         if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d exiting.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
             HDfflush(stdout);
         }
 
@@ -2721,7 +2721,7 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     const char * fcn_name =
 	    "check_mdj_file_unmarking_on_journaling_shutdown_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     hid_t file_id = -1;
@@ -2730,19 +2730,19 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     check_test_in_progress("mdj_file_unmarking_on_journaling_shutdown_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2752,25 +2752,25 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2780,38 +2780,38 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -2825,31 +2825,31 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 
 	if ( file_id < 0 ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "H5Fopen() failed (11).";
+            pass = FALSE;
+	    failure_mssg = "H5Fopen() failed (11).";
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
 	/* close the file and fapl */
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( ( H5Pclose(fapl_id) < 0 ) ||
                  ( H5Fclose(file_id) < 0 ) ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "fapl or file close failed.";
+                pass = FALSE;
+                failure_mssg = "fapl or file close failed.";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -2861,7 +2861,7 @@ check_mdj_file_unmarking_on_journaling_shutdown_test(hbool_t verbose)
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d done.\n",
-		      fcn_name, (int)pass2, cp++);
+		      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
 	}
     }
@@ -2897,28 +2897,28 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 {
     const char * fcn_name = "setup_mdj_file_unmarking_on_recovery_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     int cp = 0;
     uint64_t trans_num;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2928,25 +2928,25 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -2956,7 +2956,7 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* clean out any existing journal file */
         HDremove(journal_filename);
@@ -2965,25 +2965,25 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* run a dummy transaction to fource metadata journaling
          * initialization.
          */
-        H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-        H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr,
+        H5C_begin_transaction(cache_ptr, &trans_num, "dummy");
+        H5C_end_transaction(file_ptr, H5AC_dxpl_id, cache_ptr,
                              trans_num, "dummy");
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* flush the file to ensure that it is in a readable state */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Fflush(file_id, H5F_SCOPE_GLOBAL) < 0 ) {
 
@@ -2992,21 +2992,21 @@ setup_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 		    HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
                     HDfflush(stdout);
                 }
-	        pass2 = FALSE;
-	        failure_mssg2 = "H5Fflush() failed.";
+	        pass = FALSE;
+	        failure_mssg = "H5Fflush() failed.";
             }
         }
 
-        if ( ( verbose ) && ( ! pass2 ) ) {
+        if ( ( verbose ) && ( ! pass ) ) {
             HDfprintf(stdout, "%s%d failure_mssg = \"%s\".\n",
-                     fcn_name, pass2, failure_mssg2);
+                     fcn_name, pass, failure_mssg);
 	    HDfflush(stdout);
         }
 
         if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d exiting.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -3057,30 +3057,30 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 {
     const char * fcn_name = "check_mdj_file_unmarking_on_recovery_test():";
     char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t show_progress = FALSE;
     herr_t result;
     int cp = 0;
     hid_t file_id = -1;
     hid_t fapl_id = -1;
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     check_test_in_progress("mdj_file_unmarking_on_recovery_test");
 
     /* setup the file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
 	                sizeof(filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (1).\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -3090,25 +3090,25 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
     }
 
     /* setup the journal file name */
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
                         sizeof(journal_filename)) == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
+            pass = FALSE;
+            failure_mssg = "h5_fixname() failed (2).\n";
         }
         else if ( strlen(journal_filename) >=
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+			H5AC__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
+            pass = FALSE;
+            failure_mssg = "journal file name too long.\n";
         }
     }
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	HDfflush(stdout);
     }
 
@@ -3118,38 +3118,38 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	HDfflush(stdout);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         /* create a file access propertly list. */
-        if ( pass2 ) {
+        if ( pass ) {
 
             fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
             if ( fapl_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pcreate() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pcreate() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
         /* call H5Pset_libver_bounds() on the fapl_id */
-        if ( pass2 ) {
+        if ( pass ) {
 
             if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
 				      H5F_LIBVER_LATEST) < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_libver_bounds() failed.\n";
             }
         }
 
         if ( show_progress ) {
-	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	    HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -3159,7 +3159,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	 * in progress.
 	 */
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    H5E_BEGIN_TRY {
 
@@ -3169,14 +3169,14 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 
 	    if ( file_id >= 0 ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Fopen() succeeded - 4.";
+                pass = FALSE;
+	        failure_mssg = "H5Fopen() succeeded - 4.";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -3186,16 +3186,16 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	 * succeed, and the file should not be marked as having
 	 * journaling in progress.
 	 */
-        if ( pass2 ) {
+        if ( pass ) {
 
-            jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+            jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
             result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pget_jnl_config() failed.\n";
+                pass = FALSE;
+                failure_mssg = "H5Pget_jnl_config() failed.\n";
             }
 
             jnl_config.journal_recovered       = TRUE;
@@ -3203,56 +3203,56 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_jnl_config() failed(1).\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_jnl_config() failed(1).\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
 	    if ( file_id < 0 ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Fopen() failed (12).";
+                pass = FALSE;
+	        failure_mssg = "H5Fopen() failed (12).";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    if ( H5Fclose(file_id) < 0 ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Fclose() failed(1).";
+                pass = FALSE;
+	        failure_mssg = "H5Fclose() failed(1).";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -3260,7 +3260,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	 * open the file again.  Should succeed.
 	 */
 
-        if ( pass2 ) {
+        if ( pass ) {
 
             jnl_config.journal_recovered       = FALSE;
 
@@ -3268,47 +3268,47 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 
             if ( result < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Pset_jnl_config() failed(2).\n";
+                pass = FALSE;
+                failure_mssg = "H5Pset_jnl_config() failed(2).\n";
             }
         }
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
 
 	    if ( file_id < 0 ) {
 
-                pass2 = FALSE;
-                failure_mssg2 = "H5Fopen() failed (13).";
+                pass = FALSE;
+                failure_mssg = "H5Fopen() failed (13).";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
-	if ( pass2 ) {
+	if ( pass ) {
 
 	    if ( ( H5Fclose(file_id) < 0 ) ||
 		 ( H5Pclose(fapl_id) < 0 ) ) {
 
-                pass2 = FALSE;
-	        failure_mssg2 = "H5Fclose() or H5Pclose() failed(2).";
+                pass = FALSE;
+	        failure_mssg = "H5Fclose() or H5Pclose() failed(2).";
 	    }
 	}
 
         if ( show_progress ) {
 
-            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+            HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
 
@@ -3320,7 +3320,7 @@ check_mdj_file_unmarking_on_recovery_test(hbool_t verbose)
 	if ( show_progress ) {
 
             HDfprintf(stdout, "%s%d cp = %d done.\n",
-                      fcn_name, (int)pass2, cp++);
+                      fcn_name, (int)pass, cp++);
 	    HDfflush(stdout);
         }
     }
@@ -3353,11 +3353,11 @@ usage(void)
     const char * s[] =
     {
 	"\n",
-        "cache2_jnl_file_marking:\n",
+        "cache_jnl_file_marking:\n",
         "\n",
         "Setup or check the results of the specified test.\n",
         "\n",
-        "usage:	cache2_jnl_file_marking <test> <op> [verbose]\n",
+        "usage:	cache_jnl_file_marking <test> <op> [verbose]\n",
         "\n",
         "where:\n",
         "\n",
@@ -3417,7 +3417,7 @@ main(int argc,
 
     express_test = GetTestExpress();
 
-    pass2 = TRUE;
+    pass = TRUE;
 
     if ( argc == 4 ) {
 
@@ -3427,14 +3427,14 @@ main(int argc,
 
 	} else {
 
-            pass2 = FALSE;
+            pass = FALSE;
 	    usage();
 
 	}
 
     } else if ( argc != 3 ) {
 
-        pass2 = FALSE;
+        pass = FALSE;
 	usage();
     }
 
@@ -3443,7 +3443,7 @@ main(int argc,
 	HDfprintf(stdout, "%s %s %s %s:\n", argv[0], argv[1], argv[2], argv[3]);
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         if ( strcmp("setup", argv[2]) == 0 ) {
 
@@ -3455,12 +3455,12 @@ main(int argc,
 
         } else {
 
-	    pass2 = FALSE;
+	    pass = FALSE;
 	    usage();
 	}
     }
 
-    if ( pass2 ) {
+    if ( pass ) {
 
         H5open();
 
@@ -3476,8 +3476,8 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else if ( strcmp("file_marking_on_create", argv[1]) == 0 ) {
@@ -3492,8 +3492,8 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else if ( strcmp("file_marking_on_open", argv[1]) == 0 ) {
@@ -3508,8 +3508,8 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else if ( strcmp("file_unmarking_on_file_close", argv[1]) == 0 ) {
@@ -3524,8 +3524,8 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else if ( strcmp("file_unmarking_on_journaling_shutdown", argv[1])
@@ -3541,8 +3541,8 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else if ( strcmp("file_unmarking_on_recovery", argv[1]) == 0 ) {
@@ -3557,21 +3557,21 @@ main(int argc,
 
 	    } else {
 
-		pass2 = FALSE;
-		failure_mssg2 = "setup and check both FALSE?";
+		pass = FALSE;
+		failure_mssg = "setup and check both FALSE?";
 	    }
 
 	} else {
 
-	    pass2 = FALSE;
-	    failure_mssg2 = "unknown test requested.";
+	    pass = FALSE;
+	    failure_mssg = "unknown test requested.";
 	    usage();
 	}
     }
 
     if ( verbose ) {
 
-        if ( pass2 ) {
+        if ( pass ) {
 
 	    if ( setup ) {
 
@@ -3585,11 +3585,11 @@ main(int argc,
 	} else {
 
 	    HDfprintf(stdout, "FAILED.  Failure mssg = \"%s\"\n",
-		      failure_mssg2);
+		      failure_mssg);
         }
     }
 
-    if ( ! pass2 ) {
+    if ( ! pass ) {
 
         result = 1;
     }

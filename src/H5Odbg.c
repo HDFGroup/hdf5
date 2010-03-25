@@ -538,14 +538,14 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     loc.addr = addr;
     loc.holding_file = FALSE;
 
-    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC2_READ)))
+    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* debug */
     H5O_debug_real(f, dxpl_id, oh, addr, stream, indent, fwidth);
 
 done:
-    if(oh && H5O_unprotect(&loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(&loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)

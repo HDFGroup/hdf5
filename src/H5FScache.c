@@ -34,7 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
@@ -94,9 +94,9 @@ static herr_t H5FS_cache_sinfo_free_icr(haddr_t addr, size_t len, void *thing);
 /* Package Variables */
 /*********************/
 
-/* H5FS header inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_FSPACE_HDR[1] = {{
-    H5AC2_FSPACE_HDR_ID,
+/* H5FS header inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
+    H5AC_FSPACE_HDR_ID,
     "Free space header",
     H5FD_MEM_FSPACE_HDR,
     H5FS_cache_hdr_deserialize,
@@ -106,9 +106,9 @@ const H5AC2_class_t H5AC2_FSPACE_HDR[1] = {{
     NULL, /* H5FS_cache_hdr_clear_dirty_bits, */
 }};
 
-/* H5FS serialized sections inherit cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_FSPACE_SINFO[1] = {{
-    H5AC2_FSPACE_SINFO_ID,
+/* H5FS serialized sections inherit cache-like properties from H5AC */
+const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
+    H5AC_FSPACE_SINFO_ID,
     "Free space section info",
     H5FD_MEM_FSPACE_SINFO,
     H5FS_cache_sinfo_deserialize,

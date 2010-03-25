@@ -41,7 +41,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
@@ -128,7 +128,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Tcommit1, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit1, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
@@ -141,7 +141,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 
     /* Commit the datatype to the file, using default property list values */
     if(H5T_commit_named(&loc, name, type, H5P_LINK_CREATE_DEFAULT,
-            H5P_DATATYPE_CREATE_DEFAULT, H5P_DATATYPE_ACCESS_DEFAULT, H5AC2_dxpl_id) < 0)
+            H5P_DATATYPE_CREATE_DEFAULT, H5P_DATATYPE_ACCESS_DEFAULT, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -175,7 +175,7 @@ H5Topen1(hid_t loc_id, const char *name)
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC2_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;
 
     FUNC_ENTER_API(H5Topen1, FAIL)

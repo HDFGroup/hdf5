@@ -20,7 +20,7 @@
      position of those error codes are out of sync with the error messages
      from the H5E system.  For example,
      ======= non-standard error output ===============
-     H5C2_begin_journaling: H5C2_mark_journaling_in_progress() failed.
-     H5C2_begin_transaction H5C2_begin_journaling() failed.
+     H5C_begin_journaling: H5C_mark_journaling_in_progress() failed.
+     H5C_begin_transaction H5C_begin_journaling() failed.
      ======= end ==============
      -AKC 2008/6/17-

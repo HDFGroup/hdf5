@@ -76,10 +76,10 @@ static herr_t H5HG_free_icr(haddr_t addr, size_t len, void *thing);
 /*********************/
 
 /*
- * H5HG inherits cache-like properties from H5AC2
+ * H5HG inherits cache-like properties from H5AC
  */
-const H5AC2_class_t H5AC2_GHEAP[1] = {{
-    H5AC2_GHEAP_ID,
+const H5AC_class_t H5AC_GHEAP[1] = {{
+    H5AC_GHEAP_ID,
     "global heap",
     H5FD_MEM_GHEAP,
     H5HG_deserialize,
@@ -329,7 +329,7 @@ H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
         *new_len = heap->size;
 
         /* specify in flags that image has been resized */
-        *flags = H5AC2__SERIALIZE_RESIZED_FLAG;
+        *flags = H5AC__SERIALIZE_RESIZED_FLAG;
     } /* end if */
     else {
         /* copy the heap->chunk into the image buffer */

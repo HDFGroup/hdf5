@@ -1753,11 +1753,11 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
         /* Clear thread error stack entering public functions */	      \
         H5E_clear_stack(NULL);                                                \
                                                                               \
-	if (H5AC2_begin_transaction(id, &do_transaction, &id_oloc,            \
+	if (H5AC_begin_transaction(id, &do_transaction, &id_oloc,            \
 				    &id_oloc_open, &transaction_begun,        \
 				    &trans_num, FUNC) < 0) {                  \
 		    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, err,              \
-				"H5AC2_begin_transaction() failed.");         \
+				"H5AC_begin_transaction() failed.");         \
 	}
 
 /*
@@ -1908,11 +1908,11 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /* Use this macro to match the FUNC_ENTER_API_META macro */
 
 #define FUNC_LEAVE_API_META(ret_value)                                        \
-       if ( H5AC2_end_transaction(do_transaction, &id_oloc,                   \
+       if ( H5AC_end_transaction(do_transaction, &id_oloc,                   \
 			          id_oloc_open, transaction_begun,            \
 			          trans_dxpl_id, trans_num, FUNC) < 0 ) {     \
 	    HDONE_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL,                     \
-			"H5AC2_end_transaction() failed.");                   \
+			"H5AC_end_transaction() failed.");                   \
         }                                                                     \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
@@ -1959,7 +1959,7 @@ H5_DLL void H5_term_library(void);
 /* Functions to terminate interfaces */
 H5_DLL int H5A_term_interface(void);
 H5_DLL int H5AC1_term_interface(void);
-H5_DLL int H5AC2_term_interface(void);
+H5_DLL int H5AC_term_interface(void);
 H5_DLL int H5D_term_interface(void);
 H5_DLL int H5E_term_interface(void);
 H5_DLL int H5F_term_interface(void);

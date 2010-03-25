@@ -27,8 +27,8 @@
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {
-    "cache_api",
+const char *FILENAME1[] = {
+    "cache1_api",
     NULL
 };
 
@@ -87,7 +87,7 @@ static void check_and_validate_cache_size(hid_t file_id,
                                           int32_t * cur_num_entries_ptr,
                                           hbool_t dump_data);
 
-static void mdc_api_call_smoke_check(int express_test);
+static void mdc_api_call_smoke_check(int express_test1);
 
 static void check_fapl_mdc_api_errs(void);
 
@@ -240,7 +240,7 @@ check_fapl_mdc_api_calls(void)
 
     TESTING("MDC/FAPL related API calls");
 
-    pass = TRUE;
+    pass1 = TRUE;
 
     XLATE_EXT_TO_INT_MDC_CONFIG(default_auto_size_ctl, default_config)
     XLATE_EXT_TO_INT_MDC_CONFIG(mod_auto_size_ctl, mod_config)
@@ -249,18 +249,18 @@ check_fapl_mdc_api_calls(void)
      * initial mdc configuration
      */
 
-    if ( pass ) {
+    if ( pass1 ) {
 
 	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
 	if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
-            failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+	    pass1 = FALSE;
+            failure_mssg1 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
 	}
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
 
@@ -268,13 +268,13 @@ check_fapl_mdc_api_calls(void)
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
-            pass = FALSE;
-            failure_mssg = "retrieved config doesn't match default.";
+            pass1 = FALSE;
+            failure_mssg1 = "retrieved config doesn't match default.";
         }
     }
 
@@ -283,18 +283,18 @@ check_fapl_mdc_api_calls(void)
      * the changes can be read back
      */
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         result = H5Pset_mdc_config(fapl_id, &mod_config);
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pset_mdc_config() failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
 
@@ -302,22 +302,22 @@ check_fapl_mdc_api_calls(void)
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
-            pass = FALSE;
-            failure_mssg = "retrieved config doesn't match mod config.";
+            pass1 = FALSE;
+            failure_mssg1 = "retrieved config doesn't match mod config.";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Pclose(fapl_id) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pclose() failed.\n";
         }
     }
 
@@ -329,84 +329,84 @@ check_fapl_mdc_api_calls(void)
      */
 
     /* setup the file name */
-    if ( pass ) {
+    if ( pass1 ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME1[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "h5_fixname() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "h5_fixname() failed.\n";
         }
     }
 
     /* create the file using the default FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fcreate() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fcreate() failed.\n";
         }
     }
 
     /* get a pointer to the files internal data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_ptr = H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "Can't get file_ptr.\n";
 
         } else {
 
-            cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache1;
         }
     }
 
     /* verify that we can access the internal version of the cache config */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( ( cache_ptr == NULL ) ||
              ( cache_ptr->magic != H5C1__H5C1_T_MAGIC ) ||
              ( cache_ptr->resize_ctl.version != H5C1__CURR_AUTO_SIZE_CTL_VER ) ){
 
-            pass = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't access cache resize_ctl.\n";
         }
     }
 
     /* conpare the cache's internal configuration with the expected value */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( ! RESIZE_CONFIGS_ARE_EQUAL(default_auto_size_ctl, \
                                         cache_ptr->resize_ctl, TRUE) ) {
 
 
-            pass = FALSE;
-            failure_mssg = "Unexpected value(s) in cache resize_ctl.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "Unexpected value(s) in cache resize_ctl.\n";
         }
     }
 
     /* get a copy of the files FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         fapl_id = H5Fget_access_plist(file_id);
 
         if ( fapl_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_access_plist() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_access_plist() failed.\n";
         }
     }
 
     /* compare the initial cache config from the copy of the file's FAPL
      * to the expected value.  If all goes well, close the copy of the FAPL.
      */
-    if ( pass ) {
+    if ( pass1 ) {
 
         scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
 
@@ -414,33 +414,33 @@ check_fapl_mdc_api_calls(void)
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
-            pass = FALSE;
-            failure_mssg = "config retrieved from file doesn't match default.";
+            pass1 = FALSE;
+            failure_mssg1 = "config retrieved from file doesn't match default.";
 
         } else if ( H5Pclose(fapl_id) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( H5Fclose(file_id) < 0  ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "HDremove() failed.\n";
         }
     }
 
@@ -453,109 +453,109 @@ check_fapl_mdc_api_calls(void)
      */
 
     /* Create a FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
 	if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
-            failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+	    pass1 = FALSE;
+            failure_mssg1 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
 	}
     }
 
     /* Modify the initial mdc configuration in the FAPL. */
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         result = H5Pset_mdc_config(fapl_id, &mod_config);
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pset_mdc_config() failed.\n";
         }
     }
 
     /* setup the file name */
-    if ( pass ) {
+    if ( pass1 ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME1[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "h5_fixname() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "h5_fixname() failed.\n";
         }
     }
 
     /* create the file using the modified FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( file_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fcreate() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fcreate() failed.\n";
         }
     }
 
     /* get a pointer to the files internal data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_ptr = H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "Can't get file_ptr.\n";
 
         } else {
 
-            cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache1;
         }
     }
 
     /* verify that we can access the internal version of the cache config */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( ( cache_ptr == NULL ) ||
              ( cache_ptr->magic != H5C1__H5C1_T_MAGIC ) ||
              ( cache_ptr->resize_ctl.version != H5C1__CURR_AUTO_SIZE_CTL_VER ) ){
 
-            pass = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't access cache resize_ctl.\n";
         }
     }
 
     /* conpare the cache's internal configuration with the expected value */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( ! RESIZE_CONFIGS_ARE_EQUAL(mod_auto_size_ctl, \
                                         cache_ptr->resize_ctl, TRUE) ) {
 
 
-            pass = FALSE;
-            failure_mssg = "Unexpected value(s) in cache resize_ctl.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "Unexpected value(s) in cache resize_ctl.\n";
         }
     }
 
     /* get a copy of the files FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         test_fapl_id = H5Fget_access_plist(file_id);
 
         if ( test_fapl_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_access_plist() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_access_plist() failed.\n";
         }
     }
 
     /* compare the initial cache config from the copy of the file's FAPL
      * to the expected value.  If all goes well, close the copy of the FAPL.
      */
-    if ( pass ) {
+    if ( pass1 ) {
 
         scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
 
@@ -563,51 +563,51 @@ check_fapl_mdc_api_calls(void)
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
-            pass = FALSE;
-            failure_mssg = "config retrieved from file doesn't match.";
+            pass1 = FALSE;
+            failure_mssg1 = "config retrieved from file doesn't match.";
 
         } else if ( H5Pclose(test_fapl_id) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pclose() failed.\n";
         }
     }
 
     /* close the fapl used to create the file */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Pclose(fapl_id) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( H5Fclose(file_id) < 0  ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "HDremove() failed.\n";
         }
     }
 
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass1 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if ( ! pass1 )
+        HDfprintf(stdout, "%s: failure_mssg1 = \"%s\".\n",
+                  fcn_name, failure_mssg1);
 
 } /* check_fapl_mdc_api_calls() */
 
@@ -619,7 +619,7 @@ check_fapl_mdc_api_calls(void)
  *		has both internal and external configuration matching
  *		*config_ptr.
  *
- *		Do nothin on success.  On failure, set pass to FALSE, and
+ *		Do nothin on success.  On failure, set pass1 to FALSE, and
  *		load an error message into failue_mssg.  Note that
  *		failure_msg is assumed to be at least 128 bytes in length.
  *
@@ -649,68 +649,68 @@ validate_mdc_config(hid_t file_id,
     XLATE_EXT_TO_INT_MDC_CONFIG(int_config, (*ext_config_ptr))
 
     /* get a pointer to the files internal data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_ptr = H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128, "Can't get file_ptr #%d.", test_num);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
 
         } else {
 
-            cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache1;
         }
     }
 
     /* verify that we can access the internal version of the cache config */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( ( cache_ptr == NULL ) ||
              ( cache_ptr->magic != H5C1__H5C1_T_MAGIC ) ||
              ( cache_ptr->resize_ctl.version != H5C1__CURR_AUTO_SIZE_CTL_VER ) ){
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "Can't access cache resize_ctl #%d.", test_num);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
     }
 
     /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( ! RESIZE_CONFIGS_ARE_EQUAL(int_config, cache_ptr->resize_ctl,
                                         compare_init) ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "Unexpected internal config #%d.", test_num);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
     }
 
     /* obtain external cache config */
-    if ( pass ) {
+    if ( pass1 ) {
 
         scratch.version = H5AC1__CURR_CACHE_CONFIG_VERSION;
 
         if ( H5Fget_mdc_config(file_id, &scratch) < 0 ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "H5Fget_mdc_config() failed #%d.", test_num);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         /* Recall that in any configuration supplied by the cache
          * at run time, the set_initial_size field will always
-         * be FALSE, regardless of the value passed in.  Thus we
+         * be FALSE, regardless of the value pass1ed in.  Thus we
          * always presume that this field need not match that of
          * the supplied external configuration.
          *
@@ -722,10 +722,10 @@ validate_mdc_config(hid_t file_id,
         if ( ! CACHE_CONFIGS_EQUAL((*ext_config_ptr), scratch, \
                                    FALSE, compare_init) ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "Unexpected external config #%d.", test_num);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
     }
 
@@ -906,7 +906,7 @@ check_file_mdc_api_calls(void)
 
     TESTING("MDC/FILE related API calls");
 
-    pass = TRUE;
+    pass1 = TRUE;
 
     /* Open a file with the default FAPL.  Verify that the cache is
      * configured as per the default both by looking at its internal
@@ -917,25 +917,25 @@ check_file_mdc_api_calls(void)
      */
 
     /* setup the file name */
-    if ( pass ) {
+    if ( pass1 ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME1[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "h5_fixname() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "h5_fixname() failed.\n";
         }
     }
 
     /* create the file using the default FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fcreate() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fcreate() failed.\n";
         }
     }
 
@@ -943,12 +943,12 @@ check_file_mdc_api_calls(void)
     validate_mdc_config(file_id, &default_config, TRUE, 1);
 
     /* set alternate config 1 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_1) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 1.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 1.\n";
         }
     }
 
@@ -956,12 +956,12 @@ check_file_mdc_api_calls(void)
     validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
 
     /* set alternate config 2 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_2) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 2.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 2.\n";
         }
     }
 
@@ -969,12 +969,12 @@ check_file_mdc_api_calls(void)
     validate_mdc_config(file_id, &mod_config_2, TRUE, 3);
 
     /* set alternate config 3 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_3) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 3.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 3.\n";
         }
     }
 
@@ -982,12 +982,12 @@ check_file_mdc_api_calls(void)
     validate_mdc_config(file_id, &mod_config_3, TRUE, 4);
 
     /* set alternate config 4 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_4) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 4.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 4.\n";
         }
     }
 
@@ -1000,17 +1000,17 @@ check_file_mdc_api_calls(void)
      * chance to do much yet.
      */
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fget_mdc_hit_rate(file_id, &hit_rate) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_hit_rate() failed 1.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_hit_rate() failed 1.\n";
 
         } else if ( hit_rate != 0.0 ) {
 
-            pass = FALSE;
-            failure_mssg =
+            pass1 = FALSE;
+            failure_mssg1 =
                 "H5Fget_mdc_hit_rate() returned unexpected hit rate.\n";
 
         }
@@ -1024,20 +1024,20 @@ check_file_mdc_api_calls(void)
 #endif
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fget_mdc_size(file_id, &max_size, &min_clean_size,
                              &cur_size, &cur_num_entries) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() failed 1.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() failed 1.\n";
 
         } else if ( ( mod_config_4.initial_size != max_size ) ||
                     ( min_clean_size != (size_t)
                       ((double)max_size * mod_config_4.min_clean_fraction) ) ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() returned unexpected value(s).\n";
 
         }
 #if 0 /* this may be useful now and then -- keep it around */
@@ -1053,25 +1053,25 @@ check_file_mdc_api_calls(void)
     }
 
     /* close the file and delete it */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( H5Fclose(file_id) < 0  ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "HDremove() failed.\n";
         }
     }
 
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass1 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if ( ! pass1 )
+        HDfprintf(stdout, "%s: failure_mssg1 = \"%s\".\n",
+                  fcn_name, failure_mssg1);
 
 } /* check_file_mdc_api_calls() */
 
@@ -1085,14 +1085,14 @@ check_file_mdc_api_calls(void)
  *
  *		If the number of cache accesses exceeds the value provided
  *		in the min_accesses parameter, and the hit rate is less than
- *		min_hit_rate, set pass to FALSE, and set failure_mssg to
+ *		min_hit_rate, set pass1 to FALSE, and set failure_mssg1 to
  *		a string indicating that hit rate was unexpectedly low.
  *
  *		Return hit rate in *hit_rate_ptr, and print the data to
  *		stdout if requested.
  *
- *		If an error is detected, set pass to FALSE, and set
- *		failure_mssg to an appropriate value.
+ *		If an error is detected, set pass1 to FALSE, and set
+ *		failure_mssg1 to an appropriate value.
  *
  * Return:	void
  *
@@ -1121,34 +1121,34 @@ check_and_validate_cache_hit_rate(hid_t file_id,
     H5C1_t * cache_ptr = NULL;
 
     /* get a pointer to the files internal data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_ptr = H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "Can't get file_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't get file_ptr.";
 
         } else {
 
-            cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache1;
         }
     }
 
     /* verify that we can access the cache data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( ( cache_ptr == NULL ) ||
              ( cache_ptr->magic != H5C1__H5C1_T_MAGIC ) ) {
 
-            pass = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't access cache resize_ctl.";
         }
     }
 
     /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
+    if ( pass1 ) {
 
         cache_hits     = cache_ptr->cache_hits;
         cache_accesses = cache_ptr->cache_accesses;
@@ -1166,47 +1166,47 @@ check_and_validate_cache_hit_rate(hid_t file_id,
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_hit_rate() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_hit_rate() failed.";
 
         } else if ( hit_rate != expected_hit_rate ) {
 
-            pass = FALSE;
-            failure_mssg = "unexpected hit rate.";
+            pass1 = FALSE;
+            failure_mssg1 = "unexpected hit rate.";
         }
     }
 
-    if ( pass ) { /* reset the hit rate */
+    if ( pass1 ) { /* reset the hit rate */
 
         result = H5Freset_mdc_hit_rate_stats(file_id);
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Freset_mdc_hit_rate_stats() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Freset_mdc_hit_rate_stats() failed.";
         }
     }
 
     /* set *hit_rate_ptr if appropriate */
-    if ( ( pass ) && ( hit_rate_ptr != NULL ) ) {
+    if ( ( pass1 ) && ( hit_rate_ptr != NULL ) ) {
 
         *hit_rate_ptr = hit_rate;
     }
 
     /* dump data to stdout if requested */
-    if ( ( pass ) && ( dump_data ) ) {
+    if ( ( pass1 ) && ( dump_data ) ) {
 
         HDfprintf(stdout,
                   "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n",
                   (long)cache_hits, (long)cache_accesses, hit_rate);
     }
 
-    if ( ( pass ) &&
+    if ( ( pass1 ) &&
          ( cache_accesses > min_accesses ) &&
          ( hit_rate < min_hit_rate ) ) {
 
-            pass = FALSE;
-            failure_mssg = "Unexpectedly low hit rate.";
+            pass1 = FALSE;
+            failure_mssg1 = "Unexpectedly low hit rate.";
     }
 
     return;
@@ -1225,8 +1225,8 @@ check_and_validate_cache_hit_rate(hid_t file_id,
  *		parameters if these parameters are not NULL.  Print the
  *		data to stdout if requested.
  *
- *		If an error is detected, set pass to FALSE, and set
- *		failure_mssg to an appropriate value.
+ *		If an error is detected, set pass1 to FALSE, and set
+ *		failure_mssg1 to an appropriate value.
  *
  * Return:	void
  *
@@ -1260,34 +1260,34 @@ check_and_validate_cache_size(hid_t file_id,
     H5C1_t * cache_ptr = NULL;
 
     /* get a pointer to the files internal data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_ptr = H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "Can't get file_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't get file_ptr.";
 
         } else {
 
-            cache_ptr = file_ptr->shared->cache;
+            cache_ptr = file_ptr->shared->cache1;
         }
     }
 
     /* verify that we can access the cache data structure */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( ( cache_ptr == NULL ) ||
              ( cache_ptr->magic != H5C1__H5C1_T_MAGIC ) ) {
 
-            pass = FALSE;
-            failure_mssg = "Can't access cache data structure.";
+            pass1 = FALSE;
+            failure_mssg1 = "Can't access cache data structure.";
         }
     }
 
     /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
+    if ( pass1 ) {
 
         expected_max_size        = cache_ptr->max_cache_size;
         expected_min_clean_size  = cache_ptr->min_clean_size;
@@ -1302,44 +1302,44 @@ check_and_validate_cache_size(hid_t file_id,
 
         if ( result < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() failed.";
 
         } else if ( ( max_size != expected_max_size ) ||
                     ( min_clean_size != expected_min_clean_size ) ||
                     ( cur_size != expected_cur_size ) ||
                     ( cur_num_entries != (int)expected_cur_num_entries ) ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() returned unexpected value(s).";
 
         }
     }
 
     /* return size values if requested */
-    if ( ( pass ) && ( max_size_ptr != NULL ) ) {
+    if ( ( pass1 ) && ( max_size_ptr != NULL ) ) {
 
         *max_size_ptr = max_size;
     }
 
-    if ( ( pass ) && ( min_clean_size_ptr != NULL ) ) {
+    if ( ( pass1 ) && ( min_clean_size_ptr != NULL ) ) {
 
         *min_clean_size_ptr = min_clean_size;
     }
 
-    if ( ( pass ) && ( cur_size_ptr != NULL ) ) {
+    if ( ( pass1 ) && ( cur_size_ptr != NULL ) ) {
 
         *cur_size_ptr = cur_size;
     }
 
-    if ( ( pass ) && ( cur_num_entries_ptr != NULL ) ) {
+    if ( ( pass1 ) && ( cur_num_entries_ptr != NULL ) ) {
 
         *cur_num_entries_ptr = cur_num_entries;
     }
 
 
     /* dump data to stdout if requested */
-    if ( ( pass ) && ( dump_data ) ) {
+    if ( ( pass1 ) && ( dump_data ) ) {
 
         HDfprintf(stdout,
                   "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n",
@@ -1376,7 +1376,7 @@ check_and_validate_cache_size(hid_t file_id,
 #define NUM_RANDOM_ACCESSES     200000
 
 static void
-mdc_api_call_smoke_check(int express_test)
+mdc_api_call_smoke_check(int express_test1)
 {
     const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
@@ -1504,7 +1504,7 @@ mdc_api_call_smoke_check(int express_test)
 
     TESTING("MDC API smoke check");
 
-    if ( express_test > 0 ) {
+    if ( express_test1 > 0 ) {
 
         SKIPPED();
 
@@ -1513,7 +1513,7 @@ mdc_api_call_smoke_check(int express_test)
         return;
     }
 
-    pass = TRUE;
+    pass1 = TRUE;
 
     /* Open a file with the default FAPL.  Verify that the cache is
      * configured as per the default both by looking at its internal
@@ -1525,31 +1525,31 @@ mdc_api_call_smoke_check(int express_test)
 
     /* setup the file name */
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"\nSetting up file ... ");
         HDfflush(stdout);
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME1[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "h5_fixname() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "h5_fixname() failed.\n";
         }
     }
 
     /* create the file using the default FAPL */
-    if ( pass ) {
+    if ( pass1 ) {
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
         if ( file_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fcreate() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fcreate() failed.\n";
         }
     }
 
@@ -1557,19 +1557,19 @@ mdc_api_call_smoke_check(int express_test)
     validate_mdc_config(file_id, &default_config, TRUE, 1);
 
     /* set alternate config 1 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_1) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 1.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 1.\n";
         }
     }
 
     /* verify that the cache is now set to the alternate config */
     validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Done.\n"); /* setting up file */
         HDfflush(stdout);
@@ -1578,17 +1578,17 @@ mdc_api_call_smoke_check(int express_test)
 
     /* create the datasets */
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Creating datasets ... ");
         HDfflush(stdout);
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         i = 0;
 
-        while ( ( pass ) && ( i < NUM_DSETS ) )
+        while ( ( pass1 ) && ( i < NUM_DSETS ) )
         {
             /* create a dataspace for the chunked dataset */
             dims[0] = DSET_SIZE;
@@ -1597,15 +1597,15 @@ mdc_api_call_smoke_check(int express_test)
 
             if ( dataspace_id < 0 ) {
 
-                pass = FALSE;
-                failure_mssg = "H5Screate_simple() failed.";
+                pass1 = FALSE;
+                failure_mssg1 = "H5Screate_simple() failed.";
             }
 
             /* set the dataset creation plist to specify that the raw data is
              * to be partioned into 10X10 element chunks.
              */
 
-            if ( pass ) {
+            if ( pass1 ) {
 
                 chunk_size[0] = CHUNK_SIZE;
                 chunk_size[1] = CHUNK_SIZE;
@@ -1613,22 +1613,22 @@ mdc_api_call_smoke_check(int express_test)
 
                 if ( properties < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "H5Pcreate() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "H5Pcreate() failed.";
                 }
             }
 
-            if ( pass ) {
+            if ( pass1 ) {
 
                 if ( H5Pset_chunk(properties, 2, chunk_size) < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "H5Pset_chunk() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "H5Pset_chunk() failed.";
                 }
             }
 
             /* create the dataset */
-            if ( pass ) {
+            if ( pass1 ) {
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
@@ -1636,20 +1636,20 @@ mdc_api_call_smoke_check(int express_test)
 
                 if ( dataset_ids[i] < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "H5Dcreate2() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "H5Dcreate2() failed.";
                 }
             }
 
             /* get the file space ID */
-            if ( pass ) {
+            if ( pass1 ) {
 
                 filespace_ids[i] = H5Dget_space(dataset_ids[i]);
 
                 if ( filespace_ids[i] < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "H5Dget_space() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "H5Dget_space() failed.";
                 }
             }
 
@@ -1658,7 +1658,7 @@ mdc_api_call_smoke_check(int express_test)
     }
 
     /* create the mem space to be used to read and write chunks */
-    if ( pass ) {
+    if ( pass1 ) {
 
         dims[0] = CHUNK_SIZE;
         dims[1] = CHUNK_SIZE;
@@ -1666,13 +1666,13 @@ mdc_api_call_smoke_check(int express_test)
 
         if ( memspace_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Screate_simple() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Screate_simple() failed.";
         }
     }
 
     /* select in memory hyperslab */
-    if ( pass ) {
+    if ( pass1 ) {
 
         offset[0] = 0;  /*offset of hyperslab in memory*/
         offset[1] = 0;
@@ -1683,12 +1683,12 @@ mdc_api_call_smoke_check(int express_test)
 
         if ( status < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Sselect_hyperslab() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Sselect_hyperslab() failed.";
         }
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Done.\n");
         HDfflush(stdout);
@@ -1698,19 +1698,19 @@ mdc_api_call_smoke_check(int express_test)
     i = 0;
     progress_counter = 0;
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Initializing datasets ");
         HDfflush(stdout);
     }
 
-    while ( ( pass ) && ( i < DSET_SIZE ) )
+    while ( ( pass1 ) && ( i < DSET_SIZE ) )
     {
         j = 0;
-        while ( ( pass ) && ( j < DSET_SIZE ) )
+        while ( ( pass1 ) && ( j < DSET_SIZE ) )
         {
             m = 0;
-            while ( ( pass ) && ( m < NUM_DSETS ) )
+            while ( ( pass1 ) && ( m < NUM_DSETS ) )
             {
                 /* initialize the slab */
                 for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -1732,8 +1732,8 @@ mdc_api_call_smoke_check(int express_test)
 
                 if ( status < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "disk H5Sselect_hyperslab() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "disk H5Sselect_hyperslab() failed.";
                 }
 
                 /* write the chunk to file */
@@ -1742,8 +1742,8 @@ mdc_api_call_smoke_check(int express_test)
 
                 if ( status < 0 ) {
 
-                    pass = FALSE;
-                    failure_mssg = "H5Dwrite() failed.";
+                    pass1 = FALSE;
+                    failure_mssg1 = "H5Dwrite() failed.";
                 }
                 m++;
             }
@@ -1759,7 +1759,7 @@ mdc_api_call_smoke_check(int express_test)
          * similarly, check cache size.
          */
 
-        if ( ( pass ) && ( i % (DSET_SIZE / 4) == 0 ) ) {
+        if ( ( pass1 ) && ( i % (DSET_SIZE / 4) == 0 ) ) {
 
             check_and_validate_cache_hit_rate(file_id, NULL, dump_hit_rate,
                                               min_accesses, min_hit_rate);
@@ -1770,7 +1770,7 @@ mdc_api_call_smoke_check(int express_test)
 
         i += CHUNK_SIZE;
 
-        if ( ( pass ) && ( report_progress ) ) {
+        if ( ( pass1 ) && ( report_progress ) ) {
 
 	    progress_counter += CHUNK_SIZE;
 
@@ -1783,19 +1783,19 @@ mdc_api_call_smoke_check(int express_test)
 	}
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout," Done.\n"); /* initializing data sets */
         HDfflush(stdout);
     }
 
     /* set alternate config 2 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_2) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 2.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 2.\n";
         }
     }
 
@@ -1804,7 +1804,7 @@ mdc_api_call_smoke_check(int express_test)
 
     /* do random reads on all datasets */
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Doing random reads on all datasets ");
         HDfflush(stdout);
@@ -1812,7 +1812,7 @@ mdc_api_call_smoke_check(int express_test)
 
     n = 0;
     progress_counter = 0;
-    while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
+    while ( ( pass1 ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         m = rand() % NUM_DSETS;
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
@@ -1828,25 +1828,25 @@ mdc_api_call_smoke_check(int express_test)
 
         if ( status < 0 ) {
 
-           pass = FALSE;
-           failure_mssg = "disk hyperslab create failed.";
+           pass1 = FALSE;
+           failure_mssg1 = "disk hyperslab create failed.";
         }
 
         /* read the chunk from file */
-        if ( pass ) {
+        if ( pass1 ) {
 
             status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
                              filespace_ids[m], H5P_DEFAULT, data_chunk);
 
             if ( status < 0 ) {
 
-               pass = FALSE;
-               failure_mssg = "disk hyperslab create failed.";
+               pass1 = FALSE;
+               failure_mssg1 = "disk hyperslab create failed.";
             }
         }
 
         /* validate the slab */
-        if ( pass ) {
+        if ( pass1 ) {
 
             valid_chunk = TRUE;
             for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -1875,8 +1875,8 @@ mdc_api_call_smoke_check(int express_test)
 
             if ( ! valid_chunk ) {
 #if 1
-                pass = FALSE;
-                failure_mssg = "slab validation failed.";
+                pass1 = FALSE;
+                failure_mssg1 = "slab validation failed.";
 #else /* as above */
                 fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
@@ -1884,7 +1884,7 @@ mdc_api_call_smoke_check(int express_test)
             }
         }
 
-        if ( ( pass ) && ( n % (NUM_RANDOM_ACCESSES / 4) == 0 ) ) {
+        if ( ( pass1 ) && ( n % (NUM_RANDOM_ACCESSES / 4) == 0 ) ) {
 
             check_and_validate_cache_hit_rate(file_id, NULL, dump_hit_rate,
                                               min_accesses, min_hit_rate);
@@ -1895,7 +1895,7 @@ mdc_api_call_smoke_check(int express_test)
 
         n++;
 
-        if ( ( pass ) && ( report_progress ) ) {
+        if ( ( pass1 ) && ( report_progress ) ) {
 
 	    progress_counter++;
 
@@ -1908,7 +1908,7 @@ mdc_api_call_smoke_check(int express_test)
 	}
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, " Done.\n"); /* random reads on all data sets */
         HDfflush(stdout);
@@ -1917,12 +1917,12 @@ mdc_api_call_smoke_check(int express_test)
 
     /* close the file spaces we are done with */
     i = 1;
-    while ( ( pass ) && ( i < NUM_DSETS ) )
+    while ( ( pass1 ) && ( i < NUM_DSETS ) )
     {
         if ( H5Sclose(filespace_ids[i]) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Sclose() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Sclose() failed.";
         }
         i++;
     }
@@ -1930,23 +1930,23 @@ mdc_api_call_smoke_check(int express_test)
 
     /* close the datasets we are done with */
     i = 1;
-    while ( ( pass ) && ( i < NUM_DSETS ) )
+    while ( ( pass1 ) && ( i < NUM_DSETS ) )
     {
         if ( H5Dclose(dataset_ids[i]) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Dclose() failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Dclose() failed.";
         }
         i++;
     }
 
     /* set alternate config 3 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Fset_mdc_config(file_id, &mod_config_3) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() failed 3.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() failed 3.\n";
         }
     }
 
@@ -1955,7 +1955,7 @@ mdc_api_call_smoke_check(int express_test)
 
     /* do random reads on data set 0 only */
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, "Doing random reads on dataset 0 ");
         HDfflush(stdout);
@@ -1964,7 +1964,7 @@ mdc_api_call_smoke_check(int express_test)
     m = 0;
     n = 0;
     progress_counter = 0;
-    while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
+    while ( ( pass1 ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
@@ -1979,25 +1979,25 @@ mdc_api_call_smoke_check(int express_test)
 
         if ( status < 0 ) {
 
-           pass = FALSE;
-           failure_mssg = "disk hyperslab create failed.";
+           pass1 = FALSE;
+           failure_mssg1 = "disk hyperslab create failed.";
         }
 
         /* read the chunk from file */
-        if ( pass ) {
+        if ( pass1 ) {
 
             status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
                              filespace_ids[m], H5P_DEFAULT, data_chunk);
 
             if ( status < 0 ) {
 
-               pass = FALSE;
-               failure_mssg = "disk hyperslab create failed.";
+               pass1 = FALSE;
+               failure_mssg1 = "disk hyperslab create failed.";
             }
         }
 
         /* validate the slab */
-        if ( pass ) {
+        if ( pass1 ) {
 
             valid_chunk = TRUE;
             for ( k = 0; k < CHUNK_SIZE; k++ )
@@ -2022,8 +2022,8 @@ mdc_api_call_smoke_check(int express_test)
 
             if ( ! valid_chunk ) {
 
-                pass = FALSE;
-                failure_mssg = "slab validation failed.";
+                pass1 = FALSE;
+                failure_mssg1 = "slab validation failed.";
 #if 0 /* as above */
                 fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
                         i, j, m);
@@ -2031,7 +2031,7 @@ mdc_api_call_smoke_check(int express_test)
             }
         }
 
-        if ( ( pass ) && ( n % (NUM_RANDOM_ACCESSES / 4) == 0 ) ) {
+        if ( ( pass1 ) && ( n % (NUM_RANDOM_ACCESSES / 4) == 0 ) ) {
 
             check_and_validate_cache_hit_rate(file_id, NULL, dump_hit_rate,
                                               min_accesses, min_hit_rate);
@@ -2042,7 +2042,7 @@ mdc_api_call_smoke_check(int express_test)
 
         n++;
 
-        if ( ( pass ) && ( report_progress ) ) {
+        if ( ( pass1 ) && ( report_progress ) ) {
 
 	    progress_counter++;
 
@@ -2055,14 +2055,14 @@ mdc_api_call_smoke_check(int express_test)
 	}
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout, " Done.\n"); /* random reads data set 0 */
         HDfflush(stdout);
     }
 
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Shutting down ... ");
         HDfflush(stdout);
@@ -2070,73 +2070,73 @@ mdc_api_call_smoke_check(int express_test)
 
 
     /* close file space 0 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Sclose(filespace_ids[0]) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Sclose(filespace_ids[0]) failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Sclose(filespace_ids[0]) failed.";
         }
     }
 
     /* close the data space */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Sclose(dataspace_id) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Sclose(dataspace) failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Sclose(dataspace) failed.";
         }
     }
 
     /* close the mem space */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Sclose(memspace_id) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Sclose(memspace_id) failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Sclose(memspace_id) failed.";
         }
     }
 
     /* close dataset 0 */
-    if ( pass ) {
+    if ( pass1 ) {
 
         if ( H5Dclose(dataset_ids[0]) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Dclose(dataset_ids[0]) failed.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Dclose(dataset_ids[0]) failed.";
         }
     }
 
     /* close the file and delete it */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( H5Fclose(file_id) < 0  ) {
 
-            pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "H5Fclose() failed.\n";
 
         }
         else if ( HDremove(filename) < 0 ) {
 
-            pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+            pass1 = FALSE;
+	    failure_mssg1 = "HDremove() failed.\n";
         }
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
+    if ( ( pass1 ) && ( report_progress ) ) {
 
 	HDfprintf(stdout,"Done.\n"); /* shutting down */
         HDfflush(stdout);
     }
 
 
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass1 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if ( ! pass1 )
+        HDfprintf(stdout, "%s: failure_mssg1 = \"%s\".\n",
+                  fcn_name, failure_mssg1);
 
 } /* mdc_api_call_smoke_check() */
 
@@ -3534,21 +3534,21 @@ check_fapl_mdc_api_errs(void)
 
     TESTING("MDC/FAPL related API input errors");
 
-    pass = TRUE;
+    pass1 = TRUE;
 
 
     /* first test H5Pget_mdc_config().
      */
 
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if  ( pass ) {
+    if  ( pass1 ) {
 
         H5E_BEGIN_TRY { result = H5Pget_mdc_config(-1, &scratch); } H5E_END_TRY;
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pget_mdc_config() accepted invalid plist_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pget_mdc_config() accepted invalid plist_id.";
         }
     }
 
@@ -3556,27 +3556,27 @@ check_fapl_mdc_api_errs(void)
      * default MDC configuration.
      */
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
         if ( fapl_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
     }
 
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if ( ( pass ) &&
+    if ( ( pass1 ) &&
          ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0 ) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
-        pass = FALSE;
-        failure_mssg = "New FAPL has unexpected metadata cache config?!?!?.\n";
+        pass1 = FALSE;
+        failure_mssg1 = "New FAPL has unexpected metadata cache config?!?!?.\n";
     }
 
-    if  ( pass ) {
+    if  ( pass1 ) {
 
         H5E_BEGIN_TRY {
             result = H5Pget_mdc_config(fapl_id, NULL);
@@ -3584,15 +3584,15 @@ check_fapl_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pget_mdc_config() accepted NULL config_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pget_mdc_config() accepted NULL config_ptr.";
         }
     }
 
     /* one last test for H5Pget_mdc_config() */
 
     scratch.version = -1; /* a convenient, invalid value */
-    if  ( pass ) {
+    if  ( pass1 ) {
 
         H5E_BEGIN_TRY {
             result = H5Pget_mdc_config(fapl_id, &scratch);
@@ -3600,8 +3600,8 @@ check_fapl_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pget_mdc_config() accepted bad config version.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pget_mdc_config() accepted bad config version.";
         }
     }
 
@@ -3610,7 +3610,7 @@ check_fapl_mdc_api_errs(void)
      */
 
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if ( pass ) {
+    if ( pass1 ) {
 
         H5E_BEGIN_TRY {
             result = H5Pset_mdc_config(-1, &default_config);
@@ -3618,12 +3618,12 @@ check_fapl_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pset_mdc_config() accepted bad invalid plist_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pset_mdc_config() accepted bad invalid plist_id.";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
         H5E_BEGIN_TRY {
             result = H5Pset_mdc_config(fapl_id, NULL);
@@ -3631,13 +3631,13 @@ check_fapl_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Pset_mdc_config() accepted NULL config_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Pset_mdc_config() accepted NULL config_ptr.";
         }
     }
 
     i = 0;
-    while ( ( pass ) && ( i < NUM_INVALID_CONFIGS ) )
+    while ( ( pass1 ) && ( i < NUM_INVALID_CONFIGS ) )
     {
         H5E_BEGIN_TRY {
             result = H5Pset_mdc_config(fapl_id, &(invalid_configs[i]));
@@ -3645,10 +3645,10 @@ check_fapl_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                    "H5Pset_mdc_config() accepted invalid_configs[%d].", i);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
         i++;
     }
@@ -3657,19 +3657,19 @@ check_fapl_mdc_api_errs(void)
      * the configuration in the FAPL.
      */
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if ( ( pass ) &&
+    if ( ( pass1 ) &&
          ( ( H5Pget_mdc_config(fapl_id, &scratch) < 0 ) ||
            ( !CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE) ) ) ) {
 
-        pass = FALSE;
-        failure_mssg = "FAPL metadata cache config changed???.\n";
+        pass1 = FALSE;
+        failure_mssg1 = "FAPL metadata cache config changed???.\n";
     }
 
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass1 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if ( ! pass1 )
+        HDfprintf(stdout, "%s: failure_mssg1 = \"%s\".\n",
+                  fcn_name, failure_mssg1);
 
 } /* check_fapl_mdc_api_errs() */
 
@@ -3710,29 +3710,29 @@ check_file_mdc_api_errs(void)
 
     TESTING("MDC/FILE related API input errors");
 
-    pass = TRUE;
+    pass1 = TRUE;
 
     /* Create a file for test purposes, and veify that its metadata cache
      * set to the default MDC configuration.
      */
 
     /* setup the file name */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: calling h5_fixname().\n", fcn_name);
 	}
 
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+        if ( h5_fixname(FILENAME1[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
-            pass = FALSE;
-            failure_mssg = "h5_fixname() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "h5_fixname() failed.\n";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3743,8 +3743,8 @@ check_file_mdc_api_errs(void)
 
         if ( file_id < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fcreate() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fcreate() failed.\n";
         }
     }
 
@@ -3754,7 +3754,7 @@ check_file_mdc_api_errs(void)
     /* test H5Fget_mdc_config().  */
 
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if  ( pass ) {
+    if  ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3767,12 +3767,12 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_config() accepted invalid file_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_config() accepted invalid file_id.";
         }
     }
 
-    if  ( pass ) {
+    if  ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3785,13 +3785,13 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_config() accepted NULL config_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_config() accepted NULL config_ptr.";
         }
     }
 
     scratch.version = -1; /* a convenient, invalid value */
-    if  ( pass ) {
+    if  ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3804,8 +3804,8 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_config() accepted bad config version.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_config() accepted bad config version.";
         }
     }
 
@@ -3813,7 +3813,7 @@ check_file_mdc_api_errs(void)
     /* test H5Fset_mdc_config() */
 
     scratch.version = H5C1__CURR_AUTO_SIZE_CTL_VER;
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3826,12 +3826,12 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() accepted bad invalid file_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() accepted bad invalid file_id.";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3844,13 +3844,13 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fset_mdc_config() accepted NULL config_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fset_mdc_config() accepted NULL config_ptr.";
         }
     }
 
     i = 0;
-    while ( ( pass ) && ( i < NUM_INVALID_CONFIGS ) )
+    while ( ( pass1 ) && ( i < NUM_INVALID_CONFIGS ) )
     {
 	if ( show_progress ) {
 
@@ -3865,10 +3865,10 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
+            pass1 = FALSE;
             HDsnprintf(msg, (size_t)128,
                    "H5Fset_mdc_config() accepted invalid_configs[%d].", i);
-            failure_mssg = msg;
+            failure_mssg1 = msg;
         }
         i++;
     }
@@ -3880,7 +3880,7 @@ check_file_mdc_api_errs(void)
 
 
     /* test H5Fget_mdc_hit_rate() */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3894,12 +3894,12 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_hit_rate() accepted bad file_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_hit_rate() accepted bad file_id.";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3913,14 +3913,14 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_hit_rate() accepted NULL hit_rate_ptr.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_hit_rate() accepted NULL hit_rate_ptr.";
         }
     }
 
 
     /* test H5Freset_mdc_hit_rate_stats() */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3934,15 +3934,15 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg =
+            pass1 = FALSE;
+            failure_mssg1 =
                 "H5Freset_mdc_hit_rate_stats() accepted bad file_id.";
         }
     }
 
 
     /* test H5Fget_mdc_size() */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3956,12 +3956,12 @@ check_file_mdc_api_errs(void)
 
         if ( result >= 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() accepted bad file_id.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() accepted bad file_id.";
         }
     }
 
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3976,14 +3976,14 @@ check_file_mdc_api_errs(void)
                                &cur_num_entries) < 0 ) ||
              ( H5Fget_mdc_size(file_id, NULL, NULL, NULL, NULL) < 0 ) ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() failed to handle NULL params.";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fget_mdc_size() failed to handle NULL params.";
         }
     }
 
 
     /* close the file and delete it */
-    if ( pass ) {
+    if ( pass1 ) {
 
 	if ( show_progress ) {
 
@@ -3992,21 +3992,21 @@ check_file_mdc_api_errs(void)
 
         if ( H5Fclose(file_id) < 0  ) {
 
-            pass = FALSE;
-            failure_mssg = "H5Fclose() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
-            pass = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            pass1 = FALSE;
+            failure_mssg1 = "HDremove() failed.\n";
         }
     }
 
-    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass1 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass )
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+    if ( ! pass1 )
+        HDfprintf(stdout, "%s: failure_mssg1 = \"%s\".\n",
+                  fcn_name, failure_mssg1);
 
 } /* check_file_mdc_api_errs() */
 
@@ -4031,11 +4031,11 @@ check_file_mdc_api_errs(void)
 int
 main(void)
 {
-    int express_test;
+    int express_test1;
 
     H5open();
 
-    express_test = GetTestExpress();
+    express_test1 = GetTestExpress();
 
 #if 1
     check_fapl_mdc_api_calls();
@@ -4044,7 +4044,7 @@ main(void)
     check_file_mdc_api_calls();
 #endif
 #if 1
-    mdc_api_call_smoke_check(express_test);
+    mdc_api_call_smoke_check(express_test1);
 #endif
 #if 1
     check_fapl_mdc_api_errs();

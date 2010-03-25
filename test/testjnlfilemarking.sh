@@ -15,7 +15,7 @@
 #
 # Tests for journaling related marking and unmarking of HDF5 files.
 #
-# These tests used to be in cache2_journal.c, but had to be moved 
+# These tests used to be in cache_journal.c, but had to be moved 
 # out as the tests require simulated crashes, and it is difficult to
 # do this in a C program without using fork().
 
@@ -43,7 +43,7 @@ TEST() {
    TEST_ERR=$1                  # The test name
    TEST_ERR_BIN=`pwd`/$TEST_ERR # The path of the test binary
    TEST_DESC=$2
-   TEST_STDERR=cache2_jnl_file_marking.stderr
+   TEST_STDERR=cache_jnl_file_marking.stderr
 
    #Run the test:
    trap "" 6
@@ -93,12 +93,12 @@ echo "Tests to verify correct marking of journaling in progress status in a"
 echo "HDF5 file under various conditions -- most involving abnormal exits."
 echo "Thus the \"Aborted\" messages between tests are expected."
 
-TEST cache2_jnl_file_marking file_marking_after_open
-TEST cache2_jnl_file_marking file_marking_on_create
-TEST cache2_jnl_file_marking file_marking_on_open
-TEST cache2_jnl_file_marking file_unmarking_on_file_close
-TEST cache2_jnl_file_marking file_unmarking_on_journaling_shutdown
-TEST cache2_jnl_file_marking file_unmarking_on_recovery
+TEST cache_jnl_file_marking file_marking_after_open
+TEST cache_jnl_file_marking file_marking_on_create
+TEST cache_jnl_file_marking file_marking_on_open
+TEST cache_jnl_file_marking file_unmarking_on_file_close
+TEST cache_jnl_file_marking file_unmarking_on_journaling_shutdown
+TEST cache_jnl_file_marking file_unmarking_on_recovery
 
 if test $nerrors -eq 0 ; then
    echo "All journaling file marking tests passed."

@@ -21,7 +21,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Gprivate.h"		/* Groups				*/
@@ -471,7 +471,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
      * Also we must work out how we are going to deal with journaling
      * in such cases.
      */
-    FUNC_ENTER_API_META(H5Fmount, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Fmount, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
@@ -488,7 +488,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
     /* Do the mount */
-    if(H5F_mount(&loc, name, child, plist_id, H5AC2_dxpl_id) < 0)
+    if(H5F_mount(&loc, name, child, plist_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -526,7 +526,7 @@ H5Funmount(hid_t loc_id, const char *name)
      * Also, must decide how we are going to deal with journaling
      * in such cases.
      */
-    FUNC_ENTER_API_META(H5Funmount, loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Funmount, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check args */
@@ -536,7 +536,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Unmount */
-    if (H5F_unmount(&loc, name, H5AC2_dxpl_id) < 0)
+    if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

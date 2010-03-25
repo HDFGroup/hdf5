@@ -20,7 +20,7 @@
 #define H5_INTERFACE_INIT_FUNC	H5L_init_extern_interface
 
 #include "H5private.h"          /* Generic Functions                    */
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Gpkg.h"             /* Groups                               */
 #include "H5Iprivate.h"		/* IDs					*/
@@ -255,7 +255,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     /* target file_name is an absolute pathname: see RM for detailed description */
     if (CHECK_ABSOLUTE(file_name) || CHECK_ABS_PATH(file_name)) {
         if(NULL == (ext_file = H5F_open(file_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                                H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id))) {
+                                H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))) {
             H5E_clear_stack(NULL);
             /* get last component of file_name */
 	    GET_LAST_DELIMITER(file_name, ptr)
@@ -264,7 +264,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         }
     } else if (CHECK_ABS_DRIVE(file_name)) {
         if(NULL == (ext_file = H5F_open(file_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                                H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id))) {
+                                H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))) {
             H5E_clear_stack(NULL);
 	    /* strip "<drive-letter>:" */
 	    HDstrcpy(tempname, &file_name[2]);
@@ -285,7 +285,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
 
                 ext_file = H5F_open(full_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                            H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id);
+                            H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id);
                 if (full_name)
                     H5MM_xfree(full_name);
                 if (ext_file != NULL)
@@ -305,7 +305,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
             if (H5L_build_name(my_prefix, tempname, &full_name/*out*/) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
             if ((ext_file=H5F_open(full_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                        H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id)) == NULL)
+                        H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)) == NULL)
                 H5E_clear_stack(NULL);
             if (full_name)
                 H5MM_xfree(full_name);
@@ -317,7 +317,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         if (H5L_build_name(extpath, tempname, &full_name/*out*/) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't prepend prefix to filename")
         if ((ext_file = H5F_open(full_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                    H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id)) == NULL)
+                    H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)) == NULL)
             H5E_clear_stack(NULL);
         if (full_name)
             H5MM_xfree(full_name);
@@ -326,7 +326,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     /* try the relative file_name stored in tempname */
     if (ext_file == NULL) {
         if ((ext_file=H5F_open(tempname, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
-                        H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC2_dxpl_id)) == NULL)
+                        H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)) == NULL)
             HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file")
     }
 
@@ -452,7 +452,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     uint8_t    *p;                      /* Pointer into external link buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcreate_external, link_loc_id, H5AC2_dxpl_id, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_external, link_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
              lcpl_id, lapl_id);
 
@@ -479,7 +479,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     HDstrcpy((char *)p, obj_name);       /* External link's object */
 
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC2_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

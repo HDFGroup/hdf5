@@ -716,7 +716,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
                 /* Sanity check value */
                 if(shared->mdc_jnl_file_name_len <= 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "journaling enabled, but journal file path empty?!?")
-                if(shared->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN)
+                if(shared->mdc_jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "journal file path too long")
 
                 HDstrncpy(shared->mdc_jnl_file_name,
@@ -1211,7 +1211,7 @@ H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id)
         /* Sanity check journal file name */
         if(f->shared->mdc_jnl_file_name_len == 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "journaling enabled, but journal file path empty?!?")
-        if(f->shared->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN)
+        if(f->shared->mdc_jnl_file_name_len > H5C__MAX_JOURNAL_FILE_NAME_LEN)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "journal file path too long?!?")
 
         /* Copy journal file name into message to store */

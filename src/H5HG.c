@@ -230,7 +230,7 @@ HDmemset(heap->chunk, 0, size);
     }
 
     /* Add the heap to the cache */
-    if(H5AC2_set(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)size, heap, H5AC2__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_GHEAP, addr, (size_t)size, heap, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to cache global heap collection")
 
     ret_value = addr;
@@ -357,7 +357,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned * heap_flags_ptr)
     }
 
     /* Mark the heap as dirty */
-    *heap_flags_ptr |= H5AC2__DIRTIED_FLAG;
+    *heap_flags_ptr |= H5AC__DIRTIED_FLAG;
 
     /* Set the return value */
     ret_value=idx;
@@ -386,7 +386,7 @@ done:
  *
  *		John Mainzer, 6/8/05
  *		Modified the function to use the new dirtied parameter of
- *		of H5AC2_unprotect() instead of modifying the is_dirty
+ *		of H5AC_unprotect() instead of modifying the is_dirty
  *		field of the cache info.
  *
  *		In this case, that required adding the new heap_dirtied_ptr
@@ -460,7 +460,7 @@ HDmemset(new_chunk + heap->size, 0, need);
     assert(H5HG_ISALIGNED(heap->obj[0].size));
 
     /* Mark the heap as dirty */
-    *heap_flags_ptr |= H5AC2__DIRTIED_FLAG;
+    *heap_flags_ptr |= H5AC__DIRTIED_FLAG;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -497,7 +497,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     size_t	idx;
     haddr_t	addr = HADDR_UNDEF;
     H5HG_heap_t	*heap = NULL;
-    unsigned 	heap_flags = H5AC2__NO_FLAGS_SET;
+    unsigned 	heap_flags = H5AC__NO_FLAGS_SET;
     hbool_t     found = FALSE;          /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -591,7 +591,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
         } /* end if */
     } /* end else */
     HDassert(H5F_addr_defined(addr));
-    if(NULL == (heap = (H5HG_heap_t *)H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)))
+    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     /* Split the free space to make room for the new object */
@@ -606,14 +606,14 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
                  need - (H5HG_SIZEOF_OBJHDR(f) + size));
 #endif /* OLD_WAY */
     } /* end if */
-    heap_flags |= H5AC2__DIRTIED_FLAG;
+    heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */
     hobj->addr = heap->addr;
     hobj->idx = idx;
 
 done:
-    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, heap->addr, (size_t)0, heap, heap_flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, (size_t)0, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -653,7 +653,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     HDassert(hobj);
 
     /* Load the heap */
-    if(NULL == (heap = (H5HG_heap_t *)H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_READ)))
+    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
 
     HDassert(hobj->idx < heap->nused);
@@ -667,7 +667,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
 
     /*
      * Advance the heap in the CWFS list. We might have done this already
-     * with the H5AC2_protect(), but it won't hurt to do it twice.
+     * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if(heap->obj[0].begin) {
         int	i;
@@ -690,7 +690,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     ret_value = object;
 
 done:
-    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)0, heap, H5AC2__NO_FLAGS_SET) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -717,7 +717,7 @@ done:
  *
  *		John Mainzer - 6/8/05
  *		Modified function to use the dirtied parameter of
- *		H5AC2_unprotect() instead of modifying the is_dirty
+ *		H5AC_unprotect() instead of modifying the is_dirty
  *		field of the cache info.
  *
  *-------------------------------------------------------------------------
@@ -726,7 +726,7 @@ int
 H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
-    unsigned heap_flags = H5AC2__NO_FLAGS_SET;
+    unsigned heap_flags = H5AC__NO_FLAGS_SET;
     int ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5HG_link, FAIL);
@@ -739,7 +739,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 
     if(adjust!=0) {
         /* Load the heap */
-        if (NULL == (heap = (H5HG_heap_t *)H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)))
+        if (NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
         assert (hobj->idx<heap->nused);
@@ -749,14 +749,14 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
         if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
             HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range")
         heap->obj[hobj->idx].nrefs += adjust;
-        heap_flags |= H5AC2__DIRTIED_FLAG;
+        heap_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
 
     /* Set return value */
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)0, heap, heap_flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -777,7 +777,7 @@ done:
  *
  *		John Mainzer - 6/8/05
  *		Modified function to use the dirtied parameter of
- *		H5AC2_unprotect() instead of modifying the is_dirty
+ *		H5AC_unprotect() instead of modifying the is_dirty
  *		field of the cache info.
  *
  *-------------------------------------------------------------------------
@@ -789,7 +789,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     uint8_t	*p = NULL, *obj_start = NULL;
     size_t	need;
     unsigned	u;
-    unsigned    flags = H5AC2__NO_FLAGS_SET;/* Whether the heap gets deleted */
+    unsigned    flags = H5AC__NO_FLAGS_SET;/* Whether the heap gets deleted */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5HG_remove, FAIL);
@@ -801,7 +801,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Load the heap */
-    if(NULL == (heap = (H5HG_heap_t *)H5AC2_protect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC2_WRITE)))
+    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     HDassert(hobj->idx < heap->nused);
@@ -831,7 +831,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
     } /* end if */
     HDmemset(heap->obj + hobj->idx, 0, sizeof(H5HG_obj_t));
-    flags |= H5AC2__DIRTIED_FLAG;
+    flags |= H5AC__DIRTIED_FLAG;
 
     if((heap->obj[0].size + H5HG_SIZEOF_HDR(f)) == heap->size) {
         /*
@@ -840,14 +840,14 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
          */
         H5_CHECK_OVERFLOW(heap->size, size_t, hsize_t);
         H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, heap->addr, (hsize_t)heap->size);
-        flags |= H5AC2__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
+        flags |= H5AC__DELETED_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } /* end if */
     else {
         int	i;              /* Local index variable */
 
         /*
          * If the heap is in the CWFS list then advance it one position.  The
-         * H5AC2_protect() might have done that too, but that's okay.  If the
+         * H5AC_protect() might have done that too, but that's okay.  If the
          * heap isn't on the CWFS list then add it to the end.
          */
         for(i = 0; i < f->shared->ncwfs; i++)
@@ -865,7 +865,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     } /* end else */
 
 done:
-    if(heap && H5AC2_unprotect(f, dxpl_id, H5AC2_GHEAP, hobj->addr, (size_t)0, heap, flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);

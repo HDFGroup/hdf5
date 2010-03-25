@@ -947,7 +947,7 @@ done:
  *
  *              John Mainzer, 6/6/05
  *              Updated function to use the new dirtied parameter of
- *              H5AC2_unprotect() instead of manipulating the is_dirty
+ *              H5AC_unprotect() instead of manipulating the is_dirty
  *              field of the cache info.
  *
  *-------------------------------------------------------------------------

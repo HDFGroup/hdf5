@@ -54,7 +54,7 @@ journal_files(const char *filename, const char *ctl_filename, const char *jnl_fi
      * access properties.
      */
     hid_t       faccpl;         /* file access property list handle */
-    H5AC2_jnl_config_t jnl_config;
+    H5AC_jnl_config_t jnl_config;
 
     faccpl = H5Pcreate(H5P_FILE_ACCESS);
     /* Turn journaling on if not patch mode */
@@ -69,7 +69,7 @@ journal_files(const char *filename, const char *ctl_filename, const char *jnl_fi
     }
 
     /* get current journaling configuration */
-    jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+    jnl_config.version = H5AC__CURR_JNL_CONFIG_VER;
 
     if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
         fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");

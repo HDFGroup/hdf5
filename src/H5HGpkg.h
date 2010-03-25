@@ -32,7 +32,7 @@
 #include "H5HGprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5FLprivate.h"	/* Free lists                           */
 
 #define H5F_PACKAGE
@@ -43,7 +43,7 @@
 /*****************************/
 
 /* The cache subclass */
-H5_DLLVAR const H5AC2_class_t H5AC2_GHEAP[1];
+H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
 
 /* Declare extern the free list to manage the H5HG_t struct */
 H5FL_EXTERN(H5HG_heap_t);
@@ -132,7 +132,7 @@ typedef struct H5HG_obj_t {
 } H5HG_obj_t;
 
 struct H5HG_heap_t {
-    H5AC2_info_t cache_info; /* Information for H5AC2 cache functions, _must_ be */
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     haddr_t		addr;		/*collection address		*/
     size_t		size;		/*total size of collection	*/

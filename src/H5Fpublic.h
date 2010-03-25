@@ -22,7 +22,7 @@
 /* Public header files needed by this file */
 #include "H5public.h"
 #include "H5AC1public.h"
-#include "H5AC2public.h"
+#include "H5ACpublic.h"
 #include "H5C1public.h"
 #include "H5Ipublic.h"
 
@@ -138,9 +138,9 @@ H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
 H5_DLL herr_t H5Fget_jnl_config(hid_t file_id,
-                                H5AC2_jnl_config_t *config_ptr);
+                                H5AC_jnl_config_t *config_ptr);
 H5_DLL herr_t H5Fset_jnl_config(hid_t file_id,
-                                const H5AC2_jnl_config_t *config_ptr);
+                                const H5AC_jnl_config_t *config_ptr);
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
 				H5AC1_cache_config_t * config_ptr);
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,

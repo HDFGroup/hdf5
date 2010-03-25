@@ -888,7 +888,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
                 /* Get a pointer to the object header itself */
-                if((oh = H5O_protect(oloc, dxpl_id, H5AC2_WRITE)) == NULL)
+                if((oh = H5O_protect(oloc, dxpl_id, H5AC_WRITE)) == NULL)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect group object header")
 
                 /* Pin the object header */
@@ -896,7 +896,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTPIN, FAIL, "unable to pin group object header")
 
                 /* Unprotect the object header */
-                if(H5O_unprotect(oloc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+                if(H5O_unprotect(oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect group object header")
 
                 /* Inspect links in table for ones that can't be converted back

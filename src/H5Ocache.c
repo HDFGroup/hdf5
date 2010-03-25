@@ -94,8 +94,8 @@ static herr_t H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info,
 /*********************/
 
 /* H5O object header prefix inherits cache-like properties from H5AC */
-const H5AC2_class_t H5AC2_OHDR[1] = {{
-    H5AC2_OHDR_ID,
+const H5AC_class_t H5AC_OHDR[1] = {{
+    H5AC_OHDR_ID,
     "object header",
     H5FD_MEM_OHDR,
     H5O_cache_deserialize,
@@ -106,8 +106,8 @@ const H5AC2_class_t H5AC2_OHDR[1] = {{
 }};
 
 /* H5O object header chunk inherits cache-like properties from H5AC */
-const H5AC2_class_t H5AC2_OHDR_CHK[1] = {{
-    H5AC2_OHDR_CHK_ID,
+const H5AC_class_t H5AC_OHDR_CHK[1] = {{
+    H5AC_OHDR_CHK_ID,
     "object header chunk",
     H5FD_MEM_OHDR,
     H5O_cache_chk_deserialize,

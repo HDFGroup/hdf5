@@ -72,9 +72,9 @@ static herr_t H5SM_list_free_icr(haddr_t addr, size_t len, void *thing);
 /*********************/
 /* Package Variables */
 /*********************/
-/* H5SM inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_SOHM_TABLE[1] = {{
-    H5AC2_SOHM_TABLE_ID,
+/* H5SM inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_SOHM_TABLE[1] = {{
+    H5AC_SOHM_TABLE_ID,
     "shared object header message",
     H5FD_MEM_SOHM_TABLE,
     H5SM_table_deserialize,
@@ -84,8 +84,8 @@ const H5AC2_class_t H5AC2_SOHM_TABLE[1] = {{
     NULL
 }};
 
-const H5AC2_class_t H5AC2_SOHM_LIST[1] = {{
-    H5AC2_SOHM_LIST_ID,
+const H5AC_class_t H5AC_SOHM_LIST[1] = {{
+    H5AC_SOHM_LIST_ID,
     "shared object header message",
     H5FD_MEM_SOHM_INDEX,
     H5SM_list_deserialize,
@@ -379,7 +379,7 @@ H5SM_list_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
     /* Allocate space for the SOHM list data structure */
     if(NULL == (list = H5FL_MALLOC(H5SM_list_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&list->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
     if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, udata->header->list_max)) == NULL)

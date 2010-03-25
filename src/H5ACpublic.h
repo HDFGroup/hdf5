@@ -15,7 +15,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5AC2public.h
+ * Created:             H5ACpublic.h
  *                      Jul 10 1997
  *                      Robb Matzke <matzke@llnl.gov>
  *
@@ -25,12 +25,12 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5AC2public_H
-#define _H5AC2public_H
+#ifndef _H5ACpublic_H
+#define _H5ACpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
-#include "H5C2public.h"
+#include "H5Cpublic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,35 +38,35 @@ extern "C" {
 
 /****************************************************************************
  *
- * structure H5AC2_cache_config_t
+ * structure H5AC_cache_config_t
  *
- * H5AC2_cache_config_t is a public structure intended for use in public APIs.
+ * H5AC_cache_config_t is a public structure intended for use in public APIs.
  * At least in its initial incarnation, it is basicaly a copy of struct
- * H5C2_auto_size_ctl_t, minus the report_fcn field, and plus the
+ * H5C_auto_size_ctl_t, minus the report_fcn field, and plus the
  * dirty_bytes_threshold field.
  *
  * The report_fcn field is omitted, as including it would require us to
- * make H5C2_t structure public.
+ * make H5C_t structure public.
  *
- * The dirty_bytes_threshold field does not appear in H5C2_auto_size_ctl_t,
+ * The dirty_bytes_threshold field does not appear in H5C_auto_size_ctl_t,
  * as synchronization between caches on different processes is handled at
- * the H5AC2 level, not at the level of H5C2.  Note however that there is
+ * the H5AC level, not at the level of H5C.  Note however that there is
  * considerable interaction between this value and the other fields in this
  * structure.
  *
  * Similarly, the open_trace_file, close_trace_file, and trace_file_name
- * fields do not appear in H5C2_auto_size_ctl_t, as most trace file
- * issues are handled at the H5AC2 level.  The one exception is storage of
- * the pointer to the trace file, which is handled by H5C2.
+ * fields do not appear in H5C_auto_size_ctl_t, as most trace file
+ * issues are handled at the H5AC level.  The one exception is storage of
+ * the pointer to the trace file, which is handled by H5C.
  *
- * The structure is in H5AC2public.h as we may wish to allow different
+ * The structure is in H5ACpublic.h as we may wish to allow different
  * configuration options for metadata and raw data caches.
  *
  * The fields of the structure are discussed individually below:
  *
  * version: Integer field containing the version number of this version
- *      of the H5AC2_cache_config_t structure.  Any instance of
- *      H5AC2_cache_config_t passed to the cache must have a known
+ *      of the H5AC_cache_config_t structure.  Any instance of
+ *      H5AC_cache_config_t passed to the cache must have a known
  *      version number, or an error will be flagged.
  *
  * rpt_fcn_enabled: Boolean field used to enable and disable the default
@@ -102,7 +102,7 @@ extern "C" {
  * 	the process will be appended to the file name to yield a unique
  * 	trace file name for each process.
  *
- * 	The length of the path must not exceed H5AC2__MAX_TRACE_FILE_NAME_LEN
+ * 	The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
  * 	characters.
  *
  * evictions_enabled:  Boolean field used to either report the current
@@ -118,7 +118,7 @@ extern "C" {
  *
  * 	At present, evictions can only be disabled if automatic
  * 	cache resizing is also disabled (that is, ( incr_mode ==
- *	H5C2_incr__off ) && ( decr_mode == H5C2_decr__off )).  There
+ *	H5C_incr__off ) && ( decr_mode == H5C_decr__off )).  There
  *	is no logical reason why this should be so, but it simplifies
  *	implementation and testing, and I can't think of any reason
  *	why it would be desireable.  If you can think of one, I'll
@@ -144,7 +144,7 @@ extern "C" {
  *
  * min_size: Minimum size to which the cache can be adjusted.  The
  *      supplied value must fall in the closed interval
- *      [H5C2__MIN_MAX_CACHE_SIZE, H5C2__MAX_MAX_CACHE_SIZE].  Also, min_size
+ *      [H5C__MIN_MAX_CACHE_SIZE, H5C__MAX_MAX_CACHE_SIZE].  Also, min_size
  *      must be less than or equal to max_size.
  *
  * epoch_length: Number of accesses on the cache over which to collect
@@ -153,22 +153,22 @@ extern "C" {
  *
  *      At the end of an epoch, we discard prior hit rate data and start
  *      collecting afresh.  The epoch_length must lie in the closed
- *      interval [H5C2__MIN_AR_EPOCH_LENGTH, H5C2__MAX_AR_EPOCH_LENGTH].
+ *      interval [H5C__MIN_AR_EPOCH_LENGTH, H5C__MAX_AR_EPOCH_LENGTH].
  *
  *
  * Cache size increase control fields:
  *
- * incr_mode: Instance of the H5C2_cache_incr_mode enumerated type whose
+ * incr_mode: Instance of the H5C_cache_incr_mode enumerated type whose
  *      value indicates how we determine whether the cache size should be
  *      increased.  At present there are two possible values:
  *
- *      H5C2_incr__off:  Don't attempt to increase the size of the cache
+ *      H5C_incr__off:  Don't attempt to increase the size of the cache
  *              automatically.
  *
  *              When this increment mode is selected, the remaining fields
  *              in the cache size increase section ar ignored.
  *
- *      H5C2_incr__threshold: Attempt to increase the size of the cache
+ *      H5C_incr__threshold: Attempt to increase the size of the cache
  *              whenever the average hit rate over the last epoch drops
  *              below the value supplied in the lower_hr_threshold
  *              field.
@@ -177,11 +177,11 @@ extern "C" {
  *              at its maximum size, or if the cache is not already using
  *              all available space.
  *
- *      Note that you must set decr_mode to H5C2_incr__off if you
+ *      Note that you must set decr_mode to H5C_incr__off if you
  *      disable metadata cache entry evictions.
  *
  * lower_hr_threshold: Lower hit rate threshold.  If the increment mode
- *      (incr_mode) is H5C2_incr__threshold and the hit rate drops below the
+ *      (incr_mode) is H5C_incr__threshold and the hit rate drops below the
  *      value supplied in this field in an epoch, increment the cache size by
  *      size_increment.  Note that cache size may not be incremented above
  *      max_size, and that the increment may be further restricted by the
@@ -206,7 +206,7 @@ extern "C" {
  *      above, this field contains the maximum number of bytes by which the
  *      cache size can be increased in a single re-size.
  *
- * flash_incr_mode:  Instance of the H5C2_cache_flash_incr_mode enumerated
+ * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
  *      type whose value indicates whether and by which algorithm we should
  *      make flash increases in the size of the cache to accomodate insertion
  *      of large entries and large increases in the size of a single entry.
@@ -219,10 +219,10 @@ extern "C" {
  *
  *      At present, there are two possible values for the flash_incr_mode:
  *
- *      H5C2_flash_incr__off:  Don't perform flash increases in the size of
+ *      H5C_flash_incr__off:  Don't perform flash increases in the size of
  *              the cache.
  *
- *      H5C2_flash_incr__add_space:  Let x be either the size of a newly
+ *      H5C_flash_incr__add_space:  Let x be either the size of a newly
  *              newly inserted entry, or the number of bytes by which the
  *              size of an existing entry has been increased.
  *
@@ -251,34 +251,34 @@ extern "C" {
  *      expect to revisit the issue.
  *
  * flash_multiple: Double containing the multiple described above in the
- *      H5C2_flash_incr__add_space section of the discussion of the
+ *      H5C_flash_incr__add_space section of the discussion of the
  *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
- *      is H5C2_flash_incr__add_space.
+ *      is H5C_flash_incr__add_space.
  *
  * flash_threshold: Double containing the factor by which current max cache
  *      size is multiplied to obtain the size threshold for the add_space flash
  *      increment algorithm.  The field is ignored unless flash_incr_mode is
- *      H5C2_flash_incr__add_space.
+ *      H5C_flash_incr__add_space.
  *
  *
  * Cache size decrease control fields:
  *
- * decr_mode: Instance of the H5C2_cache_decr_mode enumerated type whose
+ * decr_mode: Instance of the H5C_cache_decr_mode enumerated type whose
  *      value indicates how we determine whether the cache size should be
  *      decreased.  At present there are four possibilities.
  *
- *      H5C2_decr__off:  Don't attempt to decrease the size of the cache
+ *      H5C_decr__off:  Don't attempt to decrease the size of the cache
  *              automatically.
  *
  *              When this increment mode is selected, the remaining fields
  *              in the cache size decrease section are ignored.
  *
- *      H5C2_decr__threshold: Attempt to decrease the size of the cache
+ *      H5C_decr__threshold: Attempt to decrease the size of the cache
  *              whenever the average hit rate over the last epoch rises
  *              above the value supplied in the upper_hr_threshold
  *              field.
  *
- *      H5C2_decr__age_out:  At the end of each epoch, search the cache for
+ *      H5C_decr__age_out:  At the end of each epoch, search the cache for
  *              entries that have not been accessed for at least the number
  *              of epochs specified in the epochs_before_eviction field, and
  *              evict these entries.  Conceptually, the maximum cache size
@@ -286,21 +286,21 @@ extern "C" {
  *              this reduction may be modified by the min_size, the
  *              max_decrement, and/or the empty_reserve.
  *
- *      H5C2_decr__age_out_with_threshold:  Same as age_out, but we only
+ *      H5C_decr__age_out_with_threshold:  Same as age_out, but we only
  *              attempt to reduce the cache size when the hit rate observed
  *              over the last epoch exceeds the value provided in the
  *              upper_hr_threshold field.
  *
- *      Note that you must set decr_mode to H5C2_decr__off if you
+ *      Note that you must set decr_mode to H5C_decr__off if you
  *      disable metadata cache entry evictions.
  *
  * upper_hr_threshold: Upper hit rate threshold.  The use of this field
  *      varies according to the current decr_mode:
  *
- *      H5C2_decr__off or H5C2_decr__age_out:  The value of this field is
+ *      H5C_decr__off or H5C_decr__age_out:  The value of this field is
  *              ignored.
  *
- *      H5C2_decr__threshold:  If the hit rate exceeds this threshold in any
+ *      H5C_decr__threshold:  If the hit rate exceeds this threshold in any
  *              epoch, attempt to decrement the cache size by size_decrement.
  *
  *              Note that cache size may not be decremented below min_size.
@@ -308,13 +308,13 @@ extern "C" {
  *              Note also that if the upper_threshold is 1.0, the cache size
  *              will never be reduced.
  *
- *      H5C2_decr__age_out_with_threshold:  If the hit rate exceeds this
+ *      H5C_decr__age_out_with_threshold:  If the hit rate exceeds this
  *              threshold in any epoch, attempt to reduce the cache size
  *              by evicting entries that have not been accessed for more
  *              than the specified number of epochs.
  *
  * decrement: This field is only used when the decr_mode is
- *      H5C2_decr__threshold.
+ *      H5C_decr__threshold.
  *
  *      The field is a double containing the multiplier used to derive the
  *      new cache size from the old if a cache size decrement is triggered.
@@ -330,20 +330,20 @@ extern "C" {
  *      restricted by the min_size of the cache, and (in age out modes) by
  *      the empty_reserve field.
  *
- * epochs_before_eviction:  Integer field used in H5C2_decr__age_out and
- *      H5C2_decr__age_out_with_threshold decrement modes.
+ * epochs_before_eviction:  Integer field used in H5C_decr__age_out and
+ *      H5C_decr__age_out_with_threshold decrement modes.
  *
  *      This field contains the number of epochs an entry must remain
  *      unaccessed before it is evicted in an attempt to reduce the
  *      cache size.  If applicable, this field must lie in the range
- *      [1, H5C2__MAX_EPOCH_MARKERS].
+ *      [1, H5C__MAX_EPOCH_MARKERS].
  *
  * apply_empty_reserve:  Boolean field controlling whether the empty_reserve
  *      field is to be used in computing the new cache size when the
- *      decr_mode is H5C2_decr__age_out or H5C2_decr__age_out_with_threshold.
+ *      decr_mode is H5C_decr__age_out or H5C_decr__age_out_with_threshold.
  *
  * empty_reserve:  To avoid a constant racheting down of cache size by small
- *      amounts in the H5C2_decr__age_out and H5C2_decr__age_out_with_threshold
+ *      amounts in the H5C_decr__age_out and H5C_decr__age_out_with_threshold
  *      modes, this field allows one to require that any cache size
  *      reductions leave the specified fraction of unused space in the cache.
  *
@@ -380,10 +380,10 @@ extern "C" {
  *
  ****************************************************************************/
 
-#define H5AC2__CURR_CACHE_CONFIG_VERSION 	1
-#define H5AC2__MAX_TRACE_FILE_NAME_LEN		1024
+#define H5AC__CURR_CACHE_CONFIG_VERSION 	1
+#define H5AC__MAX_TRACE_FILE_NAME_LEN		1024
 
-typedef struct H5AC2_cache_config_t
+typedef struct H5AC_cache_config_t
 {
     /* general configuration fields: */
     int                       version;
@@ -392,7 +392,7 @@ typedef struct H5AC2_cache_config_t
 
     hbool_t		      open_trace_file;
     hbool_t                   close_trace_file;
-    char                      trace_file_name[H5AC2__MAX_TRACE_FILE_NAME_LEN+1];
+    char                      trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN+1];
 
     hbool_t                   evictions_enabled;
 
@@ -408,7 +408,7 @@ typedef struct H5AC2_cache_config_t
 
 
     /* size increase control fields: */
-    enum H5C2_cache_incr_mode incr_mode;
+    enum H5C_cache_incr_mode incr_mode;
 
     double                    lower_hr_threshold;
 
@@ -417,13 +417,13 @@ typedef struct H5AC2_cache_config_t
     hbool_t                   apply_max_increment;
     size_t                    max_increment;
 
-    enum H5C2_cache_flash_incr_mode     flash_incr_mode;
+    enum H5C_cache_flash_incr_mode     flash_incr_mode;
     double                              flash_multiple;
     double                              flash_threshold;
 
 
     /* size decrease control fields: */
-    enum H5C2_cache_decr_mode decr_mode;
+    enum H5C_cache_decr_mode decr_mode;
 
     double                    upper_hr_threshold;
 
@@ -441,14 +441,14 @@ typedef struct H5AC2_cache_config_t
     /* parallel configuration fields: */
     int                       dirty_bytes_threshold;
 
-} H5AC2_cache_config_t;
+} H5AC_cache_config_t;
 
 
 /****************************************************************************
  *
- * structure H5AC2_jnl_config_t
+ * structure H5AC_jnl_config_t
  *
- * H5AC2_jnl_config_t is a public structure intended for use in public APIs.
+ * H5AC_jnl_config_t is a public structure intended for use in public APIs.
  * At least in its initial incarnation, it is intended to package all the
  * data needed to configure metadata journaling.  In the future, we may
  * use it to package configuration data for other types of journaling as well.
@@ -459,8 +459,8 @@ typedef struct H5AC2_cache_config_t
  * output of journal messages.
  *
  * version: Integer field containing the version number of this version
- *      of the H5AC2_jnl_config_t structure.  Any instance of
- *      H5AC2_cache_config_t passed to the cache must have a known
+ *      of the H5AC_jnl_config_t structure.  Any instance of
+ *      H5AC_cache_config_t passed to the cache must have a known
  *      version number, or an error will be flagged.
  *
  * enable_journaling:  Boolean flag that is set to TRUE if journaling is
@@ -474,7 +474,7 @@ typedef struct H5AC2_cache_config_t
  * 	is TRUE.
  *
  * 	At present, the length of the journal file path is restricted to
- * 	no more than H5AC2__MAX_JOURNAL_FILE_NAME_LEN.
+ * 	no more than H5AC__MAX_JOURNAL_FILE_NAME_LEN.
  *
  * journal_recovered:  Boolean flag use to indicate that we are opening
  * 	a journaled file that was not closed correctly, and on which the
@@ -504,23 +504,23 @@ typedef struct H5AC2_cache_config_t
  *
  ****************************************************************************/
 
-#define H5AC2__CURR_JNL_CONFIG_VER 		1
-#define H5AC2__MAX_JOURNAL_FILE_NAME_LEN	1024
+#define H5AC__CURR_JNL_CONFIG_VER 		1
+#define H5AC__MAX_JOURNAL_FILE_NAME_LEN	1024
 
-typedef struct H5AC2_jnl_config_t
+typedef struct H5AC_jnl_config_t
 {
     int		version;
 
     /* metadata journaling configuration fields: */
     hbool_t     enable_journaling;
-    char        journal_file_path[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char        journal_file_path[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t     journal_recovered;
     size_t      jbrb_buf_size;
     int         jbrb_num_bufs;
     hbool_t     jbrb_use_aio;
     hbool_t     jbrb_human_readable;
 
-} H5AC2_jnl_config_t;
+} H5AC_jnl_config_t;
 
 
 #ifdef __cplusplus

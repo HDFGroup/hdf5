@@ -30,7 +30,7 @@
 /* Module Setup */
 /****************/
 
-#define H5C2_PACKAGE            /*suppress error about including H5C2pkg  */
+#define H5C_PACKAGE             /*suppress error about including H5Cpkg  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
@@ -38,7 +38,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5C2pkg.h"            /* Metadata cache                       */
+#include "H5Cpkg.h"             /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -116,7 +116,7 @@ H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
 
     /* Check for journaling in progress */
-    if(f->shared->cache2->mdj_enabled) {
+    if(f->shared->cache->mdj_enabled) {
         haddr_t	new_eoa;
 
         /* get updated EOA value */
@@ -124,8 +124,8 @@ H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed")
 
         /* journal the updated EOA value */
-        if(H5C2_jb__eoa(&(f->shared->cache2->mdj_jbrb), new_eoa) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTJOURNAL, HADDR_UNDEF, "H5C2_jb__eoa() failed.")
+        if(H5C_jb__eoa(&(f->shared->cache->mdj_jbrb), new_eoa) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTJOURNAL, HADDR_UNDEF, "H5C_jb__eoa() failed.")
     } /* end if */
 
     /* Convert absolute file address to relative file address */

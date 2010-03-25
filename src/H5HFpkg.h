@@ -32,7 +32,7 @@
 #include "H5HFprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FSprivate.h"	/* File free space                      */
@@ -360,7 +360,7 @@ typedef struct H5HF_free_section_t {
  */
 typedef struct H5HF_hdr_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC2_info_t cache_info;
+    H5AC_info_t cache_info;
 
     /* General header information (stored in header) */
     unsigned    id_len;         /* Size of heap IDs (in bytes) */
@@ -405,7 +405,7 @@ typedef struct H5HF_hdr_t {
     hbool_t     dirty;          /* Shared info is modified */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     size_t      heap_size;      /* Size of heap header in the file */
-    H5AC2_protect_t mode;        /* Access mode for heap */
+    H5AC_protect_t mode;        /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      file_rc;        /* Reference count of files using heap header */
     hbool_t     pending_delete; /* Heap is pending deletion */
@@ -439,7 +439,7 @@ typedef struct H5HF_indirect_filt_ent_t {
 /* Fractal heap indirect block */
 struct H5HF_indirect_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC2_info_t cache_info;
+    H5AC_info_t cache_info;
 
     /* Internal heap information (not stored) */
     size_t      rc;             /* Reference count of objects using this block */
@@ -463,7 +463,7 @@ struct H5HF_indirect_t {
 /* A fractal heap direct block */
 typedef struct H5HF_direct_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC2_info_t cache_info;
+    H5AC_info_t cache_info;
 
     /* Internal heap information */
     H5HF_hdr_t	*hdr;	        /* Shared heap header info	              */
@@ -568,13 +568,13 @@ typedef struct H5HF_dblock_cache_ud_t {
 /*****************************/
 
 /* H5HF header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
 
 /* H5HF indirect block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_IBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
 
 /* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC2_class_t H5AC2_FHEAP_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
 
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
 H5_DLLVAR const H5B2_class_t H5HF_BT2_INDIR[1];
@@ -679,7 +679,7 @@ H5_DLL herr_t H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL H5HF_indirect_t *H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t iblock_addr, unsigned iblock_nrows,
     H5HF_indirect_t *par_iblock, unsigned par_entry, hbool_t must_protect,
-    H5AC2_protect_t rw, hbool_t *did_protect);
+    H5AC_protect_t rw, hbool_t *did_protect);
 H5_DLL herr_t H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
     unsigned cache_flags, hbool_t did_protect);
 H5_DLL herr_t H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry,
@@ -705,10 +705,10 @@ H5_DLL herr_t H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL H5HF_direct_t *H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr, size_t dblock_size,
     H5HF_indirect_t *par_iblock, unsigned par_entry,
-    H5AC2_protect_t rw);
+    H5AC_protect_t rw);
 H5_DLL herr_t H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id,
     hsize_t obj_off, H5HF_indirect_t **par_iblock,
-    unsigned *par_entry, hbool_t *par_did_protect, H5AC2_protect_t rw);
+    unsigned *par_entry, hbool_t *par_did_protect, H5AC_protect_t rw);
 H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     hsize_t dblock_size);
 H5_DLL herr_t H5HF_man_dblock_dest(H5HF_direct_t *dblock);

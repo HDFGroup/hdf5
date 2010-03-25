@@ -37,7 +37,7 @@
 #include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5AC2private.h"       /* Metadata cache                       */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
@@ -532,7 +532,7 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
  *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
  *
  * mdc_jnl_file_name: Array of char of length
- *	H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1 used to store the journal
+ *	H5C__MAX_JOURNAL_FILE_NAME_LEN + 1 used to store the journal
  *	file path.
  *
  *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
@@ -546,7 +546,7 @@ typedef struct H5O_mdj_msg_t {
     hbool_t	mdc_jnl_enabled;
     int32_t     mdc_jnl_magic;
     size_t      mdc_jnl_file_name_len;
-    char        mdc_jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    char        mdc_jnl_file_name[H5C__MAX_JOURNAL_FILE_NAME_LEN + 1];
 
 } H5O_mdj_msg_t;
 
@@ -596,7 +596,7 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC2_protect_t prot);
+H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot);
 H5_DLL herr_t H5O_pin(H5O_t *oh);
 H5_DLL herr_t H5O_unpin(H5O_t *oh);
 H5_DLL herr_t H5O_unprotect(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,

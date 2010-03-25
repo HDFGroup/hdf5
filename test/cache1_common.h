@@ -141,17 +141,17 @@ typedef struct flush_op
 					 */
     int			type;		/* type code of the cache entry that
 					 * is the target of the operation.
-					 * This value is passed into the
+					 * This value is pass1ed into the
 					 * function implementing the flush
 					 * operation.
 					 */
     int			idx;		/* index of the cache entry that
 					 * is the target of the operation.
-					 * This value is passed into the
+					 * This value is pass1ed into the
                                          * function implementing the flush
                                          * operation.
 					 */
-    hbool_t		flag;		/* boolean flag passed into the
+    hbool_t		flag;		/* boolean flag pass1ed into the
 					 * function implementing the flush
 					 * operation.  The meaning of the
 					 * flag is dependant upon the flush
@@ -243,7 +243,7 @@ typedef struct test_entry_t
 					 * value must be in the range
 					 * [0, MAX_PINS].
 					 */
-    int			  pin_type[MAX_PINS]; /* array of the types of entries
+    int			  pin_type[MAX_PINS]; /* array of the types1 of entries
 					 * pinned by this entry.
 					 */
     int			  pin_idx[MAX_PINS]; /* array of the indicies of
@@ -460,35 +460,35 @@ struct expected_entry_status
 
 extern const char *FILENAME[];
 
-extern hbool_t write_permitted;
-extern hbool_t pass; /* set to false on error */
-extern hbool_t skip_long_tests;
-extern hbool_t run_full_test;
-extern const char *failure_mssg;
+extern hbool_t write_permitted1;
+extern hbool_t pass1; /* set to false on error */
+extern hbool_t skip_long_tests1;
+extern hbool_t run_full_test1;
+extern const char *failure_mssg1;
 
-extern test_entry_t pico_entries[NUM_PICO_ENTRIES];
-extern test_entry_t nano_entries[NUM_NANO_ENTRIES];
-extern test_entry_t micro_entries[NUM_MICRO_ENTRIES];
-extern test_entry_t tiny_entries[NUM_TINY_ENTRIES];
-extern test_entry_t small_entries[NUM_SMALL_ENTRIES];
-extern test_entry_t medium_entries[NUM_MEDIUM_ENTRIES];
-extern test_entry_t large_entries[NUM_LARGE_ENTRIES];
-extern test_entry_t huge_entries[NUM_HUGE_ENTRIES];
-extern test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
+extern test_entry_t pico_entries1[NUM_PICO_ENTRIES];
+extern test_entry_t nano_entries1[NUM_NANO_ENTRIES];
+extern test_entry_t micro_entries1[NUM_MICRO_ENTRIES];
+extern test_entry_t tiny_entries1[NUM_TINY_ENTRIES];
+extern test_entry_t small_entries1[NUM_SMALL_ENTRIES];
+extern test_entry_t medium_entries1[NUM_MEDIUM_ENTRIES];
+extern test_entry_t large_entries1[NUM_LARGE_ENTRIES];
+extern test_entry_t huge_entries1[NUM_HUGE_ENTRIES];
+extern test_entry_t monster_entries1[NUM_MONSTER_ENTRIES];
 
-extern test_entry_t * entries[NUMBER_OF_ENTRY_TYPES];
-extern const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
-extern const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES];
-extern const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
-extern const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
-extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
+extern test_entry_t * entries1[NUMBER_OF_ENTRY_TYPES];
+extern const int32_t max_indices1[NUMBER_OF_ENTRY_TYPES];
+extern const size_t entry_sizes1[NUMBER_OF_ENTRY_TYPES];
+extern const haddr_t base_addrs1[NUMBER_OF_ENTRY_TYPES];
+extern const haddr_t alt_base_addrs1[NUMBER_OF_ENTRY_TYPES];
+extern const char * entry_type_names1[NUMBER_OF_ENTRY_TYPES];
 
 
 /* call back function declarations: */
 
-herr_t check_write_permitted(const H5F_t * f,
+herr_t check_write_permitted1(const H5F_t * f,
                              hid_t dxpl_id,
-                             hbool_t * write_permitted_ptr);
+                             hbool_t * write_permitted1_ptr);
 
 herr_t pico_clear(H5F_t * f, void *  thing, hbool_t dest);
 herr_t nano_clear(H5F_t * f, void *  thing, hbool_t dest);
@@ -571,12 +571,12 @@ herr_t variable_size(H5F_t * f, void * thing, size_t * size_ptr);
 
 /* callback table extern */
 
-extern const H5C1_class_t types[NUMBER_OF_ENTRY_TYPES];
+extern const H5C1_class_t types1[NUMBER_OF_ENTRY_TYPES];
 
 
 /* function declarations: */
 
-void add_flush_op(int target_type,
+void add_flush_op1(int target_type,
                   int target_idx,
                   int op_code,
                   int type,
@@ -585,84 +585,84 @@ void add_flush_op(int target_type,
                   size_t size);
 
 
-void addr_to_type_and_index(haddr_t addr,
+void addr_to_type_and_index1(haddr_t addr,
                             int32_t * type_ptr,
                             int32_t * index_ptr);
 
 #if 0 /* keep this for a while -- it may be useful */
-haddr_t type_and_index_to_addr(int32_t type,
+haddr_t type_and_index_to_addr1(int32_t type,
                                int32_t idx);
 #endif
 
-void dirty_entry(H5C1_t * cache_ptr,
+void dirty_entry1(H5C1_t * cache_ptr,
                  int32_t type,
                  int32_t idx,
                  hbool_t dirty_pin);
 
-void expunge_entry(H5C1_t * cache_ptr,
+void expunge_entry1(H5C1_t * cache_ptr,
                    int32_t type,
                    int32_t idx);
 
-void insert_entry(H5C1_t * cache_ptr,
+void insert_entry1(H5C1_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
                   hbool_t dirty,
                   unsigned int flags);
 
-void mark_pinned_entry_dirty(H5C1_t * cache_ptr,
+void mark_pinned_entry_dirty1(H5C1_t * cache_ptr,
 	                     int32_t type,
 		             int32_t idx,
 		             hbool_t size_changed,
 		             size_t  new_size);
 
-void mark_pinned_or_protected_entry_dirty(H5C1_t * cache_ptr,
+void mark_pinned_or_protected_entry_dirty1(H5C1_t * cache_ptr,
                                           int32_t type,
                                           int32_t idx);
 
-void rename_entry(H5C1_t * cache_ptr,
+void rename_entry1(H5C1_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
                   hbool_t main_addr);
 
-void protect_entry(H5C1_t * cache_ptr,
+void protect_entry1(H5C1_t * cache_ptr,
                    int32_t type,
                    int32_t idx);
 
-void protect_entry_ro(H5C1_t * cache_ptr,
+void protect_entry_ro1(H5C1_t * cache_ptr,
                       int32_t type,
                       int32_t idx);
 
-hbool_t entry_in_cache(H5C1_t * cache_ptr,
+hbool_t entry_in_cache1(H5C1_t * cache_ptr,
                        int32_t type,
                        int32_t idx);
 
-void create_pinned_entry_dependency(H5C1_t * cache_ptr,
+void create_pinned_entry_dependency1(H5C1_t * cache_ptr,
 		                    int pinning_type,
 		                    int pinning_idx,
 		                    int pinned_type,
 		                    int pinned_idx);
 
-void execute_flush_op(H5C1_t * cache_ptr,
+void execute_flush_op1(H5C1_t * cache_ptr,
 		      struct test_entry_t * entry_ptr,
                       struct flush_op * op_ptr,
 		      unsigned * flags_ptr);
 
-void reset_entries(void);
+void reset_entries1(void);
 
-void resize_entry(H5C1_t * cache_ptr,
+void resize_entry1(H5C1_t * cache_ptr,
                    int32_t type,
                    int32_t idx,
                    size_t new_size,
                    hbool_t resize_pin);
 
-void resize_pinned_entry(H5C1_t * cache_ptr,
+void resize_pinned_entry1(H5C1_t * cache_ptr,
                          int32_t type,
                          int32_t idx,
                          size_t new_size);
 
-H5C1_t * setup_cache(size_t max_cache_size, size_t min_clean_size);
+H5C1_t * setup_cache1(size_t max_cache_size, size_t min_clean_size);
 
-void row_major_scan_forward(H5C1_t * cache_ptr,
+void row_major_scan_forward1(H5C1_t * cache_ptr,
                             int32_t lag,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -677,7 +677,7 @@ void row_major_scan_forward(H5C1_t * cache_ptr,
                             int dirty_destroys,
                             int dirty_unprotects);
 
-void hl_row_major_scan_forward(H5C1_t * cache_ptr,
+void hl_row_major_scan_forward1(H5C1_t * cache_ptr,
                                int32_t max_index,
                                hbool_t verbose,
                                hbool_t reset_stats,
@@ -686,7 +686,7 @@ void hl_row_major_scan_forward(H5C1_t * cache_ptr,
                                hbool_t do_inserts,
                                hbool_t dirty_inserts);
 
-void row_major_scan_backward(H5C1_t * cache_ptr,
+void row_major_scan_backward1(H5C1_t * cache_ptr,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -701,7 +701,7 @@ void row_major_scan_backward(H5C1_t * cache_ptr,
                              int dirty_destroys,
                              int dirty_unprotects);
 
-void hl_row_major_scan_backward(H5C1_t * cache_ptr,
+void hl_row_major_scan_backward1(H5C1_t * cache_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -710,7 +710,7 @@ void hl_row_major_scan_backward(H5C1_t * cache_ptr,
                                 hbool_t do_inserts,
                                 hbool_t dirty_inserts);
 
-void col_major_scan_forward(H5C1_t * cache_ptr,
+void col_major_scan_forward1(H5C1_t * cache_ptr,
                             int32_t lag,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -720,7 +720,7 @@ void col_major_scan_forward(H5C1_t * cache_ptr,
                             hbool_t dirty_inserts,
                             int dirty_unprotects);
 
-void hl_col_major_scan_forward(H5C1_t * cache_ptr,
+void hl_col_major_scan_forward1(H5C1_t * cache_ptr,
                                int32_t max_index,
                                hbool_t verbose,
                                hbool_t reset_stats,
@@ -730,7 +730,7 @@ void hl_col_major_scan_forward(H5C1_t * cache_ptr,
                                hbool_t dirty_inserts,
                                int dirty_unprotects);
 
-void col_major_scan_backward(H5C1_t * cache_ptr,
+void col_major_scan_backward1(H5C1_t * cache_ptr,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -740,7 +740,7 @@ void col_major_scan_backward(H5C1_t * cache_ptr,
                              hbool_t dirty_inserts,
                              int dirty_unprotects);
 
-void hl_col_major_scan_backward(H5C1_t * cache_ptr,
+void hl_col_major_scan_backward1(H5C1_t * cache_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -750,37 +750,37 @@ void hl_col_major_scan_backward(H5C1_t * cache_ptr,
                                 hbool_t dirty_inserts,
                                 int dirty_unprotects);
 
-void takedown_cache(H5C1_t * cache_ptr,
+void takedown_cache1(H5C1_t * cache_ptr,
                     hbool_t dump_stats,
                     hbool_t dump_detailed_stats);
 
-void flush_cache(H5C1_t * cache_ptr,
+void flush_cache1(H5C1_t * cache_ptr,
                  hbool_t destroy_entries,
                  hbool_t dump_stats,
                  hbool_t dump_detailed_stats);
 
-void unpin_entry(H5C1_t * cache_ptr,
+void unpin_entry1(H5C1_t * cache_ptr,
                  int32_t type,
                  int32_t idx);
 
-void unprotect_entry(H5C1_t * cache_ptr,
+void unprotect_entry1(H5C1_t * cache_ptr,
                      int32_t type,
                      int32_t idx,
                      int dirty,
                      unsigned int flags);
 
-void unprotect_entry_with_size_change(H5C1_t * cache_ptr,
+void unprotect_entry1_with_size_change(H5C1_t * cache_ptr,
                                       int32_t type,
                                       int32_t idx,
                                       unsigned int flags,
                                       size_t new_size);
 
-void verify_clean(void);
+void verify_clean1(void);
 
-void verify_entry_status(H5C1_t * cache_ptr,
+void verify_entry_status1(H5C1_t * cache_ptr,
 		         int tag,
                          int num_entries,
                          struct expected_entry_status expected[]);
 
-void verify_unprotected(void);
+void verify_unprotected1(void);
 

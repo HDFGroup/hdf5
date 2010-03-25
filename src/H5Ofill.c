@@ -23,7 +23,7 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
@@ -523,7 +523,7 @@ H5O_fill_copy(const void *_src, void *_dst)
             H5T_path_t *tpath;      /* Conversion information */
 
             /* Set up type conversion function */
-            if(NULL == (tpath = H5T_path_find(src->type, dst->type, NULL, NULL, H5AC2_ind_dxpl_id, FALSE)))
+            if(NULL == (tpath = H5T_path_find(src->type, dst->type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "unable to convert between src and dst data types")
 
             /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
@@ -551,7 +551,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                 } /* end if */
 
                 /* Convert fill value */
-                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC2_ind_dxpl_id) < 0) {
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
                     H5I_dec_ref(src_id);
                     H5I_dec_ref(dst_id);
                     if(bkg_buf)

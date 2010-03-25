@@ -34,7 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC2private.h"
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -76,7 +76,7 @@
 static herr_t H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable);
 static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
-/* Metadata cache (H5AC2) callbacks */
+/* Metadata cache (H5AC) callbacks */
 static void *H5HF_cache_hdr_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
@@ -104,9 +104,9 @@ static herr_t H5HF_cache_dblock_free_icr(haddr_t addr, size_t len, void *thing);
 /* Package Variables */
 /*********************/
 
-/* H5HF header inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_FHEAP_HDR[1] = {{
-    H5AC2_FHEAP_HDR_ID,
+/* H5HF header inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
+    H5AC_FHEAP_HDR_ID,
     "fractal heap header",
     H5FD_MEM_FHEAP_HDR,
     H5HF_cache_hdr_deserialize,
@@ -116,9 +116,9 @@ const H5AC2_class_t H5AC2_FHEAP_HDR[1] = {{
     NULL,
 }};
 
-/* H5HF indirect block inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_FHEAP_IBLOCK[1] = {{
-    H5AC2_FHEAP_IBLOCK_ID,
+/* H5HF indirect block inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
+    H5AC_FHEAP_IBLOCK_ID,
     "fractal heap indirect block",
     H5FD_MEM_FHEAP_IBLOCK,
     H5HF_cache_iblock_deserialize,
@@ -128,9 +128,9 @@ const H5AC2_class_t H5AC2_FHEAP_IBLOCK[1] = {{
     NULL,
 }};
 
-/* H5HF direct block inherits cache-like properties from H5AC2 */
-const H5AC2_class_t H5AC2_FHEAP_DBLOCK[1] = {{
-    H5AC2_FHEAP_DBLOCK_ID,
+/* H5HF direct block inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
+    H5AC_FHEAP_DBLOCK_ID,
     "fractal head direct block",
     H5FD_MEM_FHEAP_DBLOCK,
     H5HF_cache_dblock_deserialize,
@@ -641,7 +641,7 @@ H5HF_cache_iblock_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Allocate space for the fractal heap indirect block */
     if(NULL == (iblock = H5FL_CALLOC(H5HF_indirect_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&iblock->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Get the pointer to the shared heap header */
     hdr = udata->par_info->hdr;
@@ -988,7 +988,7 @@ H5HF_cache_dblock_deserialize(haddr_t addr, size_t len, const void *image,
     /* Allocate space for the fractal heap direct block */
     if(NULL == (dblock = H5FL_MALLOC(H5HF_direct_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&dblock->cache_info, 0, sizeof(H5AC2_info_t));
+    HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
 
     par_info = (H5HF_parent_t *)(&(udata->par_info));
@@ -1261,12 +1261,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                 if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5AC2__SERIALIZE_RESIZED_FLAG;
+                *flags |= H5AC__SERIALIZE_RESIZED_FLAG;
 		*new_len = write_size;
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr)) {
-		    *flags |= H5AC2__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC__SERIALIZE_RENAMED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 
@@ -1314,12 +1314,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
                 if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                *flags |= H5AC2__SERIALIZE_RESIZED_FLAG;
+                *flags |= H5AC__SERIALIZE_RESIZED_FLAG;
 		*new_len = write_size;
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr)) {
-		    *flags |= H5AC2__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC__SERIALIZE_RENAMED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 

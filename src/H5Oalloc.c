@@ -110,7 +110,7 @@ H5O_add_gap(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, unsigned idx,
     uint8_t *new_gap_loc, size_t new_gap_size)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     hbool_t merged_with_null;           /* Whether the gap was merged with a null message */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -195,7 +195,7 @@ H5O_add_gap(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, unsigned idx,
             oh->chunk[chunkno].gap = new_gap_size;
 
         /* Mark the chunk as modified */
-        chk_flags |= H5AC2__DIRTIED_FLAG;
+        chk_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
 
 done:
@@ -232,7 +232,7 @@ H5O_eliminate_gap(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     uint8_t *gap_loc, size_t gap_size)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     uint8_t *move_start, *move_end;     /* Pointers to area of messages to move */
     hbool_t null_before_gap;    /* Flag whether the null message is before the gap or not */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -314,7 +314,7 @@ H5O_eliminate_gap(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
 
     /* Mark null message as dirty */
     mesg->dirty = TRUE;
-    chk_flags |= H5AC2__DIRTIED_FLAG;
+    chk_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     /* Release chunk */
@@ -344,7 +344,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned null_idx,
     const H5O_msg_class_t *new_type, void *new_native, size_t new_size)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     H5O_mesg_t *alloc_msg;              /* Pointer to null message to allocate out of */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
@@ -401,7 +401,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned null_idx,
             null_msg->dirty = TRUE;
 
             /* Release chunk, marking it dirty */
-            if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+            if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, UFAIL, "unable to unprotect object header chunk")
 
             /* Check for gap in new null message's chunk */
@@ -430,7 +430,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned null_idx,
 
     /* Mark the new message as dirty */
     alloc_msg->dirty = TRUE;
-    chk_flags |= H5AC2__DIRTIED_FLAG;
+    chk_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     /* Release chunk */
@@ -521,7 +521,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     size_t size, unsigned * msg_idx)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     size_t      delta;          /* Change in chunk's size */
     size_t      aligned_size = H5O_ALIGN_OH(oh, size);
     uint8_t     *old_image;     /* Old address of chunk's image in memory */
@@ -615,7 +615,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         oh->flags |= new_size_flags;
 
         /* Mark object header as dirty in cache */
-        if(H5AC2_mark_pinned_or_protected_entry_dirty(oh) < 0)
+        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 
@@ -646,7 +646,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
 
     /* Mark the extended message as dirty */
     oh->mesg[extend_msg].dirty = TRUE;
-    chk_flags |= H5AC2__DIRTIED_FLAG;
+    chk_flags |= H5AC__DIRTIED_FLAG;
 
     /* Allocate more memory space for chunk's image */
     old_image = oh->chunk[chunkno].image;
@@ -677,7 +677,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
                 (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
             H5O_chunk_proxy_t *chk_proxy2 = NULL;       /* Chunk that continuation message is in */
-            unsigned chk_flags2 = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+            unsigned chk_flags2 = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
             unsigned cont_chunkno = oh->mesg[u].chunkno;    /* Chunk # for continuation message */
 
             /* Protect chunk containing continuation message */
@@ -690,7 +690,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
 
             /* Flag continuation message as dirty */
             oh->mesg[u].dirty = TRUE;
-            chk_flags2 |= H5AC2__DIRTIED_FLAG;
+            chk_flags2 |= H5AC__DIRTIED_FLAG;
 
             /* Release chunk containing continuation message */
             if(H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy2, chk_flags2) < 0)
@@ -699,7 +699,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     } /* end for */
 
     /* Mark the chunk size in the cache as changed */
-    chk_flags |= H5AC2__SIZE_CHANGED_FLAG;
+    chk_flags |= H5AC__SIZE_CHANGED_FLAG;
 
     /* Set return value */
     *msg_idx = extend_msg;
@@ -1001,7 +1001,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size)
         null_msg->dirty = TRUE;
 
         /* Release chunk, marking it dirty */
-        if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+        if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, UFAIL, "unable to unprotect object header chunk")
     } /* end if */
     HDassert(found_null >= 0);
@@ -1117,7 +1117,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, UFAIL, "can't split null message")
 
     /* Mark object header as dirty in cache */
-    if(H5AC2_mark_pinned_or_protected_entry_dirty(oh) < 0)
+    if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, UFAIL, "unable to mark object header as dirty")
 
     /* Set return value */
@@ -1147,7 +1147,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     hbool_t adj_link)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     herr_t ret_value = SUCCEED; 	                /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_release_mesg, FAIL)
@@ -1181,7 +1181,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
 
     /* Mark the message as modified */
     mesg->dirty = TRUE;
-    chk_flags |= H5AC2__DIRTIED_FLAG;
+    chk_flags |= H5AC__DIRTIED_FLAG;
 
     /* Release chunk */
     if(H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)
@@ -1285,7 +1285,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                                 curr_msg->dirty = TRUE;
 
                                 /* Release chunk, marking it dirty */
-                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
 
@@ -1345,9 +1345,9 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             null_msg->dirty = TRUE;
 
                             /* Release chunks, marking them dirty */
-                            if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                            if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
-                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
                             /* Check for gap in null message's chunk */
@@ -1373,7 +1373,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                                 null_msg->dirty = TRUE;
 
                                 /* Release null message's chunk, marking it dirty */
-                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
                                 /* Add the gap to the chunk */
@@ -1392,7 +1392,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                                 null_msg->dirty = TRUE;
 
                                 /* Release null message's chunk, marking it dirty */
-                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                                if(H5O_chunk_unprotect(f, dxpl_id, oh, null_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
                                 /* Create new null message for previous location of non-null message */
@@ -1419,7 +1419,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             oh->mesg[new_null_msg].dirty = TRUE;
 
                             /* Release new null message's chunk, marking it dirty */
-                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
                             /* Check for gap in new null message's chunk */
@@ -1553,7 +1553,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             curr_msg->dirty = TRUE;
 
                             /* Release new null message's chunk, marking it dirty */
-                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC2__DIRTIED_FLAG) < 0)
+                            if(H5O_chunk_unprotect(f, dxpl_id, oh, curr_chk_proxy, H5AC__DIRTIED_FLAG) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
                             /* Remove second message from list of messages */
@@ -1695,11 +1695,11 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                         unsigned chk_proxy_status = 0;  /* Metadata cache status of chunk proxy for chunk */
 
                         /* Check the chunk proxy's status in the metadata cache */
-                        if(H5AC2_get_entry_status(f, oh->chunk[u].addr, &chk_proxy_status) < 0)
+                        if(H5AC_get_entry_status(f, oh->chunk[u].addr, &chk_proxy_status) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check metadata cache status for chunk proxy")
 
                         /* If the entry is in the cache, update its chunk index */
-                        if(chk_proxy_status & H5AC2_ES__IN_CACHE) {
+                        if(chk_proxy_status & H5AC_ES__IN_CACHE) {
                             if(H5O_chunk_update_idx(f, dxpl_id, oh, u) < 0)
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to update index for chunk proxy")
                         } /* end if */
