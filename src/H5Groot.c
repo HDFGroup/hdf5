@@ -160,7 +160,6 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
             f->shared->sblock->root_ent->type = H5G_NOTHING_CACHED; /* We will cache the stab later */
             f->shared->sblock->root_ent->name_off = 0;  /* No name (yet) */
             f->shared->sblock->root_ent->header = root_loc.oloc->addr;
-            f->shared->sblock->root_ent->file = root_loc.oloc->file;
         } /* end if */
     } /* end if */
     else {
