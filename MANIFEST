@@ -82,6 +82,7 @@
 ./config/i686-apple
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
+./config/ibm-aix
 ./config/intel-flags
 ./config/irix6.x
 ./config/linux-gnu
@@ -1211,6 +1212,7 @@
 ./fortran/config/i686-apple
 ./fortran/config/i386-pc-cygwin32
 ./fortran/config/ia64-linux-gnu
+./fortran/config/ibm-aix
 ./fortran/config/intel-fflags
 ./fortran/config/intel-flags
 ./fortran/config/irix6.x
@@ -1350,6 +1352,7 @@
 ./c++/config/hpux11.00
 ./c++/config/hpux11.23
 ./c++/config/ia64-linux-gnu
+./c++/config/ibm-aix
 ./c++/config/irix6.x
 ./c++/config/linux-gnu
 ./c++/config/linux-gnulibc1
