@@ -32,7 +32,6 @@
 #include "H5Gprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5HFprivate.h"	/* Fractal heaps			*/
@@ -108,7 +107,6 @@ struct H5G_entry_t {
     H5G_cache_t cache;                  /*cached data from object header     */
     size_t      name_off;               /*offset of name within name heap    */
     haddr_t     header;                 /*file address of object header      */
-    H5F_t       *file;                  /*file to which this obj hdr belongs */
 };
 
 /*
@@ -118,10 +116,10 @@ struct H5G_entry_t {
  * table or group.
  */
 typedef struct H5G_node_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    unsigned nsyms;                     /*number of symbols                  */
-    H5G_entry_t *entry;                 /*array of symbol table entries      */
+    H5AC_info_t cache_info;     /* Information for H5AC cache functions, _must_ be */
+                                /* first field in structure */
+    unsigned nsyms;             /*number of symbols                  */
+    H5G_entry_t *entry;         /*array of symbol table entries      */
 } H5G_node_t;
 
 /*
@@ -434,7 +432,7 @@ H5_DLL herr_t H5G_ent_encode_vec(const H5F_t *f, uint8_t **pp,
 H5_DLL herr_t H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap,
     const char *name, const H5O_link_t *lnk, H5G_entry_t *ent);
 H5_DLL herr_t H5G_ent_debug(const H5G_entry_t *ent, FILE * stream, int indent,
-    int fwidth, H5HL_t *heap);
+    int fwidth, const H5HL_t *heap);
 
 /* Functions that understand symbol table nodes */
 H5_DLL herr_t H5G_node_init(H5F_t *f);

@@ -43,8 +43,8 @@ enum H5C_cache_incr_mode
 
 enum H5C_cache_flash_incr_mode
 {
-    H5C_flash_incr__off,
-    H5C_flash_incr__add_space
+     H5C_flash_incr__off,
+     H5C_flash_incr__add_space
 };
 
 enum H5C_cache_decr_mode
