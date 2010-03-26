@@ -263,6 +263,9 @@ Footnotes:
 
 Known Problems
 ==============
+* thread safe test (ttsafe/cancel) fails in AIX system because the mutex and
+  cond are not initized in the test program. (See Bug 1832) AKC - 2010/3/15
+
 * H5Tdetect_class says a VL string is a string type.  But when it's in
   a compound type, it says it's a VL type (Bug #1584).  I fixed it in
   v1.8 and the trunk but NOT in this branch (v1.6).  When it becomes
