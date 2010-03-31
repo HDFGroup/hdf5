@@ -40,6 +40,10 @@ static const char *FileHeader = "\n\
  *
  *-------------------------------------------------------------------------
  */
+
+/* Avoid trying to include the header file we are going to generate. :-) */
+#define _H5lib_settings_H
+
 #include <stdio.h>
 #include <time.h>
 #include "H5private.h"
@@ -65,53 +69,58 @@ static const char *FileHeader = "\n\
 static void
 insert_libhdf5_settings(FILE *flibinfo)
 {
+    fprintf(flibinfo, "#ifndef H5_LIBSETTINGS_OWNER\n");
+    fprintf(flibinfo, "extern const char H5libhdf5_settings[];\n");
+    fprintf(flibinfo, "#else /* H5_LIBSETTINGS_OWNER */\n");
 #ifdef H5_HAVE_EMBEDDED_LIBINFO
     FILE *fsettings;	/* for files libhdf5.settings */
     int inchar;
-    int	bol=0;	/* indicates the beginning of a new line */
+    int	bol = 0;	/* indicates the beginning of a new line */
 
-    if (NULL==(fsettings=HDfopen(LIBSETTINGSFNAME, "r"))){
-        perror(LIBSETTINGSFNAME);
-        exit(1);
-    }
+    if(NULL == (fsettings = HDfopen(LIBSETTINGSFNAME, "r"))) {
+        HDperror(LIBSETTINGSFNAME);
+        HDexit(1);
+    } /* end if */
+
     /* print variable definition and the string */
-    /* Do not use const else AIX strings does not show it. */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
+    /* Do not use static else AIX strings does not show it. */
+    fprintf(flibinfo, "const char H5libhdf5_settings[]=\n");
     bol++;
-    while (EOF != (inchar = getc(fsettings))){
-	if (bol){
+    while(EOF != (inchar = HDgetc(fsettings))) {
+	if(bol) {
 	    /* Start a new line */
 	    fprintf(flibinfo, "\t\"");
 	    bol = 0;
-	}
-	if (inchar == '\n'){
+	} /* end if */
+	if(inchar == '\n') {
 	    /* end of a line */
 	    fprintf(flibinfo, "\\n\"\n");
 	    bol++;
-	}else{
-	    putc(inchar, flibinfo);
-	}
-    }
-    if (feof(fsettings)){
+        } /* end if */
+	else
+	    HDputc(inchar, flibinfo);
+    } /* end while */
+    if(feof(fsettings)) {
 	/* wrap up */
-	if (!bol){
+	if(!bol)
 	    /* EOF found without a new line */
 	    fprintf(flibinfo, "\\n\"\n");
-	};
 	fprintf(flibinfo, ";\n\n");
-    }else{
+    } /* end if */
+    else {
 	fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
-	exit(1);
-    }
-    if (0 != fclose(fsettings)){
-	perror(LIBSETTINGSFNAME);
-	exit(1);
-    }
+	HDexit(1);
+    } /* end else */
+    if(0 != HDfclose(fsettings)) {
+	HDperror(LIBSETTINGSFNAME);
+	HDexit(1);
+    } /* end if */
 #else
     /* print variable definition and an empty string */
-    /* Do not use const else AIX strings does not show it. */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+    /* Do not use static else AIX strings does not show it. */
+    fprintf(flibinfo, "const char H5libhdf5_settings[]=\"\";\n");
 #endif
+    fprintf(flibinfo, "#endif /* H5_LIBSETTINGS_OWNER */\n");
 } /* insert_libhdf5_settings() */
 
 
@@ -140,7 +149,7 @@ make_libinfo(void)
 /*-------------------------------------------------------------------------
  * Function:	print_header
  *
- * Purpose:	Prints the C file header for the generated file.
+ * Purpose:	Prints the H file header for the generated file.
  *
  * Return:	void
  *
@@ -148,15 +157,13 @@ make_libinfo(void)
  *		matzke@llnl.gov
  *		Mar 12 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
 print_header(void)
 {
-    time_t		now = time(NULL);
-    struct tm		*tm = localtime(&now);
+    time_t		now = HDtime(NULL);
+    struct tm		*tm = HDlocaltime(&now);
     char		real_name[30];
     char		host_name[256];
     int			i;
@@ -181,18 +188,20 @@ information about the library build configuration\n";
     {
 	size_t n;
 	char *comma;
-	if ((pwd = getpwuid(getuid()))) {
-	    if ((comma = strchr(pwd->pw_gecos, ','))) {
-		n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
-		strncpy(real_name, pwd->pw_gecos, n);
+
+	if((pwd = HDgetpwuid(getuid()))) {
+	    if((comma = HDstrchr(pwd->pw_gecos, ','))) {
+		n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
+		HDstrncpy(real_name, pwd->pw_gecos, n);
 		real_name[n] = '\0';
-	    } else {
-		strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+	    } /* end if */
+            else {
+		HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
 		real_name[sizeof(real_name) - 1] = '\0';
-	    }
-	} else {
+	    } /* end else */
+	} /* end if */
+        else
 	    real_name[0] = '\0';
-	}
     }
 #else
     real_name[0] = '\0';
@@ -202,9 +211,8 @@ information about the library build configuration\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (gethostname(host_name, sizeof(host_name)) < 0) {
+    if(gethostname(host_name, sizeof(host_name)) < 0)
 	host_name[0] = '\0';
-    }
 #else
     host_name[0] = '\0';
 #endif
@@ -213,34 +221,62 @@ information about the library build configuration\n";
      * The file header: warning, copyright notice, build information.
      */
     printf("/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
-    puts(FileHeader);		/*the copyright notice--see top of this file */
+    HDputs(FileHeader);		/*the copyright notice--see top of this file */
 
     printf(" *\n * Created:\t\t%s %2d, %4d\n",
 	   month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
-    if (pwd || real_name[0] || host_name[0]) {
+    if(pwd || real_name[0] || host_name[0]) {
 	printf(" *\t\t\t");
-	if (real_name[0]) printf("%s <", real_name);
+	if(real_name[0])
+            printf("%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-	if (pwd) fputs(pwd->pw_name, stdout);
+	if(pwd)
+            HDfputs(pwd->pw_name, stdout);
 #endif
-	if (host_name[0]) printf("@%s", host_name);
-	if (real_name[0]) printf(">");
-	putchar('\n');
-    }
+	if(host_name[0])
+            printf("@%s", host_name);
+	if(real_name[0])
+            printf(">");
+	HDputchar('\n');
+    } /* end if */
     printf(" *\n * Purpose:\t\t");
-    for (s = purpose; *s; s++) {
-	putchar(*s);
-	if ('\n' == *s && s[1]) printf(" *\t\t\t");
-    }
+    for(s = purpose; *s; s++) {
+	HDputchar(*s);
+	if('\n' == *s && s[1])
+            printf(" *\t\t\t");
+    } /* end for */
 
     printf(" *\n * Modifications:\n *\n");
     printf(" *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
     printf(" *\tIt was generated by code in `H5make_libsettings.c'.\n");
 
     printf(" *\n *");
-    for (i = 0; i < 73; i++) putchar('-');
+    for(i = 0; i < 73; i++)
+        HDputchar('-');
     printf("\n */\n\n");
 
+    printf("#ifndef _H5lib_settings_H\n");
+    printf("#define _H5lib_settings_H\n\n");
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	print_footer
+ *
+ * Purpose:	Prints the H file footer for the generated file.
+ *
+ * Return:	void
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 31 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+print_footer(void)
+{
+    printf("#endif /* _H5lib_settings_H */\n\n");
 }
 
 
@@ -269,11 +305,12 @@ information about the library build configuration\n";
 int
 main(void)
 {
-
     print_header();
 
     /* Generate embedded library information variable definition */
     make_libinfo();
+
+    print_footer();
 
     return 0;
 }

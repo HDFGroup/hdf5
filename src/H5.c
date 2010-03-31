@@ -16,6 +16,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#define H5_LIBSETTINGS_OWNER    /* This module is the owner of the lib settings variable */
 
 
 /***********/
@@ -56,7 +57,6 @@ static void H5_debug_mask(const char*);
 /*********************/
 /* Package Variables */
 /*********************/
-#include "H5lib_settings.c"     /* Embedded library information */
 
 
 /*****************************/

@@ -1535,8 +1535,6 @@ typedef struct H5_debug_t {
 
 extern H5_debug_t		H5_debug_g;
 #define H5DEBUG(X)		(H5_debug_g.pkg[H5_PKG_##X].stream)
-/* Do not use const else AIX strings does not show it. */
-extern char H5libhdf5_settings[]; /* embedded library information */
 
 /*-------------------------------------------------------------------------
  * Purpose:	These macros are inserted automatically just after the
@@ -2261,6 +2259,9 @@ func_init_failed:							      \
 
 /* Compile-time "assert" macro */
 #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
+
+/* Include header for library build settings */
+#include "H5lib_settings.h"
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
