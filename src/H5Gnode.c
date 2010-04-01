@@ -74,7 +74,6 @@ typedef struct H5G_node_t {
 #define H5G_NODE_BUF_SIZE       512
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size_real(const H5F_t *f);
 
 /* Metadata cache callbacks */
@@ -442,7 +441,8 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
      * Write the symbol node to disk.
      */
     if(sym->cache_info.is_dirty) {
-        uint8_t	   *node;           /* Pointer to node buffer */
+        uint8_t	   *node;           /* Node buffer */
+        uint8_t    *p;              /* Pointer into node buffer */
         size_t	size;
 
         /* Wrap the local buffer for serialized node info */
@@ -457,8 +457,25 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Serialize symbol table node into buffer */
-        if(H5G_node_serialize(f, sym, size, node) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed")
+        p = node;
+
+        /* magic number */
+        HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
+        p += 4;
+
+        /* version number */
+        *p++ = H5G_NODE_VERS;
+
+        /* reserved */
+        *p++ = 0;
+
+        /* number of symbols */
+        UINT16ENCODE(p, sym->nsyms);
+
+        /* entries */
+        if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
+        HDmemset(p, 0, size - (size_t)(p - node));
 
 	/* Write the serialized symbol table node. */
         if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)
@@ -483,59 +500,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_node_serialize
- *
- * Purpose:     Serialize the symbol table node
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
- *              Sept. 16, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
-{
-    uint8_t    *p;
-    herr_t      ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize);
-
-    /* check args */
-    assert(f);
-    assert(sym);
-    assert(buf);
-
-    p = buf;
-
-    /* magic number */
-    HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
-    p += 4;
-
-    /* version number */
-    *p++ = H5G_NODE_VERS;
-
-    /* reserved */
-    *p++ = 0;
-
-    /* number of symbols */
-    UINT16ENCODE(p, sym->nsyms);
-
-    /* entries */
-    if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
-    HDmemset(p, 0, size - (p - buf));
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_serialize() */
 
 
 /*-------------------------------------------------------------------------

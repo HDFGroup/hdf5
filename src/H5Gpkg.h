@@ -315,9 +315,6 @@ typedef struct {
  */
 H5_DLLVAR H5B_class_t H5B_SNODE[1];
 
-/* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
-
 /* The v2 B-tree class for indexing 'name' field on links */
 H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
 
