@@ -81,7 +81,6 @@ static herr_t H5G_node_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5G_node_free_icr(haddr_t addr, size_t len, void *thing);
-static herr_t H5G_node_clear(haddr_t addr, size_t len, void *sym);
 
 /* B-tree callbacks */
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
@@ -114,7 +113,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     NULL,
     H5G_node_serialize,
     H5G_node_free_icr,
-    H5G_node_clear,
+    NULL,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -497,40 +496,6 @@ H5G_node_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_free_icr() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_clear
- *
- * Purpose:	Mark a symbol table node in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 20 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_clear(haddr_t UNUSED addr, size_t UNUSED len, void *_sym)
-{
-    H5G_node_t *sym = (H5G_node_t *)_sym;
-    unsigned u;              /* Local index variable */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_clear)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(sym);
-
-    /* Look for dirty entries and reset their dirty flag.  */
-    for(u = 0; u < sym->nsyms; u++)
-        sym->entry[u].dirty = FALSE;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_clear() */
 
 
 /*-------------------------------------------------------------------------
@@ -970,9 +935,6 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Copy new entry into table */
     H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
-
-    /* Flag entry as dirty */
-    insert_into->entry[idx].dirty = TRUE;
 
     /* Increment # of symbols in table */
     insert_into->nsyms += 1;
