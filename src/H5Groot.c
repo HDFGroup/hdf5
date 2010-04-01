@@ -156,7 +156,6 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for symbol table entry")
 
             /* Initialize the root group symbol table entry */
-            f->shared->sblock->root_ent->dirty = TRUE;
             f->shared->sblock->root_ent->type = H5G_NOTHING_CACHED; /* We will cache the stab later */
             f->shared->sblock->root_ent->name_off = 0;  /* No name (yet) */
             f->shared->sblock->root_ent->header = root_loc.oloc->addr;

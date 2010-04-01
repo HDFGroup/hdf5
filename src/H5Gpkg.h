@@ -102,7 +102,6 @@ typedef union H5G_cache_t {
  * points.
  */
 struct H5G_entry_t {
-    hbool_t     dirty;                  /*entry out-of-date?                 */
     H5G_cache_type_t type;              /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     size_t      name_off;               /*offset of name within name heap    */

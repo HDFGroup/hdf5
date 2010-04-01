@@ -435,9 +435,6 @@ H5G_ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth,
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Object header address:", ent->header);
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	      "Dirty:",
-	      ent->dirty ? "Yes" : "No");
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
 	      "Cache info type:");
     switch(ent->type) {

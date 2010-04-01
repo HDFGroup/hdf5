@@ -701,9 +701,6 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Copy new entry into table */
     H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
 
-    /* Flag entry as dirty */
-    insert_into->entry[idx].dirty = TRUE;
-
     /* Increment # of symbols in table */
     insert_into->nsyms += 1;
 
