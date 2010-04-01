@@ -35,7 +35,7 @@ static const char *FileHeader = "\n\
  *		17 Mar 2010
  *		Quincey Koziol
  *
- * Purpose:	Generate the H5libsettings.h header file from the
+ * Purpose:	Generate the H5libsettings.c file from the
  *		libhdf5.settings file.
  *
  *-------------------------------------------------------------------------
@@ -66,11 +66,7 @@ static const char *FileHeader = "\n\
 static void
 insert_libhdf5_settings(FILE *flibinfo)
 {
-    fprintf(flibinfo, "#ifndef H5_LIBSETTINGS_OWNER\n");
-    fprintf(flibinfo, "extern const char H5libhdf5_settings[];\n");
-    fprintf(flibinfo, "#else /* H5_LIBSETTINGS_OWNER */\n");
 #ifdef H5_HAVE_EMBEDDED_LIBINFO
-{
     FILE *fsettings;	/* for files libhdf5.settings */
     int inchar;
     int	bol = 0;	/* indicates the beginning of a new line */
@@ -81,8 +77,8 @@ insert_libhdf5_settings(FILE *flibinfo)
     } /* end if */
 
     /* print variable definition and the string */
-    /* Do not use static else AIX strings does not show it. */
-    fprintf(flibinfo, "const char H5libhdf5_settings[]=\n");
+    /* Do not use const else AIX strings does not show it. */
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
     bol++;
     while(EOF != (inchar = HDgetc(fsettings))) {
 	if(bol) {
@@ -113,13 +109,11 @@ insert_libhdf5_settings(FILE *flibinfo)
 	HDperror(LIBSETTINGSFNAME);
 	HDexit(1);
     } /* end if */
-}
 #else
     /* print variable definition and an empty string */
-    /* Do not use static else AIX strings does not show it. */
-    fprintf(flibinfo, "const char H5libhdf5_settings[]=\"\";\n");
+    /* Do not use const else AIX strings does not show it. */
+    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
 #endif
-    fprintf(flibinfo, "#endif /* H5_LIBSETTINGS_OWNER */\n");
 } /* insert_libhdf5_settings() */
 
 
@@ -148,7 +142,7 @@ make_libinfo(void)
 /*-------------------------------------------------------------------------
  * Function:	print_header
  *
- * Purpose:	Prints the H file header for the generated file.
+ * Purpose:	Prints the header for the generated file.
  *
  * Return:	void
  *
@@ -253,16 +247,13 @@ information about the library build configuration\n";
     for(i = 0; i < 73; i++)
         HDputchar('-');
     printf("\n */\n\n");
-
-    printf("#ifndef _H5lib_settings_H\n");
-    printf("#define _H5lib_settings_H\n\n");
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	print_footer
  *
- * Purpose:	Prints the H file footer for the generated file.
+ * Purpose:	Prints the file footer for the generated file.
  *
  * Return:	void
  *
@@ -275,7 +266,7 @@ information about the library build configuration\n";
 static void
 print_footer(void)
 {
-    printf("#endif /* _H5lib_settings_H */\n\n");
+    /* nothing */
 }
 
 
@@ -288,16 +279,8 @@ print_footer(void)
  *
  *		Failure:	exit(1)
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 12, 1996
- *
- * Modifications:
- *	Albert Cheng, 2004/05/20
- *	Some compilers, e.g., Intel C v7.0, took a long time to compile
- *      with optimization when a module routine contains many code lines.
- *      Divide up all those types detections macros into subroutines, both
- *      to avoid the compiler optimization error and cleaner codes.
+ * Programmer:	Albert Cheng
+ *		2010/4/1
  *
  *-------------------------------------------------------------------------
  */
@@ -311,6 +294,5 @@ main(void)
 
     print_footer();
 
-    return 0;
+    HDexit(0);
 }
-
