@@ -236,18 +236,6 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     HDassert(sym);
 
     /*
-     * Look for dirty entries and set the node dirty flag.
-     */
-    for(u = 0; u < sym->nsyms; u++)
-	if(sym->entry[u].dirty) {
-            /* Set the node's dirty flag */
-            sym->cache_info.is_dirty = TRUE;
-
-            /* Reset the entry's dirty flag */
-            sym->entry[u].dirty = FALSE;
-        } /* end if */
-
-    /*
      * Write the symbol node to disk.
      */
     if(sym->cache_info.is_dirty) {
@@ -378,7 +366,6 @@ done:
 static herr_t
 H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
 {
-    unsigned u;              /* Local index variable */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear)
@@ -388,9 +375,7 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
      */
     HDassert(sym);
 
-    /* Look for dirty entries and reset their dirty flag.  */
-    for(u = 0; u < sym->nsyms; u++)
-        sym->entry[u].dirty = FALSE;
+    /* Reset the node's dirty flag */
     sym->cache_info.is_dirty = FALSE;
 
     /*
