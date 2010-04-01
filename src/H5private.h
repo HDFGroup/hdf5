@@ -2260,9 +2260,6 @@ func_init_failed:							      \
 /* Compile-time "assert" macro */
 #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
 
-/* Include header for library build settings */
-#include "H5lib_settings.h"
-
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void H5_term_library(void);

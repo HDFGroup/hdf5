@@ -41,9 +41,6 @@ static const char *FileHeader = "\n\
  *-------------------------------------------------------------------------
  */
 
-/* Avoid trying to include the header file we are going to generate. :-) */
-#define _H5lib_settings_H
-
 #include <stdio.h>
 #include <time.h>
 #include "H5private.h"
@@ -73,6 +70,7 @@ insert_libhdf5_settings(FILE *flibinfo)
     fprintf(flibinfo, "extern const char H5libhdf5_settings[];\n");
     fprintf(flibinfo, "#else /* H5_LIBSETTINGS_OWNER */\n");
 #ifdef H5_HAVE_EMBEDDED_LIBINFO
+{
     FILE *fsettings;	/* for files libhdf5.settings */
     int inchar;
     int	bol = 0;	/* indicates the beginning of a new line */
@@ -115,6 +113,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 	HDperror(LIBSETTINGSFNAME);
 	HDexit(1);
     } /* end if */
+}
 #else
     /* print variable definition and an empty string */
     /* Do not use static else AIX strings does not show it. */
