@@ -56,6 +56,7 @@
 /* Metadata cache callbacks */
 static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
+static herr_t H5B_dest(H5F_t *f, H5B_t *bt);
 static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
 static herr_t H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr);
 
@@ -181,7 +182,8 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
 
 done:
     if(!ret_value && bt)
-        (void)H5B_dest(f, bt);
+        if(H5B_node_dest(bt) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_load() */  /*lint !e818 Can't make udata a pointer to const */
@@ -270,7 +272,7 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, uns
     } /* end if */
 
     if(destroy)
-        if(H5B_dest(f, bt) < 0)
+        if(H5B_node_dest(bt) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
 done:
@@ -292,10 +294,12 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_dest)
 
     /*
      * Check arguments.
@@ -303,12 +307,12 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
     HDassert(bt);
     HDassert(bt->rc_shared);
 
-    bt->child = H5FL_SEQ_FREE(haddr_t, bt->child);
-    bt->native = H5FL_BLK_FREE(native_block, bt->native);
-    H5RC_DEC(bt->rc_shared);
-    bt = H5FL_FREE(H5B_t, bt);
+    /* Destroy B-tree node */
+    if(H5B_node_dest(bt) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_dest() */
 
 
@@ -325,8 +329,9 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
-H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
+H5B_clear(H5F_t UNUSED *f, H5B_t *bt, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
@@ -341,7 +346,7 @@ H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
     bt->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5B_dest(f, bt) < 0)
+        if(H5B_node_dest(bt) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
 done:

@@ -261,7 +261,8 @@ done:
             (void)H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, *addr_p, (hsize_t)shared->sizeof_rnode);
         } /* end if */
 	if(bt)
-            (void)H5B_dest(f, bt);
+            if(H5B_node_dest(bt) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1963,6 +1964,38 @@ H5B_get_info(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_get_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_node_dest
+ *
+ * Purpose:     Destroy/release a B-tree node
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 26, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B_node_dest(H5B_t *bt)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_node_dest)
+
+    /* check arguments */
+    HDassert(bt);
+    HDassert(bt->rc_shared);
+
+    bt->child = H5FL_SEQ_FREE(haddr_t, bt->child);
+    bt->native = H5FL_BLK_FREE(native_block, bt->native);
+    H5RC_DEC(bt->rc_shared);
+    bt = H5FL_FREE(H5B_t, bt);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B_node_dest() */
 
 
 /*-------------------------------------------------------------------------

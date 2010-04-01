@@ -73,18 +73,18 @@ typedef struct {
 /********************/
 
 /* Section info routines */
-static herr_t H5FS_sinfo_free_sect_cb(void *item, void *key, void *op_data);
-static herr_t H5FS_sinfo_free_node_cb(void *item, void *key, void *op_data);
 static herr_t H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *_udata);
 static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata);
 
 /* Metadata cache callbacks */
 static H5FS_t *H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr);
+static herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace);
 static herr_t H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy);
 static herr_t H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr);
 static H5FS_sinfo_t *H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr);
+static herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
 static herr_t H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy);
 static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr);
 
@@ -251,7 +251,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_fs_prot,
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Set return value */
     ret_value = fspace;
@@ -261,7 +261,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && fspace)
-        (void)H5FS_cache_hdr_dest(f, fspace);
+        if(H5FS_hdr_dest(fspace) < 0)
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -375,7 +376,7 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
     } /* end if */
 
     if(destroy)
-        if(H5FS_cache_hdr_dest(f, fspace) < 0)
+        if(H5FS_hdr_dest(fspace) < 0)
 	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
@@ -401,33 +402,19 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
 {
-    unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_dest)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(fspace);
 
-    /* Terminate the section classes for this free space list */
-    for(u = 0; u < fspace->nclasses ; u++) {
-        /* Call the class termination routine, if there is one */
-        if(fspace->sect_cls[u].term_cls)
-            if((fspace->sect_cls[u].term_cls)(&fspace->sect_cls[u]) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "unable to finalize section class")
-    } /* end for */
-
-    /* Release the memory for the free space section classes */
-    if(fspace->sect_cls)
-        fspace->sect_cls = H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
-
-    /* Free free space info */
-    H5FL_FREE(H5FS_t, fspace);
+    /* Destroy free space header */
+    if(H5FS_hdr_dest(fspace) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -447,8 +434,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
-H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy)
+H5FS_cache_hdr_clear(H5F_t UNUSED *f, H5FS_t *fspace, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -463,7 +451,7 @@ H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy)
     fspace->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5FS_cache_hdr_dest(f, fspace) < 0)
+        if(H5FS_hdr_dest(fspace) < 0)
 	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
@@ -657,7 +645,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)buf) == old_sect_size);
@@ -667,9 +655,10 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *
 
 done:
     if(buf)
-        H5FL_BLK_FREE(sect_block, buf);
+        buf = H5FL_BLK_FREE(sect_block, buf);
     if(!ret_value && sinfo)
-        (void)H5FS_cache_sinfo_dest(f, sinfo);
+        if(H5FS_sinfo_dest(sinfo) < 0)
+	    HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space section info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_cache_sinfo_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -860,83 +849,18 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
         if(H5F_block_write(f, H5FD_MEM_FSPACE_SINFO, sinfo->fspace->sect_addr, (size_t)sinfo->fspace->sect_size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space sections to disk")
 
-        H5FL_BLK_FREE(sect_block, buf);
+        buf = H5FL_BLK_FREE(sect_block, buf);
 
 	sinfo->cache_info.is_dirty = FALSE;
     } /* end if */
 
     if(destroy)
-        if(H5FS_cache_sinfo_dest(f, sinfo) < 0)
+        if(H5FS_sinfo_dest(sinfo) < 0)
 	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_cache_sinfo_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_free_sect_cb
- *
- * Purpose:	Free a size-tracking node for a bin
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FS_sinfo_free_sect_cb(void *_sect, void UNUSED *key, void *op_data)
-{
-    H5FS_section_info_t *sect = (H5FS_section_info_t *)_sect;   /* Section to free */
-    const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)op_data;     /* Free space manager for section */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_sinfo_free_sect_cb)
-
-    HDassert(sect);
-    HDassert(sinfo);
-
-    /* Call the section's class 'free' method on the section */
-    (*sinfo->fspace->sect_cls[sect->type].free)(sect);
-
-    FUNC_LEAVE_NOAPI(0)
-}   /* H5FS_sinfo_free_sect_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_free_node_cb
- *
- * Purpose:	Free a size-tracking node for a bin
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, March 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
-{
-    H5FS_node_t *fspace_node = (H5FS_node_t *)item;       /* Temporary pointer to free space list node */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_sinfo_free_node_cb)
-
-    HDassert(fspace_node);
-    HDassert(op_data);
-
-    /* Release the skip list for sections of this size */
-    H5SL_destroy(fspace_node->sect_list, H5FS_sinfo_free_sect_cb, op_data);
-
-    /* Release free space list node */
-    H5FL_FREE(H5FS_node_t, fspace_node);
-
-    FUNC_LEAVE_NOAPI(0)
-}   /* H5FS_sinfo_free_node_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -953,45 +877,19 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5FS_cache_sinfo_dest(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo)
 {
-    unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_dest)
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(sinfo);
-    HDassert(sinfo->fspace);
-    HDassert(sinfo->bins);
 
-    /* Clear out lists of nodes */
-    for(u = 0; u < sinfo->nbins; u++)
-        if(sinfo->bins[u].bin_list) {
-            H5SL_destroy(sinfo->bins[u].bin_list, H5FS_sinfo_free_node_cb, sinfo);
-            sinfo->bins[u].bin_list = NULL;
-        } /* end if */
-
-    /* Release bins for skip lists */
-    sinfo->bins = H5FL_SEQ_FREE(H5FS_bin_t, sinfo->bins);
-
-    /* Release skip list for merging sections */
-    if(sinfo->merge_list)
-        if(H5SL_close(sinfo->merge_list) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy section merging skip list")
-
-    /* Unpin the free space header in the cache */
-    /* (make certain this is last action with section info, to allow for header
-     *  disappearing immediately)
-     */
-    if(H5AC_unpin_entry(sinfo->fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
-
-    /* Release free space section info */
-    H5FL_FREE(H5FS_sinfo_t, sinfo);
+    /* Destroy free space info */
+    if(H5FS_sinfo_dest(sinfo) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1011,8 +909,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
-H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy)
+H5FS_cache_sinfo_clear(H5F_t UNUSED *f, H5FS_sinfo_t *sinfo, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1027,7 +926,7 @@ H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy)
     sinfo->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5FS_cache_sinfo_dest(f, sinfo) < 0)
+        if(H5FS_sinfo_dest(sinfo) < 0)
 	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
 
 done:

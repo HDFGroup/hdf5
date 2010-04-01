@@ -143,7 +143,8 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 done:
     if(ret_value < 0) {
 	if(bt2)
-            (void)H5B2_cache_hdr_dest(f, bt2);
+            if(H5B2_hdr_dest(bt2) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
