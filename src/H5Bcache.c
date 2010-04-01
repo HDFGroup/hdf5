@@ -182,7 +182,8 @@ H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
 
 done:
     if(!ret_value && bt)
-        (void)H5B_dest(bt);
+        if(H5B_node_dest(bt) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_deserialize() */
@@ -287,14 +288,18 @@ done:
 static herr_t
 H5B_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_free_icr)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
     /* Destroy B-tree node */
-    H5B_dest(thing);
+    if(H5B_node_dest(thing) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_free_icr() */
 

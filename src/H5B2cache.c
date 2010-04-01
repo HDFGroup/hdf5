@@ -236,7 +236,8 @@ H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
 done:
     if(!ret_value && bt2)
-        (void)H5B2_cache_hdr_dest(bt2);
+        if(H5B2_hdr_dest(bt2) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree header node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_hdr_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -348,15 +349,19 @@ H5B2_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
 static herr_t
 H5B2_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_free_icr)
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
     /* Destroy v2 b-tree header */
-    H5B2_cache_hdr_dest(thing);
+    if(H5B2_hdr_dest(thing) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_hdr_free_icr() */
 
 
@@ -480,7 +485,8 @@ H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
 done:
     if(!ret_value && internal)
-        (void)H5B2_cache_internal_dest(internal);
+        if(H5B2_internal_dest(internal) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree internal node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -598,15 +604,19 @@ done:
 static herr_t
 H5B2_cache_internal_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_internal_free_icr)
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy v2 b-tree header */
-    H5B2_cache_internal_dest(thing);
+    /* Destroy v2 b-tree internal node */
+    if(H5B2_internal_dest(thing) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree internal node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_free_icr() */
 
 
@@ -711,7 +721,8 @@ H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
 done:
     if(!ret_value && leaf)
-        (void)H5B2_cache_leaf_dest(leaf);
+        if(H5B2_leaf_dest(leaf) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -815,14 +826,18 @@ done:
 static herr_t
 H5B2_cache_leaf_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_free_icr)
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy v2 b-tree header */
-    H5B2_cache_leaf_dest(thing);
+    /* Destroy v2 b-tree leaf node */
+    if(H5B2_leaf_dest(thing) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_free_icr() */
 

@@ -227,9 +227,9 @@ H5_DLL herr_t H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 H5_DLL herr_t H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, haddr_t fs_addr, haddr_t client_addr);
 
-/* Metadata cache callbacks */
-H5_DLL herr_t H5FS_cache_hdr_dest(H5FS_t *hdr);
-H5_DLL herr_t H5FS_cache_sinfo_dest(H5FS_sinfo_t *sinfo);
+/* Routines for destroying structures */
+H5_DLL herr_t H5FS_hdr_dest(H5FS_t *hdr);
+H5_DLL herr_t H5FS_sinfo_dest(H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
 #ifdef H5FS_DEBUG

@@ -103,7 +103,7 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     NULL, /* H5FS_cache_hdr_image_len, */
     H5FS_cache_hdr_serialize,
     H5FS_cache_hdr_free_icr,
-    NULL, /* H5FS_cache_hdr_clear_dirty_bits, */
+    NULL,
 }};
 
 /* H5FS serialized sections inherit cache-like properties from H5AC */
@@ -236,7 +236,7 @@ H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)image) <= len);
@@ -247,7 +247,8 @@ H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 done:
     /* Release resources */
     if(!ret_value && fspace)
-        (void)H5FS_cache_hdr_dest(fspace);
+        if(H5FS_hdr_dest(fspace) < 0)
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_cache_hdr_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -369,15 +370,19 @@ H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
 static herr_t
 H5FS_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_free_icr)
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
     /* Destroy free space header */
-    H5FS_cache_hdr_dest(thing);
+    if(H5FS_hdr_dest(thing) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_cache_hdr_free_icr() */
 
 
@@ -528,7 +533,7 @@ H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)image) <= len);
@@ -538,7 +543,8 @@ H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 
 done:
     if(!ret_value && sinfo)
-        (void)H5FS_cache_sinfo_dest(sinfo);
+        if(H5FS_sinfo_dest(sinfo) < 0)
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS_cache_sinfo_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -751,14 +757,18 @@ done:
 static herr_t
 H5FS_cache_sinfo_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_free_icr)
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy B-tree node */
-    H5FS_cache_sinfo_dest(thing);
+    /* Destroy free space info */
+    if(H5FS_sinfo_dest(thing) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space info")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_cache_sinfo_free_icr() */
 

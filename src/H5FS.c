@@ -144,7 +144,8 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
 
 done:
     if(!ret_value && fspace)
-        (void)H5FS_cache_hdr_dest(fspace);
+        if(H5FS_hdr_dest(fspace) < 0)
+            HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_create() */
@@ -512,7 +513,7 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_dest
+ * Function:	H5FS_hdr_dest
  *
  * Purpose:	Destroys a free space header in memory.
  *
@@ -524,14 +525,13 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5FS_cache_hdr_dest(H5FS_t *fspace)
+H5FS_hdr_dest(H5FS_t *fspace)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_hdr_dest)
 
     /*
      * Check arguments.
@@ -545,16 +545,17 @@ H5FS_cache_hdr_dest(H5FS_t *fspace)
             if((fspace->sect_cls[u].term_cls)(&fspace->sect_cls[u]) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "unable to finalize section class")
     } /* end for */
+
     /* Release the memory for the free space section classes */
     if(fspace->sect_cls)
         fspace->sect_cls = H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
 
     /* Free free space info */
-    H5FL_FREE(H5FS_t, fspace);
+    fspace = H5FL_FREE(H5FS_t, fspace);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_hdr_dest() */
+} /* end H5FS_hdr_dest() */
 
 
 /*-------------------------------------------------------------------------
@@ -616,14 +617,14 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
     H5SL_destroy(fspace_node->sect_list, H5FS_sinfo_free_sect_cb, op_data);
 
     /* Release free space list node */
-    H5FL_FREE(H5FS_node_t, fspace_node);
+    fspace_node = H5FL_FREE(H5FS_node_t, fspace_node);
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5FS_sinfo_free_node_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_dest
+ * Function:	H5FS_sinfo_dest
  *
  * Purpose:	Destroys a free space section info in memory.
  *
@@ -635,14 +636,13 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5FS_cache_sinfo_dest(H5FS_sinfo_t *sinfo)
+H5FS_sinfo_dest(H5FS_sinfo_t *sinfo)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5FS_sinfo_dest)
 
     /*
      * Check arguments.
@@ -674,11 +674,11 @@ H5FS_cache_sinfo_dest(H5FS_sinfo_t *sinfo)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
 
     /* Release free space section info */
-    H5FL_FREE(H5FS_sinfo_t, sinfo);
+    sinfo = H5FL_FREE(H5FS_sinfo_t, sinfo);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_cache_sinfo_dest() */
+} /* end H5FS_sinfo_dest() */
 
 #ifdef H5FS_DEBUG
 

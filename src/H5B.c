@@ -261,7 +261,9 @@ done:
             (void)H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, *addr_p, (hsize_t)shared->sizeof_rnode);
         } /* end if */
 	if(bt)
-            (void)H5B_dest(bt);
+            /* Destroy B-tree node */
+            if(H5B_node_dest(bt) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2045,9 +2047,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B_dest
+ * Function:    H5B_node_dest
  *
- * Purpose:     Destroy/release an "in core representation" of a B-tree node
+ * Purpose:     Destroy/release a B-tree node
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -2059,9 +2061,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_dest(H5B_t *bt)
+H5B_node_dest(H5B_t *bt)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_node_dest)
 
     /* check arguments */
     HDassert(bt);
@@ -2073,7 +2075,7 @@ H5B_dest(H5B_t *bt)
     bt = H5FL_FREE(H5B_t, bt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B_dest() */
+} /* end H5B_node_dest() */
 
 
 /*-------------------------------------------------------------------------

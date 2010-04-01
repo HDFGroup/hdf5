@@ -143,7 +143,8 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 done:
     if(ret_value < 0) {
 	if(bt2)
-            (void)H5B2_cache_hdr_dest(bt2);
+            if(H5B2_hdr_dest(bt2) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1326,133 +1327,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_iterate_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_dest
- *
- * Purpose:	Destroys a B-tree header in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 1 2005
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5B2_cache_hdr_dest(H5B2_t *bt2)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_dest)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt2);
-
-    /* Decrement reference count on shared B-tree info */
-    if(bt2->shared)
-        H5RC_DEC(bt2->shared);
-
-    /* Free B-tree header info */
-    H5FL_FREE(H5B2_t, bt2);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2_cache_hdr_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_cache_internal_dest
- *
- * Purpose:	Destroys a B-tree internal node in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 2 2005
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5B2_cache_internal_dest(H5B2_internal_t *internal)
-{
-    H5B2_shared_t *shared;      /* Shared B-tree information */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_internal_dest)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(internal);
-
-    /* Get the pointer to the shared B-tree info */
-    shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
-    HDassert(shared);
-
-    /* Release internal node's native key buffer */
-    if(internal->int_native)
-        H5FL_FAC_FREE(shared->node_info[internal->depth].nat_rec_fac, internal->int_native);
-
-    /* Release internal node's node pointer buffer */
-    if(internal->node_ptrs)
-        H5FL_FAC_FREE(shared->node_info[internal->depth].node_ptr_fac, internal->node_ptrs);
-
-    /* Decrement reference count on shared B-tree info */
-    if(internal->shared)
-        H5RC_DEC(internal->shared);
-
-    /* Free B-tree internal node info */
-    H5FL_FREE(H5B2_internal_t, internal);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2_cache_internal_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B2_cache_leaf_dest
- *
- * Purpose:	Destroys a B-tree leaf node in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 2 2005
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5B2_cache_leaf_dest(H5B2_leaf_t *leaf)
-{
-    H5B2_shared_t *shared;      /* Shared B-tree information */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_dest)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(leaf);
-
-    /* Get the pointer to the shared B-tree info */
-    shared = (H5B2_shared_t *)H5RC_GET_OBJ(leaf->shared);
-    HDassert(shared);
-
-    /* Release leaf's native key buffer */
-    if(leaf->leaf_native)
-        H5FL_FAC_FREE(shared->node_info[0].nat_rec_fac, leaf->leaf_native);
-
-    /* Decrement reference count on shared B-tree info */
-    if(leaf->shared)
-        H5RC_DEC(leaf->shared);
-
-    /* Free B-tree leaf node info */
-    H5FL_FREE(H5B2_leaf_t,leaf);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B2_cache_leaf_dest() */
 

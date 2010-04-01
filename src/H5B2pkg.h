@@ -324,10 +324,10 @@ H5_DLL herr_t H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_remove_t op,
     void *op_data);
 
-/* Metadata cache callbacks */
-H5_DLL herr_t H5B2_cache_hdr_dest(H5B2_t *b);
-H5_DLL herr_t H5B2_cache_leaf_dest(H5B2_leaf_t *l);
-H5_DLL herr_t H5B2_cache_internal_dest(H5B2_internal_t *i);
+/* Routines for destroying structures */
+H5_DLL herr_t H5B2_hdr_dest(H5B2_t *b);
+H5_DLL herr_t H5B2_leaf_dest(H5B2_leaf_t *l);
+H5_DLL herr_t H5B2_internal_dest(H5B2_internal_t *i);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
