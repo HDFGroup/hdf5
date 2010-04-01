@@ -56,7 +56,6 @@ static void H5_debug_mask(const char*);
 /*********************/
 /* Package Variables */
 /*********************/
-#include "H5lib_settings.c"     /* Embedded library information */
 
 
 /*****************************/
