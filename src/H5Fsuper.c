@@ -594,7 +594,8 @@ done:
             } /* end if */
             else
                 /* Free superblock */
-                sblock = (H5F_super_t *)H5FL_FREE(H5F_super_t, sblock);
+                if(H5F_super_free(sblock) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
             /* Reset variables in file structure */
             f->shared->sblock = NULL;
@@ -637,6 +638,37 @@ H5F_super_dirty(H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_super_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_free
+ *
+ * Purpose:     Destroyer the file's superblock
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              April 1, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_super_free(H5F_super_t *sblock)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_super_free)
+
+    /* Sanity check */
+    HDassert(sblock);
+
+    /* Free root group symbol table entry, if any */
+    sblock->root_ent = (H5G_entry_t *)H5MM_xfree(sblock->root_ent);
+
+    /* Free superblock */
+    sblock = (H5F_super_t *)H5FL_FREE(H5F_super_t, sblock);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_super_free() */
 
 
 /*-------------------------------------------------------------------------
