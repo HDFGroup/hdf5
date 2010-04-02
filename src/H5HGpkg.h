@@ -35,8 +35,6 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5FLprivate.h"	/* Free lists                           */
 
-#define H5F_PACKAGE
-#include "H5Fpkg.h"
 
 /*****************************/
 /* Package Private Variables */
@@ -131,6 +129,9 @@ typedef struct H5HG_obj_t {
     uint8_t		*begin;		/*ptr to object into heap->chunk*/
 } H5HG_obj_t;
 
+/* Forward declarations for fields */
+struct H5F_file_t;
+
 struct H5HG_heap_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
@@ -142,14 +143,14 @@ struct H5HG_heap_t {
                                         /* If this value is >65535 then all indices */
                                         /* have been used at some time and the */
                                         /* correct new index should be searched for */
-    H5F_file_t          *shared;        /* shared file */
+    struct H5F_file_t   *shared;        /* shared file */
     H5HG_obj_t	*obj;		/*array of object descriptions	*/
 };
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5HG_dest(H5HG_heap_t *heap);
+H5_DLL herr_t H5HG_free(H5HG_heap_t *heap);
 
 #endif /* _H5HGpkg_H */
 

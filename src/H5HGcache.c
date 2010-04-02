@@ -125,7 +125,7 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
     size_t      max_idx = 0;            /* The maximum index seen */
     H5HG_heap_t	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_deserialize, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_deserialize)
 
     /* check arguments */
     HDassert(image);
@@ -165,7 +165,7 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
 
         /* Decode each object */
         p = heap->chunk + H5HG_SIZEOF_HDR(f);
-        nalloc = H5HG_NOBJS (f, heap->size);
+        nalloc = H5HG_NOBJS(f, heap->size);
         /* Calloc the obj array because the file format spec makes no guarantee
          * about the order of the objects, and unused slots must be set to zero.
          */
@@ -278,8 +278,8 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
 
 done:
     if(!ret_value && heap)
-        if(H5HG_dest(heap) < 0)
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection");
+        if(H5HG_free(heap) < 0)
+	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_deserialize() */
@@ -309,8 +309,8 @@ H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined (addr));
-    HDassert(H5F_addr_eq (addr, heap->addr));
+    HDassert(H5F_addr_defined(addr));
+    HDassert(H5F_addr_eq(addr, heap->addr));
     HDassert(heap);
 
     /* Need to increase image size if we need to copy a bigger thing into it */
@@ -392,14 +392,18 @@ H5HG_image_len(const void *thing, size_t *image_len_ptr)
 static herr_t
 H5HG_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_free_icr)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
     /* Destroy global heap collection */
-    H5HG_dest(thing);
+    if(H5HG_free(thing) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_free_icr() */
 

@@ -67,13 +67,13 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     FUNC_ENTER_NOAPI(H5HG_debug, FAIL);
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined (addr));
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(H5F_addr_defined (addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
-    if (NULL == (h = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, fwidth, f, H5AC_READ)))
+    if(NULL == (h = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, (size_t)H5HG_SPEC_READ_SIZE, f, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
 
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");
