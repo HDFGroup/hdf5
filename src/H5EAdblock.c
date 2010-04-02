@@ -141,7 +141,7 @@ H5EA__dblock_alloc(H5EA_hdr_t *hdr, void *parent, size_t nelmts))
 
 CATCH
     if(!ret_value)
-        if(dblock && H5EA__dblock_dest(hdr->f, dblock) < 0)
+        if(dblock && H5EA__dblock_dest(dblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block")
 
 END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
@@ -230,7 +230,7 @@ CATCH
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array data block")
 
             /* Destroy data block */
-            if(H5EA__dblock_dest(hdr->f, dblock) < 0)
+            if(H5EA__dblock_dest(dblock) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block")
         } /* end if */
 
@@ -455,7 +455,7 @@ END_FUNC(PKG)   /* end H5EA__dblock_delete() */
 /* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__dblock_dest(H5F_t UNUSED *f, H5EA_dblock_t *dblock))
+H5EA__dblock_dest(H5EA_dblock_t *dblock))
 
     /* Sanity check */
     HDassert(dblock);
@@ -479,7 +479,7 @@ H5EA__dblock_dest(H5F_t UNUSED *f, H5EA_dblock_t *dblock))
     } /* end if */
 
     /* Free the data block itself */
-    (void)H5FL_FREE(H5EA_dblock_t, dblock);
+    dblock = H5FL_FREE(H5EA_dblock_t, dblock);
 
 CATCH
 

@@ -310,7 +310,7 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page))
     } /* end if */
 
     /* Free the data block page itself */
-    (void)H5FL_FREE(H5EA_dblk_page_t, dblk_page);
+    dblk_page = H5FL_FREE(H5EA_dblk_page_t, dblk_page);
 
 CATCH
 

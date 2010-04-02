@@ -170,7 +170,7 @@ HDfprintf(stderr, "%s: hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock
 
 CATCH
     if(!ret_value)
-        if(sblock && H5EA__sblock_dest(hdr->f, sblock) < 0)
+        if(sblock && H5EA__sblock_dest(sblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
 
 END_FUNC(PKG)   /* end H5EA__sblock_alloc() */
@@ -253,7 +253,7 @@ CATCH
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array super block")
 
             /* Destroy super block */
-            if(H5EA__sblock_dest(hdr->f, sblock) < 0)
+            if(H5EA__sblock_dest(sblock) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
         } /* end if */
 
@@ -407,7 +407,7 @@ END_FUNC(PKG)   /* end H5EA__sblock_delete() */
 /* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
+H5EA__sblock_dest(H5EA_sblock_t *sblock))
 
     /* Sanity check */
     HDassert(sblock);
@@ -418,9 +418,6 @@ HDfprintf(stderr, "%s: sblock->hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu
 
     /* Check if shared header field has been initialized */
     if(sblock->hdr) {
-        /* Set the shared array header's file context for this operation */
-        sblock->hdr->f = f;
-
         /* Free buffer for super block data block addresses, if there are any */
         if(sblock->dblk_addrs)
             sblock->dblk_addrs = H5FL_SEQ_FREE(haddr_t, sblock->dblk_addrs);
@@ -438,7 +435,7 @@ HDfprintf(stderr, "%s: sblock->hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu
     } /* end if */
 
     /* Free the super block itself */
-    (void)H5FL_FREE(H5EA_sblock_t, sblock);
+    sblock = H5FL_FREE(H5EA_sblock_t, sblock);
 
 CATCH
 

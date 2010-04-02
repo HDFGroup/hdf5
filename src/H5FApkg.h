@@ -260,7 +260,7 @@ H5_DLL herr_t H5FA__dblock_unprotect(H5FA_dblock_t *dblock, hid_t dxpl_id,
     unsigned cache_flags);
 H5_DLL herr_t H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblk_addr, hsize_t dblk_nelmts);
-H5_DLL herr_t H5FA__dblock_dest(H5F_t *f, H5FA_dblock_t *dblock);
+H5_DLL herr_t H5FA__dblock_dest(H5FA_dblock_t *dblock);
 
 /* Data block page routines */
 H5_DLL herr_t H5FA__dblk_page_create(H5FA_hdr_t *hdr, hid_t dxpl_id,

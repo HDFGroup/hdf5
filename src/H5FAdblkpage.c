@@ -280,7 +280,6 @@ END_FUNC(PKG)   /* end H5FA__dblk_page_unprotect() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page))
@@ -293,8 +292,7 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page))
         /* Check if buffer for data block page elements has been initialized */
         if(dblk_page->elmts) {
             /* Free buffer for data block page elements */
-	    (void) H5FL_BLK_FREE(page_elmts, dblk_page->elmts);
-            dblk_page->elmts = NULL;
+	    dblk_page->elmts = H5FL_BLK_FREE(page_elmts, dblk_page->elmts);
         } /* end if */
 
         /* Decrement reference count on shared info */
@@ -304,7 +302,7 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page))
     } /* end if */
 
     /* Free the data block page itself */
-    (void)H5FL_FREE(H5FA_dblk_page_t, dblk_page);
+    dblk_page = H5FL_FREE(H5FA_dblk_page_t, dblk_page);
 
 CATCH
 

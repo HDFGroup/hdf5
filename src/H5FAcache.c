@@ -279,7 +279,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(hdr && H5FA__cache_hdr_dest(f, hdr) < 0)
+        if(hdr && H5FA__hdr_dest(hdr) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array header")
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_load() */
@@ -485,7 +485,6 @@ CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_dest() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblock_load
@@ -614,7 +613,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(dblock && H5FA__cache_dblock_dest(f, dblock) < 0)
+        if(dblock && H5FA__dblock_dest(dblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblock_load() */
@@ -833,7 +832,7 @@ H5FA__cache_dblock_dest(H5F_t *f, H5FA_dblock_t *dblock))
     } /* end if */
 
     /* Release the data block */
-    if(H5FA__dblock_dest(f, dblock) < 0)
+    if(H5FA__dblock_dest(dblock) < 0)
         H5E_THROW(H5E_CANTFREE, "can't free fixed array data block")
 
 CATCH
@@ -941,7 +940,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(dblk_page && H5FA__cache_dblk_page_dest(f, dblk_page) < 0)
+        if(dblk_page && H5FA__dblk_page_dest(dblk_page) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block page")
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_load() */

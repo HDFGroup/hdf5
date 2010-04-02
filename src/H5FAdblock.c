@@ -166,7 +166,7 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
 CATCH
 
     if(!ret_value)
-        if(dblock && H5FA__dblock_dest(hdr->f, dblock) < 0)
+        if(dblock && H5FA__dblock_dest(dblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
 
 END_FUNC(PKG)   /* end H5FA__dblock_alloc() */
@@ -243,7 +243,7 @@ CATCH
                 H5E_THROW(H5E_CANTFREE, "unable to release fixed array data block")
 
             /* Destroy data block */
-            if(H5FA__dblock_dest(hdr->f, dblock) < 0)
+            if(H5FA__dblock_dest(dblock) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
         } /* end if */
 
@@ -401,10 +401,9 @@ END_FUNC(PKG)   /* end H5FA__dblock_delete() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__dblock_dest(H5F_t UNUSED *f, H5FA_dblock_t *dblock))
+H5FA__dblock_dest(H5FA_dblock_t *dblock))
 
     /* Sanity check */
     HDassert(dblock);
@@ -415,8 +414,7 @@ H5FA__dblock_dest(H5F_t UNUSED *f, H5FA_dblock_t *dblock))
         if(dblock->elmts && !dblock->npages) {
             /* Free buffer for data block elements */
             HDassert(dblock->hdr->cparam.nelmts > 0);
-	    (void) H5FL_BLK_FREE(chunk_elmts, dblock->elmts);
-            dblock->elmts = NULL;
+	    dblock->elmts = H5FL_BLK_FREE(chunk_elmts, dblock->elmts);
         } /* end if */
 
         /* Check if data block is paged */
@@ -434,7 +432,7 @@ H5FA__dblock_dest(H5F_t UNUSED *f, H5FA_dblock_t *dblock))
     } /* end if */
 
     /* Free the data block itself */
-    (void)H5FL_FREE(H5FA_dblock_t, dblock);
+    dblock = H5FL_FREE(H5FA_dblock_t, dblock);
 
 CATCH
 

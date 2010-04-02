@@ -157,7 +157,7 @@ HDfprintf(stderr, "%s: iblock->nsblk_addrs = %Zu\n", FUNC, iblock->nsblk_addrs);
 
 CATCH
     if(!ret_value)
-        if(iblock && H5EA__iblock_dest(hdr->f, iblock) < 0)
+        if(iblock && H5EA__iblock_dest(iblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array index block")
 
 END_FUNC(PKG)   /* end H5EA__iblock_alloc() */
@@ -257,7 +257,7 @@ CATCH
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array index block")
 
             /* Destroy index block */
-            if(H5EA__iblock_dest(hdr->f, iblock) < 0)
+            if(H5EA__iblock_dest(iblock) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array index block")
         } /* end if */
 
@@ -432,7 +432,7 @@ END_FUNC(PKG)   /* end H5EA__iblock_delete() */
 /* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
+H5EA__iblock_dest(H5EA_iblock_t *iblock))
 
     /* Sanity check */
     HDassert(iblock);
@@ -440,9 +440,6 @@ H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
 
     /* Check if shared header field has been initialized */
     if(iblock->hdr) {
-        /* Set the shared array header's file context for this operation */
-        iblock->hdr->f = f;
-
         /* Check if we've got elements in the index block */
         if(iblock->elmts) {
             /* Free buffer for index block elements */
@@ -473,7 +470,7 @@ H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
     } /* end if */
 
     /* Free the index block itself */
-    (void)H5FL_FREE(H5EA_iblock_t, iblock);
+    iblock = H5FL_FREE(H5EA_iblock_t, iblock);
 
 CATCH
 

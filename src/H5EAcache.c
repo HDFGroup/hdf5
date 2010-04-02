@@ -329,7 +329,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(hdr && H5EA__cache_hdr_dest(f, hdr) < 0)
+        if(hdr && H5EA__hdr_dest(hdr) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array header")
 
 END_FUNC(STATIC)   /* end H5EA__cache_hdr_load() */
@@ -685,7 +685,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(iblock && H5EA__cache_iblock_dest(f, iblock) < 0)
+        if(iblock && H5EA__iblock_dest(iblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array index block")
 
 END_FUNC(STATIC)   /* end H5EA__cache_iblock_load() */
@@ -957,7 +957,7 @@ H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
     } /* end if */
 
     /* Release the index block */
-    if(H5EA__iblock_dest(f, iblock) < 0)
+    if(H5EA__iblock_dest(iblock) < 0)
         H5E_THROW(H5E_CANTFREE, "can't free extensible array index block")
 
 CATCH
@@ -1094,7 +1094,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(sblock && H5EA__cache_sblock_dest(f, sblock) < 0)
+        if(sblock && H5EA__sblock_dest(sblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
 
 END_FUNC(STATIC)   /* end H5EA__cache_sblock_load() */
@@ -1356,7 +1356,7 @@ H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
     } /* end if */
 
     /* Release the super block */
-    if(H5EA__sblock_dest(f, sblock) < 0)
+    if(H5EA__sblock_dest(sblock) < 0)
         H5E_THROW(H5E_CANTFREE, "can't free extensible array super block")
 
 CATCH
@@ -1491,7 +1491,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(dblock && H5EA__cache_dblock_dest(f, dblock) < 0)
+        if(dblock && H5EA__dblock_dest(dblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block")
 
 END_FUNC(STATIC)   /* end H5EA__cache_dblock_load() */
@@ -1758,7 +1758,7 @@ H5EA__cache_dblock_dest(H5F_t *f, H5EA_dblock_t *dblock))
     } /* end if */
 
     /* Release the data block */
-    if(H5EA__dblock_dest(f, dblock) < 0)
+    if(H5EA__dblock_dest(dblock) < 0)
         H5E_THROW(H5E_CANTFREE, "can't free extensible array data block")
 
 CATCH
@@ -1867,7 +1867,7 @@ CATCH
     if(wb && H5WB_unwrap(wb) < 0)
 	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
     if(!ret_value)
-        if(dblk_page && H5EA__cache_dblk_page_dest(f, dblk_page) < 0)
+        if(dblk_page && H5EA__dblk_page_dest(dblk_page) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block page")
 
 END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_load() */
