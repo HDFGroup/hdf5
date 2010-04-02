@@ -62,6 +62,10 @@
 
 /* Local Macros */
 
+/* Define the maximum number of returned ID structures to keep around
+   for re-use. */
+#define MAX_FREE_ID_STRUCTS 1000
+
 /*
  * Define the following macro for fast hash calculations (but limited
  * hash sizes)
@@ -99,12 +103,14 @@ typedef struct H5I_id_info_t {
 /* ID type structure used */
 typedef struct {
     unsigned	count;		/*# of times this type has been initialized*/
+    unsigned    free_count; /* # of available ID structures awaiting recycling */
     unsigned	reserved;	/*# of IDs to reserve for constant IDs	    */
     unsigned	wrapped;	/*whether the id count has wrapped around   */
     size_t	hash_size;	/*sizeof the hash table to store the IDs in */
     unsigned	ids;		/*current number of IDs held		    */
     unsigned	nextid;		/*ID to use for the next atom		    */
     H5I_free_t	free_func;	/*release object method	    		    */
+    H5I_id_info_t * next_id_ptr; /* pointer to head of available ID list */
     H5I_id_info_t **id_list;	/*pointer to an array of ptrs to IDs	    */
 } H5I_id_type_t;
 
@@ -832,7 +838,6 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
     H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
-    hid_t		new_id;		/*new ID			*/
     unsigned		hash_loc;	/*new item's hash table location*/
     hid_t		next_id;	/*next ID to check		*/
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
@@ -847,26 +852,49 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     type_ptr = H5I_id_type_list_g[type];
     if(NULL == type_ptr || type_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-    if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
-        HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Create the struct & it's ID */
-    new_id = H5I_MAKE(type, type_ptr->nextid);
-    id_ptr->id = new_id;
+    /* If there is an available ID structure, use it. */
+    if (type_ptr->next_id_ptr) {
+    
+        /* Use existing available ID struct */
+        id_ptr = type_ptr->next_id_ptr;
+    
+        /* Remove struct from list of available ones */
+        type_ptr->next_id_ptr = type_ptr->next_id_ptr->next;
+
+        /* Decrease count of available ID structures */
+        type_ptr->free_count--;
+
+    /* If no available ID structure, then create a new id for use, and
+     * allocate a new struct to house it. */
+    } else {
+
+        /* Allocate new ID struct */
+        if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
+            HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        /* Make a new ID */
+        id_ptr->id = H5I_MAKE(type, type_ptr->nextid);
+
+        /* Increment nextid value */
+        type_ptr->nextid++;
+
+    } /* end if */
+
+    /* Fill in remaining fields of ID struct */
     id_ptr->count = 1; /*initial reference count*/
     id_ptr->app_count = !!app_ref;
     id_ptr->obj_ptr = object;
     id_ptr->next = NULL;
 
     /* hash bucket already full, prepend to front of chain */
-    hash_loc = type_ptr->nextid % (unsigned)type_ptr->hash_size;
+    hash_loc = id_ptr->id % (unsigned)type_ptr->hash_size;
     if(type_ptr->id_list[hash_loc] != NULL)
 	id_ptr->next = type_ptr->id_list[hash_loc];
 
     /* Insert into the type */
     type_ptr->id_list[hash_loc] = id_ptr;
     type_ptr->ids++;
-    type_ptr->nextid++;
 
     /*
      * This next section of code checks for the 'nextid' getting too large and
@@ -917,7 +945,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     } /* end if */
 
     /* Set return value */
-    ret_value = new_id;
+    ret_value = id_ptr->id;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1251,6 +1279,7 @@ H5I_remove(hid_t id)
     H5I_id_type_t	*type_ptr;	/*ptr to the atomic type	*/
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
     H5I_id_info_t	*last_id;	/*ptr to the last atom		*/
+    H5I_id_info_t   *tmp_id_ptr; /*temp ptr to next atom     */
     H5I_type_t		type;		/*atom's atomic type		*/
     unsigned		hash_loc;	/*atom's hash table location	*/
     void *	      ret_value = NULL;	/*return value			*/
@@ -1288,7 +1317,17 @@ H5I_remove(hid_t id)
         }
         /* (Casting away const OK -QAK) */
         ret_value = (void *)curr_id->obj_ptr;
-        (void)H5FL_FREE(H5I_id_info_t, curr_id);
+        
+        /* If there's room, save the struct (and its ID) for future re-use */
+        if (type_ptr->free_count < MAX_FREE_ID_STRUCTS) {
+            curr_id->next = type_ptr->next_id_ptr;
+            type_ptr->next_id_ptr = curr_id;
+            type_ptr->free_count++;
+        /* Otherwise, just toss it. */
+        } else {
+            (void)H5FL_FREE(H5I_id_info_t, curr_id);
+        } /* end if */
+
     } else {
         /* couldn't find the ID in the proper place */
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID")
@@ -1296,6 +1335,23 @@ H5I_remove(hid_t id)
 
     /* Decrement the number of IDs in the type */
     (type_ptr->ids)--;
+
+    /* If there are no more IDs of this type, then we can free all available
+       ID strutures, and reset starting typeid and wrapped status. */
+    if (type_ptr->ids == 0) {
+
+        while (type_ptr->next_id_ptr) {
+
+            tmp_id_ptr = type_ptr->next_id_ptr->next;
+            (void)H5FL_FREE(H5I_id_info_t, type_ptr->next_id_ptr);
+            type_ptr->next_id_ptr = tmp_id_ptr;
+
+        } /* end while */
+
+        type_ptr->nextid = type_ptr->reserved;
+        type_ptr->wrapped = FALSE;
+
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

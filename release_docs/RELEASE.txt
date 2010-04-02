@@ -117,6 +117,12 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Added a mechanism to the H5I interface to save returned object ID 
+        structures for immediate re-use if needed. This addresses a
+        potential performance issue by delaying the case when the next ID to be
+        registered has grown so large that it wraps around and needs to be
+        checked to see if it is available for distribution.
+        (MAM - 2010/03/15 - 1730)
     - Files can now be concurrently opened more than once using the core file
         driver, as long as the backing store is used. (NAF - 2010/03/09)
     - Added support for H5O_COPY_EXPAND_EXT_LINK_FLAG to H5Ocopy.  External
