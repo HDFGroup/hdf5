@@ -67,6 +67,7 @@ static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void 
 			      void *udata2);
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 			 H5HG_heap_t *heap, unsigned UNUSED * flags_ptr);
+static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
 static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
 static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_ptr);
 
@@ -116,12 +117,12 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	   void UNUSED * udata2)
 {
     H5HG_heap_t	*heap = NULL;
-    uint8_t	*p = NULL;
+    uint8_t	*p;
     size_t	nalloc, need;
     size_t      max_idx = 0;            /* The maximum index seen */
     H5HG_heap_t	*ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_load)
 
     /* check arguments */
     HDassert(f);
@@ -133,15 +134,17 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     heap->addr = addr;
+    heap->shared = f->shared;
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)H5HG_MINSIZE)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if(H5F_block_read(f, H5FD_MEM_GHEAP, addr, (size_t)H5HG_MINSIZE, dxpl_id, heap->chunk) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read global heap collection")
+    p = heap->chunk;
 
     /* Magic number */
-    if(HDmemcmp(heap->chunk, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad global heap collection signature")
-    p = heap->chunk + H5_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(H5HG_VERSION != *p++)
@@ -185,7 +188,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	     * assume that it's free space.
 	     */
 	    HDassert(NULL == heap->obj[0].begin);
-	    heap->obj[0].size = (heap->chunk + heap->size) - p;
+	    heap->obj[0].size = ((const uint8_t *)heap->chunk + heap->size) - p;
 	    heap->obj[0].begin = p;
 	    p += heap->obj[0].size;
 	} /* end if */
@@ -214,7 +217,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
                 /* Update heap information */
                 heap->nalloc = new_alloc;
                 heap->obj = new_obj;
-                HDassert(heap->nalloc>heap->nused);
+                HDassert(heap->nalloc > heap->nused);
             } /* end if */
 
 	    UINT16DECODE(p, heap->obj[idx].nrefs);
@@ -258,8 +261,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
      * free space than this heap.
      */
     if(!f->shared->cwfs) {
-        f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *));
-        if(NULL == f->shared->cwfs)
+        if(NULL == (f->shared->cwfs = (H5HG_heap_t **)H5MM_malloc(H5HG_NCWFS * sizeof(H5HG_heap_t *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         f->shared->ncwfs = 1;
         f->shared->cwfs[0] = heap;
@@ -282,7 +284,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 
 done:
     if(!ret_value && heap)
-        if(H5HG_dest(f, heap) < 0)
+        if(H5HG_free(heap) < 0)
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy global heap collection")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -307,7 +309,7 @@ H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_flush, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_flush)
 
     /* Check arguments */
     HDassert(f);
@@ -342,10 +344,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5HG_dest(H5F_t *f, H5HG_heap_t *heap)
 {
-    int	i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HG_dest)
@@ -367,20 +368,9 @@ H5HG_dest(H5F_t *f, H5HG_heap_t *heap)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free global heap")
     } /* end if */
 
-    /* Remove heap from NCWFS array, if it's present */
-    for(i = 0; i < f->shared->ncwfs; i++)
-        if(f->shared->cwfs[i] == heap) {
-            f->shared->ncwfs -= 1;
-            HDmemmove(f->shared->cwfs + i, f->shared->cwfs + i + 1, (f->shared->ncwfs - i) * sizeof(H5HG_heap_t *));
-            break;
-        } /* end if */
-
-    /* Release resources */
-    if(heap->chunk)
-        heap->chunk = H5FL_BLK_FREE(gheap_chunk, heap->chunk);
-    if(heap->obj)
-        heap->obj = H5FL_SEQ_FREE(H5HG_obj_t, heap->obj);
-    heap = H5FL_FREE(H5HG_heap_t, heap);
+    /* Destroy global heap collection */
+    if(H5HG_free(heap) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap collection")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
