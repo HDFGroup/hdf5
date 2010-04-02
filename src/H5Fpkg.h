@@ -125,7 +125,7 @@ typedef struct H5F_file_t {
     hbool_t	latest_format;	/* Always use the latest format?	*/
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2? */
-    int	ncwfs;			/* Num entries on cwfs list		*/
+    unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
