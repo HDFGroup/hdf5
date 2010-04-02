@@ -78,14 +78,17 @@ static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dt
 /* Metadata cache (H5AC) callbacks */
 static H5HF_hdr_t *H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_hdr_t *hdr, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr);
 static herr_t H5HF_cache_hdr_clear(H5F_t *f, H5HF_hdr_t *hdr, hbool_t destroy);
 static herr_t H5HF_cache_hdr_size(const H5F_t *f, const H5HF_hdr_t *hdr, size_t *size_ptr);
 static H5HF_indirect_t *H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock);
 static herr_t H5HF_cache_iblock_clear(H5F_t *f, H5HF_indirect_t *iblock, hbool_t destroy);
 static herr_t H5HF_cache_iblock_size(const H5F_t *f, const H5HF_indirect_t *iblock, size_t *size_ptr);
 static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock);
 static herr_t H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy);
 static herr_t H5HF_cache_dblock_size(const H5F_t *f, const H5HF_direct_t *dblock, size_t *size_ptr);
 
@@ -421,7 +424,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && hdr)
-        (void)H5HF_cache_hdr_dest(f, hdr);
+        if(H5HF_hdr_dest(hdr) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_load() */ /*lint !e818 Can't make udata a pointer to const */
@@ -579,10 +583,12 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_hdr_dest)
 
     /*
      * Check arguments.
@@ -590,17 +596,12 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
     HDassert(hdr);
     HDassert(hdr->rc == 0);
 
-    /* Free the block size lookup table for the doubling table */
-    H5HF_dtable_dest(&hdr->man_dtable);
+    /* Destroy fractal heap header */
+    if(H5HF_hdr_dest(hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap header")
 
-    /* Release any I/O pipeline filter information */
-    if(hdr->pline.nused)
-        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
-
-    /* Free the shared info itself */
-    H5FL_FREE(H5HF_hdr_t, hdr);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_dest() */
 
 
@@ -859,7 +860,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
 
         /* Allocate & initialize child indirect block pointer array */
         if(NULL == (iblock->child_iblocks = H5FL_SEQ_CALLOC(H5HF_indirect_ptr_t, (size_t)(indir_rows * hdr->man_dtable.cparam.width))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block entries")
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for block entries")
     } /* end if */
     else
         iblock->child_iblocks = NULL;
@@ -872,7 +873,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && iblock)
-        (void)H5HF_cache_iblock_dest(f, iblock);
+        if(H5HF_man_iblock_dest(iblock) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_iblock_load() */
@@ -1034,7 +1036,7 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1047,27 +1049,9 @@ H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
     HDassert(iblock);
     HDassert(iblock->rc == 0);
 
-    /* Set the shared heap header's file context for this operation */
-    iblock->hdr->f = f;
-
-    /* Decrement reference count on shared info */
-    HDassert(iblock->hdr);
-    if(H5HF_hdr_decr(iblock->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
-    if(iblock->parent)
-        if(H5HF_iblock_decr(iblock->parent) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
-
-    /* Release entry tables */
-    if(iblock->ents)
-        H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
-    if(iblock->filt_ents)
-        H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
-    if(iblock->child_iblocks)
-        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
-
-    /* Free fractal heap indirect block info */
-    H5FL_FREE(H5HF_indirect_t, iblock);
+    /* Destroy fractal heap indirect block */
+    if(H5HF_man_iblock_dest(iblock) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1311,7 +1295,8 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
 
 done:
     if(!ret_value && dblock)
-        (void)H5HF_cache_dblock_dest(f, dblock);
+        if(H5HF_man_dblock_dest(dblock) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_dblock_load() */
@@ -1536,7 +1521,7 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1548,22 +1533,9 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
      */
     HDassert(dblock);
 
-    /* Set the shared heap header's file context for this operation */
-    dblock->hdr->f = f;
-
-    /* Decrement reference count on shared fractal heap info */
-    HDassert(dblock->hdr);
-    if(H5HF_hdr_decr(dblock->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
-    if(dblock->parent)
-        if(H5HF_iblock_decr(dblock->parent) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
-
-    /* Free block's buffer */
-    dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
-
-    /* Free fractal heap direct block info */
-    H5FL_FREE(H5HF_direct_t, dblock);
+    /* Destroy fractal heap direct block */
+    if(H5HF_man_dblock_dest(dblock) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1023,7 +1023,8 @@ H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *par_iblo
 done:
     if(ret_value < 0)
         if(iblock)
-            (void)H5HF_cache_iblock_dest(hdr->f, iblock);
+            if(H5HF_man_iblock_dest(iblock) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_create() */
@@ -1534,4 +1535,54 @@ done:
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_iblock_dest
+ *
+ * Purpose:	Destroys a fractal heap indirect block in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_iblock_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(iblock);
+    HDassert(iblock->rc == 0);
+
+    /* Decrement reference count on shared info */
+    HDassert(iblock->hdr);
+    if(H5HF_hdr_decr(iblock->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+    if(iblock->parent)
+        if(H5HF_iblock_decr(iblock->parent) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+    /* Release entry tables */
+    if(iblock->ents)
+        H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
+    if(iblock->filt_ents)
+        H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
+    if(iblock->child_iblocks)
+        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+
+    /* Free fractal heap indirect block info */
+    iblock = H5FL_FREE(H5HF_indirect_t, iblock);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_iblock_dest() */
 

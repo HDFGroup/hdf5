@@ -75,6 +75,7 @@ typedef struct H5G_node_t {
 
 /* PRIVATE PROTOTYPES */
 static size_t H5G_node_size_real(const H5F_t *f);
+static herr_t H5G_node_free(H5G_node_t *sym);
 
 /* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -298,6 +299,40 @@ H5G_node_size_real(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_node_free
+ *
+ * Purpose:	Destroy a symbol table node in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_free(H5G_node_t *sym)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(sym);
+
+    /* Verify that node is clean */
+    HDassert(sym->cache_info.is_dirty == FALSE);
+
+    if(sym->entry)
+        sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+    sym = H5FL_FREE(H5G_node_t, sym);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_node_load
  *
  * Purpose:	Loads a symbol table node from the file.
@@ -388,7 +423,7 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
-        if(sym && H5G_node_dest(f, sym) < 0)
+        if(sym && H5G_node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -506,7 +541,9 @@ done:
 static herr_t
 H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_dest)
 
     /* Check arguments */
     HDassert(sym);
@@ -514,11 +551,12 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
     /* Verify that node is clean */
     HDassert(sym->cache_info.is_dirty == FALSE);
 
-    if(sym->entry)
-        sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
-    H5FL_FREE(H5G_node_t, sym);
+    /* Destroy symbol table node */
+    if(H5G_node_free(sym) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_dest() */
 
 
