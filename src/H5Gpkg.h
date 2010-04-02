@@ -448,6 +448,7 @@ H5_DLL int H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void *_lt_key, ha
 		     const void *_rt_key, void *_udata);
 H5_DLL herr_t H5G_node_iterate_size(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
                      const void *_rt_key, void *_udata);
+H5_DLL herr_t H5G_node_free(H5G_node_t *sym);
 
 /* Functions that understand links in groups */
 H5_DLL int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);

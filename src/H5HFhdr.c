@@ -1343,7 +1343,9 @@ done:
 herr_t
 H5HF_hdr_free(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_free)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_free)
 
     /*
      * Check arguments.
@@ -1351,16 +1353,19 @@ H5HF_hdr_free(H5HF_hdr_t *hdr)
     HDassert(hdr);
 
     /* Free the block size lookup table for the doubling table */
-    H5HF_dtable_dest(&hdr->man_dtable);
+    if(H5HF_dtable_dest(&hdr->man_dtable) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap doubling table")
 
     /* Release any I/O pipeline filter information */
     if(hdr->pline.nused)
-        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
+        if(H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to reset I/O pipeline message")
 
     /* Free the shared info itself */
     hdr = H5FL_FREE(H5HF_hdr_t, hdr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_free() */
 
 

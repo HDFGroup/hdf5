@@ -196,7 +196,8 @@ HDmemset(dblock->blk, 0, dblock->size);
 done:
     if(ret_value < 0)
         if(dblock)
-            (void)H5HF_cache_dblock_dest(hdr->f, dblock);
+            if(H5HF_man_dblock_dest(dblock) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_dblock_create() */
@@ -639,4 +640,48 @@ H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_dblock_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_man_dblock_dest
+ *
+ * Purpose:	Destroys a fractal heap direct block in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 27 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_dblock_dest(H5HF_direct_t *dblock)
+{
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(dblock);
+
+    /* Decrement reference count on shared fractal heap info */
+    HDassert(dblock->hdr != NULL);
+    if(H5HF_hdr_decr(dblock->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+    if(dblock->parent)
+        if(H5HF_iblock_decr(dblock->parent) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+    /* Free block's buffer */
+    dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
+
+    /* Free fractal heap direct block info */
+    dblock = H5FL_FREE(H5HF_direct_t, dblock);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_man_dblock_dest() */
 

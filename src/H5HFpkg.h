@@ -563,6 +563,7 @@ H5_DLL herr_t H5HF_hdr_reset_iter(H5HF_hdr_t *hdr, hsize_t curr_off);
 H5_DLL herr_t H5HF_hdr_empty(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_free(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_hdr_dest(H5HF_hdr_t *hdr);
 
 /* Indirect block routines */
 H5_DLL herr_t H5HF_iblock_incr(H5HF_indirect_t *iblock);
@@ -593,6 +594,7 @@ H5_DLL herr_t H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned par_entry);
 H5_DLL herr_t H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr,
     haddr_t iblock_addr, unsigned nrows, H5HF_indirect_t *par_iblock, unsigned par_entry, hsize_t *heap_size/*out*/);
+H5_DLL herr_t H5HF_man_iblock_dest(H5HF_indirect_t *iblock);
 
 /* Direct block routines */
 H5_DLL herr_t H5HF_man_dblock_new(H5HF_hdr_t *fh, hid_t dxpl_id, size_t request,
@@ -611,6 +613,7 @@ H5_DLL herr_t H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned *par_entry, hbool_t *par_did_protect, H5AC_protect_t rw);
 H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     hsize_t dblock_size);
+H5_DLL herr_t H5HF_man_dblock_dest(H5HF_direct_t *dblock);
 
 /* Managed object routines */
 H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
@@ -658,11 +661,6 @@ H5_DLL herr_t H5HF_tiny_read(H5HF_hdr_t *fh, const uint8_t *id, void *obj);
 H5_DLL herr_t H5HF_tiny_op(H5HF_hdr_t *hdr, const uint8_t *id,
     H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_tiny_remove(H5HF_hdr_t *fh, const uint8_t *id);
-
-/* Metadata cache callbacks */
-H5_DLL herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr);
-H5_DLL herr_t H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock);
-H5_DLL herr_t H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
