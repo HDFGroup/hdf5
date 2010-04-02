@@ -159,7 +159,7 @@ HDfprintf(stderr, "%s: sinfo->sect_off_size = %u, sinfo->sect_len_size = %u\n", 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space section bin array")
 
     /* Increment the reference count on the free space manager header */
-    if(H5FS_incr(f, fspace) < 0)
+    if(H5FS_incr(fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINC, NULL, "unable to increment ref. count on free space header")
     sinfo->fspace = fspace;
 
@@ -335,7 +335,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
         /* Assume that the modification will affect the statistics in the header
          *  and mark that dirty also
          */
-        if(H5FS_dirty(f, fspace) < 0)
+        if(H5FS_dirty(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
     } /* end if */
 
@@ -430,7 +430,7 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
 
             /* If we haven't already marked the header dirty, do so now */
             if(!modified)
-                if(H5FS_dirty(f, fspace) < 0)
+                if(H5FS_dirty(fspace) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
 #ifdef H5FS_SINFO_DEBUG

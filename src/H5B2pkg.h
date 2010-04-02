@@ -266,7 +266,6 @@ H5_DLL herr_t H5B2_hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr);
 H5_DLL size_t H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_dirty(H5B2_hdr_t *hdr);
-H5_DLL herr_t H5B2_hdr_free(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on internal nodes */
@@ -277,6 +276,11 @@ H5_DLL H5B2_internal_t *H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL herr_t H5B2_split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5B2_create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *node_ptr);
+
+/* Routines for releasing structures */
+H5_DLL herr_t H5B2_hdr_free(H5B2_hdr_t *hdr);
+H5_DLL herr_t H5B2_leaf_free(H5B2_leaf_t *l);
+H5_DLL herr_t H5B2_internal_free(H5B2_internal_t *i);
 
 /* Routines for inserting records */
 H5_DLL herr_t H5B2_insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
@@ -320,11 +324,6 @@ H5_DLL herr_t H5B2_remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
 /* Routines for deleting nodes */
 H5_DLL herr_t H5B2_delete_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     const H5B2_node_ptr_t *curr_node, H5B2_remove_t op, void *op_data);
-
-/* Metadata cache callbacks */
-H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *b);
-H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);
-H5_DLL herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *i);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
