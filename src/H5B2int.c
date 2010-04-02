@@ -1730,7 +1730,8 @@ HDmemset(leaf->leaf_native, 0, hdr->cls->nrec_size * hdr->node_info[0].max_nrec)
 done:
     if(ret_value < 0) {
 	if(leaf)
-            (void)H5B2_cache_leaf_dest(hdr->f, leaf);
+            if(H5B2_leaf_free(leaf) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree leaf node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1808,7 +1809,8 @@ HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth
 done:
     if(ret_value < 0) {
 	if(internal)
-            (void)H5B2_cache_internal_dest(hdr->f, internal);
+            if(H5B2_internal_free(internal) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2889,6 +2891,92 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_node_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_internal_free
+ *
+ * Purpose:	Destroys a B-tree internal node in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 2 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_internal_free(H5B2_internal_t *internal)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_internal_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(internal);
+
+    /* Release internal node's native key buffer */
+    if(internal->int_native)
+        H5FL_FAC_FREE(internal->hdr->node_info[internal->depth].nat_rec_fac, internal->int_native);
+
+    /* Release internal node's node pointer buffer */
+    if(internal->node_ptrs)
+        H5FL_FAC_FREE(internal->hdr->node_info[internal->depth].node_ptr_fac, internal->node_ptrs);
+
+    /* Decrement ref. count on B-tree header */
+    if(H5B2_hdr_decr(internal->hdr) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
+
+    /* Free B-tree internal node info */
+    internal = H5FL_FREE(H5B2_internal_t, internal);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_internal_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_leaf_free
+ *
+ * Purpose:	Destroys a B-tree leaf node in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 2 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_leaf_free(H5B2_leaf_t *leaf)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_leaf_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(leaf);
+
+    /* Release leaf's native key buffer */
+    if(leaf->leaf_native)
+        H5FL_FAC_FREE(leaf->hdr->node_info[0].nat_rec_fac, leaf->leaf_native);
+
+    /* Decrement ref. count on B-tree header */
+    if(H5B2_hdr_decr(leaf->hdr) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
+
+    /* Free B-tree leaf node info */
+    leaf = H5FL_FREE(H5B2_leaf_t, leaf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_leaf_free() */
 
 #ifdef H5B2_DEBUG
 
