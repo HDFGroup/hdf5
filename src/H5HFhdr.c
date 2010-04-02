@@ -131,7 +131,8 @@ H5HF_hdr_alloc(H5F_t *f)
 done:
     if(!ret_value)
         if(hdr)
-            (void)H5HF_hdr_dest(hdr);
+            if(H5HF_hdr_dest(hdr) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -498,7 +499,8 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 done:
     if(!H5F_addr_defined(ret_value))
         if(hdr)
-            (void)H5HF_hdr_dest(hdr);
+            if(H5HF_hdr_dest(hdr) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_create() */
@@ -1443,7 +1445,9 @@ done:
 herr_t
 H5HF_hdr_dest(H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_dest)
 
     /*
      * Check arguments.
@@ -1452,15 +1456,18 @@ H5HF_hdr_dest(H5HF_hdr_t *hdr)
     HDassert(hdr->rc == 0);
 
     /* Free the block size lookup table for the doubling table */
-    H5HF_dtable_dest(&hdr->man_dtable);
+    if(H5HF_dtable_dest(&hdr->man_dtable) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap doubling table")
 
     /* Release any I/O pipeline filter information */
     if(hdr->pline.nused)
-        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
+        if(H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to reset I/O pipeline message")
 
     /* Free the shared info itself */
-    H5FL_FREE(H5HF_hdr_t, hdr);
+    hdr = H5FL_FREE(H5HF_hdr_t, hdr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_dest() */
 

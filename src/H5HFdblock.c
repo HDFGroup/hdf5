@@ -677,7 +677,6 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
     HDassert(dblock->hdr != NULL);
     if(H5HF_hdr_decr(dblock->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
-
     if(dblock->parent)
         if(H5HF_iblock_decr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
@@ -686,7 +685,7 @@ H5HF_man_dblock_dest(H5HF_direct_t *dblock)
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
 
     /* Free fractal heap direct block info */
-    H5FL_FREE(H5HF_direct_t, dblock);
+    dblock = H5FL_FREE(H5HF_direct_t, dblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

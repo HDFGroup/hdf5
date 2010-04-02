@@ -297,7 +297,7 @@ H5G_node_size_real(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_dest
+ * Function:	H5G_node_free
  *
  * Purpose:	Destroy a symbol table node in memory.
  *
@@ -310,9 +310,9 @@ H5G_node_size_real(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_dest(H5G_node_t *sym)
+H5G_node_free(H5G_node_t *sym)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free)
 
     /*
      * Check arguments.
@@ -324,10 +324,10 @@ H5G_node_dest(H5G_node_t *sym)
 
     if(sym->entry)
         sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
-    H5FL_FREE(H5G_node_t,sym);
+    sym = H5FL_FREE(H5G_node_t, sym);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_dest() */
+} /* end H5G_node_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -395,7 +395,7 @@ H5G_node_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
 
 done:
     if(!ret_value)
-        if(sym && H5G_node_dest(sym) < 0)
+        if(sym && H5G_node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -486,15 +486,19 @@ done:
 static herr_t
 H5G_node_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free_icr)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy B-tree node */
-    H5G_node_dest(thing);
+    /* Destroy symbol table node */
+    if(H5G_node_free(thing) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_free_icr() */
 
 

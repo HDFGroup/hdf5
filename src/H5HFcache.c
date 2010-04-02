@@ -413,7 +413,8 @@ H5HF_cache_hdr_deserialize(haddr_t addr, size_t UNUSED len,
 done:
     /* Release resources */
     if(!ret_value && hdr)
-        (void)H5HF_hdr_dest(hdr);
+        if(H5HF_hdr_dest(hdr) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -592,15 +593,19 @@ done:
 static herr_t
 H5HF_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_free_icr)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_hdr_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy B-tree node */
-    H5HF_hdr_dest(thing);
+    /* Destroy fractal heap header */
+    if(H5HF_hdr_dest(thing) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_free_icr() */
 
 
@@ -786,7 +791,8 @@ H5HF_cache_iblock_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 done:
     /* Release resources */
     if(!ret_value && iblock)
-        (void)H5HF_man_iblock_dest(iblock);
+        if(H5HF_man_iblock_dest(iblock) < 0)
+            HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_iblock_deserialize() */
@@ -929,15 +935,19 @@ done:
 static herr_t
 H5HF_cache_iblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_free_icr)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_iblock_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
     /* Destroy fractal heap indirect block */
-    H5HF_man_iblock_dest(thing);
+    if(H5HF_man_iblock_dest(thing) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_cache_iblock_free_icr() */
 
 
@@ -1391,7 +1401,9 @@ done:
 herr_t
 H5HF_cache_dblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_dblock_free_icr)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_dblock_free_icr)
 
     /*
      * Check arguments.
@@ -1399,8 +1411,10 @@ H5HF_cache_dblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
     HDassert(thing);
 
     /* Destroy fractal heap direct block */
-    H5HF_man_dblock_dest(thing);
+    if(H5HF_man_dblock_dest(thing) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_dblock_free_icr() */
 

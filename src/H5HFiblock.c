@@ -1039,7 +1039,8 @@ H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_indirect_t *par_iblo
 done:
     if(ret_value < 0)
         if(iblock)
-            (void)H5HF_man_iblock_dest(iblock);
+            if(H5HF_man_iblock_dest(iblock) < 0)
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_create() */
@@ -1602,7 +1603,7 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
         H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
-    H5FL_FREE(H5HF_indirect_t, iblock);
+    iblock = H5FL_FREE(H5HF_indirect_t, iblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
