@@ -197,7 +197,7 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
-        if(sym && H5G_node_dest(f, sym) < 0)
+        if(sym && H5G_node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -339,10 +339,9 @@ H5G_node_dest(H5F_t *f, H5G_node_t *sym)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to free symbol table node")
     } /* end if */
 
-    /* Release resources */
-    if(sym->entry)
-        sym->entry = (H5G_entry_t *)H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
-    sym = H5FL_FREE(H5G_node_t, sym);
+    /* Destroy symbol table node */
+    if(H5G_node_free(sym) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

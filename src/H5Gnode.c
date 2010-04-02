@@ -263,6 +263,40 @@ H5G_node_size_real(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_node_free
+ *
+ * Purpose:	Destroy a symbol table node in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_free(H5G_node_t *sym)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(sym);
+
+    /* Verify that node is clean */
+    HDassert(sym->cache_info.is_dirty == FALSE);
+
+    if(sym->entry)
+        sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+    sym = H5FL_FREE(H5G_node_t, sym);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_node_create
  *
  * Purpose:	Creates a new empty symbol table node.	This function is
