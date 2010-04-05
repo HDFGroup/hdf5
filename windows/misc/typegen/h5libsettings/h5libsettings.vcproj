@@ -195,8 +195,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Generating H5lib_settings.h"
-				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
+				Description="Generating H5lib_settings.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -285,8 +285,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Generating H5lib_settings.h"
-				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
+				Description="Generating H5lib_settings.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -376,8 +376,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Generating H5lib_settings.h"
-				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.h&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.h&quot;"
+				Description="Generating H5lib_settings.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5lib_settings.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5lib_settings.c&quot;"
 			/>
 		</Configuration>
 	</Configurations>
