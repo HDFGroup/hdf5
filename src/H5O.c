@@ -1194,7 +1194,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
 done:
     if(ret_value < 0 && oh)
-        if(H5O_dest(f, oh) < 0)
+        if(H5O_free(oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2871,4 +2871,49 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_visit() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_free
+ *
+ * Purpose:	Destroys an object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_free(H5O_t *oh)
+{
+    unsigned	u;                      /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free)
+
+    /* check args */
+    HDassert(oh);
+
+    /* Destroy chunks */
+    if(oh->chunk) {
+        for(u = 0; u < oh->nchunks; u++)
+            oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
+
+        oh->chunk = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
+    } /* end if */
+
+    /* Destroy messages */
+    if(oh->mesg) {
+        for(u = 0; u < oh->nmesgs; u++)
+            H5O_msg_free_mesg(&oh->mesg[u]);
+
+        oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
+    } /* end if */
+
+    /* destroy object header */
+    oh = H5FL_FREE(H5O_t, oh);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_free() */
 

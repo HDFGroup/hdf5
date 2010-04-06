@@ -69,6 +69,7 @@
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 		       void *_udata2);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh, unsigned UNUSED * flags_ptr);
+static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
@@ -610,7 +611,7 @@ H5O_assert(oh);
 done:
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && oh)
-        if(H5O_dest(f, oh) < 0)
+        if(H5O_free(oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -796,7 +797,7 @@ H5O_assert(oh);
 
     /* Destroy the object header, if requested */
     if(destroy)
-        if(H5O_dest(f,oh) < 0)
+        if(H5O_dest(f, oh) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
 done:
@@ -817,12 +818,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
 {
-    unsigned	u;                      /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dest)
 
     /* check args */
     HDassert(oh);
@@ -830,34 +831,12 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     /* Verify that node is clean */
     HDassert(oh->cache_info.is_dirty == FALSE);
 
-    /* destroy chunks */
-    if(oh->chunk) {
-        for(u = 0; u < oh->nchunks; u++) {
-            /* Verify that chunk is clean */
-            HDassert(oh->chunk[u].dirty == 0);
+    /* Destroy object header */
+    if(H5O_free(oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
 
-            oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
-        } /* end for */
-
-        oh->chunk = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
-    } /* end if */
-
-    /* destroy messages */
-    if(oh->mesg) {
-        for(u = 0; u < oh->nmesgs; u++) {
-            /* Verify that message is clean */
-            HDassert(oh->mesg[u].dirty == 0);
-
-            H5O_msg_free_mesg(&oh->mesg[u]);
-        } /* end for */
-
-        oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
-    } /* end if */
-
-    /* destroy object header */
-    H5FL_FREE(H5O_t, oh);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dest() */
 
 
