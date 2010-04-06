@@ -130,9 +130,9 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 	size_hint = H5HL_SIZEOF_FREE(f);
     size_hint = H5HL_ALIGN(size_hint);
 
-    /* Allocate memory structure */
+    /* Allocate new heap structure */
     if(NULL == (heap = H5HL_new(H5F_SIZEOF_SIZE(f), H5F_SIZEOF_ADDR(f), H5HL_SIZEOF_HDR(f))))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate new heap struct")
 
     /* Allocate file space */
     total_size = heap->prfx_size + size_hint;
@@ -1097,25 +1097,6 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin local heap prefix")
         } /* end if */
     } /* end if */
-
-    /* Check if the heap is contiguous on disk */
-    if(heap->single_cache_obj) {
-        /* Free the contiguous local heap in one call */
-        H5_CHECK_OVERFLOW(heap->prfx_size + heap->dblk_size, size_t, hsize_t);
-        if(H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, addr, (hsize_t)(heap->prfx_size + heap->dblk_size)) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free contiguous local heap")
-    } /* end if */
-    else {
-        /* Free the local heap's prefix */
-        H5_CHECK_OVERFLOW(heap->prfx_size, size_t, hsize_t);
-        if(H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->prfx_addr, (hsize_t)heap->prfx_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap header")
-
-        /* Free the local heap's data block */
-        H5_CHECK_OVERFLOW(heap->dblk_size, size_t, hsize_t);
-        if(H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, heap->dblk_addr, (hsize_t)heap->dblk_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data")
-    } /* end else */
 
     /* Set the flags for releasing the prefix and data block */
     cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;

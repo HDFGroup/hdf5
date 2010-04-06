@@ -251,6 +251,10 @@ H5_DLL herr_t H5SM_bt2_convert_to_list_op(const void * record, void *op_data);
 /* Fractal heap 'op' callback to compute hash value for message "in place" */
 H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata);
 
+/* Routines to release data structures */
+herr_t H5SM_table_free(H5SM_master_table_t *table);
+herr_t H5SM_list_free(H5SM_list_t *list);
+
 /* Testing functions */
 #ifdef H5SM_TESTING
 H5_DLL herr_t H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
