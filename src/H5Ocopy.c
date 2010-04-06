@@ -733,7 +733,7 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Release pointer to destination object header */
-    if(ret_value < 0 && oh_dst && H5O_dest(oh_dst) < 0)
+    if(ret_value < 0 && oh_dst && H5O_free(oh_dst) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     /* Release user data for particular type of object to copy */

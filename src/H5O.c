@@ -1206,7 +1206,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
 done:
     if(ret_value < 0 && oh)
-        if(H5O_dest(oh) < 0)
+        if(H5O_free(oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3208,7 +3208,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dest
+ * Function:	H5O_free
  *
  * Purpose:	Destroys an object header.
  *
@@ -3221,11 +3221,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_dest(H5O_t *oh)
+H5O_free(H5O_t *oh)
 {
     unsigned	u;                      /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free)
 
     /* check args */
     HDassert(oh);
@@ -3247,8 +3247,8 @@ H5O_dest(H5O_t *oh)
     } /* end if */
 
     /* destroy object header */
-    H5FL_FREE(H5O_t, oh);
+    oh = H5FL_FREE(H5O_t, oh);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_dest() */
+} /* end H5O_free() */
 

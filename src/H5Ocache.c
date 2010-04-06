@@ -310,7 +310,7 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
 done:
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && oh)
-        if(H5O_dest(oh) < 0)
+        if(H5O_free(oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -496,17 +496,20 @@ static herr_t
 H5O_cache_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
     H5O_t *oh = (H5O_t *)thing;         /* Object header to destroy */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_free_icr)
 
     /* Check arguments */
     HDassert(oh);
     HDassert(oh->rc == 0);
 
     /* Destroy object header */
-    H5O_dest(oh);
+    if(H5O_free(oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_cache_free_icr() */
 
 

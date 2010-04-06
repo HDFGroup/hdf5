@@ -516,7 +516,7 @@ H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_mesg_
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 H5_DLL herr_t H5O_inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc(H5O_t *oh);
-H5_DLL herr_t H5O_dest(H5O_t *oh);
+H5_DLL herr_t H5O_free(H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL unsigned H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
