@@ -476,6 +476,7 @@ H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL hid_t H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref);
 H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_mesg_t *mesg);
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
+H5_DLL herr_t H5O_free(H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL unsigned H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
@@ -535,9 +536,6 @@ H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
-
-/* Useful metadata cache callbacks */
-H5_DLL herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 
 /* Testing functions */
 #ifdef H5O_TESTING
