@@ -363,17 +363,20 @@ done:
 static herr_t
 H5SM_table_dest(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_dest)
 
     /* Sanity check */
     HDassert(table);
     HDassert(table->indexes);
 
-    H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
+    /* Destroy Shared Object Header Message table */
+    if(H5SM_table_free(table) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message table")
 
-    H5FL_FREE(H5SM_master_table_t, table);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_table_dest() */
 
 
@@ -654,16 +657,19 @@ done:
 static herr_t
 H5SM_list_dest(H5F_t UNUSED *f, H5SM_list_t* list)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_dest)
 
     HDassert(list);
     HDassert(list->messages);
 
-    H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
+    /* Destroy Shared Object Header Message list */
+    if(H5SM_list_free(list) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message list")
 
-    H5FL_FREE(H5SM_list_t, list);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_list_dest() */
 
 

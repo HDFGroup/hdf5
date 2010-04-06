@@ -456,7 +456,7 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
     /* Should we destroy the memory version? */
     if(destroy)
-        if(H5HL_prfx_dest(prfx) < 0)
+        if(H5HL_prefix_dest(f, prfx) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap prefix")
 
 done:
@@ -532,7 +532,7 @@ H5HL_prefix_clear(H5F_t UNUSED *f, void *thing, hbool_t destroy)
     prfx->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5HL_prfx_dest(prfx) < 0)
+        if(H5HL_prefix_dest(f, prfx) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap prefix")
 
 done:
@@ -689,7 +689,7 @@ H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
     /* Should we destroy the memory version? */
     if(destroy)
-        if(H5HL_dblk_dest(dblk) < 0)
+        if(H5HL_datablock_dest(f, dblk) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
 
 done:
@@ -761,7 +761,7 @@ H5HL_datablock_clear(H5F_t UNUSED *f, void *_thing, hbool_t destroy)
     dblk->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5HL_dblk_dest(dblk) < 0)
+        if(H5HL_datablock_dest(f, dblk) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy local heap data block")
 
 done:

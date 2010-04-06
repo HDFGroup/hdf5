@@ -130,9 +130,9 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 	size_hint = H5HL_SIZEOF_FREE(f);
     size_hint = H5HL_ALIGN(size_hint);
 
-    /* Allocate memory structure */
+    /* Allocate new heap structure */
     if(NULL == (heap = H5HL_new(H5F_SIZEOF_SIZE(f), H5F_SIZEOF_ADDR(f), H5HL_SIZEOF_HDR(f))))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate new heap struct")
 
     /* Allocate file space */
     total_size = heap->prfx_size + size_hint;
