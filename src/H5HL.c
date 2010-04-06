@@ -1242,7 +1242,7 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
     /* Get the pointer to the heap */
     heap = prfx->heap;
 
-    /* Compute the size of the local heap */
+    /* Accumulate the size of the local heap */
     *heap_size += (hsize_t)(heap->prfx_size + heap->dblk_size);
 
 done:

@@ -221,7 +221,7 @@ H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 done:
     /* Release resources */
      if(!ret_value && table)
-        (void)H5SM_table_dest(table);
+        (void)H5SM_table_free(table);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_table_deserialize() */
@@ -332,16 +332,19 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
 static herr_t
 H5SM_table_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy Shared Object Header Message */
-    H5SM_table_dest(thing);
+    /* Destroy Shared Object Header Message table */
+    if(H5SM_table_free(thing) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message table")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_table_free_icr() */
 
 
@@ -528,14 +531,17 @@ done:
 static herr_t
 H5SM_list_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_free_icr)
 
     /* Check arguments */
     HDassert(thing);
 
-    /* Destroy Shared Object Header Message */
-    H5SM_list_dest(thing);
+    /* Destroy Shared Object Header Message list */
+    if(H5SM_list_free(thing) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message list")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_list_free_icr() */

@@ -2340,7 +2340,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_table_dest
+ * Function:	H5SM_table_free
  *
  * Purpose:	Frees memory used by the SOHM table.
  *
@@ -2352,9 +2352,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_table_dest(H5SM_master_table_t *table)
+H5SM_table_free(H5SM_master_table_t *table)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_free)
 
     /* Sanity check */
     HDassert(table);
@@ -2365,11 +2365,11 @@ H5SM_table_dest(H5SM_master_table_t *table)
     H5FL_FREE(H5SM_master_table_t, table);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_table_dest() */
+} /* end H5SM_table_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_list_dest
+ * Function:	H5SM_list_free
  *
  * Purpose:	Frees all memory used by the list.
  *
@@ -2381,9 +2381,9 @@ H5SM_table_dest(H5SM_master_table_t *table)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_list_dest(H5SM_list_t *list)
+H5SM_list_free(H5SM_list_t *list)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_dest)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_free)
 
     HDassert(list);
     HDassert(list->messages);
@@ -2393,7 +2393,7 @@ H5SM_list_dest(H5SM_list_t *list)
     H5FL_FREE(H5SM_list_t, list);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_list_dest() */
+} /* end H5SM_list_free() */
 
 
 /*-------------------------------------------------------------------------

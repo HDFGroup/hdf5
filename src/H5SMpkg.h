@@ -268,9 +268,9 @@ H5_DLL herr_t H5SM_btree_convert_to_list_op(const void * record, void *op_data);
 /* Fractal heap 'op' callback to compute hash value for message "in place" */
 H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata);
 
-herr_t H5SM_table_dest(H5SM_master_table_t * table);
-
-herr_t H5SM_list_dest(H5SM_list_t * list);
+/* Routines to release data structures */
+herr_t H5SM_table_free(H5SM_master_table_t *table);
+herr_t H5SM_list_free(H5SM_list_t *list);
 
 /* Testing functions */
 #ifdef H5SM_TESTING
