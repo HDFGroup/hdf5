@@ -231,7 +231,8 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SOHM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && table)
-        (void)H5SM_table_dest(f, table);
+        if(H5SM_table_free(table) < 0)
+	    HDONE_ERROR(H5E_SOHM, H5E_CANTFREE, NULL, "unable to destroy sohm table")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_table_load() */
@@ -364,17 +365,20 @@ done:
 static herr_t
 H5SM_table_dest(H5F_t UNUSED *f, H5SM_master_table_t* table)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_table_dest)
 
     /* Sanity check */
     HDassert(table);
     HDassert(table->indexes);
 
-    H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
+    /* Destroy Shared Object Header Message table */
+    if(H5SM_table_free(table) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message table")
 
-    (void)H5FL_FREE(H5SM_master_table_t, table);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_table_dest() */
 
 
@@ -679,9 +683,9 @@ H5SM_list_dest(H5F_t *f, H5SM_list_t* list)
             HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "unable to free shared message list")
     } /* end if */
 
-    /* Release resources */
-    H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-    (void)H5FL_FREE(H5SM_list_t, list);
+    /* Destroy Shared Object Header Message list */
+    if(H5SM_list_free(list) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to free shared message list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -2291,6 +2291,63 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5SM_table_free
+ *
+ * Purpose:	Frees memory used by the SOHM table.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *		November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_table_free(H5SM_master_table_t *table)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_table_free)
+
+    /* Sanity check */
+    HDassert(table);
+    HDassert(table->indexes);
+
+    H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
+
+    H5FL_FREE(H5SM_master_table_t, table);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_table_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_list_free
+ *
+ * Purpose:	Frees all memory used by the list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	James Laird
+ *		November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SM_list_free(H5SM_list_t *list)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_free)
+
+    HDassert(list);
+    HDassert(list->messages);
+
+    H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
+
+    H5FL_FREE(H5SM_list_t, list);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM_list_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5SM_table_debug
  *
  * Purpose:     Print debugging information for the master table.
