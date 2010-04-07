@@ -91,7 +91,8 @@ ac_cv_sizeof_char=${ac_cv_sizeof_char=1}
 ac_cv_sizeof_short=${ac_cv_sizeof_short=2}
 ac_cv_sizeof_int=${ac_cv_sizeof_int=4}
 ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long=8}
-ac_cv_sizeof___int64=${ac_cv_sizeof___int64=8}
+# Do not cache __int64 since it is not a standard C type and some compilers
+# (e.g., gcc) does not support it.
 ac_cv_sizeof_float=${ac_cv_sizeof_float=4}
 ac_cv_sizeof_double=${ac_cv_sizeof_double=8}
 ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=8}
