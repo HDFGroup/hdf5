@@ -32,6 +32,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -50,6 +51,7 @@
 typedef struct H5G_node_key_t {
     size_t      offset;                 /*offset into heap for name          */
 } H5G_node_key_t;
+
 
 /* Private macros */
 
@@ -258,6 +260,40 @@ H5G_node_size_real(const H5F_t *f)
     FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
                      (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
 } /* end H5G_node_size_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_free
+ *
+ * Purpose:	Destroy a symbol table node in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_free(H5G_node_t *sym)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(sym);
+
+    /* Verify that node is clean */
+    HDassert(sym->cache_info.is_dirty == FALSE);
+
+    if(sym->entry)
+        sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+    sym = H5FL_FREE(H5G_node_t, sym);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -698,9 +734,6 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Copy new entry into table */
     H5G_ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
-
-    /* Flag entry as dirty */
-    insert_into->entry[idx].dirty = TRUE;
 
     /* Increment # of symbols in table */
     insert_into->nsyms += 1;

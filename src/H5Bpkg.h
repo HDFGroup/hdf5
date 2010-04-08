@@ -51,8 +51,8 @@
 
 /* The B-tree node as stored in memory...  */
 typedef struct H5B_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions */
-                            /* _must_ be first field in structure */
+    H5AC_info_t        cache_info;     /* Information for H5AC cache functions */
+                                        /* _must_ be first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
     unsigned		nchildren;	/*number of child pointers	     */
@@ -82,7 +82,7 @@ H5FL_EXTERN(H5B_t);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5B_dest(H5F_t *f, H5B_t *b);
+H5_DLL herr_t H5B_node_dest(H5B_t *b);
 #ifdef H5B_DEBUG
 herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
 			 void *udata);

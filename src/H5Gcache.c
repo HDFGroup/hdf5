@@ -198,7 +198,7 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
-        if(sym && H5G_node_dest(f, sym) < 0)
+        if(sym && H5G_node_free(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -234,18 +234,6 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(sym);
-
-    /*
-     * Look for dirty entries and set the node dirty flag.
-     */
-    for(u = 0; u < sym->nsyms; u++)
-	if(sym->entry[u].dirty) {
-            /* Set the node's dirty flag */
-            sym->cache_info.is_dirty = TRUE;
-
-            /* Reset the entry's dirty flag */
-            sym->entry[u].dirty = FALSE;
-        } /* end if */
 
     /*
      * Write the symbol node to disk.
@@ -352,10 +340,9 @@ H5G_node_dest(H5F_t *f, H5G_node_t *sym)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to free symbol table node")
     } /* end if */
 
-    /* Release resources */
-    if(sym->entry)
-        sym->entry = (H5G_entry_t *)H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
-    sym = H5FL_FREE(H5G_node_t, sym);
+    /* Destroy symbol table node */
+    if(H5G_node_free(sym) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -378,7 +365,6 @@ done:
 static herr_t
 H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
 {
-    unsigned u;              /* Local index variable */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear)
@@ -388,9 +374,7 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
      */
     HDassert(sym);
 
-    /* Look for dirty entries and reset their dirty flag.  */
-    for(u = 0; u < sym->nsyms; u++)
-        sym->entry[u].dirty = FALSE;
+    /* Reset the node's dirty flag */
     sym->cache_info.is_dirty = FALSE;
 
     /*

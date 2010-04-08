@@ -225,7 +225,7 @@ typedef struct H5F_file_t {
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hbool_t	latest_format;	/* Always use the latest format?	*/
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
-    int         ncwfs;		/* Num entries on cwfs list		*/
+    unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
@@ -302,6 +302,7 @@ H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
+H5_DLL herr_t H5F_super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
 H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);

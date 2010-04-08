@@ -25,6 +25,7 @@
  *		The one exception to this rule is testpar/t_cache.c.  The
  *		test code is easier to write if it can look at H5AC_aux_t.
  *		Indeed, this is the main reason why this file was created.
+ *
  */
 
 #ifndef H5AC_PACKAGE
@@ -35,7 +36,7 @@
 #define _H5ACpkg_H
 
 /* Get package's private header */
-#include "H5ACprivate.h"
+#include "H5ACprivate.h"	/* Metadata cache			*/
 
 
 /* Get needed headers */

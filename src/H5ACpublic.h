@@ -36,8 +36,6 @@
 extern "C" {
 #endif
 
-#define H5AC__MAX_TRACE_FILE_NAME_LEN	1024
-
 /****************************************************************************
  *
  * structure H5AC_cache_config_t
@@ -240,8 +238,8 @@ extern "C" {
  *      stay within max_size.
  *
  *      With a little thought, it should be obvious that the above flash
- *      cache size increase algorithm is not sufficient for all circumstances --
- *      for example, suppose the user round robins through
+ *      cache size increase algorithm is not sufficient for all circumstances
+ *      -- for example, suppose the user round robins through
  *      (1/flash_threshold) +1 groups, adding one data set to each on each
  *      pass.  Then all will increase in size at about the same time, requiring
  *      the max cache size to at least double to maintain acceptable
@@ -257,11 +255,10 @@ extern "C" {
  *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
  *      is H5C_flash_incr__add_space.
  *
- * flash_threshold: Double containing the factor by which current max cache size
- *      is multiplied to obtain the size threshold for the add_space flash
+ * flash_threshold: Double containing the factor by which current max cache
+ *      size is multiplied to obtain the size threshold for the add_space flash
  *      increment algorithm.  The field is ignored unless flash_incr_mode is
  *      H5C_flash_incr__add_space.
- *
  *
  *
  * Cache size decrease control fields:
@@ -383,7 +380,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-#define H5AC__CURR_CACHE_CONFIG_VERSION 1
+#define H5AC__CURR_CACHE_CONFIG_VERSION 	1
+#define H5AC__MAX_TRACE_FILE_NAME_LEN		1024
 
 typedef struct H5AC_cache_config_t
 {

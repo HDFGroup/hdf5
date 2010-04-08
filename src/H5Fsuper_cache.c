@@ -613,7 +613,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, const void UNUSED 
 done:
     /* Release the [possibly partially initialized] superblock on errors */
     if(!ret_value && sblock)
-        if(H5F_sblock_dest(f, sblock) < 0)
+        if(H5F_super_free(sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -840,18 +840,19 @@ done:
 static herr_t
 H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sblock_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_dest)
 
     /* Sanity check */
     HDassert(sblock);
 
-    /* Free root group symbol table entry, if any */
-    sblock->root_ent = (H5G_entry_t *)H5MM_xfree(sblock->root_ent);
-
     /* Free superblock */
-    sblock = (H5F_super_t *)H5FL_FREE(H5F_super_t, sblock);
+    if(H5F_super_free(sblock) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_sblock_dest() */
 
 

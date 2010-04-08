@@ -349,7 +349,7 @@ HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", 
     /* Free buffer for elements in index block */
     HDassert(idx < hdr->elmt_fac.nalloc);
     HDassert(hdr->elmt_fac.fac[idx]);
-    (void)H5FL_FAC_FREE(hdr->elmt_fac.fac[idx], elmts);
+    elmts = H5FL_FAC_FREE(hdr->elmt_fac.fac[idx], elmts);
 
 END_FUNC(PKG)   /* end H5EA__hdr_free_elmts() */
 

@@ -164,6 +164,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;
+    heap->shared = f->shared;
 
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
@@ -222,7 +223,7 @@ HDmemset(heap->chunk, 0, size);
 	HDmemmove(f->shared->cwfs + 1, f->shared->cwfs,
                    MIN(f->shared->ncwfs, H5HG_NCWFS - 1) * sizeof(H5HG_heap_t *));
 	f->shared->cwfs[0] = heap;
-	f->shared->ncwfs = MIN(H5HG_NCWFS, f->shared->ncwfs+1);
+	f->shared->ncwfs = MIN(H5HG_NCWFS, f->shared->ncwfs + 1);
     } /* end else */
 
     /* Add the heap to the cache */
@@ -242,7 +243,7 @@ done:
             /* Check if the heap object was allocated */
             if(heap)
                 /* Destroy the heap object */
-                if(H5HG_dest(f, heap) < 0)
+                if(H5HG_free(heap) < 0)
                     HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, "unable to destroy global heap collection")
         } /* end if */
     } /* end if */
@@ -485,7 +486,7 @@ herr_t
 H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/)
 {
     size_t	need;		/*total space needed for object		*/
-    int	        cwfsno;
+    unsigned    cwfsno;
     size_t	idx;
     haddr_t	addr = HADDR_UNDEF;
     H5HG_heap_t	*heap = NULL;
@@ -544,7 +545,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     if(!found) {
         size_t new_need;
 
-        for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
+        for(cwfsno = 0; cwfsno < f->shared->ncwfs; cwfsno++) {
             new_need = need;
             new_need -= f->shared->cwfs[cwfsno]->obj[0].size;
             new_need = MAX(f->shared->cwfs[cwfsno]->size, new_need);
@@ -575,7 +576,6 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
 
         if(!H5F_addr_defined(addr))
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to allocate a global heap collection")
-	cwfsno = 0;
     } /* end if */
     else {
         /* Move the collection forward in the CWFS list, if it's not
@@ -671,13 +671,13 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
      * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if(heap->obj[0].begin) {
-        int	i;
+        unsigned u;     /* Local index variable */
 
-	for(i = 0; i < f->shared->ncwfs; i++)
-	    if(f->shared->cwfs[i] == heap) {
-		if(i) {
-		    f->shared->cwfs[i] = f->shared->cwfs[i - 1];
-		    f->shared->cwfs[i - 1] = heap;
+	for(u = 0; u < f->shared->ncwfs; u++)
+	    if(f->shared->cwfs[u] == heap) {
+		if(u) {
+		    f->shared->cwfs[u] = f->shared->cwfs[u - 1];
+		    f->shared->cwfs[u - 1] = heap;
 		} /* end if */
 		break;
 	    } /* end if */
@@ -691,7 +691,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     ret_value = object;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET)<0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header")
 
     if(NULL == ret_value && NULL == orig_object && object)
@@ -838,22 +838,20 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG; /* Indicate that the object was deleted, for the unprotect call */
     } /* end if */
     else {
-        int	i;              /* Local index variable */
-
         /*
          * If the heap is in the CWFS list then advance it one position.  The
          * H5AC_protect() might have done that too, but that's okay.  If the
          * heap isn't on the CWFS list then add it to the end.
          */
-        for(i = 0; i < f->shared->ncwfs; i++)
-            if(f->shared->cwfs[i] == heap) {
-                if(i) {
-                    f->shared->cwfs[i] = f->shared->cwfs[i - 1];
-                    f->shared->cwfs[i - 1] = heap;
+        for(u = 0; u < f->shared->ncwfs; u++)
+            if(f->shared->cwfs[u] == heap) {
+                if(u) {
+                    f->shared->cwfs[u] = f->shared->cwfs[u - 1];
+                    f->shared->cwfs[u - 1] = heap;
                 } /* end if */
                 break;
             } /* end if */
-        if(i >= f->shared->ncwfs) {
+        if(u >= f->shared->ncwfs) {
             f->shared->ncwfs = MIN(f->shared->ncwfs + 1, H5HG_NCWFS);
             f->shared->cwfs[f->shared->ncwfs - 1] = heap;
         } /* end if */
@@ -865,4 +863,45 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HG_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HG_free
+ *
+ * Purpose:	Destroys a global heap collection in memory
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, January 15, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HG_free(H5HG_heap_t *heap)
+{
+    unsigned u;         /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_free)
+
+    /* Check arguments */
+    HDassert(heap);
+
+    /* Remove the heap from the CWFS list */
+    for(u = 0; u < heap->shared->ncwfs; u++) {
+        if(heap->shared->cwfs[u] == heap) {
+            heap->shared->ncwfs -= 1;
+            HDmemmove(heap->shared->cwfs + u, heap->shared->cwfs + u + 1, (heap->shared->ncwfs - u) * sizeof(H5HG_heap_t *));
+            break;
+        } /* end if */
+    } /* end for */
+
+    if(heap->chunk)
+        heap->chunk = H5FL_BLK_FREE(gheap_chunk, heap->chunk);
+    if(heap->obj)
+        heap->obj = H5FL_SEQ_FREE(H5HG_obj_t, heap->obj);
+    heap = H5FL_FREE(H5HG_heap_t, heap);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5HG_free() */
 
