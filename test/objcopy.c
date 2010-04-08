@@ -7783,6 +7783,168 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_copy_null_ref
+ *
+ * Purpose:     Creates 2 datasets with references, one with object and
+ *              the other with region references.  Copies these datasets
+ *              to a new file without expanding references, causing them
+ *              to become NULL.  Next, copies these references to a third
+ *              file with expanding references, to verify that NULL
+ *              references are handled correctly.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, March 31, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1;                 /* File IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t pid = -1;                             /* Object copy property list ID */
+    hid_t did1 = -1, did2 = -1;                 /* Dataset IDs */
+    hsize_t dim1d[1] = {2};                     /* Dataset dimensions */
+    hobj_ref_t obj_buf[2];                      /* Buffer for object refs */
+    hdset_reg_ref_t reg_buf[2];                 /* Buffer for region refs */
+    char zeros[MAX(sizeof(obj_buf),sizeof(reg_buf))]; /* Array of zeros, for memcmp */
+    char src_filename[NAME_BUF_SIZE];
+    char mid_filename[NAME_BUF_SIZE];
+    char dst_filename[NAME_BUF_SIZE];
+
+    TESTING("H5Ocopy(): NULL references");
+
+    /* Initialize "zeros" array */
+    HDmemset(zeros, 0, sizeof(zeros));
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], fapl, mid_filename, sizeof mid_filename);
+    h5_fixname(FILENAME[2], fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* Create source file */
+    if((fid1 = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
+
+    /* Create object reference dataset at SRC file */
+    if((did1 = H5Dcreate2(fid1, "obj_ref_dset", H5T_STD_REF_OBJ, sid,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create region reference dataset at SRC file */
+    if((did2 = H5Dcreate2(fid1, "reg_ref_dset", H5T_STD_REF_DSETREG,
+            sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create references */
+    if(H5Rcreate(&obj_buf[0], did1, ".", H5R_OBJECT, -1) < 0) TEST_ERROR
+    if(H5Rcreate(&obj_buf[1], did2, ".", H5R_OBJECT, -1) < 0) TEST_ERROR
+    if(H5Rcreate(&reg_buf[0], did1, ".", H5R_DATASET_REGION, sid) < 0)
+        TEST_ERROR
+    if(H5Rcreate(&reg_buf[1], did2, ".", H5R_DATASET_REGION, sid) < 0)
+        TEST_ERROR
+
+    /* Write data into file */
+    if(H5Dwrite(did1, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf)
+            < 0) TEST_ERROR
+    if(H5Dwrite(did2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+            reg_buf) < 0) TEST_ERROR
+
+    /* Close datasets */
+    if(H5Dclose(did1) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* Create middle file */
+    if((fid2 = H5Fcreate(mid_filename, H5F_ACC_TRUNC, fcpl_src, fapl)) < 0)
+        TEST_ERROR
+
+    /* Copy the source file to the middle file.  Note the expand references
+     * flag is not set. */
+    if(H5Ocopy(fid1, "/", fid2, "/A", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close source file */
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Open copied datasets */
+    if((did1 = H5Dopen2(fid2, "/A/obj_ref_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid2, "/A/reg_ref_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Read copied datasets */
+    if(H5Dread(did1, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf)
+            < 0) TEST_ERROR
+    if(H5Dread(did2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+            reg_buf) < 0) TEST_ERROR
+
+    /* Verify that the references contain only "0" bytes */
+    if(HDmemcmp(obj_buf, zeros, sizeof(obj_buf))) TEST_ERROR
+    if(HDmemcmp(reg_buf, zeros, sizeof(reg_buf))) TEST_ERROR
+
+    /* Close datasets */
+    if(H5Dclose(did1) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
+
+    /* Create destination file */
+    if((fid1 = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create object copy property list */
+    if((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0) TEST_ERROR
+
+    /* Set the "expand references" flag */
+    if(H5Pset_copy_object(pid, H5O_COPY_EXPAND_REFERENCE_FLAG) < 0) TEST_ERROR
+
+    /* Copy the middle file to the destination file.  Note the expand references
+     * flag *is* set, even though the references are now NULL. */
+    if(H5Ocopy(fid2, "/", fid1, "/AA", pid, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close source file */
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+    /* Open copied datasets */
+    if((did1 = H5Dopen2(fid1, "/AA/A/obj_ref_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid1, "/AA/A/reg_ref_dset", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Read copied datasets */
+    if(H5Dread(did1, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_buf)
+            < 0) TEST_ERROR
+    if(H5Dread(did2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+            reg_buf) < 0) TEST_ERROR
+
+    /* Verify that the references contain only "0" bytes */
+    if(HDmemcmp(obj_buf, zeros, sizeof(obj_buf))) TEST_ERROR
+    if(HDmemcmp(reg_buf, zeros, sizeof(reg_buf))) TEST_ERROR
+
+    /* Close */
+    if(H5Pclose(pid) < 0) TEST_ERROR
+    if(H5Dclose(did1) < 0) TEST_ERROR
+    if(H5Dclose(did2) < 0) TEST_ERROR
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(pid);
+        H5Dclose(did1);
+        H5Dclose(did2);
+        H5Fclose(fid1);
+        H5Fclose(fid2);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_null_ref */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_copy_option
  *
  * Purpose:     Create a group in SRC file and copy it to DST file
@@ -8251,7 +8413,8 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
             nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
-        }
+            nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, my_fapl);
+    }
 
 /* TODO: not implemented
         nerrors += test_copy_mount(my_fapl);
