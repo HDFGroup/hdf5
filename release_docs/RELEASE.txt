@@ -117,6 +117,8 @@ Bug Fixes since HDF5-1.8.4
 
     Library
     -------
+    - Fixed a bug when copying objects with NULL references with the
+        H5O_COPY_EXPAND_REFERENCE_FLAG flag set. (NAF - 2010/04/08 - 1815)
     - Added a mechanism to the H5I interface to save returned object ID 
         structures for immediate re-use if needed. This addresses a
         potential performance issue by delaying the case when the next ID to be

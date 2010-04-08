@@ -1863,12 +1863,6 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 
     assert(dt);
 
-    /* Lie to the user if they have a VL string and tell them it's in the string class */
-    if(dt->shared->type==H5T_VLEN && dt->shared->u.vlen.type==H5T_VLEN_STRING)
-        ret_value=H5T_STRING;
-    else
-        ret_value=dt->shared->type;
-
     /* Externally, a VL string is a string; internally, a VL string is a VL. */
     if(internal) {
         ret_value=dt->shared->type;
