@@ -1082,7 +1082,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
 
     /* Get the property list */
-    if(NULL == (oc_plist = H5I_object(ocpl_id)))
+    if(NULL == (oc_plist = (H5P_genplist_t *)H5I_object(ocpl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get any object header status flags set by properties */
@@ -1138,7 +1138,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
 
         /* Determine correct value for chunk #0 size bits */
-        if(size_hint > 4294967295)
+        if(size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
         else if(size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
@@ -1152,7 +1152,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Compute total size of initial object header */
     /* (i.e. object header prefix and first chunk) */
-    oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
+    oh_size = (size_t)H5O_SIZEOF_HDR(oh) + size_hint;
 
     /* Allocate disk space for header and first chunk */
     if(HADDR_UNDEF == (oh_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)oh_size)))
@@ -1522,7 +1522,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
     } /* end if */
 
     /* Set return value */
-    ret_value = oh->nlink;
+    ret_value = (int)oh->nlink;
 
 done:
     if(oh && H5O_unpin(oh) < 0)
@@ -1637,9 +1637,9 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
 
         /* Release any continuation messages built up */
         if(cont_msg_info.msgs)
-            H5FL_SEQ_FREE(H5O_cont_t, cont_msg_info.msgs);
+            cont_msg_info.msgs = (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, cont_msg_info.msgs);
 
-        /* Pass the back out some of the chunk's user data */
+        /* Pass back out some of the chunk's user data */
         udata.common.merged_null_msgs = chk_udata.common.merged_null_msgs;
         udata.common.mesgs_modified = chk_udata.common.mesgs_modified;
     } /* end if */
@@ -1674,7 +1674,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
                 if(H5AC_get_entry_status(loc->file, loc->addr, &oh_status) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to check metadata cache status for object header")
 
-                /* Make certain that object header is dirty */
+                /* Make certain that object header is not dirty */
                 HDassert(!(oh_status & H5AC_ES__IS_DIRTY));
             } /* end else */
 #endif /* NDEBUG */
@@ -2901,7 +2901,7 @@ H5O_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_free_visit_visited)
 
-    H5FL_FREE(H5_obj_t, item);
+    item = H5FL_FREE(H5_obj_t, item);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_free_visit_visited() */

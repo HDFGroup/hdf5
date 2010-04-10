@@ -687,16 +687,14 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
         HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
     /* Count all opened attributes */
-    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get number of opened attributes")
+    num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL);
 
     /* Find out whether the attribute has been opened */
     if(num_open_attr) {
-        attr_id_list = (hid_t*)H5MM_malloc(num_open_attr*sizeof(hid_t));
+        attr_id_list = (hid_t *)H5MM_malloc((size_t)num_open_attr * sizeof(hid_t));
 
         /* Retrieve the IDs of all opened attributes */
-        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't IDs of opened attributes")
+        H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list);
 
         for(i=0; i<num_open_attr; i++) {
             if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[i], H5I_ATTR)))
@@ -1070,7 +1068,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         /* Check for shared message */
         if(mesg->flags & H5O_MSG_FLAG_SHARED) {
             /* Update the shared attribute in the SOHM storage */
-            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, mesg->native, NULL) < 0)
+            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, (H5A_t *)mesg->native, NULL) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
         } /* end if */
         else {
@@ -1755,7 +1753,8 @@ H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
         unsigned u;             /* Local index variable */
 
         /* Loop over all messages, counting the attributes */
-        for(u = ret_value = 0; u < oh->nmesgs; u++)
+        ret_value = (hsize_t)0;
+        for(u = 0; u < oh->nmesgs; u++)
             if(oh->mesg[u].type == H5O_MSG_ATTR)
                 ret_value++;
     } /* end else */
@@ -1862,7 +1861,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
 
         /* Check that we found the attribute */
-        ret_value = udata.found;
+        ret_value = (htri_t)udata.found;
     } /* end else */
 
 done:

@@ -25,7 +25,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5FLprivate.h"        /* Free Lists                           */
+#include "H5FLprivate.h"	/* Free Lists                           */
 
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */
@@ -247,8 +247,8 @@ typedef struct H5O_chunk_t {
 } H5O_chunk_t;
 
 struct H5O_t {
-    H5AC_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
-                                /* first field in structure */
+    H5AC_info_t cache_info; /* Information for metadata cache functions, _must_ be */
+                            /* first field in structure */
 
     /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */

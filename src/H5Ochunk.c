@@ -154,7 +154,7 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDassert(oh);
     HDassert(idx < oh->nchunks);
 
-    /* Check for marking first chunk as dirty */
+    /* Check for protecting first chunk */
     if(0 == idx) {
         /* Create new "fake" chunk proxy for first chunk */
         /* (since the first chunk is already handled by the H5O_t object) */
@@ -233,11 +233,10 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_chunk_proxy_t *chk_p
             if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end else/if */
-        else
-        {
+        else {
             /* Sanity check */
             HDassert(0 && "Unknown chunk proxy flag(s)?!?");
-        }
+        } /* end else */
 
         /* Free fake chunk proxy */
         H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);

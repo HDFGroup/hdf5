@@ -83,7 +83,7 @@
  * want them on for testing on occasion, but in general they should be
  * off.
  */
-#define H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  0 /* JRM */
+#define H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  0
 
 #endif /* H5_HAVE_PARALLEL */
 

@@ -120,7 +120,10 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
 /* Declare external the free list for H5O_unknown_t's */
 H5FL_EXTERN(H5O_unknown_t);
 
-/* Declare external the free list for H5O_cont_t sequences */
+/* Declare extern the free list for H5O_chunk_proxy_t's */
+H5FL_EXTERN(H5O_chunk_proxy_t);
+
+/* Declare the free list for H5O_cont_t sequences */
 H5FL_SEQ_DEFINE(H5O_cont_t);
 
 
@@ -133,8 +136,6 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
-/* Declare extern the free list for H5O_chunk_proxy_t's */
-H5FL_EXTERN(H5O_chunk_proxy_t);
 
 
 /*-------------------------------------------------------------------------
@@ -203,10 +204,16 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
 
         /* Time fields */
         if(oh->flags & H5O_HDR_STORE_TIMES) {
-            UINT32DECODE(p, oh->atime);
-            UINT32DECODE(p, oh->mtime);
-            UINT32DECODE(p, oh->ctime);
-            UINT32DECODE(p, oh->btime);
+            uint32_t tmp;       /* Temporary value */
+
+            UINT32DECODE(p, tmp);
+            oh->atime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->mtime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->ctime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->btime = (time_t)tmp;
         } /* end if */
         else
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
@@ -216,7 +223,7 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
             UINT16DECODE(p, oh->max_compact);
             UINT16DECODE(p, oh->min_dense);
             if(oh->max_compact < oh->min_dense)
-                HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header attribute phase change values")
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header attribute phase change values")
         } /* end if */
         else {
             oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
@@ -245,7 +252,7 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad size for chunk 0")
         } /* end switch */
         if(oh->chunk0_size > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header chunk size")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header chunk size")
     } /* end if */
     else {
         /* Version */
@@ -276,7 +283,7 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
         UINT32DECODE(p, oh->chunk0_size);
         if((udata->v1_pfx_nmesgs > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
                 (udata->v1_pfx_nmesgs == 0 && oh->chunk0_size > 0))
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header chunk size")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header chunk size")
 
         /* Reserved, in version 1 (for 8-byte alignment padding) */
         p += 4;
@@ -386,7 +393,10 @@ H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
      * on the entire block of memory needs to be updated if anything is
      * modified */
     if(oh->version > H5O_VERSION_1) {
-        uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);  /* Size of chunk 0's data */
+        uint64_t chunk0_size;       /* Size of chunk 0's data */
+
+        HDassert(oh->chunk[0].size >= (size_t)H5O_SIZEOF_HDR(oh));
+        chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
         /* Magic number */
         HDmemcpy(p, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC);
@@ -416,7 +426,7 @@ H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
         switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
             case 0:     /* 1 byte size */
                 HDassert(chunk0_size < 256);
-                *p++ = chunk0_size;
+                *p++ = (uint8_t)chunk0_size;
                 break;
 
             case 1:     /* 2 byte size */
@@ -457,7 +467,7 @@ H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
         UINT32ENCODE(p, oh->nlink);
 
         /* First chunk size */
-        UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));
+        UINT32ENCODE(p, (oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh)));
 
         /* Zero to alignment */
         HDmemset(p, 0, (size_t)(H5O_SIZEOF_HDR(oh) - 12));
@@ -549,6 +559,7 @@ H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Check if we are still decoding the object header  */
+    /* (as opposed to bringing a piece of it back from the file) */
     if(udata->decoding) {
         /* Sanity check */
         HDassert(udata->common.f);
@@ -654,16 +665,19 @@ static herr_t
 H5O_cache_chk_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)thing;         /* Object header chunk proxy to destroy */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_chk_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_cache_chk_free_icr)
 
     /* Check arguments */
     HDassert(chk_proxy);
 
     /* Destroy object header chunk proxy */
-    H5O_chunk_proxy_dest(chk_proxy);
+    if(H5O_chunk_proxy_dest(chk_proxy) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header chunk proxy")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_cache_chk_free_icr() */
 
 
@@ -769,7 +783,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
     if(chunkno == 0) {
         /* First chunk's 'image' includes room for the object header prefix */
         oh->chunk[0].addr = addr;
-        oh->chunk[0].size = len + H5O_SIZEOF_HDR(oh);
+        oh->chunk[0].size = len + (size_t)H5O_SIZEOF_HDR(oh);
     } /* end if */
     else {
         oh->chunk[chunkno].addr = addr;
@@ -952,7 +966,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
             HDassert(nullcnt == 0);
 
             /* Set gap information for chunk */
-            oh->chunk[chunkno].gap = (eom_ptr - p);
+            oh->chunk[chunkno].gap = (size_t)(eom_ptr - p);
 
             /* Increment location in chunk */
             p += oh->chunk[chunkno].gap;
@@ -1127,7 +1141,7 @@ H5O_chunk_proxy_dest(H5O_chunk_proxy_t *chk_proxy)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement reference count on object header")
 
     /* Release the chunk proxy object */
-    H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+    chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

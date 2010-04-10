@@ -4557,9 +4557,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     if ( (entry_ptr)->is_pinned ) {                                        \
                                                                            \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->pel_head_ptr,           \
-                          (cache_ptr)->pel_tail_ptr,                       \
-                          (cache_ptr)->pel_len,                            \
-                          (cache_ptr)->pel_size, (fail_val))               \
+                         (cache_ptr)->pel_tail_ptr,                        \
+                         (cache_ptr)->pel_len,                             \
+                         (cache_ptr)->pel_size, (fail_val))                \
                                                                            \
     } else if ( (entry_ptr)->last_trans != 0 ) {                           \
                                                                            \

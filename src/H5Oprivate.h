@@ -63,8 +63,6 @@ typedef struct H5O_t H5O_t;
 #define H5O_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
 #define H5O_FHEAP_ID_LEN                        8
 
-/* #define H5O_ENABLE_BOGUS 1 */
-
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
 #define H5O_ALL		(-1)		/* Operate on all messages of type   */

@@ -147,9 +147,8 @@ static herr_t H5AC_check_if_write_permitted(const H5F_t *f,
 static herr_t H5AC_broadcast_clean_list(H5AC_t * cache_ptr);
 #endif /* JRM */
 
-static herr_t H5AC_ext_config_2_int_config(
-		                    H5AC_cache_config_t * ext_conf_ptr,
-                                    H5C_auto_size_ctl_t * int_conf_ptr);
+static herr_t H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
+                                           H5C_auto_size_ctl_t * int_conf_ptr);
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5AC_log_deleted_entry(H5AC_t * cache_ptr,
@@ -2218,6 +2217,9 @@ H5AC_pin_protected_entry(void *thing)
 
     FUNC_ENTER_NOAPI(H5AC_pin_protected_entry, FAIL)
 
+    /* Sanity check */
+    HDassert(thing);
+
 #if H5AC__TRACE_FILE_ENABLED
     /* For the pin protected entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
@@ -2692,7 +2694,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    dirtied = ( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
+    dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
 		( ((H5AC_info_t *)thing)->dirtied ) );
 
     size_changed = ( (flags & H5AC__SIZE_CHANGED_FLAG) ==
@@ -2701,9 +2703,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #ifdef H5_HAVE_PARALLEL
     if ( ( dirtied ) && ( ((H5AC_info_t *)thing)->is_dirty == FALSE ) &&
          ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) ) {
-
-        if(H5AC_log_dirtied_entry(thing, addr, size_changed, new_size) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log entry")
+        if(H5AC_log_dirtied_entry((H5AC_info_t *)thing, addr, size_changed, new_size) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
     }
 
     if ( ( (flags & H5C__DELETED_FLAG) != 0 ) &&
