@@ -110,6 +110,7 @@ typedef struct {
     unsigned	ids;		/*current number of IDs held		    */
     unsigned	nextid;		/*ID to use for the next atom		    */
     H5I_free_t	free_func;	/*release object method	    		    */
+    unsigned    reuse_ids;  /* whether to reuse returned IDs for this type */
     H5I_id_info_t * next_id_ptr; /* pointer to head of available ID list */
     H5I_id_info_t **id_list;	/*pointer to an array of ptrs to IDs	    */
 } H5I_id_type_t;
@@ -355,9 +356,18 @@ H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
         type_ptr->ids = 0;
         type_ptr->nextid = reserved;
         type_ptr->free_func = free_func;
+        type_ptr->next_id_ptr = NULL;
         type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(hash_size * sizeof(H5I_id_info_t *));
         if(NULL == type_ptr->id_list)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
+
+        /* Don't re-use IDs for property lists, as this causes problems
+         * with some virtual file drivers. */
+        if (type_id == H5I_GENPROP_LST)
+            type_ptr->reuse_ids = FALSE;
+        else
+            type_ptr->reuse_ids = TRUE;
+
     } /* end if */
 
     /* Increment the count of the times this type has been initialized */
@@ -1318,8 +1328,9 @@ H5I_remove(hid_t id)
         /* (Casting away const OK -QAK) */
         ret_value = (void *)curr_id->obj_ptr;
         
-        /* If there's room, save the struct (and its ID) for future re-use */
-        if (type_ptr->free_count < MAX_FREE_ID_STRUCTS) {
+        /* If there's room, and we can save IDs of this type, then 
+           save the struct (and its ID) for future re-use */
+        if ((type_ptr->reuse_ids)&&(type_ptr->free_count < MAX_FREE_ID_STRUCTS)) {
             curr_id->next = type_ptr->next_id_ptr;
             type_ptr->next_id_ptr = curr_id;
             type_ptr->free_count++;
