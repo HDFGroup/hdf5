@@ -2133,7 +2133,7 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
     H5FL_blk_unlink(&(factory->queue));
 
     /* Free factory info */
-    H5FL_FREE(H5FL_fac_head_t,factory);
+    factory = H5FL_FREE(H5FL_fac_head_t, factory);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

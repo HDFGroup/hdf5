@@ -49,6 +49,7 @@ typedef enum {
     H5AC_LHEAP_DBLK_ID, /*local heap data block			     */
     H5AC_GHEAP_ID,	/*global heap				     */
     H5AC_OHDR_ID,	/*object header				     */
+    H5AC_OHDR_CHK_ID,	/*object header chunk			     */
     H5AC_BT2_HDR_ID,	/*v2 B-tree header			     */
     H5AC_BT2_INT_ID,	/*v2 B-tree internal node		     */
     H5AC_BT2_LEAF_ID,	/*v2 B-tree leaf node			     */

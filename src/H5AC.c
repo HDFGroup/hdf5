@@ -154,7 +154,7 @@ static herr_t H5AC_log_deleted_entry(H5AC_t * cache_ptr,
                                      haddr_t addr,
                                      unsigned int flags);
 
-static herr_t H5AC_log_dirtied_entry(const H5C_cache_entry_t *entry_ptr,
+static herr_t H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
                                      haddr_t addr,
                                      hbool_t size_changed,
                                      size_t new_size);
@@ -480,6 +480,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "local heap data blocks",
     "global heaps",
     "object headers",
+    "object header chunks",
     "v2 B-tree headers",
     "v2 B-tree internal nodes",
     "v2 B-tree leaf nodes",
@@ -2827,7 +2828,6 @@ herr_t
 H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 {
     herr_t              result;
-    int		        name_len;
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -2866,6 +2866,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if ( config_ptr->open_trace_file ) {
+        size_t	        name_len;
 
 	/* Can't really test the trace_file_name field without trying to
 	 * open the file, so we will content ourselves with a couple of

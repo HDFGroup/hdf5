@@ -223,7 +223,7 @@ H5O_cont_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_cont_t *mesg = (H5O_cont_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -237,6 +237,10 @@ H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
     /* Release space for chunk */
     if(H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, mesg->addr, (hsize_t)mesg->size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header chunk")
+
+    /* Notify the cache that the chunk has been deleted */
+    if(H5O_chunk_delete(f, dxpl_id, open_oh, mesg->chunkno) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove chunk from cache")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
