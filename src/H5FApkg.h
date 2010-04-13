@@ -229,7 +229,7 @@ H5_DLLVAR const H5FA_class_t H5FA_CLS_TEST[1];
 #endif /* H5FA_TESTING */
 
 /* Array of fixed array client ID -> client class mappings */
-extern const H5FA_class_t *const H5FA_client_class_g[];
+extern const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
 
 
 /******************************/

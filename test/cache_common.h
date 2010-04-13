@@ -516,7 +516,7 @@ struct expected_entry_status
 
 /* global variable externs: */
 
-extern const char *FILENAME[];
+extern const char *FILENAME[3];
 
 extern hbool_t write_permitted;
 extern hbool_t pass; /* set to false on error */
