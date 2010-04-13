@@ -248,7 +248,7 @@ H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
 #endif /* H5B2_TESTING */
 
 /* Array of v2 B-tree client ID -> client class mappings */
-extern const H5B2_class_t *const H5B2_client_class_g[];
+extern const H5B2_class_t *const H5B2_client_class_g[H5B2_NUM_BTREE_ID];
 
 
 /******************************/

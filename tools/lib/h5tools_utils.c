@@ -315,7 +315,7 @@ print_version(const char *progname)
 {
     printf("%s: Version %u.%u.%u%s%s\n",
            progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-           H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
+           ((char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
 
