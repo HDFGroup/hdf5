@@ -30,6 +30,13 @@ $ type sys$input
 $ define/user_mode sys$output h5tinit.c
 $ run h5detect
 $!
+$ ccc h5make_libsettings.c
+$ link h5make_libsettings
+$ type sys$input
+        Running h5make_libsettings to create H5lib_settings.h
+$ define/user_mode sys$output H5lib_settings.h
+$ run h5make_libsettings
+$!
 $ type sys$input
          Creating  HDF5 library
 $!
