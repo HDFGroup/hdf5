@@ -17,6 +17,12 @@ $ !
 $ ! This command file tests h5copy utility. The command file has to
 $ ! run in the [hdf5-top.tools.h5copy.testfiles] directory.
 $ !
+$ type sys$input
+
+===================================
+       Testing h5copy utiltity
+===================================
+
 $ !
 $ ! Define h5copy symbols
 $ !
