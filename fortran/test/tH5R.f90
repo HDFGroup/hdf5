@@ -147,6 +147,8 @@ SUBROUTINE refobjtest(cleanup, total_error)
 
   CALL H5Rget_name_f(dsetr_id, ref(1), buf, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
+
+
   CALL VERIFY("H5Rget_name_f", INT(buf_size),7, total_error)
   CALL VerifyString("H5Rget_name_f", buf, "/GROUP1", total_error)
 
