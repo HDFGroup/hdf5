@@ -699,6 +699,10 @@ H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _u
     ret_value = chk_proxy;
 
 done:
+    /* Release resources */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
+
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && chk_proxy)
         if(H5O_chunk_proxy_dest(chk_proxy) < 0)

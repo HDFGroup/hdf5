@@ -2302,6 +2302,7 @@ HDmemset(file->meta_accum + size, 0, (file->accum_buf_size - size));
                     HDmemcpy(file->meta_accum, buf, size);
 
                     /* Set the new size & location of the metadata accumulator */
+                    file->accum_loc = addr;
                     file->accum_size = size;
 
                     /* Mark it as written to */

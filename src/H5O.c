@@ -1545,7 +1545,7 @@ done:
 H5O_t *
 H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
 {
-    H5O_t *oh;                  /* Object header protected */
+    H5O_t *oh = NULL;           /* Object header protected */
     H5O_cache_ud_t udata;       /* User data for protecting object header */
     H5O_cont_msgs_t cont_msg_info;      /* Continuation message info */
     unsigned file_intent;       /* R/W intent on file */
