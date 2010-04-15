@@ -637,7 +637,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_mpio_chunk_opt_num
@@ -1407,15 +1406,15 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
     MPI_Offset			mpi_off;
-    MPI_Status  		mpi_stat;
+    MPI_Status  		mpi_stat;       /* Status from I/O operation */
     int				mpi_code;	/* mpi return code */
-    MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
+    MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int         		size_i;         /* Integer copy of 'size' to read */
     int         		bytes_read;     /* Number of bytes read in */
     int         		n;
     int                         type_size;      /* MPI datatype used for I/O's size */
     int                         io_size;        /* Actual number of bytes requested */
-    H5P_genplist_t              *plist;      /* Property list pointer */
+    H5P_genplist_t              *plist = NULL;  /* Property list pointer */
     hbool_t			use_view_this_time = FALSE;
     herr_t              	ret_value = SUCCEED;
 
@@ -1498,6 +1497,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	    fprintf(stdout, "H5FD_mpio_read: using MPIO collective mode\n");
 #endif
         /* Peek the collective_opt property to check whether the application wants to do IO individually. */
+        HDassert(plist);
         coll_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
 
         if(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
@@ -1692,15 +1692,15 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
     MPI_Offset 		 	mpi_off;
-    MPI_Status			mpi_stat;
-    MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
+    MPI_Status  		mpi_stat;       /* Status from I/O operation */
+    MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int			        mpi_code;	/* MPI return code */
     int         		size_i, bytes_written;
     int                         type_size;      /* MPI datatype used for I/O's size */
     int                         io_size;        /* Actual number of bytes requested */
     hbool_t			use_view_this_time = FALSE;
-    H5P_genplist_t              *plist;                 /* Property list pointer */
-    herr_t              	ret_value=SUCCEED;
+    H5P_genplist_t              *plist = NULL;  /* Property list pointer */
+    herr_t              	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_write, FAIL)
 
@@ -1730,12 +1730,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         fprintf(stdout, "in H5FD_mpio_write  mpi_off=%ld  size_i=%d\n", (long)mpi_off, size_i);
 #endif
 
-    /* Obtain the data transfer properties */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
     if(type == H5FD_MEM_DRAW) {
         H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+
+        /* Obtain the data transfer properties */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
         /* Obtain the data transfer properties */
         xfer_mode = (H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
@@ -1790,6 +1790,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             fprintf(stdout, "H5FD_mpio_write: using MPIO collective mode\n");
 #endif
         /* Peek the collective_opt property to check whether the application wants to do IO individually. */
+        HDassert(plist);
         coll_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
 
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
