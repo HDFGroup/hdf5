@@ -56,6 +56,9 @@ New Features
 
     Configuration
     -------------
+    - Upgraded versions of autotools used to generate configuration suite.
+      We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
+      (MAM 2010/04/15)
     - Added the xlc-* and mpcc_r-* BASENAME patterns to be recognized as IBM
       compilers so that the ibm compiler options can be added properly.  This
       allows non-system-default compiler command names (e.g. xlc-m.n.k.l) be
