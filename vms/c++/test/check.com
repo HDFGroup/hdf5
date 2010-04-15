@@ -20,5 +20,4 @@ $ type sys$input
  	Running C++ tests
 $!
 $ run testhdf5
-$ run dsets
 $ exit
