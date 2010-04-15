@@ -27,7 +27,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -794,7 +793,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
     HDassert(file == dset->oloc.file);
 
-    /* Get a pointer to the object header itself */
+    /* Pin the object header */
     if(NULL == (oh = H5O_pin(oloc, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
@@ -2261,7 +2260,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id)
     if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
         unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
 
-        /* Get a pointer to the dataset's object header */
+        /* Pin the object header */
         if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 

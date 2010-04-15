@@ -366,8 +366,9 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
     H5G_loc_t loc;              /* Group location */
+    unsigned rc;		/* Reference count of object */
     H5O_type_t obj_type;        /* Type of object */
-    hid_t ret_value;
+    hid_t ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_dereference)
 
@@ -415,18 +416,15 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
 
-    /* Check to make certain that this object hasn't been deleted since the reference was created */
-    if(H5O_link(&oloc, 0, dxpl_id) <= 0)
+    /* Get the # of links for object, and its type */
+    /* (To check to make certain that this object hasn't been deleted since the reference was created) */
+    if(H5O_get_rc_and_type(&oloc, dxpl_id, &rc, &obj_type) < 0 || 0 == rc)
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
 
     /* Construct a group location for opening the object */
     H5G_name_reset(&path);
     loc.oloc = &oloc;
     loc.path = &path;
-
-    /* Get the type of the object */
-    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get object type")
 
     /* Open the object */
     switch(obj_type) {
@@ -688,6 +686,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
     const void *_ref, H5O_type_t *obj_type)
 {
     H5O_loc_t oloc;             /* Object location */
+    unsigned rc;		/* Reference count of object    */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5R_get_obj_type)
@@ -736,13 +735,10 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
 
-    /* Check to make certain that this object hasn't been deleted since the reference was created */
-    if(H5O_link(&oloc, 0, dxpl_id) <= 0)
+    /* Get the # of links for object, and its type */
+    /* (To check to make certain that this object hasn't been deleted since the reference was created) */
+    if(H5O_get_rc_and_type(&oloc, dxpl_id, &rc, obj_type) < 0 || 0 == rc)
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
-
-    /* Get the object type */
-    if(H5O_obj_type(&oloc, obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get object type")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -2352,7 +2352,7 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
     } /* end else */
 
     /* Free factory info */
-    (void)H5FL_FREE(H5FL_fac_head_t, factory);
+    factory = H5FL_FREE(H5FL_fac_head_t, factory);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
