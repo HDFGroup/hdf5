@@ -451,9 +451,9 @@ H5MP_close(H5MP_pool_t *mp)
 
             /* Free the page appropriately */
             if(page->fac_alloc)
-                page = H5FL_FAC_FREE(mp->page_fac, page);
+                page = (H5MP_page_t *)H5FL_FAC_FREE(mp->page_fac, page);
             else
-                page = H5MM_xfree(page);
+                page = (H5MP_page_t *)H5MM_xfree(page);
 
             page = next_page;
         } /* end while */

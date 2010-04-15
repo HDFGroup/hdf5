@@ -684,6 +684,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5F_FILE_SPACE_VFD:
                                 fprintf(out, "H5F_FILE_SPACE_VFD");
                                 break;
+                            case H5F_FILE_SPACE_NTYPES:
                             default:
                                 fprintf(out, "%ld", (long)fs_type);
                                 break;
@@ -726,6 +727,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5FD_MEM_OHDR:
                                 fprintf(out, "H5FD_MEM_OHDR");
                                 break;
+                            case H5FD_MEM_NTYPES:
                             default:
                                 fprintf(out, "%ld", (long)mem_type);
                                 break;

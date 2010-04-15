@@ -334,6 +334,19 @@ H5Aget_num_attrs(hid_t loc_id)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get location for object")
             break;
 
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "inappropriate attribute target")
     } /*lint !e788 All appropriate cases are covered */
