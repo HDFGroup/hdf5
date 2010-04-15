@@ -163,7 +163,7 @@ H5O_dset_free_copy_file_udata(void *_udata)
         H5O_msg_free(H5O_LAYOUT_ID, udata->src_layout);
 
     /* Release space for 'copy file' user data */
-    (void)H5FL_FREE(H5D_copy_file_ud_t, udata);
+    udata = H5FL_FREE(H5D_copy_file_ud_t, udata);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5O_dset_free_copy_file_udata() */

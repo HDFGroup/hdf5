@@ -256,12 +256,12 @@ H5O_shared_link_adj(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
              * is possible, for example, if an attribute's datatype is shared in
              * the same object header the attribute is in.  Adjust the link
              * count directly. */
-            unsigned oh_flags = H5AC__NO_FLAGS_SET; /* This is used only to satisfy H5O_link_oh */
+            hbool_t deleted = FALSE; /* This is used only to satisfy H5O_link_oh */
 
-            if(H5O_link_oh(f, adjust, dxpl_id, open_oh, &oh_flags) < 0)
+            if(H5O_link_oh(f, adjust, dxpl_id, open_oh, &deleted) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "unable to adjust shared object link count")
 
-            HDassert(!(oh_flags & H5AC__DELETED_FLAG));
+            HDassert(!deleted);
         } else
             /* The shared message is in another object header */
             if(H5O_link(&oloc, adjust, dxpl_id) < 0)

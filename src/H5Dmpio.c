@@ -1163,7 +1163,7 @@ if(H5DEBUG(D))
          * Note: even there is no selection for this process, the process still
          *      needs to contribute MPI NONE TYPE.
          */
-        if(chunk_io_option[u] == 1) {
+        if(chunk_io_option[u] == H5D_CHUNK_IO_MODE_COL) {
 #ifdef H5D_DEBUG
 if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"inside collective chunk IO mpi_rank = %d, chunk index = %Zu\n", mpi_rank, u);
@@ -1206,7 +1206,7 @@ if(H5DEBUG(D))
             HDassert(chunk_io_option[u] == 0);
 
 #if !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
-            /* Check if this process has somethign to do with this chunk */
+            /* Check if this process has something to do with this chunk */
             if(chunk_info) {
                 H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
                 H5D_chunk_ud_t udata;         /* B-tree pass-through	*/
@@ -1849,7 +1849,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     MPI_Comm          comm;
     int               ic, root;
     int               mpi_code;
-    int               mem_cleanup      = 0;
+    hbool_t           mem_cleanup      = FALSE;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     int new_value;
     htri_t check_prop;
@@ -1890,8 +1890,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     tempbuf           = mergebuf + total_chunks;
     if(mpi_rank == root)
         recv_io_mode_info = (uint8_t *)H5MM_malloc(total_chunks * mpi_size);
-
-    mem_cleanup       = 1;
+    mem_cleanup       = TRUE;
 
     /* Obtain the regularity and selection information for all chunks in this process. */
     chunk_node        = H5SL_first(fm->sel_chunks);
@@ -1911,7 +1910,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         chunk_node = H5SL_next(chunk_node);
     } /* end while */
 
-    /*Gather all the information */
+    /* Gather all the information */
     if(MPI_SUCCESS != (mpi_code = MPI_Gather(io_mode_info, total_chunks, MPI_BYTE, recv_io_mode_info, total_chunks, MPI_BYTE, root, comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
 

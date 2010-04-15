@@ -1,4 +1,4 @@
-HDF5 version 1.9.66-FA_a4 currently under development
+HDF5 version 1.9.67-FA_a4 currently under development
 ================================================================================
 
 
@@ -39,6 +39,9 @@ New Features
 
     Configuration:
     -------------
+    - Upgraded versions of autotools used to generate configuration suite.
+      We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
+      MAM 2010/04/15.
     - Added the xlc-* and mpcc_r-* BASENAME patterns to be recognized as IBM
       compilers so that the ibm compiler options can be added properly.  This
       allows non-system-default compiler command names (e.g. xlc-m.n.k.l) be
@@ -210,6 +213,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug when copying objects with NULL references with the
+            H5O_COPY_EXPAND_REFERENCE_FLAG flag set. (NAF - 2010/04/08 - 1815)
       - Files can now be concurrently opened more than once using the core file
             driver, as long as the backing store is used. (NAF - 2010/03/09)
       - Added support for H5O_COPY_EXPAND_EXT_LINK_FLAG to H5Ocopy.  External

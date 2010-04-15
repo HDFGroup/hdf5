@@ -654,7 +654,7 @@ H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
             } /* end if */
             else
                 /* Index that is greater than the number of records in the tree? */
-                HDassert("Index off end of tree??" && 0);
+                HDassert(0 && "Index off end of tree??");
         } /* end if */
 
         /* Decrement depth we're at in B-tree */

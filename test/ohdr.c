@@ -104,7 +104,7 @@ test_cont(char *filename, hid_t fapl)
 
     if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT) < 0)
 	FAIL_STACK_ERROR
-    if(H5AC_expunge_entry(f, H5P_DATASET_XFER_DEFAULT, H5AC_OHDR, oh_locA.addr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5O_expunge_chunks_test(&oh_locA, H5P_DATASET_XFER_DEFAULT) < 0)
 	FAIL_STACK_ERROR
 
     if(H5O_get_hdr_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, &hdr_info) < 0)

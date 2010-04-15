@@ -121,7 +121,7 @@ static H5B_ins_t H5D_btree_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr,
 static herr_t H5D_btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw,
     void *_key);
 static herr_t H5D_btree_encode_key(const H5B_shared_t *shared, uint8_t *raw,
-    void *_key);
+    const void *_key);
 static herr_t H5D_btree_debug_key(FILE *stream, int indent, int fwidth,
     const void *key, const void *udata);
 
@@ -708,9 +708,9 @@ H5D_btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, void *_key)
+H5D_btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
-    H5D_btree_key_t	*key = (H5D_btree_key_t *) _key;
+    const H5D_btree_key_t *key = (const H5D_btree_key_t *)_key;
     size_t		ndims;
     unsigned		u;
 

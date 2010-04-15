@@ -1017,6 +1017,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Ochunk.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Ocont.c"
 				>
 			</File>

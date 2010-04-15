@@ -901,7 +901,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                 if(H5G_dense_build_table(oloc->file, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
-                /* Get a pointer to the object header itself */
+                /* Pin the object header */
                 if(NULL == (oh = H5O_pin(oloc, dxpl_id)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTPIN, FAIL, "unable to pin group object header")
 

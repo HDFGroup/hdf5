@@ -126,68 +126,68 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     /* Check if this information is in the metadata accumulator */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && type != H5FD_MEM_DRAW
             && size < H5F_ACCUM_MAX_SIZE) {
-        /* Current read overlaps with metadata accumulator */
-        if(H5F_addr_overlap(addr, size, f->shared->accum.loc, f->shared->accum.size)) {
-            unsigned char *read_buf = (unsigned char *)buf; /* Pointer to the buffer being read in */
-            size_t amount_read;         /* Amount to read at a time */
-            hsize_t read_off;           /* Offset to read from */
+        /* Sanity check */
+        HDassert(!f->shared->accum.buf || (f->shared->accum.alloc_size >= f->shared->accum.size));
+
+        /* Current read adjoins or overlaps with metadata accumulator */
+        if(H5F_addr_overlap(addr, size, f->shared->accum.loc, f->shared->accum.size)
+                || ((addr + size) == f->shared->accum.loc)
+                || (f->shared->accum.loc + f->shared->accum.size) == addr) {
+            size_t amount_before;       /* Amount to read before current accumulator */
+            haddr_t new_addr;           /* New address of the accumulator buffer */
+            size_t new_size;            /* New size of the accumulator buffer */
+
+            /* Compute new values for accumulator */
+            new_addr = MIN(addr, f->shared->accum.loc);
+            new_size = (size_t)(MAX((addr + size), (f->shared->accum.loc + f->shared->accum.size))
+                    - new_addr);
+
+            /* Check if we need more buffer space */
+            if(new_size > f->shared->accum.size) {
+                /* Adjust the buffer size, by doubling it */
+                f->shared->accum.alloc_size = MAX(f->shared->accum.alloc_size * 2, new_size);
+
+                /* Reallocate the metadata accumulator buffer */
+                if(NULL == (f->shared->accum.buf = H5FL_BLK_REALLOC(meta_accum, f->shared->accum.buf, f->shared->accum.alloc_size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate metadata accumulator buffer")
+#ifdef H5_CLEAR_MEMORY
+HDmemset(f->shared->accum.buf + f->shared->accum.size, 0, (f->shared->accum.alloc_size - f->shared->accum.size));
+#endif /* H5_CLEAR_MEMORY */
+            } /* end if */
 
             /* Read the part before the metadata accumulator */
             if(addr < f->shared->accum.loc) {
                 /* Set the amount to read */
-                H5_ASSIGN_OVERFLOW(amount_read, (f->shared->accum.loc - addr), hsize_t, size_t);
+                H5_ASSIGN_OVERFLOW(amount_before, (f->shared->accum.loc - addr), hsize_t, size_t);
+
+                /* Make room for the metadata to read in */
+                HDmemmove(f->shared->accum.buf + amount_before, f->shared->accum.buf, f->shared->accum.size);
 
                 /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl_id, type, addr, amount_read, read_buf) < 0)
+                if(H5FD_read(f->shared->lf, dxpl_id, type, addr, amount_before, f->shared->accum.buf) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
-
-                /* Adjust the buffer, address & size */
-                read_buf += amount_read;
-                addr += amount_read;
-                size -= amount_read;
             } /* end if */
-
-            /* Copy the part overlapping the metadata accumulator */
-            if(size > 0 && (addr >= f->shared->accum.loc && addr < (f->shared->accum.loc + f->shared->accum.size))) {
-                /* Set the offset to "read" from */
-                read_off = addr - f->shared->accum.loc;
-
-                /* Set the amount to "read" */
-#ifndef NDEBUG
-{
-                hsize_t tempamount_read;         /* Amount to read at a time */
-
-                tempamount_read = f->shared->accum.size - read_off;
-                H5_CHECK_OVERFLOW(tempamount_read, hsize_t, size_t);
-                amount_read = MIN(size, (size_t)tempamount_read);
-}
-#else /* NDEBUG */
-                amount_read = MIN(size, (size_t)(f->shared->accum.size - read_off));
-#endif /* NDEBUG */
-
-                /* Copy the data out of the buffer */
-                HDmemcpy(read_buf, f->shared->accum.buf + read_off, amount_read);
-
-                /* Adjust the buffer, address & size */
-                read_buf += amount_read;
-                addr += amount_read;
-                size -= amount_read;
-            } /* end if */
+            else
+                amount_before = 0;
 
             /* Read the part after the metadata accumulator */
-            if(size > 0 && addr >= (f->shared->accum.loc + f->shared->accum.size)) {
-                /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, read_buf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
+            if((addr + size) > (f->shared->accum.loc + f->shared->accum.size)) {
+                size_t amount_after;         /* Amount to read at a time */
 
-                /* Adjust the buffer, address & size */
-                read_buf += size;
-                addr += size;
-                size -= size;
+                /* Set the amount to read */
+                H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (f->shared->accum.loc + f->shared->accum.size)), hsize_t, size_t);
+
+                /* Dispatch to driver */
+                if(H5FD_read(f->shared->lf, dxpl_id, type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
             } /* end if */
 
-            /* Make certain we've read it all */
-            HDassert(size == 0);
+            /* Copy the data out of the buffer */
+            HDmemcpy(buf, f->shared->accum.buf + (addr - new_addr), size);
+
+            /* Adjust the accumulator address & size */
+            f->shared->accum.loc = new_addr;
+            f->shared->accum.size = new_size;
         } /* end if */
         /* Current read doesn't overlap with metadata accumulator, read it from file */
         else {
@@ -340,6 +340,9 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     /* Check for accumulating metadata */
     if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && type != H5FD_MEM_DRAW
             && size < H5F_ACCUM_MAX_SIZE) {
+        /* Sanity check */
+        HDassert(!f->shared->accum.buf || (f->shared->accum.alloc_size >= f->shared->accum.size));
+
         /* Check if there is already metadata in the accumulator */
         if(f->shared->accum.size > 0) {
             /* Check if the new metadata adjoins the beginning of the current accumulator */
@@ -433,8 +436,30 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                     /* Mark it as written to */
                     f->shared->accum.dirty = TRUE;
                 } /* end if */
+                /* New metadata overlaps both ends of the current accumulator */
                 else {
-                    HDassert(0 && "New metadata overlapped both beginning and end of existing metadata accumulator!");
+                    /* Check if we need more buffer space */
+                    if(size > f->shared->accum.size) {
+                        /* Adjust the buffer size, by doubling it */
+                        f->shared->accum.alloc_size = MAX(f->shared->accum.alloc_size * 2, size);
+
+                        /* Reallocate the metadata accumulator buffer */
+                        if(NULL == (f->shared->accum.buf = H5FL_BLK_REALLOC(meta_accum, f->shared->accum.buf, f->shared->accum.alloc_size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
+#ifdef H5_CLEAR_MEMORY
+HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
+#endif /* H5_CLEAR_MEMORY */
+                    } /* end if */
+
+                    /* Copy the new metadata to the buffer */
+                    HDmemcpy(f->shared->accum.buf, buf, size);
+
+                    /* Set the new size & location of the metadata accumulator */
+                    f->shared->accum.loc = addr;
+                    f->shared->accum.size = size;
+
+                    /* Mark it as written to */
+                    f->shared->accum.dirty = TRUE;
                 } /* end else */
             } /* end if */
             /* New piece of metadata doesn't adjoin or overlap the existing accumulator */

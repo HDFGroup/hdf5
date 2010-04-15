@@ -17,6 +17,13 @@ $ !
 $ ! This command file tests h5ls utility. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
+$ type sys$input
+
+===================================
+       Testing h5ls utiltity
+===================================
+
+$
 $ !
 $ ! Define h5ls symbol
 $ !

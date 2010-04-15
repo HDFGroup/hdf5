@@ -482,9 +482,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_span_hyper_type
@@ -511,7 +508,6 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
 			  hsize_t         *extra_offset,
 			  hbool_t         *is_derived_type )
 {
-
     MPI_Datatype          span_type;
     H5S_hyper_span_t      *ospan;
     H5S_hyper_span_info_t *odown;
@@ -588,9 +584,9 @@ H5S_obtain_datatype(const hsize_t size[],
     MPI_Datatype          bas_type;
     MPI_Datatype          temp_type;
     MPI_Datatype          tempinner_type;
-    MPI_Datatype          *inner_type;
-    int                   *blocklen;
-    MPI_Aint              *disp;
+    MPI_Datatype          *inner_type = NULL;
+    int                   *blocklen = NULL;
+    MPI_Aint              *disp = NULL;
     MPI_Aint              stride;
     H5S_hyper_span_info_t *down;
     H5S_hyper_span_t      *tspan;
@@ -612,7 +608,7 @@ H5S_obtain_datatype(const hsize_t size[],
     down       = span->down;
     tspan      = span;
 
-    /* obtain the number of span tree for this dimension */
+    /* Obtain the number of span tree nodes for this dimension */
     outercount = 0;
     while(tspan) {
         tspan = tspan->next;
@@ -623,32 +619,27 @@ H5S_obtain_datatype(const hsize_t size[],
 
 /* MPI2 hasn't been widely acccepted, adding H5_HAVE_MPI2 for the future use */
 #ifdef H5_HAVE_MPI2
-
     MPI_Type_extent(MPI_Aint, &sizeaint);
     MPI_Type_extent(MPI_Datatype, &sizedtype);
 
     blocklen  = (int *)HDcalloc((size_t)outercount, sizeof(int));
     disp = (MPI_Aint *)HDcalloc((size_t)outercount, sizeaint);
     inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount, sizedtype);
-
 #else
-
     blocklen     = (int *)HDcalloc((size_t)outercount, sizeof(int));
     disp         = (MPI_Aint *)HDcalloc((size_t)outercount, sizeof(MPI_Aint));
     inner_type   = (MPI_Datatype *)HDcalloc((size_t)outercount, sizeof(MPI_Datatype));
-
 #endif
-
 
     tspan      = span;
     outercount = 0;
 
     /* if this is the fastest changing dimension, it is the base case for derived datatype. */
-    if(down == NULL){
+    if(down == NULL) {
 
         HDassert(dimindex <= 1);
 
-        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE,&bas_type)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Type_contiguous((int)elmt_size, MPI_BYTE, &bas_type)))
               HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
 
         if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&bas_type)))
@@ -664,42 +655,42 @@ H5S_obtain_datatype(const hsize_t size[],
         if(MPI_SUCCESS != (mpi_code = MPI_Type_hindexed(outercount, blocklen, disp, bas_type, span_type)))
               HMPI_GOTO_ERROR(FAIL, "MPI_Type_hindexed failed", mpi_code);
     } /* end if */
-    else {/* dimindex is the rank of the dimension */
+    else {      /* dimindex is the rank of the dimension */
 
         HDassert(dimindex > 1);
 
-        /* Calculate the total bytes of the lower dimension */
+        /* Calculate the total bytes of the lower dimensions */
         total_lowd  = 1;  /* one dimension down */
-        total_lowd1 = 1; /* two dimensions down */
+        total_lowd1 = 1;  /* two dimensions down */
 
-        for ( i = dimindex-1; i > 0; i--)
-             total_lowd = total_lowd * size[i];
+        for(i = dimindex - 1; i > 0; i--)
+            total_lowd = total_lowd * size[i];
 
-        for ( i = dimindex-1; i > 1; i--)
-              total_lowd1 = total_lowd1 * size[i];
+        for(i = dimindex - 1; i > 1; i--)
+            total_lowd1 = total_lowd1 * size[i];
 
-         while(tspan) {
+        while(tspan) {
 
             /* Displacement should be in byte and should have dimension information */
             /* First using MPI Type vector to build derived data type for this span only */
             /* Need to calculate the disp in byte for this dimension. */
             /* Calculate the total bytes of the lower dimension */
 
-            disp[outercount]      = tspan->low*total_lowd*elmt_size;
+            disp[outercount]      = tspan->low * total_lowd * elmt_size;
             blocklen[outercount]  = 1;
 
             /* generating inner derived datatype by using MPI_Type_hvector */
-            if(FAIL == H5S_obtain_datatype(size,tspan->down->head,&temp_type,elmt_size,dimindex-1))
+            if(FAIL == H5S_obtain_datatype(size, tspan->down->head, &temp_type, elmt_size, dimindex - 1))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't obtain  MPI derived data type")
 
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&temp_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
 
             /* building the inner vector datatype */
-            stride     = total_lowd*elmt_size;
+            stride     = total_lowd * elmt_size;
             innercount = tspan->nelem;
 
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_hvector(innercount,1,stride,temp_type,&tempinner_type)))
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_hvector(innercount, 1, stride, temp_type, &tempinner_type)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_hvector failed", mpi_code);
 
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&tempinner_type)))
@@ -719,18 +710,23 @@ H5S_obtain_datatype(const hsize_t size[],
     } /* end else */
 
     if(inner_type != NULL && down != NULL) {
-        for(i = 0; i < outercount; i++)
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[i])))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     } /* end if */
 
-    if(inner_type != NULL)
+done:
+    if(inner_type != NULL) {
+        if(down != NULL) {
+            for(i = 0; i < outercount; i++)
+                if(MPI_SUCCESS != (mpi_code = MPI_Type_free(&inner_type[i])))
+                    HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+        } /* end if */
+
         HDfree(inner_type);
+    } /* end if */
     if(blocklen != NULL)
         HDfree(blocklen);
     if(disp != NULL)
         HDfree(disp);
-done:
+
   FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_obtain_datatype() */
 
