@@ -239,7 +239,7 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_chunk_proxy_t *chk_p
         } /* end else */
 
         /* Free fake chunk proxy */
-        H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+        chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
     } /* end if */
     else {
         /* Release the chunk proxy from the cache, marking it dirty */
