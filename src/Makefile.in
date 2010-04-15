@@ -122,7 +122,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Lexternal.lo H5lib_settings.lo H5MF.lo H5MFaggr.lo \
 	H5MFdbg.lo H5MFsection.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo \
 	H5Oainfo.lo H5Oalloc.lo H5Oattr.lo H5Oattribute.lo H5Obogus.lo \
-	H5Obtreek.lo H5Ocache.lo H5Ocont.lo H5Ocopy.lo H5Odbg.lo \
+	H5Obtreek.lo H5Ocache.lo H5Ochunk.lo H5Ocont.lo H5Ocopy.lo H5Odbg.lo \
 	H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oginfo.lo \
 	H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omessage.lo H5Omtime.lo \
 	H5Oname.lo H5Onull.lo H5Opline.lo H5Orefcount.lo H5Osdspace.lo \
@@ -485,7 +485,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5MF.c H5MFaggr.c H5MFdbg.c H5MFsection.c \
         H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
-        H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c \
+        H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ochunk.c \
         H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
         H5Ofill.c H5Oginfo.c \
         H5Olayout.c \
@@ -789,6 +789,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Obogus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Obtreek.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ocache.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ochunk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ocont.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ocopy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Odbg.Plo@am__quote@

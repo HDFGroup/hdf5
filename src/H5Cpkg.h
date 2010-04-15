@@ -96,11 +96,11 @@
  *
  *						JRM - 9/26/05
  *
- * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.  
- * 		This field is used to validate pointers to instances of 
+ * magic:	Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC. 
+ * 		This field is used to validate pointers to instances of
  * 		H5C_t.
  *
- * flush_in_progress: Boolean flag indicating whether a flush is in 
+ * flush_in_progress: Boolean flag indicating whether a flush is in
  * 		progress.
  *
  * trace_file_ptr:  File pointer pointing to the trace file, which is used
@@ -109,7 +109,7 @@
  *              no trace file should be recorded.
  *
  *              Since much of the code supporting the parallel metadata
- *              cache is in H5AC, we don't write the trace file from 
+ *              cache is in H5AC, we don't write the trace file from
  *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
  *
  *              When we get to using H5C in other places, we may add
@@ -182,7 +182,7 @@
  * writes.  The following field is used to implement this.
  *
  * evictions_enabled:  Boolean flag that is initialized to TRUE.  When
- * 		this flag is set to FALSE, the metadata cache will not 
+ * 		this flag is set to FALSE, the metadata cache will not
  * 		attempt to evict entries to make space for newly protected
  * 		entries, and instead the will grow without limit.
  * 		
@@ -288,7 +288,7 @@
  * following two fields have been added.  They are only compiled in when
  * H5C_DO_SANITY_CHECKS is TRUE.
  *
- * slist_len_increase: Number of entries that have been added to the 
+ * slist_len_increase: Number of entries that have been added to the
  * 		slist since the last time this field was set to zero.
  *
  * slist_size_increase: Total size of all entries that have been added
@@ -625,23 +625,23 @@
  *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been write protected 
+ * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been write protected
  * 		in the current epoch.
  *
  * 		Observe that (hits + misses) = (write_protects + read_protects).
  *
- * read_protects: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
- * 		cells are used to record the number of times an entry with 
- * 		type id equal to the array index has been read protected in 
+ * read_protects: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The
+ * 		cells are used to record the number of times an entry with
+ * 		type id equal to the array index has been read protected in
  * 		the current epoch.
  *
  *              Observe that (hits + misses) = (write_protects + read_protects).
  *
- * max_read_protects:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1. 
- * 		The cells are used to maximum number of simultaneous read 
- * 		protects on any entry with type id equal to the array index 
+ * max_read_protects:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1.
+ * 		The cells are used to maximum number of simultaneous read
+ * 		protects on any entry with type id equal to the array index
  * 		in the current epoch.
  *
  * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -649,9 +649,9 @@
  *		id equal to the array index has been inserted into the
  *		cache in the current epoch.
  *
- * pinned_insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
- * 		with type id equal to the array index has been inserted 
+ * pinned_insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
+ * 		with type id equal to the array index has been inserted
  * 		pinned into the cache in the current epoch.
  *
  * clears:      Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -674,13 +674,13 @@
  *		id equal to the array index has been renamed in the current
  *		epoch.
  *
- * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during its flush callback in the current epoch.
  *
- * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  
- * 		The cells are used to record the number of times an entry 
+ * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to record the number of times an entry
  * 		with type id equal to the array index has been renamed
  * 		during a cache flush in the current epoch.
  *
@@ -719,14 +719,14 @@
  *		with type id equal to the array index has decreased in
  *		size in the current epoch.
  *
- * entry_flush_size_changes:  Array of int64 of length 
- * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * entry_flush_size_changes:  Array of int64 of length
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size while in its flush callback.
  *
- * cache_flush_size_changes:  Array of int64 of length 
- * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record 
- * 		the number of times an entry with type id equal to the 
+ * cache_flush_size_changes:  Array of int64 of length
+ * 		H5C__MAX_NUM_TYPE_IDS + 1.  The cells are used to record
+ * 		the number of times an entry with type id equal to the
  * 		array index has changed size during a cache flush
  *
  * total_ht_insertions: Number of times entries have been inserted into the
@@ -860,7 +860,7 @@
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	18
+#define H5C__MAX_NUM_TYPE_IDS	19
 #define H5C__PREFIX_LEN		32
 
 struct H5C_t
@@ -1449,7 +1449,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	More pinned entry stats related updates.
  *
  * 	JRM -- 3/31/07
- * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on 
+ * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on
  * 	read and write protects.
  *
  *      MAM -- 1/15/09
@@ -2877,7 +2877,7 @@ if ( (cache_ptr)->index_size !=                                             \
                          (cache_ptr)->pel_tail_ptr,                        \
                          (cache_ptr)->pel_len,                             \
                          (cache_ptr)->pel_size, (fail_val))                \
-                                                                           \
+	                                                                   \
     } else {                                                               \
                                                                            \
         /* modified LRU specific code */                                   \
@@ -3122,62 +3122,70 @@ if ( (cache_ptr)->index_size !=                                             \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
+    if ( ! ( (entry_ptr)->is_pinned ) ) {                                    \
+	                                                                     \
         /* modified LRU specific code */                                     \
                                                                              \
         /* remove the entry from the LRU list, and re-insert it at the head. \
 	 */                                                                  \
                                                                              \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
+            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+                             (cache_ptr)->LRU_tail_ptr,                      \
+			     (cache_ptr)->LRU_list_len,                      \
+                             (cache_ptr)->LRU_list_size, (fail_val))         \
                                                                              \
         H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
                          (cache_ptr)->LRU_tail_ptr,                          \
 			 (cache_ptr)->LRU_list_len,                          \
                          (cache_ptr)->LRU_list_size, (fail_val))             \
                                                                              \
-        /* remove the entry from either the clean or dirty LUR list as       \
-         * indicated by the was_dirty parameter                              \
-         */                                                                  \
-        if ( was_dirty ) {                                                   \
+            /* remove the entry from either the clean or dirty LUR list as   \
+             * indicated by the was_dirty parameter                          \
+             */                                                              \
+            if ( was_dirty ) {                                               \
                                                                              \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->dLRU_head_ptr,     \
-                                (cache_ptr)->dLRU_tail_ptr,                  \
-                                (cache_ptr)->dLRU_list_len,                  \
-                                (cache_ptr)->dLRU_list_size, (fail_val))     \
+                H5C__AUX_DLL_REMOVE((entry_ptr),                             \
+				     (cache_ptr)->dLRU_head_ptr,             \
+                                     (cache_ptr)->dLRU_tail_ptr,             \
+                                     (cache_ptr)->dLRU_list_len,             \
+                                     (cache_ptr)->dLRU_list_size,            \
+				     (fail_val))                             \
                                                                              \
-        } else {                                                             \
+            } else {                                                         \
                                                                              \
-            H5C__AUX_DLL_REMOVE((entry_ptr), (cache_ptr)->cLRU_head_ptr,     \
-                                (cache_ptr)->cLRU_tail_ptr,                  \
-                                (cache_ptr)->cLRU_list_len,                  \
-                                (cache_ptr)->cLRU_list_size, (fail_val))     \
+                H5C__AUX_DLL_REMOVE((entry_ptr),                             \
+				     (cache_ptr)->cLRU_head_ptr,             \
+                                     (cache_ptr)->cLRU_tail_ptr,             \
+                                     (cache_ptr)->cLRU_list_len,             \
+                                     (cache_ptr)->cLRU_list_size,            \
+				     (fail_val))                             \
+            }                                                                \
+                                                                             \
+            /* insert the entry at the head of either the clean or dirty     \
+	     * LRU list as appropriate.                                      \
+             */                                                              \
+                                                                             \
+            if ( (entry_ptr)->is_dirty ) {                                   \
+                                                                             \
+                H5C__AUX_DLL_PREPEND((entry_ptr),                            \
+				      (cache_ptr)->dLRU_head_ptr,            \
+                                      (cache_ptr)->dLRU_tail_ptr,            \
+                                      (cache_ptr)->dLRU_list_len,            \
+                                      (cache_ptr)->dLRU_list_size,           \
+				      (fail_val))                            \
+                                                                             \
+            } else {                                                         \
+                                                                             \
+                H5C__AUX_DLL_PREPEND((entry_ptr),                            \
+				      (cache_ptr)->cLRU_head_ptr,            \
+                                      (cache_ptr)->cLRU_tail_ptr,            \
+                                      (cache_ptr)->cLRU_list_len,            \
+                                      (cache_ptr)->cLRU_list_size,           \
+				      (fail_val))                            \
+            }                                                                \
+                                                                             \
+            /* End modified LRU specific code. */                            \
         }                                                                    \
-                                                                             \
-        /* insert the entry at the head of either the clean or dirty LRU     \
-         * list as appropriate.                                              \
-         */                                                                  \
-                                                                             \
-        if ( (entry_ptr)->is_dirty ) {                                       \
-                                                                             \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,    \
-                                 (cache_ptr)->dLRU_tail_ptr,                 \
-                                 (cache_ptr)->dLRU_list_len,                 \
-                                 (cache_ptr)->dLRU_list_size, (fail_val))    \
-                                                                             \
-        } else {                                                             \
-                                                                             \
-            H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,    \
-                                 (cache_ptr)->cLRU_tail_ptr,                 \
-                                 (cache_ptr)->cLRU_list_len,                 \
-                                 (cache_ptr)->cLRU_list_size, (fail_val))    \
-        }                                                                    \
-                                                                             \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
 } /* H5C__UPDATE_RP_FOR_RENAME */
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3192,25 +3200,25 @@ if ( (cache_ptr)->index_size !=                                             \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ((entry_ptr)->is_pinned) ) {                                      \
-                                                                             \
+    if ( ! ( (entry_ptr)->is_pinned ) ) {                                    \
+	                                                                     \
         /* modified LRU specific code */                                     \
                                                                              \
         /* remove the entry from the LRU list, and re-insert it at the head. \
 	 */                                                                  \
                                                                              \
-        H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,              \
-                        (cache_ptr)->LRU_tail_ptr,                           \
-			(cache_ptr)->LRU_list_len,                           \
-                        (cache_ptr)->LRU_list_size, (fail_val))              \
+            H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->LRU_head_ptr,          \
+                             (cache_ptr)->LRU_tail_ptr,                      \
+			     (cache_ptr)->LRU_list_len,                      \
+                             (cache_ptr)->LRU_list_size, (fail_val))         \
                                                                              \
-        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,             \
-                         (cache_ptr)->LRU_tail_ptr,                          \
-			 (cache_ptr)->LRU_list_len,                          \
-                         (cache_ptr)->LRU_list_size, (fail_val))             \
+            H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,         \
+                              (cache_ptr)->LRU_tail_ptr,                     \
+			      (cache_ptr)->LRU_list_len,                     \
+                              (cache_ptr)->LRU_list_size, (fail_val))        \
                                                                              \
-        /* End modified LRU specific code. */                                \
-    }                                                                        \
+            /* End modified LRU specific code. */                            \
+        }                                                                    \
 } /* H5C__UPDATE_RP_FOR_RENAME */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3267,7 +3275,7 @@ if ( (cache_ptr)->index_size !=                                             \
 			                (cache_ptr)->pel_size,            \
 			                (entry_ptr)->size,                \
 					(new_size));                      \
-                                                                          \
+	                                                                  \
     } else {                                                              \
                                                                           \
         /* modified LRU specific code */                                  \
@@ -3393,35 +3401,39 @@ if ( (cache_ptr)->index_size !=                                             \
                     (cache_ptr)->pel_size, (fail_val))                 \
     HDassert( (cache_ptr)->pel_len >= 0 );                             \
                                                                        \
-    /* modified LRU specific code */                                   \
+        /* modified LRU specific code */                               \
                                                                        \
-    /* insert the entry at the head of the LRU list. */                \
+        /* insert the entry at the head of the LRU list. */            \
                                                                        \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
-                     (cache_ptr)->LRU_tail_ptr,                        \
-                     (cache_ptr)->LRU_list_len,                        \
-                     (cache_ptr)->LRU_list_size, (fail_val))           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
+                         (cache_ptr)->LRU_tail_ptr,                    \
+                         (cache_ptr)->LRU_list_len,                    \
+                         (cache_ptr)->LRU_list_size, (fail_val))       \
                                                                        \
-    /* Similarly, insert the entry at the head of either the clean or  \
-     * dirty LRU list as appropriate.                                  \
-     */                                                                \
+        /* Similarly, insert the entry at the head of either the clean \
+         * or dirty LRU list as appropriate.                           \
+         */                                                            \
                                                                        \
-    if ( (entry_ptr)->is_dirty ) {                                     \
+        if ( (entry_ptr)->is_dirty ) {                                 \
                                                                        \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
-                             (cache_ptr)->dLRU_tail_ptr,               \
-                             (cache_ptr)->dLRU_list_len,               \
-                             (cache_ptr)->dLRU_list_size, (fail_val))  \
+            H5C__AUX_DLL_PREPEND((entry_ptr),                          \
+			          (cache_ptr)->dLRU_head_ptr,          \
+                                  (cache_ptr)->dLRU_tail_ptr,          \
+                                  (cache_ptr)->dLRU_list_len,          \
+                                  (cache_ptr)->dLRU_list_size,         \
+			          (fail_val))                          \
                                                                        \
-    } else {                                                           \
+        } else {                                                       \
                                                                        \
-        H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->cLRU_head_ptr,  \
-                             (cache_ptr)->cLRU_tail_ptr,               \
-                             (cache_ptr)->cLRU_list_len,               \
-                             (cache_ptr)->cLRU_list_size, (fail_val))  \
-    }                                                                  \
+            H5C__AUX_DLL_PREPEND((entry_ptr),                          \
+			          (cache_ptr)->cLRU_head_ptr,          \
+                                  (cache_ptr)->cLRU_tail_ptr,          \
+                                  (cache_ptr)->cLRU_list_len,          \
+                                  (cache_ptr)->cLRU_list_size,         \
+			          (fail_val))                          \
+         }                                                             \
                                                                        \
-    /* End modified LRU specific code. */                              \
+        /* End modified LRU specific code. */                          \
                                                                        \
 } /* H5C__UPDATE_RP_FOR_UNPIN */
 
@@ -3446,16 +3458,16 @@ if ( (cache_ptr)->index_size !=                                             \
                     (cache_ptr)->pel_size, (fail_val))                 \
     HDassert( (cache_ptr)->pel_len >= 0 );                             \
                                                                        \
-    /* modified LRU specific code */                                   \
+        /* modified LRU specific code */                               \
                                                                        \
-    /* insert the entry at the head of the LRU list. */                \
+        /* insert the entry at the head of the LRU list. */            \
                                                                        \
-    H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,           \
-                     (cache_ptr)->LRU_tail_ptr,                        \
-                     (cache_ptr)->LRU_list_len,                        \
-                     (cache_ptr)->LRU_list_size, (fail_val))           \
+        H5C__DLL_PREPEND((entry_ptr), (cache_ptr)->LRU_head_ptr,       \
+                         (cache_ptr)->LRU_tail_ptr,                    \
+                         (cache_ptr)->LRU_list_len,                    \
+                         (cache_ptr)->LRU_list_size, (fail_val))       \
                                                                        \
-    /* End modified LRU specific code. */                              \
+        /* End modified LRU specific code. */                          \
                                                                        \
 } /* H5C__UPDATE_RP_FOR_UNPIN */
 

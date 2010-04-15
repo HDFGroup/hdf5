@@ -127,21 +127,17 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
     HDassert(mesg);
 
-    /* Check for write access on the file */
-    if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
-
-    /* Protect the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+    /* Pin the object header */
+    if(NULL == (oh = H5O_pin(loc, dxpl_id)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Go append message to object header */
     if(H5O_msg_append_oh(loc->file, dxpl_id, oh, type_id, mesg_flags, update_flags, mesg) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_create() */
@@ -280,21 +276,17 @@ H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     HDassert(mesg);
     HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
 
-    /* Check for write access on the file */
-    if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
-
-    /* Protect the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+    /* Pin the object header */
+    if(NULL == (oh = H5O_pin(loc, dxpl_id)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Call the "real" modify routine */
     if(H5O_msg_write_real(loc->file, dxpl_id, oh, type, mesg_flags, update_flags, mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_write() */
@@ -484,7 +476,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
@@ -492,7 +484,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -809,14 +801,14 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     HDassert(type);
 
     /* Load the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Count the messages of the correct type */
     ret_value = H5O_msg_count_real(oh, type);
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -890,7 +882,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Load the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Call the "real" exists routine */
@@ -898,7 +890,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "unable to verify object header message")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -986,17 +978,17 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
 
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+    /* Pin the object header */
+    if(NULL == (oh = H5O_pin(loc, dxpl_id)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Call the "real" remove routine */
     if((ret_value = H5O_msg_remove_real(loc->file, oh, type, sequence, NULL, NULL, adj_link, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove() */
@@ -1038,17 +1030,17 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
 
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+    /* Pin the object header */
+    if(NULL == (oh = H5O_pin(loc, dxpl_id)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header")
 
     /* Call the "real" remove routine */
     if((ret_value = H5O_msg_remove_real(loc->file, oh, type, sequence, op, op_data, adj_link, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove_op() */
@@ -1230,7 +1222,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
     HDassert(op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Call the "real" iterate routine */
@@ -1238,7 +1230,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
         HERROR(H5E_OHDR, H5E_BADITER, "unable to iterate over object header messages");
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1962,7 +1954,9 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
     unsigned update_flags)
 {
+    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
     H5O_mesg_t *idx_msg = &oh->mesg[idx];       /* Pointer to message to modify */
+    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_copy_mesg)
@@ -1973,6 +1967,10 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     HDassert(type);
     HDassert(type->copy);
     HDassert(mesg);
+
+    /* Protect chunk */
+    if(NULL == (chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, idx_msg->chunkno)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Reset existing native information for the header's message */
     H5O_msg_reset_real(type, idx_msg->native);
@@ -1986,17 +1984,23 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
 
     /* Mark the message as modified */
     idx_msg->dirty = TRUE;
+    chk_flags |= H5AC__DIRTIED_FLAG;
+
+    /* Release chunk */
+    if(H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+    chk_proxy = NULL;
 
     /* Update the modification time, if requested */
     if(update_flags & H5O_UPDATE_TIME)
         if(H5O_touch_oh(f, dxpl_id, oh, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Mark object header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
-
 done:
+    /* Release chunk, if not already released */
+    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_copy_mesg() */
 
@@ -2183,9 +2187,8 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
     } /* end if */
 
-    /* Pass "modifiedness" from message to chunk */
+    /* Mark the message as clean now */
     mesg->dirty = FALSE;
-    oh->chunk[mesg->chunkno].dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

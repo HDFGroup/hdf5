@@ -316,7 +316,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(cpy_info);
 
     /* Get source object header */
-    if(NULL == (oh_src = (H5O_t *)H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC_READ)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Get pointer to object class for this object */
@@ -579,7 +579,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Set dest. chunk information */
-    oh_dst->chunk[0].dirty = TRUE;
     oh_dst->chunk[0].size = (size_t)dst_oh_size;
     oh_dst->chunk[0].gap = dst_oh_gap;
 
@@ -739,7 +738,7 @@ done:
         HDfree(deleted);
 
     /* Release pointer to source object header and its derived objects */
-    if(oh_src && H5AC_unprotect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, oh_src, H5AC__NO_FLAGS_SET) < 0)
+    if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Release pointer to destination object header */

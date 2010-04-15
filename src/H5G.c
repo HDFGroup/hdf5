@@ -1772,8 +1772,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_t      *grp = NULL;         /* Group opened */
     H5G_loc_t	loc;                /* Location of group passed in */
     H5G_loc_t	start_loc;          /* Location of starting group */
-    H5O_type_t otype;               /* Basic object type (group, dataset, etc.) */
-    unsigned rc;		    /* Reference count of object    */
+    unsigned    rc;		    /* Reference count of object    */
     herr_t      ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_visit, FAIL)
@@ -1814,8 +1813,8 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if((udata.visited = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 
-    /* Get the group's reference count and type */
-    if(H5O_get_rc_and_type(&grp->oloc, dxpl_id, &rc, &otype) < 0)
+    /* Get the group's reference count */
+    if(H5O_get_rc_and_type(&grp->oloc, dxpl_id, &rc, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object info")
 
     /* If its ref count is > 1, we add it to the list of visited objects */
