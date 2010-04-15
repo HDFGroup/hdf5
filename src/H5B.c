@@ -1511,7 +1511,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
             HDmemmove(bt->child + idx,
                     bt->child + idx + 1,
-                    (bt->nchildren - idx) * sizeof(haddr_t));
+                    (bt->nchildren - 1 - idx) * sizeof(haddr_t));
 
             bt->nchildren -= 1;
             bt_flags |= H5AC__DIRTIED_FLAG;
