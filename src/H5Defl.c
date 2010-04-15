@@ -269,16 +269,16 @@ H5D_efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
     }
 
     /* Read the data */
-    while (size) {
+    while(size) {
         HDassert(buf);
-	if (u>=efl->nused)
-	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
-	if (H5F_OVERFLOW_HSIZET2OFFT (efl->slot[u].offset+skip))
-	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
-	if ((fd=HDopen (efl->slot[u].name, O_RDONLY, 0))<0)
-	    HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
-	if (HDlseek (fd, (off_t)(efl->slot[u].offset+skip), SEEK_SET)<0)
-	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
+	if(u>=efl->nused)
+	    HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
+	if(H5F_OVERFLOW_HSIZET2OFFT (efl->slot[u].offset + skip))
+	    HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
+	if((fd = HDopen(efl->slot[u].name, O_RDONLY, 0)) < 0)
+	    HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
+	if(HDlseek(fd, (off_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+	    HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
 	tempto_read = MIN(efl->slot[u].size-skip,(hsize_t)size);
         H5_CHECK_OVERFLOW(tempto_read,hsize_t,size_t);

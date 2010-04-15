@@ -658,6 +658,49 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     }
                     break;
 
+                case 'm':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5F_mem_t mem_type = va_arg(ap, H5F_mem_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(mem_type) {
+                            case H5FD_MEM_NOLIST:
+                                fprintf(out, "H5FD_MEM_NOLIST");
+                                break;
+                            case H5FD_MEM_DEFAULT:
+                                fprintf(out, "H5FD_MEM_DEFAULT");
+                                break;
+                            case H5FD_MEM_SUPER:
+                                fprintf(out, "H5FD_MEM_SUPER");
+                                break;
+                            case H5FD_MEM_BTREE:
+                                fprintf(out, "H5FD_MEM_BTREE");
+                                break;
+                            case H5FD_MEM_DRAW:
+                                fprintf(out, "H5FD_MEM_DRAW");
+                                break;
+                            case H5FD_MEM_GHEAP:
+                                fprintf(out, "H5FD_MEM_GHEAP");
+                                break;
+                            case H5FD_MEM_LHEAP:
+                                fprintf(out, "H5FD_MEM_LHEAP");
+                                break;
+                            case H5FD_MEM_OHDR:
+                                fprintf(out, "H5FD_MEM_OHDR");
+                                break;
+                            case H5FD_MEM_NTYPES:
+                            default:
+                                fprintf(out, "%ld", (long)mem_type);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
                 case 's':
                     if(ptr) {
                         if(vp)
