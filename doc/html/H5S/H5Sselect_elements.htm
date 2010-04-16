@@ -2,6 +2,11 @@
 <!-- HEADER RIGHT "H5Sselect_elements" -->
 <hr>
 <dl>
+
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 16 April 2010
+    </i></font></div>
+
 <dt><strong>Name:</strong> <a name="Dataspace-SelectElements">H5Sselect_elements</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
@@ -9,23 +14,33 @@
         <em>size_t</em> <code>num_elements</code>,
         <em>const hsize_t *</em><code>coord</code>
     )
+
+<p>
 <dt><strong>Purpose:</strong>
     <dd>Selects array elements to be included in the selection for a dataspace.
+
+<p>
 <dt><strong>Description:</strong>
     <dd><code>H5Sselect_elements</code> selects array elements to be 
         included in the selection for the <code>space_id</code> dataspace. 
+        This is referred to as a <i>point selection</i>.
         <p>
         The number of elements selected is set in the 
         <code>num_elements</code> parameter.  
         <p>
-        The <code>coord</code> array is a two-dimensional array of size
-        <code>num_elements</code> by <code><i>dataspace_rank</i></code> 
-        containing a list of of zero-based values specifying the 
+        The <code>coord</code> parameter is a pointer to a buffer
+        containing a serialized 2-dimensional array of size
+        <code>num_elements</code> by the rank of the dataspace.
+        The array lists dataset elements in the point selection; 
+        that is, it&rsquo;s a list of of zero-based values specifying the 
         coordinates in the dataset of the selected elements.  
         The order of the element coordinates in the 
         <code>coord</code> array specifies the order in which  
         the array elements are iterated through when I/O is performed.  
         Duplicate coordinate locations are not checked for.
+        See below for examples of the mapping between 
+        the serialized contents of the buffer and
+        the point selection array that it represents.
         <p>
         The selection operator <code>op</code> determines how the 
         new selection is to be combined with the previously existing
@@ -60,6 +75,50 @@
         is used to combine a new selection with an existing selection,
         the selection ordering is reset to C array ordering.
 -->
+        <p>
+        <strong>Mapping the serialized <code>coord</code> buffer 
+        to a 2-dimensional point selection array:</strong> &nbsp;
+        To illustrate the construction of the contents of the 
+        <code>coord</code> buffer, consider two simple examples:
+        a selection of 5 points in a 1-dimensional array and
+        a selection of 3 points in a 4-dimensional array.
+        <p>
+        In the 1D case, 
+        we will be selecting five points and a 1D dataspace has rank 1,
+        so the selection will be described in a 5-by-1 array.
+        To select the 1st, 14th, 17th, 23rd, 8th elements 
+        of the dataset, the selection array would be as follows
+        (remembering that point coordinates are zero-based):
+        <pre>
+         0
+        13
+        16
+        22
+         7 </pre>
+        This point selection array will be serialized in the 
+        <code>coord</code> buffer as:
+        <pre>
+         0 13 16 22 7 </pre>
+
+        <p>
+        In the 4D case, 
+        we will be selecting three points and a 4D dataspace has rank 4,
+        so the selection will be described in a 3-by-4 array.
+        To select the points 
+        (1,1,1,1), (14,6,12,18), and (8,22,30,22),
+        the point selection array would be as follows:
+        <pre>
+         0  0  0  0
+        13  5 11 17
+         7 21 29 21</pre>
+        This point selection array will be serialized in the 
+        <code>coord</code> buffer as:
+        <pre>
+         0 0 0 0 13 5 11 17 7 21 29 21</pre>
+
+        
+
+<p>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -74,15 +133,20 @@
           <td valign="top">Number of elements to be selected.</td></tr>
         <tr>
           <td valign="top"><em>const hsize_t *</em><code>coord</code></td>
-          <td valign="top">A 2-dimensional array of 0-based values specifying 
-              the coordinates of the elements being selected.</td></tr>
+          <td valign="top">A pointer to a buffer containing a serialized
+              copy of a 2-dimensional array of zero-based values specifying 
+              the coordinates of the elements in the point selection.</td></tr>
     </table></ul>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful; 
         otherwise returns a negative value.
+
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5sselect_elements_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
                                 coord, hdferr) 
   IMPLICIT NONE
@@ -107,33 +171,25 @@ SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
   INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5sselect_elements_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
+<p>
 <dt><strong>History</strong>:</strong>
-    <ul><table width="90%">
+    <dd><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td>
-		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-		  <td valign="top" align="left">
-		    <strong>Fortran90</strong></td></tr>
+            <strong>Change</strong></td>
+            </td></tr>
         <tr>
-		  <td valign="top">1.6.4</td>
+          <td valign="top">1.6.4</td>
           <td valign="top">
-		    <code>coord</code> parameter type changed to 
-			<em>const hsize_t</em>.</td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">
-		    <code>coord</code> parameter type changed to 
-			<code>INTEGER(HSIZE_T)</code>.</td></tr>
-    </table></ul>
+            C <code>coord</code> parameter type changed to 
+            <em>const hsize_t</em>.
+            <br>
+            Fortran <code>coord</code> parameter type changed to 
+            <code>INTEGER(HSIZE_T)</code>.</td></tr>
+    </table></dd>
 </dl>
 
