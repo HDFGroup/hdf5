@@ -2587,8 +2587,8 @@ herr_t
 H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	      H5T_conv_t func)
 {
-    H5T_t	*src, *dst;	        /*data type descriptors		*/
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5T_t	*src = NULL, *dst = NULL;	/* Datatype descriptors	*/
+    herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(H5Tunregister, FAIL)
     H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
