@@ -4963,6 +4963,10 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
+	  <td colspan=4>Dataset Element Size <em>(optional)</em></td>
+	</tr>
+	
+	<tr>
 	  <td colspan=4>Compact Data Size (4-bytes)</td>
 	</tr>
 	
@@ -5040,9 +5044,22 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Dimensions</td>
-	  <td><P>For contiguous and compact storage the dimensions define the entire
-	    size of the array while for chunked storage they define the size of a single 
-	    chunk.</P></td>
+	  <td><P>For contiguous and compact storage the dimensions define
+            the entire size of the array while for chunked storage they define
+            the size of a single chunk.  In all cases, they are in units of 
+            array elements (not bytes).  The first dimension stored in the list
+            of dimensions is the slowest changing dimension and the last
+            dimension stored is the fastest changing dimension.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dataset Element Size</td>
+	  <td><P>The size of a dataset element, in bytes.  This field is only
+            present for chunked storage.
+            </P>
+          </td>
 	</tr>
 
 	<tr>
@@ -5269,6 +5286,10 @@ TABLE.list TD { border:none; }
 	<tr>
 	  <td colspan=4>...</td>
 	</tr>
+
+	<tr>
+	  <td colspan=4>Dataset Element Size</td>
+	</tr>
       </table>
     </div>
 
@@ -5291,6 +5312,23 @@ TABLE.list TD { border:none; }
 	  <td><P>This is the address of the B-tree that is used to look up the addresses of the
 	    chunks.  The address may have the "undefined address" value, to indicate that
             storage has not yet been allocated for this array.</P></td>
+	</tr>
+
+	<tr>
+	  <td>Dimensions</td>
+	  <td><P>These values define the dimension size of a single chunk, in
+            units of array elements (not bytes).  The first dimension stored in
+            the list of dimensions is the slowest changing dimension and the
+            last dimension stored is the fastest changing dimension.
+            </P>
+          </td>
+	</tr>
+
+	<tr>
+	  <td>Dataset Element Size</td>
+	  <td><P>The size of a dataset element, in bytes.
+            </P>
+          </td>
 	</tr>
       </table>
     </div>
