@@ -562,7 +562,7 @@ done:
         if(new_dset != NULL) {
             if(new_dset->dcpl_id != 0)
                 (void)H5I_dec_ref(new_dset->dcpl_id, FALSE);
-            (void)H5FL_FREE(H5D_shared_t, new_dset);
+            new_dset = H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1073,10 +1073,10 @@ done:
             } /* end if */
             if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id, FALSE) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
-            (void)H5FL_FREE(H5D_shared_t, new_dset->shared);
+            new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
         new_dset->oloc.file = NULL;
-        (void)H5FL_FREE(H5D_t, new_dset);
+        new_dset = H5FL_FREE(H5D_t, new_dset);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1168,12 +1168,12 @@ done:
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL)   /* Need to free shared fo */
-                (void)H5FL_FREE(H5D_shared_t, dataset->shared);
+                dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
 
             H5O_loc_free(&(dataset->oloc));
             H5G_name_free(&(dataset->path));
 
-            (void)H5FL_FREE(H5D_t, dataset);
+            dataset = H5FL_FREE(H5D_t, dataset);
         } /* end if */
         if(shared_fo)
             shared_fo->fo_count--;
@@ -1272,6 +1272,8 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
                     fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
                     break;
 
+                case H5D_LAYOUT_ERROR:
+                case H5D_NLAYOUTS:
                 default:
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet")
             } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -1396,7 +1398,7 @@ H5D_close(H5D_t *dataset)
 
                 /* Check for cached single element chunk info */
                 if(dataset->shared->cache.chunk.single_chunk_info) {
-                    (void)H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
+                    dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
                     dataset->shared->cache.chunk.single_chunk_info = NULL;
                 } /* end if */
 
@@ -1410,6 +1412,8 @@ H5D_close(H5D_t *dataset)
                 dataset->shared->layout.storage.u.compact.buf = H5MM_xfree(dataset->shared->layout.storage.u.compact.buf);
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
@@ -1443,7 +1447,7 @@ H5D_close(H5D_t *dataset)
          */
         dataset->oloc.file = NULL;
 
-        (void)H5FL_FREE(H5D_shared_t, dataset->shared);
+        dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
     } /* end if */
     else {
         /* Decrement the ref. count for this object in the top file */
@@ -1461,7 +1465,7 @@ H5D_close(H5D_t *dataset)
        free_failed = TRUE;
 
     /* Free the dataset's memory structure */
-    (void)H5FL_FREE(H5D_t, dataset);
+    dataset = H5FL_FREE(H5D_t, dataset);
 
     /* Check if anything failed in the middle... */
     if(free_failed)
@@ -1635,6 +1639,8 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
                 } /* end if */
                 break;
 
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
                 HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
@@ -1750,6 +1756,8 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
                 break;
             } /* end block */
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HDassert("not implemented yet" && 0);
 #ifdef NDEBUG
@@ -1806,6 +1814,8 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
             ret_value = dset->shared->layout.storage.u.compact.size;
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset type")
     } /*lint !e788 All appropriate cases are covered */
@@ -1852,6 +1862,8 @@ H5D_get_offset(const H5D_t *dset)
                 ret_value = dset->shared->layout.storage.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "unknown dataset layout type")
     } /*lint !e788 All appropriate cases are covered */

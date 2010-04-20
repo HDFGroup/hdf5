@@ -549,7 +549,7 @@ done:
     if(!ret_value && list) {
         if(list->messages)
             H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-        (void)H5FL_FREE(H5SM_list_t, list);
+        list = H5FL_FREE(H5SM_list_t, list);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

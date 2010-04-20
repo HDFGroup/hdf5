@@ -338,13 +338,13 @@ done:
     if(dst_id != (-1) && H5I_dec_ref(dst_id, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
-        (void)H5FL_BLK_FREE(type_conv, tmp_buf);
+        tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
     if(elem_wb && H5WB_unwrap(elem_wb) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
     if(bkg_elem_wb && H5WB_unwrap(bkg_elem_wb) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
     if(bkg_buf)
-        (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+        bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_fill() */
@@ -642,9 +642,9 @@ H5D_fill_release(H5D_fill_buf_info_t *fb_info)
             fb_info->fill_free_func(fb_info->fill_buf, fb_info->fill_free_info);
         else {
             if(fb_info->fill->buf)
-                (void)H5FL_BLK_FREE(non_zero_fill, fb_info->fill_buf);
+                fb_info->fill_buf = H5FL_BLK_FREE(non_zero_fill, fb_info->fill_buf);
             else
-                (void)H5FL_BLK_FREE(zero_fill, fb_info->fill_buf);
+                fb_info->fill_buf = H5FL_BLK_FREE(zero_fill, fb_info->fill_buf);
         } /* end else */
         fb_info->fill_buf = NULL;
     } /* end if */
@@ -683,7 +683,7 @@ H5D_fill_term(H5D_fill_buf_info_t *fb_info)
         else if(fb_info->mem_type)
             H5T_close(fb_info->mem_type);
         if(fb_info->bkg_buf)
-            (void)H5FL_BLK_FREE(type_conv, fb_info->bkg_buf);
+            fb_info->bkg_buf = H5FL_BLK_FREE(type_conv, fb_info->bkg_buf);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

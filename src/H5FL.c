@@ -1188,7 +1188,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
         } /* end while */
 
         /* Free the free list node */
-        (void)H5FL_FREE(H5FL_blk_node_t, head->head);
+        head->head = H5FL_FREE(H5FL_blk_node_t, head->head);
 
         /* Advance to the next free list */
         head->head = (H5FL_blk_node_t *)temp;
@@ -2338,14 +2338,14 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
 
         HDassert(last->next->list == factory);
         tmp = last->next->next;
-        (void)H5FL_FREE(H5FL_fac_gc_node_t, last->next);
+        last->next = H5FL_FREE(H5FL_fac_gc_node_t, last->next);
         last->next = tmp;
         if(tmp)
             tmp->list->prev_gc = last;
     } else {
         HDassert(H5FL_fac_gc_head.first->list == factory);
         tmp = H5FL_fac_gc_head.first->next;
-        (void)H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);
+        H5FL_fac_gc_head.first = H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);
         H5FL_fac_gc_head.first = tmp;
         if(tmp)
             tmp->list->prev_gc = NULL;
@@ -2396,7 +2396,7 @@ printf("H5FL_fac_term: head->size=%d, head->allocated=%d\n", (int)H5FL_fac_gc_he
         H5FL_fac_gc_head.first->list->init = 0;
 
         /* Free the node from the garbage collection list */
-        (void)H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);
+        H5FL_fac_gc_head.first = H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);
 
         H5FL_fac_gc_head.first = tmp;
     } /* end while */

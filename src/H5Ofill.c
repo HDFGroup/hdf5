@@ -275,7 +275,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	(void)H5FL_FREE(H5O_fill_t, fill);
+	fill = H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -335,7 +335,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	(void)H5FL_FREE(H5O_fill_t, fill);
+	fill = H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -581,7 +581,7 @@ done:
 	if(dst->type)
             H5T_close(dst->type);
 	if(!_dst)
-            (void)H5FL_FREE(H5O_fill_t, dst);
+            dst = H5FL_FREE(H5O_fill_t, dst);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -783,7 +783,7 @@ H5O_fill_free(void *fill)
 
     HDassert(fill);
 
-    (void)H5FL_FREE(H5O_fill_t, fill);
+    fill = H5FL_FREE(H5O_fill_t, fill);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_free() */

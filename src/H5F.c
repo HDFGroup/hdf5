@@ -663,6 +663,18 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                     oloc = NULL;
 		break;
 
+	    case H5I_UNINIT:
+	    case H5I_BADID:
+	    case H5I_FILE:
+	    case H5I_DATASPACE:
+	    case H5I_REFERENCE:
+	    case H5I_VFL:
+	    case H5I_GENPROP_CLS:
+	    case H5I_GENPROP_LST:
+	    case H5I_ERROR_CLASS:
+	    case H5I_ERROR_MSG:
+	    case H5I_ERROR_STACK:
+	    case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
 	} /* end switch */
@@ -938,8 +950,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 done:
     if(!ret_value && f) {
 	if(!shared)
-            (void)H5FL_FREE(H5F_file_t, f->shared);
-	(void)H5FL_FREE(H5F_t, f);
+            f->shared = H5FL_FREE(H5F_file_t, f->shared);
+	f = H5FL_FREE(H5F_t, f);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1084,7 +1096,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
-    (void)H5FL_FREE(H5F_t, f);
+    f = H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_dest() */
@@ -1567,6 +1579,17 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
             }
             break;
 
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
     } /* end switch */
@@ -1809,6 +1832,7 @@ H5F_try_close(H5F_t *f)
             /* If we've gotten this far (ie. there are no open file IDs in the file/mount hierarchy), fall through to flush & close */
             break;
 
+        case H5F_CLOSE_DEFAULT:
         default:
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, unknown file close degree")
     } /* end switch */

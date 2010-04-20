@@ -687,7 +687,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
                 } /* end else */
 
                 /* Free the node */
-                (void)H5FL_FREE(H5I_id_info_t, cur);
+                cur = H5FL_FREE(H5I_id_info_t, cur);
             } /* end if */
             else {
                 /* Advance to next node */
@@ -1330,15 +1330,14 @@ H5I_remove(hid_t id)
         
         /* If there's room, and we can save IDs of this type, then 
            save the struct (and its ID) for future re-use */
-        if ((type_ptr->reuse_ids)&&(type_ptr->free_count < MAX_FREE_ID_STRUCTS)) {
+        if((type_ptr->reuse_ids)&&(type_ptr->free_count < MAX_FREE_ID_STRUCTS)) {
             curr_id->next = type_ptr->next_id_ptr;
             type_ptr->next_id_ptr = curr_id;
             type_ptr->free_count++;
-        /* Otherwise, just toss it. */
-        } else {
-            (void)H5FL_FREE(H5I_id_info_t, curr_id);
         } /* end if */
-
+        /* Otherwise, just toss it. */
+        else
+            curr_id = H5FL_FREE(H5I_id_info_t, curr_id);
     } else {
         /* couldn't find the ID in the proper place */
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID")
