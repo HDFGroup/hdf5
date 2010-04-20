@@ -2442,7 +2442,7 @@ H5A_close(H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     attr->shared = NULL;
-    (void)H5FL_FREE(H5A_t, attr);
+    attr = H5FL_FREE(H5A_t, attr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

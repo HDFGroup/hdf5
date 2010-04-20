@@ -991,7 +991,7 @@ H5E_get_current_stack(void)
 done:
     if(ret_value == NULL)
         if(estack_copy)
-            (void)H5FL_FREE(H5E_t, estack_copy);
+            estack_copy = H5FL_FREE(H5E_t, estack_copy);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_get_current_stack() */
@@ -1158,7 +1158,7 @@ H5E_close_stack(H5E_t *estack)
     H5E_clear_stack(estack);
 
     /* Free the stack structure */
-    (void)H5FL_FREE(H5E_t, estack);
+    estack = H5FL_FREE(H5E_t, estack);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_stack() */

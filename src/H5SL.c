@@ -176,7 +176,7 @@
         if(NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc]))) \
             HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed") \
         HDmemcpy((void *)_tmp, (const void *)X->forward, (LVL + 1) * sizeof(H5SL_node_t *)); \
-        (void)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc-1], (void *)X->forward);  \
+        X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc-1], (void *)X->forward);  \
         X->forward = _tmp;                                                     \
     } /* end if */                                                             \
                                                                                \
@@ -198,7 +198,7 @@
         if(NULL == (_tmp = (H5SL_node_t **)H5FL_FAC_MALLOC(H5SL_fac_g[X->log_nalloc]))) \
             HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed") \
         HDmemcpy((void *)_tmp, (const void *)X->forward, (LVL) * sizeof(H5SL_node_t *)); \
-        (void)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc+1], (void *)X->forward);  \
+        X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[X->log_nalloc+1], (void *)X->forward);  \
         X->forward = _tmp;                                                     \
     } /* end if */                                                             \
                                                                                \
@@ -451,8 +451,8 @@
         else                                                                   \
             X->forward[0]->backward = X->backward;                             \
         SLIST->nobjs--;                                                        \
-        (void)H5FL_FAC_FREE(H5SL_fac_g[0], X->forward);                        \
-        (void)H5FL_FREE(H5SL_node_t, X);                                       \
+        X->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[0], X->forward);                        \
+        X = H5FL_FREE(H5SL_node_t, X);                                       \
                                                                                \
         HGOTO_DONE(tmp);                                                       \
     } /* end if */                                                             \
@@ -749,13 +749,13 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
             /* Casting away const OK -QAK */
             (void)(op)(node->item,(void *)node->key,op_data);
 
-        (void)H5FL_FAC_FREE(H5SL_fac_g[node->log_nalloc], node->forward);
-        (void)H5FL_FREE(H5SL_node_t, node);
-        node=next_node;
+        node->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[node->log_nalloc], node->forward);
+        node = H5FL_FREE(H5SL_node_t, node);
+        node = next_node;
     } /* end while */
 
     /* Reset the header pointers */
-    (void)H5FL_FAC_FREE(H5SL_fac_g[slist->header->log_nalloc], slist->header->forward);
+    slist->header->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[slist->header->log_nalloc], slist->header->forward);
     if(NULL == (slist->header->forward = (H5SL_node_t **) H5FL_FAC_MALLOC(H5SL_fac_g[0])))
         HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, FAIL, "memory allocation failed")
     slist->header->forward[0] = NULL;
@@ -815,11 +815,11 @@ H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
         HGOTO_ERROR(H5E_SLIST, H5E_CANTFREE, FAIL, "can't release skip list nodes")
 
     /* Release header node */
-    (void)H5FL_FAC_FREE(H5SL_fac_g[slist->header->log_nalloc], slist->header->forward);
-    (void)H5FL_FREE(H5SL_node_t, slist->header);
+    slist->header->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[slist->header->log_nalloc], slist->header->forward);
+    slist->header = H5FL_FREE(H5SL_node_t, slist->header);
 
     /* Free skip list object */
-    (void)H5FL_FREE(H5SL_t, slist);
+    slist = H5FL_FREE(H5SL_t, slist);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -887,7 +887,7 @@ done:
     /* Error cleanup */
     if(ret_value == NULL) {
         if(new_slist != NULL)
-            (void)H5FL_FREE(H5SL_t, new_slist);
+            new_slist = H5FL_FREE(H5SL_t, new_slist);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1151,8 +1151,8 @@ H5SL_remove_first(H5SL_t *slist)
             tmp->forward[0]->backward = head;
         slist->nobjs--;
         /* Free memory */
-        (void)H5FL_FAC_FREE(H5SL_fac_g[0], tmp->forward);
-        (void)H5FL_FREE(H5SL_node_t, tmp);
+        tmp->forward = (H5SL_node_t **)H5FL_FAC_FREE(H5SL_fac_g[0], tmp->forward);
+        tmp = H5FL_FREE(H5SL_node_t, tmp);
 
         /* Reshape the skip list as necessary to maintain 1-2-3 condition */
         for(i=0; i < level; i++) {

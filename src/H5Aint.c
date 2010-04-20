@@ -1162,10 +1162,10 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
 
 done:
-    if (attr_dst) {
+    if(attr_dst) {
         (void)H5A_free(attr_dst);
-        (void)H5FL_FREE(H5A_t, attr_dst);
-    }
+        attr_dst = H5FL_FREE(H5A_t, attr_dst);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_copy_file_cb() */

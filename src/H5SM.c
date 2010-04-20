@@ -662,7 +662,7 @@ done:
         if(list != NULL) {
             if(list->messages != NULL)
                 H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-            (void)H5FL_FREE(H5SM_list_t, list);
+            list = H5FL_FREE(H5SM_list_t, list);
         } /* end if */
         if(addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, addr, size);
@@ -2312,7 +2312,7 @@ H5SM_table_free(H5SM_master_table_t *table)
 
     H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
 
-    H5FL_FREE(H5SM_master_table_t, table);
+    table = H5FL_FREE(H5SM_master_table_t, table);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_table_free() */
@@ -2340,7 +2340,7 @@ H5SM_list_free(H5SM_list_t *list)
 
     H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
 
-    H5FL_FREE(H5SM_list_t, list);
+    list = H5FL_FREE(H5SM_list_t, list);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_list_free() */

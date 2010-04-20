@@ -623,7 +623,7 @@ H5Dget_create_plist(hid_t dset_id)
                 H5I_dec_ref(src_id, FALSE);
                 H5I_dec_ref(dst_id, FALSE);
                 if(bkg_buf)
-                    (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                    bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
 
@@ -631,7 +631,7 @@ H5Dget_create_plist(hid_t dset_id)
             H5I_dec_ref(src_id, FALSE);
             H5I_dec_ref(dst_id, FALSE);
             if(bkg_buf)
-                (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
     } /* end if */
 
@@ -1039,9 +1039,9 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
     } /* end if */
     if(vlen_bufsize.fl_tbuf != NULL)
-        (void)H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
+        vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
     if(vlen_bufsize.vl_tbuf != NULL)
-        (void)H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
+        vlen_bufsize.vl_tbuf = H5FL_BLK_FREE(vlen_vl_buf, vlen_bufsize.vl_tbuf);
     if(vlen_bufsize.xfer_pid > 0) {
         if(H5I_dec_ref(vlen_bufsize.xfer_pid, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list")

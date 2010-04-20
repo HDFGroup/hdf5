@@ -123,7 +123,7 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
     if(NULL == (f->shared->root_grp = H5FL_CALLOC(H5G_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     if(NULL == (f->shared->root_grp->shared = H5FL_CALLOC(H5G_shared_t))) {
-        (void)H5FL_FREE(H5G_t, f->shared->root_grp);
+        f->shared->root_grp = H5FL_FREE(H5G_t, f->shared->root_grp);
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
 

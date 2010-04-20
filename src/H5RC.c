@@ -115,10 +115,10 @@ H5RC_decr(H5RC_t *rc)
     /* Check if we should delete this object now */
     if(rc->n == 0) {
         if((rc->free_func)(rc->o) < 0) {
-            (void)H5FL_FREE(H5RC_t, rc);
+            rc = H5FL_FREE(H5RC_t, rc);
             HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed")
         } /* end if */
-        (void)H5FL_FREE(H5RC_t, rc);
+        rc = H5FL_FREE(H5RC_t, rc);
     } /* end if */
 
 done:

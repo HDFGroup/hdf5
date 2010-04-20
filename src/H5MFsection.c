@@ -459,7 +459,7 @@ H5MF_sect_simple_free(H5FS_section_info_t *_sect)
     HDassert(sect);
 
     /* Release the section */
-    (void)H5FL_FREE(H5MF_free_section_t, sect);
+    sect = H5FL_FREE(H5MF_free_section_t, sect);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5MF_sect_simple_free() */

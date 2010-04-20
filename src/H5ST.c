@@ -95,7 +95,7 @@ H5ST_close_internal(H5ST_ptr_t p)
         if(p->splitchar)
             H5ST_close_internal(p->eqkid);
         H5ST_close_internal(p->hikid);
-        (void)H5FL_FREE(H5ST_node_t, p);
+        p = H5FL_FREE(H5ST_node_t, p);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -136,7 +136,7 @@ H5ST_close(H5ST_tree_t *tree)
         HGOTO_ERROR(H5E_TST, H5E_CANTFREE, FAIL, "can't free TST")
 
     /* Free root node itself */
-    (void)H5FL_FREE(H5ST_tree_t, tree);
+    tree = H5FL_FREE(H5ST_tree_t, tree);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -632,7 +632,7 @@ H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
             *root = newp;
     } /* end else */
 
-    (void)H5FL_FREE(H5ST_node_t, p);
+    p = H5FL_FREE(H5ST_node_t, p);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ST_delete_internal() */
