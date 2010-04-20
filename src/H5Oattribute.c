@@ -865,7 +865,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         chk_flags |= H5AC__DIRTIED_FLAG;
 
         /* Release chunk */
-        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, chk_proxy, chk_flags) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
         chk_proxy = NULL;
 
@@ -886,7 +886,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
 done:
     /* Release chunk, if not already done */
-    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, chk_proxy, chk_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1066,7 +1066,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         chk_flags |= H5AC__DIRTIED_FLAG;
 
         /* Release chunk */
-        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, chk_proxy, chk_flags) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
         chk_proxy = NULL;
 
@@ -1130,7 +1130,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
 done:
     /* Release chunk, if not already done */
-    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, chk_proxy, chk_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
