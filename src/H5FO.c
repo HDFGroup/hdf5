@@ -234,7 +234,7 @@ H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     } /* end if */
 
     /* Release the object information */
-    (void)H5FL_FREE(H5FO_open_obj_t, open_obj);
+    open_obj = H5FL_FREE(H5FO_open_obj_t, open_obj);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -506,7 +506,7 @@ H5FO_top_decr(const H5F_t *f, haddr_t addr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "can't remove object from container")
 
             /* Release the object information */
-            (void)H5FL_FREE(H5FO_obj_count_t, obj_count);
+            obj_count = H5FL_FREE(H5FO_obj_count_t, obj_count);
         } /* end if */
     } /* end if */
     else

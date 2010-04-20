@@ -254,7 +254,7 @@ done:
                 H5MM_xfree(lnk->u.soft.name);
             if(lnk->type >= H5L_TYPE_UD_MIN && lnk->u.ud.size > 0 && lnk->u.ud.udata != NULL)
                 H5MM_xfree(lnk->u.ud.udata);
-            (void)H5FL_FREE(H5O_link_t, lnk);
+            lnk = H5FL_FREE(H5O_link_t, lnk);
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -578,7 +578,7 @@ H5O_link_free(void *_mesg)
 
     /* Free information for link */
     H5O_link_reset(lnk);
-    (void)H5FL_FREE(H5O_link_t, lnk);
+    lnk = H5FL_FREE(H5O_link_t, lnk);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_link_free() */

@@ -906,7 +906,7 @@ done:
                 H5MM_xfree(prop->name);
             if(prop->value != NULL)
                 H5MM_xfree(prop->value);
-            (void)H5FL_FREE(H5P_genprop_t, prop);
+            prop = H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
     } /* end if */
 
@@ -1005,7 +1005,7 @@ done:
                 H5MM_xfree(prop->name);
             if(prop->value!=NULL)
                 H5MM_xfree(prop->value);
-            (void)H5FL_FREE(H5P_genprop_t, prop);
+            prop = H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
     } /* end if */
 
@@ -1641,7 +1641,7 @@ done:
                 H5SL_close(plist->del);
 
             /* Release the property list itself */
-            (void)H5FL_FREE(H5P_genplist_t, plist);
+            plist = H5FL_FREE(H5P_genplist_t, plist);
         } /* end if */
     } /* end if */
 
@@ -4414,7 +4414,7 @@ H5P_close(void *_plist)
     H5SL_destroy(plist->props,H5P_free_prop_cb,&make_cb);
 
     /* Destroy property list object */
-    (void)H5FL_FREE(H5P_genplist_t, plist);
+    plist = H5FL_FREE(H5P_genplist_t, plist);
 
 done:
     /* Release the skip list of 'seen' properties */

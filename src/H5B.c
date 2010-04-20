@@ -1188,9 +1188,9 @@ done:
     if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
     if(native)
-        (void)H5FL_BLK_FREE(native_block, native);
+        native = H5FL_BLK_FREE(native_block, native);
     if(child)
-        (void)H5FL_SEQ_FREE(haddr_t, child);
+        child = H5FL_SEQ_FREE(haddr_t, child);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_iterate_helper() */
@@ -1773,13 +1773,13 @@ H5B_shared_free(void *_shared)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_shared_free)
 
     /* Free the raw B-tree node buffer */
-    (void)H5FL_BLK_FREE(page, shared->page);
+    shared->page = H5FL_BLK_FREE(page, shared->page);
 
     /* Free the B-tree native key offsets buffer */
-    (void)H5FL_SEQ_FREE(size_t, shared->nkey);
+    shared->nkey = H5FL_SEQ_FREE(size_t, shared->nkey);
 
     /* Free the shared B-tree info */
-    (void)H5FL_FREE(H5B_shared_t, shared);
+    shared = H5FL_FREE(H5B_shared_t, shared);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B_shared_free() */

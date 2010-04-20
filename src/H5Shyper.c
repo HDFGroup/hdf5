@@ -1543,7 +1543,7 @@ H5S_hyper_free_span_info (H5S_hyper_span_info_t *span_info)
         } /* end while */
 
         /* Free this span info */
-        (void)H5FL_FREE(H5S_hyper_span_info_t, span_info);
+        span_info = H5FL_FREE(H5S_hyper_span_info_t, span_info);
     } /* end if */
 
 done:
@@ -1586,7 +1586,7 @@ H5S_hyper_free_span (H5S_hyper_span_t *span)
     } /* end if */
 
     /* Free this span */
-    (void)H5FL_FREE(H5S_hyper_span_t, span);
+    span = H5FL_FREE(H5S_hyper_span_t, span);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3174,30 +3174,29 @@ H5S_hyper_is_regular(const H5S_t *space)
  *	when closing some other data space.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_release (H5S_t *space)
+H5S_hyper_release(H5S_t *space)
 {
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5S_hyper_release, FAIL);
+    FUNC_ENTER_NOAPI(H5S_hyper_release, FAIL)
 
     /* Check args */
-    assert (space && H5S_SEL_HYPERSLABS==H5S_GET_SELECT_TYPE(space));
+    HDassert(space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(space));
 
     /* Reset the number of points selected */
-    space->select.num_elem=0;
+    space->select.num_elem = 0;
 
     /* Release irregular hyperslab information */
-    if(space->select.sel_info.hslab->span_lst!=NULL) {
-        if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst)<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans");
+    if(space->select.sel_info.hslab->span_lst != NULL) {
+        if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans")
     } /* end if */
 
     /* Release space for the hyperslab selection information */
-    (void)H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
-    space->select.sel_info.hslab=NULL;
+    space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_release() */
 
 

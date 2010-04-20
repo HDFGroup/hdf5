@@ -552,6 +552,8 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 dt->shared->force_conv = TRUE;
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown datatype class found")
     } /* end switch */
@@ -589,7 +591,7 @@ static herr_t
 H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
 {
     unsigned	flags = 0;
-    char	*hdr = (char *)*pp;
+    uint8_t	*hdr = (uint8_t *)*pp;
     unsigned	i;
     size_t	n, z;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -612,9 +614,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
                     break;		/*nothing */
+
                 case H5T_ORDER_BE:
                     flags |= 0x01;
                     break;
+
+                case H5T_ORDER_ERROR:
+                case H5T_ORDER_VAX:
+                case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
             } /* end switch */
@@ -622,9 +629,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.lsb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x02;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -632,9 +644,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.msb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 case H5T_PAD_ONE:
                     flags |= 0x04;
                     break;
+
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -642,9 +659,13 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.u.i.sign) {
                 case H5T_SGN_NONE:
                     break;		/*nothing */
+
                 case H5T_SGN_2:
                     flags |= 0x08;
                     break;
+
+                case H5T_SGN_ERROR:
+                case H5T_NSGN:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "sign scheme is not supported in file format yet")
             } /* end switch */
@@ -660,13 +681,18 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
                     break;		/*nothing*/
+
                 case H5T_ORDER_BE:
                     flags |= 0x01;
                     break;
+
                 case H5T_ORDER_VAX:     /*turn on 1st and 6th (reserved before adding VAX) bits*/
                     flags |= 0x41;
                     HDassert(dt->shared->version >= H5O_DTYPE_VERSION_3);
                     break;
+
+                case H5T_ORDER_ERROR:
+                case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
             } /* end switch */
@@ -674,9 +700,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.lsb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x02;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -684,9 +715,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.msb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x04;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -694,9 +730,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.u.f.pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x08;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -704,12 +745,16 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.u.f.norm) {
                 case H5T_NORM_NONE:
                     break;		/*nothing */
+
                 case H5T_NORM_MSBSET:
                     flags |= 0x10;
                     break;
+
                 case H5T_NORM_IMPLIED:
                     flags |= 0x20;
                     break;
+
+                case H5T_NORM_ERROR:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "normalization scheme is not supported in file format yet")
             } /* end switch */
@@ -732,9 +777,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
                     break;		/*nothing */
+
                 case H5T_ORDER_BE:
                     flags |= 0x01;
                     break;
+
+                case H5T_ORDER_ERROR:
+                case H5T_ORDER_VAX:
+                case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
             } /* end switch */
@@ -762,9 +812,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.order) {
                 case H5T_ORDER_LE:
                     break;		/*nothing */
+
                 case H5T_ORDER_BE:
                     flags |= 0x01;
                     break;
+
+                case H5T_ORDER_ERROR:
+                case H5T_ORDER_VAX:
+                case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
             } /* end switch */
@@ -772,9 +827,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.lsb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x02;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -782,9 +842,14 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             switch (dt->shared->u.atomic.msb_pad) {
                 case H5T_PAD_ZERO:
                     break;		/*nothing */
+
                 case H5T_PAD_ONE:
                     flags |= 0x04;
                     break;
+
+                case H5T_PAD_ERROR:
+                case H5T_PAD_BACKGROUND:
+                case H5T_NPAD:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "bit padding is not supported in file format yet")
             } /* end switch */
@@ -931,7 +996,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             flags |= (dt->shared->u.vlen.type & 0x0f);
             if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
                 flags |= (dt->shared->u.vlen.pad   & 0x0f) << 4;
-                flags |= (dt->shared->u.vlen.cset  & 0x0f) << 8;
+                flags |= ((unsigned)dt->shared->u.vlen.cset  & 0x0f) << 8;
             } /* end if */
 
             /* Encode base type of VL information */
@@ -950,7 +1015,8 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             HDassert(dt->shared->version >= dt->shared->parent->shared->version);
 
             /* Encode the number of dimensions */
-            *(*pp)++ = dt->shared->u.array.ndims;
+            HDassert(dt->shared->u.array.ndims <= UCHAR_MAX);
+            *(*pp)++ = (uint8_t)dt->shared->u.array.ndims;
 
             /* Drop this information for Version 3 of the format */
             if(dt->shared->version < H5O_DTYPE_VERSION_3) {
@@ -976,16 +1042,18 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type")
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             /*nothing */
             break;
     } /* end switch */
 
     /* Encode the type's class, version and bit field */
-    *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | (dt->shared->version << 4);
-    *hdr++ = (flags >> 0) & 0xff;
-    *hdr++ = (flags >> 8) & 0xff;
-    *hdr++ = (flags >> 16) & 0xff;
+    *hdr++ = (uint8_t)(((unsigned)(dt->shared->type) & 0x0f) | (dt->shared->version << 4));
+    *hdr++ = (uint8_t)((flags >> 0) & 0xff);
+    *hdr++ = (uint8_t)((flags >> 8) & 0xff);
+    *hdr++ = (uint8_t)((flags >> 16) & 0xff);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1114,7 +1182,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     /* Was result already allocated? */
     if(_dst) {
         *((H5T_t *) _dst) = *dst;
-        (void)H5FL_FREE(H5T_t, dst);
+        dst = H5FL_FREE(H5T_t, dst);
         dst = (H5T_t *) _dst;
     } /* end if */
 
@@ -1249,6 +1317,10 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
             ret_value += H5O_dtype_size(f, dt->shared->parent);
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_STRING:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
         default:
             /*no properties */
             break;
@@ -1308,8 +1380,8 @@ H5O_dtype_free(void *mesg)
 
     HDassert(mesg);
 
-    (void)H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
-    (void)H5FL_FREE(H5T_t, mesg);
+    ((H5T_t *) mesg)->shared = H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
+    mesg = H5FL_FREE(H5T_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dtype_free() */
@@ -1585,6 +1657,8 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             s = "vlen";
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
         default:
             sprintf(buf, "H5T_CLASS_%d", (int)(dt->shared->type));
             s = buf;
@@ -1646,11 +1720,32 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_CSET_ASCII:
                 s = "ASCII";
                 break;
+
             case H5T_CSET_UTF8:
                 s = "UTF-8";
                 break;
-            default:
+
+            case H5T_CSET_RESERVED_2:
+            case H5T_CSET_RESERVED_3:
+            case H5T_CSET_RESERVED_4:
+            case H5T_CSET_RESERVED_5:
+            case H5T_CSET_RESERVED_6:
+            case H5T_CSET_RESERVED_7:
+            case H5T_CSET_RESERVED_8:
+            case H5T_CSET_RESERVED_9:
+            case H5T_CSET_RESERVED_10:
+            case H5T_CSET_RESERVED_11:
+            case H5T_CSET_RESERVED_12:
+            case H5T_CSET_RESERVED_13:
+            case H5T_CSET_RESERVED_14:
+            case H5T_CSET_RESERVED_15:
                 sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(dt->shared->u.atomic.u.s.cset));
+                s = buf;
+                break;
+
+            case H5T_CSET_ERROR:
+            default:
+                sprintf(buf, "Unknown character set: %d", (int)(dt->shared->u.atomic.u.s.cset));
                 s = buf;
                 break;
         } /* end switch */
@@ -1662,14 +1757,35 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_STR_NULLTERM:
                 s = "NULL Terminated";
                 break;
+
             case H5T_STR_NULLPAD:
                 s = "NULL Padded";
                 break;
+
             case H5T_STR_SPACEPAD:
                 s = "Space Padded";
                 break;
-            default:
+
+            case H5T_STR_RESERVED_3:
+            case H5T_STR_RESERVED_4:
+            case H5T_STR_RESERVED_5:
+            case H5T_STR_RESERVED_6:
+            case H5T_STR_RESERVED_7:
+            case H5T_STR_RESERVED_8:
+            case H5T_STR_RESERVED_9:
+            case H5T_STR_RESERVED_10:
+            case H5T_STR_RESERVED_11:
+            case H5T_STR_RESERVED_12:
+            case H5T_STR_RESERVED_13:
+            case H5T_STR_RESERVED_14:
+            case H5T_STR_RESERVED_15:
                 sprintf(buf, "H5T_STR_RESERVED_%d", (int)(dt->shared->u.atomic.u.s.pad));
+                s = buf;
+                break;
+
+            case H5T_STR_ERROR:
+            default:
+                sprintf(buf, "Unknown string padding: %d", (int)(dt->shared->u.atomic.u.s.pad));
                 s = buf;
                 break;
         } /* end switch */
@@ -1681,9 +1797,13 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_VLEN_SEQUENCE:
                 s = "sequence";
                 break;
+
             case H5T_VLEN_STRING:
                 s = "string";
                 break;
+
+            case H5T_VLEN_BADTYPE:
+            case H5T_VLEN_MAXTYPE:
             default:
                 sprintf(buf, "H5T_VLEN_%d", dt->shared->u.vlen.type);
                 s = buf;
@@ -1696,9 +1816,13 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_LOC_MEMORY:
                 s = "memory";
                 break;
+
             case H5T_LOC_DISK:
                 s = "disk";
                 break;
+
+            case H5T_LOC_BADLOC:
+            case H5T_LOC_MAXLOC:
             default:
                 sprintf(buf, "H5T_LOC_%d", (int)dt->shared->u.vlen.loc);
                 s = buf;
@@ -1713,11 +1837,32 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 case H5T_CSET_ASCII:
                     s = "ASCII";
                     break;
+
                 case H5T_CSET_UTF8:
                     s = "UTF-8";
                     break;
-                default:
+
+                case H5T_CSET_RESERVED_2:
+                case H5T_CSET_RESERVED_3:
+                case H5T_CSET_RESERVED_4:
+                case H5T_CSET_RESERVED_5:
+                case H5T_CSET_RESERVED_6:
+                case H5T_CSET_RESERVED_7:
+                case H5T_CSET_RESERVED_8:
+                case H5T_CSET_RESERVED_9:
+                case H5T_CSET_RESERVED_10:
+                case H5T_CSET_RESERVED_11:
+                case H5T_CSET_RESERVED_12:
+                case H5T_CSET_RESERVED_13:
+                case H5T_CSET_RESERVED_14:
+                case H5T_CSET_RESERVED_15:
                     sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(dt->shared->u.vlen.cset));
+                    s = buf;
+                    break;
+
+                case H5T_CSET_ERROR:
+                default:
+                    sprintf(buf, "Unknown character set: %d", (int)(dt->shared->u.vlen.cset));
                     s = buf;
                     break;
             } /* end switch */
@@ -1729,14 +1874,35 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 case H5T_STR_NULLTERM:
                     s = "NULL Terminated";
                     break;
+
                 case H5T_STR_NULLPAD:
                     s = "NULL Padded";
                     break;
+
                 case H5T_STR_SPACEPAD:
                     s = "Space Padded";
                     break;
-                default:
+
+                case H5T_STR_RESERVED_3:
+                case H5T_STR_RESERVED_4:
+                case H5T_STR_RESERVED_5:
+                case H5T_STR_RESERVED_6:
+                case H5T_STR_RESERVED_7:
+                case H5T_STR_RESERVED_8:
+                case H5T_STR_RESERVED_9:
+                case H5T_STR_RESERVED_10:
+                case H5T_STR_RESERVED_11:
+                case H5T_STR_RESERVED_12:
+                case H5T_STR_RESERVED_13:
+                case H5T_STR_RESERVED_14:
+                case H5T_STR_RESERVED_15:
                     sprintf(buf, "H5T_STR_RESERVED_%d", (int)(dt->shared->u.vlen.pad));
+                    s = buf;
+                    break;
+
+                case H5T_STR_ERROR:
+                default:
+                    sprintf(buf, "Unknown string padding: %d", (int)(dt->shared->u.vlen.pad));
                     s = buf;
                     break;
             } /* end switch */
@@ -1759,15 +1925,20 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_ORDER_LE:
                 s = "little endian";
                 break;
+
             case H5T_ORDER_BE:
                 s = "big endian";
                 break;
+
             case H5T_ORDER_VAX:
                 s = "VAX";
                 break;
+
             case H5T_ORDER_NONE:
                 s = "none";
                 break;
+
+            case H5T_ORDER_ERROR:
             default:
                 sprintf(buf, "H5T_ORDER_%d", dt->shared->u.atomic.order);
                 s = buf;
@@ -1791,9 +1962,17 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_PAD_ZERO:
                 s = "zero";
                 break;
+
             case H5T_PAD_ONE:
                 s = "one";
                 break;
+
+            case H5T_PAD_BACKGROUND:
+                s = "background";
+                break;
+
+            case H5T_PAD_ERROR:
+            case H5T_NPAD:
             default:
                 s = "pad?";
                 break;
@@ -1805,9 +1984,17 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             case H5T_PAD_ZERO:
                 s = "zero";
                 break;
+
             case H5T_PAD_ONE:
                 s = "one";
                 break;
+
+            case H5T_PAD_BACKGROUND:
+                s = "background";
+                break;
+
+            case H5T_PAD_ERROR:
+            case H5T_NPAD:
             default:
                 s = "pad?";
                 break;
@@ -1820,15 +2007,22 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 case H5T_PAD_ZERO:
                     s = "zero";
                     break;
+
                 case H5T_PAD_ONE:
                     s = "one";
                     break;
+
+                case H5T_PAD_BACKGROUND:
+                    s = "background";
+                    break;
+
+                case H5T_PAD_ERROR:
+                case H5T_NPAD:
                 default:
-                    if (dt->shared->u.atomic.u.f.pad < 0) {
+                    if (dt->shared->u.atomic.u.f.pad < 0)
                         sprintf(buf, "H5T_PAD_%d", -(dt->shared->u.atomic.u.f.pad));
-                    } else {
+                    else
                         sprintf(buf, "bit-%d", dt->shared->u.atomic.u.f.pad);
-                    }
                     s = buf;
                     break;
 	    } /* end switch */
@@ -1839,12 +2033,16 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 case H5T_NORM_IMPLIED:
                     s = "implied";
                     break;
+
                 case H5T_NORM_MSBSET:
                     s = "msb set";
                     break;
+
                 case H5T_NORM_NONE:
                     s = "none";
                     break;
+
+                case H5T_NORM_ERROR:
                 default:
                     sprintf(buf, "H5T_NORM_%d", (int) (dt->shared->u.atomic.u.f.norm));
                     s = buf;
@@ -1881,9 +2079,13 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 case H5T_SGN_NONE:
                     s = "none";
                     break;
+
                 case H5T_SGN_2:
                     s = "2's comp";
                     break;
+
+                case H5T_SGN_ERROR:
+                case H5T_NSGN:
                 default:
                     sprintf(buf, "H5T_SGN_%d", (int) (dt->shared->u.atomic.u.i.sign));
                     s = buf;

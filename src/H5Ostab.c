@@ -120,7 +120,7 @@ H5O_stab_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 done:
     if(ret_value == NULL) {
         if(stab != NULL)
-            (void)H5FL_FREE(H5O_stab_t,stab);
+            stab = H5FL_FREE(H5O_stab_t, stab);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -253,7 +253,7 @@ H5O_stab_free(void *mesg)
 
     HDassert(mesg);
 
-    (void)H5FL_FREE(H5O_stab_t, mesg);
+    mesg = H5FL_FREE(H5O_stab_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_stab_free() */
@@ -339,7 +339,7 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
 done:
     if(!ret_value)
         if(stab_dst)
-            (void)H5FL_FREE(H5O_stab_t, stab_dst);
+            stab_dst = H5FL_FREE(H5O_stab_t, stab_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_stab_copy_file() */

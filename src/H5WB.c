@@ -137,7 +137,7 @@ H5WB_wrap(void *buf, size_t buf_size)
 done:
     /* Release resources on error */
     if(!ret_value && wb)
-        (void)H5FL_FREE(H5WB_t, wb);
+        wb = H5FL_FREE(H5WB_t, wb);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5WB_wrap() */

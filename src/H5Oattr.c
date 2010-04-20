@@ -205,7 +205,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
     HDmemcpy(&(attr->shared->ds->extent), extent, sizeof(H5S_extent_t));
 
     /* Release temporary extent information */
-    (void)H5FL_FREE(H5S_extent_t, extent);
+    extent = H5FL_FREE(H5S_extent_t, extent);
 
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->shared->ds, FALSE) < 0)
@@ -810,11 +810,32 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
         case H5T_CSET_ASCII:
             s = "ASCII";
             break;
+
         case H5T_CSET_UTF8:
             s = "UTF-8";
             break;
-        default:
+
+        case H5T_CSET_RESERVED_2:
+        case H5T_CSET_RESERVED_3:
+        case H5T_CSET_RESERVED_4:
+        case H5T_CSET_RESERVED_5:
+        case H5T_CSET_RESERVED_6:
+        case H5T_CSET_RESERVED_7:
+        case H5T_CSET_RESERVED_8:
+        case H5T_CSET_RESERVED_9:
+        case H5T_CSET_RESERVED_10:
+        case H5T_CSET_RESERVED_11:
+        case H5T_CSET_RESERVED_12:
+        case H5T_CSET_RESERVED_13:
+        case H5T_CSET_RESERVED_14:
+        case H5T_CSET_RESERVED_15:
             sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(mesg->shared->encoding));
+            s = buf;
+            break;
+
+        case H5T_CSET_ERROR:
+        default:
+            sprintf(buf, "Unknown character set: %d", (int)(mesg->shared->encoding));
             s = buf;
             break;
     } /* end switch */

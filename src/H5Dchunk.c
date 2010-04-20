@@ -906,7 +906,7 @@ H5D_chunk_xfree(void *chk, const H5O_pline_t *pline)
         if(pline->nused > 0)
             H5MM_xfree(chk);
         else
-            (void)H5FL_BLK_FREE(chunk, chk);
+            chk = H5FL_BLK_FREE(chunk, chk);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(NULL)
@@ -950,7 +950,7 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
         (void)H5S_close(chunk_info->mspace);
 
     /* Free the actual chunk info */
-    (void)H5FL_FREE(H5D_chunk_info_t, chunk_info);
+    chunk_info = H5FL_FREE(H5D_chunk_info_t, chunk_info);
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D_free_chunk_info() */
@@ -1382,14 +1382,14 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
 
             /* Create a dataspace for the chunk */
             if((fspace = H5S_create_simple(fm->f_ndims,fm->chunk_dim,NULL))==NULL) {
-                (void)H5FL_FREE(H5D_chunk_info_t,chunk_info);
+                chunk_info = H5FL_FREE(H5D_chunk_info_t, chunk_info);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace for chunk")
             } /* end if */
 
             /* De-select the chunk space */
             if(H5S_select_none(fspace) < 0) {
                 (void)H5S_close(fspace);
-                (void)H5FL_FREE(H5D_chunk_info_t,chunk_info);
+                chunk_info = H5FL_FREE(H5D_chunk_info_t, chunk_info);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select dataspace")
             } /* end if */
 
@@ -2561,7 +2561,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     --rdcc->nused;
 
     /* Free */
-    (void)H5FL_FREE(H5D_rdcc_ent_t, ent);
+    ent = H5FL_FREE(H5D_rdcc_ent_t, ent);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3979,7 +3979,7 @@ done:
     while(tmp_stack) {
         /* Free the stack node and advance the stack pointer  */
         tmp_stack = tmp_stack->next;
-        (void)H5FL_FREE(H5D_chunk_prune_stack_t, fill_stack);
+        fill_stack = H5FL_FREE(H5D_chunk_prune_stack_t, fill_stack);
         fill_stack = tmp_stack;
     } /* end while */
 
@@ -3988,7 +3988,7 @@ done:
     while(tmp_stack) {
         /* Free the stack node and advance the stack pointer  */
         tmp_stack = tmp_stack->next;
-        (void)H5FL_FREE(H5D_chunk_prune_stack_t, udata.rm_stack);
+        udata.rm_stack = H5FL_FREE(H5D_chunk_prune_stack_t, udata.rm_stack);
         udata.rm_stack = tmp_stack;
     } /* end while */
 

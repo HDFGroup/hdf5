@@ -373,7 +373,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 done:
     if(ret_value == NULL)
         if(mesg)
-            (void)H5FL_FREE(H5O_layout_t, mesg);
+            mesg = H5FL_FREE(H5O_layout_t, mesg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_decode() */
@@ -693,7 +693,7 @@ H5O_layout_free(void *_mesg)
     if(H5O_layout_reset(mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free message resources")
 
-    (void)H5FL_FREE(H5O_layout_t, mesg);
+    mesg = H5FL_FREE(H5O_layout_t, mesg);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

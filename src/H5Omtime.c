@@ -502,7 +502,7 @@ H5O_mtime_free(void *mesg)
 
     HDassert(mesg);
 
-    (void)H5FL_FREE(time_t, mesg);
+    mesg = H5FL_FREE(time_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_mtime_free() */

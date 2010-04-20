@@ -734,7 +734,7 @@ H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
 CATCH
 
     if(elmt)
-	(void)H5FL_BLK_FREE(native_elmt, elmt);
+	elmt = H5FL_BLK_FREE(native_elmt, elmt);
 
 END_FUNC(PRIV)  /* end H5FA_iterate() */
 

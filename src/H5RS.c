@@ -148,7 +148,7 @@ H5RS_wrap(const char *s)
         HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s = (char*)s;      /* (Cast away const OK - QAK) */
+    ret_value->s = (char *)s;      /* (Cast away const OK - QAK) */
     ret_value->wrapped = 1;
     ret_value->n = 1;
 
@@ -230,8 +230,8 @@ H5RS_decr(H5RS_str_t *rs)
     /* Decrement reference count for string */
     if((--rs->n) == 0) {
         if(!rs->wrapped)
-            (void)H5FL_BLK_FREE(str_buf, rs->s);
-        (void)H5FL_FREE(H5RS_str_t, rs);
+            rs->s = (char *)H5FL_BLK_FREE(str_buf, rs->s);
+        rs = H5FL_FREE(H5RS_str_t, rs);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
