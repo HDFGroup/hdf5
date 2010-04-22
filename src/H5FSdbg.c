@@ -292,6 +292,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
 #endif /* NOT_YET */
             break;
 
+        case H5FS_NUM_CLIENT_ID:
         default:
             HDfprintf(stream, "Unknown client!\n");
             break;

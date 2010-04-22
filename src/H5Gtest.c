@@ -538,6 +538,19 @@ H5G_user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigne
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
             break;
 
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object type")
     } /* end switch */

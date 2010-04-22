@@ -201,7 +201,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *ud
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header version")
 
     /* B-tree class */
-    id = *p++;
+    id = (H5B2_subid_t)*p++;
     if(id >= H5B2_NUM_BTREE_ID)
 	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "invalid B-tree type")
 

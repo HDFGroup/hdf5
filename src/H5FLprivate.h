@@ -344,7 +344,7 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_DEFINE_STATIC(t)  static H5FL_SEQ_DEFINE_COMMON(t)
 #define H5FL_SEQ_MALLOC(t,elem) (t *)H5MM_malloc((elem)*sizeof(t))
 #define H5FL_SEQ_CALLOC(t,elem) (t *)H5MM_calloc((elem)*sizeof(t))
-#define H5FL_SEQ_FREE(t,obj) H5MM_xfree(obj)
+#define H5FL_SEQ_FREE(t,obj) (t *)H5MM_xfree(obj)
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_SEQ_FREE_LISTS */
 
@@ -372,18 +372,18 @@ typedef struct H5FL_fac_head_t {
  */
 #ifndef H5_NO_FAC_FREE_LISTS
 /* Allocate a block from a factory */
-#define H5FL_FAC_MALLOC(t) H5FL_fac_malloc(t H5FL_TRACK_INFO)
+#define H5FL_FAC_MALLOC(f) H5FL_fac_malloc(f H5FL_TRACK_INFO)
 
 /* Allocate a block from a factory and clear it to all zeros */
-#define H5FL_FAC_CALLOC(t) H5FL_fac_calloc(t H5FL_TRACK_INFO)
+#define H5FL_FAC_CALLOC(f) H5FL_fac_calloc(f H5FL_TRACK_INFO)
 
 /* Return a block to a factory */
-#define H5FL_FAC_FREE(t,obj) H5FL_fac_free(t,obj)
+#define H5FL_FAC_FREE(f, obj) H5FL_fac_free(f, obj)
 
 #else /* H5_NO_FAC_FREE_LISTS */
-#define H5FL_FAC_MALLOC(t) H5MM_malloc(t->size)
-#define H5FL_FAC_CALLOC(t) H5MM_calloc(t->size)
-#define H5FL_FAC_FREE(t,obj) H5MM_xfree(obj)
+#define H5FL_FAC_MALLOC(f) H5MM_malloc(f->size)
+#define H5FL_FAC_CALLOC(f) H5MM_calloc(f->size)
+#define H5FL_FAC_FREE(f, obj) H5MM_xfree(obj)
 #endif /* H5_NO_FAC_FREE_LISTS */
 
 /*

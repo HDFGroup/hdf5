@@ -138,23 +138,26 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 	    s = fmt + 1;
 
 	    /* Flags */
-	    while (HDstrchr ("-+ #", *s)) {
-		switch (*s) {
-		case '-':
-		    leftjust = 1;
-		    break;
-		case '+':
-		    plussign = 1;
-		    break;
-		case ' ':
-		    ldspace = 1;
-		    break;
-		case '#':
-		    prefix = 1;
-		    break;
-		} /*lint !e744 Switch statement doesn't _need_ default */
+	    while(HDstrchr ("-+ #", *s)) {
+		switch(*s) {
+                    case '-':
+                        leftjust = 1;
+                        break;
+
+                    case '+':
+                        plussign = 1;
+                        break;
+
+                    case ' ':
+                        ldspace = 1;
+                        break;
+
+                    case '#':
+                        prefix = 1;
+                        break;
+		} /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
 		s++;
-	    }
+	    } /* end while */
 
 	    /* Field width */
 	    if (HDisdigit (*s)) {

@@ -177,7 +177,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_fs_prot,
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the size of the free space header on disk */
-    size = H5FS_HEADER_SIZE(f);
+    size = (size_t)H5FS_HEADER_SIZE(f);
 
     /* Get a pointer to a buffer that's large enough for header */
     if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
@@ -355,7 +355,7 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
         /* Compute the size of the free space header on disk */
-        size = H5FS_HEADER_SIZE(f);
+        size = (size_t)H5FS_HEADER_SIZE(f);
 
         /* Get a pointer to a buffer that's large enough for header */
         if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
@@ -549,7 +549,7 @@ H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t UNUSED *fspace, size_t *size_pt
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5FS_HEADER_SIZE(f);
+    *size_ptr = (size_t)H5FS_HEADER_SIZE(f);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_cache_hdr_size() */

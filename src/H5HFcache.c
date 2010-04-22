@@ -712,7 +712,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrows
     haddr_t             heap_addr;      /* Address of heap header in the file */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
-    size_t              u;              /* Local index variable */
+    unsigned            u;              /* Local index variable */
     H5HF_indirect_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_iblock_load)

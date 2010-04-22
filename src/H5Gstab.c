@@ -1089,6 +1089,10 @@ H5G_stab_get_type_by_idx_cb(const H5G_entry_t *ent, void *_udata)
             udata->type = H5G_LINK;
             break;
 
+        case H5G_CACHED_ERROR:
+        case H5G_NOTHING_CACHED:
+        case H5G_CACHED_STAB:
+        case H5G_NCACHED:
         default:
             {
                 H5O_loc_t tmp_oloc;             /* Temporary object location */
