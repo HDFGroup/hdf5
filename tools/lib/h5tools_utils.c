@@ -626,3 +626,135 @@ tmpfile(void)
 }
 
 #endif
+
+/*-------------------------------------------------------------------------
+ * Function: H5tools_get_link_info
+ *
+ * Purpose: Get link (soft, external) info and its target object type 
+            (dataset, group, named datatype) and path, if exist
+ *
+ * Patameters:
+ *  - [IN]  fileid : link file id
+ *  - [IN]  linkpath : link path
+ *  - [OUT] h5li : link's info (H5L_info_t)
+ *  - [OUT] link_info: returning target object info (h5tool_link_info_t)
+ *
+ * Return: 
+ *   2 : given pathname is object 
+ *   1 : Succed to get link info.  
+ *   0 : Detected as a dangling link
+ *  -1 : H5 API failed.
+ *
+ * NOTE:
+ *  link_info->trg_path must be freed out of this function
+ *
+ * Programmer: Jonathan Kim
+ *
+ * Date: Feb 8, 2010
+ *-------------------------------------------------------------------------*/
+int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
+{
+    int Ret = -1; /* init to fail */
+    htri_t l_ret;
+    H5O_info_t trg_oinfo;
+    hid_t fapl;
+    hid_t lapl = H5P_DEFAULT;
+
+    /* init */
+    link_info->trg_type = H5O_TYPE_UNKNOWN;
+
+    /* check if link itself exist */
+    if((H5Lexists(file_id, linkpath, H5P_DEFAULT) <= 0)) 
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: link <%s> doesn't exist \n",linkpath);
+        goto out;
+    }
+
+    /* get info from link */
+    if(H5Lget_info(file_id, linkpath, &(link_info->linfo), H5P_DEFAULT) < 0)
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get link info from <%s>\n",linkpath);
+        goto out;
+    }
+
+    /* given path is hard link (object) */
+    if (link_info->linfo.type == H5L_TYPE_HARD)
+    {
+        Ret = 2;
+        goto out;
+    }
+
+    /* trg_path must be freed out of this function when finished using */
+    link_info->trg_path = (char*)HDcalloc(link_info->linfo.u.val_size, sizeof(char));
+    HDassert(link_info->trg_path);
+
+    /* get link value */
+    if(H5Lget_val(file_id, linkpath, link_info->trg_path, link_info->linfo.u.val_size, H5P_DEFAULT) < 0)
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get link value from <%s>\n",linkpath);
+        goto out;
+    }
+
+    /*-----------------------------------------------------
+     * if link type is external link use different lapl to 
+     * follow object in other file
+     */
+    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
+    {
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_sec2(fapl);
+        lapl = H5Pcreate(H5P_LINK_ACCESS);
+        H5Pset_elink_fapl(lapl, fapl);
+    }
+
+    /*--------------------------------------------------------------
+     * if link's target object exist, get type
+     */
+     /* check if target object exist */
+    l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
+    
+    /* detect dangling link */
+    if(l_ret == FALSE) 
+    {
+            Ret = 0;
+            goto out;
+    }
+    /* function failed */
+    else if (l_ret < 0)
+    {
+        goto out;    
+    }
+
+    /* get target object info */
+    if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) 
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: unable to get object information for <%s>\n", linkpath);
+        goto out;
+    }
+
+    /* check unknown type */
+    if (trg_oinfo.type < H5O_TYPE_GROUP || trg_oinfo.type >=H5O_TYPE_NTYPES)
+    {
+        if(link_info->opt.msg_mode==1)
+            parallel_print("Warning: target object of <%s> is unknown type\n", linkpath);
+        goto out;
+    } 
+
+    /* set target obj type to return */
+    link_info->trg_type = trg_oinfo.type;
+
+    /* succeed */
+    Ret = 1;
+out:
+    if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
+    {
+        H5Pclose(fapl);
+        H5Pclose(lapl);
+    }
+
+    return Ret;
+}

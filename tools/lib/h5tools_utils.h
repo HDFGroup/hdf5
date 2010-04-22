@@ -119,4 +119,35 @@ extern obj_t   *search_obj(table_t *temp, haddr_t objno);
 extern FILE *	tmpfile(void);
 #endif
 
+
+/*************************************************************
+ *
+ * candidate functions to be public
+ *
+ *************************************************************/
+
+/* This code is layout for common code among tools */
+typedef enum toolname_t {
+    TOOL_H5DIFF, TOOL_H5LS, TOOL__H5DUMP /* add as necessary */
+} h5tool_toolname_t;
+
+/* this struct can be used to differntiate among tools */
+typedef struct {
+    h5tool_toolname_t toolname;
+    int msg_mode;
+} h5tool_opt_t;
+
+/* obtain link info from H5tools_get_link_info() */
+typedef struct {
+    H5O_type_t  trg_type;  /* OUT: target type */
+    const char *trg_path;  /* OUT: target obj path. This must be freed 
+                            *      when used with H5tools_get_link_info() */
+    H5L_info_t linfo;      /* OUT: link info */
+    h5tool_opt_t opt;      /* IN: options */
+} h5tool_link_info_t;
+
+
+/* Definitions of routines */
+extern int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info);
+
 #endif	/* H5TOOLS_UTILS_H__ */
