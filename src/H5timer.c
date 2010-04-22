@@ -131,18 +131,18 @@ H5_timer_begin (H5_timer_t *timer)
 #ifdef H5_HAVE_GETRUSAGE
     HDgetrusage (RUSAGE_SELF, &rusage);
     timer->utime = (double)rusage.ru_utime.tv_sec +
-                   ((double)rusage.ru_utime.tv_usec/1e6);
+                   ((double)rusage.ru_utime.tv_usec / (double)1e6);
     timer->stime = (double)rusage.ru_stime.tv_sec +
-                   ((double)rusage.ru_stime.tv_usec/1e6);
+                   ((double)rusage.ru_stime.tv_usec / (double)1e6);
 #else
-    timer->utime = 0.0;
-    timer->stime = 0.0;
+    timer->utime = (double)0.0;
+    timer->stime = (double)0.0;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
     HDgettimeofday (&etime, NULL);
-    timer->etime = (double)etime.tv_sec + ((double)etime.tv_usec/1e6);
+    timer->etime = (double)etime.tv_sec + ((double)etime.tv_usec / (double)1e6);
 #else
-    timer->etime = 0.0;
+    timer->etime = (double)0.0;
 #endif
 } /* end H5_timer_begin() */
 
@@ -172,9 +172,9 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
     assert (timer);
     H5_timer_begin (&now);
 
-    timer->utime = MAX(0.0, now.utime - timer->utime);
-    timer->stime = MAX(0.0, now.stime - timer->stime);
-    timer->etime = MAX(0.0, now.etime - timer->etime);
+    timer->utime = MAX((double)0.0, now.utime - timer->utime);
+    timer->stime = MAX((double)0.0, now.stime - timer->stime);
+    timer->etime = MAX((double)0.0, now.etime - timer->etime);
 
     if (sum) {
 	sum->utime += timer->utime;
@@ -216,37 +216,34 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 {
     double	bw;
 
-    if (nseconds<=0.0) {
+    if(nseconds <= (double)0.0)
 	HDstrcpy(buf, "       NaN");
-    } else {
+    else {
 	bw = nbytes/nseconds;
-        if (fabs(bw) < 0.0000000001) {
+        if(fabs(bw) < (double)0.0000000001)
             /* That is == 0.0, but direct comparison between floats is bad */
 	    HDstrcpy(buf, "0.000  B/s");
-	} else if (bw<1.0) {
+	else if(bw < (double)1.0)
 	    sprintf(buf, "%10.4e", bw);
-	} else if (bw<1024.0) {
+	else if(bw < (double)1024.0) {
 	    sprintf(buf, "%05.4f", bw);
 	    HDstrcpy(buf+5, "  B/s");
-	} else if (bw<1024.0*1024.0) {
-	    sprintf(buf, "%05.4f", bw/1024.0);
+	} else if(bw < (double)(1024.0 * 1024.0)) {
+	    sprintf(buf, "%05.4f", bw / 1024.0);
 	    HDstrcpy(buf+5, " kB/s");
-	} else if (bw<1024.0*1024.0*1024.0) {
-	    sprintf(buf, "%05.4f", bw/(1024.0*1024.0));
+	} else if(bw < (double)(1024.0 * 1024.0 * 1024.0)) {
+	    sprintf(buf, "%05.4f", bw / (1024.0 * 1024.0));
 	    HDstrcpy(buf+5, " MB/s");
-	} else if (bw<1024.0*1024.0*1024.0*1024.0) {
-	    sprintf(buf, "%05.4f",
-		    bw/(1024.0*1024.0*1024.0));
+	} else if(bw < (double)(1024.0 * 1024.0 * 1024.0 * 1024.0)) {
+	    sprintf(buf, "%05.4f", bw / (1024.0 * 1024.0 * 1024.0));
 	    HDstrcpy(buf+5, " GB/s");
-	} else if (bw<1024.0*1024.0*1024.0*1024.0*1024.0) {
-	    sprintf(buf, "%05.4f",
-		    bw/(1024.0*1024.0*1024.0*1024.0));
+	} else if(bw < (double)(1024.0 * 1024.0 * 1024.0 * 1024.0 * 1024.0)) {
+	    sprintf(buf, "%05.4f", bw / (1024.0 * 1024.0 * 1024.0 * 1024.0));
 	    HDstrcpy(buf+5, " TB/s");
 	} else {
 	    sprintf(buf, "%10.4e", bw);
-	    if (HDstrlen(buf)>10) {
+	    if(HDstrlen(buf) > 10)
 		sprintf(buf, "%10.3e", bw);
-	    }
 	}
     }
 } /* end H5_bandwidth() */
