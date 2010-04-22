@@ -920,10 +920,10 @@ H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
 
     /* Increase chunk array size, if necessary */
     if(cont_msg_info->nmsgs >= cont_msg_info->alloc_nmsgs) {
-        unsigned na = MAX(H5O_NCHUNKS, cont_msg_info->alloc_nmsgs * 2);        /* Double # of messages allocated */
-        H5O_cont_t *x = H5FL_SEQ_REALLOC(H5O_cont_t, cont_msg_info->msgs, (size_t)na);
+        size_t na = MAX(H5O_NCHUNKS, cont_msg_info->alloc_nmsgs * 2);        /* Double # of messages allocated */
+        H5O_cont_t *x;
 
-        if(!x)
+        if(NULL == (x = H5FL_SEQ_REALLOC(H5O_cont_t, cont_msg_info->msgs, na)))
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
         cont_msg_info->alloc_nmsgs = na;
         cont_msg_info->msgs = x;
@@ -978,10 +978,10 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 
     /* Increase chunk array size, if necessary */
     if(oh->nchunks >= oh->alloc_nchunks) {
-        unsigned na = MAX(H5O_NCHUNKS, oh->alloc_nchunks * 2);        /* Double # of chunks allocated */
-        H5O_chunk_t *x = H5FL_SEQ_REALLOC(H5O_chunk_t, oh->chunk, (size_t)na);
+        size_t na = MAX(H5O_NCHUNKS, oh->alloc_nchunks * 2);        /* Double # of chunks allocated */
+        H5O_chunk_t *x;
 
-        if(!x)
+        if(NULL == (x = H5FL_SEQ_REALLOC(H5O_chunk_t, oh->chunk, na)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
         oh->alloc_nchunks = na;
         oh->chunk = x;
