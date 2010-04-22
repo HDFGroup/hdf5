@@ -1971,10 +1971,10 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
         /* Check version, to determine how to store time information */
         if(oh->version == H5O_VERSION_1) {
-            unsigned	idx;                    /* Index of modification time message to update */
+            int	idx;                    /* Index of modification time message to update */
 
             /* Look for existing message */
-            for(idx = 0; idx < oh->nmesgs; idx++)
+            for(idx = 0; idx < (int)oh->nmesgs; idx++)
                 if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
                     break;
 
@@ -1987,7 +1987,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
                     HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
                 /* Allocate space for the modification time message */
-                if(UFAIL == (idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)))
+                if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
 
                 /* Set the message's flags if appropriate */
@@ -2094,8 +2094,8 @@ done:
 herr_t
 H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
 {
-    unsigned	idx;                    /* Local index variable */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    int	idx;                        /* Local index variable */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_bogus_oh, FAIL)
 
@@ -2103,7 +2103,7 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
     HDassert(oh);
 
     /* Look for existing message */
-    for(idx = 0; idx < oh->nmesgs; idx++)
+    for(idx = 0; idx < (int)oh->nmesgs; idx++)
 	if(H5O_MSG_BOGUS == oh->mesg[idx].type)
             break;
 
