@@ -135,43 +135,43 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
     va_list		ap;
     char		buf[64], *rest;
     const char		*argname;
-    int		argno=0, ptr, asize_idx;
+    int			argno = 0, ptr, asize_idx;
     hssize_t		asize[16];
     hssize_t		i;
     void		*vp = NULL;
     FILE		*out = H5_debug_g.trace;
     H5_timer_t          event_time;
-    static H5_timer_t   first_time = {0.0, 0.0, 0.0};
-    static int          current_depth=0;
-    static int          last_call_depth=0;
+    static H5_timer_t   first_time = {(double)0.0, (double)0.0, (double)0.0};
+    static int          current_depth = 0;
+    static int          last_call_depth = 0;
 
     /* FUNC_ENTER() should not be called */
 
-    if (!out) return 0.0;	/*tracing is off*/
-    va_start (ap, type);
+    if(!out) return (double)0.0;	/*tracing is off*/
+    va_start(ap, type);
 
-    if (H5_debug_g.ttop) {
-        if (returning) {
-            if (current_depth>1) {
+    if(H5_debug_g.ttop) {
+        if(returning) {
+            if(current_depth > 1) {
                 --current_depth;
-                return 0.0;
+                return (double)0.0;
             }
         } else {
-            if (current_depth>0) {
+            if(current_depth > 0) {
                 /*do not update last_call_depth*/
                 current_depth++;
-                return 0.0;
+                return (double)0.0;
             }
         }
     }
 
     /* Get tim for event */
-    if (fabs(first_time.etime) < 0.0000000001)
+    if(fabs(first_time.etime) < (double)0.0000000001)
         /* That is == 0.0, but direct comparison between floats is bad */
         H5_timer_begin(&first_time);
-    if (H5_debug_g.ttimes) {
+    if(H5_debug_g.ttimes)
         H5_timer_begin(&event_time);
-    } else {
+    else {
         HDmemset(&event_time, 0, sizeof event_time);
     }
 
@@ -464,26 +464,26 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             fprintf(out, "NULL");
                         }
                     } else {
-                        H5D_layout_t layout = va_arg (ap, H5D_layout_t); /*lint !e64 Type mismatch not really occuring */
+                        H5D_layout_t layout = va_arg(ap, H5D_layout_t); /*lint !e64 Type mismatch not really occuring */
                         switch (layout) {
-                        case H5D_LAYOUT_ERROR:
-                            fprintf (out, "H5D_LAYOUT_ERROR");
-                            break;
-                        case H5D_COMPACT:
-                            fprintf (out, "H5D_COMPACT");
-                            break;
-                        case H5D_CONTIGUOUS:
-                            fprintf (out, "H5D_CONTIGUOUS");
-                            break;
-                        case H5D_CHUNKED:
-                            fprintf (out, "H5D_CHUNKED");
-                            break;
-                        case H5D_NLAYOUTS:
-                            fprintf (out, "H5D_NLAYOUTS");
-                            break;
-                        default:
-                            fprintf (out, "%ld", (long)layout);
-                            break;
+                            case H5D_LAYOUT_ERROR:
+                                fprintf (out, "H5D_LAYOUT_ERROR");
+                                break;
+                            case H5D_COMPACT:
+                                fprintf (out, "H5D_COMPACT");
+                                break;
+                            case H5D_CONTIGUOUS:
+                                fprintf (out, "H5D_CONTIGUOUS");
+                                break;
+                            case H5D_CHUNKED:
+                                fprintf (out, "H5D_CHUNKED");
+                                break;
+                            case H5D_NLAYOUTS:
+                                fprintf (out, "H5D_NLAYOUTS");
+                                break;
+                            default:
+                                fprintf (out, "%ld", (long)layout);
+                                break;
                         }
                     }
                     break;
@@ -497,22 +497,22 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         }
                     } else {
                         H5D_space_status_t space_status = va_arg(ap, H5D_space_status_t); /*lint !e64 Type mismatch not really occuring */
-                        switch (space_status) {
-                        case H5D_SPACE_STATUS_NOT_ALLOCATED:
-                            fprintf (out, "H5D_SPACE_STATUS_NOT_ALLOCATED");
-                            break;
-                        case H5D_SPACE_STATUS_PART_ALLOCATED:
-                            fprintf (out, "H5D_SPACE_STATUS_PART_ALLOCATED");
-                            break;
-                        case H5D_SPACE_STATUS_ALLOCATED:
-                            fprintf (out, "H5D_SPACE_STATUS_ALLOCATED");
-                            break;
-                        case H5D_SPACE_STATUS_ERROR:
-                            fprintf (out, "H5D_SPACE_STATUS_ERROR");
-                            break;
-                        default:
-                            fprintf (out, "%ld", (long)space_status);
-                            break;
+                        switch(space_status) {
+                            case H5D_SPACE_STATUS_NOT_ALLOCATED:
+                                fprintf (out, "H5D_SPACE_STATUS_NOT_ALLOCATED");
+                                break;
+                            case H5D_SPACE_STATUS_PART_ALLOCATED:
+                                fprintf (out, "H5D_SPACE_STATUS_PART_ALLOCATED");
+                                break;
+                            case H5D_SPACE_STATUS_ALLOCATED:
+                                fprintf (out, "H5D_SPACE_STATUS_ALLOCATED");
+                                break;
+                            case H5D_SPACE_STATUS_ERROR:
+                                fprintf (out, "H5D_SPACE_STATUS_ERROR");
+                                break;
+                            default:
+                                fprintf (out, "%ld", (long)space_status);
+                                break;
                         }
                     }
                     break;
@@ -527,15 +527,15 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     } else {
                         H5FD_mpio_xfer_t transfer = va_arg(ap, H5FD_mpio_xfer_t); /*lint !e64 Type mismatch not really occuring */
                         switch (transfer) {
-                        case H5FD_MPIO_INDEPENDENT:
-                            fprintf (out, "H5FD_MPIO_INDEPENDENT");
-                            break;
-                        case H5FD_MPIO_COLLECTIVE:
-                            fprintf (out, "H5FD_MPIO_COLLECTIVE");
-                            break;
-                        default:
-                            fprintf (out, "%ld", (long)transfer);
-                            break;
+                            case H5FD_MPIO_INDEPENDENT:
+                                fprintf (out, "H5FD_MPIO_INDEPENDENT");
+                                break;
+                            case H5FD_MPIO_COLLECTIVE:
+                                fprintf (out, "H5FD_MPIO_COLLECTIVE");
+                                break;
+                            default:
+                                fprintf (out, "%ld", (long)transfer);
+                                break;
                         }
                     }
                     break;
@@ -571,16 +571,16 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		} else {
 		    H5E_direction_t direction = va_arg (ap, H5E_direction_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (direction) {
-		    case H5E_WALK_UPWARD:
-			fprintf (out, "H5E_WALK_UPWARD");
-			break;
-		    case H5E_WALK_DOWNWARD:
-			fprintf (out, "H5E_WALK_DOWNWARD");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)direction);
-			break;
+		    switch(direction) {
+                        case H5E_WALK_UPWARD:
+                            fprintf (out, "H5E_WALK_UPWARD");
+                            break;
+                        case H5E_WALK_DOWNWARD:
+                            fprintf (out, "H5E_WALK_DOWNWARD");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)direction);
+                            break;
 		    }
 		}
 		break;
@@ -607,16 +607,16 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    }
 		} else {
 		    H5E_type_t etype = va_arg (ap, H5E_type_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (etype) {
-		    case H5E_MAJOR:
-			fprintf (out, "H5E_MAJOR");
-			break;
-		    case H5E_MINOR:
-			fprintf (out, "H5E_MINOR");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)etype);
-			break;
+		    switch(etype) {
+                        case H5E_MAJOR:
+                            fprintf (out, "H5E_MAJOR");
+                            break;
+                        case H5E_MINOR:
+                            fprintf (out, "H5E_MINOR");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)etype);
+                            break;
 		    }
 		}
 		break;
@@ -1788,34 +1788,39 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		break;
 
 	    case 'p':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
+		if(ptr) {
+		    if(vp)
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    else
 			fprintf(out, "NULL");
-		    }
 		} else {
-		    H5T_pad_t pad = va_arg (ap, H5T_pad_t); /*lint !e64 Type mismatch not really occuring */
-		    switch (pad) {
+		    H5T_pad_t pad = (H5T_pad_t)va_arg(ap, H5T_pad_t); /*lint !e64 Type mismatch not really occuring */
+
+		    switch(pad) {
                         case H5T_PAD_ERROR:
-                            fprintf (out, "H5T_PAD_ERROR");
+                            fprintf(out, "H5T_PAD_ERROR");
                             break;
+
                         case H5T_PAD_ZERO:
-                            fprintf (out, "H5T_PAD_ZERO");
+                            fprintf(out, "H5T_PAD_ZERO");
                             break;
+
                         case H5T_PAD_ONE:
-                            fprintf (out, "H5T_PAD_ONE");
+                            fprintf(out, "H5T_PAD_ONE");
                             break;
+
                         case H5T_PAD_BACKGROUND:
-                            fprintf (out, "H5T_PAD_BACKGROUND");
+                            fprintf(out, "H5T_PAD_BACKGROUND");
                             break;
+
                         case H5T_NPAD:
-                            fprintf (out, "H5T_NPAD");
+                            fprintf(out, "H5T_NPAD");
                             break;
+
                         default:
-                            fprintf (out, "%ld", (long)pad);
+                            fprintf(out, "%ld", (long)pad);
                             break;
-		    }
+		    } /* end switch */
 		}
 		break;
 
