@@ -144,7 +144,7 @@ HDfprintf(stderr, "%s: fspace->addr = %a\n", FUNC, fspace->addr);
 
     /* Set non-zero values */
     sinfo->nbins = H5V_log2_gen(fspace->max_sect_size);
-    sinfo->sect_prefix_size = H5FS_SINFO_PREFIX_SIZE(f);
+    sinfo->sect_prefix_size = (size_t)H5FS_SINFO_PREFIX_SIZE(f);
     sinfo->sect_off_size = (fspace->max_sect_addr + 7) / 8;
     sinfo->sect_len_size = H5V_limit_enc_size((uint64_t)fspace->max_sect_size);
 #ifdef H5FS_SINFO_DEBUG

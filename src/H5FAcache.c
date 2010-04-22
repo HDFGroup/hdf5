@@ -211,7 +211,7 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *u
 	H5E_THROW(H5E_VERSION, "wrong fixed array header version")
 
     /* Fixed array class */
-    id = *p++;
+    id = (H5FA_cls_id_t)*p++;
     if(id >= H5FA_NUM_CLS_ID)
 	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
     hdr->cparam.cls = H5FA_client_class_g[id];

@@ -299,6 +299,9 @@ H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *info)
                 info->u.val_size = HDstrlen(lnk->u.soft.name) + 1; /*count the null terminator*/
                 break;
 
+            case H5L_TYPE_ERROR:
+            case H5L_TYPE_EXTERNAL:
+            case H5L_TYPE_MAX:
             default:
             {
                 const H5L_class_t *link_class;      /* User-defined link class */

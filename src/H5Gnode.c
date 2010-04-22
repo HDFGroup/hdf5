@@ -91,9 +91,9 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_cmp3,		/*cmp3			*/
     H5G_node_found,		/*found			*/
     H5G_node_insert,		/*insert		*/
-    H5B_RIGHT,                  /*critical key          */
     TRUE,			/*follow min branch?	*/
     TRUE,			/*follow max branch?	*/
+    H5B_RIGHT,                  /*critical key          */
     H5G_node_remove,		/*remove		*/
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/
@@ -1404,7 +1404,7 @@ H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_
     /* Iterate over the symbol table node entries, adding to link table */
     for(u = 0; u < sn->nsyms; u++) {
         const char	*name;          /* Pointer to link name in heap */
-        unsigned        linkno;         /* Link allocated */
+        size_t          linkno;         /* Link allocated */
 
         /* Get pointer to link's name in the heap */
         name = (const char *)H5HL_offset_into(udata->heap, sn->entry[u].name_off);
