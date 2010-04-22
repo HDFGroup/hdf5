@@ -2446,14 +2446,8 @@ static void test_sohm_size2(int close_reopen)
      if((mult_index_med.dsets2 - mult_index_med.dsets1) >
             (list_index_med.dsets2 - list_index_med.dsets1) * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
-     if((mult_index_med.dsets2 - mult_index_med.dsets1)  <
-            (list_index_med.dsets2 - list_index_med.dsets1))
-        VERIFY(0, 1, "h5_get_file_size");
      if((mult_index_btree.dsets2 - mult_index_btree.dsets1) >
             (btree_index.dsets2 - btree_index.dsets1) * OVERHEAD_ALLOWED)
-        VERIFY(0, 1, "h5_get_file_size");
-     if((mult_index_btree.dsets2 - mult_index_btree.dsets1)  <
-            (btree_index.dsets2 - btree_index.dsets1))
         VERIFY(0, 1, "h5_get_file_size");
 
      if((mult_index_med.interleaved - mult_index_med.dsets2) >
