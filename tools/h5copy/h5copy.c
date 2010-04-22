@@ -213,6 +213,8 @@ main (int argc, const char *argv[])
  hid_t        lcpl_id = (-1);          /* Link creation property list */
  char         str_flag[20];
  int          opt;
+ int          li_ret;
+ h5tool_link_info_t linkinfo;
 
  /* initialize h5tools lib */
  h5tools_init();
@@ -406,7 +408,22 @@ main (int argc, const char *argv[])
 /*-------------------------------------------------------------------------
  * do the copy
  *-------------------------------------------------------------------------*/
-
+ /* init linkinfo struct */
+ memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+ 
+ if(verbose)
+    linkinfo.opt.msg_mode = 1;
+ 
+ li_ret = H5tools_get_link_info(fid_src, oname_src, &linkinfo);
+ if (li_ret == 0) /* dangling link */
+ {
+    if(H5Lcopy(fid_src, oname_src, 
+               fid_dst, oname_dst,
+               H5P_DEFAULT, H5P_DEFAULT) < 0)
+               goto error;
+ }
+ else /* valid link */
+ {
   if (H5Ocopy(fid_src,          /* Source file or group identifier */
               oname_src,        /* Name of the source object to be copied */
               fid_dst,          /* Destination file or group identifier  */
@@ -414,6 +431,11 @@ main (int argc, const char *argv[])
               ocpl_id,          /* Object copy property list */
               lcpl_id)<0)       /* Link creation property list */
               goto error;
+ }
+
+ /* free link info path */
+ if (linkinfo.trg_path)
+    free(linkinfo.trg_path);
 
  /* close propertis */
  if(H5Pclose(ocpl_id)<0)
@@ -442,6 +464,11 @@ main (int argc, const char *argv[])
 
 error:
  printf("Error in copy...Exiting\n");
+
+ /* free link info path */
+ if (linkinfo.trg_path)
+    free(linkinfo.trg_path);
+
  H5E_BEGIN_TRY {
   H5Pclose(ocpl_id);
   H5Pclose(lcpl_id);
