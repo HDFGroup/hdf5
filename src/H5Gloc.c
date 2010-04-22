@@ -61,7 +61,7 @@ typedef struct {
 /* User data for checking if an object exists */
 typedef struct {
     /* upward */
-    hbool_t exists;             /* Whether the object exists */
+    htri_t exists;              /* Whether the object exists */
 } H5G_loc_exists_t;
 
 /* User data for looking up an object in a group by index */
@@ -69,7 +69,7 @@ typedef struct {
     /* downward */
     hid_t lapl_id;              /* LAPL to use for operation */
     hid_t dxpl_id;              /* DXPL to use for operation */
-    H5_index_t idx_type;       /* Index to use */
+    H5_index_t idx_type;        /* Index to use */
     H5_iter_order_t order;      /* Iteration order within index */
     hsize_t n;                  /* Offset within index */
 
@@ -245,6 +245,10 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_REFERENCE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
 
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_VFL:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")
     } /* end switch */
@@ -710,7 +714,7 @@ H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists")
 
     /* Set return value */
-    ret_value = (htri_t)udata.exists;
+    ret_value = udata.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

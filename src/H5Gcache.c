@@ -223,7 +223,6 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
 {
     H5WB_t     *wb = NULL;     /* Wrapped buffer for node data */
     uint8_t     node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    unsigned	u;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush)

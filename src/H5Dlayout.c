@@ -119,6 +119,8 @@ H5D_layout_set_io_ops(const H5D_t *dataset)
             dataset->shared->layout.ops = H5D_LOPS_COMPACT;
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown storage method")
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -227,6 +229,8 @@ H5D_layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include
             } /* end else */
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class")
     } /* end switch */
@@ -605,6 +609,8 @@ H5D_layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t 
         case H5D_COMPACT:
             break;
 
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown storage method")
     } /* end switch */ /*lint !e788 All appropriate cases are covered */

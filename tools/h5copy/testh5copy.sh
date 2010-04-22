@@ -354,20 +354,16 @@ COPY_EXT_LINKS()
     TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo "Test copying dangling external link (no obj) directly without -f ext"
-    #TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
-    SKIP -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo "Test copying dangling external link (no obj) directly with -f ext"
-    #TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
-    SKIP -f ext -s /copy2_group/extlink_notyet1 -d /copy2_dangle1
+    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo "Test copying dangling external link (no file) directly without -f ext"
-    #TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
-    SKIP -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo "Test copying dangling external link (no file) directly with -f ext"
-    #TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
-    SKIP -f ext -s /copy2_group/extlink_notyet2 -d /copy2_dangle2
+    TOOLTEST -f ext -i $TESTFILE -o $FILEOUT -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
 
     echo "Test copying a group contains external links without -f ext"
     TOOLTEST -v -i $TESTFILE -o $FILEOUT -s /group_ext -d /copy1_group

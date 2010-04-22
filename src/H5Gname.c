@@ -687,6 +687,19 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
             break;
 
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown data object")
     } /* end switch */
@@ -962,6 +975,9 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                                 search_datatype = TRUE;
                                 break;
 
+                            case H5O_TYPE_UNKNOWN:
+                            case H5O_TYPE_NTYPES:
+                                /* Search and replace names through datatype IDs */
                             default:
                                 HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type")
                         } /* end switch */
@@ -973,6 +989,9 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
                     search_group = search_dataset = search_datatype = TRUE;
                     break;
 
+                case H5L_TYPE_ERROR:
+                case H5L_TYPE_EXTERNAL:
+                case H5L_TYPE_MAX:
                 default:  /* User-defined link */
                     /* Check for unknown library-defined link type */
                     if(lnk->type < H5L_TYPE_UD_MIN)

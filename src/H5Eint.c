@@ -227,7 +227,7 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     unsigned            have_desc = 1;  /* Flag to indicate whether the error has a "real" description */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_walk1_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk1_cb)
 
     /* Check arguments */
     HDassert(err_desc);
@@ -274,7 +274,7 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 	    MPI_Initialized(&mpi_initialized);
 	    if(mpi_initialized) {
 	        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	        fprintf (stream, "MPI-process %d", mpi_rank);
+	        fprintf(stream, "MPI-process %d", mpi_rank);
 	    } /* end if */
             else
 	        fprintf(stream, "thread 0");
@@ -349,7 +349,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     unsigned            have_desc = 1;  /* Flag to indicate whether the error has a "real" description */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_walk2_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk2_cb)
 
     /* Check arguments */
     HDassert(err_desc);

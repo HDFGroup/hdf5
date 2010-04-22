@@ -192,9 +192,9 @@ H5B_class_t H5B_BTREE[1] = {{
     H5D_btree_cmp3,		/*cmp3			*/
     H5D_btree_found,		/*found			*/
     H5D_btree_insert,		/*insert		*/
-    H5B_LEFT,                   /*critical key          */
     FALSE,			/*follow min branch?	*/
     FALSE,			/*follow max branch?	*/
+    H5B_LEFT,                   /*critical key          */
     H5D_btree_remove,           /*remove		*/
     H5D_btree_decode_key,	/*decode		*/
     H5D_btree_encode_key,	/*encode		*/

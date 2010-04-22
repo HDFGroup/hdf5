@@ -113,16 +113,20 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     chk_proxy->oh = oh;
     chk_proxy->chunkno = idx;
 
+    /* Increment reference count on object header */
+    if(H5O_inc_rc(oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "can't increment reference count on object header")
+
     /* Insert the chunk proxy into the cache */
     if(H5AC_set(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header chunk")
     chk_proxy = NULL;
 
-    /* Increment reference count on object header */
-    if(H5O_inc_rc(oh) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "can't increment reference count on object header")
-
 done:
+    if(ret_value < 0)
+        if(chk_proxy)
+            chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_chunk_add() */
 

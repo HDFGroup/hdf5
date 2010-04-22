@@ -178,7 +178,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, const void UNUSED 
     HDassert(((size_t)(p - sbuf)) == fixed_size);
 
     /* Determine the size of the variable-length part of the superblock */
-    variable_size = H5F_SUPERBLOCK_VARLEN_SIZE(super_vers, f);
+    variable_size = (size_t)H5F_SUPERBLOCK_VARLEN_SIZE(super_vers, f);
     HDassert(variable_size > 0);
     HDassert(fixed_size + variable_size <= sizeof(sbuf));
 
@@ -667,9 +667,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             *p++ = 0;   /* reserved*/
 
             *p++ = (uint8_t)HDF5_SHAREDHEADER_VERSION;  /* (hard-wired) */
-            HDassert(H5F_SIZEOF_ADDR(f) <= 255);
             *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
-            HDassert(H5F_SIZEOF_SIZE(f) <= 255);
             *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
             *p++ = 0;   /* reserved */
 
@@ -737,9 +735,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             H5O_loc_t       *root_oloc;             /* Pointer to root group's object location */
 
             /* Size of file addresses & offsets, and status flags */
-            HDassert(H5F_SIZEOF_ADDR(f) <= 255);
             *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
-            HDassert(H5F_SIZEOF_SIZE(f) <= 255);
             *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
             *p++ = sblock->status_flags;
 
@@ -757,13 +753,13 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             H5F_addr_encode(f, &p, root_oloc->addr);
 
             /* Compute superblock checksum */
-            chksum = H5_checksum_metadata(buf, (size_t)(H5F_SUPERBLOCK_SIZE(sblock->super_vers, f) - H5F_SIZEOF_CHKSUM), 0);
+            chksum = H5_checksum_metadata(buf, ((size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f) - H5F_SIZEOF_CHKSUM), 0);
 
             /* Superblock checksum */
             UINT32ENCODE(p, chksum);
 
             /* Sanity check */
-            HDassert((size_t)(p - buf) == H5F_SUPERBLOCK_SIZE(sblock->super_vers, f));
+            HDassert((size_t)(p - buf) == (size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f));
         } /* end else */
 
         /* Retrieve the total size of the superblock info */
@@ -915,7 +911,7 @@ H5F_sblock_size(const H5F_t *f, const H5F_super_t *sblock, size_t *size_ptr)
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5F_SUPERBLOCK_SIZE(sblock->super_vers, f);
+    *size_ptr = (size_t)H5F_SUPERBLOCK_SIZE(sblock->super_vers, f);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F_sblock_size() */
