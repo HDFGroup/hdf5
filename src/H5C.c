@@ -157,7 +157,7 @@ static herr_t H5C__flash_increase_cache_size(H5C_t * cache_ptr,
                                              size_t old_entry_size,
                                              size_t new_entry_size);
 
-static herr_t H5C_flush_single_entry(const H5F_t *       f,
+static herr_t H5C_flush_single_entry(H5F_t *       	 f,
                                      hid_t               primary_dxpl_id,
                                      hid_t               secondary_dxpl_id,
                                      const H5C_class_t * type_ptr,
@@ -166,7 +166,7 @@ static herr_t H5C_flush_single_entry(const H5F_t *       f,
                                      hbool_t *           first_flush_ptr,
                                      hbool_t    del_entry_from_slist_on_destroy);
 
-static herr_t H5C_flush_invalidate_cache(const H5F_t *  f,
+static herr_t H5C_flush_invalidate_cache(H5F_t *  f,
 	                                 hid_t    primary_dxpl_id,
 				         hid_t    secondary_dxpl_id,
 					 unsigned flags);
@@ -741,6 +741,12 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 
             switch ( (cache_ptr->resize_ctl).decr_mode )
             {
+                case H5C_decr__off:
+                    HDfprintf(stdout,
+                              "%sAuto cache resize -- decrease off.  HR = %lf\n",
+                              cache_ptr->prefix, hit_rate);
+                    break;
+
                 case H5C_decr__threshold:
                     HDassert( hit_rate >
                               (cache_ptr->resize_ctl).upper_hr_threshold );
@@ -7109,7 +7115,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_cache(const H5F_t * f,
+H5C_flush_invalidate_cache(H5F_t * f,
                            hid_t    primary_dxpl_id,
                            hid_t    secondary_dxpl_id,
 			   unsigned flags)
@@ -7693,7 +7699,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_single_entry(const H5F_t *	   f,
+H5C_flush_single_entry(H5F_t *	   	   f,
                        hid_t 		   primary_dxpl_id,
                        hid_t 		   secondary_dxpl_id,
                        const H5C_class_t * type_ptr,

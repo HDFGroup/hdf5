@@ -1718,7 +1718,7 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     shared->sizeof_rkey = sizeof_rkey;
     HDassert(shared->sizeof_rkey);
     shared->sizeof_keys = (shared->two_k + 1) * type->sizeof_nkey;
-    shared->sizeof_rnode = (H5B_SIZEOF_HDR(f) + 	/*node header	*/
+    shared->sizeof_rnode = ((size_t)H5B_SIZEOF_HDR(f) + /*node header	*/
 	    shared->two_k * H5F_SIZEOF_ADDR(f) +	/*child pointers */
 	    (shared->two_k + 1) * shared->sizeof_rkey);	/*keys		*/
     HDassert(shared->sizeof_rnode);

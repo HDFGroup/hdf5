@@ -33,6 +33,7 @@
 unsigned, UNSIGNED;
 int, SIGNED;
 uint8_t, UNSIGNED;
+uint16_t, UNSIGNED;
 uint32_t, UNSIGNED;
 uint64_t, UNSIGNED;
 size_t, UNSIGNED;

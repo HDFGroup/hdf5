@@ -405,7 +405,7 @@ H5D_chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "external storage not supported with chunked layout")
 
     /* Set the last dimension of the chunk size to the size of the datatype */
-    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = H5T_GET_SIZE(type);
+    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(type);
 
     /* Get local copy of dataset dimensions (for sanity checking) */
     if(H5S_get_simple_extent_dims(dset->shared->space, NULL, max_dim) < 0)
