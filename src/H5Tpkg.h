@@ -1363,7 +1363,7 @@ H5_DLL herr_t H5T_conv_ldouble_ullong(hid_t src_id, hid_t dst_id,
 /* Bit twiddling functions */
 H5_DLL void H5T_bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 			  size_t src_offset, size_t size);
-H5_DLL void H5T_bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size);
+H5_DLL herr_t H5T_bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size);
 H5_DLL void H5T_bit_set(uint8_t *buf, size_t offset, size_t size,
 			 hbool_t value);
 H5_DLL uint64_t H5T_bit_get_d(uint8_t *buf, size_t offset, size_t size);
