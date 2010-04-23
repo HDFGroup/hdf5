@@ -53,7 +53,7 @@
 
 /* Size of a internal node pointer (on disk) */
 #define H5B2_INT_POINTER_SIZE(h, d) (                                         \
-    (h)->sizeof_addr            /* Address of child node */                   \
+    (unsigned)(h)->sizeof_addr  /* Address of child node */                   \
     + (h)->max_nrec_size        /* # of records in child node */              \
     + (h)->node_info[(d) - 1].cum_max_nrec_size /* Total # of records in child & below */ \
     )
