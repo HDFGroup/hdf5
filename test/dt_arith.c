@@ -2821,6 +2821,10 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 	    return 0; /*child exit after catching SIGFPE*/
 	} else if (WIFEXITED(status)) {
 	    return WEXITSTATUS(status);
+	} else if (WIFSIGNALED(status)) {
+	    sprintf(str, "   Child caught signal %d.", WTERMSIG(status));
+	    HDputs(str);
+	    return 1; /*child exit after catching non-SIGFPE signal */
 	} else {
 	    HDputs("   Child didn't exit normally.");
 	    return 1;
@@ -3367,10 +3371,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     if(!fails_all_tests)
         PASSED();
 
- done:
-#ifdef AKCDEBUG
-     printf("uflow=%d, fails_all_tests=%d\n", uflow, fails_all_tests);
-#endif
+done:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
@@ -3391,7 +3392,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         return 0;
 #endif
 
- error:
+error:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
