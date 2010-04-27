@@ -68,15 +68,16 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     #esac
 
     # General
-    H5_CFLAGS="$H5_CFLAGS $arch -Xa -c99 -Minform=inform"
+    H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=inform"
 
     # Production
     case "$cc_vendor-$cc_version" in
-      pgcc-10.*)
-        PROD_CFLAGS="-fast -s"
+      # Tweak down compiler optimizations for v9.x
+      pgcc-9.*)
+        PROD_CFLAGS="-O1 -s"
         ;;
       *)
-        PROD_CFLAGS="-O1 -s"
+        PROD_CFLAGS="-fast -s"
         ;;
     esac
     PROD_CPPFLAGS=
