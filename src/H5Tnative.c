@@ -148,6 +148,11 @@ done:
  *              Oct 3, 2002
  *
  * Modifications:
+ *              Raymond Lu
+ *              27 April 2010
+ *              I changed the way that the offset, alignment, and size of
+ *              nested compound type are calculated by using H5T_cmp_offset.  
+ *              The old way had a bug in it (see bug #1850).
  *
  *-------------------------------------------------------------------------
  */
@@ -312,12 +317,11 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member to compound datatype")
                 }
 
-                /* Update size, offset and compound alignment for parent. */
-                if(offset)
-                    *offset = *comp_size;
-                if(struct_align && *struct_align < children_st_align)
-                    *struct_align = children_st_align;
-                *comp_size += children_size;
+                /* Update size, offset and compound alignment for parent in the case of 
+                 * nested compound type. */
+                if(H5T_cmp_offset(comp_size, offset, children_size, (size_t)1, children_st_align,
+                                  struct_align) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
 
                 /* Close member data type */
                 for(i=0; i<nmemb; i++) {
