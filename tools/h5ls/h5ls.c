@@ -2180,6 +2180,7 @@ main(int argc, const char *argv[])
     static char root_name[] = "/";
     char        drivername[50];
     const char *preferred_driver = NULL;
+    int err_openfile = 0;
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -2405,6 +2406,7 @@ main(int argc, const char *argv[])
         if(file < 0) {
             fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);
+            err_openfile = 1;
             continue;
         } /* end if */
         if(oname) {
@@ -2478,6 +2480,9 @@ main(int argc, const char *argv[])
         HDfree(elink_list.objs);
     } /* end while */
 
-    leave(EXIT_SUCCESS);
+    if (err_openfile)
+        leave(EXIT_FAILURE);
+    else
+        leave(EXIT_SUCCESS);
 } /* end main() */
 
