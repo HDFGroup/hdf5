@@ -1844,7 +1844,7 @@ test_misc11(void)
     ret=H5Pset_shared_mesg_nindexes(fcpl,MISC11_NINDEXES);
     CHECK(ret, FAIL, "H5Pset_shared_mesg");
 
-    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_VFD, 0);
+    ret = H5Pset_file_space(fcpl, H5F_FILE_SPACE_VFD, (hsize_t)0);
     CHECK(ret, FAIL, "H5Pset_file_space");
 
     /* Creating a file with the non-default file creation property list should

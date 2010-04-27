@@ -50,6 +50,7 @@
 /* Sanity checking value for callback contexts */
 #define H5EA__TEST_BOGUS_VAL    42
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -59,6 +60,7 @@ typedef struct H5EA__test_ctx_t {
     uint32_t    bogus;          /* Placeholder field to verify that context is working */
     H5EA__ctx_cb_t *cb;         /* Pointer to context's callback action */
 } H5EA__test_ctx_t;
+
 
 /********************/
 /* Package Typedefs */

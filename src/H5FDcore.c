@@ -900,7 +900,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
     if (REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
-    if (addr + size > file->eoa)
+    if((addr + size) > file->eoa)
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /* Read the part which is before the EOF marker */

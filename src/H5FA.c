@@ -78,7 +78,7 @@
 extern const H5FA_class_t H5FA_CLS_TEST[1];
 
 const H5FA_class_t *const H5FA_client_class_g[] = {
-    H5FA_CLS_TEST,		/* 0 - H5FA_TEST_ID 			*/
+    H5FA_CLS_TEST,		/* ? - H5FA_CLS_TEST_ID 		*/
 };
 
 

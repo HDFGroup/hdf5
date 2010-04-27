@@ -5957,8 +5957,8 @@ H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
  * Function:    H5C_create_flush_dependency()
  *
  * Purpose:	Initiates a parent<->child entry flush dependency.  The parent
- *              entry must be protected at the time of call, and must have all
- *              dependencies removed before the cache can shut down.
+ *              entry must be pinned or protected at the time of call, and must
+ *              have all dependencies removed before the cache can shut down.
  *
  * Note:	Flush dependencies in the cache indicate that a child entry
  *              must be flushed to the file before its parent.  (This is
@@ -5971,8 +5971,7 @@ H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
  *              dependency height of its children.
  *
  *              Creating a flush dependency between two entries will also pin
- *              the parent entry.  (The parent entry must _not_ be pinned
- *              through some other mechanism)
+ *              the parent entry.
  *
  * Return:      Non-negative on success/Negative on failure
  *

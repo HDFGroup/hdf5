@@ -528,7 +528,6 @@ static herr_t gen_region_ref(hid_t loc_id)
     char  data[3][16] = {"The quick brown", "fox jumps over ", "the 5 lazy dogs"};
     hsize_t dims2[2] = {3,16};
     hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
-
     hdset_reg_ref_t  rr_data[2];
     hsize_t start[2] = {0,0};
     hsize_t stride[2] = {2,11};

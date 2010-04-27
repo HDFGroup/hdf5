@@ -96,7 +96,7 @@ h5repack_init(pack_opt_t *options, int verbose, H5F_file_space_type_t strategy, 
     int k, n;
     memset(options,0,sizeof(pack_opt_t));
     options->min_comp = 1024;
-    options->verbose   = verbose;
+    options->verbose  = verbose;
 
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
     {

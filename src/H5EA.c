@@ -87,7 +87,7 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 extern const H5EA_class_t H5EA_CLS_TEST[1];
 
 const H5EA_class_t *const H5EA_client_class_g[] = {
-    H5EA_CLS_TEST,		/* 0 - H5EA_TEST_ID 			*/
+    H5EA_CLS_TEST,		/* ? - H5EA_CLS_TEST_ID			*/
 };
 
 
@@ -820,7 +820,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Set the shared array header's file context for this operation */
     hdr->f = ea->f;
 
-    /* Set up flush dependency between child_entry and metadata array 'thing' */
+    /* Set up flush dependency between parent entry and extensible array header */
     if(H5EA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
         H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
 
@@ -863,7 +863,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Set the shared array header's file context for this operation */
     hdr->f = ea->f;
 
-    /* Remove flush dependency between child_entry and metadata array 'thing' */
+    /* Remove flush dependency between parent entry and extensible array header */
     if(H5EA__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
         H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
 

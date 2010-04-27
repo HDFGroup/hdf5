@@ -1128,7 +1128,10 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     HDassert(mesg);
 
     /* Compute the size needed to store the message in the object header */
-    if((raw_size = (type->raw_size)(f, FALSE, mesg)) >= H5O_MESG_MAX_SIZE)
+    raw_size = (type->raw_size)(f, FALSE, mesg);
+    if(0 == raw_size)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "can't compute object header message size")
+    if(raw_size >= H5O_MESG_MAX_SIZE)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "object header message is too large")
     aligned_size = H5O_ALIGN_OH(oh, raw_size);
 

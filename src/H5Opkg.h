@@ -504,6 +504,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_FSINFO[1];
 /* Placeholder for unknown message. (0x0018) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
+
 /*
  * Object header "object" types
  */

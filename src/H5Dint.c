@@ -797,9 +797,11 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     if(NULL == (oh = H5O_pin(oloc, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
-    /* Update the datatype and dataspace header messages */
+    /* Write the dataspace header message */
     if(H5S_append(file, dxpl_id, oh, dset->shared->space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message")
+
+    /* Write the datatype header message */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
 

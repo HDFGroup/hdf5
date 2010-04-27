@@ -955,7 +955,6 @@ print_file_info(const iter_t *iter)
     return 0;
 } /* print_file_info() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function: print_group_info
@@ -1331,18 +1330,20 @@ print_storage_summary(const iter_t *iter)
 static herr_t
 print_file_metadata(const iter_t *iter)
 {
-    printf("File space information for file metadata (in bytes):\n");
+    HDfprintf(stdout, "File space information for file metadata (in bytes):\n");
     HDfprintf(stdout, "\tSuperblock: %Hu\n", iter->super_size);
     HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
     HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
 
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n",
+                iter->group_ohdr_info.total_size,
 		iter->group_ohdr_info.free_size);
     HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n",
 		iter->dset_ohdr_info.total_size,
 		iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n",
+                iter->dtype_ohdr_info.total_size,
 		iter->dtype_ohdr_info.free_size);
 
     HDfprintf(stdout, "\tGroups:\n");

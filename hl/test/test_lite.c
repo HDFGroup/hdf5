@@ -1292,7 +1292,6 @@ static int test_enums(void)
     H5T_class_t type_class;
     char*   dt_str;
     size_t  str_len;
-    H5T_order_t native_order = H5Tget_order(H5T_NATIVE_INT);
 
     TESTING3("        text for enum types");
 
