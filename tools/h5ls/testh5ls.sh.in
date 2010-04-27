@@ -177,7 +177,7 @@ TOOLTEST tattr2.ls 0 -w80 -v -S tattr2.h5
 
 # tests for error handling.
 # test for non-existing file
-TOOLTEST nosuchfile.ls 0 nosuchfile.h5
+TOOLTEST nosuchfile.ls 1 nosuchfile.h5
 
 # test for variable length data types in verbose mode 
 if test $WORDS_BIGENDIAN != "yes"; then
