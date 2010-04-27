@@ -423,18 +423,15 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
     // If there is data, allocate buffer and read it.
     if (attr_size > 0)
     {
-	char *strg_C = NULL;
-
-	strg_C = new char [(size_t)attr_size+1];
+	char *strg_C = new char[(size_t)attr_size+1];
 	herr_t ret_value = H5Aread(id, mem_type.getId(), strg_C);
-
 	if( ret_value < 0 )
 	{
 	    delete []strg_C;	// de-allocate for fixed-len string
 	    throw AttributeIException("Attribute::read", "H5Aread failed");
 	}
-
 	// Get string from the C char* and release resource allocated locally
+	strg_C[attr_size] = '\0';
 	strg = strg_C;
 	delete []strg_C;
     }

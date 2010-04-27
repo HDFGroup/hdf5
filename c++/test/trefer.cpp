@@ -216,11 +216,20 @@ static void test_reference_obj(void)
 	H5std_string read_comment1 = group.getComment(".", 10);
 	verify_val(read_comment1, write_comment, "Group::getComment", __LINE__, __FILE__);
 
-        // Test that getComment handles failures gracefully
-        try {
-            H5std_string read_comment_tmp = group.getComment(NULL);
-        }
-        catch (Exception E) {} // We expect this to fail
+	// Test that getComment handles failures gracefully
+	try {
+	    H5std_string read_comment_tmp = group.getComment(NULL);
+	}
+	catch (Exception E) {} // We expect this to fail
+
+	// Test reading the name of an item in the group
+	H5std_string name;
+	name = group.getObjnameByIdx(0);
+	verify_val(name, "Dataset1", "Group::getObjnameByIdx", __LINE__, __FILE__);
+	name.clear();
+	ssize_t name_size = group.getObjnameByIdx(0, name, 5);
+	verify_val(name, "Data", "Group::getObjnameByIdx(index,buf,buf_len)", __LINE__, __FILE__);
+	verify_val(name_size, 8, "Group::getObjnameByIdx(index,buf,buf_len)", __LINE__, __FILE__);
 
 	// Close group
 	group.close();
