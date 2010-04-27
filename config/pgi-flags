@@ -68,15 +68,18 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     #esac
 
     # General
-    H5_CFLAGS="$H5_CFLAGS $arch -Minform,warn"
+    H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=inform"
 
     # Production
-    # Check for MPI wrapper being used and tweak down compiler options
-    if test "X-" == "X-$is_mpi"; then
-        PROD_CFLAGS="-fast -s -Mnoframe"
-    else
-        PROD_CFLAGS="-O2 -s"
-    fi
+    case "$cc_vendor-$cc_version" in
+      # Tweak down compiler optimizations for v9.x
+      pgcc-9.*)
+        PROD_CFLAGS="-O1 -s"
+        ;;
+      *)
+        PROD_CFLAGS="-fast -s"
+        ;;
+    esac
     PROD_CPPFLAGS=
 
     # Debug

@@ -92,7 +92,7 @@ static volatile int	nd_g = 0, na_g = 0;
 
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
-static int byte_cmp(int, void *, void *);
+static int byte_cmp(int, const void *, const void *);
 static int bit_cmp(int, int *, void *, void *);
 static void fix_order(int, int, int, int *, const char **);
 static int imp_bit(int, int *, void *, void *);
@@ -250,19 +250,10 @@ precision (detected_t *d)
  *		matzke@llnl.gov
  *		Jun 12 1996
  *
- * Modifications:
- *
- *	Robb Matzke, 14 Aug 1996
- *	The byte order detection has been changed because on the Cray
- *	the last pass causes a rounding to occur that causes the least
- *	significant mantissa byte to change unexpectedly.
- *
- *	Robb Matzke, 5 Nov 1996
- *	Removed HFILE and CFILE arguments.
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE,VAR,INFO) {					      \
-   TYPE _v1, _v2, _v3;							      \
+   volatile TYPE _v1, _v2, _v3;							      \
    int _i, _j, _first=(-1), _last=(-1);					      \
    char *_mesg;								      \
 									      \
@@ -279,7 +270,8 @@ precision (detected_t *d)
    /* Byte Order */							      \
    for (_i=0,_v1=0.0,_v2=1.0; _i<(signed)sizeof(TYPE); _i++) {		      \
       _v3 = _v1; _v1 += _v2; _v2 /= 256.0;				      \
-      if ((_j=byte_cmp(sizeof(TYPE), &_v3, &_v1))>=0) {			      \
+      _j=byte_cmp(sizeof(TYPE), &_v3, &_v1);				      \
+      if(_j>=0) {							      \
 	 if (0==_i || INFO.perm[_i-1]!=_j) {				      \
 	    INFO.perm[_i] = _j;						      \
 	    _last = _i;							      \
@@ -831,11 +823,11 @@ iprint(detected_t *d)
  *-------------------------------------------------------------------------
  */
 static int
-byte_cmp(int n, void *_a, void *_b)
+byte_cmp(int n, const void *_a, const void *_b)
 {
-    register int	i;
-    unsigned char	*a = (unsigned char *) _a;
-    unsigned char	*b = (unsigned char *) _b;
+    int	i;
+    const unsigned char	*a = (const unsigned char *) _a;
+    const unsigned char	*b = (const unsigned char *) _b;
 
     for (i = 0; i < n; i++) if (a[i] != b[i]) return i;
     return -1;
