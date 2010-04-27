@@ -548,6 +548,9 @@
 /* The size of `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
 
+/* The size of `ptrdiff_t', as computed by sizeof. */
+#undef SIZEOF_PTRDIFF_T
+
 /* The size of `short', as computed by sizeof. */
 #undef SIZEOF_SHORT
 
@@ -675,6 +678,9 @@
 
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef ptrdiff_t
 
 /* Define to `unsigned long' if <sys/types.h> does not define. */
 #undef size_t

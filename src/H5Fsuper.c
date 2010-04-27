@@ -453,7 +453,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     sblock->super_vers = super_vers;
 
     /* Compute the size of the superblock */
-    superblock_size = (size_t)H5F_SUPERBLOCK_SIZE(super_vers, f);
+    superblock_size = (hsize_t)H5F_SUPERBLOCK_SIZE(super_vers, f);
 
     /* Compute the size of the driver information block */
     H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
@@ -699,7 +699,7 @@ H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_
 
     /* Set the superblock size */
     if(super_size)
-	*super_size = (size_t)H5F_SUPERBLOCK_SIZE(f->shared->sblock->super_vers, f);
+	*super_size = (hsize_t)H5F_SUPERBLOCK_SIZE(f->shared->sblock->super_vers, f);
 
     /* Set the superblock extension size */
     if(super_ext_size) {

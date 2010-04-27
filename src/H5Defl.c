@@ -115,7 +115,8 @@ H5D_efl_construct(H5F_t *f, H5D_t *dset)
     size_t dt_size;                     /* Size of datatype */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
-    hssize_t tmp_size;                  /* Temporary holder for raw data size */
+    hssize_t stmp_size;                 /* Temporary holder for raw data size */
+    hsize_t tmp_size;                   /* Temporary holder for raw data size */
     hsize_t max_points;                 /* Maximum elements */
     hsize_t max_storage;                /* Maximum storage size */
     int ndims;                          /* Rank of dataspace */
@@ -158,7 +159,9 @@ H5D_efl_construct(H5F_t *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataspace size exceeds external storage size")
 
     /* Compute the total size of dataset */
-    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * dt_size;
+    stmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
+    HDassert(stmp_size >= 0);
+    tmp_size = (hsize_t)stmp_size * dt_size;
     H5_ASSIGN_OVERFLOW(dset->shared->layout.storage.u.contig.size, tmp_size, hssize_t, hsize_t);
 
     /* Get the sieve buffer size for this dataset */
@@ -340,59 +343,58 @@ H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *bu
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_write)
 
     /* Check args */
-    HDassert(efl && efl->nused>0);
+    HDassert(efl && efl->nused > 0);
     HDassert(H5F_addr_defined(addr));
     HDassert(size < SIZET_MAX);
     HDassert(buf || 0 == size);
 
     /* Find the first efl member in which to write */
-    for (u=0, cur=0; u<efl->nused; u++) {
-	if (H5O_EFL_UNLIMITED==efl->slot[u].size || addr < cur+efl->slot[u].size) {
+    for(u = 0, cur = 0; u < efl->nused; u++) {
+	if(H5O_EFL_UNLIMITED == efl->slot[u].size || addr < cur + efl->slot[u].size) {
 	    skip = addr - cur;
 	    break;
-	}
+	} /* end if */
 	cur += efl->slot[u].size;
-    }
+    } /* end for */
 
     /* Write the data */
-    while (size) {
-        assert(buf);
-	if (u>=efl->nused)
-	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file")
-	if (H5F_OVERFLOW_HSIZET2OFFT (efl->slot[u].offset+skip))
-	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
-	if ((fd=HDopen (efl->slot[u].name, O_CREAT|O_RDWR, 0666))<0) {
-	    if (HDaccess (efl->slot[u].name, F_OK)<0) {
-		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL, "external raw data file does not exist")
-	    } else {
-		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
-	    }
-	}
-	if (HDlseek (fd, (off_t)(efl->slot[u].offset+skip), SEEK_SET)<0)
-	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
+    while(size) {
+        HDassert(buf);
+	if(u >= efl->nused)
+	    HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file")
+	if(H5F_OVERFLOW_HSIZET2OFFT(efl->slot[u].offset + skip))
+	    HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
+	if((fd = HDopen(efl->slot[u].name, O_CREAT|O_RDWR, 0666)) < 0) {
+	    if(HDaccess(efl->slot[u].name, F_OK) < 0)
+		HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "external raw data file does not exist")
+	    else
+		HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
+	} /* end if */
+	if(HDlseek(fd, (off_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+	    HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
-	tempto_write = MIN(efl->slot[u].size-skip,(hsize_t)size);
-        H5_CHECK_OVERFLOW(tempto_write,hsize_t,size_t);
+	tempto_write = MIN(efl->slot[u].size - skip, (hsize_t)size);
+        H5_CHECK_OVERFLOW(tempto_write, hsize_t, size_t);
         to_write = (size_t)tempto_write;
 #else /* NDEBUG */
-	to_write = MIN((size_t)(efl->slot[u].size-skip), size);
+	to_write = MIN((size_t)(efl->slot[u].size - skip), size);
 #endif /* NDEBUG */
-	if ((size_t)HDwrite (fd, buf, to_write)!=to_write)
-	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL, "write error in external raw data file")
+	if((size_t)HDwrite(fd, buf, to_write)!=to_write)
+	    HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "write error in external raw data file")
 	HDclose (fd);
 	fd = -1;
 	size -= to_write;
 	buf += to_write;
 	skip = 0;
 	u++;
-    }
+    } /* end while */
 
 done:
-    if (fd>=0)
-        HDclose (fd);
+    if(fd >= 0)
+        HDclose(fd);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5D_efl_write() */
 
 
 /*-------------------------------------------------------------------------
