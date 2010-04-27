@@ -172,7 +172,8 @@ done:
 static herr_t
 H5D_compact_construct(H5F_t *f, H5D_t *dset)
 {
-    hssize_t tmp_size;          /* Temporary holder for raw data size */
+    hssize_t stmp_size;         /* Temporary holder for raw data size */
+    hsize_t tmp_size;           /* Temporary holder for raw data size */
     hsize_t max_comp_data_size; /* Max. allowed size of compact data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -186,7 +187,11 @@ H5D_compact_construct(H5F_t *f, H5D_t *dset)
      * Compact dataset is stored in dataset object header message of
      * layout.
      */
-    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(dset->shared->type);
+    stmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
+    HDassert(stmp_size >= 0);
+    tmp_size = H5T_get_size(dset->shared->type);
+    HDassert(tmp_size > 0);
+    tmp_size = tmp_size * (hsize_t)stmp_size;
     H5_ASSIGN_OVERFLOW(dset->shared->layout.storage.u.compact.size, tmp_size, hssize_t, size_t);
 
     /* Verify data size is smaller than maximum header message size

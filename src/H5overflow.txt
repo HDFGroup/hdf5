@@ -36,6 +36,7 @@ uint8_t, UNSIGNED;
 uint16_t, UNSIGNED;
 uint32_t, UNSIGNED;
 uint64_t, UNSIGNED;
+ptrdiff_t, SIGNED;
 size_t, UNSIGNED;
 ssize_t, SIGNED;
 haddr_t, UNSIGNED;

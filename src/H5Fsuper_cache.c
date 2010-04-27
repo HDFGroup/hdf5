@@ -763,7 +763,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
         } /* end else */
 
         /* Retrieve the total size of the superblock info */
-        H5_ASSIGN_OVERFLOW(superblock_size, (p - buf), int, size_t);
+        H5_ASSIGN_OVERFLOW(superblock_size, (p - buf), ptrdiff_t, size_t);
 
         /* Double check we didn't overrun the block (unlikely) */
         HDassert(superblock_size <= sizeof(buf));

@@ -743,7 +743,8 @@ H5B2_remove(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_remove_t op,
                 if(H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
 
-            hdr->depth -= (uint16_t)depth_decreased;
+            HDassert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
+            hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
     } /* end if */
     else {
@@ -824,7 +825,8 @@ H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
                 if(H5FL_fac_term(hdr->node_info[hdr->depth].node_ptr_fac) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy node's node pointer block factory")
 
-            hdr->depth -= (uint16_t)depth_decreased;
+            HDassert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
+            hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
     } /* end if */
     else {

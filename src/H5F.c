@@ -1852,9 +1852,9 @@ H5F_try_close(H5F_t *f)
 
         /* Forced close of all opened objects in this file */
         if(f->nopen_objs > 0) {
-            unsigned obj_count;     /* # of open objects */
+            size_t obj_count;       /* # of open objects */
             hid_t objs[128];        /* Array of objects to close */
-            unsigned u;             /* Local index variable */
+            size_t u;               /* Local index variable */
 
             /* Get the list of IDs of open dataset, group, & attribute objects */
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs, FALSE)) != 0) {

@@ -1727,7 +1727,8 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 io_info->store->chunk.index = chunk_info->index;
 
                 /* Compute # of bytes accessed in chunk */
-                src_accessed_bytes = chunk_info->chunk_points * type_info->src_type_size;
+                H5_CHECK_OVERFLOW(type_info->src_type_size, /*From:*/ size_t, /*To:*/ uint32_t);
+                src_accessed_bytes = chunk_info->chunk_points * (uint32_t)type_info->src_type_size;
 
                 /* Lock the chunk into the cache */
                 if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, FALSE, &idx_hint)))
@@ -1859,7 +1860,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             io_info->store->chunk.index = chunk_info->index;
 
             /* Compute # of bytes accessed in chunk */
-            dst_accessed_bytes = chunk_info->chunk_points * type_info->dst_type_size;
+            H5_CHECK_OVERFLOW(type_info->dst_type_size, /*From:*/ size_t, /*To:*/ uint32_t);
+            dst_accessed_bytes = chunk_info->chunk_points * (uint32_t)type_info->dst_type_size;
 
             /* Determine if we will access all the data in the chunk */
             if(dst_accessed_bytes != ctg_store.contig.dset_size ||
