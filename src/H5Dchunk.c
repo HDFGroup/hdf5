@@ -2458,7 +2458,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         ent->dirty = FALSE;
 
         /* Check for SWMR writes to the file */
-        if(dset->shared->layout.storage.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+        if(dset->shared->layout.storage.u.chunk.ops->can_swim && (H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE)) {
             /* Mark the proxy entry in the cache as clean */
             if(H5D_chunk_proxy_mark(ent, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as clean")
@@ -2537,7 +2537,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     } /* end else */
 
     /* Check for SWMR writes to the file */
-    if(dset->shared->layout.storage.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+    if(dset->shared->layout.storage.u.chunk.ops->can_swim && (H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE)) {
         /* Remove the proxy entry in the cache */
         if(H5D_chunk_proxy_remove(dset, dxpl_id, ent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove proxy for chunk from metadata cache")
@@ -2893,7 +2893,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
 
         /* Check for SWMR writes to the file */
         if(io_info->dset->shared->layout.storage.u.chunk.ops->can_swim
-                && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+                && (H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE)) {
             /* Insert a proxy entry in the cache, to make certain that the
              *  flush dependencies are maintained in the proper way for SWMR
              *  access to work.
@@ -3041,7 +3041,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 
             /* Check for SWMR writes to the file */
             if(io_info->dset->shared->layout.storage.u.chunk.ops->can_swim
-                    && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+                    && (H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE)) {
                 /* Mark the proxy entry in the cache as dirty */
                 if(H5D_chunk_proxy_mark(ent, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as dirty")

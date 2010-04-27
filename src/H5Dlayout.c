@@ -305,7 +305,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
             /* Set the chunk index type to an extensible array */
             layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
             layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-            layout->storage.u.chunk.ops = H5D_COPS_EARRAY;;
+            layout->storage.u.chunk.ops = H5D_COPS_EARRAY;
 
             /* Set the extensible array creation parameters */
             /* (use hard-coded defaults for now, until we give applications
@@ -322,7 +322,7 @@ H5D_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
             /* Set the chunk index type to a fixed array */
 	    layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
             layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-            layout->storage.u.chunk.ops = H5D_COPS_FARRAY;;
+            layout->storage.u.chunk.ops = H5D_COPS_FARRAY;
 
             /* Set the fixed array creation parameters */
             /* (use hard-coded defaults for now, until we give applications

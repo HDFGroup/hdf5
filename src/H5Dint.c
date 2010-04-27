@@ -65,6 +65,8 @@ static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating,
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
+static herr_t H5D_swmr_setup(const H5D_t *dset, hid_t dxpl_id);
+static herr_t H5D_swmr_teardown(const H5D_t *dataset, hid_t dxpl_id);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
@@ -692,6 +694,105 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_swmr_setup
+ *
+ * Purpose:	Set up SWMR access for a chunked dataset, if possible
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, April 27, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_swmr_setup(const H5D_t *dataset, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_swmr_setup)
+
+    /* Sanity checking */
+    HDassert(dataset);
+
+    /* Check if it's possible to enable swmr access to this dataset */
+    if(dataset->shared->layout.type == H5D_CHUNKED &&
+            dataset->shared->layout.storage.u.chunk.ops->can_swim &&
+            (H5F_INTENT(dataset->oloc.file) & H5F_ACC_SWMR_WRITE)) {
+        int chunkno;    /* Object header chunk index for message */
+
+        /* Get object header chunk index for dataspace message */
+        if((chunkno = H5O_msg_get_chunkno(&dataset->oloc, H5O_SDSPACE_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query dataspace chunk index")
+
+        /* Fail currently, if the dataspace message is not in chunk #0 */
+        /* (Note that this could be addressed by moving the dataspace message
+         *      into chunk #0, but that can be hard and we're deferring that
+         *      work for now. -QAK)
+         */
+        if(chunkno > 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dataspace chunk index must be 0 for SWMR access, chunkno = %d", chunkno)
+
+        /* Pin the object header */
+        if(NULL == (dataset->shared->oh = H5O_pin(&dataset->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+        /* Lock dataspace message into chunk #0 */
+        if(H5O_msg_lock(&dataset->oloc, H5O_SDSPACE_ID, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOCK, FAIL, "can't lock dataspace message into object header chunk #0")
+
+        /* Indicate that dataset is set up for SWMR access */
+        dataset->shared->is_swimming = TRUE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_swmr_setup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_swmr_teardown
+ *
+ * Purpose:	Tear down SWMR access for a chunked dataset.
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, April 27, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_swmr_teardown(const H5D_t *dataset, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_swmr_teardown)
+
+    /* Sanity checking */
+    HDassert(dataset);
+    HDassert(dataset->shared->is_swimming);
+    HDassert(dataset->shared->oh);
+
+    /* Unlock dataspace message from chunk #0 */
+    if(H5O_msg_unlock(&dataset->oloc, H5O_SDSPACE_ID, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNLOCK, FAIL, "can't unlock dataspace message from object header chunk #0")
+
+    /* Release pointer to object header */
+    if(H5O_unpin(dataset->shared->oh) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+
+    /* Indicate that dataset is NOT set up for SWMR access now */
+    dataset->shared->is_swimming = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_swmr_teardown() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_update_oh_info
  *
  * Purpose:	Create and fill object header for dataset
@@ -797,9 +898,11 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     if(NULL == (oh = H5O_pin(oloc, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
-    /* Update the datatype and dataspace header messages */
+    /* Write the dataspace header message */
     if(H5S_append(file, dxpl_id, oh, dset->shared->space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message")
+
+    /* Write the datatype header message */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
 
@@ -861,6 +964,10 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     if(!use_latest_format)
         if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
+
+    /* Set up SWMR writes to the dataset, if possible */
+    if(H5D_swmr_setup(dset, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up SWMR access for dataset")
 
 done:
     /* Release pointer to object header itself */
@@ -1312,6 +1419,10 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
 
+    /* Set up SWMR writes to the dataset, if possible */
+    if(H5D_swmr_setup(dataset, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up SWMR access for dataset")
+
 done:
     if(ret_value < 0) {
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
@@ -1424,6 +1535,11 @@ H5D_close(H5D_t *dataset)
 #endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
+        /* If the dataset is opened for SWMR access, shut that down */
+        if(dataset->shared->is_swimming)
+            if(H5D_swmr_teardown(dataset, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to shut down SWMR access")
+        
         /*
         * Release datatype, dataspace and creation property list -- there isn't
         * much we can do if one of these fails, so we just continue.

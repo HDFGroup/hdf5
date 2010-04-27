@@ -81,7 +81,7 @@ $DPRINT pid_writer=$pid_writer
 n=0
 echo launch $Nreaders swmr_readers
 while [ $n -lt $Nreaders ]; do
-    ./swmr_reader $Nsecs &
+    ./swmr_reader -r $n $Nsecs &
     pid_readers="$pid_readers $!"
     n=`expr $n + 1`
 done

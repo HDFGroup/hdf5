@@ -214,19 +214,19 @@ static void
 usage(void)
 {
     printf("Usage error!\n");
-    printf("Usage: swmr_reader [-q] [-s <# of seconds to sleep between polling>] [-h <# of common symbols to poll>] [-l <# of random symbols to poll>] <# of seconds to test>\n");
+    printf("Usage: swmr_reader [-q] [-s <# of seconds to sleep between polling>] [-h <# of common symbols to poll>] [-l <# of random symbols to poll>] [-r <random # seed>] <# of seconds to test>\n");
     printf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'), 5 common symbols to poll ('-h 5') and 10 random symbols to poll ('-l 10')\n");
     exit(1);
 } 
 
 int main(int argc, const char *argv[])
 {
-    time_t curr_time;   /* Current time, for seeding random number generator */
     long nseconds = 0;  /* # of seconds to test */
     int poll_time = 1;  /* # of seconds between polling */
     int ncommon = 5;    /* # of common symbols to poll */
     int nrandom = 10;   /* # of random symbols to poll */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
+    int random_seed = 0; /* Random # seed */
     unsigned u;         /* Local index variables */
 
     /* Parse command line options */
@@ -237,14 +237,6 @@ int main(int argc, const char *argv[])
         while(u < (unsigned)argc) {
             if(argv[u][0] == '-') {
                 switch(argv[u][1]) {
-                    /* # of seconds between polling */
-                    case 's':
-                        poll_time = atoi(argv[u + 1]);
-                        if(poll_time < 0)
-                            usage();
-                        u += 2;
-                        break;
-
                     /* # of common symbols to poll */
                     case 'h':
                         ncommon = atoi(argv[u + 1]);
@@ -265,6 +257,22 @@ int main(int argc, const char *argv[])
                     case 'q':
                         verbose = 0;
                         u++;
+                        break;
+
+                    /* Random # seed */
+                    case 'r':
+                        random_seed = atoi(argv[u + 1]);
+                        if(random_seed < 0)
+                            usage();
+                        u += 2;
+                        break;
+
+                    /* # of seconds between polling */
+                    case 's':
+                        poll_time = atoi(argv[u + 1]);
+                        if(poll_time < 0)
+                            usage();
+                        u += 2;
                         break;
 
                     default:
@@ -297,8 +305,8 @@ int main(int argc, const char *argv[])
     } /* end if */
 
     /* Create randomized set of numbers */
-    curr_time = time(NULL);
-    srandom((unsigned)curr_time);
+    random_seed += (int)time(NULL);
+    srandom((unsigned)random_seed);
 
     /* Emit informational message */
     if(verbose)
