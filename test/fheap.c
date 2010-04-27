@@ -15608,6 +15608,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
+    /* Free resources */
+    if(tparam->comp == FHEAP_TEST_COMPRESS)
+        H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* Free resources */
     H5MM_xfree(keep_ids.ids);
