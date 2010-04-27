@@ -58,15 +58,15 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_layout_encode,      	/*encode message                */
     H5O_layout_copy,        	/*copy the native value         */
     H5O_layout_size,        	/*size of message on disk       */
-    H5O_layout_reset,           /*reset method                  */
+    H5O_layout_reset,		/*reset method                  */
     H5O_layout_free,        	/*free the struct		*/
     H5O_layout_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
     NULL,			/* pre copy native value to file */
-    H5O_layout_copy_file,       /* copy native value to file    */
-    NULL,		        /* post copy native value to file    */
+    H5O_layout_copy_file,	/* copy native value to file    */
+    NULL,		        /* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_layout_debug       	/*debug the message             */
@@ -589,6 +589,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     FUNC_ENTER_NOAPI_NOINIT(H5O_layout_copy_file)
 
     /* check args */
+    HDassert(file_src);
     HDassert(layout_src);
     HDassert(file_dst);
 

@@ -154,7 +154,7 @@ typedef struct H5O_copy_t {
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
 #define H5O_LINK_ID     0x0006          /* Link Message. */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
-#define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
+#define H5O_LAYOUT_ID	0x0008          /* Data Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
 #define H5O_GINFO_ID	0x000a          /* Group info Message.  */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */

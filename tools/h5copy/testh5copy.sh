@@ -261,6 +261,7 @@ COPY_OBJECTS()
     # Remove any output file left over from previous test run
     rm -f $FILEOUT
 
+    echo "Testing from `basename $TESTFILE` to `basename $FILEOUT` for the following tests:"
     echo "Test copying various forms of datasets"
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s simple     -d simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s chunk      -d chunk

@@ -106,7 +106,7 @@ int main(int argc, const char **argv)
     int           ret=-1;
 
     /* initialize options  */
-    h5repack_init (&options,0);
+    h5repack_init(&options,0);
 
     parse_command_line(argc, argv, &options);
 

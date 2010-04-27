@@ -104,6 +104,8 @@
 
 /* utility functions */
 static int
+make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void *buf);
+static int
 write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
                 hid_t tid, void *buf);
 static int
@@ -376,7 +378,6 @@ gent_dataset2(void)
     H5Pclose(create_plist);
     H5Fclose(fid);
 }
-
 
 static void
 gent_attribute(void)
@@ -2952,7 +2953,6 @@ static void gent_array8(void)
     hsize_t sdims[] = {F64_DIM0};
     hsize_t tdims[] = {F64_DIM1};
     int         wdata[(F64_DIM1) * sizeof(int)];      /* Write buffer */
-    int         ndims;
     int     i;
 
     /*
@@ -6481,7 +6481,6 @@ gent_extlinks(void)
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -6553,7 +6552,6 @@ int main(void)
     gent_attr_creation_order();
     gent_fpformat();
     gent_extlinks();
-
 
     return 0;
 }

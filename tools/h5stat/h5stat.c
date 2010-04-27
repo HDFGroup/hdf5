@@ -571,6 +571,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
      return 0;
 }  /* end dataset_stats() */
 
+
 /*-------------------------------------------------------------------------
  * Function: datatype_stats
  *
@@ -878,17 +879,19 @@ print_file_info(const iter_t *iter)
 static herr_t
 print_file_metadata(const iter_t *iter)
 {
-    printf("File space information for file metadata (in bytes):\n");
+    HDfprintf(stdout, "File space information for file metadata (in bytes):\n");
     HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
     HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
 
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n",
+                iter->group_ohdr_info.total_size,
 		iter->group_ohdr_info.free_size);
     HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n",
 		iter->dset_ohdr_info.total_size,
 		iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n",
+                iter->dtype_ohdr_info.total_size,
 		iter->dtype_ohdr_info.free_size);
 
     HDfprintf(stdout, "\tGroups:\n");
@@ -970,6 +973,7 @@ print_group_info(const iter_t *iter)
     return 0;
 } /* print_group_info() */
 
+
 /*-------------------------------------------------------------------------
  * Function: print_group_metadata
  *
@@ -997,6 +1001,7 @@ print_group_metadata(const iter_t *iter)
     return 0;
 } /* print_group_metadata() */
 
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_info
  *
@@ -1089,6 +1094,7 @@ print_dataset_info(const iter_t *iter)
     return 0;
 } /* print_dataset_info() */
 
+
 /*-------------------------------------------------------------------------
  * Function: print_dataset_metadata
  *              
@@ -1160,6 +1166,7 @@ print_dset_dtype_meta(const iter_t *iter)
     return 0;
 } /* print_dset_dtype_meta() */
 
+
 /*-------------------------------------------------------------------------
  * Function: print_attr_info
  *
@@ -1252,7 +1259,6 @@ print_file_statistics(const iter_t *iter)
 
     if(display_attr)          print_attr_info(iter);
 } /* print_file_statistics() */
-
 
 
 /*-------------------------------------------------------------------------

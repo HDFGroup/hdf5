@@ -125,7 +125,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
     H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
-    H5O_MSG_UNKNOWN,		/*0x0017 Placeholder for unknown message */
+    H5O_MSG_UNKNOWN		/*0x0017 Placeholder for unknown message */
 };
 
 /* Declare a free list to manage the H5O_t struct */

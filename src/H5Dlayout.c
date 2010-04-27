@@ -441,7 +441,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_layout_oh_write
  *
- * Purpose:	Read layout/pline/efl information for dataset
+ * Purpose:	Write layout/pline/efl information for dataset
  *
  * Return:	Success:    SUCCEED
  *		Failure:    FAIL
