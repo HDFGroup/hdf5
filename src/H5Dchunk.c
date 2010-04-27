@@ -369,10 +369,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, May 22, 2008
  *
- * Modifications:
- *	Vailin Choi; April 2009
- * 	Reset address and pointer of the array struct for the chunked storage index
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2056,10 +2052,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
- * 
- * Modifications:
- *	Vailin Choi; April 2009
- *	Pass along RESET_ADDR: whether to reset the address of chunked storage index
  *
  *-------------------------------------------------------------------------
  */

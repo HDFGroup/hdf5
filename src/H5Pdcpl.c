@@ -219,10 +219,6 @@ done:
  * Programmer:     Raymond Lu
  *                 Tuesday, October 2, 2001
  *
- * Modifications:
- *      Vailin Choi; April 2009
- *      Reset address and pointer of the array struct for the chunked storage index
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */

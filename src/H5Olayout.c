@@ -543,10 +543,6 @@ done:
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
- * Modifications:
- *      Vailin Choi; April 2009
- *      Reset the pointer of the chunked storage index but not the address
- *
  *-------------------------------------------------------------------------
  */
 static void *

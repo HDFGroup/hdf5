@@ -1349,10 +1349,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
  *
- * Modifications:
- *	Vailin Choi; April 2009
- *	Reset address of the chunked storage index if RESET_ADDR is set
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

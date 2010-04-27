@@ -108,8 +108,8 @@ int main(int argc, const char **argv)
     int           ret=-1;
 
     /* initialize options  */
-    h5repack_init (&options, 0, 0, 0, (hsize_t)0);        
-    
+    h5repack_init(&options, 0, 0, 0, (hsize_t)0);
+
     parse_command_line(argc, argv, &options);
 
     /* get file names if they were not yet got */
