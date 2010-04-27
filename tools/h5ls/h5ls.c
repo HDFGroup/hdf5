@@ -2403,6 +2403,7 @@ main(int argc, const char *argv[])
                 break;
             *oname = '\0';
         } /* end while */
+
         if(file < 0) {
             fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);

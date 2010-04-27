@@ -3415,6 +3415,9 @@ if test ${ac_cv_sizeof_long_double} = 0; then
 else
    AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision],
         [AC_TRY_RUN([
+        #include <stdlib.h>
+        #include <string.h>
+
         int main(void)
         {
             /* General variables */
