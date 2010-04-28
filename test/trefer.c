@@ -62,6 +62,178 @@ typedef struct s1_t {
 
 /****************************************************************
 **
+**  test_reference_params(): Test basic H5R (reference) parameters
+**                           for correct processing
+**
+****************************************************************/
+static void
+test_reference_params(void)
+{
+    hid_t       fid1;       /* HDF5 File IDs        */
+    hid_t       dataset,    /* Dataset ID           */
+                dset2;      /* Dereferenced dataset ID */
+    hid_t       group;      /* Group ID             */
+    hid_t       sid1;       /* Dataspace ID         */
+    hid_t       tid1;       /* Datatype ID          */
+    hsize_t     dims1[] = {SPACE1_DIM1};
+    hobj_ref_t *wbuf,       /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf;       /* temp. buffer read from disk */
+    hobj_ref_t  nvrbuf[3]={0,101,1000000000}; /* buffer with non-valid refs */
+    unsigned   *tu32;       /* Temporary pointer to uint32 data */
+    int         i, j;       /* counting variables */
+    const char *write_comment="Foo!"; /* Comments for group */
+    char        read_comment[10];
+    H5O_type_t  obj_type;   /* Object type */
+    herr_t      ret;        /* Generic return value     */
+    char       *ref_name;   /* Buffer for ref name */
+    size_t      name_size;  /* Size of reference name */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Reference Parameters\n"));
+
+    /* Allocate write & read buffers */
+    wbuf = malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    rbuf = malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+    tbuf = malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)) * SPACE1_DIM1);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a group */
+    group = H5Gcreate2(fid1, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gcreate2");
+
+    /* Set group's comment */
+    ret = H5Oset_comment(group, write_comment);
+    CHECK(ret, FAIL, "H5Oset_comment");
+
+    /* Create a dataset (inside Group1) */
+    dataset = H5Dcreate2(group, "Dataset1", H5T_NATIVE_UINT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    for(tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
+        *tu32++=i*3;
+
+    /* Write selection to disk */
+    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create another dataset (inside Group1) */
+    dataset = H5Dcreate2(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
+    CHECK(tid1, FAIL, "H5Tcreate");
+
+    /* Insert fields */
+    ret = H5Tinsert(tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* Save datatype for later */
+    ret = H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close group */
+    ret = H5Gclose(group);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
+
+    /* Test parameters to H5Rcreate */
+    ret = H5Rcreate(NULL, fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
+    VERIFY(ret, FAIL, "H5Rcreate ref");
+    ret = H5Rcreate(&wbuf[0], -1, "/Group1/Dataset1", H5R_OBJECT, -1);
+    VERIFY(ret, FAIL, "H5Rcreate loc_id");
+    ret = H5Rcreate(&wbuf[0], fid1, NULL, H5R_OBJECT, -1);
+    VERIFY(ret, FAIL, "H5Rcreate name");
+    ret = H5Rcreate(&wbuf[0], fid1, "", H5R_OBJECT, -1);
+    VERIFY(ret, FAIL, "H5Rcreate null name");
+    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, -1);
+    VERIFY(ret, FAIL, "H5Rcreate type");
+    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_DATASET_REGION, -1);
+    VERIFY(ret, FAIL, "H5Rcreate region space");
+    ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_MAXTYPE, 0);
+    VERIFY(ret, FAIL, "H5Rcreate space");
+
+    /* Test parameters to H5Rdereference */
+    dset2 = H5Rdereference(-1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rdereference loc_id");
+    dset2 = H5Rdereference(dataset, H5R_OBJECT, NULL);
+    VERIFY(dset2, FAIL, "H5Rdereference ref");
+    dset2 = H5Rdereference(dataset, H5R_MAXTYPE, &rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rdereference type");
+
+    /* Test parameters to H5Rget_obj_type */
+    ret = H5Rget_obj_type(-1, H5R_OBJECT, &rbuf[0], NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type loc_id");
+    ret = H5Rget_obj_type(fid1, H5R_OBJECT, NULL, NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type ref");
+    ret = H5Rget_obj_type(fid1, H5R_MAXTYPE, &rbuf[0], NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type type");
+
+    /* Test parameters to H5Rget_name */
+    name_size = H5Rget_name(-1, H5R_DATASET_REGION, &rbuf[0], NULL, 0);
+    VERIFY(name_size, FAIL, "H5Rget_name loc_id");
+    name_size = H5Rget_name(fid1, H5R_DATASET_REGION, NULL, NULL, 0);
+    VERIFY(ret, FAIL, "H5Rget_name ref");
+    name_size = H5Rget_name(fid1, H5R_MAXTYPE, &rbuf[0], NULL, 0);
+    VERIFY(ret, FAIL, "H5Rget_name type");
+
+    /* Test parameters to H5Rget_region */
+    ret = H5Rget_region(-1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(ret, FAIL, "H5Rget_region loc_id");
+    ret = H5Rget_region(fid1, H5R_OBJECT, NULL);
+    VERIFY(ret, FAIL, "H5Rget_region ref");
+    ret = H5Rget_region(fid1, H5R_OBJECT, &rbuf[0]);
+    VERIFY(ret, FAIL, "H5Rget_region type");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+    free(tbuf);
+}   /* test_reference_obj() */
+
+/****************************************************************
+**
 **  test_reference_obj(): Test basic H5R (reference) object reference code.
 **      Tests references to various kinds of objects
 **
@@ -1373,6 +1545,7 @@ test_reference(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing References\n"));
 
+    test_reference_params();    /* Test for correct parameter checking */
     test_reference_obj();       /* Test basic H5R object reference code */
     test_reference_region();    /* Test basic H5R dataset region reference code */
     test_reference_region_1D(); /* Test H5R dataset region reference code for 1-D datasets */

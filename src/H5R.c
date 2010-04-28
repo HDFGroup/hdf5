@@ -309,7 +309,7 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
     H5G_loc_t   loc;            /* File location */
-    H5S_t	*space;         /* Pointer to dataspace containing region */
+    H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Rcreate, FAIL)
@@ -326,6 +326,8 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(ref_type != H5R_OBJECT && ref_type != H5R_DATASET_REGION)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported")
+    if(space_id == (-1) && ref_type == H5R_DATASET_REGION)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
     if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
