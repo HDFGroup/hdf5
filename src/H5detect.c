@@ -288,33 +288,39 @@ precision (detected_t *d)
  *-------------------------------------------------------------------------
  */
 #define DETECT_F(TYPE,VAR,INFO) {					      \
-   volatile TYPE _v1, _v2, _v3;							      \
-   int _i, _j, _first=(-1), _last=(-1);					      \
+   volatile TYPE _v1, _v2, _v3;						      \
+   unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];		      \
+   int _i, _j, _first = (-1), _last = (-1);				      \
    char *_mesg;								      \
 									      \
-   memset (&INFO, 0, sizeof(INFO));					      \
+   memset(&INFO, 0, sizeof(INFO));					      \
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
 									      \
    /* Completely initialize temporary variables, in case the bits used in */  \
    /* the type take less space than the number of bits used to store the type */  \
-   memset(&_v3,0,sizeof(TYPE));                                               \
-   memset(&_v2,0,sizeof(TYPE));                                               \
-   memset(&_v1,0,sizeof(TYPE));                                               \
+   memset(&_v3, 0, sizeof(TYPE));                                             \
+   memset(&_v2, 0, sizeof(TYPE));                                             \
+   memset(&_v1, 0, sizeof(TYPE));                                             \
 									      \
    /* Byte Order */							      \
-   for (_i=0,_v1=0.0,_v2=1.0; _i<(signed)sizeof(TYPE); _i++) {		      \
-      _v3 = _v1; _v1 += _v2; _v2 /= 256.0;				      \
-      _j=byte_cmp(sizeof(TYPE), &_v3, &_v1);				      \
-      if(_j>=0) {							      \
-	 if (0==_i || INFO.perm[_i-1]!=_j) {				      \
+   for(_i = 0, _v1 = 0.0, _v2 = 1.0; _i < (int)sizeof(TYPE); _i++) {	      \
+      _v3 = _v1;							      \
+      _v1 += _v2;							      \
+      _v2 /= 256.0;							      \
+      memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));			      \
+      memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));			      \
+      _j = byte_cmp(sizeof(TYPE), &_buf3, &_buf1);			      \
+      if(_j >= 0) {							      \
+	 if(0 == _i || INFO.perm[_i - 1] != _j) {			      \
 	    INFO.perm[_i] = _j;						      \
 	    _last = _i;							      \
-	    if (_first<0) _first = _i;					      \
+	    if(_first < 0)						      \
+                _first = _i;						      \
 	 }								      \
       }									      \
    }									      \
-   fix_order (sizeof(TYPE), _first, _last, INFO.perm, (const char**)&_mesg);  \
+   fix_order(sizeof(TYPE), _first, _last, INFO.perm, (const char**)&_mesg);   \
                                                                               \
    if(!strcmp(_mesg, "VAX"))                                                  \
       INFO.is_vax = TRUE;                                                     \
