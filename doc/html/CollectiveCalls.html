@@ -1,0 +1,352 @@
+<html>
+<head><title>
+Collective HDF5 Calls in Parallel
+</title>
+<link href="../ed_styles/RMelect.css" rel="stylesheet" type="text/css">
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<!-- #BeginLibraryItem "/ed_libs/styles_RM.lbi" -->
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="../index.html">HDF5 documents and links</a>&nbsp;<br>
+<a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="../UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<!--
+<a href="Glossary.html">Glossary</a><br>
+-->
+</td>
+<td valign=top align=right>
+And in this document, the 
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<br>
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<br>
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
+<br>
+<i><font size=-1>(Printable <a href="http://hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a> of this Reference Manual)</font></i>&nbsp;
+</td></tr>
+</table>
+</center>
+<hr>
+<!-- #EndLibraryItem -->
+
+<div align=center>
+<h1>Collective Calling Requirements<br>in Parallel HDF5 Applications</h1>
+</div>
+
+
+<h2>Introduction</h2>
+<dir>
+
+    This is the initial sketch of a document addressing two major topics:
+    <ul><li>HDF5 functions that must be called collectively and when 
+            in a parallel computing environment
+        <li>Properties that must be used in a coordinated manner
+            in a parallel computing environment
+    </ul>
+    <p>
+    The notes referenced in parantheses with many function names 
+    follow the lists of functions and properties.
+
+
+
+</dir>
+<h2>Always collective</h2>
+<dir>
+    The following functions must always be called collectively.
+    <dir>
+    <pre>
+    H5Aclose (2)
+    H5Acreate (6) (9)
+    H5Adelete
+    H5Arename (A)
+    H5Awrite (3)
+
+    H5Dclose (2)
+    H5Dcreate (6) (9)
+    H5Dextend (5) (10)
+    H5Dset_extent (5) (10) (A)
+
+    H5Fclose (1)
+    H5Fcreate (8) (9)
+    H5Fflush
+    H5Fmount
+    H5Fopen (9)
+    H5Freopen
+    H5Funmount
+
+    H5Gclose (2)
+    H5Gcreate (8) (9)
+    H5Glink
+    H5Glink2 (A)
+    H5Gmove
+    H5Gmove2 (A)
+    H5Gset_comment
+    H5Gunlink
+
+    H5Idec_ref (7) (A)
+    H5Iinc_ref (7) (A)
+
+    H5Rcreate
+
+    H5Tclose (4)
+    H5Tcommit (8) (9)
+    </pre>
+    </dir>
+
+
+</dir>
+<h2>Collective, unless target object will not be modified</h2>
+<dir>
+    The following functions must normally be called collectively.
+    If, however, the target object will <emphasis>not</emphasis> be modified, 
+    they may be called independently.
+    <dir>
+    <pre>
+    H5Aopen_idx (9)
+    H5Aopen_name (9)
+
+    H5Dopen (9)
+
+    H5Gopen (9)
+
+    H5Rdereference
+
+    H5Topen (9)
+    </pre>
+    </dir>
+
+
+</dir>
+<h2>Properties</h2>
+<dir>
+    The following properties must be set to the same values
+    when they are used in a parallel program.
+    <dir>
+   Dataset creation properties:
+    <pre>
+    H5Pset_alloc_time
+    H5Pset_chunk
+    H5Pset_deflate
+    H5Pset_external
+    H5Pset_fill_time
+    H5Pset_fill_value
+    H5Pset_filter
+    H5Pset_layout
+    H5Pset_shuffle
+    H5Pset_szip
+    </pre>
+
+   Dataset transfer properties:
+    <pre>
+    H5Pset_btree_ratios
+    H5Pset_buffer
+    H5Pset_dxpl_mpio
+    H5Pset_hyper_cache
+    H5Pset_preserve
+    </pre>
+
+   File access properties:
+    <pre>
+    H5Pset_alignment
+    H5Pset_cache
+    H5Pset_fapl_mpio
+    H5Pset_fclose_degree
+    H5Pset_gc_references
+    H5Pset_meta_block_size
+    H5Pset_small_data_block_size
+    H5Pset_sieve_buf_size
+    </pre>
+
+   File creation properties:
+    <pre>
+    H5Pset_istore_k
+    H5Pset_sizes
+    H5Pset_sym_k
+    H5Pset_userblock
+    </pre>
+
+    </dir>
+
+
+</dir>
+<h2>Notes</h2>
+<dir>
+    <table>
+      <tr>
+        <td valign="top" align="right">
+            (1)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must participate only if this is the last
+            reference to the file identifier.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (2)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must participate only if all file identifiers 
+            for a file have been closed and this is the last outstanding 
+            object identifier.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (3)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            Because raw data for an attribute is cached locally, all
+            processes must participate in order to guarantee that future
+            <code>H5Aread</code> calls return correct results on all 
+            processes.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (4)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must participate only if the datatype is for a
+            committed datatype, all the file identifiers for the file have 
+            been closed, and this is the last outstanding object identifier.
+            </td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (5)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must participate only if the number of chunks in
+            the dataset actually changes.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (6)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must use the same datatype, dataspace, and 
+            creation properties.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (7)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            This function may be called independently if the object 
+            identifier does not refer to an object that was collectively 
+            opened.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (8)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must use the same creation properties.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (9)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must use the same access properties.</td>
+        </tr>
+      <tr>
+        <td valign="top" align="right">
+            (10)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            All processes must use the same dataspace dimensions</td>
+        </tr>
+
+      <tr>
+        <td valign="top" align="right">
+            &nbsp;<br>
+            (A)</td><td>&nbsp;&nbsp;</td>
+        <td valign="top" align="left">
+            &nbsp;<br>
+            Available only in the HDF5 Release 1.6.x series or later 
+            versions of the library.
+            </td>
+        </tr>
+    </table>
+
+
+</dir>
+
+
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="../index.html">HDF5 documents and links</a>&nbsp;<br>
+<a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="../UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<!--
+<a href="Glossary.html">Glossary</a><br>
+-->
+</td>
+<td valign=top align=right>
+And in this document, the 
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<br>
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<br>
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
+<br>
+<i><font size=-1>(Printable <a href="http://hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a> of this Reference Manual)</font></i>&nbsp;
+</td></tr>
+</table>
+</center>
+<hr>
+<!-- #EndLibraryItem -->
+
+<!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+<address>
+The HDF Group Help Desk: <img src="../Graphics/help.png" align=top height=16>
+<br>
+Describes HDF5 Development Trunk, Release 1.9.x.
+<br>
+Highest current public release is HDF5 Release 1.8.x.
+</address>
+<!-- #EndLibraryItem --></body>
+<SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 28 April 2010");
+-->
+</SCRIPT>
+</html>
