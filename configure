@@ -24831,7 +24831,7 @@ _ACEOF
 fi
 done
 
-for ac_func in gethostname getpwuid getrusage longjmp lstat
+for ac_func in gethostname getpwuid getrusage lstat
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -24844,7 +24844,20 @@ _ACEOF
 fi
 done
 
-for ac_func in rand_r random setsysinfo siglongjmp signal
+for ac_func in rand_r random setsysinfo
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+for ac_func in signal longjmp setjmp siglongjmp sigsetjmp sigprocmask
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

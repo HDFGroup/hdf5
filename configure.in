@@ -1989,8 +1989,9 @@ dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(alarm BSDgettimeofday fork frexpf frexpl)
-AC_CHECK_FUNCS(gethostname getpwuid getrusage longjmp lstat)
-AC_CHECK_FUNCS(rand_r random setsysinfo siglongjmp signal)
+AC_CHECK_FUNCS(gethostname getpwuid getrusage lstat)
+AC_CHECK_FUNCS(rand_r random setsysinfo)
+AC_CHECK_FUNCS(signal longjmp setjmp siglongjmp sigsetjmp sigprocmask)
 AC_CHECK_FUNCS(snprintf srandom strdup symlink system)
 AC_CHECK_FUNCS(tmpfile vasprintf waitpid)
 
