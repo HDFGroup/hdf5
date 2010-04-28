@@ -282,6 +282,7 @@ test_compound_dtype2(hid_t file)
     typedef struct s2 {
         short           c2;
         long            l2;
+        long long       ll2;
     } s2;
     typedef struct s1 {
         char            c;
@@ -311,9 +312,10 @@ test_compound_dtype2(hid_t file)
 	for (j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->i = n++;
-	    temp_point->st.c2 = i+j;
-	    temp_point->st.l2 = (i*5+j*50)*n;
-	    temp_point->l = (i*10+j*100)*n;
+            temp_point->st.c2 = (short)(i + j);
+            temp_point->st.l2 = (i * 5 + j * 50) * n;
+            temp_point->st.ll2 = (i * 10 + j * 100) * n;
+            temp_point->l = (unsigned long long)((i * 100 + j * 1000) * n);
 	}
     }
 
@@ -323,36 +325,39 @@ test_compound_dtype2(hid_t file)
     if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
-#if H5_SIZEOF_LONG==4
-    if((tid2=H5Tcreate(H5T_COMPOUND, 6))<0) TEST_ERROR;
-    if((tid=H5Tcreate(H5T_COMPOUND, 19))<0) TEST_ERROR;
-#elif H5_SIZEOF_LONG==8
-    if((tid2=H5Tcreate(H5T_COMPOUND, 10))<0) TEST_ERROR;
-    if((tid=H5Tcreate(H5T_COMPOUND, 23))<0) TEST_ERROR;
-#else
-#error "Unknown 'long' size"
-#endif
+    if((tid2=H5Tcreate(H5T_COMPOUND, sizeof(s2))) < 0) TEST_ERROR;
+    if((tid=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
 
     /* Insert and pack members */
-    if(H5Tinsert(tid2, "c2", 0, H5T_STD_I16BE)<0) TEST_ERROR;
-#if H5_SIZEOF_LONG==4
-    if(H5Tinsert(tid2, "l2", 2, H5T_STD_I32LE)<0) TEST_ERROR;
-#elif H5_SIZEOF_LONG==8
-    if(H5Tinsert(tid2, "l2", 2, H5T_STD_I64LE)<0) TEST_ERROR;
+    if(H5Tinsert(tid2, "c2", HOFFSET(s2, c2), H5T_STD_I16BE) < 0) TEST_ERROR;
+#if H5_SIZEOF_LONG == 4
+    if(H5Tinsert(tid2, "l2", HOFFSET(s2, l2), H5T_STD_I32LE) < 0) TEST_ERROR;
+#elif H5_SIZEOF_LONG == 8
+    if(H5Tinsert(tid2, "l2", HOFFSET(s2, l2), H5T_STD_I64LE) < 0) TEST_ERROR;
 #else
 #error "Unknown 'long' size"
+#endif
+#if H5_SIZEOF_LONG_LONG == 4
+    if(H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I32BE) < 0) TEST_ERROR;
+#elif H5_SIZEOF_LONG_LONG == 8
+    if(H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I64BE) < 0) TEST_ERROR;
+#else
+#error "Unknown 'long long' size"
 #endif
 
-    if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE)<0) TEST_ERROR;
-    if(H5Tinsert(tid, "i", 1, H5T_STD_I32LE)<0) TEST_ERROR;
-    if(H5Tinsert(tid, "st", 5, tid2)<0) TEST_ERROR;
-#if H5_SIZEOF_LONG==4
-    if(H5Tinsert(tid, "l", 11, H5T_STD_U64BE)<0) TEST_ERROR;
-#elif H5_SIZEOF_LONG==8
-    if(H5Tinsert(tid, "l", 15, H5T_STD_U64BE)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "c", HOFFSET(s1, c), H5T_STD_U8LE) < 0) TEST_ERROR;
+    if(H5Tinsert(tid, "i", HOFFSET(s1, i), H5T_STD_I32LE) < 0) TEST_ERROR;
+    if(H5Tinsert(tid, "st", HOFFSET(s1, st), tid2) < 0) TEST_ERROR;
+#if H5_SIZEOF_LONG_LONG == 4
+    if(H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U32BE) < 0) TEST_ERROR;
+#elif H5_SIZEOF_LONG_LONG == 8
+    if(H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U64BE) < 0) TEST_ERROR;
 #else
-#error "Unknown 'long' size"
+#error "Unknown 'long long' size"
 #endif
+
+    /* Take away the paddings */
+    if(H5Tpack(tid) < 0) TEST_ERROR;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_2, tid, space,
@@ -365,6 +370,7 @@ test_compound_dtype2(hid_t file)
     /* Insert members */
     if(H5Tinsert(tid_m2, "c2", HOFFSET(s2, c2), H5T_NATIVE_SHORT)<0) TEST_ERROR;
     if(H5Tinsert(tid_m2, "l2", HOFFSET(s2, l2), H5T_NATIVE_LONG)<0) TEST_ERROR;
+    if(H5Tinsert(tid_m2, "ll2", HOFFSET(s2, ll2), H5T_NATIVE_LLONG) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "i", HOFFSET(s1, i), H5T_NATIVE_INT)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "st", HOFFSET(s1, st), tid_m2)<0) TEST_ERROR;
@@ -393,9 +399,9 @@ test_compound_dtype2(hid_t file)
     /* check the char member */
     if((mem_id = H5Tget_member_type(native_type, 0))<0)
         TEST_ERROR;
-    if(H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_UCHAR))
+    if(H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_SCHAR))
         TEST_ERROR;
-    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_U8LE))
+    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I8LE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(mem_id))
         TEST_ERROR;
@@ -452,6 +458,21 @@ test_compound_dtype2(hid_t file)
         TEST_ERROR;
     H5Tclose(mem_id);
 
+    if((mem_id = H5Tget_member_type(nest_mem_id, 2)) < 0)
+        TEST_ERROR;
+    if(H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_LLONG))
+        TEST_ERROR;
+#if H5_SIZEOF_LONG_LONG==4
+    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I32LE)) TEST_ERROR;
+#elif H5_SIZEOF_LONG_LONG==8
+    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I64LE)) TEST_ERROR;
+#else
+#error "Unknown 'long long' size"
+#endif
+    if(H5T_INTEGER!=H5Tget_class(mem_id))
+        TEST_ERROR;
+    H5Tclose(mem_id);
+
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
     tmp = malloc(DIM0*DIM1*H5Tget_size(native_type));
@@ -476,6 +497,7 @@ test_compound_dtype2(hid_t file)
 	        temp_point->i != temp_check->i ||
 	        temp_point->st.c2 != temp_check->st.c2 ||
 	        temp_point->st.l2 != temp_check->st.l2 ||
+                temp_point->st.ll2 != temp_check->st.ll2 ||
 	        temp_point->l != temp_check->l ) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
