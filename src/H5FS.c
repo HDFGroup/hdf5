@@ -33,6 +33,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -55,6 +56,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
+/* Section info routines */
 static herr_t H5FS_sinfo_free_sect_cb(void *item, void *key, void *op_data);
 static herr_t H5FS_sinfo_free_node_cb(void *item, void *key, void *op_data);
 
@@ -169,6 +172,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, size_t nclasses,
     H5FS_t *fspace = NULL;      /* New free space structure */
     H5FS_prot_t fs_prot;        /* Information for protecting free space manager */
     unsigned fspace_status = 0; /* Free space header's status in the metadata cache */
+    H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     H5FS_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_open, NULL)
@@ -185,9 +189,11 @@ HDfprintf(stderr, "%s: Opening free space manager, nclasses = %Zu\n", FUNC, ncla
     fs_prot.nclasses = nclasses;
     fs_prot.classes = classes;
     fs_prot.cls_init_udata = cls_init_udata;
+    cache_udata.fs_prot = &fs_prot;
+    cache_udata.f = f;
 
     /* Protect the free space header */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_READ)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
@@ -239,6 +245,7 @@ H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr)
 {
     H5FS_t *fspace = NULL;              /* Free space header loaded from file */
     H5FS_prot_t fs_prot;                /* Temporary information for protecting free space header */
+    H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_delete, FAIL)
@@ -255,9 +262,11 @@ HDfprintf(stderr, "%s: Deleting free space manager\n", FUNC);
     fs_prot.nclasses = 0;
     fs_prot.classes = NULL;
     fs_prot.cls_init_udata = NULL;
+    cache_udata.fs_prot = &fs_prot;
+    cache_udata.f = f;
 
     /* Protect the free space header */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to protect free space header")
 
     /* Delete serialized section storage, if there are any */

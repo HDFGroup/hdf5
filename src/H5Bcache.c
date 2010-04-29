@@ -54,7 +54,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
+static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
 static herr_t H5B_dest(H5F_t *f, H5B_t *bt);
 static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
@@ -96,10 +96,10 @@ const H5AC_class_t H5AC_BT[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5B_t *
-H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
+H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    const H5B_class_t	*type = (const H5B_class_t *) _type;
-    H5B_t		*bt = NULL;
+    H5B_t *bt = NULL;           /* Pointer to the deserialized B-tree node */
+    H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata;       /* User data for callback */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
     const uint8_t *p;           /* Pointer into raw data buffer */
     uint8_t *native;            /* Pointer to native keys */
@@ -111,8 +111,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(type);
-    HDassert(type->get_shared);
+    HDassert(udata);
 
     /* Allocate the B-tree node in memory */
     if(NULL == (bt = H5FL_MALLOC(H5B_t)))
@@ -120,8 +119,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
-    if(NULL == (bt->rc_shared=(type->get_shared)(f, udata)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
+    bt->rc_shared = udata->rc_shared;
     H5RC_INC(bt->rc_shared);
 
     /* Get a pointer to the shared info, for convenience */
@@ -146,7 +144,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     p += 4;
 
     /* node type and level */
-    if(*p++ != (uint8_t)type->id)
+    if(*p++ != (uint8_t)udata->type->id)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type")
     bt->level = *p++;
 
@@ -154,26 +152,26 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     UINT16DECODE(p, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_decode(f, (const uint8_t **)&p, &(bt->left));
-    H5F_addr_decode(f, (const uint8_t **)&p, &(bt->right));
+    H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->left));
+    H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->right));
 
     /* the child/key pairs */
     native = bt->native;
     for(u = 0; u < bt->nchildren; u++) {
         /* Decode native key value */
-        if((type->decode)(shared, p, native) < 0)
+        if((udata->type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
         p += shared->sizeof_rkey;
-        native += type->sizeof_nkey;
+        native += udata->type->sizeof_nkey;
 
         /* Decode address value */
-        H5F_addr_decode(f, (const uint8_t **)&p, bt->child + u);
+        H5F_addr_decode(udata->f, (const uint8_t **)&p, bt->child + u);
     } /* end for */
 
     /* Decode final key */
     if(bt->nchildren > 0) {
         /* Decode native key value */
-        if((type->decode)(shared, p, native) < 0)
+        if((udata->type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
     } /* end if */
 

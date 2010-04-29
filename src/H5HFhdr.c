@@ -132,7 +132,7 @@ done:
     if(!ret_value)
         if(hdr)
             if(H5HF_hdr_dest(hdr) < 0)
-                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap header")
+                HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -660,6 +660,12 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
+
+    /* Resize pinned header in cache if I/O filter is present. */
+    if(hdr->filter_len > 0) {
+        if(H5AC_resize_pinned_entry(hdr, (size_t)hdr->heap_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap header")
+    } /* end if */
 
     /* Mark header as dirty in cache */
     if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)

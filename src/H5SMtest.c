@@ -94,7 +94,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         ssize_t index_num;                  /* Table index for message type */
 
         /* Look up the master SOHM table */
-        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Find the correct index for this message type */

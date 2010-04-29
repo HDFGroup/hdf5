@@ -126,6 +126,27 @@ typedef struct {
     hsize_t     all_nrec;       /* Number of records in node pointed to and all it's children */
 } H5B2_node_ptr_t;
 
+/* Callback info for loading a free space header into the cache */
+typedef struct H5B2_hdr_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    const H5B2_class_t *type;   /* User-data for protecting */
+} H5B2_hdr_cache_ud_t;
+
+/* Callback info for loading a free space internal node into the cache */
+typedef struct H5B2_internal_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
+    unsigned nrec;              /* Number of records in node to load */
+    unsigned depth;             /* Depth of node to load */
+} H5B2_internal_cache_ud_t;
+
+/* Callback info for loading a free space leaf node into the cache */
+typedef struct H5B2_leaf_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    const unsigned *nrec;             /* Number of records in node to load */
+    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
+} H5B2_leaf_cache_ud_t;
+
 /* Information about a node at a given depth */
 typedef struct {
     unsigned    max_nrec;       /* Max. number of records in node */
@@ -193,13 +214,6 @@ typedef struct H5B2_internal_t {
     unsigned    nrec;           /* Number of records in node                  */
     unsigned    depth;          /* Depth of this node in the B-tree           */
 } H5B2_internal_t;
-
-/* User data for metadata cache 'load' callback */
-typedef struct {
-    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
-    unsigned nrec;              /* Number of records in node to load */
-    unsigned depth;             /* Depth of node to load */
-} H5B2_int_load_ud1_t;
 
 #ifdef H5B2_TESTING
 /* Node information for testing */

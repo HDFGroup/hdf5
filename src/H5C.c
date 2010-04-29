@@ -175,8 +175,7 @@ static void * H5C_load_entry(H5F_t *             f,
                              hid_t               dxpl_id,
                              const H5C_class_t * type,
                              haddr_t             addr,
-                             const void *        udata1,
-                             void *              udata2,
+                             void *              udata,
                              hbool_t             skip_file_checks);
 
 static herr_t H5C_make_space_in_cache(H5F_t * f,
@@ -210,7 +209,7 @@ static herr_t H5C_verify_not_in_index(H5C_t * cache_ptr,
 #define H5C__EPOCH_MARKER_TYPE	H5C__MAX_NUM_TYPE_IDS
 
 static void *H5C_epoch_marker_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                                   const void *udata1, void *udata2);
+                                   void *udata);
 static herr_t H5C_epoch_marker_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                                      haddr_t addr, void *thing,
 				     unsigned *flags_ptr);
@@ -241,8 +240,7 @@ static void *
 H5C_epoch_marker_load(H5F_t UNUSED * f,
                       hid_t UNUSED dxpl_id,
                       haddr_t UNUSED addr,
-                      const void UNUSED * udata1,
-                      void UNUSED * udata2)
+                      void UNUSED * udata)
 {
     void * ret_value = NULL;      /* Return value */
 
@@ -320,6 +318,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
 
 
 /*-------------------------------------------------------------------------
@@ -2175,7 +2174,7 @@ H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_insert_entry(H5F_t * 	     f,
+H5C_insert_entry(H5F_t *             f,
                  hid_t		     primary_dxpl_id,
                  hid_t		     secondary_dxpl_id,
                  const H5C_class_t * type,
@@ -2475,7 +2474,7 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5C_mark_entries_as_clean(H5F_t   * f,
+H5C_mark_entries_as_clean(H5F_t *  f,
                           hid_t     primary_dxpl_id,
                           hid_t     secondary_dxpl_id,
                           int32_t   ce_array_len,
@@ -3332,13 +3331,12 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5C_protect(H5F_t *	        f,
+H5C_protect(H5F_t *		f,
             hid_t	        primary_dxpl_id,
             hid_t	        secondary_dxpl_id,
             const H5C_class_t * type,
             haddr_t 	        addr,
-            const void *        udata1,
-            void *	        udata2,
+            void *              udata,
 	    unsigned		flags)
 {
     H5C_t *		cache_ptr;
@@ -3396,8 +3394,7 @@ H5C_protect(H5F_t *	        f,
 
         hit = FALSE;
 
-        thing = H5C_load_entry(f, primary_dxpl_id, type, addr, udata1, udata2,
-                               cache_ptr->skip_file_checks);
+        thing = H5C_load_entry(f, primary_dxpl_id, type, addr, udata, cache_ptr->skip_file_checks);
 
         if ( thing == NULL ) {
 
@@ -7472,7 +7469,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
                        hid_t 		   secondary_dxpl_id,
                        const H5C_class_t * type_ptr,
                        haddr_t		   addr,
-                       unsigned		   flags,
+                       unsigned	     	   flags,
                        hbool_t *	   first_flush_ptr,
                        hbool_t		   del_entry_from_slist_on_destroy)
 {
@@ -7879,7 +7876,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		if ( cache_ptr->aux_ptr != NULL ) {
 
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			        "Flush operation occured in the parallel case.")
+		        "resize/rename in serialize occured in parallel case.")
 
 		}
 	    }
@@ -8030,8 +8027,7 @@ H5C_load_entry(H5F_t *             f,
                hid_t               dxpl_id,
                const H5C_class_t * type,
                haddr_t             addr,
-               const void *        udata1,
-               void *              udata2,
+               void *              udata,
 #ifndef NDEBUG
                hbool_t		   skip_file_checks)
 #else /* NDEBUG */
@@ -8053,7 +8049,7 @@ H5C_load_entry(H5F_t *             f,
     HDassert( type->size );
     HDassert( H5F_addr_defined(addr) );
 
-    if ( NULL == (thing = (type->load)(f, dxpl_id, addr, udata1, udata2)) ) {
+    if ( NULL == (thing = (type->load)(f, dxpl_id, addr, udata)) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load entry")
 

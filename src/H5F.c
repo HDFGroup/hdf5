@@ -22,7 +22,7 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
@@ -1956,7 +1956,7 @@ H5F_try_close(H5F_t *f)
      */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5C__NO_FLAGS_SET) < 0)
+        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_NONE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 

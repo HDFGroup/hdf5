@@ -53,12 +53,12 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static H5SM_master_table_t *H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *table);
+static H5SM_master_table_t *H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_master_table_t *table);
 static herr_t H5SM_table_dest(H5F_t *f, H5SM_master_table_t* table);
 static herr_t H5SM_table_clear(H5F_t *f, H5SM_master_table_t *table, hbool_t destroy);
 static herr_t H5SM_table_size(const H5F_t *f, const H5SM_master_table_t *table, size_t *size_ptr);
-static H5SM_list_t *H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
+static H5SM_list_t *H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_list_t *list);
 static herr_t H5SM_list_dest(H5F_t *f, H5SM_list_t* list);
 static herr_t H5SM_list_clear(H5F_t *f, H5SM_list_t *list, hbool_t destroy);
@@ -113,7 +113,7 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5SM_master_table_t *
-H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, void UNUSED *udata2)
+H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
     H5SM_master_table_t *table = NULL;
     size_t        size;                 /* Size of SOHM master table on disk */
@@ -458,10 +458,10 @@ H5SM_table_size(const H5F_t *f, const H5SM_master_table_t *table, size_t *size_p
  *-------------------------------------------------------------------------
  */
 static H5SM_list_t *
-H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1, void *udata2)
+H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5SM_list_t *list;          /* The SOHM list being read in */
-    H5SM_index_header_t *header = (H5SM_index_header_t *) udata2;     /* Index header for this list */
+    H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata; /* User data for callback */
     size_t size;                /* Size of SOHM list on disk */
     H5WB_t *wb = NULL;          /* Wrapped buffer for list index data */
     uint8_t lst_buf[H5SM_LST_BUF_SIZE]; /* Buffer for list index */
@@ -475,7 +475,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     FUNC_ENTER_NOAPI_NOINIT(H5SM_list_load)
 
     /* Sanity check */
-    HDassert(header);
+    HDassert(udata->header);
 
     /* Allocate space for the SOHM list data structure */
     if(NULL == (list = H5FL_MALLOC(H5SM_list_t)))
@@ -483,17 +483,17 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
-    if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, header->list_max)) == NULL)
+    if((list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, udata->header->list_max)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for SOHM list")
 
-    list->header = header;
+    list->header = udata->header;
 
     /* Wrap the local buffer for serialized list index info */
     if(NULL == (wb = H5WB_wrap(lst_buf, sizeof(lst_buf))))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the size of the SOHM list on disk */
-    size = H5SM_LIST_SIZE(f, header->num_messages);
+    size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
 
     /* Get a pointer to a buffer that's large enough for serialized list index */
     if(NULL == (buf = H5WB_actual(wb, size)))
@@ -512,10 +512,10 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     p += H5SM_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
-    for(x = 0; x < header->num_messages; x++) {
-        if(H5SM_message_decode(f, p, &(list->messages[x])) < 0)
+    for(x = 0; x < udata->header->num_messages; x++) {
+        if(H5SM_message_decode(udata->f, p, &(list->messages[x])) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message")
-        p += H5SM_SOHM_ENTRY_SIZE(f);
+        p += H5SM_SOHM_ENTRY_SIZE(udata->f);
     } /* end for */
 
     /* Read in checksum */
@@ -532,7 +532,7 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list")
 
     /* Initialize the rest of the array */
-    for(x = header->num_messages; x < header->list_max; x++)
+    for(x = udata->header->num_messages; x < udata->header->list_max; x++)
         list->messages[x].location = H5SM_NO_LOC;
 
     /* Set return value */
@@ -544,8 +544,8 @@ done:
         HDONE_ERROR(H5E_SOHM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && list) {
         if(list->messages)
-            H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-        H5FL_FREE(H5SM_list_t, list);
+            list->messages = H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
+        list = H5FL_FREE(H5SM_list_t, list);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

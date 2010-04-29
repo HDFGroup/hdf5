@@ -36,7 +36,7 @@
 
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
@@ -100,14 +100,14 @@ typedef struct H5F_file_t {
     size_t	sizeof_size;	/* Size of offsets in file              */
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
-    haddr_t	extension_addr;	/* Relative address of superblock extension	*/
+    haddr_t	extension_addr;	/* Relative address of superblock extension */
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     haddr_t	driver_addr;	/* File driver information block address*/
     haddr_t	maxaddr;	/* Maximum address for file             */
 
-    H5AC_t      *cache;		/* The object cache			*/
+    H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
                                 /* metadata cache.  This structure is   */

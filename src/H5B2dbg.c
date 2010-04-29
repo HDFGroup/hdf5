@@ -94,6 +94,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_shared_t *shared;              /* Shared B-tree information */
     unsigned    u;                      /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_hdr_debug, FAIL)
@@ -111,7 +112,9 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.type = type;
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
@@ -204,6 +207,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_int_debug, FAIL)
@@ -223,7 +227,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.type = type;
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
@@ -333,6 +339,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     unsigned		u;              /* Local index variable */
     char                temp_str[128];  /* Temporary string, for formatting */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    H5B2_leaf_cache_ud_t cache_leaf_udata;    /* User-data for callback */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_leaf_debug, FAIL)
@@ -352,7 +360,9 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.type = type;
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
@@ -362,7 +372,10 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
+    cache_leaf_udata.f = f;
+    cache_leaf_udata.nrec = &nrec;
+    cache_leaf_udata.bt2_shared = bt2->shared;
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &cache_leaf_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
 
     /* Release the B-tree header */

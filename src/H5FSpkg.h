@@ -101,6 +101,19 @@ typedef struct H5FS_prot_t {
     void *cls_init_udata;                       /* Pointer to class init user data */
 } H5FS_prot_t;
 
+/* Callback info for loading a free space header into the cache */
+typedef struct H5FS_hdr_cache_ud_t {
+    H5F_t *f;                  /* File that free space header is within */
+    H5FS_prot_t * fs_prot;     /* user data for protecting */
+} H5FS_hdr_cache_ud_t;
+
+/* Callback info for loading free space section info into the cache */
+typedef struct H5FS_sinfo_cache_ud_t {
+    H5F_t *f;                  /* File that free space section info is within */
+    H5FS_t *fspace;            /* free space manager */
+    hid_t dxpl_id;
+} H5FS_sinfo_cache_ud_t;
+
 /* Free space section bin info */
 typedef struct H5FS_bin_t {
     size_t tot_sect_count;      /* Total # of sections in this bin */

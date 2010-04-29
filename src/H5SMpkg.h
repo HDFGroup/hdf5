@@ -32,6 +32,7 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"        /* Metadata Cache		  	*/
 #include "H5B2private.h"        /* B-trees                              */
 #include "H5HFprivate.h"        /* Fractal heaps		  	*/
 
@@ -219,6 +220,12 @@ typedef struct {
     H5O_fheap_id_t fheap_id;    /* OUT: fheap ID of record */
     hid_t dxpl_id;
 } H5SM_incr_ref_opdata;
+
+/* Callback info for loading a shared message index into the cache */
+typedef struct H5SM_list_cache_ud_t {
+    H5F_t *f;  /* File that shared message index stored as a list is in */
+    H5SM_index_header_t *header; /* Index header for this list */
+} H5SM_list_cache_ud_t;
 
 
 /****************************/

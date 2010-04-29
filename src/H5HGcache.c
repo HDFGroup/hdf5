@@ -62,8 +62,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1,
-			      void *udata2);
+static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
 			 H5HG_heap_t *heap, unsigned UNUSED * flags_ptr);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
@@ -76,7 +75,7 @@ static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_pt
 /*********************/
 
 /*
- * H5HG inherits cache-like properties from H5AC2
+ * H5HG inherits cache-like properties from H5AC
  */
 const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
@@ -114,8 +113,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5HG_heap_t *
-H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
-	   void UNUSED * udata2)
+H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
     H5HG_heap_t	*heap = NULL;
     uint8_t	*p;
@@ -128,8 +126,7 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(!udata1);
-    HDassert(!udata2);
+    HDassert(udata);
 
     /* Allocate space for heap */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))

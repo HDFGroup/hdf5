@@ -27,7 +27,7 @@
 
 #include "H5Cpkg.h"
 
-#define H5AC_PACKAGE            /*suppress error about including H5Cpkg   */
+#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
 
 #include "H5ACpkg.h"
 
@@ -312,7 +312,7 @@ herr_t destroy_datum(H5F_t UNUSED * f, void * thing);
 herr_t flush_datum(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, haddr_t addr,
                    void *thing);
 void * load_datum(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
-                  const void UNUSED *udata1, void UNUSED *udata2);
+                  void UNUSED *udata);
 herr_t size_datum(H5F_t UNUSED * f, void * thing, size_t * size_ptr);
 
 #define DATUM_ENTRY_TYPE	H5AC_TEST_ID
@@ -1815,7 +1815,7 @@ flush_datum(H5F_t *f,
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
     HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-	      ( entry_ptr->header.size == entry_ptr->local_len ) );
+              ( entry_ptr->header.size == entry_ptr->local_len ) );
 
     HDassert( entry_ptr->header.is_dirty == entry_ptr->dirty );
 
@@ -1824,7 +1824,7 @@ flush_datum(H5F_t *f,
         ret_value = FAIL;
         HDfprintf(stdout,
                   "%d:%s: Flushed dirty entry from non-zero file process.",
-                   world_mpi_rank, fcn_name);
+                  world_mpi_rank, fcn_name);
     }
 
     if ( ret_value == SUCCEED ) {
@@ -1902,7 +1902,7 @@ flush_datum(H5F_t *f,
     if ( entry_ptr->header.is_pinned ) {
 
         datum_pinned_flushes++;
-	HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
+        HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
     }
 
     return(ret_value);
@@ -1929,8 +1929,7 @@ void *
 load_datum(H5F_t UNUSED *f,
            hid_t UNUSED dxpl_id,
            haddr_t addr,
-           const void UNUSED *udata1,
-           void UNUSED *udata2)
+           void UNUSED *udata)
 {
     const char * fcn_name = "load_datum()";
     hbool_t success = TRUE;
@@ -2704,7 +2703,7 @@ lock_entry(H5C_t * cache_ptr,
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, -1, &(types[0]),
                                        entry_ptr->base_addr,
-                                       NULL, NULL, H5AC_WRITE);
+                                       NULL, H5AC_WRITE);
 
         if ( ( cache_entry_ptr != (void *)(&(entry_ptr->header)) ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -3618,7 +3617,7 @@ unlock_entry(H5C_t * cache_ptr,
             entry_ptr->dirty = TRUE;
         }
 
-        result = H5AC_unprotect(file_ptr, -1, &(types[0]),
+        result = H5AC_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
 			        entry_ptr->base_addr,
                                 (void *)(&(entry_ptr->header)), flags);
 
@@ -3720,7 +3719,7 @@ unpin_entry(H5C_t * cache_ptr,
 
 	    }
 
-	    result = H5AC_unpin_entry((void *)entry_ptr);
+	    result = H5AC_unpin_entry(entry_ptr);
 
 	    if ( result < 0 ) {
 
@@ -5240,7 +5239,7 @@ smoke_check_5(void)
  * Modifications:
  *
  *		JRM -- 7/11/06
- *		Updated fro H5AC_expunge_entry() and
+ *		Updated for H5AC_expunge_entry() and
  *		H5AC_resize_pinned_entry().
  *
  *****************************************************************************/
@@ -5420,8 +5419,8 @@ trace_file_check(void)
 
 		    nerrors++;
 	            HDfprintf(stdout,
-                         "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
-                          world_mpi_rank, fcn_name);
+                        "%d:%s: H5AC_set_cache_auto_resize_config() failed.\n",
+                        world_mpi_rank, fcn_name);
                 }
             }
         }

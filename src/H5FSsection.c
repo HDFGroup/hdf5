@@ -186,6 +186,7 @@ static H5FS_sinfo_t *
 H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 {
     H5FS_sinfo_t *sinfo;        /* Section information struct created */
+    H5FS_sinfo_cache_ud_t cache_udata; /* User-data for cache callback */
     H5FS_sinfo_t *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_sinfo_pin)
@@ -232,8 +233,12 @@ HDfprintf(stderr, "%s: New section info, addr = %a, size = %Hu\n", FUNC, fspace-
 #ifdef QAK
 HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
 #endif /* QAK */
+
         /* Protect the free space sections */
-        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
+        cache_udata.fspace = fspace;
+        cache_udata.f = f;
+        cache_udata.dxpl_id = dxpl_id;
+        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
 
         /* Pin them in the cache */
@@ -304,7 +309,7 @@ H5FS_sect_increase(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
 
         /* Increment amount of space required to serialize all sections */
 #ifdef QAK
-HDfprintf(stderr, "%s: sinfo->serial_size = %Zu\n", FUNC, sinfo->serial_size);
+HDfprintf(stderr, "%s: sinfo->serial_size = %Zu\n", FUNC, fspace->sinfo->serial_size);
 HDfprintf(stderr, "%s: cls->serial_size = %Zu\n", FUNC, cls->serial_size);
 #endif /* QAK */
         fspace->sinfo->serial_size += cls->serial_size;
@@ -370,7 +375,7 @@ H5FS_sect_decrease(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, const H5FS_section_c
 
         /* Decrement amount of space required to serialize all sections */
 #ifdef QAK
-HDfprintf(stderr, "%s: fspace->serial_size = %Zu\n", FUNC, fspace->serial_size);
+HDfprintf(stderr, "%s: fspace->serial_size = %Zu\n", FUNC, fspace->sinfo->serial_size);
 HDfprintf(stderr, "%s: cls->serial_size = %Zu\n", FUNC, cls->serial_size);
 #endif /* QAK */
         fspace->sinfo->serial_size -= cls->serial_size;
@@ -1092,7 +1097,7 @@ HDfprintf(stderr, "%s: Returning space\n", FUNC);
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space section into skip list")
 
 #ifdef QAK
-HDfprintf(stderr, "%s: fspace->hdr->tot_space = %Hu\n", FUNC, fspace->hdr->tot_space);
+HDfprintf(stderr, "%s: fspace->hdr->tot_space = %Hu\n", FUNC, fspace->tot_space);
 #endif /* QAK */
     /* Mark free space sections as changed */
     /* (if adding sections while deserializing sections, don't set the flag) */
@@ -1330,6 +1335,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu\n", FUNC, fspace->alloc_sec
     if(fspace->sect_size > fspace->alloc_sect_size) {
         size_t new_size;        /* New size of space for serialized sections */
         haddr_t old_addr;       /* Old address of serialized sections */
+        hsize_t old_alloc_sect_size;    /* Old size of section info */
 
 /* Currently, the old block data is "thrown away" after the space is reallocated,
  * so avoid data copy in H5MF_realloc() call by just free'ing the space and
@@ -1342,6 +1348,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu\n", FUNC, fspace->alloc_sec
  */
         /* Free previous serialized sections disk space */
         old_addr = fspace->sect_addr;
+        old_alloc_sect_size = fspace->alloc_sect_size;
         if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, old_addr, fspace->alloc_sect_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
 
@@ -1362,6 +1369,12 @@ HDfprintf(stderr, "%s: fspace->sect_size = %Hu\n", FUNC, fspace->sect_size);
 HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr, fspace->sect_addr);
 #endif /* QAK */
 
+        /* Resize pinned section info in the cache, if its changed size */
+        if(old_alloc_sect_size != fspace->alloc_sect_size) {
+            if(H5AC_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
+        } /* end if */
+
         /* Move object in cache, if it actually was relocated */
         if(H5F_addr_ne(fspace->sect_addr, old_addr)) {
             if(H5AC_rename(f, H5AC_FSPACE_SINFO, old_addr, fspace->sect_addr) < 0)
@@ -1380,6 +1393,7 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
     else {
         size_t decrease_threshold;      /* Size threshold for decreasing serialized section size */
         haddr_t old_addr;               /* Old address of serialized sections */
+        hsize_t old_alloc_sect_size;    /* Old size of section info */
 
         /* Compute the threshold for decreasing the sections' serialized size */
         decrease_threshold = (size_t)(((size_t)fspace->alloc_sect_size * (double)fspace->shrink_percent) / 100.0);
@@ -1399,6 +1413,7 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
  */
             /* Free previous serialized sections disk space */
             old_addr = fspace->sect_addr;
+            old_alloc_sect_size = fspace->alloc_sect_size;
             if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, old_addr, fspace->alloc_sect_size) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
 
@@ -1418,6 +1433,12 @@ HDfprintf(stderr, "%s: Allocating space for smaller serialized sections, new_siz
 #endif /* QAK */
             if(HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, (hsize_t)fspace->alloc_sect_size)))
                 HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections")
+
+            /* Resize pinned section info in the cache, if its changed size */
+            if(old_alloc_sect_size != fspace->alloc_sect_size) {
+                if(H5AC_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
+            } /* end if */
 
             /* Move object in cache, if it actually was relocated */
             if(H5F_addr_ne(fspace->sect_addr, old_addr)) {

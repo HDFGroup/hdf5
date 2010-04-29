@@ -25,6 +25,7 @@
 #include "H5ACprivate.h"
 #include "cache_common.h"
 
+
 /* global variable declarations: */
 
 extern const char *FILENAME[];
@@ -199,8 +200,7 @@ check_fapl_mdc_api_calls(void)
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config =
     {
-      /* int         version                = */
-                                                H5AC__CURR_CACHE_CONFIG_VERSION,
+      /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,
       /* hbool_t     rpt_fcn_enabled        = */ FALSE,
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
@@ -351,16 +351,16 @@ check_fapl_mdc_api_calls(void)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
             pass = FALSE;
 	    failure_mssg = "Can't get file_ptr.\n";
 
-        } else {
+	} else {
 
-            cache_ptr = file_ptr->shared->cache;
+	    cache_ptr = file_ptr->shared->cache;
         }
     }
 
@@ -500,7 +500,7 @@ check_fapl_mdc_api_calls(void)
     /* get a pointer to the files internal data structure */
     if ( pass ) {
 
-        file_ptr = H5I_object_verify(file_id, H5I_FILE);
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
 
         if ( file_ptr == NULL ) {
 
@@ -2138,6 +2138,7 @@ mdc_api_call_smoke_check(int express_test)
 } /* mdc_api_call_smoke_check() */
 
 
+
 /* The following array of invalid external MDC cache configurations is
  * used to test error rejection in the MDC related API calls.
  */
@@ -2197,11 +2198,11 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
     /* enum H5C_cache_flash_incr_mode       */
     /*                    flash_incr_mode = */ H5C_flash_incr__off,
     /* double      flash_multiple         = */ 2.0,
     /* double      flash_threshold        = */ 0.5,
-    /* size_t      max_increment          = */ (4 * 1024 * 1024),
     /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,

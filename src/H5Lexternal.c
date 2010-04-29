@@ -20,6 +20,7 @@
 #define H5_INTERFACE_INIT_FUNC	H5L_init_extern_interface
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Gpkg.h"             /* Groups                               */
 #include "H5Iprivate.h"		/* IDs					*/

@@ -25,7 +25,7 @@
 #include "H5MFprivate.h"
 #include "cache_common.h"
 
-
+
 /* global variable declarations: */
 
 const char *FILENAME[] = {
@@ -249,8 +249,7 @@ static herr_t clear(H5F_t * f, void * thing, hbool_t dest);
 static herr_t destroy(H5F_t * f, void * thing);
 static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                     haddr_t addr, void *thing, unsigned UNUSED * flags_ptr);
-static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                   const void *udata1, void *udata2);
+static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
 static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
     struct flush_op *op_ptr, unsigned *flags_ptr);
@@ -270,8 +269,6 @@ static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
  *
  * Programmer:	John Mainzer
  *              6/10/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -385,8 +382,6 @@ type_and_index_to_addr(int32_t type,
 #endif
 
 
-/* Call back functions: */
-
 /*-------------------------------------------------------------------------
  *
  * Function:    check_if_write_permitted
@@ -403,8 +398,6 @@ type_and_index_to_addr(int32_t type,
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 5/15/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -920,8 +913,7 @@ void *
 load(H5F_t UNUSED *f,
      hid_t UNUSED dxpl_id,
      haddr_t addr,
-     const void UNUSED *udata1,
-     void UNUSED *udata2)
+     void UNUSED *udata)
 {
     int32_t type;
     int32_t idx;
@@ -966,73 +958,63 @@ load(H5F_t UNUSED *f,
 } /* load() */
 
 void *
-pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-          const void *udata1, void *udata2)
+pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-          const void *udata1, void *udata2)
+nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-           const void *udata1, void *udata2)
+micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-          const void *udata1, void *udata2)
+tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-           const void *udata1, void *udata2)
+small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-            const void *udata1, void *udata2)
+medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-           const void *udata1, void *udata2)
+large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-          const void *udata1, void *udata2)
+huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-             const void *udata1, void *udata2)
+monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 void *
-variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-              const void *udata1, void *udata2)
+variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    return(load(f, dxpl_id, addr, udata1, udata2));
+    return(load(f, dxpl_id, addr, udata));
 }
 
 
@@ -1165,7 +1147,7 @@ variable_size(H5F_t * f, void * thing, size_t * size_ptr)
 /*-------------------------------------------------------------------------
  * Function:	add_flush_op
  *
- * Purpose:	Do noting if pass is FALSE on entry.
+ * Purpose:	Do nothing if pass is FALSE on entry.
  *
  *              Otherwise, add the specified flush operation to the
  *              target instance of test_entry_t.
@@ -1174,8 +1156,6 @@ variable_size(H5F_t * f, void * thing, size_t * size_ptr)
  *
  * Programmer:	John Mainzer
  *              9/1/06
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1231,7 +1211,7 @@ add_flush_op(int target_type,
 /*-------------------------------------------------------------------------
  * Function:	create_pinned_entry_dependency
  *
- * Purpose:	Do noting if pass is FALSE on entry.
+ * Purpose:	Do nothing if pass is FALSE on entry.
  *
  *              Otherwise, set up a pinned entry dependency so we can
  *              test the pinned entry modifications to the flush routine.
@@ -1246,8 +1226,6 @@ add_flush_op(int target_type,
  *
  * Programmer:	John Mainzer
  *              6/10/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1328,10 +1306,6 @@ create_pinned_entry_dependency(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1404,10 +1378,6 @@ dirty_entry(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              9/1/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1516,12 +1486,6 @@ execute_flush_op(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		JRM - 10/12/04
- *		Removed references to local_H5C_t, as we now get direct
- *		access to the definition of H5C_t via H5Cpkg.h.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1569,16 +1533,6 @@ entry_in_cache(H5C_t * cache_ptr,
  *
  * Programmer:	John Mainzer
  *              6/10/04
- *
- * Modifications:
- *
- * 		JRM -- 3/31/06
- * 		Added initialization for new pinned entry test related
- * 		fields.
- *
- * 		JRM -- 4/1/07
- * 		Added initialization for the new is_read_only, and
- * 		ro_ref_count fields.
  *
  *-------------------------------------------------------------------------
  */
@@ -1695,10 +1649,6 @@ reset_entries(void)
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1762,22 +1712,18 @@ resize_entry(H5F_t * file_ptr,
 
 
 /*-------------------------------------------------------------------------
- * Function:	resize_pinned_entry
+ * Function:    resize_pinned_entry
  *
- * Purpose:	Given a pointer to a cache, an entry type, an index, and
+ * Purpose:     Given a pointer to a cache, an entry type, an index, and
  *              a new size, change the size of the target pinned entry
  *              to match the supplied new size.
  *
- *		Do nothing if pass is false on entry.
+ *              Do nothing if pass is false on entry.
  *
- * Return:	void
+ * Return:      void
  *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              1/11/08
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1786,7 +1732,7 @@ void
 resize_pinned_entry(H5C_t * cache_ptr,
                     int32_t type,
                     int32_t idx,
-	            size_t new_size)
+                    size_t new_size)
 {
     herr_t result;
     test_entry_t * base_addr;
@@ -1802,7 +1748,7 @@ resize_pinned_entry(H5C_t * cache_ptr,
 
         if ( ! entry_in_cache(cache_ptr, type, idx) ) {
 
-	    pass = FALSE;
+            pass = FALSE;
             failure_mssg = "entry not in cache.";
 
         } else {
@@ -1821,23 +1767,23 @@ resize_pinned_entry(H5C_t * cache_ptr,
 
             } else {
 
-		entry_ptr->size = new_size;
+                entry_ptr->size = new_size;
 
 	        result = H5C_resize_pinned_entry((void *)entry_ptr,
 						 new_size);
 
-		if ( result != SUCCEED ) {
+                if ( result != SUCCEED ) {
 
-		    pass = FALSE;
-		    failure_mssg = "error(s) in H5C_resize_pinned_entry().";
+                    pass = FALSE;
+                    failure_mssg = "error(s) in H5C_resize_pinned_entry().";
 
-		} else {
+                } else {
 
-		    HDassert( entry_ptr->size = (entry_ptr->header).size );
+                    HDassert( entry_ptr->size = (entry_ptr->header).size );
 
                 }
-	    }
-	}
+            }
+        }
     }
 
     return;
@@ -1857,8 +1803,6 @@ resize_pinned_entry(H5C_t * cache_ptr,
  *
  * Programmer:	John Mainzer
  *              6/10/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1918,8 +1862,6 @@ verify_clean(void)
  * Programmer:	John Mainzer
  *              10/8/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1947,7 +1889,7 @@ verify_entry_status(H5C_t * cache_ptr,
 	       ( expected[i].is_pinned ) ) ) {
 
 	    pass = FALSE;
-	    sprintf(msg, "Contradictory data in expected[%d].\n", i);
+	    sprintf(msg, "%d: Contradictory data in expected[%d].\n", tag, i);
 	    failure_mssg = msg;
 	}
 
@@ -2159,8 +2101,6 @@ verify_entry_status(H5C_t * cache_ptr,
  * Programmer:	John Mainzer
  *              6/10/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2233,10 +2173,10 @@ setup_cache(size_t max_cache_size,
     hbool_t verbose = TRUE;
     int mile_stone = 1;
     hid_t fid = -1;
-    haddr_t actual_base_addr;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
     H5F_t * ret_val = NULL;
+    haddr_t actual_base_addr;
     hid_t fapl_id = H5P_DEFAULT;
 
     if ( show_progress ) /* 1 */
@@ -2578,16 +2518,11 @@ takedown_cache(H5F_t * file_ptr,
  *
  * Purpose:	Expunge the entry indicated by the type and index.
  *
- *		Do nothing if pass is FALSE on entry.
  *
  * Return:	void
  *
  * Programmer:	John Mainzer
  *              7/6/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2650,8 +2585,6 @@ expunge_entry(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              6/23/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2717,24 +2650,6 @@ flush_cache(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              6/16/04
- *
- * Modifications:
- *
- *		JRM -- 1/13/05
- *		Updated function for the flags parameter in
- *		H5C_insert_entry(), and to allow access to this parameter.
- *
- *		JRM -- 6/17/05
- *		The interface no longer permits clean inserts.
- *		Accordingly, the dirty parameter is no longer meaningfull.
- *
- *		JRM -- 4/5/06
- *		Added code to initialize the new cache_ptr field of the
- *		test_entry_t structure.
- *
- *		JRM -- 8/10/06
- *		Updated to reflect the fact that entries can now be
- *		inserted pinned.
  *
  *-------------------------------------------------------------------------
  */
@@ -2836,10 +2751,6 @@ insert_entry(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              3/28/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2871,11 +2782,11 @@ mark_pinned_entry_dirty(int32_t type,
 
 	entry_ptr->is_dirty = TRUE;
 
-	if ( size_changed ) {
+        if ( size_changed ) {
 
-	    /* update entry size now to keep the sanity checks happy */
-	    entry_ptr->size = new_size;
-	}
+            /* update entry size now to keep the sanity checks happy */
+            entry_ptr->size = new_size;
+        }
 
         result = H5C_mark_pinned_entry_dirty((void *)entry_ptr,
 					     size_changed,
@@ -2889,20 +2800,20 @@ mark_pinned_entry_dirty(int32_t type,
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
 #if 0 /* This is useful debugging code -- keep it around  */
-	    HDfprintf(stdout, "result = %ld.\n", (long)result);
-	    HDfprintf(stdout, "entry_ptr->header.is_dirty = %d.\n",
-		      (int)(entry_ptr->header.is_dirty));
-	    HDfprintf(stdout, "entry_ptr->header.is_pinned = %d.\n",
-		      (int)(entry_ptr->header.is_pinned));
-	    HDfprintf(stdout,
-		      "(entry_ptr->header.type != &(types[type])) = %d.\n",
-		      (int)(entry_ptr->header.type != &(types[type])));
-	    HDfprintf(stdout,
-		      "entry_ptr->size = %ld, entry_ptr->header.size = %ld.\n",
-		      (long)(entry_ptr->size), (long)(entry_ptr->header.size));
-	    HDfprintf(stdout,
-		      "entry_ptr->addr = %ld, entry_ptr->header.addr = %ld.\n",
-		      (long)(entry_ptr->addr), (long)(entry_ptr->header.addr));
+            HDfprintf(stdout, "result = %ld.\n", (long)result);
+            HDfprintf(stdout, "entry_ptr->header.is_dirty = %d.\n",
+                      (int)(entry_ptr->header.is_dirty));
+            HDfprintf(stdout, "entry_ptr->header.is_pinned = %d.\n",
+                      (int)(entry_ptr->header.is_pinned));
+            HDfprintf(stdout,
+                      "(entry_ptr->header.type != &(types[type])) = %d.\n",
+                      (int)(entry_ptr->header.type != &(types[type])));
+            HDfprintf(stdout,
+                      "entry_ptr->size = %ld, entry_ptr->header.size = %ld.\n",
+                      (long)(entry_ptr->size), (long)(entry_ptr->header.size));
+            HDfprintf(stdout,
+                      "entry_ptr->addr = %ld, entry_ptr->header.addr = %ld.\n",
+                      (long)(entry_ptr->addr), (long)(entry_ptr->header.addr));
 #endif
             pass = FALSE;
             failure_mssg = "error in H5C_mark_pinned_entry_dirty().";
@@ -2929,10 +2840,6 @@ mark_pinned_entry_dirty(int32_t type,
  *
  * Programmer:	John Mainzer
  *              5/17/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3013,12 +2920,6 @@ mark_pinned_or_protected_entry_dirty(int32_t type,
  *
  * Programmer:	John Mainzer
  *              6/21/04
- *
- * Modifications:
- *
- *		JRM -- 6/17/05
- *		Updated code to reflect the fact that renames automatically
- *		dirty entries.
  *
  *-------------------------------------------------------------------------
  */
@@ -3118,12 +3019,6 @@ rename_entry(H5C_t * cache_ptr,
  * Programmer:	John Mainzer
  *              6/11/04
  *
- * Modifications:
- *
- *    - Modified call to H5C_protect to pass H5C__NO_FLAGS_SET in the
- *      new flags parameter.
- *    						JRM -- 3/28/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3155,7 +3050,7 @@ protect_entry(H5F_t * file_ptr,
         HDassert( !(entry_ptr->is_protected) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, NULL, NULL, H5C__NO_FLAGS_SET);
+                &(types[type]), entry_ptr->addr, NULL, H5C__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -3219,10 +3114,6 @@ protect_entry(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              4/1/07
  *
- * Modifications:
- *
- *    - None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3256,7 +3147,7 @@ protect_entry_ro(H5F_t * file_ptr,
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, NULL, NULL, H5C__READ_ONLY_FLAG);
+                &(types[type]), entry_ptr->addr, NULL, H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -3299,10 +3190,6 @@ protect_entry_ro(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              3/28/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3366,26 +3253,6 @@ unpin_entry(int32_t type,
  *
  * Programmer:	John Mainzer
  *              6/12/04
- *
- * Modifications:
- *
- *		JRM -- 1/7/05
- *		Updated for the replacement of the deleted parameter in
- *		H5C_unprotect() with the new flags parameter.
- *
- *		JRM - 6/17/05
- *		Modified function to use the new dirtied parameter of
- *		H5C_unprotect().
- *
- *		JRM -- 9/8/05
- *		Update for new entry size parameter in H5C_unprotect().
- *		We don't use them here for now.
- *
- *		JRM -- 3/31/06
- *		Update for pinned entries.
- *
- *		JRM -- 4/1/07
- *		Updated for new multiple read protects.
  *
  *-------------------------------------------------------------------------
  */
@@ -3540,10 +3407,6 @@ unprotect_entry(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              8/31/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3555,7 +3418,6 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
 		                 size_t new_size)
 {
     /* const char * fcn_name = "unprotect_entry_with_size_change()"; */
-    H5C_t *cache_ptr;
     herr_t result;
     hbool_t dirty_flag_set;
     hbool_t pin_flag_set;
@@ -3565,10 +3427,13 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
     test_entry_t * entry_ptr;
 
     if ( pass ) {
+#ifndef NDEBUG
+    H5C_t * cache_ptr;
 
         cache_ptr = file_ptr->shared->cache;
 
         HDassert( cache_ptr );
+#endif /* NDEBUG */
         HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
         HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
 	HDassert( new_size <= entry_sizes[type] );
@@ -3660,12 +3525,6 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              6/12/04
- *
- * Modifications:
- *
- * 		JRM -- 4/4/07
- * 		Added code supporting multiple read only protects.
- * 		Note that this increased the minimum lag to 10.
  *
  *-------------------------------------------------------------------------
  */
@@ -3977,13 +3836,6 @@ row_major_scan_forward(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              10/21/04
- *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
  *
  *-------------------------------------------------------------------------
  */
@@ -4399,13 +4251,6 @@ row_major_scan_backward(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              10/21/04
  *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4620,13 +4465,6 @@ col_major_scan_forward(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              19/25/04
  *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4746,8 +4584,6 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
  * Programmer:	John Mainzer
  *              6/23/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4863,13 +4699,6 @@ col_major_scan_backward(H5F_t * file_ptr,
  *
  * Programmer:	John Mainzer
  *              10/25/04
- *
- * Modifications:
- *
- *		JRM -- 1/21/05
- *		Added the max_index parameter to allow the caller to
- *		throttle the size of the inner loop, and thereby the
- *		execution time of the function.
  *
  *-------------------------------------------------------------------------
  */

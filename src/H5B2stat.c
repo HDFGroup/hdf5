@@ -88,6 +88,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree header */
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_stat_info)
@@ -99,7 +100,9 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     HDassert(info);
 
     /* Look up the B-tree header */
-    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.type = type;
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get pointer to reference counted shared B-tree info */
