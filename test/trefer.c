@@ -190,13 +190,13 @@ test_reference_params(void)
     dset2 = H5Rdereference(dataset, H5R_MAXTYPE, &rbuf[0]);
     VERIFY(dset2, FAIL, "H5Rdereference type");
 
-    /* Test parameters to H5Rget_obj_type */
-    ret = H5Rget_obj_type(-1, H5R_OBJECT, &rbuf[0], NULL);
-    VERIFY(ret, FAIL, "H5Rget_obj_type loc_id");
-    ret = H5Rget_obj_type(fid1, H5R_OBJECT, NULL, NULL);
-    VERIFY(ret, FAIL, "H5Rget_obj_type ref");
-    ret = H5Rget_obj_type(fid1, H5R_MAXTYPE, &rbuf[0], NULL);
-    VERIFY(ret, FAIL, "H5Rget_obj_type type");
+    /* Test parameters to H5Rget_obj_type2 */
+    ret = H5Rget_obj_type2(-1, H5R_OBJECT, &rbuf[0], NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type2 loc_id");
+    ret = H5Rget_obj_type2(fid1, H5R_OBJECT, NULL, NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type2 ref");
+    ret = H5Rget_obj_type2(fid1, H5R_MAXTYPE, &rbuf[0], NULL);
+    VERIFY(ret, FAIL, "H5Rget_obj_type2 type");
 
     /* Test parameters to H5Rget_name */
     name_size = H5Rget_name(-1, H5R_DATASET_REGION, &rbuf[0], NULL, 0);
