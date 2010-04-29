@@ -9809,7 +9809,6 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
              ( cache_ptr->index_size != init_expected_index_size ) ) {
 
             pass = FALSE;
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                 "Unexpected cache len/size before flush in flush op test #%d.",
                 test_num);

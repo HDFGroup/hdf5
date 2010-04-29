@@ -187,6 +187,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     fh->hdr = hdr;
     if(H5HF_hdr_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")

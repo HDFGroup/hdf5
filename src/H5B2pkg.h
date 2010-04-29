@@ -215,13 +215,6 @@ typedef struct H5B2_internal_t {
     unsigned    depth;          /* Depth of this node in the B-tree           */
 } H5B2_internal_t;
 
-/* User data for metadata cache 'load' callback */
-typedef struct {
-    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
-    unsigned nrec;              /* Number of records in node to load */
-    unsigned depth;             /* Depth of node to load */
-} H5B2_int_load_ud1_t;
-
 #ifdef H5B2_TESTING
 /* Node information for testing */
 typedef struct {

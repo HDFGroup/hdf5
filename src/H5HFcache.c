@@ -978,12 +978,12 @@ H5HF_cache_dblock_deserialize(haddr_t addr, size_t len, const void *image,
     void *_udata, hbool_t *dirty)
 {
     H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata; /* pointer to user data */
-    H5HF_hdr_t          *hdr;            /* Shared fractal heap information */
-    H5HF_parent_t       *par_info;       /* Pointer to parent information */
-    H5HF_direct_t	*dblock = NULL;  /* Direct block info */
-    const uint8_t	*p;              /* Pointer into raw data buffer */
-    haddr_t             heap_addr;       /* Address of heap header in the file */
-    H5HF_direct_t	*ret_value;      /* Return value */
+    H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
+    H5HF_parent_t       *par_info;      /* Pointer to parent information */
+    H5HF_direct_t	*dblock = NULL; /* Direct block info */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
+    haddr_t             heap_addr;      /* Address of heap header in the file */
+    H5HF_direct_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_dblock_deserialize)
 
@@ -1000,10 +1000,8 @@ H5HF_cache_dblock_deserialize(haddr_t addr, size_t len, const void *image,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
-
-    par_info = (H5HF_parent_t *)(&(udata->par_info));
-
     /* Get the pointer to the shared heap header */
+    par_info = (H5HF_parent_t *)(&(udata->par_info));
     hdr = par_info->hdr;
 
     /* Set the shared heap header's file context for this operation */

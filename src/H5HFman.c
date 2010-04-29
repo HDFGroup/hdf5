@@ -213,7 +213,7 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     H5HF_operator_t op, void *op_data, unsigned op_flags)
 {
     H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
-    H5AC_protect_t dblock_access;      /* Access method for direct block */
+    H5AC_protect_t dblock_access;       /* Access method for direct block */
     haddr_t dblock_addr;                /* Direct block address */
     size_t dblock_size;                 /* Direct block size */
     unsigned dblock_cache_flags;        /* Flags for unprotecting direct block */

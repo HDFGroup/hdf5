@@ -269,10 +269,9 @@ H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     HDassert(H5F_addr_defined(addr));
     HDassert(root_addr);
 
+    /* Look up the B-tree header */
     cache_udata.f = f;
     cache_udata.type = type;
-
-    /* Look up the B-tree header */
     if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
@@ -323,17 +322,16 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
 
+    /* Look up the B-tree header */
     cache_udata.f = f;
     cache_udata.type = type;
-
-    /* Look up the B-tree header */
-    if (NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
-    bt2_shared=bt2->shared;
+    bt2_shared = bt2->shared;
     H5RC_INC(bt2_shared);
-    incr_rc=TRUE;
+    incr_rc = TRUE;
 
     /* Get the pointer to the shared B-tree info */
     shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
@@ -399,8 +397,12 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
 
     {
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
+        H5B2_leaf_cache_ud_t cache_leaf_udata; /* User-data for callback */
 
         /* Lock B-tree leaf node */
+        cache_leaf_udata.f = f;
+        cache_leaf_udata.nrec = &(curr_node_ptr.node_nrec);
+        cache_leaf_udata.bt2_shared = bt2_shared;
         if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, (size_t)shared->node_size, &cache_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 

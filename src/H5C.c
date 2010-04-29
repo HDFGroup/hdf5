@@ -169,7 +169,7 @@ static void * H5C_load_entry(H5F_t *             f,
                              const H5C_class_t * type,
                              haddr_t             addr,
        	                     size_t		 len,
-                             void *              udata_ptr);
+                             void *              udata);
 
 static herr_t H5C_make_space_in_cache(H5F_t * f,
                                       hid_t   dxpl_id,
@@ -203,7 +203,7 @@ static herr_t H5C_verify_not_in_index(H5C_t * cache_ptr,
 static void * H5C_epoch_marker_deserialize(haddr_t addr,
 		                            size_t len,
                                             const void * image_ptr,
-			                    void * udata_ptr,
+			                    void * udata,
 			                    hbool_t * dirty_ptr);
 static herr_t H5C_epoch_marker_image_len(const void * thing,
 		                          size_t *image_len_ptr);
@@ -250,7 +250,7 @@ static void *
 H5C_epoch_marker_deserialize(haddr_t UNUSED addr,
 		              size_t UNUSED len,
                               const void UNUSED * image_ptr,
-			      void UNUSED * udata_ptr,
+			      void UNUSED * udata,
 			      hbool_t UNUSED * dirty_ptr)
 {
     void * ret_value = NULL;      /* Return value */
@@ -8586,7 +8586,7 @@ H5C_load_entry(H5F_t *             f,
                const H5C_class_t * type,
                haddr_t             addr,
        	       size_t		   len,
-               void *              udata_ptr)
+               void *              udata)
 {
     hbool_t		dirty = FALSE;
     void *		image_ptr = NULL;
@@ -8652,7 +8652,7 @@ H5C_load_entry(H5F_t *             f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image*")
     }
 
-    thing = type->deserialize(addr, len, image_ptr, udata_ptr, &dirty);
+    thing = type->deserialize(addr, len, image_ptr, udata, &dirty);
 
     if ( thing == NULL ) {
 
@@ -8701,7 +8701,7 @@ H5C_load_entry(H5F_t *             f,
                 }
 
                 thing = type->deserialize(addr, new_len, image_ptr,
-                                          udata_ptr, &dirty);
+                                          udata, &dirty);
 
                 if ( thing == NULL ) {
 

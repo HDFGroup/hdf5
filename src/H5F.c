@@ -1728,8 +1728,8 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */
     unsigned		i;              /* Index variable */
-    unsigned int	H5AC1_flags;     /* translated flags for H5AC1_flush() */
-    unsigned int	H5AC_flags;    /* translated flags for H5AC_flush() */
+    unsigned int	H5AC1_flags;    /* translated flags for H5AC1_flush() */
+    unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
     herr_t              ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_flush)

@@ -475,11 +475,13 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
             udata.filter_mask = par_iblock->filt_ents[par_entry].filter_mask;
 	} /* end else */
     } /* end if */
-    else
+    else {
 	odi_size = dblock_size;
+        udata.filter_mask = 0;
+    } /* end else */
 
     /* Protect the direct block */
-    if(NULL == (dblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, odi_size, (void *)&udata, rw)))
+    if(NULL == (dblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, odi_size, &udata, rw)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
 
     /* Set the return value */

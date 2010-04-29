@@ -38,7 +38,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5AC1private.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
