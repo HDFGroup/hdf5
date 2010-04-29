@@ -3,13 +3,22 @@
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
+
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 5 November 2009
+    </i></font></div>
+
 <dt><strong>Signature:</strong>
     <dd><em>ssize_t </em><code>H5Fget_obj_count</code>(
             <em>hid_t</em> <code>file_id</code>,
 	    <em>unsigned int</em> <code>types</code>
             )
+
+<p>
 <dt><strong>Purpose:</strong>
         <dd>Returns the number of open object identifiers for an open file.
+
+<p>
 <dt><strong>Description:</strong>
     <dd>Given the identifier of an open file, <code>file_id</code>, 
 	and the desired object types, <code>types</code>,
@@ -49,21 +58,36 @@
             </td><td valign=top>
             All of the above
 	    <br>
-	    (I.e., <code>H5F_OBJ_FILE</code> | <code>H5F_OBJ_DATASET</code> | 
-	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> 
-	    | <code>H5F_OBJ_ATTR</code> )
+	    (That is, <code>H5F_OBJ_FILE</code> <code>|</code> 
+	    <code>H5F_OBJ_DATASET</code> <code>|</code> 
+            <code>H5F_OBJ_GROUP</code> <code>|</code> 
+	    <code>H5F_OBJ_DATATYPE</code> <code>|</code> 
+            <code>H5F_OBJ_ATTR</code>)
           </td></tr><tr><td valign=top>
             <code>H5F_OBJ_LOCAL</code>
             </td><td valign=top>
             Restrict search to objects opened through current file identifier.
+            <br />
+            <b>Note:</b> <code>H5F_OBJ_LOCAL</code> does not stand alone;
+            it is effective only when used in combination with one or more
+            of the preceding types.
+	    For example, 
+            <br>
+            <code>&nbsp;&nbsp;&nbsp;&nbsp;H5F_OBJ_DATASET</code> 
+            <code>|</code> <code>H5F_OBJ_GROUP</code> 
+            <code>|</code> <code>H5F_OBJ_LOCAL</code> 
+            <br>would count all datasets and groups 
+            opened through the current file identifier.
           </td></tr>
         </table>
 	</center>
         <p>
 	Multiple object types can be combined with the 
 	logical <code>OR</code> operator (<code>|</code>).
-	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> would call for 
-	datasets and groups.
+	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> 
+	would call for datasets and groups.
+
+<p>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -74,12 +98,17 @@
 		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>types&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr>
     </table></ul>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of open objects if successful;
         otherwise returns a negative value.
+
+<!-- NEW PAGE -->	
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5fget_obj_count_f
     <dd>
-	<pre>
+        <pre>
 SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
 
   IMPLICIT NONE 
@@ -94,8 +123,9 @@ SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
   INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
                                            ! 0 on success and -1 on failure
 END SUBROUTINE h5fget_obj_count_f
-	</pre>
-	
+        </pre>
+
+<p>
 <dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
@@ -117,11 +147,5 @@ END SUBROUTINE h5fget_obj_count_f
               </td></tr>
     </table></ul>
 
-        <!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
