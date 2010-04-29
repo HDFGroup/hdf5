@@ -71,13 +71,13 @@ static const char *FileHeader = "\n\
 #if defined(H5_HAVE_SIGSETJMP) && defined(H5_HAVE_SIGLONGJMP)
 /* Always save blocked signals to be restore by siglongjmp. */
 #define H5JMP_BUF	sigjmp_buf
-#define H5SETJMP(buf)	sigsetjmp(buf, 1)
-#define H5LONGJMP(buf, val)	siglongjmp(buf, val)
+#define H5SETJMP(buf)	HDsigsetjmp(buf, 1)
+#define H5LONGJMP(buf, val)	HDsiglongjmp(buf, val)
 #define H5HAVE_SIGJMP		# sigsetjmp/siglongjmp are supported.
 #elif defined(H5_HAVE_LONGJMP)
 #define H5JMP_BUF	jmp_buf
-#define H5SETJMP(buf)	setjmp(buf)
-#define H5LONGJMP(buf, val)	longjmp(buf, val)
+#define H5SETJMP(buf)	HDsetjmp(buf)
+#define H5LONGJMP(buf, val)	HDlongjmp(buf, val)
 #endif
 
 /* ALIGNMENT and signal-handling status codes */
@@ -463,9 +463,9 @@ sigsegv_handler(int UNUSED signo)
     /* supported. */
     sigset_t set;
 
-    sigemptyset(&set);
-    sigaddset(&set, SIGSEGV);
-    sigprocmask(SIG_UNBLOCK, &set, NULL);
+    HDsigemptyset(&set);
+    HDsigaddset(&set, SIGSEGV);
+    HDsigprocmask(SIG_UNBLOCK, &set, NULL);
 #endif
 
     sigsegv_handler_called_g++;
