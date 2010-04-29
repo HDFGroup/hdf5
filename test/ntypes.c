@@ -412,6 +412,9 @@ test_compound_dtype2(hid_t file)
     if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
+    if(H5Tequal(native_type, tid_m) != TRUE)
+        TEST_ERROR;
+
     /* Verify the datatype of each field retrieved and converted */
     /* check the char member */
     if((mem_id = H5Tget_member_type(native_type, 0)) < 0)
@@ -664,6 +667,9 @@ test_compound_dtype(hid_t file)
     if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
     if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Tequal(native_type, tid2) != TRUE)
         TEST_ERROR;
 
     /* Verify the datatype of each field retrieved and converted */
@@ -2572,7 +2578,7 @@ test_bitfield_dtype(hid_t file)
         H5P_DEFAULT)) < 0) TEST_ERROR;
 
     for(i = 0; i < BITFIELD_ENUMB*sizeof(int); i++)
-        wbuf[i] = (unsigned int)0xff ^ (unsigned int)i;
+        wbuf[i] = (unsigned char)((unsigned int)0xff ^ (unsigned int)i);
 
     if(H5Dwrite(dset1, H5T_NATIVE_B32, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
     if(H5Dclose(dset1) < 0) TEST_ERROR;
@@ -2603,12 +2609,12 @@ test_bitfield_dtype(hid_t file)
     /* Read the data and compare them */
     if(H5Dread(dataset1, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
 
-    p = (unsigned int*)rbuf;
+    p = (unsigned char *)rbuf;
     for(i = 0; i < BITFIELD_ENUMB*4; i++) {
         if(*p != wbuf[i]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %d\n", i);
+            printf("    At index %zu\n", i);
             TEST_ERROR;
         }
         p++;
@@ -2633,7 +2639,7 @@ test_bitfield_dtype(hid_t file)
         if(intr[i] != intw[i]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
-            printf("    At index %d\n", i);
+            printf("    At index %zu\n", i);
             TEST_ERROR;
         }
     }
