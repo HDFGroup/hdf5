@@ -216,7 +216,7 @@ rem ############################################################################
 
     rem tests for error handling.
     rem test for non-existing file
-    call :tooltest nosuchfile.ls 0 nosuchfile.h5
+    call :tooltest nosuchfile.ls 1 nosuchfile.h5
 
     rem test for variable length data types in verbose mode 
     call :tooltest tvldtypes2le.ls 0 -v tvldtypes1.h5
