@@ -8,6 +8,7 @@ Collective HDF5 Calls in Parallel
 <body bgcolor="#FFFFFF">
 
 <!-- #BeginLibraryItem "/ed_libs/styles_RM.lbi" -->
+
 <!--
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   * Copyright by The HDF Group.                                               *
@@ -24,46 +25,53 @@ Collective HDF5 Calls in Parallel
   * access to either file, you may request a copy from help@hdfgroup.org.     *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  -->
+
+<link href="ed_styles/RMelect.css" rel="stylesheet" type="text/css">
 <!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+
 <hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
-<a href="../index.html">HDF5 documents and links</a>&nbsp;<br>
-<a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="../UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="http://www.hdfgroup.org/HDF5/doc1.6/UG/UG_frame.html">HDF5 User Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
 </td>
 <td valign=top align=right>
 And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
-<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;<br>
+<font size=-1>&nbsp;
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
-<a href="RM_H5I.html">H5I</a>&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<br>
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;<br>
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
-<a href="RM_H5Z.html">H5Z</a>&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 <br>
-<i><font size=-1>(Printable <a href="http://hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a> of this Reference Manual)</font></i>&nbsp;
+<a href="CollectiveCalls.html">Collective Calls in Parallel</a>&nbsp;&nbsp;
+</font>
+</td></tr>
+<tr><td colspan="2" align="right">
+<i><small>(<a href="http://www.hdfgroup.org/HDF5/doc1.6/PSandPDF/">PDF</a>
+of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </td></tr>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem -->
 
-<div align=center>
+
+<!-- #EndLibraryItem --><div align=center>
 <h1>Collective Calling Requirements<br>in Parallel HDF5 Applications</h1>
 </div>
 
@@ -297,52 +305,58 @@ And in this document, the
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+
 <hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
-<a href="../index.html">HDF5 documents and links</a>&nbsp;<br>
-<a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="../UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="http://www.hdfgroup.org/HDF5/doc1.6/UG/UG_frame.html">HDF5 User Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
 </td>
 <td valign=top align=right>
 And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
-<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;<br>
+<font size=-1>&nbsp;
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
 <a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
-<a href="RM_H5I.html">H5I</a>&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-<br>
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;<br>
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
-<a href="RM_H5Z.html">H5Z</a>&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 <br>
-<i><font size=-1>(Printable <a href="http://hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a> of this Reference Manual)</font></i>&nbsp;
+<a href="CollectiveCalls.html">Collective Calls in Parallel</a>&nbsp;&nbsp;
+</font>
+</td></tr>
+<tr><td colspan="2" align="right">
+<i><small>(<a href="http://www.hdfgroup.org/HDF5/doc1.6/PSandPDF/">PDF</a>
+of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </td></tr>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem -->
 
-<!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+
 <address>
-The HDF Group Help Desk: <img src="../Graphics/help.png" align=top height=16>
+The HDF Group Help Desk: <img src="Graphics/help.png" align=top height=16>
 <br>
-Describes HDF5 Development Trunk, Release 1.9.x.
-<br>
-Highest current public release is HDF5 Release 1.8.x.
+Describes HDF5 Release 1.6.10, November 2009 
 </address>
+
+
 <!-- #EndLibraryItem --></body>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
