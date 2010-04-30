@@ -254,6 +254,9 @@
 /* Define to 1 if you have the `rand_r' function. */
 /* #define H5_HAVE_RAND_R 1 */
 
+/* Define to 1 if you have the `setjmp' function. */
+#define H5_HAVE_SETJMP 1
+
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define H5_HAVE_SETJMP_H 1
 
@@ -265,6 +268,12 @@
 
 /* Define to 1 if you have the `signal' function. */
 #define H5_HAVE_SIGNAL 1
+
+/* Define to 1 if you have the `sigprocmask' function. */
+#define H5_HAVE_SIGPROCMASK 1
+
+/* Define to 1 if you have the `sigsetjmp' function. */
+#define H5_HAVE_SIGSETJMP 1
 
 /* Define to 1 if you have the `snprintf' function. */
 #define H5_HAVE_SNPRINTF 1
