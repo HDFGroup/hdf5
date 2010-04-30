@@ -32,7 +32,7 @@ INSTALL_FILES=ptExampleFL.cpp ptExampleVL.cpp
 CXX_API=yes
 
 # Where to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++
+EXAMPLEDIR=$(exec_prefix)/examples/hl/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

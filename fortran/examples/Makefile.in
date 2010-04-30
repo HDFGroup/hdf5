@@ -356,7 +356,7 @@ INSTALL_FILES = dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
 FORTRAN_API = yes
 
 # Tell automake how to install examples
-EXAMPLEDIR = $(docdir)/hdf5/examples/fortran
+EXAMPLEDIR = $(exec_prefix)/examples/fortran
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -634,12 +634,13 @@ install-data-local:
 uninstall-local:
 	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) $(TEST_SCRIPT)
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
+	@(set -x; $(INSTALL) $(builddir)/$(TEST_SCRIPT) $(EXAMPLEDIR)/.. || exit 1);
 
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \

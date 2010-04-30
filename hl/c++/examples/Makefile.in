@@ -592,12 +592,13 @@ install-data-local:
 uninstall-local:
 	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) $(TEST_SCRIPT)
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
+	@(set -x; $(INSTALL) $(builddir)/$(TEST_SCRIPT) $(EXAMPLEDIR)/.. || exit 1);
 
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
