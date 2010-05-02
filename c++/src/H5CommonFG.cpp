@@ -1058,10 +1058,27 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 ///		each time the group is opened.
 // Programmer	Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
+ssize_t CommonFG::getObjnameByIdx(hsize_t idx, char* name, size_t size) const
+{
+   ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name, size, H5P_DEFAULT);
+   if(name_len < 0)
+   {
+      throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+   }
+   return (name_len);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjnameByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
 ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const
 {
    char* name_C = new char[size];
-   ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, size, H5P_DEFAULT);
+   ssize_t name_len = getObjnameByIdx(idx, name_C, size);
    if(name_len < 0)
    {
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
