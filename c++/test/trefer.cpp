@@ -47,6 +47,10 @@ const H5std_string      FILE2("trefer2.h5");
 const H5std_string      FILE3("trefer3.h5");
 const H5std_string      DSET_DEFAULT_NAME("default");
 
+// Dataset 1
+const H5std_string      DSET1_NAME("Dataset1");
+const int DSET1_LEN = 8;
+
 const H5std_string MEMBER1( "a_name" );
 const H5std_string MEMBER2( "b_name" );
 const H5std_string MEMBER3( "c_name" );
@@ -109,7 +113,7 @@ static void test_reference_obj(void)
 	group.setComment(".", write_comment);
 
 	// Create a dataset (inside /Group1)
-	DataSet dataset = group.createDataSet("Dataset1", PredType::NATIVE_UINT, sid1);
+	DataSet dataset = group.createDataSet(DSET1_NAME, PredType::NATIVE_UINT, sid1);
 
 	unsigned *tu32;      // Temporary pointer to uint32 data
 	for (tu32=(unsigned *)wbuf, i=0; i<SPACE1_DIM1; i++)
@@ -223,13 +227,27 @@ static void test_reference_obj(void)
 	catch (Exception E) {} // We expect this to fail
 
 	// Test reading the name of an item in the group
+
+	// Test getObjnameByIdx(idx)
 	H5std_string name;
 	name = group.getObjnameByIdx(0);
-	verify_val(name, "Dataset1", "Group::getObjnameByIdx", __LINE__, __FILE__);
+	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx", __LINE__, __FILE__);
+	// Test getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size)
 	name.clear();
 	ssize_t name_size = group.getObjnameByIdx(0, name, 5);
-	verify_val(name, "Data", "Group::getObjnameByIdx(index,buf,buf_len)", __LINE__, __FILE__);
-	verify_val(name_size, 8, "Group::getObjnameByIdx(index,buf,buf_len)", __LINE__, __FILE__);
+	verify_val(name, "Data", "Group::getObjnameByIdx(index,(std::string)buf,buf_len)", __LINE__, __FILE__);
+	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(std::string)buf,buf_len)", __LINE__, __FILE__);
+
+	name.clear();
+	name_size = group.getObjnameByIdx(0, name, name_size+1);
+	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx(index,(std::string)buf,buf_len)", __LINE__, __FILE__);
+	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(std::string)buf,buf_len)", __LINE__, __FILE__);
+
+	// Test getObjnameByIdx(hsize_t idx, char* name, size_t size)
+	char name_C[DSET1_LEN+1];
+	group.getObjnameByIdx(0, name, name_size+1);
+	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
+	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 
 	// Close group
 	group.close();
