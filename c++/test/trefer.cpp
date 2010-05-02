@@ -249,6 +249,26 @@ static void test_reference_obj(void)
 	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 
+	// Test getting the type of objects
+	
+	// Test getObjTypeByIdx(hsize_t idx)
+	obj_type = group.getObjTypeByIdx(0);
+	verify_val(obj_type, H5G_DATASET, "Group::getObjTypeByIdx(index)", __LINE__, __FILE__);
+
+	// Test getObjTypeByIdx(hsize_t idx, char* type_name)
+	obj_type = H5G_UNKNOWN;
+	char type_name_C[256];
+	obj_type = group.getObjTypeByIdx(0, type_name_C);
+	verify_val(obj_type, H5G_DATASET, "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
+	verify_val((const char*)type_name_C, (const char*)"dataset", "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
+
+	// Test getObjTypeByIdx(hsize_t idx, H5std_string& type_name)
+	obj_type = H5G_UNKNOWN;
+	H5std_string type_name;
+	obj_type = group.getObjTypeByIdx(0, type_name);
+	verify_val(obj_type, H5G_DATASET, "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
+	verify_val(type_name, "dataset", "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
+
 	// Close group
 	group.close();
 

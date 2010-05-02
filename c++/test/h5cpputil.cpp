@@ -138,6 +138,43 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
     return 0;
 } // check_values
 
+/*-------------------------------------------------------------------------
+ * Function:	verify_val (const char*, const char*,...)
+ *
+ * Purpose:	Compares two character strings.  If they are
+ *		different, the function will print out a message and the
+ *		different values.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		May 2, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name)
+{
+    if (GetTestVerbosity()>=VERBO_HI)
+    {
+        cerr << endl;
+        cerr << "   Call to routine: " << where << " at line " << line
+             << " in " << file_name <<  " had value " << x << endl;
+    }
+    if (strcmp(x, value) != 0)
+    {
+        cerr << endl;
+        cerr << "*** UNEXPECTED VALUE from " << where << " should be "
+             << value << ", but is " << x << " at line " << line
+             << " in " << file_name << endl;
+        IncTestNumErrs();
+        throw TestFailedException(where, "");
+    }
+}
+
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException default constructor
 //--------------------------------------------------------------------------
