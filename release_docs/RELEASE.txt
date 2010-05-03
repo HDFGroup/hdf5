@@ -127,6 +127,10 @@ New Features
 
     C++ Library:
     ------------
+	- Added function CommonFG::getObjnameByIdx to take char* for name.
+	  (BMR - 2010/05/02)
+	- Added function CommonFG::getObjTypeByIdx to return type name as
+	  a char*.
         - These member functions were added as wrapper for H5Rdereference to
           replace the incorrect IdComponent::dereference().
                 void H5Object::dereference(H5File& h5file, void* ref)
