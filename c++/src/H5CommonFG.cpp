@@ -31,6 +31,7 @@
 #include "H5DataSet.h"
 #include "H5File.h"
 #include "H5Alltypes.h"
+#include "H5private.h"		// for HDstrcpy
 
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
@@ -1124,10 +1125,10 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
    H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
    switch (obj_type)
    {
-	case H5G_LINK: strcpy(type_name, "symbolic link"); break;
-	case H5G_GROUP: strcpy(type_name, "group"); break;
-	case H5G_DATASET: strcpy(type_name, "dataset"); break;
-	case H5G_TYPE: strcpy(type_name, "datatype"); break;
+	case H5G_LINK: HDstrcpy(type_name, "symbolic link"); break;
+	case H5G_GROUP: HDstrcpy(type_name, "group"); break;
+	case H5G_DATASET: HDstrcpy(type_name, "dataset"); break;
+	case H5G_TYPE: HDstrcpy(type_name, "datatype"); break;
 	case H5G_UNKNOWN:
 	default:
    	{
