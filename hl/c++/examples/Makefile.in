@@ -342,7 +342,7 @@ INSTALL_FILES = ptExampleFL.cpp ptExampleVL.cpp
 CXX_API = yes
 
 # Where to install examples
-EXAMPLEDIR = $(docdir)/hdf5/examples/hl/c++
+EXAMPLEDIR = $(exec_prefix)/examples/hl/c++
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -598,7 +598,9 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) $(TEST_SCRIPT)
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
-	@(set -x; $(INSTALL) $(builddir)/$(TEST_SCRIPT) $(EXAMPLEDIR)/.. || exit 1);
+	@if test $(TEST_SCRIPT) != X; then                                   \
+	   (set -x; $(INSTALL) $(builddir)/$(TEST_SCRIPT) $(EXAMPLEDIR)/..   \
+	   || exit 1);
 
 uninstall-examples:
 	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
