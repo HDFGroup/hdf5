@@ -78,6 +78,7 @@ class H5_DLLCPP CommonFG {
 	// Returns the type of an object in this group, given the
 	// object's index.
 	H5G_obj_t getObjTypeByIdx(hsize_t idx) const;
+	H5G_obj_t getObjTypeByIdx(hsize_t idx, char* type_name) const;
 	H5G_obj_t getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const;
 
 	// Returns information about an HDF5 object, given by its name,
