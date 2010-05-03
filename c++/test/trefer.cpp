@@ -249,6 +249,7 @@ static void test_reference_obj(void)
 	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Test getting the type of objects
 	
 	// Test getObjTypeByIdx(hsize_t idx)
@@ -268,6 +269,8 @@ static void test_reference_obj(void)
 	obj_type = group.getObjTypeByIdx(0, type_name);
 	verify_val(obj_type, H5G_DATASET, "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
 	verify_val(type_name, "dataset", "Group::getObjTypeByIdx(index, (char*)name)", __LINE__, __FILE__);
+
+#endif // ifndef H5_NO_DEPRECATED_SYMBOLS
 
 	// Close group
 	group.close();
