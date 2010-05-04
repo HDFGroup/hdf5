@@ -167,6 +167,7 @@ dnl STATIC_SHARED: whether static and/or shared libraries are requested.
 dnl enable_shared: whether shared lib is enabled.
 dnl enable_static: whether static lib is enabled.
 dnl UNAME_INFO: System information.
+dnl PACKED_BITS: H5dump packed bits feature is enabled.
 
 AC_SUBST(EXTERNAL_FILTERS)
 AC_SUBST(MPE) MPE=no
@@ -187,6 +188,7 @@ AC_SUBST(STATIC_SHARED)
 AC_SUBST(enable_shared)
 AC_SUBST(enable_static)
 AC_SUBST(UNAME_INFO) UNAME_INFO=`uname -a`
+AC_SUBST(PACKED_BITS) PACKED_BITS=yes
 
 dnl ----------------------------------------------------------------------
 dnl Some platforms have broken basename, and/or xargs programs. Check
@@ -3944,6 +3946,26 @@ AC_ARG_ENABLE([embedded-libinfo],
                 [Define if library information should be embedded in the executables])
    else
       AC_MSG_RESULT([no])
+    fi
+
+
+dnl ----------------------------------------------------------------------
+dnl Enable h5dump packed bits feature
+dnl
+AC_MSG_CHECKING([Whether to enable the h5dump packed bits feature])
+AC_ARG_ENABLE([h5dump-packed-bits],
+    [AC_HELP_STRING([--enable-h5dump-packed-bits],
+	[Enable h5dump packed bits feature [default=yes]])],
+	[enable_h5dump_packed_bits=$enableval],
+	[enable_h5dump_packed_bits=yes])
+
+   if test "${enable_h5dump_packed_bits}" = "yes"; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([HAVE_H5DUMP_PACKED_BITS], [1],
+                [Define if h5dump packed bits feature is enabled])
+   else
+      AC_MSG_RESULT([no])
+      PACKED_BITS=no
     fi
 
 
