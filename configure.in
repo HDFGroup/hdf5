@@ -961,6 +961,7 @@ dnl ----------------------------------------------------------------------
 dnl Shared libraries are not currently supported under Cygwin.
 case "`uname`" in
   CYGWIN*)
+    AC_DEFINE([CYGWIN], [1], [Define a macro for Cygwin system])
     if test "X${enable_shared}" = "Xyes"; then
       echo '    warning: shared libraries are not supported on Cygwin!'
       echo '    disabling shared libraries'

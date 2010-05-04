@@ -17,6 +17,9 @@
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
 
+/* Define a macro for Cygwin system */
+#undef CYGWIN
+
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
 
