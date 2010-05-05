@@ -59,14 +59,14 @@ static void *H5SM_table_deserialize(haddr_t addr, size_t len, const void *image,
 static herr_t H5SM_table_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5SM_table_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5SM_table_free_icr(void *thing);
 
 static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5SM_list_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5SM_list_free_icr(void *thing);
 
 
 /*********************/
@@ -81,7 +81,6 @@ const H5AC_class_t H5AC_SOHM_TABLE[1] = {{
     NULL,
     H5SM_table_serialize,
     H5SM_table_free_icr,
-    NULL
 }};
 
 const H5AC_class_t H5AC_SOHM_LIST[1] = {{
@@ -92,7 +91,6 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
     NULL,
     H5SM_list_serialize,
     H5SM_list_free_icr,
-    NULL
 }};
 
 
@@ -330,7 +328,7 @@ H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_table_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5SM_table_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -529,7 +527,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5SM_list_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -59,7 +59,7 @@ static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
 static herr_t H5B_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5B_free_icr(void *thing);
 
 
 /*********************/
@@ -75,7 +75,6 @@ const H5AC_class_t H5AC_BT[1] = {{
     NULL,
     H5B_serialize,
     H5B_free_icr,
-    NULL
 }};
 
 /*******************/
@@ -286,7 +285,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5B_free_icr(void *thing)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 

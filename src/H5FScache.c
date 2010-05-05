@@ -80,14 +80,14 @@ static void *H5FS_cache_hdr_deserialize(haddr_t addr, size_t len,
 static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5FS_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5FS_cache_hdr_free_icr(void *thing);
 
 static void *H5FS_cache_sinfo_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5FS_cache_sinfo_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5FS_cache_sinfo_free_icr(void *thing);
 
 
 /*********************/
@@ -100,10 +100,9 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     "Free space header",
     H5FD_MEM_FSPACE_HDR,
     H5FS_cache_hdr_deserialize,
-    NULL, /* H5FS_cache_hdr_image_len, */
+    NULL,
     H5FS_cache_hdr_serialize,
     H5FS_cache_hdr_free_icr,
-    NULL,
 }};
 
 /* H5FS serialized sections inherit cache-like properties from H5AC */
@@ -115,7 +114,6 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     NULL,
     H5FS_cache_sinfo_serialize,
     H5FS_cache_sinfo_free_icr,
-    NULL,
 }};
 
 
@@ -368,7 +366,7 @@ H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5FS_cache_hdr_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -755,7 +753,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5FS_cache_sinfo_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

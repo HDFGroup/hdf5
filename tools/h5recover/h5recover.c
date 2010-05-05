@@ -4799,7 +4799,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
 
         config.version = H5C__CURR_AUTO_SIZE_CTL_VER;
 
-        /* get H5AC1_cache_config_t configuration from fapl */
+        /* get H5AC_cache_config_t configuration from fapl */
         if ( H5Pget_jnl_config(fapl, &config) == -1) {
 
             proceed = FALSE;
@@ -4813,7 +4813,7 @@ mark_hdf5_file_recovered(char * hdf5_file_path_ptr)
         /* set journal recovered field to TRUE in mdc_config */
         config.journal_recovered = TRUE;
 
-        /* set H5AC1_cache_config_t configuration with file recovered */
+        /* set H5AC_cache_config_t configuration with file recovered */
         if ( H5Pset_jnl_config(fapl, &config) == -1 ) {
 
             proceed = FALSE;
@@ -7672,7 +7672,7 @@ main(int argc,
 
         config.version = 1; /* should be H5C__CURR_AUTO_SIZE_CTL_VER */
 
-        /* get H5AC1_cache_config_t configuration from fapl */
+        /* get H5AC_cache_config_t configuration from fapl */
         if ( H5Pget_jnl_config(fapl, &config) == -1) {
 
             error_msg(progname, "Could not get mdc config from FAPL.\n");
@@ -7683,7 +7683,7 @@ main(int argc,
         /* make sure journal recovered field is set to TRUE in mdc_config */
         config.journal_recovered = TRUE;
 
-        /* set H5AC1_cache_config_t configuration with file recovered */
+        /* set H5AC_cache_config_t configuration with file recovered */
         if ( H5Pset_jnl_config(fapl, &config) == -1) {
 
             error_msg(progname, "Could not set mdc config on FAPL.\n");

@@ -1092,120 +1092,100 @@ free_icr(test_entry_t *entry_ptr)
 } /* free_icr() */
 
 herr_t
-pico_free_icr(haddr_t addr, size_t len, void * thing)
+pico_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == PICO_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-nano_free_icr(haddr_t addr, size_t len, void * thing)
+nano_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == NANO_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-micro_free_icr(haddr_t addr, size_t len, void * thing)
+micro_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == MICRO_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-tiny_free_icr(haddr_t addr, size_t len, void * thing)
+tiny_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == TINY_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-small_free_icr(haddr_t addr, size_t len, void * thing)
+small_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == SMALL_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-medium_free_icr(haddr_t addr, size_t len, void * thing)
+medium_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == MEDIUM_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-large_free_icr(haddr_t addr, size_t len, void * thing)
+large_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == LARGE_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-huge_free_icr(haddr_t addr, size_t len, void * thing)
+huge_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == HUGE_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-monster_free_icr(haddr_t addr, size_t len, void * thing)
+monster_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == MONSTER_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
 }
 
 herr_t
-variable_free_icr(haddr_t addr, size_t len, void * thing)
+variable_free_icr(void * thing)
 {
     test_entry_t * entry_ptr = (test_entry_t *)thing;
 
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
     HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
@@ -5838,7 +5818,7 @@ validate_mdc_config(hid_t file_id,
 
         scratch.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
-        if ( H5Fget_mdc_config(file_id, (H5AC1_cache_config_t *)&scratch) < 0 ) {
+        if ( H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&scratch) < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,

@@ -71,14 +71,14 @@ static herr_t H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5HL_prfx_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5HL_prfx_free_icr(void *thing);
 
 static void *H5HL_dblk_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5HL_dblk_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5HL_dblk_free_icr(void *thing);
 
 
 /*********************/
@@ -96,7 +96,6 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     H5HL_prfx_image_len,
     H5HL_prfx_serialize,
     H5HL_prfx_free_icr,
-    NULL,
 }};
 
 /*
@@ -110,7 +109,6 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     NULL,
     H5HL_dblk_serialize,
     H5HL_dblk_free_icr,
-    NULL,
 }};
 
 
@@ -474,7 +472,7 @@ H5HL_prfx_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prfx_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HL_prfx_free_icr(void *thing)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to destroy */
     herr_t ret_value = SUCCEED;                 /* Return value */
@@ -616,7 +614,7 @@ H5HL_dblk_serialize(const H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_dblk_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HL_dblk_free_icr(void *thing)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)thing;   /* Local heap data block to destroy */
     herr_t ret_value = SUCCEED;                 /* Return value */

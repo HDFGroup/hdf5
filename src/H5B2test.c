@@ -403,7 +403,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(curr_node_ptr.node_nrec);
         cache_leaf_udata.bt2_shared = bt2_shared;
-        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, (size_t)shared->node_size, &cache_udata, H5AC_READ)))
+        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */

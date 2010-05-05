@@ -66,14 +66,14 @@ static herr_t H5O_cache_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5O_cache_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5O_cache_free_icr(void *thing);
 
 static void *H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_chk_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5O_cache_chk_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5O_cache_chk_free_icr(void *thing);
 
 /* Chunk proxy routines */
 static herr_t H5O_chunk_proxy_dest(H5O_chunk_proxy_t *chunk_proxy);
@@ -102,7 +102,6 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     H5O_cache_image_len,
     H5O_cache_serialize,
     H5O_cache_free_icr,
-    NULL,
 }};
 
 /* H5O object header chunk inherits cache-like properties from H5AC */
@@ -114,7 +113,6 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     NULL,
     H5O_cache_chk_serialize,
     H5O_cache_chk_free_icr,
-    NULL,
 }};
 
 /* Declare external the free list for H5O_unknown_t's */
@@ -503,7 +501,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5O_cache_free_icr(void *thing)
 {
     H5O_t *oh = (H5O_t *)thing;         /* Object header to destroy */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -662,7 +660,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_chk_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5O_cache_chk_free_icr(void *thing)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)thing;         /* Object header chunk proxy to destroy */
     herr_t      ret_value = SUCCEED;    /* Return value */

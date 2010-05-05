@@ -441,10 +441,6 @@
 ./src/H5Apkg.h
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
-./src/H5AC1.c
-./src/H5AC1pkg.h
-./src/H5AC1private.h
-./src/H5AC1public.h
 ./src/H5AC.c
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
@@ -463,10 +459,6 @@
 ./src/H5B2public.h		
 ./src/H5B2stat.c
 ./src/H5B2test.c
-./src/H5C1.c
-./src/H5C1pkg.h
-./src/H5C1private.h
-./src/H5C1public.h
 ./src/H5C.c
 ./src/H5Cjournal.c
 ./src/H5Cpkg.h
@@ -767,13 +759,9 @@
 ./test/big.c
 ./test/bittests.c
 ./test/btree2.c
-./test/cache1.c
 ./test/cache.c
-./test/cache1_api.c
 ./test/cache_api.c
-./test/cache1_common.c
 ./test/cache_common.c
-./test/cache1_common.h
 ./test/cache_common.h
 ./test/cache_jnl_file_marking.c
 ./test/cache_journal.c
@@ -957,7 +945,6 @@
 ./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
-./testpar/t_cache1.c
 ./testpar/t_cache.c
 ./testpar/t_dset.c
 ./testpar/t_file.c

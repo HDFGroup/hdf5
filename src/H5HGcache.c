@@ -68,7 +68,7 @@ static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
-static herr_t H5HG_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5HG_free_icr(void *thing);
 
 
 /*********************/
@@ -86,7 +86,6 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     H5HG_image_len,
     H5HG_serialize,
     H5HG_free_icr,
-    NULL,
 }};
 
 
@@ -390,7 +389,7 @@ H5HG_image_len(const void *thing, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HG_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

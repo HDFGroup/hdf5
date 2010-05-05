@@ -37,7 +37,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
 # These tests (fheap, btree2) are under development and are not used by
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache1 cache1_api cache cache_api \
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            cache_journal pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -71,7 +71,7 @@ endif
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
-libh5test_la_SOURCES=h5test.c testframe.c cache1_common.c cache_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)

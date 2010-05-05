@@ -22,7 +22,6 @@
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
-#include "H5AC1private.h"	/* Metadata cache			*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -937,13 +936,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 * The cache might be created with a different number of elements and
 	 * the access property list should be updated to reflect that.
 	 */
-	if(SUCCEED != H5AC1_create(f, &(f->shared->mdc_initCacheCfg)))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache1")
-
-	/* Create a metadata cache with modified API along side the regular
-	 * version.  For now, this is just for testing.  Once we get it
-	 * fully in use, we will delete the old version.
-	 */
 	if(H5AC_create(f, (H5AC_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
@@ -1013,10 +1005,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
          *      orderly manner with the 'closing' flag set)
          */
         if(f->closing) {
-#if H5AC1_DUMP_STATS_ON_CLOSE
-            /* Dump debugging info */
-            H5AC1_stats(f);
-#endif /* H5AC1_DUMP_STATS_ON_CLOSE */
 #if H5AC_DUMP_STATS_ON_CLOSE
             /* Dump debugging info */
             H5AC_stats(f);
@@ -1055,10 +1043,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             f->shared->root_grp = NULL;
         } /* end if */
 
-        if(H5AC1_dest(f, dxpl_id) < 0)
-            /* Push error, but keep going*/
-            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-        /* also destroy the new cache */
         if(H5AC_dest(f, dxpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
@@ -1728,7 +1712,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */
     unsigned		i;              /* Index variable */
-    unsigned int	H5AC1_flags;    /* translated flags for H5AC1_flush() */
     unsigned int	H5AC_flags;     /* translated flags for H5AC_flush() */
     herr_t              ret_value;      /* Return value */
 
@@ -1764,11 +1747,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
     /* flush (and invalidate, if requested) the entire metadata cache */
-    H5AC1_flags = 0;
-    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
-        H5AC1_flags |= H5AC1__FLUSH_INVALIDATE_FLAG;
-    if(H5AC1_flush(f, dxpl_id, H5AC1_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache1")
     H5AC_flags = 0;
     if((flags & H5F_FLUSH_INVALIDATE) != 0 )
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
@@ -3517,7 +3495,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_mdc_config(hid_t file_id, H5AC1_cache_config_t *config_ptr)
+H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;      /* Return value */
@@ -3545,7 +3523,7 @@ done:
  *
  * Purpose:     Sets the current metadata cache automatic resize
  *		configuration, using the contents of the instance of
- *		H5AC1_cache_config_t pointed to by config_ptr.
+ *		H5AC_cache_config_t pointed to by config_ptr.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -3556,7 +3534,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fset_mdc_config(hid_t file_id, H5AC1_cache_config_t *config_ptr)
+H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;     /* Return value */
@@ -3567,10 +3545,6 @@ H5Fset_mdc_config(hid_t file_id, H5AC1_cache_config_t *config_ptr)
     /* Check args */
     if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* set the resize configuration  */
-    if(H5AC1_set_cache_auto_resize_config(file->shared->cache1, config_ptr) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC1_set_cache_auto_resize_config() failed.")
 
     /* pass the resize configuration to the modified cache as well. */
     if(H5AC_set_cache_auto_resize_config(file->shared->cache, (H5AC_cache_config_t *)config_ptr) < 0)

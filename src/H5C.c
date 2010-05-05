@@ -217,12 +217,7 @@ static herr_t H5C_epoch_marker_serialize(const H5F_t *f,
 		                          haddr_t * new_addr_ptr,
 		                          size_t * new_len_ptr,
 		                          void ** new_image_ptr_ptr);
-static herr_t H5C_epoch_marker_free_icr(haddr_t addr,
-	 	                         size_t len,
-			                 void * thing);
-static herr_t H5C_epoch_marker_clear_dirty_bits(haddr_t addr,
-		                                 size_t len,
-				                 void * thing);
+static herr_t H5C_epoch_marker_free_icr(void * thing);
 
 const H5C_class_t epoch_marker_class =
 {
@@ -233,7 +228,6 @@ const H5C_class_t epoch_marker_class =
     /* image_len        = */ &H5C_epoch_marker_image_len,
     /* serialize        = */ &H5C_epoch_marker_serialize,
     /* free_icr         = */ &H5C_epoch_marker_free_icr,
-    /* clear_dirty_bits = */ &H5C_epoch_marker_clear_dirty_bits,
 };
 
 
@@ -303,29 +297,11 @@ done:
 }
 
 static herr_t
-H5C_epoch_marker_free_icr(haddr_t UNUSED addr,
-		           size_t UNUSED len,
-			   void UNUSED * thing)
+H5C_epoch_marker_free_icr(void UNUSED * thing)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_epoch_marker_free_icr, FAIL)
-
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-static herr_t
-H5C_epoch_marker_clear_dirty_bits(haddr_t UNUSED addr,
-		                   size_t UNUSED len,
-				   void UNUSED * thing)
-{
-    herr_t ret_value = FAIL;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_epoch_marker_clear_dirty_bits, FAIL)
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
 
@@ -8203,25 +8179,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 
         /* Clear the dirty flag only, if requested */
         if ( clear_only ) {
-	    if ( entry_ptr->is_dirty )
-            {
-#ifndef NDEBUG
-		/* only call the clear_dirty_bits callback if debugging
-		 * is enabled.
-		 */
-	        if ( entry_ptr->type->clear_dirty_bits && entry_ptr->type->clear_dirty_bits(addr,
-					               entry_ptr->size,
-						       (void *)entry_ptr)
-                     != SUCCEED )
-                {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                "clear_dirty_bits() failed.")
-                }
-#endif /* NDEBUG */
-            }
 	    entry_ptr->is_dirty = FALSE;
-
         }
 	else if ( entry_ptr->is_dirty )
 	{
@@ -8498,13 +8456,8 @@ H5C_flush_single_entry(const H5F_t *	   f,
 #endif /* NDEBUG */
             entry_ptr->cache_ptr = NULL;
 
-            if ( type_ptr->free_icr(entry_ptr->addr, entry_ptr->size,
-		                    (void *)entry_ptr) != SUCCEED )
-            {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "free_icr callback failed.")
-            }
+            if(type_ptr->free_icr((void *)entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "free_icr callback failed.")
         }
 	else /* just flushing or clearing */
 	{
@@ -8685,20 +8638,12 @@ H5C_load_entry(H5F_t *             f,
             /* If the thing's image needs to be bigger, free the thing
              * and retry with new length
              */
-            if ( new_len > len)
-            {
-                if ( type->free_icr(addr, len, thing) != SUCCEED )
-                {
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, \
-                                "free_icr callback failed.")
-                }
+            if(new_len > len) {
+                if(type->free_icr(thing) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed.")
 
-                if ( H5F_block_read(f, type->mem_type, addr, new_len,
-                                    dxpl_id, image_ptr) < 0 ) {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
-                                "Can't read image")
-                }
+                if(H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
 
                 thing = type->deserialize(addr, new_len, image_ptr,
                                           udata, &dirty);

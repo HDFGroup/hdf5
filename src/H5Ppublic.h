@@ -25,7 +25,6 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5ACpublic.h"
-#include "H5C1public.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
 #include "H5FDpublic.h"
@@ -253,9 +252,9 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id,
        size_t *rdcc_nelmts/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
 H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
-       H5AC1_cache_config_t * config_ptr);
+       H5AC_cache_config_t * config_ptr);
 H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
-       H5AC1_cache_config_t * config_ptr);	/* out */
+       H5AC_cache_config_t * config_ptr);	/* out */
 H5_DLL herr_t H5Pset_jnl_config(hid_t    plist_id,
        const H5AC_jnl_config_t * config_ptr);
 H5_DLL herr_t H5Pget_jnl_config(hid_t     plist_id,

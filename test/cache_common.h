@@ -718,16 +718,16 @@ herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	                  haddr_t * new_addr_ptr, size_t * new_len_ptr,
 	                  void ** new_image_ptr_ptr);
 
-herr_t pico_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t nano_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t micro_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t tiny_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t small_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t medium_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t large_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t huge_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t monster_free_icr(haddr_t addr, size_t len, void * thing);
-herr_t variable_free_icr(haddr_t addr, size_t len, void * thing);
+herr_t pico_free_icr(void * thing);
+herr_t nano_free_icr(void * thing);
+herr_t micro_free_icr(void * thing);
+herr_t tiny_free_icr(void * thing);
+herr_t small_free_icr(void * thing);
+herr_t medium_free_icr(void * thing);
+herr_t large_free_icr(void * thing);
+herr_t huge_free_icr(void * thing);
+herr_t monster_free_icr(void * thing);
+herr_t variable_free_icr(void * thing);
 
 
 /* callback table extern */

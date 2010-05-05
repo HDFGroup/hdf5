@@ -76,8 +76,6 @@ MPI_Comm	file_mpi_comm = MPI_COMM_NULL;
  * to check the validity of the statistics maintained by H5C.c
  */
 
-long datum_clears          = 0;
-long datum_pinned_clears   = 0;
 long datum_destroys        = 0;
 long datum_flushes         = 0;
 long datum_pinned_flushes  = 0;
@@ -317,10 +315,6 @@ hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
-static herr_t datum_clear_dirty_bits(haddr_t addr,
-                                     size_t len,
-                                     void * thing);
-
 static void * datum_deserialize(haddr_t addr,
                                 size_t len,
                                 const void * image_ptr,
@@ -341,9 +335,7 @@ static herr_t datum_serialize(const H5F_t *f,
                               size_t * new_len_ptr,
                               void ** new_image_ptr_ptr);
 
-static herr_t datum_free_icr(haddr_t addr,
-                             size_t len,
-                             void * thing);
+static herr_t datum_free_icr(void * thing);
 
 #define DATUM_ENTRY_TYPE	H5AC_TEST_ID
 
@@ -359,7 +351,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)datum_image_len,
     (H5C_serialize_func_t)datum_serialize,
     (H5C_free_icr_func_t)datum_free_icr,
-    (H5C_clear_dirty_bits_func_t)datum_clear_dirty_bits
   }
 };
 
@@ -445,9 +436,8 @@ void
 print_stats(void)
 {
     HDfprintf(stdout,
-	      "%d: datum clears / pinned clears / destroys = %ld / %ld / %ld\n",
-              world_mpi_rank, datum_clears, datum_pinned_clears,
-	      datum_destroys );
+	      "%d: destroys = %ld\n",
+              world_mpi_rank, datum_destroys );
     HDfprintf(stdout,
 	      "%d: datum flushes / pinned flushes / loads  = %ld / %ld / %ld\n",
               world_mpi_rank, datum_flushes, datum_pinned_flushes,
@@ -480,8 +470,6 @@ print_stats(void)
 void
 reset_stats(void)
 {
-    datum_clears          = 0;
-    datum_pinned_clears   = 0;
     datum_destroys        = 0;
     datum_flushes         = 0;
     datum_pinned_flushes  = 0;
@@ -1678,68 +1666,6 @@ serve_write_request(struct mssg_t * mssg_ptr)
 /**************************** Call back functions ****************************/
 /*****************************************************************************/
 
-/*-------------------------------------------------------------------------
- * Function:	datum_clear_dirty_bits
- *
- * Purpose:	Clear the dirty bits of the target entry.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              10/30/07
- *
- * Modifications:
- *
- * 		None
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-datum_clear_dirty_bits(UNUSED haddr_t addr,
-                       UNUSED size_t len,
-                       void * thing)
-{
-    int idx;
-    struct datum * entry_ptr;
-
-    HDassert( thing );
-
-    entry_ptr = (struct datum *)thing;
-
-    idx = addr_to_datum_index(entry_ptr->base_addr);
-
-    if ( callbacks_verbose ) {
-
-        HDfprintf(stdout,
-		  "%d: clear_dirty_bits() idx = %d, addr = %ld, len = %d.\n",
-		  world_mpi_rank, idx, (long)addr, (int)len);
-	fflush(stdout);
-    }
-
-    HDassert( idx >= 0 );
-    HDassert( idx < NUM_DATA_ENTRIES );
-    HDassert( idx < virt_num_data_entries );
-    HDassert( &(data[idx]) == entry_ptr );
-
-    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
-    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-              ( entry_ptr->header.size == entry_ptr->local_len ) );
-
-    entry_ptr->dirty = FALSE;
-
-    datum_clears++;
-
-    if ( entry_ptr->header.is_pinned ) {
-
-        datum_pinned_clears++;
-        HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
-    }
-
-    return(SUCCEED);
-
-} /* datum_clear_dirty_bits() */
-
 
 /*-------------------------------------------------------------------------
  * Function:	datum_deserialize
@@ -2151,9 +2077,7 @@ datum_serialize(const H5F_t UNUSED *f,
  */
 
 herr_t
-datum_free_icr(UNUSED haddr_t addr,
-               UNUSED size_t len,
-               void * thing)
+datum_free_icr(void * thing)
 {
     int idx;
     struct datum * entry_ptr;
@@ -2172,9 +2096,8 @@ datum_free_icr(UNUSED haddr_t addr,
     if ( callbacks_verbose ) {
 
         HDfprintf(stdout,
-	  "%d: free_icr() idx = %d, addr = %ld, len = %d, dirty = %d.\n",
-		  world_mpi_rank, idx, (long)addr, (int)len,
-		  (int)(entry_ptr->dirty));
+	  "%d: free_icr() idx = %d, dirty = %d.\n",
+		  world_mpi_rank, idx, (int)(entry_ptr->dirty));
 	fflush(stdout);
     }
 

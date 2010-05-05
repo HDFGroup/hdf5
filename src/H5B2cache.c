@@ -69,21 +69,21 @@ static void *H5B2_cache_hdr_deserialize(haddr_t addr, size_t len,
 static herr_t H5B2_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5B2_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5B2_cache_hdr_free_icr(void *thing);
 
 static void *H5B2_cache_internal_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_internal_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5B2_cache_internal_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5B2_cache_internal_free_icr(void *thing);
 
 static void *H5B2_cache_leaf_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_leaf_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5B2_cache_leaf_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5B2_cache_leaf_free_icr(void *thing);
 
 /*********************/
 /* Package Variables */
@@ -98,7 +98,6 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     NULL,
     H5B2_cache_hdr_serialize,
     H5B2_cache_hdr_free_icr,
-    NULL,
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
@@ -110,7 +109,6 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     NULL,
     H5B2_cache_internal_serialize,
     H5B2_cache_internal_free_icr,
-    NULL,
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
@@ -122,7 +120,6 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     NULL,
     H5B2_cache_leaf_serialize,
     H5B2_cache_leaf_free_icr,
-    NULL,
 }};
 
 /*****************************/
@@ -347,7 +344,7 @@ H5B2_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5B2_cache_hdr_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -602,7 +599,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5B2_cache_internal_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -824,7 +821,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5B2_cache_leaf_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 

@@ -1958,7 +1958,6 @@ H5_DLL void H5_term_library(void);
 
 /* Functions to terminate interfaces */
 H5_DLL int H5A_term_interface(void);
-H5_DLL int H5AC1_term_interface(void);
 H5_DLL int H5AC_term_interface(void);
 H5_DLL int H5D_term_interface(void);
 H5_DLL int H5E_term_interface(void);

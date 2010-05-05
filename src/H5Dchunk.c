@@ -4411,9 +4411,6 @@ H5D_chunk_stats(const H5D_t *dset, hbool_t headers)
             "-----", "----", "------", "--------", "-----", "-------");
     }
 
-#ifdef H5AC1_DEBUG
-    if (H5DEBUG(AC1)) headers = TRUE;
-#endif
 #ifdef H5AC_DEBUG
     if (H5DEBUG(AC)) headers = TRUE;
 #endif

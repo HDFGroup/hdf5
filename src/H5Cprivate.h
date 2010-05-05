@@ -354,26 +354,9 @@ typedef struct H5C_t H5C_t;
  *
  *	The typedef for the free ICR callback is as follows:
  *
- *	typedef herr_t (*N5C_free_icr_func_t)(haddr_t addr,
- *	                                      size_t len,
- *                                            void * thing);
+ *	typedef herr_t (*N5C_free_icr_func_t)(void * thing);
  *
  * 	The parameters of the free ICR callback are as follows:
- *
- * 	addr:   Base address in file of the entry being evicted. 
- *
- * 		This parameter is supplied mainly for sanity checking. 
- * 		Sanity checks should be performed when compiled in debug
- * 		mode, but the parameter may be unused when compiled in
- * 		production mode. 
- *
- *	len:    Length of the in file image of the entry being evicted
- *		in bytes. 
- *
- *		This parameter is supplied mainly for sanity checking. 
- *		Sanity checks should be performed when compiled in debug
- *		mode, but the parameter may be unused when compiled in
- *		production mode. 
  *
  *	thing:  Pointer to void containing the address of the in core
  *		representation of the target metadata cache entry.  This
@@ -394,59 +377,6 @@ typedef struct H5C_t H5C_t;
  *	At least when compiled with debug, it would be useful if the
  *	free ICR call would fail if the in core representation has been
  *	modified since the last serialize of clear callback.
- *
- *
- * clear_dirty_bits:  Pointer to the clear dirty bits callback.
- *
- * 	For sanity checking purposes, it will be useful if cache clients
- * 	track whether an in core representation has been modified since
- * 	the last time it was serialized.  This data is used to flag an
- * 	error if the cache attempts to free an in core representation
- * 	that has not been serialized since the last time it was modified. 
- *
- * 	If this happens, either the client forgot to tell the cache that
- * 	an entry is dirty, or the cache forgot to flush a dirty entry
- * 	before evicting it.  In either case we want to know before we
- * 	get file corruption complaints. 
- *
- * 	However, in some cases, we want to mark an entry as clean even
- * 	though it has not been flushed to disk -- most particularly in
- * 	the parallel case.  Thus we need some way to tell the client
- * 	that a free of the associated ICR is OK even though it has
- * 	been modified since the last serialization.  Hence the clear
- * 	dirty bits callback. 
- *
- * 	Since the clear dirty bits callback is purely for sanity checking,
- * 	it is called only when we compile with debug. 
- *
- * 	The typedef for the clear callback is as follows:
- *
- *	typedef herr_t (*N5C_clear_dirty_bits_func_t)(haddr_t addr,
- *                                                    size_t len,
- *                                                    void * thing);
- *
- *	The parameters of the clear callback are as follows:
- *
- *	addr:   Base address in file of the entry whose dirty bits
- *		are being cleared
- *
- *	len:    Length in bytes of the in file image of the entry
- *		whose dirty bits are being cleared. 
- *
- *	thing:  Pointer to void containing the address of the in
- *		core representation of the target metadata cache entry. 
- *		This is the same pointer that would be returned by a
- *		protect of the addr and len above. 
- *
- *	Processing in the clear callback function should proceed as follows:
- *
- *	The function must clear any dirty bits associated with the ICR. 
- *
- *	If successful, the function must return SUCCEED. 
- *
- *	If it fails for any reason, the function must return FAIL and
- *	push error information on the error stack with the error API
- *	routines.
  *
  ***************************************************************************/
 typedef void *(*H5C_deserialize_func_t)(haddr_t addr,
@@ -472,9 +402,7 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 				        size_t * new_len_ptr,
 				        void ** new_image_ptr_ptr);
 
-typedef herr_t (*H5C_free_icr_func_t)(haddr_t addr,
-                                       size_t len,
-                                       void * thing);
+typedef herr_t (*H5C_free_icr_func_t)(void * thing);
 
 typedef herr_t (*H5C_clear_dirty_bits_func_t)(haddr_t addr,
                                                size_t len,
@@ -487,8 +415,7 @@ typedef struct H5C_class_t {
     H5C_deserialize_func_t 		deserialize;
     H5C_image_len_func_t		image_len;
     H5C_serialize_func_t		serialize;
-    H5C_free_icr_func_t		free_icr;
-    H5C_clear_dirty_bits_func_t	clear_dirty_bits;
+    H5C_free_icr_func_t		        free_icr;
 } H5C_class_t;
 
 

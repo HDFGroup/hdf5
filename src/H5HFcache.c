@@ -79,25 +79,25 @@ static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dt
 /* Metadata cache (H5AC) callbacks */
 static void *H5HF_cache_hdr_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
+static herr_t H5HF_cache_hdr_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HF_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5HF_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
-static herr_t H5HF_cache_hdr_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t H5HF_cache_hdr_free_icr(void *thing);
 
 static void *H5HF_cache_iblock_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_iblock_serialize(const H5F_t * f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *_thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5HF_cache_iblock_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5HF_cache_iblock_free_icr(void *thing);
 
 static void *H5HF_cache_dblock_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_dblock_serialize(const H5F_t * f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *_thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
-static herr_t H5HF_cache_dblock_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5HF_cache_dblock_free_icr(void *thing);
 
 
 /*********************/
@@ -113,7 +113,6 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     H5HF_cache_hdr_image_len,
     H5HF_cache_hdr_serialize,
     H5HF_cache_hdr_free_icr,
-    NULL,
 }};
 
 /* H5HF indirect block inherits cache-like properties from H5AC */
@@ -125,7 +124,6 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     NULL,
     H5HF_cache_iblock_serialize,
     H5HF_cache_iblock_free_icr,
-    NULL,
 }};
 
 /* H5HF direct block inherits cache-like properties from H5AC */
@@ -137,7 +135,6 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     NULL,
     H5HF_cache_dblock_serialize,
     H5HF_cache_dblock_free_icr,
-    NULL
 }};
 
 
@@ -591,7 +588,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HF_cache_hdr_free_icr(void *thing)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -933,7 +930,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_iblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HF_cache_iblock_free_icr(void *thing)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1397,7 +1394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_cache_dblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
+H5HF_cache_dblock_free_icr(void *thing)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
