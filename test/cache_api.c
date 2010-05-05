@@ -25,6 +25,7 @@
 #include "H5ACprivate.h"
 #include "cache_common.h"
 
+
 /* global variable declarations: */
 
 /* macro definitions */
@@ -197,8 +198,7 @@ check_fapl_mdc_api_calls(void)
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config =
     {
-      /* int         version                = */
-                                                H5AC__CURR_CACHE_CONFIG_VERSION,
+      /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,
       /* hbool_t     rpt_fcn_enabled        = */ FALSE,
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
@@ -356,9 +356,9 @@ check_fapl_mdc_api_calls(void)
             pass = FALSE;
 	    failure_mssg = "Can't get file_ptr.\n";
 
-        } else {
+	} else {
 
-            cache_ptr = file_ptr->shared->cache;
+	    cache_ptr = file_ptr->shared->cache;
         }
     }
 
@@ -2019,6 +2019,7 @@ mdc_api_call_smoke_check(int express_test)
                   fcn_name, failure_mssg);
 
 } /* mdc_api_call_smoke_check() */
+
 
 
 /* The following array of invalid external MDC cache configurations is

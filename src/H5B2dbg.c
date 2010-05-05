@@ -94,6 +94,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned    u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_hdr_debug, FAIL)
@@ -120,7 +121,9 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, dbg_ctx, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.ctx_udata = dbg_ctx;
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -206,6 +209,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5B2_int_debug, FAIL)
@@ -234,7 +238,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, dbg_ctx, H5AC_READ)))
+    cache_udata.f = f;
+    cache_udata.ctx_udata = dbg_ctx;
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -331,6 +337,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_leaf_t	*leaf = NULL;           /* B-tree leaf node */
+    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     void        *dbg_ctx = NULL;	/* v2 B-tree debugging context */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
@@ -362,8 +369,10 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree header.
      */
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, dbg_ctx, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
+    cache_udata.f = f;
+    cache_udata.ctx_udata = dbg_ctx;
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree header")
 
     /* Set file pointer for this B-tree operation */
     hdr->f = f;
@@ -371,8 +380,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, hdr, H5AC_READ)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
+    if(NULL == (leaf = H5B2_protect_leaf(hdr, dxpl_id, addr, nrec, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
     /* Print opening message */
     HDfprintf(stream, "%*sv2 B-tree Leaf Node...\n", indent, "");
