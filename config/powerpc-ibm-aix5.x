@@ -19,7 +19,6 @@
 # the various compile modes.
 
 # Use AIX supplied C compiler by default, xlc for serial, mpcc_r for parallel.
-# Use -D_LARGE_FILES by default to support large file size.
 # Make sure this is applied to other API compile options such as C++.
 if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
@@ -46,9 +45,8 @@ case $CC_BASENAME in
   xlc|xlc-*|mpcc_r|mpcc_r-*)
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
-    # Use -D_LARGE_FILES by default to support large file size.
     # Make sure this is applied to other API compile options such as C++.
-    AM_CFLAGS="-D_LARGE_FILES $AM_CFLAGS"
+    AM_CFLAGS="$AM_CFLAGS"
     H5_CFLAGS="-qlanglvl=stdc99 $H5_CFLAGS"
     DEBUG_CFLAGS="-g -qfullpath"
     DEBUG_CPPFLAGS=
@@ -121,10 +119,6 @@ ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t=8}
 # Don't cache long since it varies between 32 and 64 bits
 #ac_cv_sizeof_long=${ac_cv_sizeof_long=4}
 
-# Don't cache size_t and off_t because they depend on if -D_LARGE_FILES is used
-#ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t=4}
-#ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t=8}
-
 # The default Fortran 90 compiler
 
 if test "X-" = "X-$FC"; then
@@ -163,8 +157,7 @@ CXX=${CXX=xlC}
 
 # Added -qweaksymbol to suppress linker messages warning of duplicate
 # symbols; these warnings are harmless. - BMR
-# Use -D_LARGE_FILES by default to support large file size.
 H5_CXXFLAGS="$H5_CXXFLAGS -qweaksymbol"
-AM_CXXFLAGS="$AM_CXXFLAGS -D_LARGE_FILES"
+AM_CXXFLAGS="$AM_CXXFLAGS"
 
 
