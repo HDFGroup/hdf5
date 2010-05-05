@@ -516,6 +516,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_protect
+ *
+ * Purpose:	Convenience wrapper around H5AC_protect on an indirect block
+ *
+ * Return:	Pointer to indirect block on success, NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May  5 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+H5HF_hdr_t *
+H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
+{
+    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
+    H5HF_hdr_t *hdr;                    /* Fractal heap header */
+    H5HF_hdr_t *ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_hdr_protect)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Set up userdata for protect call */
+    cache_udata.f = f;
+    cache_udata.dxpl_id = dxpl_id;
+
+    /* Lock the heap header into memory */
+    if(NULL == (hdr = (H5HF_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, addr, &cache_udata, rw)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
+
+    /* Set the header's address */
+    hdr->heap_addr = addr;
+
+    /* Set the return value */
+    ret_value = hdr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_hdr_protect() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_hdr_incr
  *
  * Purpose:	Increment component reference count on shared heap header

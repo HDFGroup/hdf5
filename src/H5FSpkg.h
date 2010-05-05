@@ -99,6 +99,7 @@ typedef struct H5FS_hdr_cache_ud_t {
     size_t nclasses;                            /* Number of section classes */
     const H5FS_section_class_t **classes;       /* Array of section class info */
     void *cls_init_udata;                       /* Pointer to class init user data */
+    haddr_t addr;              /* Address of header */
 } H5FS_hdr_cache_ud_t;
 
 /* Callback info for loading free space section info into the cache */

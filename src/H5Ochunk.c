@@ -235,16 +235,13 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_chunk_proxy_t *chk_proxy,
             if(H5AC_resize_pinned_entry(chk_proxy->oh, chk_proxy->oh->chunk[0].size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize chunk in cache")
         } /* end if */
+
         /* Check for dirtying the first chunk */
-        else if(chk_flags & H5AC__DIRTIED_FLAG) {
+        if(chk_flags & H5AC__DIRTIED_FLAG) {
             /* Mark object header as dirty in cache */
             if(H5AC_mark_pinned_or_protected_entry_dirty(chk_proxy->oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end else/if */
-        else {
-            /* Sanity check */
-            HDassert(0 && "Unknown chunk proxy flag(s)?!?");
-        } /* end else */
 
         /* Decrement reference count of object header */
         if(H5O_dec_rc(chk_proxy->oh) < 0)

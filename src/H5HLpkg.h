@@ -123,6 +123,7 @@ typedef struct H5HL_cache_prfx_ud_t {
     /* Downwards */
     size_t sizeof_size;                 /* Size of file sizes */
     size_t sizeof_addr;                 /* Size of file addresses */
+    haddr_t prfx_addr;                  /* Address of prefix */
     size_t sizeof_prfx;                 /* Size of heap prefix */
 
     /* Upwards */
