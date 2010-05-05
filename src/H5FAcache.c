@@ -74,19 +74,19 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static H5FA_hdr_t *H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5FA_hdr_t *H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_hdr_t *hdr, unsigned * flags_ptr);
 static herr_t H5FA__cache_hdr_clear(H5F_t *f, H5FA_hdr_t *hdr, hbool_t destroy);
 static herr_t H5FA__cache_hdr_size(const H5F_t *f, const H5FA_hdr_t *hdr, size_t *size_ptr);
 static herr_t H5FA__cache_hdr_dest(H5F_t *f, H5FA_hdr_t *hdr);
 
-static H5FA_dblock_t *H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5FA_dblock_t *H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_dblock_t *dblock, unsigned * flags_ptr);
 static herr_t H5FA__cache_dblock_clear(H5F_t *f, H5FA_dblock_t *dblock, hbool_t destroy);
 static herr_t H5FA__cache_dblock_size(const H5F_t *f, const H5FA_dblock_t *dblock, size_t *size_ptr);
 static herr_t H5FA__cache_dblock_dest(H5F_t *f, H5FA_dblock_t *dblock);
 
-static H5FA_dblk_page_t *H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5FA_dblk_page_t *H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_dblk_page_t *dblk_page, unsigned * flags_ptr);
 static herr_t H5FA__cache_dblk_page_clear(H5F_t *f, H5FA_dblk_page_t *dblk_page, hbool_t destroy);
 static herr_t H5FA__cache_dblk_page_size(const H5F_t *f, const H5FA_dblk_page_t *dblk_page, size_t *size_ptr);
@@ -158,8 +158,7 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
  */
 BEGIN_FUNC(STATIC, ERR,
 H5FA_hdr_t *, NULL, NULL,
-H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
-    void *ctx_udata))
+H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
 
     /* Local variables */
     H5FA_cls_id_t       id;		/* ID of fixed array class, as found in file */
@@ -266,7 +265,7 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *u
 	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array header")
 
     /* Finish initializing fixed array header */
-    if(H5FA__hdr_init(hdr, ctx_udata) < 0)
+    if(H5FA__hdr_init(hdr, udata) < 0)
 	H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
     HDassert(hdr->size == size);
 
@@ -501,13 +500,11 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5FA_dblock_t *, NULL, NULL,
-H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_nelmts, void *_hdr))
+H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5FA_hdr_t     *hdr = (H5FA_hdr_t *)_hdr;  /* Shared fixed array information */
-    const hsize_t  *nelmts = (const hsize_t *)_nelmts;  /* Number of elements in data block */
     H5FA_dblock_t  *dblock = NULL;  /* Data block info */
+    H5FA_dblock_cache_ud_t *udata = (H5FA_dblock_cache_ud_t *)_udata; /* User data for loading data block */
     size_t	   size;            /* Data block size */
     H5WB_t         *wb = NULL;      /* Wrapped buffer for data block data */
     uint8_t        dblock_buf[H5FA_DBLOCK_BUF_SIZE]; /* Buffer for data block */
@@ -520,11 +517,10 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(nelmts && *nelmts > 0);
-    HDassert(hdr);
+    HDassert(udata && udata->hdr && udata->nelmts > 0);
 
     /* Allocate the fixed array data block */
-    if(NULL == (dblock = H5FA__dblock_alloc(hdr, *nelmts)))
+    if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Set the fixed array data block's information */
@@ -562,11 +558,11 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(f, &p, &arr_addr);
-    if(H5F_addr_ne(arr_addr, hdr->addr))
+    if(H5F_addr_ne(arr_addr, udata->hdr->addr))
 	H5E_THROW(H5E_BADVALUE, "wrong fixed array header address")
 
     /* Fixed array type */
-    if(*p++ != (uint8_t)hdr->cparam.cls->id)
+    if(*p++ != (uint8_t)udata->hdr->cparam.cls->id)
 	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
 
     /* Page initialization flags */
@@ -579,9 +575,9 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)*nelmts, hdr->cb_ctx) < 0)
+        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)udata->nelmts, udata->hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode fixed array data elements")
-        p += (*nelmts * hdr->cparam.raw_elmt_size);
+        p += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Sanity check */
@@ -855,13 +851,11 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5FA_dblk_page_t *, NULL, NULL,
-H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_udata1, void *_hdr))
+H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5FA_hdr_t          *hdr = (H5FA_hdr_t *)_hdr;  /* Shared fixed array information */
-    const H5FA_dblk_page_load_ud_t *ud_load = (const H5FA_dblk_page_load_ud_t *)_udata1; /* User data for loading data block page */
     H5FA_dblk_page_t	*dblk_page = NULL; /* Data block page info */
+    H5FA_dblk_page_cache_ud_t *udata = (H5FA_dblk_page_cache_ud_t *)_udata; /* User data for loading data block page */
     size_t		size;           /* Data block page size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for data block page data */
     uint8_t             dblk_page_buf[H5FA_DBLK_PAGE_BUF_SIZE]; /* Buffer for data block page */
@@ -873,13 +867,13 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(hdr);
+    HDassert(udata && udata->hdr && udata->nelmts > 0);
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
 
     /* Allocate the fixed array data block page */
-    if(NULL == (dblk_page = H5FA__dblk_page_alloc(hdr, ud_load->nelmts)))
+    if(NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block page")
 
     /* Set the fixed array data block's information */
@@ -890,7 +884,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the size of the fixed array data block page on disk */
-    size = H5FA_DBLK_PAGE_SIZE(dblk_page, ud_load->nelmts);
+    size = H5FA_DBLK_PAGE_SIZE(dblk_page, udata->nelmts);
 
     /* Get a pointer to a buffer that's large enough for serialized info */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -907,9 +901,9 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
     /* Decode elements in data block page */
     /* Convert from raw elements on disk into native elements in memory */
-    if((hdr->cparam.cls->decode)(p, dblk_page->elmts, ud_load->nelmts, hdr->cb_ctx) < 0)
+    if((udata->hdr->cparam.cls->decode)(p, dblk_page->elmts, udata->nelmts, udata->hdr->cb_ctx) < 0)
         H5E_THROW(H5E_CANTDECODE, "can't decode fixed array data elements")
-    p += (ud_load->nelmts * hdr->cparam.raw_elmt_size);
+    p += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */

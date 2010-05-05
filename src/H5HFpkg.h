@@ -467,6 +467,36 @@ typedef struct {
     hsize_t obj_len;            /* Length of object removed (out) */
 } H5HF_huge_remove_ud1_t;
 
+/* User data for fractal heap header cache client callback */
+typedef struct H5HF_hdr_cache_ud_t {
+    H5F_t *f;                   /* File pointer */
+    hid_t dxpl_id;              /* DXPL ID for operation (in) */
+} H5HF_hdr_cache_ud_t;
+
+/* User data for fractal heap indirect block cache client callbacks */
+typedef struct H5HF_iblock_cache_ud_t {
+    H5HF_parent_t * par_info;   /* Parent info */
+    H5F_t * f;                  /* File pointer */
+    const unsigned *nrows;      /* Number of rows */
+} H5HF_iblock_cache_ud_t;
+
+/* User data for fractal heap direct block cache client callbacks */
+typedef struct H5HF_dblock_cache_ud_t {
+    H5HF_parent_t par_info;     /* Parent info */
+    H5F_t * f;                  /* File pointer */
+    size_t dblock_size;		/* size of the direct block, which bears
+				 * no necessary relation to the block
+				 * odi_size -- the size of the on disk
+				 * image of the block.  Note that the
+				 * metadata cache is only interested
+				 * in the odi_size, and thus it is this
+				 * value that is passed to the cache in
+				 * calls to it.
+				 */
+    unsigned filter_mask;	/* Excluded filters for direct block */
+} H5HF_dblock_cache_ud_t;
+
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/

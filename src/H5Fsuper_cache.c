@@ -59,7 +59,7 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static H5F_super_t *H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
+static H5F_super_t *H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F_super_t *sblock);
 static herr_t H5F_sblock_dest(H5F_t *f, H5F_super_t * sblock);
 static herr_t H5F_sblock_clear(H5F_t *f, H5F_super_t *sblock, hbool_t destroy);
@@ -111,8 +111,7 @@ H5FL_EXTERN(H5F_super_t);
  *-------------------------------------------------------------------------
  */
 static H5F_super_t *
-H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, const void UNUSED *udata1,
-    void *udata2/*out*/)
+H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 {
     H5F_super_t        *sblock = NULL;      /* File's superblock */
     haddr_t             base_addr = HADDR_UNDEF;        /* Base address of file */
@@ -128,7 +127,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, const void UNUSED 
     size_t              variable_size;      /*variable sizeof superblock    */
     uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
-    hbool_t            *dirtied = (hbool_t *)udata2;  /* Set up dirtied out value */
+    hbool_t            *dirtied = (hbool_t *)_udata;  /* Set up dirtied out value */
     H5F_super_t        *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_sblock_load)
@@ -136,6 +135,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, const void UNUSED 
     /* check arguments */
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
+    HDassert(dirtied);
 
     /* Short cuts */
     shared = f->shared;

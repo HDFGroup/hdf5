@@ -137,8 +137,7 @@ typedef enum H5C_notify_action_t {
 typedef void *(*H5C_load_func_t)(H5F_t *f,
                                  hid_t dxpl_id,
                                  haddr_t addr,
-                                 const void *udata1,
-                                 void *udata2);
+                                 void *udata);
 typedef herr_t (*H5C_flush_func_t)(H5F_t *f,
                                    hid_t dxpl_id,
                                    hbool_t dest,
@@ -503,6 +502,37 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		is false, and dirty is false, it should point to the
  *		previous item on the clean LRU list.  In either case, when
  *		there is no previous item, it should be NULL.
+ *
+ *
+ * Fields supporting metadata journaling:
+ *
+ * last_trans:	unit64_t containing the ID of the last transaction in
+ * 		which this entry was dirtied.  If journaling is disabled,
+ * 		or if the entry has never been dirtied in a transaction,
+ * 		this field should be set to zero.  Once we notice that
+ * 		the specified transaction has made it to disk, we will
+ * 		reset this field to zero as well.
+ *
+ * 		We must maintain this field, as to avoid messages from
+ * 		the future, we must not flush a dirty entry to disk
+ * 		until the last transaction in which it was dirtied
+ * 		has made it to disk in the journal file.
+ *
+ * trans_next:  Next pointer in the entries modified in the current
+ * 		transaction list.  This field should always be null
+ * 		unless journaling is enabled, the entry is dirty,
+ * 		and last_trans field contains the current transaction
+ * 		number.  Even if all these conditions are fulfilled,
+ * 		the field will still be NULL if this is the last
+ * 		entry on the list.
+ *
+ * trans_prev:  Previous pointer in the entries modified in the current
+ * 		transaction list.  This field should always be null
+ * 		unless journaling is enabled, the entry is dirty,
+ * 		and last_trans field contains the current transaction
+ * 		number.  Even if all these conditions are fulfilled,
+ * 		the field will still be NULL if this is the first
+ * 		entry on the list.
  *
  *
  * Cache entry stats collection fields:
@@ -1104,11 +1134,10 @@ H5_DLL herr_t H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 H5_DLL void * H5C_protect(H5F_t *             f,
                           hid_t               primary_dxpl_id,
                           hid_t               secondary_dxpl_id,
-                          const H5C_class_t * type,
+			  const H5C_class_t * type,
                           haddr_t             addr,
-                          const void *        udata1,
-                          void *              udata2,
-			  unsigned            flags);
+                          void *              udata,
+                          unsigned            flags);
 
 H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr);
 

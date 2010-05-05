@@ -36,7 +36,7 @@
 
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5FSprivate.h"	/* File free space                      */
@@ -208,7 +208,7 @@ typedef struct H5F_file_t {
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
 
-    H5AC_t      *cache;		/* The object cache			*/
+    H5AC_t      *cache;		/* The object cache	 		*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
                                 /* metadata cache.  This structure is   */

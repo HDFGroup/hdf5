@@ -80,30 +80,30 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static H5EA_hdr_t *H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5EA_hdr_t *H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_hdr_t *hdr, unsigned * flags_ptr);
 static herr_t H5EA__cache_hdr_clear(H5F_t *f, H5EA_hdr_t *hdr, hbool_t destroy);
 static herr_t H5EA__cache_hdr_size(const H5F_t *f, const H5EA_hdr_t *hdr, size_t *size_ptr);
 static herr_t H5EA__cache_hdr_dest(H5F_t *f, H5EA_hdr_t *hdr);
-static H5EA_iblock_t *H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5EA_iblock_t *H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_iblock_t *iblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_iblock_clear(H5F_t *f, H5EA_iblock_t *iblock, hbool_t destroy);
 static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock);
 static herr_t H5EA__cache_iblock_size(const H5F_t *f, const H5EA_iblock_t *iblock, size_t *size_ptr);
 static herr_t H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
-static H5EA_sblock_t *H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5EA_sblock_t *H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_sblock_t *sblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_sblock_clear(H5F_t *f, H5EA_sblock_t *sblock, hbool_t destroy);
 static herr_t H5EA__cache_sblock_size(const H5F_t *f, const H5EA_sblock_t *sblock, size_t *size_ptr);
 static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock);
 static herr_t H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
-static H5EA_dblock_t *H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5EA_dblock_t *H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_dblock_t *dblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_dblock_clear(H5F_t *f, H5EA_dblock_t *dblock, hbool_t destroy);
 static herr_t H5EA__cache_dblock_size(const H5F_t *f, const H5EA_dblock_t *dblock, size_t *size_ptr);
 static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock);
 static herr_t H5EA__cache_dblock_dest(H5F_t *f, H5EA_dblock_t *dblock);
-static H5EA_dblk_page_t *H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5EA_dblk_page_t *H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5EA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_dblk_page_t *dblk_page, unsigned * flags_ptr);
 static herr_t H5EA__cache_dblk_page_clear(H5F_t *f, H5EA_dblk_page_t *dblk_page, hbool_t destroy);
 static herr_t H5EA__cache_dblk_page_size(const H5F_t *f, const H5EA_dblk_page_t *dblk_page, size_t *size_ptr);
@@ -198,8 +198,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_hdr_t *, NULL, NULL,
-H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
-    void *ctx_udata))
+H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
 
     /* Local variables */
     H5EA_cls_id_t       id;		/* ID of extensible array class, as found in file */
@@ -316,7 +315,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *u
 	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array header")
 
     /* Finish initializing extensible array header */
-    if(H5EA__hdr_init(hdr, ctx_udata) < 0)
+    if(H5EA__hdr_init(hdr, udata) < 0)
 	H5E_THROW(H5E_CANTINIT, "initialization failed for extensible array header")
     HDassert(hdr->size == size);
 
@@ -565,11 +564,10 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_iblock_t *, NULL, NULL,
-H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void UNUSED *udata1, void *_hdr))
+H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5EA_hdr_t    *hdr = (H5EA_hdr_t *)_hdr;      /* Shared extensible array information */
+    H5EA_hdr_t    *hdr = (H5EA_hdr_t *)_udata;   /* Shared extensible array information */
     H5EA_iblock_t	*iblock = NULL; /* Index block info */
     size_t		size;           /* Index block size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for index block data */
@@ -981,13 +979,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_sblock_t *, NULL, NULL,
-H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_udata1, void *_hdr))
+H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5EA_hdr_t    *hdr = (H5EA_hdr_t *)_hdr;      /* Shared extensible array information */
-    const H5EA_sblock_load_ud_t *ud_load = (const H5EA_sblock_load_ud_t *)_udata1;      /* User data for loading super block */
     H5EA_sblock_t	*sblock = NULL; /* Super block info */
+    H5EA_sblock_cache_ud_t *udata = (H5EA_sblock_cache_ud_t *)_udata;      /* User data for loading super block */
     size_t		size;           /* Super block size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for super block data */
     uint8_t             sblock_buf[H5EA_IBLOCK_BUF_SIZE]; /* Buffer for super block */
@@ -1001,11 +997,10 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(ud_load && ud_load->parent && ud_load->sblk_idx > 0);
-    HDassert(hdr);
+    HDassert(udata && udata->hdr && udata->parent && udata->sblk_idx > 0);
 
     /* Allocate the extensible array super block */
-    if(NULL == (sblock = H5EA__sblock_alloc(hdr, ud_load->parent, ud_load->sblk_idx)))
+    if(NULL == (sblock = H5EA__sblock_alloc(udata->hdr, udata->parent, udata->sblk_idx)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array super block")
 
     /* Set the extensible array super block's address */
@@ -1040,14 +1035,14 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(f, &p, &arr_addr);
-    if(H5F_addr_ne(arr_addr, hdr->addr))
+    if(H5F_addr_ne(arr_addr, udata->hdr->addr))
 	H5E_THROW(H5E_BADVALUE, "wrong extensible array header address")
 
     /* Offset of block within the array's address space */
-    UINT64DECODE_VAR(p, sblock->block_off, hdr->arr_off_size);
+    UINT64DECODE_VAR(p, sblock->block_off, udata->hdr->arr_off_size);
 
     /* Extensible array type */
-    if(*p++ != (uint8_t)hdr->cparam.cls->id)
+    if(*p++ != (uint8_t)udata->hdr->cparam.cls->id)
 	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
 
     /* Internal information */
@@ -1380,13 +1375,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_dblock_t *, NULL, NULL,
-H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_udata1, void *_hdr))
+H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5EA_hdr_t          *hdr = (H5EA_hdr_t *)_hdr;  /* Shared extensible array information */
-    const H5EA_dblock_load_ud_t *ud_load = (const H5EA_dblock_load_ud_t *)_udata1;      /* User data for loading data block */
     H5EA_dblock_t	*dblock = NULL; /* Data block info */
+    H5EA_dblock_cache_ud_t *udata = (H5EA_dblock_cache_ud_t *)_udata;      /* User data for loading data block */
     size_t		size;           /* Data block size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for data block data */
     uint8_t             dblock_buf[H5EA_DBLOCK_BUF_SIZE]; /* Buffer for data block */
@@ -1399,11 +1392,10 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(ud_load && ud_load->parent && ud_load->nelmts > 0);
-    HDassert(hdr);
+    HDassert(udata && udata->hdr && udata->parent && udata->nelmts > 0);
 
     /* Allocate the extensible array data block */
-    if(NULL == (dblock = H5EA__dblock_alloc(hdr, ud_load->parent, ud_load->nelmts)))
+    if(NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
     /* Set the extensible array data block's information */
@@ -1441,14 +1433,14 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(f, &p, &arr_addr);
-    if(H5F_addr_ne(arr_addr, hdr->addr))
+    if(H5F_addr_ne(arr_addr, udata->hdr->addr))
 	H5E_THROW(H5E_BADVALUE, "wrong extensible array header address")
 
     /* Offset of block within the array's address space */
-    UINT64DECODE_VAR(p, dblock->block_off, hdr->arr_off_size);
+    UINT64DECODE_VAR(p, dblock->block_off, udata->hdr->arr_off_size);
 
     /* Extensible array type */
-    if(*p++ != (uint8_t)hdr->cparam.cls->id)
+    if(*p++ != (uint8_t)udata->hdr->cparam.cls->id)
 	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
 
     /* Internal information */
@@ -1457,9 +1449,9 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cparam.cls->decode)(p, dblock->elmts, ud_load->nelmts, hdr->cb_ctx) < 0)
+        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, udata->nelmts, udata->hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
-        p += (ud_load->nelmts * hdr->cparam.raw_elmt_size);
+        p += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Sanity check */
@@ -1782,13 +1774,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_dblk_page_t *, NULL, NULL,
-H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_ud_load, void *_hdr))
+H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Local variables */
-    H5EA_hdr_t          *hdr = (H5EA_hdr_t *)_hdr;  /* Shared extensible array information */
-    const H5EA_dblk_page_load_ud_t *ud_load = (const H5EA_dblk_page_load_ud_t *)_ud_load;      /* User data for loading data block page */
     H5EA_dblk_page_t	*dblk_page = NULL; /* Data block page info */
+    H5EA_dblk_page_cache_ud_t *udata = (H5EA_dblk_page_cache_ud_t *)_udata;      /* User data for loading data block page */
     size_t		size;           /* Data block page size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for data block page data */
     uint8_t             dblk_page_buf[H5EA_DBLK_PAGE_BUF_SIZE]; /* Buffer for data block page */
@@ -1800,13 +1790,13 @@ H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(hdr);
+    HDassert(udata && udata->hdr && udata->parent);
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
 
     /* Allocate the extensible array data block page */
-    if(NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, ud_load->parent)))
+    if(NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block page")
 
     /* Set the extensible array data block's information */
@@ -1834,9 +1824,9 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
     /* Decode elements in data block page */
     /* Convert from raw elements on disk into native elements in memory */
-    if((hdr->cparam.cls->decode)(p, dblk_page->elmts, hdr->dblk_page_nelmts, hdr->cb_ctx) < 0)
+    if((udata->hdr->cparam.cls->decode)(p, dblk_page->elmts, udata->hdr->dblk_page_nelmts, udata->hdr->cb_ctx) < 0)
         H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
-    p += (hdr->dblk_page_nelmts * hdr->cparam.raw_elmt_size);
+    p += (udata->hdr->dblk_page_nelmts * udata->hdr->cparam.raw_elmt_size);
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */

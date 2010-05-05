@@ -287,11 +287,11 @@ H5S_extent_release(H5S_extent_t *extent)
     assert(extent);
 
     /* Release extent */
-    if(extent->type==H5S_SIMPLE) {
+    if(extent->type == H5S_SIMPLE) {
         if(extent->size)
-            H5FL_ARR_FREE(hsize_t,extent->size);
+            extent->size = H5FL_ARR_FREE(hsize_t, extent->size);
         if(extent->max)
-            H5FL_ARR_FREE(hsize_t,extent->max);
+            extent->max = H5FL_ARR_FREE(hsize_t, extent->max);
     } /* end if */
 
 done:

@@ -440,7 +440,7 @@ done:
     if(NULL == ret_value)
         if(dest) {
             if(dest->name && dest->name != lnk->name)
-                dest->name = H5MM_xfree(dest->name);
+                dest->name = (char *)H5MM_xfree(dest->name);
             if(NULL == _dest)
                 dest = H5FL_FREE(H5O_link_t ,dest);
         } /* end if */

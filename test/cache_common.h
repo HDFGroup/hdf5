@@ -37,7 +37,7 @@
 /* Macro to make error reporting easier */
 #define CACHE_ERROR(s)      {failure_mssg = "Line #" H5_TOSTRING(__LINE__) ": " s ; pass = FALSE; goto done;}
 
-#define NO_CHANGE       -1
+#define NO_CHANGE       	-1
 
 /* with apologies for the abuse of terminology... */
 
@@ -80,6 +80,7 @@
 #define NUM_NOTIFY_ENTRIES	(10 * 1024)
 
 #define MAX_ENTRIES		(10 * 1024)
+
 
 /* The choice of the BASE_ADDR below is arbitrary -- it just has to be
  * larger than the superblock.
@@ -598,28 +599,17 @@ herr_t notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                       haddr_t addr, void *thing, unsigned * flags_ptr);
 
 
-void * pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                 const void *udata1, void *udata2);
-void * nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                 const void *udata1, void *udata2);
-void * micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                  const void *udata1, void *udata2);
-void * tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                 const void *udata1, void *udata2);
-void * small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                  const void *udata1, void *udata2);
-void * medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                   const void *udata1, void *udata2);
-void * large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                  const void *udata1, void *udata2);
-void * huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                 const void *udata1, void *udata2);
-void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                    const void *udata1, void *udata2);
-void * variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                     const void *udata1, void *udata2);
-void * notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-                     const void *udata1, void *udata2);
+void * pico_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * nano_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * micro_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * tiny_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * small_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * medium_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * large_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * huge_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+void * notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 
 
 herr_t pico_size(H5F_t * f, void * thing, size_t * size_ptr);

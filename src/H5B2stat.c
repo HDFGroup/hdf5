@@ -86,22 +86,14 @@
 herr_t
 H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info)
 {
-    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
-
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_stat_info)
 
     /* Check arguments. */
     HDassert(info);
 
-    /* Set the shared v2 B-tree header's file context for this operation */
-    bt2->hdr->f = bt2->f;
-
-    /* Get the v2 B-tree header */
-    hdr = bt2->hdr;
-
     /* Get information about the B-tree */
-    info->depth = hdr->depth;
-    info->nrecords = hdr->root.all_nrec;
+    info->depth = bt2->hdr->depth;
+    info->nrecords = bt2->hdr->root.all_nrec;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_stat_info() */

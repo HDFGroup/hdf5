@@ -307,7 +307,7 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw))
 
     /* Local variables */
-    H5EA_dblock_load_ud_t load_ud;      /* Information needed for loading data block */
+    H5EA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -319,11 +319,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(dblk_nelmts);
 
     /* Set up user data */
-    load_ud.parent = parent;
-    load_ud.nelmts = dblk_nelmts;
+    udata.hdr = hdr;
+    udata.parent = parent;
+    udata.nelmts = dblk_nelmts;
 
     /* Protect the data block */
-    if(NULL == (ret_value = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &load_ud, hdr, rw)))
+    if(NULL == (ret_value = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, rw)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)dblk_addr)
 
 CATCH

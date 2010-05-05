@@ -511,7 +511,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 done:
     /* Release resources */
     if(sequence)
-        sequence = H5MM_xfree(sequence);
+        sequence = (unsigned *)H5MM_xfree(sequence);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_debug_real() */

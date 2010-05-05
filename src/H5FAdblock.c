@@ -268,6 +268,7 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
     hsize_t dblk_nelmts, H5AC_protect_t rw))
 
     /* Local variables */
+    H5FA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
 
 #ifdef H5FA_DEBUG
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -278,8 +279,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(H5F_addr_defined(dblk_addr));
     HDassert(dblk_nelmts);
 
+    /* Set up user data */
+    udata.hdr = hdr;
+    udata.nelmts = dblk_nelmts;
+
     /* Protect the data block */
-    if(NULL == (ret_value = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &dblk_nelmts, hdr, rw)))
+    if(NULL == (ret_value = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, rw)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
 
 CATCH

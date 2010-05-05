@@ -645,7 +645,7 @@ done:
         while(curr) {
             H5S_pnt_node_t *tmp_node = curr;
 
-            curr->pnt = H5MM_xfree(curr->pnt);
+            curr->pnt = (hsize_t *)H5MM_xfree(curr->pnt);
             curr = curr->next;
             tmp_node = H5FL_FREE(H5S_pnt_node_t, tmp_node);
         } /* end while */

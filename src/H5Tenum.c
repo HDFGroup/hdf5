@@ -87,7 +87,7 @@ H5Tenum_create(hid_t parent_id)
     H5TRACE1("i", "i", parent_id);
 
     /* Check args */
-    if (NULL==(parent=H5I_object_verify(parent_id,H5I_DATATYPE)) || H5T_INTEGER!=parent->shared->type)
+    if(NULL == (parent = (H5T_t *)H5I_object_verify(parent_id, H5I_DATATYPE)) || H5T_INTEGER != parent->shared->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type")
 
     /* Build new type */
@@ -173,9 +173,9 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
     H5TRACE3("e", "i*s*x", type, name, value);
 
     /* Check args */
-    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-    if (H5T_ENUM!=dt->shared->type)
+    if(H5T_ENUM != dt->shared->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type")
     if (!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
@@ -233,13 +233,14 @@ H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
     }
 
     /* Increase table sizes */
-    if (dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
+    if(dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
 	unsigned n = MAX(32, 2*dt->shared->u.enumer.nalloc);
-	if (NULL==(names=H5MM_realloc(dt->shared->u.enumer.name, n*sizeof(char*))))
+
+	if(NULL == (names = (char **)H5MM_realloc(dt->shared->u.enumer.name, n * sizeof(char *))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	dt->shared->u.enumer.name = names;
 
-	if (NULL==(values=H5MM_realloc(dt->shared->u.enumer.value, n*dt->shared->size)))
+	if(NULL == (values = (uint8_t *)H5MM_realloc(dt->shared->u.enumer.value, n * dt->shared->size)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	dt->shared->u.enumer.value = values;
 	dt->shared->u.enumer.nalloc = n;
@@ -282,9 +283,9 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
     FUNC_ENTER_API(H5Tget_member_value, FAIL)
     H5TRACE3("e", "iIux", type, membno, value);
 
-    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-    if (H5T_ENUM!=dt->shared->type)
+    if(H5T_ENUM != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class")
     if (membno>=dt->shared->u.enumer.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number")
@@ -366,9 +367,9 @@ H5Tenum_nameof(hid_t type, const void *value, char *name/*out*/, size_t size)
     H5TRACE4("e", "i*xxz", type, value, name, size);
 
     /* Check args */
-    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-    if (H5T_ENUM!=dt->shared->type)
+    if(H5T_ENUM != dt->shared->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type")
     if (!value)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value supplied")
@@ -457,7 +458,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "value is currently not defined")
 
     /* Save result name */
-    if (!name && NULL==(name=H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md])+1)))
+    if(!name && NULL == (name = (char *)H5MM_malloc(HDstrlen(copied_dt->shared->u.enumer.name[md]) + 1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDstrncpy(name, copied_dt->shared->u.enumer.name[md], size);
     if (HDstrlen(copied_dt->shared->u.enumer.name[md])>=size)
@@ -507,9 +508,9 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     H5TRACE3("e", "i*sx", type, name, value);
 
     /* Check args */
-    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-    if (H5T_ENUM!=dt->shared->type)
+    if(H5T_ENUM != dt->shared->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an enumeration data type")
     if (!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
