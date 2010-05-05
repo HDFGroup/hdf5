@@ -200,9 +200,11 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///		zero if all attributes were processed
 ///\exception	H5::AttributeIException
 ///\par Description
+///		The signature of user_op is
+///		void (*)(H5::H5Object&, std::string, void*).
 ///		For information, please refer to the C layer Reference Manual
 ///		at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Create2
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
