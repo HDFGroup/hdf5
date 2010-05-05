@@ -635,26 +635,26 @@ herr_t monster_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
 herr_t variable_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
 
 
-void * pico_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-  		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * nano_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * micro_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * tiny_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * small_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * medium_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		          const void * udata_ptr, hbool_t * dirty_ptr);
-void * large_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		         const void * udata_ptr, hbool_t * dirty_ptr);
-void * huge_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		        const void * udata_ptr, hbool_t * dirty_ptr);
-void * monster_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		           const void * udata_ptr, hbool_t * dirty_ptr);
-void * variable_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-		            const void * udata_ptr, hbool_t * dirty_ptr);
+void * pico_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * nano_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * micro_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * tiny_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * small_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * medium_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * large_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * huge_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * monster_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
+void * variable_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr);
 
 herr_t pico_image_len(void *thing, size_t *image_len_ptr);
 herr_t nano_image_len(void *thing, size_t *image_len_ptr);

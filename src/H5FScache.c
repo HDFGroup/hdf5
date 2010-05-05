@@ -75,15 +75,15 @@ static herr_t H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *
 static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata);
 
 /* Metadata cache callbacks */
-static void *H5FS_cache_hdr_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5FS_cache_hdr_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_hdr_free_icr(void *thing);
 
-static void *H5FS_cache_sinfo_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5FS_cache_sinfo_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -143,8 +143,8 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5FS_cache_hdr_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* user data for callback */
@@ -166,7 +166,7 @@ H5FS_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
-    fspace->addr = addr;
+    fspace->addr = udata->addr;
 
     /* Compute the size of the free space header on disk */
     size = H5FS_HEADER_SIZE(udata->f);
@@ -399,8 +399,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5FS_cache_sinfo_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
@@ -425,10 +425,6 @@ H5FS_cache_sinfo_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* (for deserializing sections) */
     HDassert(udata->fspace->sinfo == NULL);
     udata->fspace->sinfo = sinfo;
-
-    /* Sanity check address */
-    if(H5F_addr_ne(addr, udata->fspace->sect_addr))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect address for free space sections")
 
     /* Allocate space for the buffer to serialize the sections into */
     H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);

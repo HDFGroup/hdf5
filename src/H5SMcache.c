@@ -54,14 +54,14 @@
 
 /* Metadata cache (H5AC) callbacks */
 
-static void *H5SM_table_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5SM_table_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5SM_table_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5SM_table_free_icr(void *thing);
 
-static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5SM_list_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
@@ -119,8 +119,8 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5SM_table_deserialize(const void *image, size_t UNUSED len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5SM_master_table_t *table = NULL;
     H5F_t *f = (H5F_t *)_udata;         /* File pointer */
@@ -145,8 +145,6 @@ H5SM_table_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Read number of indexes and version from file superblock */
     table->num_indexes = f->shared->sohm_nindexes;
 
-    HDassert(addr == f->shared->sohm_addr);
-    HDassert(addr != HADDR_UNDEF);
     HDassert(table->num_indexes > 0);
 
     /* Get temporary pointer to serialized table */
@@ -360,8 +358,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM_list_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
-    void *_udata, hbool_t UNUSED *dirty)
+H5SM_list_deserialize(const void *image, size_t UNUSED len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5SM_list_t *list;          /* The SOHM list being read in */
     H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata; /* User data for callback */

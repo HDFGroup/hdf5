@@ -315,10 +315,9 @@ hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
-static void * datum_deserialize(haddr_t addr,
+static void * datum_deserialize(const void * image_ptr,
                                 size_t len,
-                                const void * image_ptr,
-                                const void * udata_ptr,
+                                void * udata_ptr,
                                 hbool_t * dirty_ptr);
 
 static herr_t datum_image_len(void *thing,
@@ -1685,13 +1684,13 @@ serve_write_request(struct mssg_t * mssg_ptr)
  */
 
 void *
-datum_deserialize(haddr_t addr,
+datum_deserialize(const void * image_ptr,
                   UNUSED size_t len,
-                  const void * image_ptr,
-                  const UNUSED void * udata_ptr,
+                  void * udata_ptr,
                   hbool_t * dirty_ptr)
 {
     const char * fcn_name = "load_datum()";
+    haddr_t addr = *(haddr_t *)udata_ptr;
     hbool_t success = TRUE;
     int idx;
     struct datum * entry_ptr = NULL;
@@ -2697,7 +2696,7 @@ lock_entry(H5C_t * cache_ptr,
 
         cache_entry_ptr = H5AC_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                         &(types[0]), entry_ptr->base_addr,
-                                        entry_ptr->local_len, NULL, H5AC_WRITE);
+                                        entry_ptr->local_len, &entry_ptr->base_addr, H5AC_WRITE);
 
         if ( ( cache_entry_ptr != (void *)(&(entry_ptr->header)) ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||

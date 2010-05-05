@@ -152,7 +152,6 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
-    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
     haddr_t fh_addr;            /* Heap header address */
     H5HF_t *ret_value;          /* Return value */
 
@@ -175,13 +174,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 
-    /* Set up userdata for protect call */
-    cache_udata.f = f;
-    cache_udata.dxpl_id = dxpl_id;
-
     /* Lock the heap header into memory */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load fractal heap header")
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
 
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
@@ -229,7 +224,6 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 {
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
-    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
     H5HF_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_open, NULL)
@@ -240,16 +234,12 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
-    /* Set up userdata for protect call */
-    cache_udata.f = f;
-    cache_udata.dxpl_id = dxpl_id;
-
     /* Load the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load fractal heap header")
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_READ)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fspace);
 #endif /* QAK */
@@ -795,7 +785,6 @@ done:
 herr_t
 H5HF_close(H5HF_t *fh, hid_t dxpl_id)
 {
-    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     hbool_t pending_delete = FALSE;     /* Whether the heap is pending deletion */
     haddr_t heap_addr = HADDR_UNDEF;    /* Address of heap (for deletion) */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -865,13 +854,9 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
     if(pending_delete) {
         H5HF_hdr_t *hdr;            /* Another pointer to fractal heap header */
 
-        /* Set up userdata for protect call */
-        cache_udata.f = fh->f;
-        cache_udata.dxpl_id = dxpl_id;
-
         /* Lock the heap header into memory */
-        if(NULL == (hdr = H5AC_protect(fh->f, dxpl_id, H5AC_FHEAP_HDR, heap_addr, (size_t)H5HF_SPEC_READ_SIZE(fh->f), &cache_udata, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+        if(NULL == (hdr = H5HF_hdr_protect(fh->f, dxpl_id, heap_addr, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
         /* Set the shared heap header's file context for this operation */
         hdr->f = fh->f;
@@ -906,7 +891,6 @@ herr_t
 H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 {
     H5HF_hdr_t *hdr = NULL;             /* The fractal heap header information */
-    H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_delete, FAIL)
@@ -917,16 +901,12 @@ H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
-    /* Set up userdata for protect call */
-    cache_udata.f = f;
-    cache_udata.dxpl_id = dxpl_id;
-
     /* Lock the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_WRITE)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /* Check for files using shared heap header */
     if(hdr->file_rc)

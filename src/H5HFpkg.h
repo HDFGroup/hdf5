@@ -640,6 +640,8 @@ H5_DLL hsize_t H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start
 /* Heap header routines */
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
+H5_DLL H5HF_hdr_t *H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    H5AC_protect_t rw);
 H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);

@@ -179,7 +179,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)pico_image_len,
     (H5C_serialize_func_t)pico_serialize,
     (H5C_free_icr_func_t)pico_free_icr,
-    (H5C_clear_dirty_bits_func_t)pico_clear_dirty_bits
   },
   {
     NANO_ENTRY_TYPE,
@@ -189,7 +188,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)nano_image_len,
     (H5C_serialize_func_t)nano_serialize,
     (H5C_free_icr_func_t)nano_free_icr,
-    (H5C_clear_dirty_bits_func_t)nano_clear_dirty_bits
   },
   {
     MICRO_ENTRY_TYPE,
@@ -199,7 +197,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)micro_image_len,
     (H5C_serialize_func_t)micro_serialize,
     (H5C_free_icr_func_t)micro_free_icr,
-    (H5C_clear_dirty_bits_func_t)micro_clear_dirty_bits
   },
   {
     TINY_ENTRY_TYPE,
@@ -209,7 +206,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)tiny_image_len,
     (H5C_serialize_func_t)tiny_serialize,
     (H5C_free_icr_func_t)tiny_free_icr,
-    (H5C_clear_dirty_bits_func_t)tiny_clear_dirty_bits
   },
   {
     SMALL_ENTRY_TYPE,
@@ -219,7 +215,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)small_image_len,
     (H5C_serialize_func_t)small_serialize,
     (H5C_free_icr_func_t)small_free_icr,
-    (H5C_clear_dirty_bits_func_t)small_clear_dirty_bits
   },
   {
     MEDIUM_ENTRY_TYPE,
@@ -229,7 +224,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)medium_image_len,
     (H5C_serialize_func_t)medium_serialize,
     (H5C_free_icr_func_t)medium_free_icr,
-    (H5C_clear_dirty_bits_func_t)medium_clear_dirty_bits
   },
   {
     LARGE_ENTRY_TYPE,
@@ -239,7 +233,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)large_image_len,
     (H5C_serialize_func_t)large_serialize,
     (H5C_free_icr_func_t)large_free_icr,
-    (H5C_clear_dirty_bits_func_t)large_clear_dirty_bits
   },
   {
     HUGE_ENTRY_TYPE,
@@ -249,7 +242,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)huge_image_len,
     (H5C_serialize_func_t)huge_serialize,
     (H5C_free_icr_func_t)huge_free_icr,
-    (H5C_clear_dirty_bits_func_t)huge_clear_dirty_bits
   },
   {
     MONSTER_ENTRY_TYPE,
@@ -259,7 +251,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)monster_image_len,
     (H5C_serialize_func_t)monster_serialize,
     (H5C_free_icr_func_t)monster_free_icr,
-    (H5C_clear_dirty_bits_func_t)monster_clear_dirty_bits
   },
   {
     VARIABLE_ENTRY_TYPE,
@@ -269,13 +260,12 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_image_len_func_t)variable_image_len,
     (H5C_serialize_func_t)variable_serialize,
     (H5C_free_icr_func_t)variable_free_icr,
-    (H5C_clear_dirty_bits_func_t)variable_clear_dirty_bits
   }
 };
 
-static void * deserialize(haddr_t addr,
+static void * deserialize(const void * image_ptr,
                           size_t len,
-                          const void * image_ptr,
+                          void * udata_ptr,
                           hbool_t * dirty_ptr);
 
 static herr_t image_len(void *thing,
@@ -291,8 +281,6 @@ static herr_t serialize(haddr_t addr,
                         void ** new_image_ptr_ptr);
 
 static herr_t free_icr(test_entry_t *entry_ptr);
-
-static herr_t clear_dirty_bits(test_entry_t *entry_ptr);
 
 /* address translation funtions: */
 
@@ -425,8 +413,9 @@ check_write_permitted(const H5F_t UNUSED * f,
  */
 
 static void *
-deserialize(haddr_t addr, size_t len, const void * image_ptr, hbool_t * dirty_ptr)
+deserialize(const void * image_ptr, size_t len, void *udata, hbool_t * dirty_ptr)
 {
+    haddr_t addr = *(haddr_t *)udata;
     int32_t type;
     int32_t idx;
     test_entry_t * entry_ptr;
@@ -514,73 +503,73 @@ deserialize(haddr_t addr, size_t len, const void * image_ptr, hbool_t * dirty_pt
 } /* deserialize() */
 
 void *
-pico_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+pico_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-nano_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+nano_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-micro_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+micro_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-tiny_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+tiny_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-small_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+small_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-medium_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+medium_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-large_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+large_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-huge_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+huge_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-monster_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+monster_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 void *
-variable_deserialize(haddr_t addr, size_t len, const void * image_ptr,
-    const UNUSED void * udata_ptr, hbool_t * dirty_ptr)
+variable_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
+    hbool_t * dirty_ptr)
 {
-    return deserialize(addr, len, image_ptr, dirty_ptr);
+    return deserialize(image_ptr, len, udata_ptr, dirty_ptr);
 }
 
 
@@ -1189,168 +1178,6 @@ variable_free_icr(void * thing)
     HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
 
     return(free_icr(entry_ptr));
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	clear_dirty_bits & friends
- *
- * Purpose:	Clear the dirty bits.  The helper functions verify that the
- *		correct version of clear_dirty_gits is being called, and
- *		then call clear_dirty_bits() proper.
- *
- * Return:	SUCCEED
- *
- * Programmer:	John Mainzer
- *              9/20/07
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-clear_dirty_bits(test_entry_t * entry_ptr)
-{
-    test_entry_t * base_addr;
-
-    HDassert( entry_ptr );
-
-    base_addr = entries[entry_ptr->type];
-
-    HDassert( entry_ptr->index >= 0 );
-    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
-    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->header.addr == entry_ptr->addr );
-    HDassert( entry_ptr->header.size == entry_ptr->size );
-    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
-	      ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
-
-    entry_ptr->is_dirty = FALSE;
-
-    entry_ptr->cleared = TRUE;
-
-    return(SUCCEED);
-
-} /* clear_dirty_bits() */
-
-herr_t
-pico_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == PICO_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-nano_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == NANO_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-micro_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == MICRO_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-tiny_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == TINY_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-small_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == SMALL_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-medium_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == MEDIUM_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-large_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == LARGE_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-huge_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == HUGE_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-monster_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == MONSTER_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
-}
-
-herr_t
-variable_clear_dirty_bits(haddr_t addr, size_t len, void * thing)
-{
-    test_entry_t * entry_ptr = (test_entry_t *)thing;
-
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->size == len );
-    HDassert( entry_ptr->type == VARIABLE_ENTRY_TYPE );
-
-    return(clear_dirty_bits(entry_ptr));
 }
 
 
@@ -3560,7 +3387,7 @@ protect_entry(H5F_t * file_ptr,
 
         cache_entry_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			               &(types[type]), entry_ptr->addr,
-				       entry_ptr->size, NULL,
+				       entry_ptr->size, &entry_ptr->addr,
 				       H5C__NO_FLAGS_SET);
 
 	if ( verbose ) {
@@ -3670,7 +3497,7 @@ protect_entry_ro(H5F_t * file_ptr,
 
         cache_entry_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			               &(types[type]), entry_ptr->addr,
-				       entry_ptr->size, NULL,
+				       entry_ptr->size, &entry_ptr->addr,
 				       H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||

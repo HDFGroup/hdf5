@@ -60,7 +60,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5O_cache_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
@@ -68,7 +68,7 @@ static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t *new_len, void **new_image);
 static herr_t H5O_cache_free_icr(void *thing);
 
-static void *H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5O_cache_chk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_chk_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
@@ -151,8 +151,8 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
-    void *_udata, hbool_t *dirty)
+H5O_cache_deserialize(const void *image, size_t len, void *_udata,
+    hbool_t *dirty)
 {
     H5O_t		*oh = NULL;     /* Object header info */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
@@ -163,7 +163,6 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
     FUNC_ENTER_NOAPI_NOINIT(H5O_cache_deserialize)
 
     /* Check arguments */
-    HDassert(H5F_addr_defined(addr));
     HDassert(len > 0);
     HDassert(image);
     HDassert(udata);
@@ -298,7 +297,7 @@ H5O_cache_deserialize(haddr_t addr, size_t len, const void *image,
      */
     if(len >= (oh->chunk0_size + H5O_SIZEOF_HDR(oh))) {
         /* Parse the first chunk */
-        if(H5O_chunk_deserialize(oh, addr, oh->chunk0_size, image, &(udata->common), dirty) < 0)
+        if(H5O_chunk_deserialize(oh, udata->common.addr, oh->chunk0_size, image, &(udata->common), dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
     } /* end if */
     else
@@ -536,8 +535,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
-    void *_udata, hbool_t *dirty)
+H5O_cache_chk_deserialize(const void *image, size_t len, void *_udata,
+    hbool_t *dirty)
 {
     H5O_chunk_proxy_t	*chk_proxy = NULL;     /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata;       /* User data for callback */
@@ -546,7 +545,6 @@ H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
     FUNC_ENTER_NOAPI_NOINIT(H5O_cache_chk_deserialize)
 
     /* Check arguments */
-    HDassert(H5F_addr_defined(addr));
     HDassert(len > 0);
     HDassert(image);
     HDassert(udata);
@@ -564,7 +562,7 @@ H5O_cache_chk_deserialize(haddr_t addr, size_t len, const void *image,
         HDassert(udata->common.cont_msg_info);
 
         /* Parse the chunk */
-        if(H5O_chunk_deserialize(udata->oh, addr, len, image, &(udata->common), dirty) < 0)
+        if(H5O_chunk_deserialize(udata->oh, udata->common.addr, len, image, &(udata->common), dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize object header chunk")
 
         /* Set the fields for the chunk proxy */
@@ -760,6 +758,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 
     /* Check arguments */
     HDassert(oh);
+    HDassert(H5F_addr_defined(addr));
     HDassert(image);
     HDassert(udata->f);
     HDassert(udata->cont_msg_info);

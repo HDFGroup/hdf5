@@ -77,23 +77,23 @@ static herr_t H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dt
 static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
 /* Metadata cache (H5AC) callbacks */
-static void *H5HF_cache_hdr_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5HF_cache_hdr_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_hdr_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HF_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5HF_cache_hdr_free_icr(void *thing);
 
-static void *H5HF_cache_iblock_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5HF_cache_iblock_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_iblock_serialize(const H5F_t * f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *_thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5HF_cache_iblock_free_icr(void *thing);
 
-static void *H5HF_cache_dblock_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5HF_cache_dblock_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_dblock_serialize(const H5F_t * f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *_thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -267,8 +267,8 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF_cache_hdr_deserialize(haddr_t addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5HF_cache_hdr_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5HF_hdr_t		*hdr = NULL;     /* Fractal heap info */
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata;
@@ -287,9 +287,6 @@ H5HF_cache_hdr_deserialize(haddr_t addr, size_t UNUSED len,
     /* Allocate space for the fractal heap data structure */
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Set the heap header's address */
-    hdr->heap_addr = addr;
 
     /* Compute the 'base' size of the fractal heap header on disk */
     size = H5HF_HEADER_SIZE(hdr);
@@ -622,8 +619,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF_cache_iblock_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5HF_cache_iblock_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
     H5HF_iblock_cache_ud_t *udata = (H5HF_iblock_cache_ud_t *)_udata; /* user data for callback */
@@ -659,7 +656,6 @@ H5HF_cache_iblock_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     /* Set block's internal information */
     iblock->rc = 0;
     iblock->nrows = *udata->nrows;
-    iblock->addr = addr;
     iblock->nchildren = 0;
 
     /* Compute size of indirect block */
@@ -971,8 +967,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF_cache_dblock_deserialize(haddr_t addr, size_t len, const void *image,
-    void *_udata, hbool_t *dirty)
+H5HF_cache_dblock_deserialize(const void *image, size_t len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata; /* pointer to user data */
     H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
@@ -985,7 +981,6 @@ H5HF_cache_dblock_deserialize(haddr_t addr, size_t len, const void *image,
     FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_dblock_deserialize)
 
     /* Check arguments */
-    HDassert(H5F_addr_defined(addr));
     HDassert(len > 0);
     HDassert(image != NULL);
     HDassert(udata != NULL);

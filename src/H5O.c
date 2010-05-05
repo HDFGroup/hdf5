@@ -1583,6 +1583,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
     udata.common.mesgs_modified = FALSE;
     HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
+    udata.common.addr = loc->addr;
 
     /* Lock the object header into the cache */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, (size_t)H5O_SPEC_READ_SIZE, &udata, prot)))
@@ -1619,6 +1620,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
 
             /* Bring the chunk into the cache */
             /* (which adds to the object header */
+            chk_udata.common.addr = cont_msg_info.msgs[curr_msg].addr;
             if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, cont_msg_info.msgs[curr_msg].size, &chk_udata, prot)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 

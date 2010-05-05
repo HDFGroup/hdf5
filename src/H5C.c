@@ -200,9 +200,8 @@ static herr_t H5C_verify_not_in_index(H5C_t * cache_ptr,
 
 #define H5C__EPOCH_MARKER_TYPE	H5C__MAX_NUM_TYPE_IDS
 
-static void * H5C_epoch_marker_deserialize(haddr_t addr,
+static void * H5C_epoch_marker_deserialize(const void * image_ptr,
 		                            size_t len,
-                                            const void * image_ptr,
 			                    void * udata,
 			                    hbool_t * dirty_ptr);
 static herr_t H5C_epoch_marker_image_len(const void * thing,
@@ -241,9 +240,8 @@ const H5C_class_t epoch_marker_class =
  ***************************************************************************/
 
 static void *
-H5C_epoch_marker_deserialize(haddr_t UNUSED addr,
+H5C_epoch_marker_deserialize(const void UNUSED * image_ptr,
 		              size_t UNUSED len,
-                              const void UNUSED * image_ptr,
 			      void UNUSED * udata,
 			      hbool_t UNUSED * dirty_ptr)
 {
@@ -8605,7 +8603,7 @@ H5C_load_entry(H5F_t *             f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image*")
     }
 
-    thing = type->deserialize(addr, len, image_ptr, udata, &dirty);
+    thing = type->deserialize(image_ptr, len, udata, &dirty);
 
     if ( thing == NULL ) {
 
@@ -8645,8 +8643,7 @@ H5C_load_entry(H5F_t *             f,
                 if(H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
 
-                thing = type->deserialize(addr, new_len, image_ptr,
-                                          udata, &dirty);
+                thing = type->deserialize(image_ptr, new_len, udata, &dirty);
 
                 if ( thing == NULL ) {
 

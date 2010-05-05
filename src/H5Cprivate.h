@@ -118,20 +118,16 @@ typedef struct H5C_t H5C_t;
  *
  *	The typedef for the deserialize callback is as follows:
  *
- * 	   typedef void *(*H5C_deserialize_func_t)(haddr_t addr,
+ * 	   typedef void *(*H5C_deserialize_func_t)(const void * image_ptr,
  * 	                                           size_t len,
- *                                                 const void * image_ptr,
  *                                                 void * udata_ptr,
  *                                                 boolean * dirty_ptr);
  *
  *	The parameters of the deserialize callback are as follows:
  *
- *	addr:   Base address in file of the image to be deserialized.
- *
- * 		This parameter is supplied mainly for sanity checking.
- * 	        Sanity checks should be performed when compiled in debug
- * 	        mode, but the parameter may be unused when compiled in
- * 	        production mode.
+ *	image_ptr: Pointer to a buffer of length len containing the
+ *		contents of the file starting at addr and continuing
+ *		for len bytes.
  *
  *	len:    Length in bytes of the in file image to be deserialized.
  *
@@ -139,10 +135,6 @@ typedef struct H5C_t H5C_t;
  *              Sanity checks should be performed when compiled in debug
  *              mode, but the parameter may be unused when compiled in
  *              production mode.
- *
- *	image_ptr: Pointer to a buffer of length len containing the
- *		contents of the file starting at addr and continuing
- *		for len bytes.
  *
  *	udata_ptr: Pointer to user data provided in the protect call, which
  *         	must be passed through to the deserialize callback.
@@ -379,11 +371,10 @@ typedef struct H5C_t H5C_t;
  *	modified since the last serialize of clear callback.
  *
  ***************************************************************************/
-typedef void *(*H5C_deserialize_func_t)(haddr_t addr,
-                                         size_t len,
-                                         const void * image_ptr,
-                                         void * udata_ptr,
-					 hbool_t * dirty_ptr);
+typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
+                                        size_t len,
+                                        void * udata_ptr,
+					hbool_t * dirty_ptr);
 
 typedef herr_t (*H5C_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);

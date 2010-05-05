@@ -65,7 +65,7 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5HL_prfx_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
@@ -73,7 +73,7 @@ static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, s
     size_t *new_len, void **new_image);
 static herr_t H5HL_prfx_free_icr(void *thing);
 
-static void *H5HL_dblk_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5HL_dblk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
@@ -244,8 +244,8 @@ H5HL_fl_serialize(const H5HL_t *heap)
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
-    void *_udata, hbool_t UNUSED *dirty)
+H5HL_prfx_deserialize(const void *image, size_t len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5HL_t *heap = NULL;            /* Local heap */
     H5HL_prfx_t *prfx = NULL;       /* Heap prefix deserialized */
@@ -256,7 +256,6 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
     FUNC_ENTER_NOAPI_NOINIT(H5HL_prfx_deserialize)
 
     /* check arguments */
-    HDassert(H5F_addr_defined(addr));
     HDassert(len > 0);
     HDassert(image);
     HDassert(udata);
@@ -288,7 +287,7 @@ H5HL_prfx_deserialize(haddr_t addr, size_t len, const void *image,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Store the prefix's address & length */
-    heap->prfx_addr = addr;
+    heap->prfx_addr = udata->prfx_addr;
     heap->prfx_size = udata->sizeof_prfx;
 
     /* Heap data size */
@@ -506,7 +505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5HL_dblk_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
+H5HL_dblk_deserialize(const void *image, size_t UNUSED len,
     void *_udata, hbool_t UNUSED *dirty)
 {
     H5HL_dblk_t *dblk = NULL;       /* Local heap data block deserialized */

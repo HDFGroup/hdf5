@@ -62,8 +62,8 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5HG_deserialize(haddr_t addr, size_t len, const void *image,
-    void *udata, hbool_t *dirty);
+static void *H5HG_deserialize(const void *image, size_t len, void *udata,
+    hbool_t *dirty);
 static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
@@ -114,8 +114,8 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
-    void *_udata, hbool_t UNUSED *dirty)
+H5HG_deserialize(const void *image, size_t UNUSED len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5HG_heap_t	*heap = NULL;
     H5F_t *f = (H5F_t *)_udata;
@@ -132,7 +132,6 @@ H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
     /* Allocate space for heap */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-    heap->addr = addr;
     heap->shared = f->shared;
 
     p = image;

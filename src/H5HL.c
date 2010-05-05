@@ -457,6 +457,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     prfx_udata.made_attempt = FALSE;
     prfx_udata.sizeof_size = H5F_SIZEOF_SIZE(f);
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
+    prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
     prfx_udata.loaded = FALSE;
     prfx_udata.free_block = H5HL_FREE_NULL;
@@ -1078,6 +1079,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     prfx_udata.made_attempt = FALSE;
     prfx_udata.sizeof_size = H5F_SIZEOF_SIZE(f);
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
+    prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
     prfx_udata.loaded = FALSE;
     prfx_udata.free_block = H5HL_FREE_NULL;
@@ -1177,6 +1179,7 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
     prfx_udata.made_attempt = FALSE;
     prfx_udata.sizeof_size = H5F_SIZEOF_SIZE(f);
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
+    prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
     prfx_udata.loaded = FALSE;
     prfx_udata.free_block = H5HL_FREE_NULL;
@@ -1231,6 +1234,7 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
     prfx_udata.made_attempt = FALSE;
     prfx_udata.sizeof_size = H5F_SIZEOF_SIZE(f);
     prfx_udata.sizeof_addr = H5F_SIZEOF_ADDR(f);
+    prfx_udata.prfx_addr = addr;
     prfx_udata.sizeof_prfx = H5HL_SIZEOF_HDR(f);
     prfx_udata.loaded = FALSE;
     prfx_udata.free_block = H5HL_FREE_NULL;

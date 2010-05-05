@@ -54,8 +54,8 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
-    void *udata, hbool_t *dirty);
+static void *H5B_deserialize( const void *image, size_t len, void *udata,
+    hbool_t *dirty);
 static herr_t H5B_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -97,8 +97,8 @@ const H5AC_class_t H5AC_BT[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
-    void *_udata, hbool_t UNUSED *dirty)
+H5B_deserialize(const void *image, size_t UNUSED len, void *_udata,
+    hbool_t UNUSED *dirty)
 {
     H5B_t *bt = NULL;           /* Pointer to the deserialized B-tree node */
     H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata;       /* User data for callback */

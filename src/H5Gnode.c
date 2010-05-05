@@ -75,7 +75,7 @@ typedef struct H5G_node_t {
 static size_t H5G_node_size_real(const H5F_t *f);
 
 /* Metadata cache callbacks */
-static void *H5G_node_deserialize(haddr_t addr, size_t len, const void *image,
+static void *H5G_node_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5G_node_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
@@ -344,8 +344,8 @@ H5G_node_free(H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static void *
-H5G_node_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
-    void *udata, hbool_t UNUSED *dirty)
+H5G_node_deserialize(const void *image, size_t UNUSED len, void *udata,
+    hbool_t UNUSED *dirty)
 {
     H5G_node_t *sym = NULL;     /* Pointer to the deserialized symbol table node */
     H5F_t *f = (H5F_t *)udata;  /* Get file pointer from user data */

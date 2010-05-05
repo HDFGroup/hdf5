@@ -64,22 +64,22 @@
 /********************/
 
 /* Metadata cache callbacks */
-static void *H5B2_cache_hdr_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5B2_cache_hdr_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B2_cache_hdr_free_icr(void *thing);
 
-static void *H5B2_cache_internal_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5B2_cache_internal_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_internal_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B2_cache_internal_free_icr(void *thing);
 
-static void *H5B2_cache_leaf_deserialize(haddr_t addr, size_t len,
-    const void *image, void *udata, hbool_t *dirty);
+static void *H5B2_cache_leaf_deserialize(const void *image, size_t len,
+    void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_leaf_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -149,8 +149,8 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5B2_cache_hdr_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata;
     unsigned depth;                     /* Depth of B-tree */
@@ -377,8 +377,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5B2_cache_internal_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata;     /* Pointer to user data */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
@@ -632,8 +632,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, void *_udata, hbool_t UNUSED *dirty)
+H5B2_cache_leaf_deserialize(const void *image, size_t UNUSED len,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
