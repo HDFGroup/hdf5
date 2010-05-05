@@ -110,7 +110,7 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     HDassert(cls);
 
     /* Load the extensible array header */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, addr, NULL, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Print opening message */
@@ -200,7 +200,7 @@ H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, i
     HDassert(H5F_addr_defined(hdr_addr));
 
     /* Load the extensible array header */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, NULL, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Sanity check */
@@ -316,7 +316,7 @@ H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     HDassert(H5F_addr_defined(hdr_addr));
 
     /* Load the extensible array header */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, NULL, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect super block */
@@ -401,7 +401,7 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     HDassert(dblk_nelmts > 0);
 
     /* Load the extensible array header */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, NULL, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect data block */

@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.68-FA_a4], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.69-FA_a4], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1978,8 +1978,9 @@ dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(alarm BSDgettimeofday fork frexpf frexpl)
-AC_CHECK_FUNCS(gethostname getpwuid getrusage longjmp lstat)
-AC_CHECK_FUNCS(rand_r random setsysinfo siglongjmp signal)
+AC_CHECK_FUNCS(gethostname getpwuid getrusage lstat)
+AC_CHECK_FUNCS(rand_r random setsysinfo)
+AC_CHECK_FUNCS(signal longjmp setjmp siglongjmp sigsetjmp sigprocmask)
 AC_CHECK_FUNCS(snprintf srandom strdup symlink system)
 AC_CHECK_FUNCS(tmpfile vasprintf waitpid)
 
@@ -3405,6 +3406,9 @@ if test ${ac_cv_sizeof_long_double} = 0; then
 else
    AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision],
         [AC_TRY_RUN([
+        #include <stdlib.h>
+        #include <string.h>
+
         int main(void)
         {
             /* General variables */

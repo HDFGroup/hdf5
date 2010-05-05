@@ -64,10 +64,9 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
-				 void *_udata2);
+static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-			     H5G_node_t *sym, unsigned UNUSED * flags_ptr);
+			     H5G_node_t *sym, unsigned *flags_ptr);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
 static herr_t H5G_node_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
@@ -122,8 +121,7 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1,
-	      void UNUSED * _udata2)
+H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
     H5G_node_t		   *sym = NULL;
     size_t		    size;
@@ -140,8 +138,7 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
      */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(!_udata1);
-    HDassert(NULL == _udata2);
+    HDassert(udata);
 
     /*
      * Initialize variables.

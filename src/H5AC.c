@@ -1694,8 +1694,7 @@ H5AC_protect(H5F_t *f,
              hid_t dxpl_id,
              const H5AC_class_t *type,
              haddr_t addr,
-	     const void *udata1,
-             void *udata2,
+	     void *udata,
              H5AC_protect_t rw)
 {
     /* char *		fcn_name = "H5AC_protect"; */
@@ -1767,8 +1766,7 @@ H5AC_protect(H5F_t *f,
                         H5AC_noblock_dxpl_id,
                         type,
                         addr,
-                        udata1,
-                        udata2,
+                        udata,
 			protect_flags);
 
     if ( thing == NULL ) {

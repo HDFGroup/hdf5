@@ -57,6 +57,9 @@ class TestFailedException : public Exception {
 	virtual ~TestFailedException();
 };
 
+// Overloaded/Template functions to verify values and display proper info
+void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name);
+
 template <class Type1, class Type2>
     void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
 {

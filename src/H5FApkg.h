@@ -197,10 +197,17 @@ struct H5FA_t {
 
 /* Metadata cache callback user data types */
 
+/* Info needed for loading data block */
+typedef struct H5FA_dblock_cache_ud_t {
+    H5FA_hdr_t *hdr;            /* Shared fixed array information */
+    hsize_t nelmts;             /* Number of elements in data block */
+} H5FA_dblock_cache_ud_t;
+
 /* Info needed for loading data block page */
-typedef struct H5FA_dblk_page_load_ud_t {
+typedef struct H5FA_dblk_page_cache_ud_t {
+    H5FA_hdr_t *hdr;            /* Shared fixed array information */
     size_t nelmts;              /* Number of elements in data block page */
-} H5FA_dblk_page_load_ud_t;
+} H5FA_dblk_page_cache_ud_t;
 
 
 /*****************************/

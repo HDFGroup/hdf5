@@ -1140,11 +1140,13 @@ test_move(hid_t fapl, hbool_t new_format)
     if((grp_2 = H5Gcreate2(file_a, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((grp_move = H5Gcreate2(grp_1, "group_move", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* Create hard and soft links. */
+    /* Create hard, soft and external links. */
     if(H5Lcreate_hard(grp_1, "group_move", H5L_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) < 0)
 	TEST_ERROR
     if(H5Lcreate_soft("/group1/group_move", grp_2, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
 	TEST_ERROR
+    if(H5Lcreate_external("filename", "pathname", grp_2, "ext", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
 
     /* Move a group within the file.  Both of source and destination use
      * H5L_SAME_LOC.  Should fail. */
@@ -1158,6 +1160,18 @@ test_move(hid_t fapl, hbool_t new_format)
         if(H5Lmove(grp_1, "group_move", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT)
                 !=FAIL) TEST_ERROR
     } H5E_END_TRY;
+
+    /* Move a soft link across files.  Should succeed. */
+    if(H5Lmove(grp_2, "soft", file_b, "soft_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Lexists(file_b, "soft_new_name", H5P_DEFAULT) != TRUE)
+        TEST_ERROR
+
+    /* Move an external link across files.  Should succeed. */
+    if(H5Lmove(grp_2, "ext", file_b, "ext_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Lexists(file_b, "ext_new_name", H5P_DEFAULT) != TRUE)
+        TEST_ERROR
 
     /* Move a group across groups in the same file while renaming it. */
     if(H5Lmove(grp_1, "group_move", grp_2, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -1286,11 +1300,13 @@ test_copy(hid_t fapl, hbool_t new_format)
     if((grp_2 = H5Gcreate2(file_a, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((grp_move = H5Gcreate2(grp_1, "group_copy", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* Create hard and soft links. */
+    /* Create hard, soft and external links. */
     if(H5Lcreate_hard(grp_1, "group_copy", H5L_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) < 0)
 	TEST_ERROR
     if(H5Lcreate_soft("/group1/group_copy", grp_2, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
 	TEST_ERROR
+    if(H5Lcreate_external("filename", "pathname", grp_2, "ext", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
 
     /* Copy a group within the file.  Both of source and destination use
      * H5L_SAME_LOC.  Should fail. */
@@ -1304,6 +1320,18 @@ test_copy(hid_t fapl, hbool_t new_format)
         if(H5Lcopy(grp_1, "group_copy", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT)
                 !=FAIL) TEST_ERROR
     } H5E_END_TRY;
+
+    /* Copy a soft link across files.  Should succeed. */
+    if(H5Lcopy(grp_2, "soft", file_b, "soft_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Lexists(file_b, "soft_new_name", H5P_DEFAULT) != TRUE)
+        TEST_ERROR
+
+    /* Copy an external link across files.  Should succeed. */
+    if(H5Lcopy(grp_2, "ext", file_b, "ext_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
+    if(H5Lexists(file_b, "ext_new_name", H5P_DEFAULT) != TRUE)
+        TEST_ERROR
 
     /* Move a group across groups in the same file while renaming it. */
     if(H5Lcopy(grp_1, "group_copy", grp_2, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)

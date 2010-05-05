@@ -279,7 +279,7 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
     haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw))
 
     /* Local variables */
-    H5EA_sblock_load_ud_t load_ud;      /* Information needed for loading super block */
+    H5EA_sblock_cache_ud_t udata;      /* Information needed for loading super block */
 
 
 #ifdef QAK
@@ -291,11 +291,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(H5F_addr_defined(sblk_addr));
 
     /* Set up user data */
-    load_ud.parent = parent;
-    load_ud.sblk_idx = sblk_idx;
+    udata.hdr = hdr;
+    udata.parent = parent;
+    udata.sblk_idx = sblk_idx;
 
     /* Protect the super block */
-    if(NULL == (ret_value = (H5EA_sblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblk_addr, &load_ud, hdr, rw)))
+    if(NULL == (ret_value = (H5EA_sblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblk_addr, &udata, rw)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)sblk_addr)
 
 CATCH

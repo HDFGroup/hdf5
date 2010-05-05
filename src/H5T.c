@@ -3165,7 +3165,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     /* The object is already open.  Free the H5T_shared_t struct
                      * we had been using and use the one that already exists.
                      * Not terribly efficient. */
-                    H5FL_FREE(H5T_shared_t, new_dt->shared);
+                    new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
                     new_dt->shared = reopened_fo;
 
                     reopened_fo->fo_count++;
@@ -3207,7 +3207,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                 */
                 /* Only malloc if space has been allocated for members - NAF */
                 if(new_dt->shared->u.compnd.nalloc > 0) {
-                    new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
+                    new_dt->shared->u.compnd.memb = (H5T_cmemb_t *)H5MM_malloc(new_dt->shared->u.compnd.nalloc *
                                         sizeof(H5T_cmemb_t));
                     if (NULL==new_dt->shared->u.compnd.memb)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -3265,9 +3265,9 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                 * of each new member with copied values. That is, H5T_copy() is a
                 * deep copy.
                 */
-                new_dt->shared->u.enumer.name = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
+                new_dt->shared->u.enumer.name = (char **)H5MM_malloc(new_dt->shared->u.enumer.nalloc *
                                     sizeof(char*));
-                new_dt->shared->u.enumer.value = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
+                new_dt->shared->u.enumer.value = (uint8_t *)H5MM_malloc(new_dt->shared->u.enumer.nalloc *
                                     new_dt->shared->size);
                 if(NULL == new_dt->shared->u.enumer.value)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -3721,7 +3721,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                     H5T_str_t   tmp_strpad;             /* Temp. strpad info */
 
                     /* Get a copy of unsigned char type as the base/parent type */
-                    if (NULL==(base=H5I_object(H5T_NATIVE_UCHAR)))
+                    if(NULL == (base = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid base datatype");
                     dt->shared->parent=H5T_copy(base,H5T_COPY_ALL);
 
@@ -3899,8 +3899,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if(NULL == (idx1 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))) ||
-                    NULL == (idx2 = H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned))))
+            if(NULL == (idx1 = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))) ||
+                    NULL == (idx2 = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for(u = 0; u < dt1->shared->u.compnd.nmembs; u++)
                 idx1[u] = idx2[u] = u;
@@ -3977,8 +3977,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             } /* end else */
 
             /* Build an index for each type so the names are sorted */
-            if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))) ||
-                    NULL==(idx2 = H5MM_malloc(dt2->shared->u.enumer.nmembs * sizeof(unsigned))))
+            if(NULL == (idx1 = (unsigned *)H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))) ||
+                    NULL == (idx2 = (unsigned *)H5MM_malloc(dt2->shared->u.enumer.nmembs * sizeof(unsigned))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (u=0; u<dt1->shared->u.enumer.nmembs; u++)
                 idx1[u] = u;
@@ -4310,7 +4310,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * Make sure the first entry in the table is the no-op conversion path.
      */
     if(0 == H5T_g.npaths) {
-	if(NULL == (H5T_g.path = H5MM_malloc(128 * sizeof(H5T_path_t *))))
+	if(NULL == (H5T_g.path = (H5T_path_t **)H5MM_malloc(128 * sizeof(H5T_path_t *))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for type conversion path table")
 	H5T_g.apaths = 128;
 	if(NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
@@ -4499,7 +4499,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
             size_t na = MAX(128, 2 * H5T_g.apaths);
             H5T_path_t **x;
 
-            if(NULL == (x = H5MM_realloc(H5T_g.path, na * sizeof(H5T_path_t*))))
+            if(NULL == (x = (H5T_path_t **)H5MM_realloc(H5T_g.path, na * sizeof(H5T_path_t*))))
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             H5T_g.apaths = na;
             H5T_g.path = x;

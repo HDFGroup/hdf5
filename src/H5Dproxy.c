@@ -407,7 +407,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
 #endif /* QAK */
 
     /* Protect the chunk proxy */
-    if(NULL == (proxy = (H5D_chunk_proxy_t *)H5AC_protect(dset->oloc.file, dxpl_id, H5AC_CHUNK_PROXY, ent->proxy_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (proxy = (H5D_chunk_proxy_t *)H5AC_protect(dset->oloc.file, dxpl_id, H5AC_CHUNK_PROXY, ent->proxy_addr, NULL, H5AC_WRITE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect chunk proxy");
 
     /* Compose chunked index info struct */

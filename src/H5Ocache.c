@@ -68,15 +68,13 @@
 /********************/
 
 /* Metadata cache callbacks */
-static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
-		       void *_udata2);
+static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh, unsigned UNUSED * flags_ptr);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
-static H5O_chunk_proxy_t *H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
-		       void *_udata2);
+static H5O_chunk_proxy_t *H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5O_cache_chk_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_chunk_proxy_t *chk_proxy, unsigned UNUSED * flags_ptr);
 static herr_t H5O_cache_chk_dest(H5F_t *f, H5O_chunk_proxy_t *chk_proxy);
 static herr_t H5O_cache_chk_clear(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t destroy);
@@ -158,11 +156,10 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
-	 void *_udata2)
+H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5O_t	*oh = NULL;     /* Object header read in */
-    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata2;       /* User data for callback */
+    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
     H5WB_t      *wb = NULL;     /* Wrapped buffer for prefix data */
     uint8_t     read_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
     const uint8_t *p;           /* Pointer into buffer to decode */
@@ -178,7 +175,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(!_udata1);
     HDassert(udata);
     HDassert(udata->common.f);
     HDassert(udata->common.cont_msg_info);
@@ -354,7 +350,7 @@ done:
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && oh)
         if(H5O_free(oh) < 0)
-	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header data")
+	    HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_load() */
@@ -643,11 +639,10 @@ H5O_size(const H5F_t UNUSED *f, const H5O_t *oh, size_t *size_ptr)
  *-------------------------------------------------------------------------
  */
 static H5O_chunk_proxy_t *
-H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
-    void *_udata2)
+H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5O_chunk_proxy_t	*chk_proxy = NULL;     /* Chunk proxy object */
-    H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata2;       /* User data for callback */
+    H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata;       /* User data for callback */
     H5WB_t      *wb = NULL;             /* Wrapped buffer for prefix data */
     uint8_t     chunk_buf[H5O_SPEC_READ_SIZE];       /* Buffer for speculative read */
     uint8_t     *buf;                   /* Buffer to decode */

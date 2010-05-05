@@ -31,6 +31,7 @@
 #include "H5DataSet.h"
 #include "H5File.h"
 #include "H5Alltypes.h"
+#include "H5private.h"           // for HDstrcpy
 
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
@@ -1058,10 +1059,27 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 ///		each time the group is opened.
 // Programmer	Binh-Minh Ribler - January, 2003
 //--------------------------------------------------------------------------
+ssize_t CommonFG::getObjnameByIdx(hsize_t idx, char* name, size_t size) const
+{
+   ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name, size, H5P_DEFAULT);
+   if(name_len < 0)
+   {
+      throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
+   }
+   return (name_len);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjnameByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes an
+///		\c std::string for \a name.
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
 ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const
 {
    char* name_C = new char[size];
-   ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, size, H5P_DEFAULT);
+   ssize_t name_len = getObjnameByIdx(idx, name_C, size);
    if(name_len < 0)
    {
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
@@ -1095,7 +1113,35 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 // Function:	CommonFG::getObjTypeByIdx
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function because it also provides
-///		the returned object type in text.
+///		the returned object type in text (char*)
+///\param	idx       - IN: Transient index of the object
+///\param	type_name - IN: Object type in text
+///\return	Object type
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - May, 2010
+//--------------------------------------------------------------------------
+H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
+{
+   H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
+   switch (obj_type)
+   {
+	case H5G_LINK: HDstrcpy(type_name, "symbolic link"); break;
+	case H5G_GROUP: HDstrcpy(type_name, "group"); break;
+	case H5G_DATASET: HDstrcpy(type_name, "dataset"); break;
+	case H5G_TYPE: HDstrcpy(type_name, "datatype"); break;
+	case H5G_UNKNOWN:
+	default:
+   	{
+	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
+	}
+   }
+   return (obj_type);
+}
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjTypeByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function because it also provides
+///		the returned object type in text (H5std_string&)
 ///\param	idx       - IN: Transient index of the object
 ///\param	type_name - IN: Object type in text
 ///\return	Object type

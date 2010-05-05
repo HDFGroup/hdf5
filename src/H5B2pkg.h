@@ -207,12 +207,26 @@ struct H5B2_t {
     H5F_t      *f;              /* Pointer to file for v2 B-tree */
 };
 
-/* User data for metadata cache 'load' callback */
-typedef struct {
-    H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
-    uint16_t    nrec;           /* Number of records in node to load */
-    uint16_t    depth;          /* Depth of node to load */
-} H5B2_int_load_ud1_t;
+/* Callback info for loading a free space header into the cache */
+typedef struct H5B2_hdr_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    void *ctx_udata;            /* User-data for protecting */
+} H5B2_hdr_cache_ud_t;
+
+/* Callback info for loading a free space internal node into the cache */
+typedef struct H5B2_internal_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    H5B2_hdr_t *hdr;            /* v2 B-tree header */
+    unsigned nrec;              /* Number of records in node to load */
+    unsigned depth;             /* Depth of node to load */
+} H5B2_internal_cache_ud_t;
+
+/* Callback info for loading a free space leaf node into the cache */
+typedef struct H5B2_leaf_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    H5B2_hdr_t *hdr;            /* v2 B-tree header */
+    unsigned nrec;              /* Number of records in node to load */
+} H5B2_leaf_cache_ud_t;
 
 #ifdef H5B2_TESTING
 /* Node information for testing */
@@ -267,6 +281,10 @@ H5_DLL herr_t H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr);
 H5_DLL size_t H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_dirty(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
+
+/* Routines for operating on leaf nodes */
+H5B2_leaf_t *H5B2_protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
+    unsigned nrec, H5AC_protect_t rw);
 
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,

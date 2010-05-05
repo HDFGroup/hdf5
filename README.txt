@@ -1,4 +1,4 @@
-HDF5 version 1.9.68-FA_a4 currently under development
+HDF5 version 1.9.69-FA_a4 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

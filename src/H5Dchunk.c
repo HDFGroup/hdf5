@@ -4698,7 +4698,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_chunk_bh_size
+ * Function:    H5D_chunk_bh_info
  *
  * Purpose:     Retrieve the amount of index storage for chunked dataset
  *

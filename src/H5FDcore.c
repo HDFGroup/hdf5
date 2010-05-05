@@ -913,7 +913,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
      * objects being written within the file by the application performing
      * SWMR write operations.
      */
-    if((addr + size) > file->eoa)
+    if(!file->swmr_read && (addr + size) > file->eoa)
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /* Read the part which is before the EOF marker */

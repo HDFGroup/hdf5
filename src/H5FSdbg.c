@@ -97,7 +97,7 @@ herr_t
 H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     H5FS_t	*fspace = NULL;         /* Free space header info */
-    H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
+    H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_debug, FAIL)
@@ -112,14 +112,15 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     HDassert(fwidth >= 0);
 
     /* Initialize user data for protecting the free space manager */
-    fs_prot.nclasses = 0;
-    fs_prot.classes = NULL;
-    fs_prot.cls_init_udata = NULL;
+    cache_udata.f = f;
+    cache_udata.nclasses = 0;
+    cache_udata.classes = NULL;
+    cache_udata.cls_init_udata = NULL;
 
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &fs_prot, NULL, H5AC_READ)))
+    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Print opening message */
@@ -234,8 +235,8 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     haddr_t fs_addr, haddr_t client_addr)
 {
     H5FS_t	*fspace = NULL;         /* Free space header info */
-    H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     H5FS_client_t client;               /* The client of the free space */
+    H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_sects_debug, FAIL)
@@ -252,14 +253,15 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     HDassert(H5F_addr_defined(client_addr));
 
     /* Initialize user data for protecting the free space manager */
-    fs_prot.nclasses = 0;
-    fs_prot.classes = NULL;
-    fs_prot.cls_init_udata = NULL;
+    cache_udata.f = f;
+    cache_udata.nclasses = 0;
+    cache_udata.classes = NULL;
+    cache_udata.cls_init_udata = NULL;
 
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
+    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Retrieve the client id */

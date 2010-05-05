@@ -321,7 +321,7 @@ int main (void)
         GOERROR;
     if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) >0)
         GOERROR;
-    if (h5repack_verify(FNAME4, FNAME4OUT,&pack_options)<=0)
+    if (h5repack_verify(FNAME4, FNAME4OUT, &pack_options) <= 0)
         GOERROR;
     if (h5repack_end (&pack_options) < 0)
         GOERROR;
@@ -638,7 +638,7 @@ int main (void)
         GOERROR;
     if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) >0)
         GOERROR;
-    if (h5repack_verify(FNAME4, FNAME4OUT,&pack_options)<=0)
+    if (h5repack_verify(FNAME4, FNAME4OUT, &pack_options )<= 0)
         GOERROR;
     if (h5repack_end (&pack_options) < 0)
         GOERROR;
