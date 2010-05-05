@@ -65,5 +65,5 @@ Clear file buffers before write: @CLEARFILEBUF@
                            GPFS: @GPFS@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @INSTRUMENT@
- Linux Large File Support (LFS): @LINUX_LFS@
-	     H5dump Packed Bits: @PACKED_BITS@
+       Large File Support (LFS): @LARGEFILE@
+             H5dump Packed Bits: @PACKED_BITS@
