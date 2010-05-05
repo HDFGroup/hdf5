@@ -352,6 +352,11 @@ Cray XT3 2.0.62                      n       n         n         n
 
 Known Problems
 ==============
+* The library's test dt_arith.c showed a compiler's rounding problem on
+  Cygwin when converting from unsigned long long to long double.  The 
+  library's own conversion works fine.  We defined a macro for Cygwin to
+  skip this test until we can solve the problem.  Please see bug #1813.
+  SLU - 2010/5/5 
 * All the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
   structure H5FD_class_t changed in 1.8.  There is new parameter added to
   get_eoa and set_eoa callback functions.  A new callback function
