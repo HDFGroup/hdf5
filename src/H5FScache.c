@@ -162,7 +162,6 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
     /* Allocate a new free space manager */
@@ -170,7 +169,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
-    fspace->addr = addr;
+    fspace->addr = udata->addr;
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
@@ -523,7 +522,6 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
     /* Allocate a new free space section info */
@@ -534,10 +532,6 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* (for deserializing sections) */
     HDassert(udata->fspace->sinfo == NULL);
     udata->fspace->sinfo = sinfo;
-
-    /* Sanity check address */
-    if(H5F_addr_ne(addr, udata->fspace->sect_addr))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect address for free space sections")
 
     /* Allocate space for the buffer to serialize the sections into */
     H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);

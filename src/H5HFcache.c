@@ -282,9 +282,6 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Set the heap header's address */
-    hdr->heap_addr = addr;
-
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't wrap buffer")
@@ -734,7 +731,6 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Set block's internal information */
     iblock->rc = 0;
     iblock->nrows = *udata->nrows;
-    iblock->addr = addr;
     iblock->nchildren = 0;
 
     /* Wrap the local buffer for serialized indirect block */

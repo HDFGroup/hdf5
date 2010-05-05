@@ -105,6 +105,7 @@ typedef struct H5FS_prot_t {
 typedef struct H5FS_hdr_cache_ud_t {
     H5F_t *f;                  /* File that free space header is within */
     H5FS_prot_t * fs_prot;     /* user data for protecting */
+    haddr_t addr;              /* Address of header */
 } H5FS_hdr_cache_ud_t;
 
 /* Callback info for loading free space section info into the cache */

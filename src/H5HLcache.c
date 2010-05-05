@@ -304,7 +304,7 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap prefix")
 
     /* Store the prefix's address & length */
-    heap->prfx_addr = addr;
+    heap->prfx_addr = udata->prfx_addr;
     heap->prfx_size = udata->sizeof_prfx;
 
     /* Heap data size */

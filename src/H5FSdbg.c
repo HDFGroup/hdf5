@@ -112,6 +112,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     fs_prot.cls_init_udata = NULL;
     cache_udata.fs_prot = &fs_prot;
     cache_udata.f = f;
+    cache_udata.addr = addr;
 
     /*
      * Load the free space header.
@@ -254,6 +255,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     fs_prot.cls_init_udata = NULL;
     cache_udata.fs_prot = &fs_prot;
     cache_udata.f = f;
+    cache_udata.addr = fs_addr;
 
     /*
      * Load the free space header.

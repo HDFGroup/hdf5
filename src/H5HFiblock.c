@@ -1131,9 +1131,15 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
         /* Protect the indirect block */
         if(NULL == (iblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &cache_udata, rw)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
+
+        /* Set the indirect block's address */
+        iblock->addr = iblock_addr;
+
+        /* Indicate that the indirect block was protected */
         *did_protect = TRUE;
     } /* end if */
     else
+        /* Indicate that the indirect block was _not_ protected */
         *did_protect = FALSE;
 
     /* Set the return value */

@@ -131,7 +131,6 @@ H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
     /* Allocate space for heap */
     if(NULL == (heap = H5FL_CALLOC(H5HG_heap_t)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
-    heap->addr = addr;
     heap->shared = f->shared;
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, (size_t)H5HG_MINSIZE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
