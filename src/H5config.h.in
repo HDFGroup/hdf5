@@ -17,8 +17,9 @@
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
 
-/* Define a macro for Cygwin system */
-#undef CYGWIN
+/* Define a macro for Cygwin (on XP only) where the compiler has rounding
+   problem converting from unsigned long long to long double */
+#undef CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM
 
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD

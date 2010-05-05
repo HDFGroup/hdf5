@@ -961,9 +961,15 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Shared libraries are not currently supported under Cygwin.
+dnl
+dnl The GCC compiler on Cygwin running on Windows XP has rounding problem
+dnl in the data conversion dt_arith.c from unsigned long long to long 
+dnl double (see bug #1813).  I define a macro here to skip the test for
+dnl Cygwin.  I'll come back and figure out the problem once I'm available.
+dnl 2010/5/5 - SLU
 case "`uname`" in
   CYGWIN*)
-    AC_DEFINE([CYGWIN], [1], [Define a macro for Cygwin system])
+    AC_DEFINE([CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM], [1], [Define a macro for Cygwin (on XP only) where the compiler has rounding problem converting from unsigned long long to long double])
     if test "X${enable_shared}" = "Xyes"; then
       echo '    warning: shared libraries are not supported on Cygwin!'
       echo '    disabling shared libraries'
