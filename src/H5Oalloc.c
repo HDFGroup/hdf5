@@ -583,6 +583,10 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         } /* end if */
     } /* end if */
 
+    /* Protect chunk */
+    if(NULL == (chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, chunkno)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+
     /* Determine whether the chunk can be extended */
     extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
                                  (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size));
@@ -590,10 +594,6 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "can't tell if we can extend chunk")
     else if(extended == FALSE)     /* can't extend -- we are done */
         HGOTO_DONE(FALSE)
-
-    /* Protect chunk */
-    if(NULL == (chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, chunkno)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Adjust object header prefix flags */
     if(adjust_size_flags) {

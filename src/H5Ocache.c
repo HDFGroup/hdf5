@@ -331,7 +331,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         buf = read_buf;
 
     /* Parse the first chunk */
-    if(H5O_chunk_deserialize(oh, addr, oh->chunk0_size, buf, &(udata->common), &oh->cache_info.is_dirty) < 0)
+    if(H5O_chunk_deserialize(oh, udata->common.addr, oh->chunk0_size, buf, &(udata->common), &oh->cache_info.is_dirty) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
 
     /* Note that we've loaded the object header from the file */
@@ -678,7 +678,7 @@ H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HDassert(udata->common.cont_msg_info);
 
         /* Parse the chunk */
-        if(H5O_chunk_deserialize(udata->oh, addr, udata->chunk_size, buf, &(udata->common), &chk_proxy->cache_info.is_dirty) < 0)
+        if(H5O_chunk_deserialize(udata->oh, udata->common.addr, udata->chunk_size, buf, &(udata->common), &chk_proxy->cache_info.is_dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize object header chunk")
 
         /* Set the fields for the chunk proxy */
@@ -967,6 +967,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 
     /* Check arguments */
     HDassert(oh);
+    HDassert(H5F_addr_defined(addr));
     HDassert(image);
     HDassert(udata->f);
     HDassert(udata->cont_msg_info);

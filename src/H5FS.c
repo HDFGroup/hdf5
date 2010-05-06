@@ -213,6 +213,7 @@ HDfprintf(stderr, "%s: Opening free space manager, fs_addr = %a, nclasses = %Zu\
     cache_udata.nclasses = nclasses;
     cache_udata.classes = classes;
     cache_udata.cls_init_udata = cls_init_udata;
+    cache_udata.addr = fs_addr;
 
     /* Protect the free space header */
     if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_READ)))
@@ -281,6 +282,7 @@ HDfprintf(stderr, "%s: Deleting free space manager, fs_addr = %a\n", FUNC, fs_ad
     cache_udata.nclasses = 0;
     cache_udata.classes = NULL;
     cache_udata.cls_init_udata = NULL;
+    cache_udata.addr = fs_addr;
 
     /* Protect the free space header */
     if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_WRITE)))

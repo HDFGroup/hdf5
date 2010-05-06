@@ -350,6 +350,7 @@ typedef struct H5O_common_cache_ud_t {
     unsigned merged_null_msgs;          /* Number of null messages merged together */
     hbool_t mesgs_modified;             /* Whether any messages were modified when the object header was deserialized */
     H5O_cont_msgs_t *cont_msg_info;     /* Pointer to continuation messages to work on */
+    haddr_t addr;                       /* Address of the prefix or chunk */
 } H5O_common_cache_ud_t;
 
 /* Callback information for loading object header prefix from disk */
