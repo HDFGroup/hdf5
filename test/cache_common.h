@@ -141,7 +141,7 @@
 #define FLUSH_OP__NO_OP		0
 #define FLUSH_OP__DIRTY		1
 #define FLUSH_OP__RESIZE	2
-#define FLUSH_OP__RENAME	3
+#define FLUSH_OP__MOVE		3
 #define FLUSH_OP__ORDER		4
 #define FLUSH_OP__MAX_OP	4
 
@@ -159,7 +159,7 @@ typedef struct flush_op
 					 *   FLUSH_OP__NO_OP
 					 *   FLUSH_OP__DIRTY
 					 *   FLUSH_OP__RESIZE
-					 *   FLUSH_OP__RENAME
+					 *   FLUSH_OP__MOVE
 					 *   FLUSH_OP__ORDER
 					 */
     int			type;		/* type code of the cache entry that
@@ -192,12 +192,12 @@ typedef struct flush_op
 					 *   H5C_mark_entry_dirty()
 					 *   call.
 					 *
-					 * FLUSH_OP__RENAME: TRUE iff the
-					 *    target is to be renamed to
+					 * FLUSH_OP__MOVE: TRUE iff the
+					 *    target is to be moved to
 					 *    its main address.
 					 */
     size_t		size;		/* New target size in the
-					 * FLUSH_OP__RENAME operation.
+					 * FLUSH_OP__MOVE operation.
 					 * Unused elsewhere.
 					 */
     unsigned          * order_ptr;      /* Pointer to outside counter for
@@ -229,7 +229,7 @@ typedef struct test_entry_t
     haddr_t		  main_addr;    /* initial location of the entry
                                          */
     haddr_t		  alt_addr;	/* location to which the entry
-					 * can be relocated or "renamed"
+					 * can be relocated or "moved"
                                          */
     size_t		  size;         /* how big the cache thinks this
                                          * entry is
@@ -480,7 +480,7 @@ struct fo_flush_cache_test_spec
     hbool_t			expected_destroyed;
 };
 
-struct rename_entry_test_spec
+struct move_entry_test_spec
 {
     int			entry_type;
     int			entry_index;
@@ -670,7 +670,7 @@ void insert_entry(H5F_t * file_ptr,
 void mark_entry_dirty(int32_t type,
 		              int32_t idx);
 
-void rename_entry(H5C_t * cache_ptr,
+void move_entry(H5C_t * cache_ptr,
                   int32_t type,
                   int32_t idx,
                   hbool_t main_addr);
@@ -719,8 +719,8 @@ void row_major_scan_forward(H5F_t * file_ptr,
                             hbool_t display_detailed_stats,
                             hbool_t do_inserts,
                             hbool_t dirty_inserts,
-                            hbool_t do_renames,
-                            hbool_t rename_to_main_addr,
+                            hbool_t do_moves,
+                            hbool_t move_to_main_addr,
                             hbool_t do_destroys,
                             hbool_t do_mult_ro_protects,
                             int dirty_destroys,
@@ -743,8 +743,8 @@ void row_major_scan_backward(H5F_t * file_ptr,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
                              hbool_t dirty_inserts,
-                             hbool_t do_renames,
-                             hbool_t rename_to_main_addr,
+                             hbool_t do_moves,
+                             hbool_t move_to_main_addr,
                              hbool_t do_destroys,
                              hbool_t do_mult_ro_protects,
                              int dirty_destroys,

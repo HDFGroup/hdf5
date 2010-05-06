@@ -122,7 +122,7 @@ typedef struct H5C_t H5C_t;
 
 #define H5C_CALLBACK__NO_FLAGS_SET		0x0
 #define H5C_CALLBACK__SIZE_CHANGED_FLAG		0x1
-#define H5C_CALLBACK__RENAMED_FLAG		0x2
+#define H5C_CALLBACK__MOVED_FLAG		0x2
 
 /* Actions that can be reported to 'notify' client callback */
 typedef enum H5C_notify_action_t {
@@ -1118,7 +1118,7 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *  f,
 
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 
-H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
+H5_DLL herr_t H5C_move_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);

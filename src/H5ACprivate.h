@@ -129,7 +129,7 @@ typedef enum {
 
 #define H5AC_CALLBACK__NO_FLAGS_SET             H5C_CALLBACK__NO_FLAGS_SET
 #define H5AC_CALLBACK__SIZE_CHANGED_FLAG	H5C_CALLBACK__SIZE_CHANGED_FLAG
-#define H5AC_CALLBACK__RENAMED_FLAG             H5C_CALLBACK__RENAMED_FLAG
+#define H5AC_CALLBACK__MOVED_FLAG             H5C_CALLBACK__MOVED_FLAG
 
 /* Aliases for 'notify action' type & values */
 typedef H5C_notify_action_t     H5AC_notify_action_t;
@@ -338,7 +338,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
 			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
-H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
+H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
