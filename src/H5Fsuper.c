@@ -633,7 +633,7 @@ H5F_super_dirty(H5F_t *f)
     HDassert(f->shared->sblock);
 
     /* Mark superblock dirty in cache, so change to EOA will get encoded */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
+    if(H5AC_mark_entry_dirty(f->shared->sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
 done:
@@ -797,7 +797,7 @@ H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_
 done:
     /* Mark superblock dirty in cache, if necessary */
     if(sblock_dirty)
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
+        if(H5AC_mark_entry_dirty(f->shared->sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
     FUNC_LEAVE_NOAPI(ret_value)

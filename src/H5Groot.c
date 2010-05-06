@@ -262,7 +262,7 @@ done:
 
     /* Mark superblock dirty in cache, if necessary */
     if(sblock_dirty)
-        if(H5AC_mark_pinned_or_protected_entry_dirty(f->shared->sblock) < 0)
+        if(H5AC_mark_entry_dirty(f->shared->sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
     FUNC_LEAVE_NOAPI(ret_value)
