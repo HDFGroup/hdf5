@@ -3210,10 +3210,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_resize_pinned_entry
+ * Function:    H5C_resize_entry
  *
- * Purpose:	Resize a pinned entry.  The target entry MUST be
- * 		be pinned, and MUST not be unprotected.
+ * Purpose:	Resize a pinned or protected entry.
  *
  * 		Resizing an entry dirties it, so if the entry is not
  * 		already dirty, the function places the entry on the
@@ -3227,14 +3226,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_resize_pinned_entry(void *thing, size_t new_size)
+H5C_resize_entry(void *thing, size_t new_size)
 {
     H5C_t *             cache_ptr;
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
     size_t             	size_increase;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_resize_pinned_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_resize_entry, FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -3245,20 +3244,16 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
     /* Check for usage errors */
     if(new_size <= 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "New size is non-positive.")
-    if(!entry_ptr->is_pinned)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned??")
-    if(entry_ptr->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry is protected??")
-
-    /* resizing dirties entries -- mark the entry as dirty if it
-     * isn't already
-     */
-    entry_ptr->is_dirty = TRUE;
-    entry_ptr->image_up_to_date = FALSE;
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "New size is non-positive.")
+    if(!(entry_ptr->is_pinned || entry_ptr->is_protected))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "Entry isn't pinned or protected??")
 
     /* update for change in entry size if necessary */
     if ( entry_ptr->size != new_size ) {
+
+        /* mark the entry as dirty if it isn't already */
+        entry_ptr->is_dirty = TRUE;
+        entry_ptr->image_up_to_date = FALSE;
 
         /* Release the current image */
         if( entry_ptr->image_ptr )
@@ -3273,15 +3268,23 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
                 if(size_increase >= cache_ptr->flash_size_increase_threshold) {
                     if(H5C__flash_increase_cache_size(cache_ptr, entry_ptr->size, new_size) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "flash cache increase failed")
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "flash cache increase failed")
                 }
             }
         }
 
-        /* update the protected entry list */
-        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
-                                        (cache_ptr->pel_size), \
-                                        (entry_ptr->size), (new_size));
+        /* update the pinned or protected entry list */
+        if(entry_ptr->is_pinned) {
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
+                                            (cache_ptr->pel_size), \
+                                            (entry_ptr->size), (new_size))
+        } /* end if */
+        else {
+            HDassert(entry_ptr->is_protected);
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
+                                            (cache_ptr->pl_size), \
+                                            (entry_ptr->size), (new_size))
+        } /* end else */
 
         /* update the hash table */
 	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
@@ -3289,10 +3292,9 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
         /* if the entry is in the skip list, update that too */
         if ( entry_ptr->in_slist ) {
-
 	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
                                               (new_size));
-        }
+        } /* end if */
 
 	/* if journaling is enabled, and the entry is already in the
 	 * transaction list, update that list for the size change as well.
@@ -3307,24 +3309,26 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
 	/* finally, update the entry size proper */
 	entry_ptr->size = new_size;
+
+        if( !entry_ptr->in_slist ) {
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+        } /* end if */
+
+        /* if journaling is enabled, check to see if the entry is in the
+         * transaction list.  If it isn't, insert it.  If it is, move it to
+         * the head of the list.
+         */
+        H5C__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
+
+        if(entry_ptr->is_pinned) {
+            H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+        } /* end if */
+
     }
-
-    if ( ! (entry_ptr->in_slist) ) {
-
-	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-    }
-
-    /* if journaling is enabled, check to see if the entry is in the
-     * transaction list.  If it isn't, insert it.  If it is, move it to
-     * the head of the list.
-     */
-    H5C__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
-
-    H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_resize_pinned_entry() */
+} /* H5C_resize_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -5302,8 +5306,8 @@ H5C_unprotect(H5F_t *		  f,
 
         }
 
-        /* H5C__UPDATE_RP_FOR_UNPROTECT will places the unprotected entry on
-         * the pinned entry list if entry_ptr->is_pined is TRUE.
+        /* H5C__UPDATE_RP_FOR_UNPROTECT will place the unprotected entry on
+         * the pinned entry list if entry_ptr->is_pinned is TRUE.
          */
         H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 

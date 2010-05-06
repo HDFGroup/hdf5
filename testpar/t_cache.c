@@ -3080,7 +3080,6 @@ resize_entry(H5C_t * cache_ptr,
         entry_ptr = &(data[idx]);
 
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
-        HDassert( !(entry_ptr->header.is_protected) );
         HDassert( !(entry_ptr->locked) );
 	HDassert( ( entry_ptr->global_pinned ) &&
 		  ( ! entry_ptr->local_pinned ) );
@@ -3089,13 +3088,13 @@ resize_entry(H5C_t * cache_ptr,
 	HDassert( new_size > 0 );
 	HDassert( new_size <= entry_ptr->len );
 
-	result = H5AC_resize_pinned_entry((void *)entry_ptr, new_size);
+	result = H5AC_resize_entry((void *)entry_ptr, new_size);
 
         if ( result < 0 ) {
 
             nerrors++;
             if ( verbose ) {
-		HDfprintf(stdout, "%d:%s: H5AC_resize_pinned_entry() failed.\n",
+		HDfprintf(stdout, "%d:%s: H5AC_resize_entry() failed.\n",
 	                  world_mpi_rank, fcn_name);
             }
 
@@ -5071,7 +5070,7 @@ smoke_check_4(void)
  *
  *		JRM -- 7/12/06
  *		Added test code for H5AC_expunge_entry() and
- *		H5AC_resize_pinned_entry().
+ *		H5AC_resize_entry().
  *
  *****************************************************************************/
 
@@ -5252,10 +5251,7 @@ smoke_check_5(void)
 		    resize_entry(cache_ptr, file_ptr, i, data[i].len / 2);
 		}
 
-		if ( i % 4 == 0 )
-		    mark_entry_dirty(cache_ptr, file_ptr, i);
-		else
-		    mark_entry_dirty(cache_ptr, file_ptr, i);
+                mark_entry_dirty(cache_ptr, file_ptr, i);
 
 		if ( i % 8 <= 4 ) {
 
@@ -5387,7 +5383,7 @@ smoke_check_5(void)
  *                    - H5AC_unprotect()
  *                    - H5AC_set_cache_auto_resize_config()
  *                    - H5AC_expunge_entry()
- *                    - H5AC_resize_pinned_entry()
+ *                    - H5AC_resize_entry()
  *
  *              This test is skipped if H5_METADATA_TRACE_FILE is undefined.
  *
@@ -5401,7 +5397,7 @@ smoke_check_5(void)
  *
  *		JRM -- 7/11/06
  *		Updated for H5AC_expunge_entry() and
- *		H5AC_resize_pinned_entry().
+ *		H5AC_resize_entry().
  *
  *		JRM -- 2/14/08
  *		Updated for changes in H5AC_set_cache_auto_resize_config
@@ -5437,8 +5433,8 @@ trace_file_check(void)
       "H5AC_pin_protected_entry 0x404 0\n",
       "H5AC_unprotect 0x404 16 4 0 0\n",
       "H5AC_mark_entry_dirty 0x404 0\n",
-      "H5AC_resize_pinned_entry 0x404 2 0\n",
-      "H5AC_resize_pinned_entry 0x404 4 0\n",
+      "H5AC_resize_entry 0x404 2 0\n",
+      "H5AC_resize_entry 0x404 4 0\n",
       "H5AC_unpin_entry 0x404 0\n",
       "H5AC_move_entry 0x400 0x8e65 16 0\n",
       "H5AC_move_entry 0x8e65 0x400 16 0\n",

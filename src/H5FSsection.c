@@ -1371,7 +1371,7 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
 
         /* Resize pinned section info in the cache, if its changed size */
         if(old_alloc_sect_size != fspace->alloc_sect_size) {
-            if(H5AC_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+            if(H5AC_resize_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
         } /* end if */
 
@@ -1436,7 +1436,7 @@ HDfprintf(stderr, "%s: Allocating space for smaller serialized sections, new_siz
 
             /* Resize pinned section info in the cache, if its changed size */
             if(old_alloc_sect_size != fspace->alloc_sect_size) {
-                if(H5AC_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+                if(H5AC_resize_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
             } /* end if */
 

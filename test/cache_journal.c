@@ -3814,7 +3814,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
 
     /* f-2) Now resize a selection of pinned and unpinned entries via 
-     *      protect/unprotect pairs and H5C_resize_pinned_entry().
+     *      protect/unprotect pairs and H5C_resize_entry().
      */
 
 
@@ -3840,17 +3840,17 @@ mdj_smoke_check_00(hbool_t human_readable,
 		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      ((VARIABLE_ENTRY_SIZE / 16) * 12));
 
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
-		         ((VARIABLE_ENTRY_SIZE / 16) * 11));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
+		         ((VARIABLE_ENTRY_SIZE / 16) * 11), TRUE);
 
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
-		         ((VARIABLE_ENTRY_SIZE / 16) * 10));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
+		         ((VARIABLE_ENTRY_SIZE / 16) * 10), TRUE);
 
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
-		             ((VARIABLE_ENTRY_SIZE / 16) * 9));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
+		             ((VARIABLE_ENTRY_SIZE / 16) * 9), TRUE);
 
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
-		             ((VARIABLE_ENTRY_SIZE / 16) * 8));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
+		             ((VARIABLE_ENTRY_SIZE / 16) * 8), TRUE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)7, "transaction 7.2");
 
@@ -3905,18 +3905,16 @@ mdj_smoke_check_00(hbool_t human_readable,
 				      VARIABLE_ENTRY_SIZE);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE, TRUE);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, FALSE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE, TRUE);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
-		             VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, VARIABLE_ENTRY_SIZE, TRUE);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
-		             VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, VARIABLE_ENTRY_SIZE, TRUE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)8, "transaction 8.2");
 
@@ -3971,21 +3969,19 @@ mdj_smoke_check_00(hbool_t human_readable,
                 VARIABLE_ENTRY_SIZE);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE, TRUE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE, TRUE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
-		             VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, VARIABLE_ENTRY_SIZE, TRUE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
-    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
-		             VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, VARIABLE_ENTRY_SIZE, TRUE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)9, "transaction 9.2");

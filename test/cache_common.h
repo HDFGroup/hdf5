@@ -176,7 +176,7 @@ typedef struct flush_op
 					 * FLUSH_OP__RESIZE: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be resized via the
-					 *   H5C_mark_entry_dirty()
+					 *   H5C_resize_entry()
 					 *   call.
 					 *
 					 * FLUSH_OP__MOVE: TRUE iff the
@@ -309,9 +309,6 @@ typedef struct test_entry_t
 					 */
     hbool_t		  deserialized; /* entry has been deserialized since
 					 * the last time it was reset.
-                                         */
-    hbool_t		  cleared;      /* entry has been cleared since the
-                                         * last time it was reset.
                                          */
     hbool_t		  serialized;   /* entry has been serialized since the
                                          * last time it was reset.
@@ -501,7 +498,6 @@ struct flush_cache_test_spec
     hbool_t		dirty_flag;
     unsigned int	flags;
     hbool_t		expected_deserialized;
-    hbool_t		expected_cleared;
     hbool_t		expected_serialized;
     hbool_t		expected_destroyed;
 };
@@ -518,7 +514,6 @@ struct pe_flush_cache_test_spec
     int			pin_type[MAX_PINS];
     int			pin_idx[MAX_PINS];
     hbool_t		expected_deserialized;
-    hbool_t		expected_cleared;
     hbool_t		expected_serialized;
     hbool_t		expected_destroyed;
 };
@@ -535,7 +530,6 @@ struct fo_flush_entry_check
     hbool_t		is_protected;
     hbool_t		is_pinned;
     hbool_t		expected_deserialized;
-    hbool_t		expected_cleared;
     hbool_t		expected_serialized;
     hbool_t		expected_destroyed;
 };
@@ -554,7 +548,6 @@ struct fo_flush_cache_test_spec
     int				num_flush_ops;
     struct flush_op		flush_ops[MAX_FLUSH_OPS];
     hbool_t			expected_deserialized;
-    hbool_t			expected_cleared;
     hbool_t			expected_serialized;
     hbool_t			expected_destroyed;
 };
@@ -578,7 +571,6 @@ struct expected_entry_status
     hbool_t		is_protected;
     hbool_t		is_pinned;
     hbool_t		deserialized;
-    hbool_t		cleared;
     hbool_t		serialized;
     hbool_t		destroyed;
 };
@@ -622,17 +614,6 @@ extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 herr_t check_write_permitted(const H5F_t UNUSED * f,
                               hid_t UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr);
-
-herr_t pico_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t nano_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t micro_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t tiny_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t small_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t medium_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t large_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t huge_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t monster_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
-herr_t variable_clear_dirty_bits(haddr_t addr, size_t len, void * thing);
 
 
 void * pico_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
@@ -811,15 +792,10 @@ hbool_t recommend_core_file_driver(void);
 void reset_entries(void);
 
 void resize_entry(H5F_t * file_ptr,
-                   int32_t type,
-                   int32_t idx,
-                   size_t new_size,
-                   hbool_t resize_pin);
-
-void resize_pinned_entry(H5F_t * file_ptr,
                           int32_t type,
                           int32_t idx,
-                          size_t new_size);
+                          size_t new_size,
+                          hbool_t resize_pin);
 
 H5F_t * setup_cache(size_t max_cache_size, size_t min_clean_size);
 

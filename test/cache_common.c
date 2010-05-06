@@ -1757,7 +1757,6 @@ reset_entries(void)
 	    base_addr[j].flush_op_self_resize_in_progress = FALSE;
 
             base_addr[j].deserialized = FALSE;
-            base_addr[j].cleared = FALSE;
             base_addr[j].serialized = FALSE;
             base_addr[j].destroyed = FALSE;
 
@@ -1772,94 +1771,13 @@ reset_entries(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	resize_entry
- *
- * Purpose:	Given a pointer to a cache, an entry type, an index, and
- * 		a size, set the size of the target entry to the size.  Note
- * 		that at present, the type of the entry must be
- * 		VARIABLE_ENTRY_TYPE.
- *
- *		If the resize_pin parameter is true, verify that the
- *		target entry is in the cache and is pinned.  If it
- *		isn't, scream and die.  If it is, use the
- *		H5C_resize_pinned_entry() call to resize it.
- *
- *		Do nothing if pass is false on entry.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              6/10/04
- *
- *-------------------------------------------------------------------------
- */
-
-void
-resize_entry(H5F_t * file_ptr,
-             int32_t type,
-             int32_t idx,
-	     size_t new_size,
-	     hbool_t resize_pin)
-{
-    H5C_t * cache_ptr;
-    test_entry_t * base_addr;
-    test_entry_t * entry_ptr;
-
-    if ( pass ) {
-
-        cache_ptr = file_ptr->shared->cache;
-
-        HDassert( cache_ptr );
-        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
-        HDassert( type == VARIABLE_ENTRY_TYPE );
-        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
-        HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes[type] ) );
-
-        base_addr = entries[type];
-        entry_ptr = &(base_addr[idx]);
-
-        HDassert( entry_ptr->index == idx );
-        HDassert( entry_ptr->type == type );
-        HDassert( entry_ptr == entry_ptr->self );
-
-        if ( resize_pin ) {
-
-	    if ( ! entry_in_cache(cache_ptr, type, idx) ) {
-
-		pass = FALSE;
-                failure_mssg = "entry to be resized pinned is not in cache.";
-
-	    } else {
-
-		if ( ! ( (entry_ptr->header).is_pinned ) ) {
-
-                    pass = FALSE;
-                    failure_mssg = "entry to be resized pinned is not pinned.";
-
-                } else {
-
-		    resize_pinned_entry(file_ptr, type, idx, new_size);
-		}
-	    }
-        } else {
-
-	    protect_entry(file_ptr, type, idx);
-	    unprotect_entry_with_size_change(file_ptr, type, idx,
-                                             H5C__SIZE_CHANGED_FLAG, new_size);
-	}
-    }
-
-    return;
-
-} /* resize_entry() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    resize_pinned_entry
+ * Function:    resize_entry
  *
  * Purpose:     Given a pointer to a cache, an entry type, an index, and
- *              a new size, change the size of the target pinned entry
- *              to match the supplied new size.
+ * 		a new size, set the size of the target entry to the new size.
+ *
+ *		Note that at present, the type of the entry must be
+ * 		VARIABLE_ENTRY_TYPE.
  *
  *              Do nothing if pass is false on entry.
  *
@@ -1872,10 +1790,11 @@ resize_entry(H5F_t * file_ptr,
  */
 
 void
-resize_pinned_entry(H5F_t * file_ptr,
-                    int32_t type,
-                    int32_t idx,
-                    size_t new_size)
+resize_entry(H5F_t * file_ptr,
+             int32_t type,
+             int32_t idx,
+             size_t new_size,
+	     hbool_t resize_pin)
 {
     H5C_t * cache_ptr;
     herr_t result;
@@ -1891,51 +1810,58 @@ resize_pinned_entry(H5F_t * file_ptr,
         HDassert( type == VARIABLE_ENTRY_TYPE ) ;
         HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes[type] ) );
 
-        if ( ! entry_in_cache(cache_ptr, type, idx) ) {
+        if ( resize_pin ) {
 
-            pass = FALSE;
-            failure_mssg = "entry not in cache.";
-
-        } else {
-
-            base_addr = entries[type];
-            entry_ptr = &(base_addr[idx]);
-
-            HDassert( entry_ptr->index == idx );
-            HDassert( entry_ptr->type == type );
-            HDassert( entry_ptr->cache_ptr == cache_ptr );
-            HDassert( entry_ptr == entry_ptr->self );
-
-            if ( ! ( (entry_ptr->header).is_pinned ) ) {
+            if ( ! entry_in_cache(cache_ptr, type, idx) ) {
 
                 pass = FALSE;
-                failure_mssg = "entry to be resized is not pinned.";
+                failure_mssg = "entry not in cache.";
 
             } else {
 
-                entry_ptr->size = new_size;
+                base_addr = entries[type];
+                entry_ptr = &(base_addr[idx]);
 
-                result = H5C_resize_pinned_entry((void *)entry_ptr,
-                                                   new_size);
-		entry_ptr->is_dirty = TRUE;
+                HDassert( entry_ptr->index == idx );
+                HDassert( entry_ptr->type == type );
+                HDassert( entry_ptr->cache_ptr == cache_ptr );
+                HDassert( entry_ptr == entry_ptr->self );
 
-                if ( result != SUCCEED ) {
+                if ( ! ( (entry_ptr->header).is_pinned || (entry_ptr->header).is_protected ) ) {
 
                     pass = FALSE;
-                    failure_mssg = "error(s) in H5C_resize_pinned_entry().";
+                    failure_mssg = "entry to be resized is not pinned or protected.";
 
                 } else {
 
-                    HDassert( entry_ptr->size = (entry_ptr->header).size );
+                    entry_ptr->size = new_size;
 
+                    result = H5C_resize_entry((void *)entry_ptr, new_size);
+                    entry_ptr->is_dirty = TRUE;
+
+                    if ( result != SUCCEED ) {
+
+                        pass = FALSE;
+                        failure_mssg = "error(s) in H5C_resize_entry().";
+
+                    } else {
+
+                        HDassert( entry_ptr->size = (entry_ptr->header).size );
+
+                    }
                 }
             }
-        }
+        } else {
+
+	    protect_entry(file_ptr, type, idx);
+	    unprotect_entry_with_size_change(file_ptr, type, idx,
+                                             H5C__SIZE_CHANGED_FLAG, new_size);
+	}
     }
 
     return;
 
-} /* resize_pinned_entry() */
+} /* resize_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -2206,20 +2132,17 @@ verify_entry_status(H5C_t * cache_ptr,
 	if ( pass ) {
 
             if ( ( entry_ptr->deserialized != expected[i].deserialized ) ||
-	         ( entry_ptr->cleared != expected[i].cleared ) ||
 	         ( entry_ptr->serialized != expected[i].serialized ) ||
 	         ( entry_ptr->destroyed != expected[i].destroyed ) ) {
 
 	        pass = FALSE;
                 sprintf(msg,
-                        "%d entry (%d,%d) deserialized = %d(%d), clrd = %d(%d), serialized = %d(%d), dest = %d(%d)\n",
+                        "%d entry (%d,%d) deserialized = %d(%d), serialized = %d(%d), dest = %d(%d)\n",
 			tag,
 		        (int)expected[i].entry_type,
 		        (int)expected[i].entry_index,
 		        (int)(entry_ptr->deserialized),
 		        (int)(expected[i].deserialized),
-		        (int)(entry_ptr->cleared),
-		        (int)(expected[i].cleared),
 		        (int)(entry_ptr->serialized),
 		        (int)(expected[i].serialized),
 		        (int)(entry_ptr->destroyed),

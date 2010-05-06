@@ -708,7 +708,7 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
 
     /* Resize pinned header in cache if I/O filter is present. */
     if(hdr->filter_len > 0) {
-        if(H5AC_resize_pinned_entry(hdr, (size_t)hdr->heap_size) < 0)
+        if(H5AC_resize_entry(hdr, (size_t)hdr->heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap header")
     } /* end if */
 
