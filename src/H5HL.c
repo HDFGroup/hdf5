@@ -655,12 +655,12 @@ H5HL_dirty(H5HL_t *heap)
         /* Sanity check */
         HDassert(heap->dblk);
 
-        if(H5AC_mark_pinned_or_protected_entry_dirty(heap->dblk) < 0)
+        if(H5AC_mark_entry_dirty(heap->dblk) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap data block as dirty")
     } /* end if */
 
     /* Mark heap prefix as dirty */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(heap->prfx) < 0)
+    if(H5AC_mark_entry_dirty(heap->prfx) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap prefix as dirty")
 
 done:

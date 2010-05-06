@@ -1355,90 +1355,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_mark_pinned_entry_dirty
- *
- * Purpose:	Mark a pinned entry as dirty.  The target entry MUST be
- * 		be pinned, and MUST be unprotected.
- *
- * 		If the entry has changed size, the function updates
- * 		data structures for the size change.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              4/11/06
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
-{
-#if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
-#endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t              ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5AC_mark_pinned_entry_dirty, FAIL)
-
-    /* Sanity check */
-    HDassert(thing);
-
-#if H5AC__TRACE_FILE_ENABLED
-    /* For the mark pinned entry dirty call, only the addr, size_changed,
-     * and new_size are really necessary in the trace file. Write the result
-     * to catch occult errors.
-     */
-    if((H5C_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
-        sprintf(trace, "%s 0x%lx %d %d", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr),
-		(int)size_changed,
-		(int)new_size);
-#endif /* H5AC__TRACE_FILE_ENABLED */
-
-#ifdef H5_HAVE_PARALLEL
-{
-    H5AC_info_t *entry_ptr = (H5AC_info_t *)thing;
-    H5C_t *cache_ptr = entry_ptr->cache_ptr;
-
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr)) {
-        /* Check for usage errors */
-        if(!entry_ptr->is_pinned)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry isn't pinned??")
-        if(entry_ptr->is_protected)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is protected??")
-
-        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr, size_changed, new_size) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
-    } /* end if */
-}
-#endif /* H5_HAVE_PARALLEL */
-
-    if(H5C_mark_pinned_entry_dirty(thing, size_changed, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't mark pinned entry dirty")
-
-done:
-#if H5AC__TRACE_FILE_ENABLED
-    if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
-#endif /* H5AC__TRACE_FILE_ENABLED */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_mark_pinned_entry_dirty() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC_mark_pinned_or_protected_entry_dirty
+ * Function:    H5AC_mark_entry_dirty
  *
  * Purpose:	Mark a pinned or protected entry as dirty.  The target
  * 		entry MUST be either pinned, protected, or both.
- *
- * 		Unlike H5AC_mark_pinned_entry_dirty(), this function does
- * 		not support size changes.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1448,7 +1368,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_mark_pinned_or_protected_entry_dirty(void *thing)
+H5AC_mark_entry_dirty(void *thing)
 {
 #if H5AC__TRACE_FILE_ENABLED
     char          	trace[128] = "";
@@ -1456,7 +1376,7 @@ H5AC_mark_pinned_or_protected_entry_dirty(void *thing)
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5AC_mark_pinned_or_protected_entry_dirty, FAIL)
+    FUNC_ENTER_NOAPI(H5AC_mark_entry_dirty, FAIL)
 
     /* Sanity check */
     HDassert(thing);
@@ -1488,7 +1408,7 @@ H5AC_mark_pinned_or_protected_entry_dirty(void *thing)
 }
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_mark_pinned_or_protected_entry_dirty(thing) < 0)
+    if(H5C_mark_entry_dirty(thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't mark pinned or protected entry dirty")
 
 done:
@@ -1498,7 +1418,7 @@ done:
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_mark_pinned_entry_dirty() */
+} /* H5AC_mark_entry_dirty() */
 
 
 /*-------------------------------------------------------------------------

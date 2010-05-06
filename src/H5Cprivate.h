@@ -1036,11 +1036,7 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *  f,
                                         int32_t  ce_array_len,
                                         haddr_t *ce_array_ptr);
 
-H5_DLL herr_t H5C_mark_pinned_entry_dirty(void *  thing,
-					  hbool_t size_changed,
-					  size_t  new_size);
-
-H5_DLL herr_t H5C_mark_pinned_or_protected_entry_dirty(void *thing);
+H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 
 H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,

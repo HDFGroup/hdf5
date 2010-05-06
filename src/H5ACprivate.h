@@ -277,9 +277,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5AC_mark_pinned_entry_dirty(void *thing, hbool_t size_changed,
-    size_t  new_size);
-H5_DLL herr_t H5AC_mark_pinned_or_protected_entry_dirty(void *thing);
+H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 

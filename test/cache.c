@@ -10806,8 +10806,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
  *
  * 		JRM -- 5/17/06
  * 		Complete reqrite of pinned entry tests to accomodate
- * 		the new H5C_mark_pinned_or_protected_entry_dirty()
- * 		call.
+ * 		the new H5C_mark_entry_dirty() call.
  *
  *-------------------------------------------------------------------------
  */
@@ -12094,13 +12093,12 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
      *
      * 	2) Marked dirty by unprotect or not.
      *
-     * 	3) Marked dirty by call to H5C_mark_pinned_entry_dirty() or not.
+     * 	3) Marked dirty by call to H5C_mark_entry_dirty() or not.
      *
-     *  4) Marked dirty by call to H5C_mark_pinned_or_protected_entry_dirty()
-     *     while protected or not.
+     *  4) Marked dirty by call to H5C_mark_entry_dirty() while protected
+     *     or not.
      *
-     *  5) Marked dirty by call to H5C_mark_pinned_or_protected_entry_dirty()
-     *     while pinned or not.
+     *  5) Marked dirty by call to H5C_mark_entry_dirty() while pinned or not.
      *
      * 	6) Entry marked for flush or not.
      *
@@ -12653,7 +12651,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
  * 		JRM -- 5/17/06
  * 		Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
  * 		flags and supporting code to allow us to test the
- * 		H5C_mark_pinned_or_protected_entry_dirty() call.  Use the
+ * 		H5C_mark_entry_dirty() call.  Use the
  * 		call to mark the entry dirty while the entry is protected
  * 		if pop_mark_dirty_prot is TRUE, and to mark the entry
  * 		dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
@@ -12721,8 +12719,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
 	if ( pop_mark_dirty_prot ) {
 
-	    mark_pinned_or_protected_entry_dirty(entry_type,
-			                         entry_idx);
+	    mark_entry_dirty(entry_type, entry_idx);
 	}
 
         unprotect_entry(file_ptr, entry_type, entry_idx,
@@ -12730,13 +12727,12 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
 	if ( mark_dirty ) {
 
-            mark_pinned_entry_dirty(entry_type, entry_idx, FALSE, (size_t)0);
+            mark_entry_dirty(entry_type, entry_idx);
 	}
 
 	if ( pop_mark_dirty_pinned ) {
 
-	    mark_pinned_or_protected_entry_dirty(entry_type,
-			                         entry_idx);
+	    mark_entry_dirty(entry_type, entry_idx);
 	}
     }
 
@@ -12991,7 +12987,7 @@ check_get_entry_status(void)
         }
     }
 
-    mark_pinned_entry_dirty(0, 0, FALSE, (size_t)0);
+    mark_entry_dirty(0, 0);
 
     if ( pass ) {
 
@@ -16644,13 +16640,7 @@ check_double_unprotect_err(void)
  *
  * Purpose:	Verify that:
  *
- * 		1) a call to H5C_mark_pinned_entry_dirty with an upinned
- * 		   entry as the target will generate an error.
- *
- * 		2) a call to H5C_mark_pinned_entry_dirty with a protected
- * 		   entry as the target will generate an error.
- *
- *		3) a call to H5C_mark_pinned_or_protected_entry_dirty with
+ *		1) a call to H5C_mark_entry_dirty with
  *		   and unpinned and unprotected entry will generate an
  *		   error.
  *
@@ -16658,10 +16648,6 @@ check_double_unprotect_err(void)
  *
  * Programmer:	John Mainzer
  *              5/17/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -16678,14 +16664,8 @@ check_mark_entry_dirty_errs(void)
 
     pass = TRUE;
 
-    /* allocate a cache, protect an entry, and then attempt to mark it dirty
-     * with the H5C_mark_pinned_entry_dirty() call -- This should fail.
-     *
-     * Then unprotect the entry without pinning it, and try to mark it dirty
-     * again -- this should fail too.
-     *
-     * Try it again using H5C_mark_pinned_or_protected_entry_dirty -- this
-     * should fail as well.
+    /* allocate a cache, protect an entry, unprotect the entry without
+     * pinning it, and try to mark it dirty -- this should fail.
      *
      * Destroy the cache -- should succeed.
      */
@@ -16699,52 +16679,21 @@ check_mark_entry_dirty_errs(void)
 
         protect_entry(file_ptr, 0, 0);
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
-
-        protect_entry(file_ptr, 0, 0);
+	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
 
     if ( pass ) {
 
-	result = H5C_mark_pinned_entry_dirty((void *)entry_ptr, FALSE, (size_t)0);
-
-        if ( result > 0 ) {
-
-            pass = FALSE;
-            failure_mssg =
-                    "attempt dirty a pinned and protected entry succeeded.\n";
-
-        } else {
-
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__UNPIN_ENTRY_FLAG);
-	}
-    }
-
-    if ( pass ) {
-
-	result = H5C_mark_pinned_entry_dirty((void *)entry_ptr, FALSE, (size_t)0);
+	result = H5C_mark_entry_dirty((void *)entry_ptr);
 
 
         if ( result > 0 ) {
 
             pass = FALSE;
             failure_mssg =
-            "attempt to dirty a unpinned and unprotected entry succeeded 1.\n";
-        }
-    }
-
-    if ( pass ) {
-
-	result = H5C_mark_pinned_or_protected_entry_dirty((void *)entry_ptr);
-
-
-        if ( result > 0 ) {
-
-            pass = FALSE;
-            failure_mssg =
-            "attempt to dirty a unpinned and unprotected entry succeeded 2.\n";
+            "attempt to dirty a unpinned and unprotected entry succeeded.\n";
         }
     }
 

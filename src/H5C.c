@@ -2735,111 +2735,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_mark_pinned_entry_dirty
- *
- * Purpose:	Mark a pinned entry as dirty.  The target entry MUST be
- * 		be pinned, and MUST be unprotected.
- *
- * 		If the entry has changed size, the function updates
- * 		data structures for the size change.
- *
- * 		If the entry is not already dirty, the function places
- * 		the entry on the skip list.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/22/06
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
-{
-    H5C_t *             cache_ptr;
-    H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
-    size_t              size_increase;
-    herr_t              ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_mark_pinned_entry_dirty, FAIL)
-
-    /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
-    cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    /* Check for usage errors */
-    if(!entry_ptr->is_pinned)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry isn't pinned??")
-    if(entry_ptr->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is protected??")
-
-    /* mark the entry as dirty if it isn't already */
-    entry_ptr->is_dirty = TRUE;
-
-    /* update for change in entry size if necessary */
-    if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
-
-        /* do a flash cache size increase if appropriate */
-        if ( cache_ptr->flash_size_increase_possible ) {
-
-            if ( new_size > entry_ptr->size ) {
-
-                size_increase = new_size - entry_ptr->size;
-
-                if ( size_increase >=
-                        cache_ptr->flash_size_increase_threshold ) {
-                    if(H5C__flash_increase_cache_size(cache_ptr, entry_ptr->size, new_size) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "flash cache increase failed")
-                }
-            }
-        }
-
-        /* update the pinned entry list */
-        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
-                                        (cache_ptr->pel_size), \
-                                        (entry_ptr->size), (new_size));
-
-        /* update the hash table */
-	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                          (new_size));
-
-        /* if the entry is in the skip list, update that too */
-        if ( entry_ptr->in_slist ) {
-
-	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                              (new_size));
-        }
-
-        /* update statistics just before changing the entry size */
-	H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
-                                                (new_size));
-
-	/* finally, update the entry size proper */
-	entry_ptr->size = new_size;
-    }
-
-    if ( ! (entry_ptr->in_slist) ) {
-
-	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-    }
-
-    H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_mark_pinned_entry_dirty() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_mark_pinned_or_protected_entry_dirty
+ * Function:    H5C_mark_entry_dirty
  *
  * Purpose:	Mark a pinned or protected entry as dirty.  The target entry
  * 		MUST be either pinned or protected, and MAY be both.
- *
- * 		At present, this funtion does not support size change.
  *
  * 		In the protected case, this call is the functional
  * 		equivalent of setting the H5C__DIRTIED_FLAG on an unprotect
@@ -2857,13 +2756,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_mark_pinned_or_protected_entry_dirty(void *thing)
+H5C_mark_entry_dirty(void *thing)
 {
     H5C_t *             cache_ptr;
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_mark_pinned_or_protected_entry_dirty, FAIL)
+    FUNC_ENTER_NOAPI(H5C_mark_entry_dirty, FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -2900,7 +2799,7 @@ H5C_mark_pinned_or_protected_entry_dirty(void *thing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_mark_pinned_or_protected_entry_dirty() */
+} /* H5C_mark_entry_dirty() */
 
 
 /*-------------------------------------------------------------------------
