@@ -565,8 +565,8 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
-        if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move fractal heap root indirect block")
+        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */
 
@@ -724,7 +724,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
 
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
-        if(H5AC_rename(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
+        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */

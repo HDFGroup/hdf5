@@ -280,8 +280,8 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap data block in cache")
 
             /* Relocate the heap data block in the cache */
-            if(H5AC_rename(f, H5AC_LHEAP_DBLK, old_addr, new_addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move heap data block in cache")
+            if(H5AC_move_entry(f, H5AC_LHEAP_DBLK, old_addr, new_addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move heap data block in cache")
         } /* end else */
     } /* end else */
 

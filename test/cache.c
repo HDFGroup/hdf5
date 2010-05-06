@@ -95,16 +95,16 @@ static void check_flush_protected_err(void);
 static void check_get_entry_status(void);
 static void check_expunge_entry(void);
 static void check_multiple_read_protect(void);
-static void check_rename_entry(void);
-static void check_rename_entry__run_test(H5F_t * file_ptr, int test_num,
-                                      struct rename_entry_test_spec * spec_ptr);
+static void check_move_entry(void);
+static void check_move_entry__run_test(H5F_t * file_ptr, int test_num,
+                                      struct move_entry_test_spec * spec_ptr);
 static void check_pin_protected_entry(void);
 static void check_resize_entry(void);
 static void check_evictions_enabled(void);
 static void check_destroy_pinned_err(void);
 static void check_destroy_protected_err(void);
 static void check_duplicate_insert_err(void);
-static void check_rename_err(void);
+static void check_move_err(void);
 static void check_double_pin_err(void);
 static void check_double_unpin_err(void);
 static void check_pin_entry_errs(void);
@@ -132,7 +132,7 @@ static void check_auto_cache_resize_aux_fcns(void);
 /*-------------------------------------------------------------------------
  * Function:	smoke_check_1()
  *
- * Purpose:	A basic functional test, inserts, destroys, and renames in
+ * Purpose:	A basic functional test, inserts, destroys, and moves in
  *              the mix, along with repeated protects and unprotects.
  *		All entries are marked as clean.
  *
@@ -201,8 +201,8 @@ smoke_check_1(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -220,8 +220,8 @@ smoke_check_1(void)
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -239,8 +239,8 @@ smoke_check_1(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -326,7 +326,7 @@ smoke_check_1(void)
  * Function:	smoke_check_2()
  *
  * Purpose:	A basic functional test, with inserts, destroys, and
- *		renames in the mix, along with some repeated protects
+ *		moves in the mix, along with some repeated protects
  *		and unprotects.  About half the entries are marked as
  *		dirty.
  *
@@ -395,8 +395,8 @@ smoke_check_2(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -414,8 +414,8 @@ smoke_check_2(void)
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -433,8 +433,8 @@ smoke_check_2(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -520,7 +520,7 @@ smoke_check_2(void)
  * Function:	smoke_check_3()
  *
  * Purpose:	A basic functional test on a tiny cache, with inserts,
- *		destroys, and renames in the mix, along with repeated
+ *		destroys, and moves in the mix, along with repeated
  *		protects and unprotects.  All entries are marked as clean.
  *
  * Return:	void
@@ -588,8 +588,8 @@ smoke_check_3(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -607,8 +607,8 @@ smoke_check_3(void)
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -626,8 +626,8 @@ smoke_check_3(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -713,7 +713,7 @@ smoke_check_3(void)
  * Function:	smoke_check_4()
  *
  * Purpose:	A basic functional test on a tiny cache, with inserts,
- *	 	destroys, and renames in the mix, along with repeated
+ *	 	destroys, and moves in the mix, along with repeated
  *		protects and unprotects.  About half the entries are
  *		marked as dirty.
  *
@@ -782,8 +782,8 @@ smoke_check_4(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -801,8 +801,8 @@ smoke_check_4(void)
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -820,8 +820,8 @@ smoke_check_4(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -1880,7 +1880,7 @@ smoke_check_8(void)
  * 		part of the time.
  *
  * 		Recall that smoke check 1 is a basic functional test,
- * 		with inserts, destroys, and renames in the mix, along
+ * 		with inserts, destroys, and moves in the mix, along
  * 		with repeated protects and unprotects.  All entries are
  * 		marked as clean.
  *
@@ -1968,8 +1968,8 @@ smoke_check_9(void)
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -2004,8 +2004,8 @@ smoke_check_9(void)
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -2038,8 +2038,8 @@ smoke_check_9(void)
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -2189,7 +2189,7 @@ smoke_check_9(void)
  * 		part of the time.
  *
  * 		Recall that smoke check 2 is a basic functional test,
- * 		with inserts, destroys, and renames in the mix, along
+ * 		with inserts, destroys, and moves in the mix, along
  * 		with some repeated protects and unprotects.  About half
  * 		the entries are marked as dirty.
  *
@@ -2260,8 +2260,8 @@ smoke_check_10(void)
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -2294,8 +2294,8 @@ smoke_check_10(void)
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ dirty_inserts,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
@@ -2328,8 +2328,8 @@ smoke_check_10(void)
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
@@ -2551,8 +2551,8 @@ write_permitted_check(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ TRUE,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
@@ -2572,8 +2572,8 @@ write_permitted_check(void)
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
                             /* dirty_inserts          */ FALSE,
-                            /* do_renames             */ TRUE,
-                            /* rename_to_main_addr    */ TRUE,
+                            /* do_moves             */ TRUE,
+                            /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
 			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ FALSE,
@@ -2593,8 +2593,8 @@ write_permitted_check(void)
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
                            /* dirty_inserts          */ TRUE,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
+                           /* do_moves             */ TRUE,
+                           /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
 			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
@@ -5405,7 +5405,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
  *
  * 		These are tests that test the cache's ability to handle
  * 		the case in which the flush callback dirties, resizes,
- * 		and/or renames entries.
+ * 		and/or moves entries.
  *
  * 		Do nothing if pass is FALSE on entry.
  *
@@ -5809,7 +5809,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
     if ( pass ) /* test #5 & #6 */
     {
 	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function renames the entry for which it has
+	 * which the call back function moves the entry for which it has
 	 * been called.
 	 *
 	 * Run this entry twice, as the first run moves the entry to its
@@ -5837,7 +5837,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
 	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	    { { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
@@ -5885,11 +5885,11 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its
+	/* this change forces the move to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second
+	 * the moved entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
@@ -5921,7 +5921,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * second test.
 	 *
 	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function renames the entry for which it has
+	 * which the call back function moves the entry for which it has
 	 * been called.
 	 *
 	 * Run this entry twice, as the first run moves the entry to its
@@ -5949,7 +5949,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
 	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	    { { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
@@ -5997,11 +5997,11 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its
+	/* this change forces the move to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second
+	 * the moved entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
@@ -6035,7 +6035,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
     if ( pass ) /* test #9 & #10 */
     {
 	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and renames the entry
+	 * which the call back function both resizes and moves the entry
 	 * for which it has been called.
 	 *
 	 * Again, we run this entry twice, as the first run moves the entry
@@ -6064,7 +6064,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* flush_ops          = */
 	    /*	op_code:		type:			idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
@@ -6111,11 +6111,11 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its
+	/* this change forces the move to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second
+	 * the moved entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
@@ -6147,7 +6147,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * second test.
 	 *
 	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and renames the entry
+	 * which the call back function both resizes and moves the entry
 	 * for which it has been called.
 	 *
 	 * Again, we run this entry twice, as the first run moves the entry to its
@@ -6176,7 +6176,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* flush_ops          = */
 	    /*	op_code:		type:			idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
@@ -6223,11 +6223,11 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its
+	/* this change forces the move to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second
+	 * the moved entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
@@ -6650,7 +6650,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
     {
 	/* Test the ability of the cache to handle the case in which
 	 * the flush function of an entry that is resident in cache
-	 * resizes, dirties, and renames two entries that are not in cache.
+	 * resizes, dirties, and moves two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
 	 * lets make sure we can handle it regardless.
@@ -6681,10 +6681,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -6742,12 +6742,12 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the renames to move the target entries back to
+	/* this change forces the moves to move the target entries back to
 	 * their main address.  The first test moved them to their alternate
 	 * address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entries are moved forward in the slist.  In the second
+	 * the moved entries are moved forward in the slist.  In the second
 	 * they are moved backwards.
 	 */
 	if ( pass ) {
@@ -6779,7 +6779,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 *
 	 * Test the ability of the cache to handle the case in which
 	 * the flush function of an entry that is resident in cache
-	 * resizes, dirties, and renames two entries that are not in cache.
+	 * resizes, dirties, and moves two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
 	 * lets make sure we can handle it regardless.
@@ -6810,10 +6810,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -6871,12 +6871,12 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the renames to move the target entries back to
+	/* this change forces the moves to move the target entries back to
 	 * their main address.  The first test moved them to their alternate
 	 * address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entries are moved forward in the slist.  In the second
+	 * the moved entries are moved forward in the slist.  In the second
 	 * they are moved backwards.
 	 */
 	if ( pass ) {
@@ -6914,7 +6914,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	/* Now mix things up a bit.
 	 *
 	 * Load several entries, two of which have flush functions that
-	 * resize, dirty, and rename two entries that are not in the
+	 * resize, dirty, and move two entries that are not in the
 	 * cache.  Mark only one of these entries, and then flush the
 	 * cache with the flush marked entries flag.
 	 *
@@ -6951,10 +6951,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -6979,10 +6979,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -7133,7 +7133,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	/* Mix things up some more.
 	 *
 	 * Load lots of entries, some of which have flush functions that
-	 * resize, dirty, and rename two entries that are not in the
+	 * resize, dirty, and move two entries that are not in the
 	 * cache.
 	 *
 	 * Also load entries that have flush ops on entries that are in
@@ -7166,10 +7166,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -7194,10 +7194,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -7406,7 +7406,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * Mix things up some more.
 	 *
 	 * Load lots of entries, some of which have flush functions that
-	 * resize, dirty, and rename two entries that are not in the
+	 * resize, dirty, and move two entries that are not in the
 	 * cache.
 	 *
 	 * Also load entries that have flush ops on entries that are in
@@ -7436,10 +7436,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -7464,10 +7464,10 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -7975,12 +7975,12 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * 		dirties (VET, 100)
 	 * 		resizes (VET, 200)
 	 * 		dirty	(VET, 300) -- dirty first to bring into cache.
-	 * 		renames (VET, 300)
+	 * 		moves (VET, 300)
 	 *
 	 * (VET, 2000)	initially clean, and in cache
 	 * 		dirties (VET, 2100)
 	 * 		resizes (VET, 2200)
-	 * 		renames (VET, 2300)
+	 * 		moves (VET, 2300)
 	 *
 	 * (VET, 350)	initially clean, and in cache
 	 * 		pins	(VET, 1000)
@@ -7992,7 +7992,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * (VET, 450)	initially dirty, and in cache
 	 * 		pins	(VET, 1000)
 	 * 		dirties	(VET, 1000)
-	 * 		renames (VET, 450)
+	 * 		moves (VET, 450)
 	 * 		pins	(VET, 2000)
 	 * 		dirties (VET, 2000)
 	 *
@@ -8125,7 +8125,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8152,7 +8152,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8412,12 +8412,12 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * 		dirties (VET, 100)
 	 * 		resizes (VET, 200)
 	 * 		dirty	(VET, 300) -- dirty first to bring into cache.
-	 * 		renames (VET, 300)
+	 * 		moves (VET, 300)
 	 *
 	 * (VET, 2000)	initially clean, and in cache
 	 * 		dirties (VET, 2100)
 	 * 		resizes (VET, 2200)
-	 * 		renames (VET, 2300)
+	 * 		moves (VET, 2300)
 	 *
 	 * (VET, 350)	initially clean, and in cache
 	 * 		pins	(VET, 1000)
@@ -8429,7 +8429,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	 * (VET, 450)	initially dirty, and in cache
 	 * 		pins	(VET, 1000)
 	 * 		dirties	(VET, 1000)
-	 * 		renames (VET, 450)
+	 * 		moves (VET, 450)
 	 * 		pins	(VET, 2000)
 	 * 		dirties (VET, 2000)
 	 *
@@ -8562,7 +8562,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
 	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8589,7 +8589,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8867,7 +8867,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8895,7 +8895,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -8951,7 +8951,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -9060,7 +9060,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -9088,7 +9088,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -9144,7 +9144,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /*	op_code:		type:	idx:	flag:	size: */
 	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
 	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
+	      { FLUSH_OP__MOVE,		VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
 	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
@@ -9856,7 +9856,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *
 	 *          (VET, 2) dirties (VET, 0)
 	 *                   resizes (VET, 0) to VARIABLE_ENTRY_SIZE
-	 *                   renames (VET, 0) to its alternate address
+	 *                   moves (VET, 0) to its alternate address
 	 *
 	 *          (VET, 3) dirties (VET, 0)
 	 *                   resizes itself to VARIABLE_ENTRY_SIZE
@@ -9873,7 +9873,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE);
-        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RENAME,
+        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__MOVE,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY,
@@ -9900,7 +9900,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *
 	 * (VET, 2)	Y	10 KB	N	N	0	dirty (VET, 0)
 	 * 							resize (VET, 0) to 10 KB
-	 * 							rename (VET, 0) to its alternate address
+	 * 							move (VET, 0) to its alternate address
 	 *
 	 * (VET, 3)	Y	 5 KB	Y	N	0, 7	dirty (VET, 0)
 	 * 							resize (VET, 3) to 10 KB
@@ -9974,7 +9974,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *
 	 * (VET, 2)	Y	10 KB	N	N	0	dirty (VET, 0)
 	 * 							resize (VET, 0) to 10 KB
-	 * 							rename (VET, 0) to its alternate address
+	 * 							move (VET, 0) to its alternate address
 	 *
 	 * (VET, 3)	Y	 5 KB	Y	N	0, 7	dirty (VET, 0)
 	 * 							resize (VET, 3) to 10 KB
@@ -10026,7 +10026,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
 	/* Now load another large entry.  This should result in the eviction
 	 * of (VET, 2), the increase in the size of (VET, 0) from .75
-	 * VARIABLE_ENTRY_SIZE to 1.0 VARIABLE_ENTRY_SIZE, and the renaming
+	 * VARIABLE_ENTRY_SIZE to 1.0 VARIABLE_ENTRY_SIZE, and the moving
 	 * of (VET, 0) to its alternate address.
 	 *
 	 * The following table shows the expected states of the variable
@@ -10709,9 +10709,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
              ( cache_ptr->clears[VARIABLE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[VARIABLE_ENTRY_TYPE] != 14 ) ||
              ( cache_ptr->evictions[VARIABLE_ENTRY_TYPE] != 9 ) ||
-             ( cache_ptr->renames[VARIABLE_ENTRY_TYPE] != 1 ) ||
-             ( cache_ptr->entry_flush_renames[VARIABLE_ENTRY_TYPE] != 0 ) ||
-             ( cache_ptr->cache_flush_renames[VARIABLE_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->moves[VARIABLE_ENTRY_TYPE] != 1 ) ||
+             ( cache_ptr->entry_flush_moves[VARIABLE_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->cache_flush_moves[VARIABLE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pins[VARIABLE_ENTRY_TYPE] != 2 ) ||
              ( cache_ptr->unpins[VARIABLE_ENTRY_TYPE] != 2 ) ||
              ( cache_ptr->dirty_pins[VARIABLE_ENTRY_TYPE] != 0 ) ||
@@ -10734,9 +10734,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
              ( cache_ptr->clears[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[LARGE_ENTRY_TYPE] != 38 ) ||
              ( cache_ptr->evictions[LARGE_ENTRY_TYPE] != 14 ) ||
-             ( cache_ptr->renames[LARGE_ENTRY_TYPE] != 0 ) ||
-             ( cache_ptr->entry_flush_renames[LARGE_ENTRY_TYPE] != 0 ) ||
-             ( cache_ptr->cache_flush_renames[LARGE_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->moves[LARGE_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->entry_flush_moves[LARGE_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->cache_flush_moves[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pins[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->unpins[LARGE_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->dirty_pins[LARGE_ENTRY_TYPE] != 0 ) ||
@@ -10759,9 +10759,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
              ( cache_ptr->clears[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->flushes[MONSTER_ENTRY_TYPE] != 93 ) ||
              ( cache_ptr->evictions[MONSTER_ENTRY_TYPE] != 31 ) ||
-             ( cache_ptr->renames[MONSTER_ENTRY_TYPE] != 0 ) ||
-             ( cache_ptr->entry_flush_renames[MONSTER_ENTRY_TYPE] != 0 ) ||
-             ( cache_ptr->cache_flush_renames[MONSTER_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->moves[MONSTER_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->entry_flush_moves[MONSTER_ENTRY_TYPE] != 0 ) ||
+             ( cache_ptr->cache_flush_moves[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->pins[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->unpins[MONSTER_ENTRY_TYPE] != 0 ) ||
              ( cache_ptr->dirty_pins[MONSTER_ENTRY_TYPE] != 0 ) ||
@@ -13771,9 +13771,9 @@ check_multiple_read_protect(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_rename_entry()
+ * Function:	check_move_entry()
  *
- * Purpose:	Verify that H5C_rename_entry behaves as expected.  In
+ * Purpose:	Verify that H5C_move_entry behaves as expected.  In
  * 		particular, verify that it works correctly with pinned
  * 		entries.
  *
@@ -13788,12 +13788,12 @@ check_multiple_read_protect(void)
  */
 
 static void
-check_rename_entry(void)
+check_move_entry(void)
 {
-    const char * fcn_name = "check_rename_entry";
+    const char * fcn_name = "check_move_entry";
     int          i;
     H5F_t *      file_ptr = NULL;
-    struct rename_entry_test_spec test_specs[4] =
+    struct move_entry_test_spec test_specs[4] =
     {
       {
         /* int     entry_type  = */ PICO_ENTRY_TYPE,
@@ -13821,23 +13821,23 @@ check_rename_entry(void)
       }
     };
 
-    TESTING("H5C_rename_entry() functionality");
+    TESTING("H5C_move_entry() functionality");
 
     pass = TRUE;
 
-    /* allocate a cache, load entries into it, and then rename
+    /* allocate a cache, load entries into it, and then move
      * them.  To the extent possible, verify that the desired
      * actions took place.
      *
      * At present, we should do the following tests:
      *
-     * 1) Rename a clean, unprotected, unpinned entry.
+     * 1) move a clean, unprotected, unpinned entry.
      *
-     * 2) Rename a dirty, unprotected, unpinned entry.
+     * 2) move a dirty, unprotected, unpinned entry.
      *
-     * 3) Rename a clean, unprotected, pinned entry.
+     * 3) move a clean, unprotected, pinned entry.
      *
-     * 4) Rename a dirty, unprotected, pinned entry.
+     * 4) move a dirty, unprotected, pinned entry.
      *
      * In all cases, the entry should have moved to its
      * new location, and have been marked dirty if it wasn't
@@ -13861,7 +13861,7 @@ check_rename_entry(void)
     i = 0;
     while ( ( pass ) && ( i < 4 ) )
     {
-        check_rename_entry__run_test(file_ptr, i, &(test_specs[i]));
+        check_move_entry__run_test(file_ptr, i, &(test_specs[i]));
 	i++;
     }
 
@@ -13880,13 +13880,13 @@ check_rename_entry(void)
 
     return;
 
-} /* check_rename_entry() */
+} /* check_move_entry() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    check_rename_entry__run_test()
+ * Function:    check_move_entry__run_test()
  *
- * Purpose:     Run a rename entry test.
+ * Purpose:     Run a move entry test.
  *
  *		Do nothing if pass is FALSE on entry.
  *
@@ -13903,11 +13903,11 @@ check_rename_entry(void)
  */
 
 static void
-check_rename_entry__run_test(H5F_t * file_ptr,
+check_move_entry__run_test(H5F_t * file_ptr,
                              int test_num,
-                             struct rename_entry_test_spec * spec_ptr)
+                             struct move_entry_test_spec * spec_ptr)
 {
-    /* const char *   fcn_name = "check_rename_entry__run_test"; */
+    /* const char *   fcn_name = "check_move_entry__run_test"; */
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     unsigned int   flags = H5C__NO_FLAGS_SET;
@@ -13919,7 +13919,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
         pass = FALSE;
         HDsnprintf(msg, (size_t)128,
-                   "cache_ptr NULL on entry to rename test #%d.",
+                   "cache_ptr NULL on entry to move test #%d.",
                    test_num);
         failure_mssg = msg;
 
@@ -13927,7 +13927,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
         pass = FALSE;
         HDsnprintf(msg, (size_t)128,
-                   "spec_ptr NULL on entry to rename test #%d.",
+                   "spec_ptr NULL on entry to move test #%d.",
                    test_num);
         failure_mssg = msg;
 
@@ -13946,7 +13946,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "bad entry_ptr in rename test #%d.",
+                       "bad entry_ptr in move test #%d.",
                        test_num);
             failure_mssg = msg;
 
@@ -13961,13 +13961,13 @@ check_rename_entry__run_test(H5F_t * file_ptr,
     unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index,
                     (int)(spec_ptr->is_dirty), flags);
 
-    rename_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+    move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
 
     if ( pass ) {
 
-        /* verify that the rename took place, and that the cache's internal
+        /* verify that the move took place, and that the cache's internal
          * structures are as expected.  Note that some sanity checking is
-         * done by rename_entry(), so we don't have to repeat it here.
+         * done by move_entry(), so we don't have to repeat it here.
          */
 
         if ( spec_ptr->is_pinned ) {
@@ -13976,7 +13976,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Pinned entry not pinned after rename in test #%d.",
+                           "Pinned entry not pinned after move in test #%d.",
                            test_num);
                 failure_mssg = msg;
             }
@@ -13995,7 +13995,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
                     pass = FALSE;
                     HDsnprintf(msg, (size_t)128,
-                           "Pinned entry not in pel after rename in test #%d.",
+                           "Pinned entry not in pel after move in test #%d.",
                            test_num);
                     failure_mssg = msg;
                 }
@@ -14009,7 +14009,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
 
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Unpinned entry pinned after rename in test #%d.",
+                           "Unpinned entry pinned after move in test #%d.",
                            test_num);
                 failure_mssg = msg;
             }
@@ -14019,7 +14019,7 @@ check_rename_entry__run_test(H5F_t * file_ptr,
             {
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Entry not at head of LRU after rename in test #%d.",
+                           "Entry not at head of LRU after move in test #%d.",
                            test_num);
                 failure_mssg = msg;
             }
@@ -14027,11 +14027,11 @@ check_rename_entry__run_test(H5F_t * file_ptr,
     }
 
     /* put the entry back where it started from */
-    rename_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
+    move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
 
     return;
 
-} /* check_rename_entry__run_test() */
+} /* check_move_entry__run_test() */
 
 
 /*-------------------------------------------------------------------------
@@ -16071,9 +16071,9 @@ check_duplicate_insert_err(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_rename_err()
+ * Function:	check_move_err()
  *
- * Purpose:	Verify that an attempt to rename an entry to the address
+ * Purpose:	Verify that an attempt to move an entry to the address
  *		of an existing entry will generate an error.
  *
  * Return:	void
@@ -16087,9 +16087,9 @@ check_duplicate_insert_err(void)
  */
 
 static void
-check_rename_err(void)
+check_move_err(void)
 {
-    const char * fcn_name = "check_rename_err()";
+    const char * fcn_name = "check_move_err()";
     herr_t result;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
@@ -16097,11 +16097,11 @@ check_rename_err(void)
     test_entry_t * entry_0_1_ptr;
     test_entry_t * entry_1_0_ptr;
 
-    TESTING("rename to existing entry errors");
+    TESTING("move to existing entry errors");
 
     pass = TRUE;
 
-    /* allocate a cache, and insert several entries.  Try to rename
+    /* allocate a cache, and insert several entries.  Try to move
      * entries to other entries resident in the cache.  This should
      * fail.  Destroy the cache -- should succeed.
      */
@@ -16125,25 +16125,25 @@ check_rename_err(void)
 
     if ( pass ) {
 
-        result = H5C_rename_entry(cache_ptr, &(types[0]),
+        result = H5C_move_entry(cache_ptr, &(types[0]),
                                   entry_0_0_ptr->addr, entry_0_1_ptr->addr);
 
         if ( result >= 0 ) {
 
             pass = FALSE;
-            failure_mssg = "rename to addr of same type succeeded.\n";
+            failure_mssg = "move to addr of same type succeeded.\n";
         }
     }
 
     if ( pass ) {
 
-        result = H5C_rename_entry(cache_ptr, &(types[0]),
+        result = H5C_move_entry(cache_ptr, &(types[0]),
                                   entry_0_0_ptr->addr, entry_1_0_ptr->addr);
 
         if ( result >= 0 ) {
 
             pass = FALSE;
-            failure_mssg = "rename to addr of different type succeeded.\n";
+            failure_mssg = "move to addr of different type succeeded.\n";
         }
     }
 
@@ -16162,7 +16162,7 @@ check_rename_err(void)
 
     return;
 
-} /* check_rename_err() */
+} /* check_move_err() */
 
 
 /*-------------------------------------------------------------------------
@@ -28169,7 +28169,7 @@ main(void)
     check_get_entry_status();
     check_expunge_entry();
     check_multiple_read_protect();
-    check_rename_entry();
+    check_move_entry();
     check_pin_protected_entry();
     check_resize_entry();
     check_evictions_enabled();
@@ -28177,7 +28177,7 @@ main(void)
     check_destroy_pinned_err();
     check_destroy_protected_err();
     check_duplicate_insert_err();
-    check_rename_err();
+    check_move_err();
     check_double_pin_err();
     check_double_unpin_err();
     check_pin_entry_errs();

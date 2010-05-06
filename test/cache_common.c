@@ -1458,8 +1458,8 @@ execute_flush_op(H5F_t * file_ptr,
 		}
 		break;
 
-	    case FLUSH_OP__RENAME:
-		rename_entry(cache_ptr, op_ptr->type, op_ptr->idx,
+	    case FLUSH_OP__MOVE:
+		move_entry(cache_ptr, op_ptr->type, op_ptr->idx,
 			     op_ptr->flag);
 		break;
 
@@ -2804,9 +2804,9 @@ mark_entry_dirty(int32_t type,
 
 
 /*-------------------------------------------------------------------------
- * Function:	rename_entry()
+ * Function:	move_entry()
  *
- * Purpose:	Rename the entry indicated by the type and index to its
+ * Purpose:	move the entry indicated by the type and index to its
  *		main or alternate address as indicated.  If the entry is
  *		already at the desired entry, do nothing.
  *
@@ -2819,7 +2819,7 @@ mark_entry_dirty(int32_t type,
  */
 
 void
-rename_entry(H5C_t * cache_ptr,
+move_entry(H5C_t * cache_ptr,
              int32_t type,
              int32_t idx,
              hbool_t main_addr)
@@ -2848,7 +2848,7 @@ rename_entry(H5C_t * cache_ptr,
 
     if ( entry_ptr->at_main_addr && !main_addr ) {
 
-        /* rename to alt addr */
+        /* move to alt addr */
 
         HDassert( entry_ptr->addr == entry_ptr->main_addr );
 
@@ -2858,7 +2858,7 @@ rename_entry(H5C_t * cache_ptr,
 
     } else if ( !(entry_ptr->at_main_addr) && main_addr ) {
 
-        /* rename to main addr */
+        /* move to main addr */
 
         HDassert( entry_ptr->addr == entry_ptr->alt_addr );
 
@@ -2871,7 +2871,7 @@ rename_entry(H5C_t * cache_ptr,
 
         entry_ptr->is_dirty = TRUE;
 
-        result = H5C_rename_entry(cache_ptr, &(types[type]),
+        result = H5C_move_entry(cache_ptr, &(types[type]),
                                   old_addr, new_addr);
     }
 
@@ -2882,7 +2882,7 @@ rename_entry(H5C_t * cache_ptr,
 	       ( entry_ptr->header.addr != new_addr ) ) ) {
 
             pass = FALSE;
-            failure_mssg = "error in H5C_rename_entry().";
+            failure_mssg = "error in H5C_move_entry().";
 
         } else {
 
@@ -2898,7 +2898,7 @@ rename_entry(H5C_t * cache_ptr,
 
     return;
 
-} /* rename_entry() */
+} /* move_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -3411,7 +3411,7 @@ unprotect_entry_with_size_change(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	row_major_scan_forward()
  *
- * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
+ * Purpose:	Do a sequence of inserts, protects, unprotects, moves,
  *		destroys while scanning through the set of entries.  If
  *		pass is false on entry, do nothing.
  *
@@ -3432,8 +3432,8 @@ row_major_scan_forward(H5F_t * file_ptr,
                        hbool_t display_detailed_stats,
                        hbool_t do_inserts,
                        hbool_t dirty_inserts,
-                       hbool_t do_renames,
-                       hbool_t rename_to_main_addr,
+                       hbool_t do_moves,
+                       hbool_t move_to_main_addr,
                        hbool_t do_destroys,
 		       hbool_t do_mult_ro_protects,
                        int dirty_destroys,
@@ -3507,12 +3507,12 @@ row_major_scan_forward(H5F_t * file_ptr,
             }
 
 
-            if ( ( pass ) && ( do_renames ) && ( (idx + lag - 2) >= 0 ) &&
+            if ( ( pass ) && ( do_moves ) && ( (idx + lag - 2) >= 0 ) &&
                  ( (idx + lag - 2) <= max_indices[type] ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
-                rename_entry(cache_ptr, type, (idx + lag - 2),
-                             rename_to_main_addr);
+                move_entry(cache_ptr, type, (idx + lag - 2),
+                             move_to_main_addr);
             }
 
 
@@ -3831,7 +3831,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	row_major_scan_backward()
  *
- * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
+ * Purpose:	Do a sequence of inserts, protects, unprotects, moves,
  *		destroys while scanning backwards through the set of
  *		entries.  If pass is false on entry, do nothing.
  *
@@ -3852,8 +3852,8 @@ row_major_scan_backward(H5F_t * file_ptr,
                         hbool_t display_detailed_stats,
                         hbool_t do_inserts,
                         hbool_t dirty_inserts,
-                        hbool_t do_renames,
-                        hbool_t rename_to_main_addr,
+                        hbool_t do_moves,
+                        hbool_t move_to_main_addr,
                         hbool_t do_destroys,
 			hbool_t do_mult_ro_protects,
                         int dirty_destroys,
@@ -3921,12 +3921,12 @@ row_major_scan_backward(H5F_t * file_ptr,
             }
 
 
-            if ( ( pass ) && ( do_renames ) && ( (idx - lag + 2) >= 0 ) &&
+            if ( ( pass ) && ( do_moves ) && ( (idx - lag + 2) >= 0 ) &&
                  ( (idx - lag + 2) <= max_indices[type] ) &&
                  ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
-                rename_entry(cache_ptr, type, (idx - lag + 2),
-                             rename_to_main_addr);
+                move_entry(cache_ptr, type, (idx - lag + 2),
+                             move_to_main_addr);
             }
 
 

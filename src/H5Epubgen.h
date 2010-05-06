@@ -172,6 +172,7 @@ H5_DLLVAR hid_t H5E_CANTSHRINK_g;    /* Can't shrink container */
 #define H5E_BADITER          (H5OPEN H5E_BADITER_g)
 #define H5E_CANTPACK         (H5OPEN H5E_CANTPACK_g)
 #define H5E_CANTRESET        (H5OPEN H5E_CANTRESET_g)
+#define H5E_CANTRENAME       (H5OPEN H5E_CANTRENAME_g)
 H5_DLLVAR hid_t H5E_LINKCOUNT_g;     /* Bad object header link count */
 H5_DLLVAR hid_t H5E_VERSION_g;       /* Wrong version number */
 H5_DLLVAR hid_t H5E_ALIGNMENT_g;     /* Alignment error */
@@ -180,6 +181,7 @@ H5_DLLVAR hid_t H5E_CANTDELETE_g;    /* Can't delete message */
 H5_DLLVAR hid_t H5E_BADITER_g;       /* Iteration failed */
 H5_DLLVAR hid_t H5E_CANTPACK_g;      /* Can't pack messages */
 H5_DLLVAR hid_t H5E_CANTRESET_g;     /* Can't reset object */
+H5_DLLVAR hid_t H5E_CANTRENAME_g;    /* Unable to rename object */
 
 /* System level errors */
 #define H5E_SYSERRSTR        (H5OPEN H5E_SYSERRSTR_g)
@@ -255,7 +257,6 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_NOTCACHED        (H5OPEN H5E_NOTCACHED_g)
 #define H5E_SYSTEM           (H5OPEN H5E_SYSTEM_g)
 #define H5E_CANTINS          (H5OPEN H5E_CANTINS_g)
-#define H5E_CANTRENAME       (H5OPEN H5E_CANTRENAME_g)
 #define H5E_CANTPROTECT      (H5OPEN H5E_CANTPROTECT_g)
 #define H5E_CANTUNPROTECT    (H5OPEN H5E_CANTUNPROTECT_g)
 #define H5E_CANTPIN          (H5OPEN H5E_CANTPIN_g)
@@ -271,7 +272,6 @@ H5_DLLVAR hid_t H5E_PROTECT_g;       /* Protected metadata error */
 H5_DLLVAR hid_t H5E_NOTCACHED_g;     /* Metadata not currently cached */
 H5_DLLVAR hid_t H5E_SYSTEM_g;        /* Internal error detected */
 H5_DLLVAR hid_t H5E_CANTINS_g;       /* Unable to insert metadata into cache */
-H5_DLLVAR hid_t H5E_CANTRENAME_g;    /* Unable to rename metadata */
 H5_DLLVAR hid_t H5E_CANTPROTECT_g;   /* Unable to protect metadata */
 H5_DLLVAR hid_t H5E_CANTUNPROTECT_g; /* Unable to unprotect metadata */
 H5_DLLVAR hid_t H5E_CANTPIN_g;       /* Unable to pin cache entry */
@@ -290,7 +290,7 @@ H5_DLLVAR hid_t H5E_CANTRESIZE_g;    /* Unable to resize a metadata cache entry 
 H5_DLLVAR hid_t H5E_TRAVERSE_g;      /* Link traversal failure */
 H5_DLLVAR hid_t H5E_NLINKS_g;        /* Too many soft links in path */
 H5_DLLVAR hid_t H5E_NOTREGISTERED_g; /* Link class not registered */
-H5_DLLVAR hid_t H5E_CANTMOVE_g;      /* Move callback returned error */
+H5_DLLVAR hid_t H5E_CANTMOVE_g;      /* Can't move object */
 H5_DLLVAR hid_t H5E_CANTSORT_g;      /* Can't sort objects */
 
 /* Parallel MPI errors */

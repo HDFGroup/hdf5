@@ -1125,7 +1125,7 @@ done:
  *		H5C_t.
  *
  *		Also reworked function to allow for the possibility that
- *		entries will be dirtied, resized, or renamed during flush
+ *		entries will be dirtied, resized, or moved during flush
  *		callbacks.  As a result, we may have to make multiple
  *		passes through the skip list before the cache is flushed.
  *
@@ -1259,7 +1259,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
 	     *
 	     * To make things more entertaining, with the advent of the
 	     * fractal heap, the entry flush callback can cause entries
-	     * to be dirtied, resized, and/or renamed.
+	     * to be dirtied, resized, and/or moved.
 	     *
 	     * To deal with this, we first make note of the initial
 	     * skip list length and size:
@@ -2804,7 +2804,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_rename_entry
+ * Function:    H5C_move_entry
  *
  * Purpose:     Use this function to notify the cache that an entry's
  *              file address changed.
@@ -2814,36 +2814,10 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM -- 6/6/05
- *		Updated function to force all renamed entries to be
- *		dirty.  This is part of a series of code modifications
- *		moving management of the is_dirty field of
- *		H5C_cache_entry_t into the H5C code.
- *
- *		JRM -- 4/3/06
- *		Updated function to disallow renaming of pinned entries.
- *
- *		JRM -- 4/27/06
- *		Updated function to support renaming of pinned entries.
- *
- *		JRM -- 8/24/06
- *		Updated function to refrain from altering the index, the
- *		replacement policy data structures, and skip list when
- *              the function is called within the flush callback for the
- *              target entry and the target entry is being destroyed.
- *
- *              Note that in this case H5C_flush_single_entry() will handle
- *              all these details for us.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_rename_entry(H5C_t *	     cache_ptr,
+H5C_move_entry(H5C_t *	     cache_ptr,
                  const H5C_class_t * type,
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
@@ -2856,7 +2830,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 #endif /* H5C_DO_SANITY_CHECKS */
     herr_t			ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_rename_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_move_entry, FAIL)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -2886,7 +2860,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
     if ( entry_ptr->is_protected ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
 		    "Target entry is protected.")
     }
 
@@ -2896,12 +2870,12 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
         if ( test_entry_ptr->type == type ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
-                        "Target already renamed & reinserted???.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
+                        "Target already moved & reinserted???.")
 
         } else {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
                         "New address already in use?.")
 
         }
@@ -2912,7 +2886,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
      * new address, mark it as dirty (if it isn't already) and then re-insert.
      *
      * Update the replacement policy for a hit to avoid an eviction before
-     * the renamed entry is touched.  Update stats for a rename.
+     * the moved entry is touched.  Update stats for a move.
      *
      * Note that we do not check the size of the cache, or evict anything.
      * Since this is a simple re-name, cache size should be unaffected.
@@ -2976,11 +2950,11 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
-            H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty, FAIL)
+            H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL)
 	}
     }
 
-    H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
 
 done:
 
@@ -2994,7 +2968,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C_rename_entry() */
+} /* H5C_move_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -4144,9 +4118,9 @@ H5C_stats(H5C_t * cache_ptr,
     int64_t     total_clears = 0;
     int64_t     total_flushes = 0;
     int64_t     total_evictions = 0;
-    int64_t     total_renames = 0;
-    int64_t     total_entry_flush_renames = 0;
-    int64_t     total_cache_flush_renames = 0;
+    int64_t     total_moves = 0;
+    int64_t     total_entry_flush_moves = 0;
+    int64_t     total_cache_flush_moves = 0;
     int64_t	total_size_increases = 0;
     int64_t	total_size_decreases = 0;
     int64_t	total_entry_flush_size_changes = 0;
@@ -4195,11 +4169,11 @@ H5C_stats(H5C_t * cache_ptr,
         total_clears            += cache_ptr->clears[i];
         total_flushes           += cache_ptr->flushes[i];
         total_evictions         += cache_ptr->evictions[i];
-        total_renames           += cache_ptr->renames[i];
-	total_entry_flush_renames
-				+= cache_ptr->entry_flush_renames[i];
-	total_cache_flush_renames
-				+= cache_ptr->cache_flush_renames[i];
+        total_moves           += cache_ptr->moves[i];
+	total_entry_flush_moves
+				+= cache_ptr->entry_flush_moves[i];
+	total_cache_flush_moves
+				+= cache_ptr->cache_flush_moves[i];
         total_size_increases    += cache_ptr->size_increases[i];
         total_size_decreases    += cache_ptr->size_decreases[i];
     	total_entry_flush_size_changes
@@ -4347,17 +4321,17 @@ H5C_stats(H5C_t * cache_ptr,
               (long)total_evictions);
 
     HDfprintf(stdout,
-	      "%s  Total insertions(pinned) / renames = %ld(%ld) / %ld\n",
+	      "%s  Total insertions(pinned) / moves = %ld(%ld) / %ld\n",
               cache_ptr->prefix,
               (long)total_insertions,
               (long)total_pinned_insertions,
-              (long)total_renames);
+              (long)total_moves);
 
     HDfprintf(stdout,
-	      "%s  Total entry / cache flush renames  = %ld / %ld\n",
+	      "%s  Total entry / cache flush moves  = %ld / %ld\n",
               cache_ptr->prefix,
-              (long)total_entry_flush_renames,
-              (long)total_cache_flush_renames);
+              (long)total_entry_flush_moves,
+              (long)total_cache_flush_moves);
 
     HDfprintf(stdout, "%s  Total entry size incrs / decrs     = %ld / %ld\n",
               cache_ptr->prefix,
@@ -4441,17 +4415,17 @@ H5C_stats(H5C_t * cache_ptr,
                       (long)(cache_ptr->evictions[i]));
 
             HDfprintf(stdout,
-                      "%s    insertions(pinned) / renames   = %ld(%ld) / %ld\n",
+                      "%s    insertions(pinned) / moves   = %ld(%ld) / %ld\n",
                       cache_ptr->prefix,
                       (long)(cache_ptr->insertions[i]),
                       (long)(cache_ptr->pinned_insertions[i]),
-                      (long)(cache_ptr->renames[i]));
+                      (long)(cache_ptr->moves[i]));
 
             HDfprintf(stdout,
-                      "%s    entry / cache flush renames    = %ld / %ld\n",
+                      "%s    entry / cache flush moves    = %ld / %ld\n",
                       cache_ptr->prefix,
-                      (long)(cache_ptr->entry_flush_renames[i]),
-                      (long)(cache_ptr->cache_flush_renames[i]));
+                      (long)(cache_ptr->entry_flush_moves[i]),
+                      (long)(cache_ptr->cache_flush_moves[i]));
 
             HDfprintf(stdout,
                       "%s    size increases / decreases     = %ld / %ld\n",
@@ -4583,9 +4557,9 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
         cache_ptr->clears[i]			= 0;
         cache_ptr->flushes[i]			= 0;
         cache_ptr->evictions[i]	 		= 0;
-        cache_ptr->renames[i]	 		= 0;
-        cache_ptr->entry_flush_renames[i]	= 0;
-        cache_ptr->cache_flush_renames[i]	= 0;
+        cache_ptr->moves[i]	 		= 0;
+        cache_ptr->entry_flush_moves[i]	= 0;
+        cache_ptr->cache_flush_moves[i]	= 0;
         cache_ptr->pins[i]	 		= 0;
         cache_ptr->unpins[i]	 		= 0;
         cache_ptr->dirty_pins[i]	 	= 0;
@@ -6753,7 +6727,7 @@ done:
  * Modifications:
  *
  *		To support the fractal heap, the cache must now deal with
- *		entries being dirtied, resized, and/or renamed inside
+ *		entries being dirtied, resized, and/or moved inside
  *		flush callbacks.  Updated function to support this.
  *
  *		                                     -- JRM 8/27/06
@@ -6837,14 +6811,14 @@ H5C_flush_invalidate_cache(const H5F_t * f,
      * unpin themselves, or until the number of pinned entries stops
      * declining.  In this later case, we scream and die.
      *
-     * Since the fractal heap can dirty, resize, and/or rename entries
+     * Since the fractal heap can dirty, resize, and/or move entries
      * in is flush callback, it is possible that the cache will still
      * contain dirty entries at this point.  If so, we must make up to
      * H5C__MAX_PASSES_ON_FLUSH more passes through the skip list
      * to allow it to empty.  If is is not empty at this point, we again
      * scream and die.
      *
-     * Further, since clean entries can be dirtied, resized, and/or renamed
+     * Further, since clean entries can be dirtied, resized, and/or moved
      * as the result of a flush call back (either the entries own, or that
      * for some other cache entry), we can no longer promise to flush
      * the cache entries in increasing address order.
@@ -6915,7 +6889,7 @@ H5C_flush_invalidate_cache(const H5F_t * f,
         initial_slist_size = cache_ptr->slist_size;
 
         /* There is also the possibility that entries will be
-         * dirtied, resized, and/or renamed as the result of
+         * dirtied, resized, and/or moved as the result of
          * calls to the flush callbacks.  We use the slist_len_increase
          * and slist_size_increase increase fields in struct H5C_t
          * to track these changes for purpose of sanity checking.
@@ -7350,7 +7324,7 @@ done:
  *
  *		Also added flush_flags parameter to the call to
  *		type_ptr->flush() so that the flush routine can report
- *		whether the entry has been resized or renamed.  Added
+ *		whether the entry has been resized or moved.  Added
  *		code using the flush_flags variable to detect the case
  *		in which the target entry is resized during flush, and
  *		update the caches data structures accordingly.
@@ -7517,8 +7491,8 @@ H5C_flush_single_entry(const H5F_t *	   f,
          * We must do deletions now as the callback routines will free the
          * entry if destroy is true.
 	 *
-	 * Note that it is possible that the entry will be renamed during
-	 * its call to flush.  This will upset H5C_rename_entry() if we
+	 * Note that it is possible that the entry will be moved during
+	 * its call to flush.  This will upset H5C_move_entry() if we
 	 * don't tell it that it doesn't have to worry about updating the
 	 * index and SLIST.  Use the destroy_in_progress field for this
 	 * purpose.
@@ -7760,9 +7734,9 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		 * change this test accordingly.
 		 *
 		 * NB: While this test detects entryies that attempt
-		 *     to resize or rename themselves during a flush
+		 *     to resize or move themselves during a flush
 		 *     in the parallel case, it will not detect an
-		 *     entry that dirties, resizes, and/or renames
+		 *     entry that dirties, resizes, and/or moves
 		 *     other entries during its flush.
 		 *
 		 *     From what Quincey tells me, this test is
@@ -7775,7 +7749,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		if ( cache_ptr->aux_ptr != NULL ) {
 
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		        "resize/rename in serialize occured in parallel case.")
+		        "resize/move in serialize occured in parallel case.")
 
 		}
 	    }
@@ -7846,9 +7820,9 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		}
 	    }
 
-	    if ( (flush_flags & H5C_CALLBACK__RENAMED_FLAG) != 0 ) {
+	    if ( (flush_flags & H5C_CALLBACK__MOVED_FLAG) != 0 ) {
 
-		/* The entry was renamed as the result of the flush.
+		/* The entry was moved as the result of the flush.
 		 *
 		 * Most likely, the entry was compressed, and the
 		 * new version is larger than the old and thus had
