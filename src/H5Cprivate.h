@@ -544,10 +544,10 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  * 		This field is set to FALSE in the protect call, and may
  * 		be set to TRUE by the
- * 		H5C_mark_pinned_or_protected_entry_dirty()
+ * 		H5C_mark_entry_dirty()
  * 		call at an time prior to the unprotect call.
  *
- * 		The H5C_mark_pinned_or_protected_entry_dirty() call exists
+ * 		The H5C_mark_entry_dirty() call exists
  * 		as a convenience function for the fractal heap code which
  * 		may not know if an entry is protected or pinned, but knows
  * 		that is either protected or pinned.  The dirtied field was
@@ -1399,11 +1399,7 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *  f,
                                         int32_t  ce_array_len,
                                         haddr_t *ce_array_ptr);
 
-H5_DLL herr_t H5C_mark_pinned_entry_dirty(void *  thing,
-					  hbool_t size_changed,
-					  size_t  new_size);
-
-H5_DLL herr_t H5C_mark_pinned_or_protected_entry_dirty(void *thing);
+H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 
 H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,

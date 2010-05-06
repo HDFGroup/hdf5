@@ -335,7 +335,7 @@ H5HF_iblock_dirty(H5HF_indirect_t *iblock)
     HDassert(iblock);
 
     /* Mark indirect block as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(iblock) < 0)
+    if(H5AC_mark_entry_dirty(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap indirect block as dirty")
 
 done:

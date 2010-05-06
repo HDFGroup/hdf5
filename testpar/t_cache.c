@@ -374,11 +374,8 @@ void lock_and_unlock_random_entries(H5C_t * cache_ptr, H5F_t * file_ptr,
 void lock_and_unlock_random_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                                   int min_idx, int max_idx);
 void lock_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx);
-void mark_pinned_entry_dirty(H5C_t * cache_ptr, H5F_t * file_ptr,
-                int32_t idx, hbool_t size_changed, size_t new_size);
-void mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
-                                          H5F_t * file_ptr,
-                                          int32_t idx);
+void mark_entry_dirty(H5C_t * cache_ptr, H5F_t * file_ptr,
+                int32_t idx);
 void pin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
 	       hbool_t global, hbool_t dirty);
 void pin_protected_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
@@ -2724,7 +2721,7 @@ lock_entry(H5C_t * cache_ptr,
 
 
 /*****************************************************************************
- * Function:    mark_pinned_entry_dirty()
+ * Function:    mark_entry_dirty()
  *
  * Purpose:     Mark dirty the entry indicated by the index,
  *
@@ -2735,18 +2732,14 @@ lock_entry(H5C_t * cache_ptr,
  * Programmer:  John Mainzer
  *              4/14/06
  *
- * Modifications:
- *
  *****************************************************************************/
 
 void
-mark_pinned_entry_dirty(H5C_t * cache_ptr,
+mark_entry_dirty(H5C_t * cache_ptr,
                         H5F_t * file_ptr,
-                        int32_t idx,
-	                hbool_t size_changed,
-	                size_t new_size)
+                        int32_t idx)
 {
-    const char * fcn_name = "mark_pinned_entry_dirty()";
+    const char * fcn_name = "mark_entry_dirty()";
     herr_t result;
     struct datum * entry_ptr;
 
@@ -2765,16 +2758,14 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-	result = H5AC_mark_pinned_entry_dirty( (void *)entry_ptr,
-                                              size_changed,
-                                              new_size);
+	result = H5AC_mark_entry_dirty( (void *)entry_ptr);
 
         if ( result < 0 ) {
 
             nerrors++;
             if ( verbose ) {
 	        HDfprintf(stdout,
-                          "%d:%s: error in H5AC_mark_pinned_entry_dirty().\n",
+                          "%d:%s: error in H5AC_mark_entry_dirty().\n",
                           world_mpi_rank, fcn_name);
             }
         }
@@ -2786,69 +2777,7 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
     return;
 
-} /* mark_pinned_entry_dirty() */
-
-
-/*****************************************************************************
- * Function:    mark_pinned_or_protected_entry_dirty()
- *
- * Purpose:     Use the H5AC_mark_pinned_or_protected_entry_dirty() call to
- * 		mark dirty the entry indicated by the index,
- *
- *              Do nothing if nerrors is non-zero on entry.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              5/18/06
- *
- * Modifications:
- *
- *****************************************************************************/
-
-void
-mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
-                                     H5F_t * file_ptr,
-                                     int32_t idx)
-{
-    const char * fcn_name = "mark_pinned_or_protected_entry_dirty()";
-    herr_t result;
-    struct datum * entry_ptr;
-
-    if ( nerrors == 0 ) {
-
-        HDassert( file_ptr );
-        HDassert( cache_ptr );
-        HDassert( ( 0 <= idx ) && ( idx < NUM_DATA_ENTRIES ) );
-        HDassert( idx < virt_num_data_entries );
-
-        entry_ptr = &(data[idx]);
-
-	HDassert ( entry_ptr->locked || entry_ptr->global_pinned );
-
-        (entry_ptr->ver)++;
-        entry_ptr->dirty = TRUE;
-
-	result = H5AC_mark_pinned_or_protected_entry_dirty( (void *)entry_ptr);
-
-        if ( result < 0 ) {
-
-            nerrors++;
-            if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: error in %s.\n",
-                          world_mpi_rank, fcn_name,
-			  "H5AC_mark_pinned_or_protected_entry_dirty()");
-            }
-        }
-	else if ( ! ( entry_ptr->locked ) )
-	{
-	    global_dirty_pins++;
-	}
-    }
-
-    return;
-
-} /* mark_pinned_or_protected_entry_dirty() */
+} /* mark_entry_dirty() */
 
 
 /*****************************************************************************
@@ -3773,8 +3702,7 @@ unpin_entry(H5C_t * cache_ptr,
 
 	    if ( dirty ) {
 
-		mark_pinned_entry_dirty(cache_ptr, file_ptr, idx, FALSE,
-				        (size_t)0);
+		mark_entry_dirty(cache_ptr, file_ptr, idx);
 
 	    }
 
@@ -5131,8 +5059,7 @@ smoke_check_4(void)
  * Function:	smoke_check_5()
  *
  * Purpose:	Similar to smoke check 1, but modified to verify that
- * 		H5AC_mark_pinned_or_protected_entry_dirty() works in
- * 		the parallel case.
+ * 		H5AC_mark_entry_dirty() works in the parallel case.
  *
  * Return:	Success:	TRUE
  *
@@ -5269,7 +5196,7 @@ smoke_check_5(void)
 	            HDfprintf(stdout, "%d:(mpoped %d)\n", world_mpi_rank, i);
 	            fflush(stdout);
                 }
-		mark_pinned_or_protected_entry_dirty(cache_ptr, file_ptr, i);
+		mark_entry_dirty(cache_ptr, file_ptr, i);
 	    }
 
 	    if ( show_detailed_progress )
@@ -5326,15 +5253,9 @@ smoke_check_5(void)
 		}
 
 		if ( i % 4 == 0 )
-		{
-		    mark_pinned_or_protected_entry_dirty(cache_ptr,
-				                         file_ptr, i);
-		}
+		    mark_entry_dirty(cache_ptr, file_ptr, i);
 		else
-		{
-		    mark_pinned_entry_dirty(cache_ptr, file_ptr, i,
-				            FALSE, (size_t)0);
-                }
+		    mark_entry_dirty(cache_ptr, file_ptr, i);
 
 		if ( i % 8 <= 4 ) {
 
@@ -5458,8 +5379,7 @@ smoke_check_5(void)
  *
  *                    - H5AC_flush()
  *                    - H5AC_set()
- *                    - H5AC_mark_pinned_entry_dirty()
- *                    - H5AC_mark_pinned_or_protected_entry_dirty()
+ *                    - H5AC_mark_entry_dirty()
  *                      H5AC_rename()
  *                    - H5AC_pin_protected_entry()
  *                    - H5AC_protect()
@@ -5506,7 +5426,7 @@ trace_file_check(void)
       "H5AC_set 0x404 4 16 0x0 4 0\n",
       "H5AC_set 0x408 6 16 0x0 6 0\n",
       "H5AC_protect 0x400 2 16 H5AC_WRITE 2 1\n",
-      "H5AC_mark_pinned_or_protected_entry_dirty 0x400 0\n",
+      "H5AC_mark_entry_dirty 0x400 0\n",
       "H5AC_unprotect 0x400 16 2 0 0\n",
       "H5AC_protect 0x402 2 16 H5AC_WRITE 2 1\n",
       "H5AC_pin_protected_entry 0x402 0\n",
@@ -5516,7 +5436,7 @@ trace_file_check(void)
       "H5AC_protect 0x404 4 16 H5AC_WRITE 4 1\n",
       "H5AC_pin_protected_entry 0x404 0\n",
       "H5AC_unprotect 0x404 16 4 0 0\n",
-      "H5AC_mark_pinned_entry_dirty 0x404 0 0 0\n",
+      "H5AC_mark_entry_dirty 0x404 0\n",
       "H5AC_resize_pinned_entry 0x404 2 0\n",
       "H5AC_resize_pinned_entry 0x404 4 0\n",
       "H5AC_unpin_entry 0x404 0\n",
@@ -5612,7 +5532,7 @@ trace_file_check(void)
 	insert_entry(cache_ptr, file_ptr, 3, H5AC__NO_FLAGS_SET);
 
 	lock_entry(cache_ptr, file_ptr, 0);
-	mark_pinned_or_protected_entry_dirty(cache_ptr, file_ptr, 0);
+	mark_entry_dirty(cache_ptr, file_ptr, 0);
 	unlock_entry(cache_ptr, file_ptr, 0, H5AC__NO_FLAGS_SET);
 
 	lock_entry(cache_ptr, file_ptr, 1);
@@ -5625,7 +5545,7 @@ trace_file_check(void)
 	lock_entry(cache_ptr, file_ptr, 2);
         pin_protected_entry(cache_ptr, file_ptr, 2, TRUE);
 	unlock_entry(cache_ptr, file_ptr, 2, H5AC__NO_FLAGS_SET);
-	mark_pinned_entry_dirty(cache_ptr, file_ptr, 2, FALSE, 0);
+	mark_entry_dirty(cache_ptr, file_ptr, 2);
         resize_entry(cache_ptr, file_ptr, 2, data[2].len / 2);
         resize_entry(cache_ptr, file_ptr, 2, data[2].len);
         unpin_entry(cache_ptr, file_ptr, 2, TRUE, FALSE, FALSE);

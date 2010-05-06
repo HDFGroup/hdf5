@@ -618,7 +618,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         oh->flags |= new_size_flags;
 
         /* Mark object header as dirty in cache */
-        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+        if(H5AC_mark_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 
@@ -1120,7 +1120,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, UFAIL, "can't split null message")
 
     /* Mark object header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+    if(H5AC_mark_entry_dirty(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, UFAIL, "unable to mark object header as dirty")
 
     /* Set return value */

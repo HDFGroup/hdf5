@@ -379,7 +379,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
             fspace->alloc_sect_size = fspace->sect_size = 0;
 
             /* Mark free space header as dirty */
-            if(H5AC_mark_pinned_or_protected_entry_dirty(fspace) < 0)
+            if(H5AC_mark_entry_dirty(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
             /* Evict the section info from the metadata cache */

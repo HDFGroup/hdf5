@@ -3669,7 +3669,7 @@ mdj_smoke_check_00(hbool_t human_readable,
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
-    /* e-2) ... then use the H5C_mark_pinned_or_protected_entry_dirty()
+    /* e-2) ... then use the H5C_mark_entry_dirty()
      *      call to mark a variety of protected, pinned, and pinned and 
      *      protected entries dirty.  Also rename some pinned entries.
      */
@@ -3683,12 +3683,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 8);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 9);
 
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 0);
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 1);
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 2);
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 3);
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 6);
-    mark_pinned_or_protected_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 7);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 0);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 1);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 2);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 3);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 6);
+    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 7);
 
     rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
     rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
@@ -3814,8 +3814,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
 
     /* f-2) Now resize a selection of pinned and unpinned entries via 
-     *      protect/unprotect pairs, H5C_resize_pinned_entry() and 
-     *      H5C_mark_pinned_entry_dirty().
+     *      protect/unprotect pairs and H5C_resize_pinned_entry().
      */
 
 
@@ -3847,10 +3846,10 @@ mdj_smoke_check_00(hbool_t human_readable,
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, 
 		         ((VARIABLE_ENTRY_SIZE / 16) * 10));
 
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE,
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 		             ((VARIABLE_ENTRY_SIZE / 16) * 9));
 
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 		             ((VARIABLE_ENTRY_SIZE / 16) * 8));
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)7, "transaction 7.2");
@@ -3912,11 +3911,11 @@ mdj_smoke_check_00(hbool_t human_readable,
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
 
     rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 		             VARIABLE_ENTRY_SIZE);
 
     rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 		             VARIABLE_ENTRY_SIZE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)8, "transaction 8.2");
@@ -3980,12 +3979,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
 
     rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE, 
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 		             VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
 
     rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
-    mark_pinned_entry_dirty(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE,
+    resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 		             VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
 

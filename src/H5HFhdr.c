@@ -713,7 +713,7 @@ H5HF_hdr_dirty(H5HF_hdr_t *hdr)
     } /* end if */
 
     /* Mark header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)
+    if(H5AC_mark_entry_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
 
     /* Set the dirty flags for the heap header */
