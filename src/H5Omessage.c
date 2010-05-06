@@ -1328,7 +1328,7 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
         /* Mark object header as dirty in cache */
-        if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+        if(H5AC_mark_entry_dirty(oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
 

@@ -479,7 +479,7 @@ H5B2_hdr_dirty(H5B2_hdr_t *hdr)
     HDassert(hdr);
 
     /* Mark B-tree header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)
+    if(H5AC_mark_entry_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark v2 B-tree header as dirty")
 
 done:

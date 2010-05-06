@@ -183,13 +183,13 @@ typedef struct flush_op
 					 * FLUSH_OP__DIRTY: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be dirtied via the
-					 *   H5C_mark_pinned_entry_dirty()
+					 *   H5C_mark_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RESIZE: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be resized via the
-					 *   H5C_mark_pinned_entry_dirty()
+					 *   H5C_mark_entry_dirty()
 					 *   call.
 					 *
 					 * FLUSH_OP__RENAME: TRUE iff the
@@ -667,13 +667,8 @@ void insert_entry(H5F_t * file_ptr,
                   hbool_t dirty,
                   unsigned int flags);
 
-void mark_pinned_entry_dirty(int32_t type,
-		             int32_t idx,
-		             hbool_t size_changed,
-		             size_t  new_size);
-
-void mark_pinned_or_protected_entry_dirty(int32_t type,
-                                          int32_t idx);
+void mark_entry_dirty(int32_t type,
+		              int32_t idx);
 
 void rename_entry(H5C_t * cache_ptr,
                   int32_t type,
