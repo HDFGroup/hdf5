@@ -1017,7 +1017,7 @@ H5C_journal_transaction(H5F_t * f,
 	        resized = 
 		    (hbool_t)((serialize_flags & H5C__SERIALIZE_RESIZED_FLAG) != 0);
 	        renamed = 
-                    (hbool_t)((serialize_flags & H5C__SERIALIZE_RENAMED_FLAG) != 0);
+                    (hbool_t)((serialize_flags & H5C__SERIALIZE_MOVED_FLAG) != 0);
 
 	        if ( ( renamed ) && ( ! resized ) ) {
 
@@ -1058,13 +1058,13 @@ H5C_journal_transaction(H5F_t * f,
 
 	        if ( renamed ) {
 
-                    result = H5C_rename_entry(cache_ptr, entry_ptr->type,
+                    result = H5C_move_entry(cache_ptr, entry_ptr->type,
 				               entry_ptr->addr, new_addr);
 
                     if ( result < 0 ) {
 
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                    "H5C_rename_entr() failed.")
+                                    "H5C_move_entry() failed.")
                     }
                 }
             }

@@ -214,7 +214,7 @@ typedef struct H5C_t H5C_t;
  *	However, that need not be the case as fractal heap blocks can
  *	change size (and therefor possible location as well) on
  *	serialization if compression is enabled.  In the old H5C code,
- *	this happened on a flush, and occasioned a rename in the midst
+ *	this happened on a flush, and occasioned a move in the midst
  *	of the flush.  To avoid this in H5C, the serialize callback
  *	will return the new base address, length, and image pointer to
  *	the caller when necessary.  The caller must then update the
@@ -274,28 +274,28 @@ typedef struct H5C_t H5C_t;
  *		addr and len given above.
  *
  *	flags_ptr:  Pointer to an unsigned integer used to return flags
- *		indicating whether the resize function resized or renamed
- *		the entry.  If the entry was neither resized or renamed,
+ *		indicating whether the resize function resized or moved
+ *		the entry.  If the entry was neither resized or moved,
  *		the serialize function must set *flags_ptr to zero. 
- *		H5C__SERIALIZE_RESIZED_FLAG and H5C__SERIALIZE_RENAMED_FLAG
- *		must be set to indicate a resize and a rename respectively.
+ *		H5C__SERIALIZE_RESIZED_FLAG and H5C__SERIALIZE_MOVED_FLAG
+ *		must be set to indicate a resize and a move respectively.
  *
  *	        If the H5C__SERIALIZE_RESIZED_FLAG is set, the new length
  *	        and image pointer must be stored in *new_len_ptr and
  *	        *new_image_ptr_ptr respectively. 
  *
- *	        If the H5C__SERIALIZE_RENAMED_FLAG flag is also set, the
+ *	        If the H5C__SERIALIZE_MOVED_FLAG flag is also set, the
  *	        new image base address must be stored in *new_addr_ptr. 
- *	        Observe that the H5C__SERIALIZE_RENAMED_FLAG must not
+ *	        Observe that the H5C__SERIALIZE_MOVED_FLAG must not
  *	        appear without the H5C__SERIALIZE_RESIZED_FLAG. 
  *
  *	        Except as noted above, the locations pointed to by the
  *	        remaining parameters are undefined, and should be ignored
  *	        by the caller. 
  *
- *	new_addr_ptr:  Pointer to haddr_t.  If the entry is renamed by
+ *	new_addr_ptr:  Pointer to haddr_t.  If the entry is moved by
  *		the serialize function, the new on disk base address must
- *		be stored in *new_addr_ptr.  If the entry is not renamed
+ *		be stored in *new_addr_ptr.  If the entry is not moved
  *		by the serialize function, *new_addr_ptr is undefined. 
  *
  *	new_len_ptr:  Pointer to size_t.  If the entry is resized by the
@@ -328,7 +328,7 @@ typedef struct H5C_t H5C_t;
  *
  *	If in addition, the base address of the on disk image must
  *	be changed, the serialize function must also set *new_addr_ptr
- *	to the new base address, and set the H5C__SERIALIZE_RENAMED_FLAG
+ *	to the new base address, and set the H5C__SERIALIZE_MOVED_FLAG
  *	in *flags_ptr.
  *
  *	If it is successful, the function must return SUCCEED. 
@@ -380,7 +380,7 @@ typedef herr_t (*H5C_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
 
 #define H5C__SERIALIZE_RESIZED_FLAG	0x1
-#define H5C__SERIALIZE_RENAMED_FLAG	0x2
+#define H5C__SERIALIZE_MOVED_FLAG	0x2
 
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 		                        hid_t dxpl_id,
@@ -1401,7 +1401,7 @@ H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *  f,
 
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 
-H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
+H5_DLL herr_t H5C_move_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);

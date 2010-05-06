@@ -116,7 +116,7 @@ typedef enum {
  */
 
 #define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
-#define H5AC__SERIALIZE_RENAMED_FLAG	H5C__SERIALIZE_RENAMED_FLAG
+#define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
 
 typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
 typedef H5C_image_len_func_t		H5AC_image_len_func_t;
@@ -315,7 +315,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
 			     size_t new_size, void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
-H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
+H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);

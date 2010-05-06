@@ -109,6 +109,7 @@ hid_t H5E_CANTDELETE_g     = FAIL;      /* Can't delete message */
 hid_t H5E_BADITER_g        = FAIL;      /* Iteration failed */
 hid_t H5E_CANTPACK_g       = FAIL;      /* Can't pack messages */
 hid_t H5E_CANTRESET_g      = FAIL;      /* Can't reset object */
+hid_t H5E_CANTRENAME_g     = FAIL;      /* Unable to rename object */
 
 /* System level errors */
 hid_t H5E_SYSERRSTR_g      = FAIL;      /* System error message */
@@ -157,7 +158,6 @@ hid_t H5E_PROTECT_g        = FAIL;      /* Protected metadata error */
 hid_t H5E_NOTCACHED_g      = FAIL;      /* Metadata not currently cached */
 hid_t H5E_SYSTEM_g         = FAIL;      /* Internal error detected */
 hid_t H5E_CANTINS_g        = FAIL;      /* Unable to insert metadata into cache */
-hid_t H5E_CANTRENAME_g     = FAIL;      /* Unable to rename metadata */
 hid_t H5E_CANTPROTECT_g    = FAIL;      /* Unable to protect metadata */
 hid_t H5E_CANTUNPROTECT_g  = FAIL;      /* Unable to unprotect metadata */
 hid_t H5E_CANTPIN_g        = FAIL;      /* Unable to pin cache entry */
@@ -172,7 +172,7 @@ hid_t H5E_CANTJOURNAL_g    = FAIL;      /* Unable to write to journal file */
 hid_t H5E_TRAVERSE_g       = FAIL;      /* Link traversal failure */
 hid_t H5E_NLINKS_g         = FAIL;      /* Too many soft links in path */
 hid_t H5E_NOTREGISTERED_g  = FAIL;      /* Link class not registered */
-hid_t H5E_CANTMOVE_g       = FAIL;      /* Move callback returned error */
+hid_t H5E_CANTMOVE_g       = FAIL;      /* Can't move object */
 hid_t H5E_CANTSORT_g       = FAIL;      /* Can't sort objects */
 
 /* Parallel MPI errors */

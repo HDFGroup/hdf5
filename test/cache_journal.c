@@ -101,8 +101,8 @@ static void jrnl_row_major_scan_backward(H5F_t * file_ptr,
                                           hbool_t display_detailed_stats,
                                           hbool_t do_inserts,
                                           hbool_t dirty_inserts,
-                                          hbool_t do_renames,
-                                          hbool_t rename_to_main_addr,
+                                          hbool_t do_moves,
+                                          hbool_t move_to_main_addr,
                                           hbool_t do_destroys,
 			                  hbool_t do_mult_ro_protects,
                                           int dirty_destroys,
@@ -118,8 +118,8 @@ static void jrnl_row_major_scan_forward(H5F_t * file_ptr,
                                          hbool_t display_detailed_stats,
                                          hbool_t do_inserts,
                                          hbool_t dirty_inserts,
-                                         hbool_t do_renames,
-                                         hbool_t rename_to_main_addr,
+                                         hbool_t do_moves,
+                                         hbool_t move_to_main_addr,
                                          hbool_t do_destroys,
 		                         hbool_t do_mult_ro_protects,
                                          int dirty_destroys,
@@ -1016,7 +1016,7 @@ jrnl_col_major_scan_forward(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	jrnl_row_major_scan_backward()
  *
- * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
+ * Purpose:	Do a sequence of inserts, protects, unprotects, moves,
  *		destroys broken into transactions while scanning backwards 
  *		through the set of entries.  
  *
@@ -1047,8 +1047,8 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                               hbool_t display_detailed_stats,
                               hbool_t do_inserts,
                               hbool_t dirty_inserts,
-                              hbool_t do_renames,
-                              hbool_t rename_to_main_addr,
+                              hbool_t do_moves,
+                              hbool_t move_to_main_addr,
                               hbool_t do_destroys,
 			      hbool_t do_mult_ro_protects,
                               int dirty_destroys,
@@ -1160,7 +1160,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                 }
 
 
-                if ( ( pass ) && ( do_renames ) && 
+                if ( ( pass ) && ( do_moves ) && 
 		     ( (idx - lag + 2) >= 0 ) &&
 		     ( (idx - lag + 2) >= lower_bound ) &&
                      ( (idx - lag + 2) <= local_max_index ) &&
@@ -1170,10 +1170,10 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(r, %d, %d, %d) ", 
 			          type, (idx - lag + 2), 
-				  (int)rename_to_main_addr);
+				  (int)move_to_main_addr);
 
-                    rename_entry(cache_ptr, type, (idx - lag + 2),
-                                  rename_to_main_addr);
+                    move_entry(cache_ptr, type, (idx - lag + 2),
+                                  move_to_main_addr);
                 }
 
 
@@ -1449,7 +1449,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	jrnl_row_major_scan_forward()
  *
- * Purpose:	Do a sequence of inserts, protects, unprotects, renames,
+ * Purpose:	Do a sequence of inserts, protects, unprotects, moves,
  *		and destroys broken into transactions while scanning 
  *		through the set of entries. 
  *
@@ -1480,8 +1480,8 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
                              hbool_t dirty_inserts,
-                             hbool_t do_renames,
-                             hbool_t rename_to_main_addr,
+                             hbool_t do_moves,
+                             hbool_t move_to_main_addr,
                              hbool_t do_destroys,
 		             hbool_t do_mult_ro_protects,
                              int dirty_destroys,
@@ -1597,7 +1597,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
                 }
 
 
-                if ( ( pass ) && ( do_renames ) && 
+                if ( ( pass ) && ( do_moves ) && 
 		     ( (idx + lag - 2) >= 0 ) &&
 		     ( (idx + lag - 2) >= lower_bound ) &&
                      ( (idx + lag - 2) <= local_max_index ) &&
@@ -1607,11 +1607,11 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "4(r, %d, %d, %d) ", 
 			          type, (idx + lag - 2), 
-				  (int)rename_to_main_addr);
+				  (int)move_to_main_addr);
 
-		    /*** rename entry idx + lag -2 ***/
-                    rename_entry(cache_ptr, type, (idx + lag - 2),
-                                  rename_to_main_addr);
+		    /*** move entry idx + lag -2 ***/
+                    move_entry(cache_ptr, type, (idx + lag - 2),
+                                  move_to_main_addr);
                 }
 
 
@@ -3539,7 +3539,7 @@ mdj_smoke_check_00(hbool_t human_readable,
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass, cp++);
 
 
-    /* d) Mix up some protect/unprotect calls with renames.  Do this with
+    /* d) Mix up some protect/unprotect calls with moves.  Do this with
      *    different orders to make things interesting.
      */
 
@@ -3558,8 +3558,8 @@ mdj_smoke_check_00(hbool_t human_readable,
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
     unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, TRUE, H5C__NO_FLAGS_SET);
 
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, FALSE);
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, FALSE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, FALSE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, FALSE);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.2");
 
@@ -3583,8 +3583,8 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.2");
 
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, TRUE);
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, TRUE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, TRUE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, TRUE);
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
     unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
@@ -3671,7 +3671,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     /* e-2) ... then use the H5C_mark_entry_dirty()
      *      call to mark a variety of protected, pinned, and pinned and 
-     *      protected entries dirty.  Also rename some pinned entries.
+     *      protected entries dirty.  Also move some pinned entries.
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)4, "transaction 4.2");
@@ -3690,8 +3690,8 @@ mdj_smoke_check_00(hbool_t human_readable,
     mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 6);
     mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 7);
 
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
 
     unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
     unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
@@ -3723,7 +3723,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
 
     /* e-3) ...finally, upin all the pinned entries, with an undo of the
-     *      previous rename in the middle.
+     *      previous move in the middle.
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)5, "transaction 5.2");
@@ -3732,8 +3732,8 @@ mdj_smoke_check_00(hbool_t human_readable,
     unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
     unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
 
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, TRUE);
-    rename_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, TRUE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, TRUE);
+    move_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, TRUE);
 
     unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
     unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
@@ -3875,46 +3875,46 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     
 
-    /* f-3) Now put all the sizes back, and also rename all the entries. */
+    /* f-3) Now put all the sizes back, and also move all the entries. */
 
 
     begin_trans(cache_ptr, verbose, (uint64_t)8, "transaction 8.2");
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
 		                    H5C__SIZE_CHANGED_FLAG, 
 				    VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
 		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
 		                      H5C__SIZE_CHANGED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
 		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 				      VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, FALSE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 		             VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, FALSE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 		             VARIABLE_ENTRY_SIZE);
 
@@ -3941,49 +3941,49 @@ mdj_smoke_check_00(hbool_t human_readable,
     
     
     
-    /* f-4) Finally, rename all the entries back to their original locations,
+    /* f-4) Finally, move all the entries back to their original locations,
      *      and unpin all the pinned entries.
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)9, "transaction 9.2");
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
 		                    H5C__SIZE_CHANGED_FLAG, VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
                                       H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
 	                              VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
 		                    H5C__SIZE_CHANGED_FLAG|H5C__UNPIN_ENTRY_FLAG, 
 				    VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
     unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
 	        H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG|H5C__UNPIN_ENTRY_FLAG,
                 VARIABLE_ENTRY_SIZE);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6,
 		             VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
 
-    rename_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
+    move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
     resize_pinned_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7,
 		             VARIABLE_ENTRY_SIZE);
     unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
@@ -4063,7 +4063,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
 
     /* g-2) Now setup flush operations on some entries to dirty, resize,
-     *      and/or rename other entries.  When these entries are dirtied
+     *      and/or move other entries.  When these entries are dirtied
      *      in a transaction, the associated flush operations should be
      *      triggered and appear in the journal.
      *
@@ -4072,14 +4072,14 @@ mdj_smoke_check_00(hbool_t human_readable,
      *
      *      (MICRO_ENTRY_TYPE, 20) dirties (MICRO_ENTRY_TYPE, 30)
      *
-     *      (MICRO_ENTRY_TYPE, 21) renames, resizes, and dirties:
+     *      (MICRO_ENTRY_TYPE, 21) moves, resizes, and dirties:
      *      				   (VARIABLE_ENTRY_TYPE, 10)
      *      				   (VARIABLE_ENTRY_TYPE, 13)
      *
      *      (MICRO_ENTRY_TYPE, 22) resizes (VARIABLE_ENTRY_TYPE, 11)
      *                                     (VARIABLE_ENTRY_TYPE, 12)
      *
-     *      (MICRO_ENTRY_TYPE, 23) renames (VARIABLE_ENTRY_TYPE, 10)
+     *      (MICRO_ENTRY_TYPE, 23) moves (VARIABLE_ENTRY_TYPE, 10)
      *                                     (VARIABLE_ENTRY_TYPE, 13)
      *                                     to their original locations
      *
@@ -4097,14 +4097,14 @@ mdj_smoke_check_00(hbool_t human_readable,
     add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 10, FALSE, VARIABLE_ENTRY_SIZE);
     add_flush_op(MICRO_ENTRY_TYPE, 21,
-	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 10, FALSE, 0);
+	  FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 10, FALSE, 0);
     add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 10, FALSE, 0);
 
     add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__RESIZE, VARIABLE_ENTRY_TYPE, 13, FALSE, VARIABLE_ENTRY_SIZE/4);
     add_flush_op(MICRO_ENTRY_TYPE, 21,
-	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 13, FALSE, 0);
+	  FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 13, FALSE, 0);
     add_flush_op(MICRO_ENTRY_TYPE, 21,
 	  FLUSH_OP__DIRTY, VARIABLE_ENTRY_TYPE, 13, FALSE, 0);
 
@@ -4117,10 +4117,10 @@ mdj_smoke_check_00(hbool_t human_readable,
 
 
     add_flush_op(MICRO_ENTRY_TYPE, 23,
-	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 10, TRUE, 0);
+	  FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 10, TRUE, 0);
 
     add_flush_op(MICRO_ENTRY_TYPE, 23,
-	  FLUSH_OP__RENAME, VARIABLE_ENTRY_TYPE, 13, TRUE, 0);
+	  FLUSH_OP__MOVE, VARIABLE_ENTRY_TYPE, 13, TRUE, 0);
 
 
     add_flush_op(MICRO_ENTRY_TYPE, 24,
@@ -4165,7 +4165,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     /* g-4) Now dirty (MICRO_ENTRY_TYPE, 24), which dirties 
      *      (MICRO_ENTRY_TYPE, 21), which dirties, resizes, and 
-     *      renames (VARIABLE_ENTRY_TYPE, 10) and (VARIABLE_ENTRY_TYPE, 13)
+     *      moves (VARIABLE_ENTRY_TYPE, 10) and (VARIABLE_ENTRY_TYPE, 13)
      */
 
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.3");
@@ -4195,7 +4195,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     /* g-4) Now dirty (MICRO_ENTRY_TYPE, 25), which dirties 
      *      (MICRO_ENTRY_TYPE, 22) and (MICRO_ENTRY_TYPE, 23), which 
      *      in turn resize (VARIABLE_ENTRY_TYPE, 11) and 
-     *      (VARIABLE_ENTRY_TYPE, 12), and rename (VARIABLE_ENTRY_TYPE, 10)
+     *      (VARIABLE_ENTRY_TYPE, 12), and move (VARIABLE_ENTRY_TYPE, 10)
      *      and (VARIABLE_ENTRY_TYPE, 13) back to their original locations.
      */
 
@@ -4786,8 +4786,8 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
                                  /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_moves             */ TRUE,
+                                 /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
                                  /* do_mult_ro_protects    */ TRUE,
                                  /* dirty_destroys         */ dirty_destroys,
@@ -4831,8 +4831,8 @@ mdj_smoke_check_01(hbool_t human_readable,
                                   /* display_detailed_stats */ FALSE,
                                   /* do_inserts             */ FALSE,
                                   /* dirty_inserts          */ dirty_inserts,
-                                  /* do_renames             */ TRUE,
-                                  /* rename_to_main_addr    */ TRUE,
+                                  /* do_moves             */ TRUE,
+                                  /* move_to_main_addr    */ TRUE,
                                   /* do_destroys            */ FALSE,
                                   /* do_mult_ro_protects    */ TRUE,
                                   /* dirty_destroys         */ dirty_destroys,
@@ -4876,8 +4876,8 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
                                  /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_moves             */ TRUE,
+                                 /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
                                  /* do_mult_ro_protects    */ TRUE,
                                  /* dirty_destroys         */ dirty_destroys,
@@ -5191,8 +5191,8 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
                                  /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_moves             */ TRUE,
+                                 /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
                                  /* do_mult_ro_protects    */ TRUE,
                                  /* dirty_destroys         */ dirty_destroys,
@@ -5236,8 +5236,8 @@ mdj_smoke_check_02(hbool_t human_readable,
                                   /* display_detailed_stats */ FALSE,
                                   /* do_inserts             */ FALSE,
                                   /* dirty_inserts          */ dirty_inserts,
-                                  /* do_renames             */ TRUE,
-                                  /* rename_to_main_addr    */ TRUE,
+                                  /* do_moves             */ TRUE,
+                                  /* move_to_main_addr    */ TRUE,
                                   /* do_destroys            */ FALSE,
                                   /* do_mult_ro_protects    */ TRUE,
                                   /* dirty_destroys         */ dirty_destroys,
@@ -5281,8 +5281,8 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
                                  /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_moves             */ TRUE,
+                                 /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ FALSE,
                                  /* do_mult_ro_protects    */ TRUE,
                                  /* dirty_destroys         */ dirty_destroys,

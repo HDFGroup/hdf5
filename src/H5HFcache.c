@@ -1266,7 +1266,7 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr)) {
-		    *flags |= H5AC__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC__SERIALIZE_MOVED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 
@@ -1319,7 +1319,7 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr)) {
-		    *flags |= H5AC__SERIALIZE_RENAMED_FLAG;
+		    *flags |= H5AC__SERIALIZE_MOVED_FLAG;
 		    *new_addr = addr;
 		} /* end if */
 

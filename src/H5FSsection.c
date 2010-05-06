@@ -1377,8 +1377,8 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
 
         /* Move object in cache, if it actually was relocated */
         if(H5F_addr_ne(fspace->sect_addr, old_addr)) {
-            if(H5AC_rename(f, H5AC_FSPACE_SINFO, old_addr, fspace->sect_addr) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTRENAME, FAIL, "unable to move free space section info")
+            if(H5AC_move_entry(f, H5AC_FSPACE_SINFO, old_addr, fspace->sect_addr) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move free space section info")
         } /* end if */
         else {
             /* Mark free space section as dirty */
@@ -1442,8 +1442,8 @@ HDfprintf(stderr, "%s: Allocating space for smaller serialized sections, new_siz
 
             /* Move object in cache, if it actually was relocated */
             if(H5F_addr_ne(fspace->sect_addr, old_addr)) {
-                if(H5AC_rename(f, H5AC_FSPACE_SINFO, old_addr, fspace->sect_addr) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTRENAME, FAIL, "unable to move free space section info")
+                if(H5AC_move_entry(f, H5AC_FSPACE_SINFO, old_addr, fspace->sect_addr) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move free space section info")
             } /* end if */
             else {
                 /* Mark free space section as dirty */
