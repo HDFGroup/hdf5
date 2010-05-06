@@ -159,7 +159,6 @@ MINOR, CACHE, H5E_PROTECT, Protected metadata error
 MINOR, CACHE, H5E_NOTCACHED, Metadata not currently cached
 MINOR, CACHE, H5E_SYSTEM, Internal error detected
 MINOR, CACHE, H5E_CANTINS, Unable to insert metadata into cache
-MINOR, CACHE, H5E_CANTRENAME, Unable to rename metadata
 MINOR, CACHE, H5E_CANTPROTECT, Unable to protect metadata
 MINOR, CACHE, H5E_CANTUNPROTECT, Unable to unprotect metadata
 MINOR, CACHE, H5E_CANTPIN, Unable to pin cache entry
@@ -191,6 +190,7 @@ MINOR, OHDR, H5E_CANTDELETE, Can't delete message
 MINOR, OHDR, H5E_BADITER, Iteration failed
 MINOR, OHDR, H5E_CANTPACK, Can't pack messages
 MINOR, OHDR, H5E_CANTRESET, Can't reset object
+MINOR, OHDR, H5E_CANTRENAME, Unable to rename object
 
 # Group related errors
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object
@@ -219,7 +219,7 @@ MINOR, PLIST, H5E_DUPCLASS, Duplicate class name in parent class
 MINOR, LINK, H5E_TRAVERSE, Link traversal failure
 MINOR, LINK, H5E_NLINKS, Too many soft links in path
 MINOR, LINK, H5E_NOTREGISTERED, Link class not registered
-MINOR, LINK, H5E_CANTMOVE, Move callback returned error
+MINOR, LINK, H5E_CANTMOVE, Can't move object
 MINOR, LINK, H5E_CANTSORT, Can't sort objects
 
 # Parallel MPI errors

@@ -205,7 +205,7 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
  *	The data_index array is an array of integer used to maintain a list
  *	of instances of datum in the data array in increasing base_addr order.
  *
- *	This array is necessary, as rename operations can swap the values
+ *	This array is necessary, as move operations can swap the values
  *	of the base_addr fields of two instances of datum.  Without this
  *	array, we would no longer be able to use a binary search on a sorted
  *	list to find the indexes of instances of datum given the values of
@@ -364,7 +364,7 @@ void mark_entry_dirty(H5C_t * cache_ptr, H5F_t * file_ptr,
 void pin_entry(H5C_t * cache_ptr, H5F_t * file_ptr, int32_t idx,
 	       hbool_t global, hbool_t dirty);
 void pin_protected_entry(int32_t idx, hbool_t global);
-void rename_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
+void move_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t old_idx, int32_t new_idx);
 void resize_entry(int32_t idx, size_t  new_size);
 hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
@@ -724,7 +724,7 @@ init_data(void)
     int j = 0;
     haddr_t addr = 512;
 
-    /* this must hold so renames don't change entry size. */
+    /* this must hold so moves don't change entry size. */
     HDassert( (NUM_DATA_ENTRIES / 2) % 20 == 0 );
     HDassert( (virt_num_data_entries / 2) % 20 == 0 );
 
@@ -2969,9 +2969,9 @@ pin_protected_entry(int32_t idx,
 
 
 /*****************************************************************************
- * Function:    rename_entry()
+ * Function:    move_entry()
  *
- * Purpose:     Rename the entry indicated old_idx to the entry indicated
+ * Purpose:     Move the entry indicated old_idx to the entry indicated
  *		by new_idex.  Touch up the data array so that flush will
  *		not choke.
  *
@@ -2991,12 +2991,12 @@ pin_protected_entry(int32_t idx,
  *****************************************************************************/
 
 void
-rename_entry(H5C_t * cache_ptr,
+move_entry(H5C_t * cache_ptr,
              H5F_t * file_ptr,
              int32_t old_idx,
              int32_t new_idx)
 {
-    const char   * fcn_name = "rename_entry()";
+    const char   * fcn_name = "move_entry()";
     herr_t         result;
     int		   tmp;
     size_t	   tmp_len;
@@ -3025,13 +3025,13 @@ rename_entry(H5C_t * cache_ptr,
         old_addr = old_entry_ptr->base_addr;
         new_addr = new_entry_ptr->base_addr;
 
-        result = H5AC_rename(file_ptr,  &(types[0]), old_addr, new_addr);
+        result = H5AC_move_entry(file_ptr,  &(types[0]), old_addr, new_addr);
 
         if ( ( result < 0 ) || ( old_entry_ptr->header.addr != new_addr ) ) {
 
             nerrors++;
             if ( verbose ) {
-		HDfprintf(stdout, "%d:%s: H5AC_rename() failed.\n",
+		HDfprintf(stdout, "%d:%s: H5AC_move_entry() failed.\n",
 	                  world_mpi_rank, fcn_name);
             }
 
@@ -3074,7 +3074,7 @@ rename_entry(H5C_t * cache_ptr,
 
     return;
 
-} /* rename_entry() */
+} /* move_entry() */
 
 
 /*****************************************************************************
@@ -3128,7 +3128,7 @@ resize_entry(int32_t idx,
 
             nerrors++;
             if ( verbose ) {
-		HDfprintf(stdout, "%d:%s: H5AC_rename() failed.\n",
+		HDfprintf(stdout, "%d:%s: H5AC_resize_pinned_entry() failed.\n",
 	                  world_mpi_rank, fcn_name);
             }
 
@@ -4027,21 +4027,21 @@ smoke_check_1(void)
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
         }
 
-        /* rename the first half of the entries... */
+        /* move the first half of the entries... */
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
         }
 
-        /* ...and then rename them back. */
+        /* ...and then move them back. */
         for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
         }
 
@@ -4135,7 +4135,7 @@ smoke_check_1(void)
  *		Added pinned entry tests.
  *
  *		JRM -- 4/28/06
- *		Modified test to rename pinned entries.
+ *		Modified test to move pinned entries.
  *
  *****************************************************************************/
 
@@ -4227,27 +4227,27 @@ smoke_check_2(void)
 					   0, 100);
         }
 
-	/* we can't rename pinned entries, so release any local pins now. */
+	/* we can't move pinned entries, so release any local pins now. */
 	local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
-        /* rename the first half of the entries... */
+        /* move the first half of the entries... */
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   ((virt_num_data_entries / 50) - 1),
                                            0, 100);
         }
 
-        /* ...and then rename them back. */
+        /* ...and then move them back. */
         for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 100),
@@ -4558,18 +4558,18 @@ smoke_check_3(void)
         /* 7 */
         if ( verbose ) {HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);}
 
-        /* we can't rename pinned entries, so release any local pins now. */
+        /* we can't move pinned entries, so release any local pins now. */
         local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
         min_count = 10 / (file_mpi_rank + 1);
         max_count = min_count + 100;
 
-        /* rename the first half of the entries... */
+        /* move the first half of the entries... */
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 20),
@@ -4579,12 +4579,12 @@ smoke_check_3(void)
         /* 8 */
         if ( verbose ) {HDfprintf(stderr, "%d: cp = %d\n", world_mpi_rank, cp++);}
 
-        /* ...and then rename them back. */
+        /* ...and then move them back. */
         for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 40),
@@ -4896,30 +4896,30 @@ smoke_check_4(void)
                                            min_idx, max_idx, 0, 100);
         }
 
-	/* we can't rename pinned entries, so release any local pins now. */
+	/* we can't move pinned entries, so release any local pins now. */
 	local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
         min_count = 10 * (file_mpi_rank % 4);
         max_count = min_count + 100;
 
-        /* rename the first half of the entries... */
+        /* move the first half of the entries... */
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 20),
                                            min_count, max_count);
         }
 
-        /* ...and then rename them back. */
+        /* ...and then move them back. */
         for ( i = (virt_num_data_entries / 2) - 1; i >= 0; i-- )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
 	    unlock_entry(cache_ptr, file_ptr, i, H5AC__DIRTIED_FLAG);
-	    rename_entry(cache_ptr, file_ptr, i,
+	    move_entry(cache_ptr, file_ptr, i,
 			 (i + (virt_num_data_entries / 2)));
 	    lock_and_unlock_random_entries(cache_ptr, file_ptr, 0,
 			                   (virt_num_data_entries / 40),
@@ -5297,7 +5297,7 @@ smoke_check_5(void)
  *                    - H5AC_flush()
  *                    - H5AC_set()
  *                    - H5AC_mark_entry_dirty()
- *                      H5AC_rename()
+ *                      H5AC_move_entry()
  *                    - H5AC_pin_protected_entry()
  *                    - H5AC_protect()
  *                    - H5AC_unpin_entry()
@@ -5353,8 +5353,8 @@ trace_file_check(void)
       "H5AC_resize_pinned_entry 0x4 2 0\n",
       "H5AC_resize_pinned_entry 0x4 4 0\n",
       "H5AC_unpin_entry 4 0\n",
-      "H5AC_rename 0 8a65 15 0\n",
-      "H5AC_rename 8a65 0 15 0\n",
+      "H5AC_move_entry 0 8a65 15 0\n",
+      "H5AC_move_entry 8a65 0 15 0\n",
       "H5AC_flush 0\n",
       NULL
     };
@@ -5463,8 +5463,8 @@ trace_file_check(void)
         resize_entry(2, data[2].len);
         unpin_entry(cache_ptr, file_ptr, 2, TRUE, FALSE, FALSE);
 
-	rename_entry(cache_ptr, file_ptr, 0, 20);
-	rename_entry(cache_ptr, file_ptr, 0, 20);
+	move_entry(cache_ptr, file_ptr, 0, 20);
+	move_entry(cache_ptr, file_ptr, 0, 20);
 
         if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
             nerrors++;
