@@ -3008,37 +3008,21 @@ mark_entry_dirty(H5F_t * file_ptr,
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
 	HDassert( entry_ptr->cache_ptr == cache_ptr );
-        HDassert( ! (entry_ptr->header.is_protected) );
-        HDassert( entry_ptr->header.is_pinned );
-	HDassert( entry_ptr->is_pinned );
+        HDassert( entry_ptr->header.is_protected ||
+		  entry_ptr->header.is_pinned );
 
 	entry_ptr->is_dirty = TRUE;
 
         result = H5C_mark_entry_dirty((void *)entry_ptr);
 
         if ( ( result < 0 ) ||
-             ( ! (entry_ptr->header.is_dirty) ) ||
-             ( ! (entry_ptr->header.is_pinned) ) ||
+             ( !entry_ptr->header.is_protected && !entry_ptr->header.is_pinned ) ||
+             ( entry_ptr->header.is_protected && !entry_ptr->header.dirtied ) ||
+             ( !entry_ptr->header.is_protected && !entry_ptr->header.is_dirty ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
-#if 0 /* This is useful debugging code -- keep it around  */
-            HDfprintf(stdout, "result = %ld.\n", (long)result);
-            HDfprintf(stdout, "entry_ptr->header.is_dirty = %d.\n",
-                      (int)(entry_ptr->header.is_dirty));
-            HDfprintf(stdout, "entry_ptr->header.is_pinned = %d.\n",
-                      (int)(entry_ptr->header.is_pinned));
-            HDfprintf(stdout,
-                      "(entry_ptr->header.type != &(types[type])) = %d.\n",
-                      (int)(entry_ptr->header.type != &(types[type])));
-            HDfprintf(stdout,
-                      "entry_ptr->size = %ld, entry_ptr->header.size = %ld.\n",
-                      (long)(entry_ptr->size), (long)(entry_ptr->header.size));
-            HDfprintf(stdout,
-                      "entry_ptr->addr = %ld, entry_ptr->header.addr = %ld.\n",
-                      (long)(entry_ptr->addr), (long)(entry_ptr->header.addr));
-#endif
             pass = FALSE;
             failure_mssg = "error in H5C_mark_entry_dirty().";
 
