@@ -238,7 +238,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             HDassert(heap->prfx);
 
             /* Resize the heap prefix in the cache */
-            if(H5AC_resize_pinned_entry(heap->prfx, (size_t)(heap->prfx_size + new_heap_size)) < 0)
+            if(H5AC_resize_entry(heap->prfx, (size_t)(heap->prfx_size + new_heap_size)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap in cache")
         } /* end if */
         else {
@@ -247,7 +247,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             HDassert(heap->dblk);
 
             /* Resize the heap data block in the cache */
-            if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_heap_size) < 0)
+            if(H5AC_resize_entry(heap->dblk, (size_t)new_heap_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap in cache")
         } /* end else */
     } /* end if */
@@ -260,7 +260,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
 
             /* Resize current heap prefix */
             heap->prfx_size = H5HL_SIZEOF_HDR(f);
-            if(H5AC_resize_pinned_entry(heap->prfx, (size_t)heap->prfx_size) < 0)
+            if(H5AC_resize_entry(heap->prfx, (size_t)heap->prfx_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap prefix in cache")
 
             /* Insert data block into cache (pinned) */
@@ -276,7 +276,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
             /* (ignore [unlikely] case where heap data block ends up
              *      contiguous w/heap prefix again.
              */
-            if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_heap_size) < 0)
+            if(H5AC_resize_entry(heap->dblk, (size_t)new_heap_size) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap data block in cache")
 
             /* Relocate the heap data block in the cache */
@@ -788,12 +788,12 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
             /* Check for prefix & data block contiguous */
             if(heap->single_cache_obj) {
                 /* Resize prefix+data block */
-                if(H5AC_resize_pinned_entry(heap->prfx, (size_t)(heap->prfx_size + new_dblk_size)) < 0)
+                if(H5AC_resize_entry(heap->prfx, (size_t)(heap->prfx_size + new_dblk_size)) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap prefix in cache")
             } /* end if */
             else {
                 /* Resize 'standalone' data block */
-                if(H5AC_resize_pinned_entry(heap->dblk, (size_t)new_dblk_size) < 0)
+                if(H5AC_resize_entry(heap->dblk, (size_t)new_dblk_size) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, UFAIL, "unable to resize heap data block in cache")
             } /* end else */
 

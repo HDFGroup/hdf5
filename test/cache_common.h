@@ -174,7 +174,7 @@ typedef struct flush_op
 					 * FLUSH_OP__RESIZE: TRUE iff the
 					 *   target is pinned, and is to
 					 *   be resized via the
-					 *   H5C_mark_entry_dirty()
+					 *   H5C_resize_entry()
 					 *   call.
 					 *
 					 * FLUSH_OP__MOVE: TRUE iff the
@@ -640,11 +640,6 @@ void resize_entry(H5F_t * file_ptr,
                    int32_t idx,
                    size_t new_size,
                    hbool_t resize_pin);
-
-void resize_pinned_entry(H5C_t * cache_ptr,
-                         int32_t type,
-                         int32_t idx,
-                         size_t new_size);
 
 H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
 
