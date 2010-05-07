@@ -17262,11 +17262,11 @@ check_resize_entry_errs(void)
     pass = TRUE;
 
     /* Allocate a cache, protect an entry, and then call
-     * H5C_resize_entry() to resize it -- this should fail.
+     * H5C_resize_entry() to resize it -- this should succeed.
      *
      * Unprotect the the entry with the pinned flag, and then call
      * H5C_resize_entry() again with new size of zero.
-     * This should fail too.
+     * This should fail.
      *
      * Finally, unpin the entry and destroy the cache.
      * This should succeed.
@@ -17289,11 +17289,11 @@ check_resize_entry_errs(void)
 
 	result = H5C_resize_entry((void *)entry_ptr, (size_t)1);
 
-        if ( result > 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
             failure_mssg =
-            "Call to H5C_resize_entry on a protected entry succeeded.\n";
+                "Call to H5C_resize_entry on a protected entry failed.\n";
 
         } else {
 
@@ -17306,7 +17306,7 @@ check_resize_entry_errs(void)
 
 	result = H5C_resize_entry((void *)entry_ptr, (size_t)0);
 
-        if ( result > 0 ) {
+        if ( result >= 0 ) {
 
             pass = FALSE;
             failure_mssg =
