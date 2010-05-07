@@ -330,7 +330,7 @@ H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, void *udata,
                            H5AC_protect_t rw);
-H5_DLL herr_t H5AC_resize_pinned_entry(void *thing, size_t new_size);
+H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,

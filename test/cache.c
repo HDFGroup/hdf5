@@ -15138,13 +15138,13 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
+        result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_pinned_entry() reports failure 1.");
+		       "H5C_resize_entry() reports failure 1.");
             failure_mssg = msg;
 
 	}
@@ -15199,13 +15199,13 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
+        result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_pinned_entry() reports failure 2.");
+		       "H5C_resize_entry() reports failure 2.");
             failure_mssg = msg;
 
 	}
@@ -15571,13 +15571,13 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
+        result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_pinned_entry() reports failure 3.");
+		       "H5C_resize_entry() reports failure 3.");
             failure_mssg = msg;
 
 	}
@@ -15634,13 +15634,13 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
+        result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-		       "H5C_resize_pinned_entry() reports failure 4.");
+		       "H5C_resize_entry() reports failure 4.");
             failure_mssg = msg;
 
 	}
@@ -17642,17 +17642,13 @@ check_expunge_entry_errs(void)
 /*-------------------------------------------------------------------------
  * Function:	check_resize_entry_errs()
  *
- * Purpose:	Verify that invalid calls to H5C_resize_pinned_entry()
+ * Purpose:	Verify that invalid calls to H5C_resize_entry()
  * 		generates errors as expected.
  *
  * Return:	void
  *
  * Programmer:	John Mainzer
  *              7/7/06
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -17670,11 +17666,11 @@ check_resize_entry_errs(void)
     pass = TRUE;
 
     /* Allocate a cache, protect an entry, and then call
-     * H5C_resize_pinned_entry() to resize it -- this should fail.
+     * H5C_resize_entry() to resize it -- this should succeed.
      *
      * Unprotect the the entry with the pinned flag, and then call
-     * H5C_resize_pinned_entry() again with new size of zero.
-     * This should fail too.
+     * H5C_resize_entry() again with new size of zero.
+     * This should fail.
      *
      * Finally, unpin the entry and destroy the cache.
      * This should succeed.
@@ -17695,13 +17691,13 @@ check_resize_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_resize_pinned_entry((void *)entry_ptr, (size_t)1);
+	result = H5C_resize_entry((void *)entry_ptr, (size_t)1);
 
-        if ( result > 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
             failure_mssg =
-            "Call to H5C_resize_pinned_entry on a protected entry succeeded.\n";
+                "Call to H5C_resize_entry on a protected entry failed.\n";
 
         } else {
 
@@ -17712,13 +17708,13 @@ check_resize_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_resize_pinned_entry((void *)entry_ptr, (size_t)0);
+	result = H5C_resize_entry((void *)entry_ptr, (size_t)0);
 
-        if ( result > 0 ) {
+        if ( result >= 0 ) {
 
             pass = FALSE;
             failure_mssg =
-                 "Call to H5C_resize_pinned_entry with 0 new size succeeded.\n";
+                 "Call to H5C_resize_entry with 0 new size succeeded.\n";
 
         } else {
 
@@ -22042,7 +22038,7 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
-        resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024);
+        resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
@@ -22060,7 +22056,7 @@ check_auto_cache_resize(void)
 
     if ( pass ) {
 
-        resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, 10 * 1024);
+        resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (13 * 1024) ) ||
@@ -22081,7 +22077,7 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
-        resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024);
+        resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
@@ -22102,7 +22098,7 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
         unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
-        resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024);
+        resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||

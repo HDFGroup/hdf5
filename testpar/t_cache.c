@@ -3114,7 +3114,6 @@ resize_entry(int32_t idx,
         entry_ptr = &(data[idx]);
 
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
-        HDassert( !(entry_ptr->header.is_protected) );
         HDassert( !(entry_ptr->locked) );
 	HDassert( ( entry_ptr->global_pinned ) &&
 		  ( ! entry_ptr->local_pinned ) );
@@ -3123,13 +3122,13 @@ resize_entry(int32_t idx,
 	HDassert( new_size > 0 );
 	HDassert( new_size <= entry_ptr->len );
 
-	result = H5AC_resize_pinned_entry((void *)entry_ptr, new_size);
+	result = H5AC_resize_entry((void *)entry_ptr, new_size);
 
         if ( result < 0 ) {
 
             nerrors++;
             if ( verbose ) {
-		HDfprintf(stdout, "%d:%s: H5AC_resize_pinned_entry() failed.\n",
+		HDfprintf(stdout, "%d:%s: H5AC_resize_entry() failed.\n",
 	                  world_mpi_rank, fcn_name);
             }
 
@@ -5033,7 +5032,7 @@ smoke_check_4(void)
  *
  *		JRM -- 7/12/06
  *		Added test code for H5AC_expunge_entry() and
- *		H5AC_resize_pinned_entry().
+ *		H5AC_resize_entry().
  *
  *****************************************************************************/
 
@@ -5305,7 +5304,7 @@ smoke_check_5(void)
  *                    - H5AC_unprotect()
  *                    - H5AC_set_cache_auto_resize_config()
  *                    - H5AC_expunge_entry()
- *                    - H5AC_resize_pinned_entry()
+ *                    - H5AC_resize_entry()
  *
  *              This test is skipped if H5_METADATA_TRACE_FILE is undefined.
  *
@@ -5319,7 +5318,7 @@ smoke_check_5(void)
  *
  *		JRM -- 7/11/06
  *		Updated for H5AC_expunge_entry() and
- *		H5AC_resize_pinned_entry().
+ *		H5AC_resize_entry().
  *
  *****************************************************************************/
 
@@ -5351,8 +5350,8 @@ trace_file_check(void)
       "H5AC_pin_protected_entry 4 0\n",
       "H5AC_unprotect 4 15 0 0 0\n",
       "H5AC_mark_entry_dirty 0x4 0 0 0\n",
-      "H5AC_resize_pinned_entry 0x4 2 0\n",
-      "H5AC_resize_pinned_entry 0x4 4 0\n",
+      "H5AC_resize_entry 0x4 2 0\n",
+      "H5AC_resize_entry 0x4 4 0\n",
       "H5AC_unpin_entry 4 0\n",
       "H5AC_move_entry 0 8a65 15 0\n",
       "H5AC_move_entry 8a65 0 15 0\n",

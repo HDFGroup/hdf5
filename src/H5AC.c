@@ -1694,10 +1694,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_resize_pinned_entry
+ * Function:    H5AC_resize_entry
  *
- * Purpose:	Resize a pinned entry.  The target entry MUST be
- * 		be pinned, and MUST not be unprotected.
+ * Purpose:	Resize a pinned or protected entry.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1707,7 +1706,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_resize_pinned_entry(void *thing, size_t new_size)
+H5AC_resize_entry(void *thing, size_t new_size)
 {
 #if H5AC__TRACE_FILE_ENABLED
     char          	trace[128] = "";
@@ -1715,7 +1714,7 @@ H5AC_resize_pinned_entry(void *thing, size_t new_size)
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5AC_resize_pinned_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5AC_resize_entry, FAIL)
 
     /* Sanity check */
     HDassert(thing);
@@ -1742,10 +1741,8 @@ H5AC_resize_pinned_entry(void *thing, size_t new_size)
 
     if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr)) {
         /* Check for usage errors */
-        if(!entry_ptr->is_pinned)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned??")
-        if(entry_ptr->is_protected)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry is protected??")
+        if(!(entry_ptr->is_pinned || entry_ptr->is_protected))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned or protected??")
 
         if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr, TRUE, new_size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
@@ -1753,7 +1750,7 @@ H5AC_resize_pinned_entry(void *thing, size_t new_size)
 }
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_resize_pinned_entry(thing, new_size) < 0)
+    if(H5C_resize_entry(thing, new_size) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
 
 done:
@@ -1763,7 +1760,7 @@ done:
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_resize_pinned_entry() */
+} /* H5AC_resize_entry() */
 
 
 /*-------------------------------------------------------------------------
