@@ -566,7 +566,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
     /* Resize pinned indirect block in the cache, if its changed size */
     if(old_iblock_size != iblock->size) {
-        if(H5AC_resize_pinned_entry(iblock, (size_t)iblock->size) < 0)
+        if(H5AC_resize_entry(iblock, (size_t)iblock->size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap indirect block")
     } /* end if */
 
@@ -735,7 +735,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
 
     /* Resize pinned indirect block in the cache, if it has changed size */
     if(old_size != iblock->size) {
-        if(H5AC_resize_pinned_entry(iblock, (size_t)iblock->size) < 0)
+        if(H5AC_resize_entry(iblock, (size_t)iblock->size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap indirect block")
     } /* end if */
 

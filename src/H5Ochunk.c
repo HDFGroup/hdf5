@@ -232,7 +232,7 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_chunk_proxy_t *chk_proxy,
         /* Check for resizing the first chunk */
         if(chk_flags & H5AC__SIZE_CHANGED_FLAG) {
             /* Resize object header in cache */
-            if(H5AC_resize_pinned_entry(chk_proxy->oh, chk_proxy->oh->chunk[0].size) < 0)
+            if(H5AC_resize_entry(chk_proxy->oh, chk_proxy->oh->chunk[0].size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize chunk in cache")
         } /* end if */
 
