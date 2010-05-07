@@ -94,10 +94,23 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+static int          display_packed_bits = FALSE; /*print 1-byte numbers as packed bits*/
+#endif
 
 /* sort parameters */
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
 static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
+
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+/* mask list for packed bits */
+static unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
+
+/* packed bits display parameters */
+static int packed_offset[8];
+static int packed_length[8];
+#define PACKED_BITS_LOOP_MAX         8
+#endif
 
 /**
  **  Added for XML  **
@@ -118,6 +131,9 @@ static int              indent;              /*how far in to indent the line    
 /* internal functions */
 static hid_t    h5_fileaccess(void);
 static void     dump_oid(hid_t oid);
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+static void     dump_packed_bits(unsigned int packed_index);
+#endif
 static void     print_enum(hid_t type);
 static int      xml_name_to_XID(const char *, char *, int , int );
 static void     init_prefix(char **prfx, size_t prfx_len);
@@ -388,7 +404,11 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RM:";
+#else
 static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R";
+#endif
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -501,6 +521,9 @@ static struct long_options l_opts[] = {
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
     { "region", no_arg, 'R' },
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+    { "packed-bits", require_arg, 'M' },
+#endif
     { NULL, 0, '\0' }
 };
 
@@ -656,6 +679,10 @@ usage(const char *prog)
     fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+    fprintf(stdout, "     -M M, --packedbits=M Print packed bits using mask format M for dataset P given\n");
+    fprintf(stdout, "                          in option d. Where M is (offset,length)[,(offset,length)].\n");
+#endif
     fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
@@ -695,6 +722,10 @@ usage(const char *prog)
     fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
     fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+    fprintf(stdout, "  M - is a paired list of integers the first number of which is the offset and the\n");
+    fprintf(stdout, "        second number is the length of the its being queried\n");
+#endif
     fprintf(stdout, "\n");
     fprintf(stdout, "  Examples:\n");
     fprintf(stdout, "\n");
@@ -2214,6 +2245,10 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     hid_t       type, space;
     unsigned    attr_crt_order_flags;
     hid_t       dcpl_id;  /* dataset creation property list ID */
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+    int         data_loop = 1;
+    int         i;
+#endif
 
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
@@ -2246,7 +2281,18 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_dcpl)
         dump_dcpl(dcpl_id, type, did);
 
-    if(display_data)
+    if(display_data) {
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(display_packed_bits)
+            data_loop = packed_output;
+        for(i=0;i<data_loop;i++) {
+        if(display_packed_bits) {
+            dump_packed_bits(i);
+            packed_counter = packed_mask[i];
+            packed_normalize = packed_offset[i];
+        }
+#endif
+
         switch(H5Tget_class(type)) {
             case H5T_TIME:
                 indentation(indent + COL);
@@ -2269,6 +2315,10 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
             default:
                 break;
         } /* end switch */
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        }
+#endif
+    }
 
     indent += COL;
 
@@ -2633,6 +2683,24 @@ dump_oid(hid_t oid)
     indentation(indent + COL);
     printf("%s %s %d %s\n", OBJID, BEGIN, oid, END);
 }
+
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+/*-------------------------------------------------------------------------
+ * Function:    dump_packed_bits
+ *
+ * Purpose:     Prints the packed bits offset and length
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_packed_bits(unsigned int packed_index)
+{
+    indentation(indent + COL);
+    printf("%s %s=%d %s=%d\n", PACKED_BITS, PACKED_OFFSET, packed_offset[packed_index], PACKED_LENGTH, packed_length[packed_index]);
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    dump_comment
@@ -3518,6 +3586,88 @@ parse_subset_params(char *dset)
     return s;
 }
 
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+/*-------------------------------------------------------------------------
+ * Function:    parse_mask_list
+ *
+ * Purpose:     Parse a list of comma or space separated integers and fill
+ *              the packed_bits list and counter. The string being passed into this function
+ *              should be at the start of the list you want to parse. 
+ *
+ * Return:      None
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+parse_mask_list(const char *h_list)
+{
+    const char     *ptr;
+    unsigned int    size_count = 0, i = 0, last_digit = 0;
+    int             offset_value = 0, length_value = 0;
+
+    packed_counter = 0;
+    memset(packed_mask,0,8);
+    memset(packed_offset,0,8);
+    memset(packed_length,0,8);
+    
+    if (!h_list || !*h_list || *h_list == ';')
+        return;
+
+    /* count how many integers do we have */
+    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
+        if (isdigit(*ptr)) {
+            if (!last_digit)
+                /* the last read character wasn't a digit */
+                size_count++;
+
+            last_digit = 1;
+        } 
+        else {
+            last_digit = 0;
+        }
+    }
+
+    if (size_count == 0) 
+        /* there aren't any integers to read */
+       return;
+
+    offset_value = -1;
+    length_value = -1;
+    packed_output = 0;
+    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
+        if(isdigit(*ptr)) {
+            i++;
+            /* we should have an integer now */
+            if(offset_value==-1)
+                offset_value = atoi(ptr);
+            else
+                length_value = atoi(ptr);
+
+            while (isdigit(*ptr))
+                /* scroll to end of integer */
+                ptr++;
+        }
+        if(length_value>=0) {
+            packed_offset[packed_output] = offset_value;
+            packed_length[packed_output] = length_value;
+            
+            packed_mask[packed_output] = 1 << offset_value;
+            while(length_value>1) {
+                packed_mask[packed_output] = packed_mask[packed_output] << 1;
+                packed_mask[packed_output] |= 1 << offset_value;
+                length_value--;
+            }
+            packed_output++;
+            offset_value = -1;
+            length_value = -1;
+        }
+    }
+    if(packed_output > PACKED_BITS_LOOP_MAX)
+        packed_output = PACKED_BITS_LOOP_MAX;
+    packed_counter = packed_mask[0];
+}
+#endif
+
 /*-------------------------------------------------------------------------
  * Function:    handle_datasets
  *
@@ -4097,6 +4247,19 @@ parse_start:
                 leave(EXIT_FAILURE);
             }
             break;
+
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        case 'M':
+            if (!last_was_dset) {
+                error_msg(progname,
+                          "option `-%c' can only be used after --dataset option\n",
+                          opt);
+                leave(EXIT_FAILURE);
+            }
+            parse_mask_list(opt_arg);
+            display_packed_bits = TRUE;
+            break;
+#endif
 
         /** begin XML parameters **/
         case 'x':

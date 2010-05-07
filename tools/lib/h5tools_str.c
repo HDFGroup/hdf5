@@ -783,36 +783,72 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
     else if (H5Tequal(type, H5T_NATIVE_INT)) {
         HDmemcpy(&tempint, vp, sizeof(int));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempint = (tempint & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
     }
     else if (H5Tequal(type, H5T_NATIVE_UINT)) {
         HDmemcpy(&tempuint, vp, sizeof(unsigned int));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempuint = (tempuint & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), *cp_vp);
+        char               tempchar;
+        HDmemcpy(&tempchar, cp_vp, sizeof(char));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempchar = (tempchar & packed_counter)>>packed_normalize;
+#endif
+        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), tempchar);
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);
+        unsigned char      tempuchar;
+        HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempuchar = (tempuchar & packed_counter)>>packed_normalize;
+#endif
+        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), tempuchar);
     }
     else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
         short tempshort;
 
         HDmemcpy(&tempshort, vp, sizeof(short));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempshort = (tempshort & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
     }
     else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
         unsigned short tempushort;
 
         HDmemcpy(&tempushort, vp, sizeof(unsigned short));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempushort = (tempushort & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
     }
     else if (H5Tequal(type, H5T_NATIVE_LONG)) {
         HDmemcpy(&templong, vp, sizeof(long));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            templong = (templong & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+        if(packed_output)
+            tempulong = (tempulong & packed_counter)>>packed_normalize;
+#endif
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     }
     else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
