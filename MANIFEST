@@ -1294,6 +1294,9 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
+./tools/testfiles/tpackedbits.ddl
+./tools/testfiles/tpackedbits2.ddl
+./tools/testfiles/tnofilename-with-packed-bits.ddl
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
 ./tools/testfiles/tordergr.h5
