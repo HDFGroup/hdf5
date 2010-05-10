@@ -66,29 +66,35 @@ PropList::PropList(const PropList& original) : IdComponent(original)
 ///\param	plist_id - IN: Id of the existing property list
 ///\exception	H5::PropListIException
 // Description
-//		This function calls H5Pcreate to create a new property list
-//		if the given id, plist_id, is that of a property class.  If
-//		the given id is equal to H5P_ROOT, then set this
-//		property's id to H5P_DEFAULT, otherwise, to the given id.
-//		Note: someone else added this code without comments and this
-//		description was what I came up with from reading the code.
+//		This function creates a new property list if a property
+//		class is provided or makes a copy of a property list if one
+//		is given.  If the given id is anything else, then set this
+//		property's id to H5P_DEFAULT.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent()
 {
-    if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
-	// call C routine to create the new property
-	id = H5Pcreate(plist_id);
-	if( id < 0 )
-	{
-	    throw PropListIException("PropList constructor", "H5Pcreate failed");
-	}
-    }
-    else {
-	if(plist_id==H5P_ROOT)
-	    id=H5P_DEFAULT;
-	else
-	    id=plist_id;
+    H5I_type_t id_type = H5Iget_type(plist_id);
+    switch (id_type) {
+	case H5I_GENPROP_CLS:
+	  // call C routine to create a new property from the given prop class
+	  id = H5Pcreate(plist_id);
+	  if( id < 0 )
+	  {
+	      throw PropListIException("PropList constructor", "H5Pcreate failed");
+	  }
+	  break;
+	case H5I_GENPROP_LST:
+	  // call C routine to make a copy of the given property list
+	  id = H5Pcopy(plist_id);
+	  if( id < 0 )
+	  {
+	      throw PropListIException("PropList constructor", "H5Pcopy failed");
+	  }
+	  break;
+	default:
+	  id = H5P_DEFAULT;
+	  break;
     }
 }
 
