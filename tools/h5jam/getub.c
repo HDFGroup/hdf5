@@ -28,7 +28,8 @@ void parse_command_line (int argc, const char *argv[]);
 #define TRUE 1
 #define FALSE 0
 
-static const char *progname="getub";
+/* Name of tool */
+#define PROGRAMNAME "getub"
 char *nbytes = NULL;
 
 static const char *s_opts = "c:";	/* add more later ? */
@@ -89,15 +90,15 @@ parse_command_line (int argc, const char *argv[])
 	  break;
 	case '?':
 	default:
-	  usage (progname);
+	  usage (h5tools_getprogname());
 	  exit (EXIT_FAILURE);
 	}
     }
 
   if (argc <= opt_ind)
     {
-      error_msg (progname, "missing file name\n");
-      usage (progname);
+      error_msg (h5tools_getprogname(), "missing file name\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
 }
@@ -111,19 +112,22 @@ main (int argc, const char *argv[])
   long res;
   char *buf;
 
+  h5tools_setprogname(PROGRAMNAME);
+  h5tools_setstatus(EXIT_SUCCESS);
+
   parse_command_line (argc, argv);
 
   if (nbytes == NULL)
     {
       /* missing arg */
-      error_msg (progname, "missing size\n");
-      usage (progname);
+      error_msg (h5tools_getprogname(), "missing size\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
   if (argc <= (opt_ind))
     {
-      error_msg (progname, "missing file name\n");
-      usage (progname);
+      error_msg (h5tools_getprogname(), "missing file name\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
   filename = HDstrdup (argv[opt_ind]);
@@ -133,15 +137,15 @@ main (int argc, const char *argv[])
   if (res == EOF)
     {
       /* fail */
-      error_msg (progname, "missing file name\n");
-      usage (progname);
+      error_msg (h5tools_getprogname(), "missing file name\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
 
   fd = HDopen (filename, O_RDONLY, 0);
   if (fd < 0)
     {
-      error_msg (progname, "can't open file %s\n", filename);
+      error_msg (h5tools_getprogname(), "can't open file %s\n", filename);
       exit (EXIT_FAILURE);
     }
 

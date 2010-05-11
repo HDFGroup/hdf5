@@ -20,6 +20,9 @@
 #include "h5tools.h"
 
 
+/* Name of tool */
+#define PROGRAMNAME "h5diffgentest"
+
 /*-------------------------------------------------------------------------
 * Program: h5diffgentest
 *
@@ -113,9 +116,6 @@ static int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *name,hid_t
 *
 *-------------------------------------------------------------------------
 */
-
-/* module-scoped variables */
-int d_status = EXIT_SUCCESS;
 
 int main(void)
 {
@@ -923,7 +923,7 @@ int test_datasets(const char *file,
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: Create test files to compare links, one has longer name than 
+* Purpose: Create test files to compare links, one has longer name than
 *          the other and short name is subset of long name.
 *
 * Programmer: Jonathan Kim (Feb 17, 2010)

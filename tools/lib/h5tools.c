@@ -42,6 +42,8 @@ FILE       *rawdatastream; /* should initialize to stdout but gcc moans about it
 int         bin_output;    /* binary output */
 int         bin_form;      /* binary form */
 int         region_output; /* region output */
+static int  h5tools_d_status = 0;
+static const char  *h5tools_progname = "h5tools";
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
 int         packed_output; /* number of packed bits to display */
 int         packed_normalize; /* number of bits to shift right to display normalized */
@@ -284,6 +286,34 @@ enum {
 #endif /* H5_HAVE_PARALLEL */
 } driver_idx;
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
+
+/*-------------------------------------------------------------------------
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Initialize the name and operation status of the H5 Tools library
+ * Description:
+ *      These are utility functions to set/get the program name and operation status.
+ *-------------------------------------------------------------------------
+ */
+void h5tools_setprogname(const char *Progname)
+{
+    h5tools_progname = Progname;
+}
+
+void h5tools_setstatus(int D_status)
+{
+    h5tools_d_status = D_status;
+}
+
+const char*h5tools_getprogname()
+{
+   return h5tools_progname;
+}
+
+int h5tools_getstatus()
+{
+   return h5tools_d_status;
+}
 
 /*-------------------------------------------------------------------------
  * Audience:    Public

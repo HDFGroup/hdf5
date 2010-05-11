@@ -21,6 +21,9 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5copygentest"
+
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
 #define HDF_FILE2                "h5copy_ref.h5"
@@ -225,7 +228,7 @@ static void gent_compressed(hid_t loc_id)
 /*-------------------------------------------------------------------------
  * Function:    gent_named_vl
  *
- * Purpose:     Generate a variable lenght named datatype for a dataset in 
+ * Purpose:     Generate a variable lenght named datatype for a dataset in
                 LOC_ID
  *
  *-------------------------------------------------------------------------
@@ -640,12 +643,12 @@ out:
 /*-------------------------------------------------------------------------
  * Function: Test_Obj_Copy
  *
- * Purpose: Testing with various objects 
+ * Purpose: Testing with various objects
  *
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy()
 {
-    hid_t fid=0;    
+    hid_t fid=0;
 
     /* Create source file */
     fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -678,14 +681,14 @@ static void Test_Ref_Copy()
 {
     hid_t fid=0;
     herr_t status;
-    
+
     fid = H5Fcreate (HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid < 0)
     {
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
         goto out;
     }
-    
+
     /* add object reference */
     status = gen_obj_ref(fid);
     if (status < 0)
@@ -845,7 +848,7 @@ static void Test_Extlink_Copy()
     hid_t fid1=0;
     hid_t fid2=0;
     herr_t status;
-    
+
     fid1 = H5Fcreate (HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0)
     {
@@ -859,7 +862,7 @@ static void Test_Extlink_Copy()
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
         goto out;
     }
-    
+
     /* add links to source external link file */
     status = gen_extlink_src(fid1);
     if (status < 0)
@@ -888,6 +891,9 @@ out:
 
 int main(void)
 {
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();

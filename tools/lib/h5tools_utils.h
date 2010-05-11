@@ -24,12 +24,16 @@
 
 #include "hdf5.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * begin get_option section
  */
-extern int         opt_err;     /* getoption prints errors if this is on    */
-extern int         opt_ind;     /* token pointer                            */
-extern const char *opt_arg;     /* flag argument (or value)                 */
+H5TOOLS_DLLVAR int         opt_err;     /* getoption prints errors if this is on    */
+H5TOOLS_DLLVAR int         opt_ind;     /* token pointer                            */
+H5TOOLS_DLLVAR const char *opt_arg;     /* flag argument (or value)                 */
 
 enum {
     no_arg = 0,         /* doesn't take an argument     */
@@ -72,7 +76,7 @@ typedef struct long_options {
                                  * this gets returned from get_option   */
 } long_options;
 
-extern int    get_option(int argc, const char **argv, const char *opt,
+H5TOOLS_DLL int    get_option(int argc, const char **argv, const char *opt,
                          const struct long_options *l_opt);
 /*
  * end get_option section
@@ -101,24 +105,23 @@ typedef struct find_objs_t {
     table_t *dset_table;
 } find_objs_t;
 
-extern int     nCols;               /*max number of columns for outputting  */
+H5TOOLS_DLLVAR int     nCols;               /*max number of columns for outputting  */
 
 /* Definitions of useful routines */
-extern void     indentation(int);
-extern void     print_version(const char *progname);
-extern void     error_msg(const char *progname, const char *fmt, ...);
-extern void     warn_msg(const char *progname, const char *fmt, ...);
-extern void     free_table(table_t *table);
+H5TOOLS_DLL void     indentation(int);
+H5TOOLS_DLL void     print_version(const char *progname);
+H5TOOLS_DLL void     error_msg(const char *progname, const char *fmt, ...);
+H5TOOLS_DLL void     warn_msg(const char *progname, const char *fmt, ...);
+H5TOOLS_DLL void     free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
-extern void     dump_tables(find_objs_t *info)
+H5TOOLS_DLL void     dump_tables(find_objs_t *info)
 #endif  /* H5DUMP_DEBUG */
-extern herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
+H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     table_t **dset_table, table_t **type_table);
-extern obj_t   *search_obj(table_t *temp, haddr_t objno);
+H5TOOLS_DLL obj_t   *search_obj(table_t *temp, haddr_t objno);
 #ifndef H5_HAVE_TMPFILE
-extern FILE *	tmpfile(void);
+H5TOOLS_DLL FILE *	tmpfile(void);
 #endif
-
 
 /*************************************************************
  *
@@ -148,6 +151,10 @@ typedef struct {
 
 
 /* Definitions of routines */
-extern int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info);
+H5TOOLS_DLL int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* H5TOOLS_UTILS_H__ */

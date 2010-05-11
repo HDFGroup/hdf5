@@ -22,13 +22,13 @@
 extern "C" {
 #endif
 
-herr_t      fill_ref_path_table(hid_t fid);
-const char *lookup_ref_path(haddr_t ref);
-int         get_next_xid(void);
-haddr_t     get_fake_xid(void);
-haddr_t     ref_path_table_lookup(const char *);
-haddr_t     ref_path_table_gen_fake(const char *);
-int         term_ref_path_table(void);
+H5TOOLS_DLL herr_t      fill_ref_path_table(hid_t fid);
+H5TOOLS_DLL const char *lookup_ref_path(haddr_t ref);
+H5TOOLS_DLL int         get_next_xid(void);
+H5TOOLS_DLL haddr_t     get_fake_xid(void);
+H5TOOLS_DLL haddr_t     ref_path_table_lookup(const char *);
+H5TOOLS_DLL haddr_t     ref_path_table_gen_fake(const char *);
+H5TOOLS_DLL int         term_ref_path_table(void);
 
 #ifdef __cplusplus
 }

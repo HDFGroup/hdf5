@@ -19,8 +19,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-const char *progname="h5copy";
-int   d_status;
+/* Name of tool */
+#define PROGRAMNAME "h5copy"
 
 /* command-line options: short and long-named parameters */
 static const char *s_opts = "d:f:hi:o:ps:vV";
@@ -176,7 +176,7 @@ static int parse_flag(const char* str_flag, unsigned *flag)
  }
  else
  {
-  error_msg(progname, "Error in input flag\n");
+  error_msg(h5tools_getprogname(), "Error in input flag\n");
   return -1;
  }
 
@@ -216,7 +216,9 @@ main (int argc, const char *argv[])
  int          li_ret;
  h5tool_link_info_t linkinfo;
 
- /* initialize h5tools lib */
+ h5tools_setprogname(PROGRAMNAME);
+ h5tools_setstatus(EXIT_SUCCESS);
+/* initialize h5tools lib */
  h5tools_init();
 
  /* Check for no command line parameters */
@@ -266,7 +268,7 @@ main (int argc, const char *argv[])
    break;
 
   case 'V':
-   print_version(progname);
+   print_version(h5tools_getprogname());
    leave(EXIT_SUCCESS);
    break;
 
@@ -286,28 +288,28 @@ main (int argc, const char *argv[])
 
  if (fname_src==NULL)
  {
-  error_msg(progname, "Input file name missing\n");
+  error_msg(h5tools_getprogname(), "Input file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (fname_dst==NULL)
  {
-  error_msg(progname, "Output file name missing\n");
+  error_msg(h5tools_getprogname(), "Output file name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (oname_src==NULL)
  {
-  error_msg(progname, "Source object name missing\n");
+  error_msg(h5tools_getprogname(), "Source object name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
 
  if (oname_dst==NULL)
  {
-  error_msg(progname, "Destination object name missing\n");
+  error_msg(h5tools_getprogname(), "Destination object name missing\n");
   usage();
   leave(EXIT_FAILURE);
  }
@@ -324,7 +326,7 @@ main (int argc, const char *argv[])
  *-------------------------------------------------------------------------*/
  if (fid_src==-1)
  {
-  error_msg(progname, "Could not open input file <%s>...Exiting\n", fname_src);
+  error_msg(h5tools_getprogname(), "Could not open input file <%s>...Exiting\n", fname_src);
   if (fname_src)
    free(fname_src);
   leave(EXIT_FAILURE);
@@ -347,7 +349,7 @@ main (int argc, const char *argv[])
  *-------------------------------------------------------------------------*/
  if (fid_dst==-1)
  {
-  error_msg(progname, "Could not open output file <%s>...Exiting\n", fname_dst);
+  error_msg(h5tools_getprogname(), "Could not open output file <%s>...Exiting\n", fname_dst);
   if (fname_src)
    free(fname_src);
   if (fname_dst)
@@ -388,7 +390,7 @@ main (int argc, const char *argv[])
 
     /* Create link creation property list */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
-        error_msg(progname, "Could not create link creation property list\n");
+        error_msg(h5tools_getprogname(), "Could not create link creation property list\n");
         goto error;
     } /* end if */
 
@@ -396,13 +398,13 @@ main (int argc, const char *argv[])
     if(parents) {
         /* Set the intermediate group creation property */
         if(H5Pset_create_intermediate_group(lcpl_id, 1) < 0) {
-            error_msg(progname, "Could not set property for creating parent groups\n");
+            error_msg(h5tools_getprogname(), "Could not set property for creating parent groups\n");
             goto error;
         } /* end if */
 
         /* Display some output if requested */
         if(verbose)
-            printf("%s: Creating parent groups\n", progname);
+            printf("%s: Creating parent groups\n", h5tools_getprogname());
     } /* end if */
 
 /*-------------------------------------------------------------------------

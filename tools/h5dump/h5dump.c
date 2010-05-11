@@ -22,9 +22,8 @@
 #include "h5tools_ref.h"
 #include "h5trav.h"
 
-
-/* module-scoped variables */
-const char  *progname = "h5dump";
+/* Name of tool */
+#define PROGRAMNAME "h5dump"
 
 /* Macros for displaying objects */
 #define begin_obj(obj,name,begin)                               \
@@ -68,7 +67,6 @@ typedef struct h5dump_table_list_t {
     } *tables;
 } h5dump_table_list_t;
 
-int                 d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared datatype with no name */
 static h5dump_table_list_t table_list = {0, 0, NULL};
 static table_t      *group_table = NULL, *dset_table = NULL, *type_table = NULL;
@@ -103,13 +101,13 @@ static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order
 static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
+#define PACKED_BITS_LOOP_MAX         8
 /* mask list for packed bits */
-static unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
+static unsigned int packed_mask[PACKED_BITS_LOOP_MAX];  /* packed bits are restricted to 1 byte */
 
 /* packed bits display parameters */
-static int packed_offset[8];
-static int packed_length[8];
-#define PACKED_BITS_LOOP_MAX         8
+static int packed_offset[PACKED_BITS_LOOP_MAX];
+static int packed_length[PACKED_BITS_LOOP_MAX];
 #endif
 
 /**
@@ -850,7 +848,7 @@ table_list_free(void)
     for(u = 0; u < table_list.nused; u++) {
         /* Release object id */
         if(H5Idec_ref(table_list.tables[u].oid) < 0)
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
 
         /* Free each table */
         free_table(table_list.tables[u].group_table);
@@ -912,8 +910,8 @@ print_datatype(hid_t type,unsigned in_group)
             else
                 printf("\"%s\"", obj->objname);
         } else {
-            error_msg(progname, "unknown committed type.\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "unknown committed type.\n");
+            h5tools_setstatus(EXIT_FAILURE);
         }
     } else {
         switch(H5Tget_class(type)) {
@@ -1152,7 +1150,7 @@ print_datatype(hid_t type,unsigned in_group)
 
                 /* Type doesn't match any of above. */
                 printf("unknown_one_character_type;\n ");
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
 
     done:
                 H5Tclose(str_type);
@@ -1182,7 +1180,7 @@ print_datatype(hid_t type,unsigned in_group)
                     printf("H5T_STD_B64LE");
                 } else {
                     printf("undefined bitfield");
-                    d_status = EXIT_FAILURE;
+                    h5tools_setstatus(EXIT_FAILURE);
                 }
                 break;
 
@@ -1289,7 +1287,7 @@ print_datatype(hid_t type,unsigned in_group)
 
             default:
                 printf("unknown datatype");
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
                 break;
         }
     } /* end else */
@@ -1432,11 +1430,11 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, vo
 
     if((attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT)) < 0) {
         indentation(indent + COL);
-        error_msg(progname, "unable to open attribute \"%s\"\n", attr_name);
+        error_msg(h5tools_getprogname(), "unable to open attribute \"%s\"\n", attr_name);
         indentation(indent);
         end_obj(dump_header_format->attributeend,
                 dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
         ret = FAIL;
     } else {
         hid_t type, space;
@@ -1508,9 +1506,9 @@ dump_selected_attr(hid_t loc_id, const char *name)
     /* Open the object with the attribute */
     if((oid = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0) {
         indentation(COL);
-        error_msg(progname, "unable to open object \"%s\"\n", obj_name);
+        error_msg(h5tools_getprogname(), "unable to open object \"%s\"\n", obj_name);
         end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
         return FAIL;
     } /* end if */
 
@@ -1535,14 +1533,14 @@ dump_selected_attr(hid_t loc_id, const char *name)
         dump_header_format->attributeblockend);
     } else {
         indentation(COL);
-        error_msg(progname, "unable to open attribute \"%s\"\n", obj_name);
+        error_msg(h5tools_getprogname(), "unable to open attribute \"%s\"\n", obj_name);
         end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* Close object */
     if(H5Oclose(oid) < 0) {
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
         return FAIL;
     } /* end if */
 
@@ -1590,8 +1588,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
 
         /* Stat the object */
         if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0) {
-            error_msg(progname, "unable to get object information for \"%s\"\n", name);
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "unable to get object information for \"%s\"\n", name);
+            h5tools_setstatus(EXIT_FAILURE);
             ret = FAIL;
             goto done;
         } /* end if */
@@ -1601,8 +1599,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
         case H5O_TYPE_GROUP:
             if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0)
             {
-                error_msg(progname, "unable to dump group \"%s\"\n", name);
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "unable to dump group \"%s\"\n", name);
+                h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
             }
             else
@@ -1640,13 +1638,13 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                             begin_obj(dump_header_format->datasetbegin, name,
                                       dump_header_format->datasetblockbegin);
                             indentation(indent + COL);
-                            error_msg(progname,
+                            error_msg(h5tools_getprogname(),
                                       "internal error (file %s:line %d)\n",
                                       __FILE__, __LINE__);
                             indentation(indent);
                             end_obj(dump_header_format->datasetend,
                                     dump_header_format->datasetblockend);
-                            d_status = EXIT_FAILURE;
+                            h5tools_setstatus(EXIT_FAILURE);
                             ret = FAIL;
                             H5Dclose(obj);
                             goto done;
@@ -1709,16 +1707,16 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                     dump_function_table->dump_dataset_function(obj, name, NULL);
                     H5Dclose(obj);
                 } else {
-                    error_msg(progname, "unable to dump dataset \"%s\"\n", name);
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "unable to dump dataset \"%s\"\n", name);
+                    h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
                 }
                 break;
 
             case H5O_TYPE_NAMED_DATATYPE:
                 if((obj = H5Topen2(group, name, H5P_DEFAULT)) < 0) {
-                    error_msg(progname, "unable to dump datatype \"%s\"\n", name);
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "unable to dump datatype \"%s\"\n", name);
+                    h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
                 } else {
                     dump_function_table->dump_named_datatype_function(obj, name);
@@ -1727,8 +1725,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                 break;
 
             default:
-                error_msg(progname, "unknown object \"%s\"\n", name);
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "unknown object \"%s\"\n", name);
+                h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
         }
     } /* end if */
@@ -1748,8 +1746,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                 }
 
                 if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
-                    error_msg(progname, "unable to get link value\n");
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "unable to get link value\n");
+                    h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
                 } else {
                     /* print the value of a soft link */
@@ -1839,8 +1837,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                     begin_obj(dump_header_format->extlinkbegin, name, dump_header_format->extlinkblockbegin);
 
                 if(H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
-                    error_msg(progname, "unable to get external link value\n");
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "unable to get external link value\n");
+                    h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
                 } /* end if */
                 else {
@@ -1848,8 +1846,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                     const char *targname;
 
                     if(H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &targname) < 0) {
-                        error_msg(progname, "unable to unpack external link value\n");
-                        d_status = EXIT_FAILURE;
+                        error_msg(h5tools_getprogname(), "unable to unpack external link value\n");
+                        h5tools_setstatus(EXIT_FAILURE);
                         ret = FAIL;
                     } /* end if */
                     else {
@@ -1981,20 +1979,20 @@ dump_named_datatype(hid_t tid, const char *name)
 
     if ((tcpl_id = H5Tget_create_plist(tid)) < 0)
     {
-        error_msg(progname, "error in getting creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the creation properties for attributes */
     if (H5Pget_attr_creation_order(tcpl_id, &attr_crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     if(H5Pclose(tcpl_id) < 0) {
-        error_msg(progname, "error in closing creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in closing creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
 
@@ -2013,9 +2011,9 @@ dump_named_datatype(hid_t tid, const char *name)
         found_obj = search_obj(type_table, oinfo.addr);
 
         if (found_obj == NULL) {
-            error_msg(progname, "internal error (file %s:line %d)\n",
+            error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n",
                 __FILE__, __LINE__);
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
         else if (found_obj->displayed) {
@@ -2038,14 +2036,14 @@ dump_named_datatype(hid_t tid, const char *name)
 
     if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
         if(H5Aiterate2(tid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg(progname, "error getting attribute information\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "error getting attribute information\n");
+            h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
     } /* end if */
     else {
         if(H5Aiterate2(tid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg(progname, "error getting attribute information\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "error getting attribute information\n");
+            h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
     } /* end else */
 
@@ -2087,27 +2085,27 @@ dump_group(hid_t gid, const char *name)
 
     if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
     {
-        error_msg(progname, "error in getting group creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the group creation properties for attributes */
     if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting group creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the group creation properties */
     if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting group creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     if(H5Pclose(gcpl_id) < 0) {
-        error_msg(progname, "error in closing group creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in closing group creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
 
@@ -2149,9 +2147,9 @@ dump_group(hid_t gid, const char *name)
 
         if (found_obj == NULL) {
             indentation(indent);
-            error_msg(progname, "internal error (file %s:line %d)\n",
+            error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n",
                 __FILE__, __LINE__);
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
         }
         else if (found_obj->displayed) {
             indentation(indent);
@@ -2164,14 +2162,14 @@ dump_group(hid_t gid, const char *name)
 
             if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
                 if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                    error_msg(progname, "error getting attribute information\n");
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                    h5tools_setstatus(EXIT_FAILURE);
                 } /* end if */
             } /* end if */
             else {
                 if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                    error_msg(progname, "error getting attribute information\n");
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                    h5tools_setstatus(EXIT_FAILURE);
                 } /* end if */
             } /* end else */
 
@@ -2195,14 +2193,14 @@ dump_group(hid_t gid, const char *name)
 
         if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
             if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end if */
         else {
             if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end else */
 
@@ -2253,15 +2251,15 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
     {
-        error_msg(progname, "error in getting creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the creation properties for attributes */
     if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     indentation(indent);
@@ -2330,14 +2328,14 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
         if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
             if(H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end if */
         else {
             if(H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end else */
 
@@ -2648,8 +2646,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 
     if (status == FAIL) {
         indentation(indent + COL);
-        error_msg(progname, "unable to print data\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "unable to print data\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     indentation(indent);
@@ -3704,10 +3702,10 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             begin_obj(dump_header_format->datasetbegin, real_name,
                 dump_header_format->datasetblockbegin);
             indentation(COL);
-            error_msg(progname, "unable to open dataset \"%s\"\n", real_name);
+            error_msg(h5tools_getprogname(), "unable to open dataset \"%s\"\n", real_name);
             end_obj(dump_header_format->datasetend,
                 dump_header_format->datasetblockend);
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
         }
         return;
     } /* end if */
@@ -3774,8 +3772,8 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
                 if ( sset->stride[i] < sset->block[i] )
                 {
-                    error_msg(progname, "wrong subset selection; blocks overlap\n");
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "wrong subset selection; blocks overlap\n");
+                    h5tools_setstatus(EXIT_FAILURE);
                     return;
 
                 }
@@ -3809,13 +3807,13 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             }
         }
         else
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
     }
     else
         dump_dataset(dsetid, real_name, sset);
 
     if(H5Dclose(dsetid) < 0)
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
 }
 
 /*-------------------------------------------------------------------------
@@ -3851,9 +3849,9 @@ handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe, const ch
         {
             begin_obj(dump_header_format->groupbegin, real_name, dump_header_format->groupblockbegin);
             indentation(COL);
-            error_msg(progname, "unable to open group \"%s\"\n", real_name);
+            error_msg(h5tools_getprogname(), "unable to open group \"%s\"\n", real_name);
             end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
         }
     }
     else
@@ -3871,7 +3869,7 @@ handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe, const ch
         dump_group(gid, real_name);
 
         if(H5Gclose(gid) < 0)
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
     } /* end else */
 } /* end handle_groups() */
 
@@ -3895,11 +3893,11 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
     H5L_info_t linfo;
 
     if(H5Lget_info(fid, links, &linfo, H5P_DEFAULT) < 0) {
-        error_msg(progname, "unable to get link info from \"%s\"\n", links);
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "unable to get link info from \"%s\"\n", links);
+        h5tools_setstatus(EXIT_FAILURE);
     } else if(linfo.type == H5L_TYPE_HARD) {
-        error_msg(progname, "\"%s\" is a hard link\n", links);
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "\"%s\" is a hard link\n", links);
+        h5tools_setstatus(EXIT_FAILURE);
     } else {
         char *buf = HDmalloc(linfo.u.val_size);
 
@@ -3911,9 +3909,9 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
                 if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0)
                     printf("LINKTARGET \"%s\"\n", buf);
                 else {
-                    error_msg(progname, "h5dump error: unable to get link value for \"%s\"\n",
+                    error_msg(h5tools_getprogname(), "h5dump error: unable to get link value for \"%s\"\n",
                               links);
-                    d_status = EXIT_FAILURE;
+                    h5tools_setstatus(EXIT_FAILURE);
                 }
                 end_obj(dump_header_format->softlinkend,
                         dump_header_format->softlinkblockend);
@@ -3937,12 +3935,12 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
                         indentation(COL);
                         printf("TARGETPATH \"%s\"\n", elink_path);
                     } else {
-                        error_msg(progname, "h5dump error: unable to unpack external link value for \"%s\"\n", links);
-                        d_status = EXIT_FAILURE;
+                        error_msg(h5tools_getprogname(), "h5dump error: unable to unpack external link value for \"%s\"\n", links);
+                        h5tools_setstatus(EXIT_FAILURE);
                     }
                 } else {
-                    error_msg(progname, "h5dump error: unable to get external link value for \"%s\"\n", links);
-                    d_status = EXIT_FAILURE;
+                    error_msg(h5tools_getprogname(), "h5dump error: unable to get external link value for \"%s\"\n", links);
+                    h5tools_setstatus(EXIT_FAILURE);
                 }
                 end_obj(dump_header_format->extlinkend,
                         dump_header_format->extlinkblockend);
@@ -4018,10 +4016,10 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
                 begin_obj(dump_header_format->datatypebegin, real_name,
                     dump_header_format->datatypeblockbegin);
                 indentation(COL);
-                error_msg(progname, "unable to open datatype \"%s\"\n", real_name);
+                error_msg(h5tools_getprogname(), "unable to open datatype \"%s\"\n", real_name);
                 end_obj(dump_header_format->datatypeend,
                     dump_header_format->datatypeblockend);
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
             }
         }
         else
@@ -4038,7 +4036,7 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
         dump_named_datatype(type_id, real_name);
 
         if(H5Tclose(type_id) < 0)
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
     }
 }
 
@@ -4070,7 +4068,7 @@ parse_command_line(int argc, const char *argv[])
 
      /* no arguments */
     if (argc == 1) {
-        usage(progname);
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
@@ -4120,7 +4118,7 @@ parse_start:
             display_char = TRUE;
             break;
         case 'V':
-            print_version(progname);
+            print_version(h5tools_getprogname());
             leave(EXIT_SUCCESS);
             break;
         case 'w':
@@ -4196,13 +4194,13 @@ parse_start:
         case 'o':
             if ( bin_output ) {
                 if (set_output_file(opt_arg, 1) < 0) {
-                    usage(progname);
+                    usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
             }
             else {
                 if (set_output_file(opt_arg, 0) < 0) {
-                    usage(progname);
+                    usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
             }
@@ -4216,7 +4214,7 @@ parse_start:
             if ( opt_arg != NULL) {
                 if ( ( bin_form = set_binary_form(opt_arg)) < 0) {
                     /* failed to set binary form */
-                    usage(progname);
+                    usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
             }
@@ -4224,7 +4222,7 @@ parse_start:
             if (outfname!=NULL) {
                 if (set_output_file(outfname, 1) < 0)  {
                     /* failed to set output file */
-                    usage(progname);
+                    usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
 
@@ -4235,7 +4233,7 @@ parse_start:
         case 'q':
             if ( ( sort_by = set_sort_by(opt_arg)) < 0) {
                 /* failed to set "sort by" form */
-                usage(progname);
+                usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
             }
             break;
@@ -4243,7 +4241,7 @@ parse_start:
         case 'z':
             if ( ( sort_order = set_sort_order(opt_arg)) < 0) {
                 /* failed to set "sort order" form */
-                usage(progname);
+                usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
             }
             break;
@@ -4251,7 +4249,7 @@ parse_start:
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         case 'M':
             if (!last_was_dset) {
-                error_msg(progname,
+                error_msg(h5tools_getprogname(),
                           "option `-%c' can only be used after --dataset option\n",
                           opt);
                 leave(EXIT_FAILURE);
@@ -4294,7 +4292,7 @@ parse_start:
             /* specify XML namespace (default="hdf5:"), or none */
             /* To Do: check format of this value?  */
         if (!useschema) {
-                usage(progname);
+                usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
         }
         if (strcmp(opt_arg,":") == 0) {
@@ -4313,7 +4311,7 @@ parse_start:
             struct subset_t *s;
 
             if (!last_was_dset) {
-                error_msg(progname,
+                error_msg(h5tools_getprogname(),
                           "option `-%c' can only be used after --dataset option\n",
                           opt);
                 leave(EXIT_FAILURE);
@@ -4361,11 +4359,11 @@ end_collect:
         /** end subsetting parameters **/
 
         case 'h':
-            usage(progname);
+            usage(h5tools_getprogname());
             leave(EXIT_SUCCESS);
         case '?':
         default:
-            usage(progname);
+            usage(h5tools_getprogname());
             leave(EXIT_FAILURE);
         }
     }
@@ -4373,8 +4371,8 @@ end_collect:
 parse_end:
     /* check for file name to be processed */
     if (argc <= opt_ind) {
-        error_msg(progname, "missing file name\n");
-        usage(progname);
+        error_msg(h5tools_getprogname(), "missing file name\n");
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
     return hand;
@@ -4468,6 +4466,8 @@ main(int argc, const char *argv[])
     int                 i;
     unsigned            u;
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
     dump_header_format = &standardformat;
     dump_function_table = &ddl_function_table;
 
@@ -4481,43 +4481,43 @@ main(int argc, const char *argv[])
 
     if ( bin_output && outfname == NULL )
     {
-        error_msg(progname, "binary output requires a file name, use -o <filename>\n");
+        error_msg(h5tools_getprogname(), "binary output requires a file name, use -o <filename>\n");
         leave(EXIT_FAILURE);
     }
 
     /* Check for conflicting options */
     if (doxml) {
         if (!display_all) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
+            error_msg(h5tools_getprogname(), "option \"%s\" not available for XML\n",
                     "to display selected objects");
             leave(EXIT_FAILURE);
         } else if (display_bb) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
+            error_msg(h5tools_getprogname(), "option \"%s\" not available for XML\n",
                     "--boot-block");
             leave(EXIT_FAILURE);
         } else if (display_oid == 1) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
+            error_msg(h5tools_getprogname(), "option \"%s\" not available for XML\n",
                     "--object-ids");
             leave(EXIT_FAILURE);
         } else if (display_char == TRUE) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
+            error_msg(h5tools_getprogname(), "option \"%s\" not available for XML\n",
                     "--string");
             leave(EXIT_FAILURE);
         } else if (usingdasho) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
+            error_msg(h5tools_getprogname(), "option \"%s\" not available for XML\n",
                     "--output");
             leave(EXIT_FAILURE);
         }
     } else {
         if (xml_dtd_uri) {
-            warn_msg(progname, "option \"%s\" only applies with XML: %s\n",
+            warn_msg(h5tools_getprogname(), "option \"%s\" only applies with XML: %s\n",
                      "--xml-dtd", xml_dtd_uri);
         }
     }
 
     if (argc <= opt_ind) {
-        error_msg(progname, "missing file name\n");
-        usage(progname);
+        error_msg(h5tools_getprogname(), "missing file name\n");
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
     fname = HDstrdup(argv[opt_ind]);
@@ -4525,7 +4525,7 @@ main(int argc, const char *argv[])
     fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
 
     if (fid < 0) {
-        error_msg(progname, "unable to open file \"%s\"\n", fname);
+        error_msg(h5tools_getprogname(), "unable to open file \"%s\"\n", fname);
         leave(EXIT_FAILURE);
     }
 
@@ -4551,7 +4551,7 @@ main(int argc, const char *argv[])
             }
         } else {
             if (useschema && strcmp(xmlnsprefix,"")) {
-                error_msg(progname, "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
+                error_msg(h5tools_getprogname(), "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
                 leave(EXIT_FAILURE);
             }
         }
@@ -4560,15 +4560,15 @@ main(int argc, const char *argv[])
 
     /* Get object info for root group */
     if(H5Oget_info_by_name(fid, "/", &oi, H5P_DEFAULT) < 0) {
-        error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n", __FILE__, __LINE__);
+        h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* Initialize object tables */
     if(table_list_add(fid, oi.fileno) < 0) {
-        error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n", __FILE__, __LINE__);
+        h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
     group_table = table_list.tables[0].group_table;
@@ -4630,8 +4630,8 @@ main(int argc, const char *argv[])
     {
         if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
         {
-            error_msg(progname, "unable to open root group\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "unable to open root group\n");
+            h5tools_setstatus(EXIT_FAILURE);
         }
         else
         {
@@ -4642,8 +4642,8 @@ main(int argc, const char *argv[])
 
         if(H5Gclose(gid) < 0)
         {
-            error_msg(progname, "unable to close root group\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "unable to close root group\n");
+            h5tools_setstatus(EXIT_FAILURE);
         }
 
 
@@ -4652,8 +4652,8 @@ main(int argc, const char *argv[])
     {
         /* Note: this option is not supported for XML */
         if(doxml) {
-            error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n", __FILE__, __LINE__);
+            h5tools_setstatus(EXIT_FAILURE);
             goto done;
         } /* end if */
 
@@ -4673,7 +4673,7 @@ done:
     table_list_free();
 
     if (H5Fclose(fid) < 0)
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
 
     free_handler(hand, argc);
 
@@ -4684,7 +4684,7 @@ done:
 
     H5Eset_auto2(H5E_DEFAULT, func, edata);
 
-    leave(d_status);
+    leave(h5tools_getstatus());
 }
 
 /*-------------------------------------------------------------------------
@@ -5097,7 +5097,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             free(dtxid);
         } else {
             printf("<!-- h5dump error: unknown committed type. -->\n");
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
         }
     } else {
 
@@ -5401,7 +5401,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
 
             default:
                 printf("<!-- unknown datatype -->");
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
                 break;
         }
     } /* end else */
@@ -5783,7 +5783,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t UNUSED *info,
         printf("<!-- h5dump error: unable to open attribute. -->\n");
         indentation(indent);
         printf("</%sAttribute>\n", xmlnsprefix );
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
         return FAIL;
     }
 }
@@ -5858,9 +5858,9 @@ xml_dump_named_datatype(hid_t type, const char *name)
 
             if (found_obj == NULL) {
                 indentation(indent);
-                    error_msg(progname, "internal error (file %s:line %d)\n",
+                    error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n",
                               __FILE__, __LINE__);
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
                 goto done;
             } else if(found_obj->displayed) {
                 /* We have already printed this named datatype, print it as a
@@ -5939,27 +5939,27 @@ xml_dump_group(hid_t gid, const char *name)
 
     if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
     {
-        error_msg(progname, "error in getting group creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the group creation properties for attributes */
     if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting group creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* query the group creation properties */
     if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0)
     {
-        error_msg(progname, "error in getting group creation properties\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in getting group creation properties\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     if(H5Pclose(gcpl_id) < 0) {
-        error_msg(progname, "error in closing group creation property list ID\n");
-        d_status = EXIT_FAILURE;
+        error_msg(h5tools_getprogname(), "error in closing group creation property list ID\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     if(HDstrcmp(name, "/") == 0) {
@@ -5991,9 +5991,9 @@ xml_dump_group(hid_t gid, const char *name)
 
         if (found_obj == NULL) {
             indentation(indent);
-                error_msg(progname, "internal error (file %s:line %d)\n",
+                error_msg(h5tools_getprogname(), "internal error (file %s:line %d)\n",
                           __FILE__, __LINE__);
-            d_status = EXIT_FAILURE;
+            h5tools_setstatus(EXIT_FAILURE);
         } else {
             char *t_name = xml_escape_the_name(name);
             char *grpxid = malloc(100);
@@ -6058,14 +6058,14 @@ xml_dump_group(hid_t gid, const char *name)
 
                 if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
                     if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-                        error_msg(progname, "error getting attribute information\n");
-                        d_status = EXIT_FAILURE;
+                        error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                        h5tools_setstatus(EXIT_FAILURE);
                     } /* end if */
                 } /* end if */
                 else {
                     if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-                        error_msg(progname, "error getting attribute information\n");
-                        d_status = EXIT_FAILURE;
+                        error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                        h5tools_setstatus(EXIT_FAILURE);
                     } /* end if */
                 } /* end else */
 
@@ -6130,14 +6130,14 @@ xml_dump_group(hid_t gid, const char *name)
 
         if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
             if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end if */
         else {
             if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-                error_msg(progname, "error getting attribute information\n");
-                d_status = EXIT_FAILURE;
+                error_msg(h5tools_getprogname(), "error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
         } /* end else */
 
@@ -6796,14 +6796,14 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 
     if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
         if(H5Aiterate2(did, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-            error_msg(progname, "error getting attribute information\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "error getting attribute information\n");
+            h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
     } /* end if */
     else {
         if(H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL) < 0) {
-            error_msg(progname, "error getting attribute information\n");
-            d_status = EXIT_FAILURE;
+            error_msg(h5tools_getprogname(), "error getting attribute information\n");
+            h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
     } /* end else */
 
@@ -7236,7 +7236,7 @@ static int dump_extlink(hid_t group, const char *linkname, const char *objname)
                 handle_datatypes(group, linkname, NULL, 0, objname);
                 break;
             default:
-                d_status = EXIT_FAILURE;
+                h5tools_setstatus(EXIT_FAILURE);
         }
 
         indent -= 2*COL;
@@ -7251,7 +7251,7 @@ static int dump_extlink(hid_t group, const char *linkname, const char *objname)
     } /* end if */
 
     if (H5Idec_ref(oid) < 0)
-        d_status = EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
 
 
     return SUCCEED;

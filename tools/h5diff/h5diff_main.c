@@ -20,6 +20,9 @@
 #include "h5diff_common.h"
 #include "h5tools_utils.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5diff"
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -68,9 +71,6 @@
  */
 
 
-/* module-scoped variables */
-int d_status = EXIT_SUCCESS;
-
 int main(int argc, const char *argv[])
 {
     int        ret;
@@ -81,6 +81,8 @@ int main(int argc, const char *argv[])
     hsize_t    nfound=0;
     diff_opt_t options;
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
     /*-------------------------------------------------------------------------
     * process the command-line
     *-------------------------------------------------------------------------

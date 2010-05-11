@@ -22,10 +22,6 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-
-extern char  *progname;
-
-
 /*-------------------------------------------------------------------------
 * File: h5repack.c
 * Purpose: Public API functions
@@ -157,7 +153,7 @@ int h5repack_addfilter(const char* str,
 
         if(options->n_filter_g > H5_REPACK_MAX_NFILTERS)
         {
-            error_msg(progname, "maximum number of filters exceeded for <%s>\n", str);
+            error_msg(h5tools_getprogname(), "maximum number of filters exceeded for <%s>\n", str);
             free(obj_list);
             return -1;
         }
@@ -195,7 +191,7 @@ int h5repack_addlayout(const char* str,
     init_packobject(&pack);
 
     if (options->all_layout==1){
-        error_msg(progname, "invalid layout input: 'all' option \
+        error_msg(h5tools_getprogname(), "invalid layout input: 'all' option \
                             is present with other objects <%s>\n",str);
         return -1;
     }
@@ -614,7 +610,7 @@ static int check_options(pack_opt_t *options)
                 break;
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
-                error_msg(progname, "invalid layout\n");
+                error_msg(h5tools_getprogname(), "invalid layout\n");
                 return -1;
             default:
                 strcpy(slayout,"invalid layout\n");
@@ -655,7 +651,7 @@ static int check_options(pack_opt_t *options)
 
     if (options->all_layout==1 && has_ck)
     {
-        error_msg(progname, "invalid chunking input: 'all' option\
+        error_msg(h5tools_getprogname(), "invalid chunking input: 'all' option\
                             is present with other objects\n");
         return -1;
     }
@@ -717,7 +713,7 @@ static int check_options(pack_opt_t *options)
 
     if (options->all_filter==1 && has_cp)
     {
-        error_msg(progname, "invalid compression input: 'all' option\
+        error_msg(h5tools_getprogname(), "invalid compression input: 'all' option\
                             is present with other objects\n");
         return -1;
     }
@@ -729,24 +725,24 @@ static int check_options(pack_opt_t *options)
 
     if (options->grp_compact < 0)
     {
-        error_msg(progname, "invalid maximum number of links to store as header messages\n");
+        error_msg(h5tools_getprogname(), "invalid maximum number of links to store as header messages\n");
         return -1;
     }
     if (options->grp_indexed < 0)
     {
-        error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
+        error_msg(h5tools_getprogname(), "invalid minimum number of links to store in the indexed format\n");
         return -1;
     }
     if (options->grp_indexed > options->grp_compact)
     {
-        error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
+        error_msg(h5tools_getprogname(), "minimum indexed size is greater than the maximum compact size\n");
         return -1;
     }
     for (i=0; i<8; i++)
     {
         if (options->msg_size[i]<0)
         {
-            error_msg(progname, "invalid shared message size\n");
+            error_msg(h5tools_getprogname(), "invalid shared message size\n");
             return -1;
         }
     }
@@ -768,7 +764,7 @@ static int check_options(pack_opt_t *options)
 
     if ( options->ublock_filename == NULL && options->ublock_size != 0 )
     {
-        error_msg(progname, "file name missing for user block\n",
+        error_msg(h5tools_getprogname(), "file name missing for user block\n",
             options->ublock_filename);
         return -1;
     }
@@ -781,7 +777,7 @@ static int check_options(pack_opt_t *options)
 
     if ( options->alignment == 0 && options->threshold != 0 )
     {
-        error_msg(progname, "alignment for H5Pset_alignment missing\n");
+        error_msg(h5tools_getprogname(), "alignment for H5Pset_alignment missing\n");
         return -1;
     }
 
@@ -853,7 +849,7 @@ static int check_objects(const char* fname,
         /* the input object names are present in the file and are valid */
         if(h5trav_getindext(name, travt) < 0)
         {
-            error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
+            error_msg(h5tools_getprogname(), "%s Could not find <%s> in file <%s>. Exiting...\n",
                 (options->verbose?"\n":""),name,fname);
             goto out;
         }
@@ -975,7 +971,7 @@ static const char* get_sfilter(H5Z_filter_t filtn)
     else if (filtn==H5Z_FILTER_SCALEOFFSET)
         return "SOFF";
     else {
-        error_msg(progname, "input error in filter type\n");
+        error_msg(h5tools_getprogname(), "input error in filter type\n");
         exit(EXIT_FAILURE);
     }
 }

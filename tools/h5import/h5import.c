@@ -23,6 +23,9 @@
 #include "h5tools_utils.h"
 
 
+/* Name of tool */
+#define PROGRAMNAME "h5import"
+
 int main(int argc, char *argv[])
 {
   struct  Options opt;
@@ -41,6 +44,9 @@ int main(int argc, char *argv[])
     const char *err7 = "Invalid type of data - %s.\n";
     const char *err8 = "Invalid size of data - %s.\n";
     const char *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
+
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
    (void)HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
    (void)HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);

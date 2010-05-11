@@ -19,6 +19,8 @@
 #include "h5test.h"
 
 
+/* Name of tool */
+#define PROGRAMNAME "h5repack_detect_szip"
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -42,6 +44,9 @@
 
 int main(void)
 {
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
         printf("yes\n");
