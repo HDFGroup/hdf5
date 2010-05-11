@@ -1,0 +1,234 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5check" -->
+<hr>
+<dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 11 May 2010
+      </i></font></div>
+
+  <dt><strong>Tool Name:</strong> <a name="Tools-Check">h5check</a>
+
+  <dt><strong>Syntax:</strong>
+    <dd><code>h5check 
+            <em>[OPTIONS]</em>
+            <em>file</em>
+            </code>
+
+  <p>
+  <dt><strong>Purpose:</strong>
+      <dd>Verifies that an HDF5 file is encoded according to the 
+        HDF5 specification.  
+
+  <p>
+  <dt><strong>Motivation:</strong>
+    <dd><code>H5check</code> 
+      is a validation tool designed to verify that an HDF5 file is encoded 
+      according to the <a href="http:../H5.format.html"><cite>HDF5 File Format 
+      Specification</cite></a>.  The purpose is to ensure data model integrity and 
+      long-term compatibility between evolving versions of the HDF5 Library.  
+
+      <p>
+      <strong>Independent Verification Tool:</strong>
+      Note that <code>H5check</code> is designed to operate independently of the 
+      HDF5 Library:
+      <ul>
+        <li>It verifies the validity of an HDF5 file directly against the 
+          <a href="../H5.format.html"><cite>HDF5 File Format Specification</cite></a>
+          without reference to or any use of the HDF5 Library.
+        <li><code>H5check</code> is distributed separately; see
+          &ldquo;<a href="http://www.hdfgroup.org/products/hdf5_tools/index.html">HDF5 
+          Tools and Software</a>.&rdquo;
+      </ul>
+
+  <p>
+  <dt><strong>Description:</strong>
+    <dd>Given a file, <code>h5check</code> scans through the encoded content, 
+      verifying it against the defined library format.  
+      If it finds any non-compliance, <code>h5check</code> prints the error and 
+      the reason behind the non-compliance; if possible, it continues the scanning.  
+      If <code>h5check</code> does not find any non-compliance, it prints an 
+      approval statement upon completion.  
+      <p>
+      By default, the file is verified against the latest version of the 
+      file format; as of this writing, that is the format recognized by the 
+      HDF5 Release 1.8.x series.  A format version can be explicitly specified 
+      with the <code>-f<em>n</em></code>
+      (or  <code>--format=<em>n</em></code>) option.  
+      For example, <code>-f16</code>  (or <code>--format=16</code>) would specify 
+      verification against the format recognized by the HDF5 Release 1.6.x series.
+
+  <p>
+  <dt><strong>Options:</strong>
+    <dd><dl>
+      <dt><code>-h, --help</code>
+          <dd>Print usage message and exit.
+      <dt><code>-V, --version</code>
+          <dd>Print version number and exit.
+      <dt><code>-v<i>n</i>, --verbose <i>n</i></code>
+          <dd>Set verbose mode:
+              <table width=90% align=center>
+              <tr><td valign=top align=left width=10%>
+                      <code><i>n</i>=0</code>
+                  </td><td valign=top align=left width=15%>
+                      Terse
+                  </td><td valign=top align=left>
+                      Indicate only whether file is compliant.
+                  </td></tr>
+              <tr><td valign=top align=left>
+                      <code><i>n</i>=1</code>
+                  </td><td valign=top align=left>
+                      Normal
+                  </td><td valign=top align=left>
+                      Print progress and all errors found. 
+                      &nbsp; <i>(Default)</i>
+                  </td></tr>
+              <tr><td valign=top align=left>
+                      <code><i>n</i>=2</code>
+                  </td><td valign=top align=left>
+                      Verbose
+                  </td><td valign=top align=left>
+                      Print all known information; usually used for debugging.
+                  </td></tr>
+              </table>
+      <dt><code>-f<i>n</i>, --format <i>n</i></code>
+          <dd>Set library release version against which the file is to be 
+              validated:
+              <table width=90% align=center>
+              <tr><td valign=top align=left width=10%>
+                      <code><i>n</i>=16</code>
+                  </td><td valign=top align=left>
+                      Validate according to HDF5 Release 1.6.x series.
+                  </td></tr>
+              <tr><td valign=top align=left>
+                      <code><i>n</i>=18</code>
+                  </td><td valign=top align=left>
+                      Validate according to HDF5 Release 1.8.x series.
+                      &nbsp; <i>(Default)</i>
+                  </td></tr>
+              </table>
+      <dt><code>-o<i>a</i>, --object <i>a</i></code>
+          <dd>Check object header, where <code><i>a</i></code> 
+              is the address of the object header to be validated.
+      </dl>
+
+  <p>
+  <dt><strong>Exit Status:</strong>
+    <dd><table>
+        <table width=100%>
+        <tr><td valign=top align=left width=10%>
+                <code>0</code>
+            </td><td valign=top align=left>
+                Succeeded.
+            </td></tr>
+        <tr><td valign=top align=left>
+                <code>1</code>
+            </td><td valign=top align=left>
+                Command failures, such as argument errors.
+            </td></tr>
+        <tr><td valign=top align=left>
+                <code>2</code>
+            </td><td valign=top align=left>
+                Format compliance errors found.
+            </td></tr>
+        </table>
+
+<!--__ *** USAGE EXAMPLES ****************************************  -->
+<!--__ Multiple examples may be given.  Two are shown below and     -->
+<!--__ more can be added if needed (or one removed).                -->
+<!--__                                                              -->
+<!--__ Each usage example should have text describing the meanings  -->
+<!--__ of the parameters following the <dd> tag.                    -->
+<!--__ The sample usage line(s) should be entered between the       -->
+<!--__ <dir><pre> and </pre></dir> tags.                            -->
+<!--__ Multiple entries are separated by <p> tags.                  -->
+<!--__ ***********************************************************  -->
+<!--
+  <p>
+  <dt><strong>Example Usage:</strong>
+
+    <dd>Discuss the elements in the first usage example here.
+<dir><pre>
+Complete usage example line(s) for the first example here
+</pre></dir>
+    <p>
+
+    <dd>Discuss the elements in the second usage example here.
+<dir><pre>
+Complete usage example line(s) for the second example here
+</pre></dir>
+  <p>
+-->
+
+<!--__ *** SEE ALSO **********************************************  -->
+<!--__ Provide links to related documentation, such as related      -->
+<!--__ tools, functions, user guide sections, etc.                  -->
+<!--__                                                              -->
+<!--__ Ask a member of the documentation team if you need help      -->
+<!--__ identifying or locating references.                          -->
+<!--__                                                              -->
+<!--__ Edit the sample links provided, and delete unneeded text.    -->
+<!--__ The order is functions, callback or operator functions,      -->
+<!--__ HDF5 structures, tools, then other documents.                -->
+<!--__ Use a <p> between types of documents.                        -->
+<!--__ ***********************************************************  -->
+<!--
+  <p>
+  <dt><strong>See Also:</strong>
+    <dd><a href="../html/RM/RM_H5D.html#Dataset-Create">
+        <code>H5Dcreate</code></a>,
+        &nbsp;
+        <a href="../html/RM/RM_H5T.html#Datatype-Commit">
+        <code>H5Tcommit</code></a>
+        <p>
+
+        <a href="../html/RM/H5function.html#H5L_elink_traverse_t">
+        <code>H5L_elink_traverse_t</code></a>
+        <p>
+
+        <a href="../html/RM/Tools.html#h5dump"><code>h5dump</code></a>
+        <p>
+
+        &ldquo;Discovering Objects in a Group&rdquo; in the
+        &ldquo;<a href="../../html/UG/UG_frame09Groups.html">Groups</a>&rdquo; 
+        chapter of the
+        <a href="../../html/UG/index.html"><cite>HDF5 User&rsquo;s Guide</cite></a>
+-->
+
+
+  <p>
+  <dt><strong>History:</strong>
+    <dd><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Change</strong></td>
+        </tr>
+        <tr>
+          <td valign="top">1.8.5</td>
+          <td valign="top">
+            Tool first distributed shortly before this release.</td>
+        </tr>
+
+<!--__ ***********************************************************  -->
+<!--__ If describing a change to the syntax or behavior of a tool,  -->
+<!--__ include the following lines,                                 -->
+<!--__ replacing '*.**.**' with the appropriate release number      -->
+<!--__ and editing the "in-this-way" text as appropriate.           -->
+<!--__ ***********************************************************  -->
+<!--
+        <tr>
+          <td valign="top">*.**.**</td>
+          <td valign="top">
+            Tool changed in-this-way.</td>
+        </tr>
+-->
+
+<!--__ ***********************************************************  -->
+<!--__ Do not modify the next 3 lines; they close the "History:"    -->
+<!--__ table and the tool entry.                                -->
+<!--__ ***********************************************************  -->
+        </tr>
+        </table>
+</dl>
+
