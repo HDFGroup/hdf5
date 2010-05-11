@@ -507,7 +507,7 @@ int copy_attr(hid_t loc_in,
             buf = (void *)HDmalloc((size_t)(nelmts * msize));
             if(buf == NULL) 
             {
-                error_msg("h5repack", "cannot read into memory\n" );
+                error_msg(h5tools_getprogname(), "cannot read into memory\n" );
                 goto error;
             }
             if(H5Aread(attr_id, wtype_id, buf) < 0)
