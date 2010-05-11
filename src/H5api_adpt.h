@@ -63,7 +63,7 @@
 #if defined (hdf5_f90CStub_EXPORTS)
   #define HDF5FORT_CSTUB_DLL_EXPORTS
 #else
-  #define HDF5FORT_CSTUB_USELL
+  #define HDF5FORT_CSTUB_USEDLL
 #endif
 
 #if defined (hdf5_test_f90CStub_EXPORTS)
