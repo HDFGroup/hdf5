@@ -20,6 +20,9 @@
 #include <assert.h>
 #include "h5diff_common.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5diff"
+
 static void ph5diff_worker(int );
 
 /*-------------------------------------------------------------------------
@@ -52,9 +55,6 @@ static void ph5diff_worker(int );
  *-------------------------------------------------------------------------
  */
 
-/* module-scoped variables */
-int d_status = EXIT_SUCCESS;
-
 int main(int argc, const char *argv[])
 {
     int        nID = 0;
@@ -63,6 +63,9 @@ int main(int argc, const char *argv[])
     const char *objname1  = NULL;
     const char *objname2  = NULL;
     diff_opt_t options;
+
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     outBuffOffset = 0;
     g_Parallel = 1;

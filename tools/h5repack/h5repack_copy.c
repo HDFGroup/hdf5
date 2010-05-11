@@ -30,7 +30,6 @@
 * globals
 *-------------------------------------------------------------------------
 */
-extern char  *progname;
 
 /*-------------------------------------------------------------------------
 * macros
@@ -90,7 +89,7 @@ int copy_objects(const char* fnamein,
     */
     if((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0)
     {
-        error_msg(progname, "<%s>: %s\n", fnamein, H5FOPENERROR );
+        error_msg("<%s>: %s\n", fnamein, H5FOPENERROR );
         goto out;
     }
 
@@ -100,13 +99,13 @@ int copy_objects(const char* fnamein,
 
         if((fcpl_in = H5Fget_create_plist(fidin)) < 0)
         {
-            error_msg(progname, "failed to retrieve file creation property list\n");
+            error_msg("failed to retrieve file creation property list\n");
             goto out;
         }
 
         if(H5Pget_userblock(fcpl_in, &ub_size) < 0)
         {
-            error_msg(progname, "failed to retrieve userblock size\n");
+            error_msg("failed to retrieve userblock size\n");
             goto out;
         }
 
@@ -114,7 +113,7 @@ int copy_objects(const char* fnamein,
 	{
 	   if(H5Pget_file_space(fcpl_in, &options->fs_strategy, NULL) < 0)
 	   {
-		error_msg(progname, "failed to retrieve file space strategy\n");
+		error_msg("failed to retrieve file space strategy\n");
 		goto out;
 	   }
 	}
@@ -123,14 +122,14 @@ int copy_objects(const char* fnamein,
 	{
 	   if(H5Pget_file_space(fcpl_in, NULL, &options->fs_threshold) < 0)
 	   {
-		error_msg(progname, "failed to retrieve file space threshold\n");
+		error_msg("failed to retrieve file space threshold\n");
 		goto out;
 	   }
 	}
 
         if(H5Pclose(fcpl_in) < 0)
         {
-            error_msg(progname, "failed to close property list\n");
+            error_msg("failed to close property list\n");
             goto out;
         }
     }
@@ -141,7 +140,7 @@ int copy_objects(const char* fnamein,
         /* Create file creation property list */
         if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         {
-            error_msg(progname, "fail to create a file creation property list\n");
+            error_msg("fail to create a file creation property list\n");
             goto out;
         }
 
@@ -149,7 +148,7 @@ int copy_objects(const char* fnamein,
         {
             if(H5Pset_userblock(fcpl, ub_size) < 0)
             {
-                error_msg(progname, "failed to set non-default userblock size\n");
+                error_msg("failed to set non-default userblock size\n");
                 goto out;
             }
         }
@@ -162,7 +161,7 @@ int copy_objects(const char* fnamein,
             /* (So that it is created in "dense storage" form) */
             if(H5Pset_link_phase_change(fcpl, (unsigned)options->grp_compact, (unsigned)options->grp_indexed) < 0)
             {
-                error_msg(progname, "fail to adjust group creation parameters for root group\n");
+                error_msg("fail to adjust group creation parameters for root group\n");
                 goto out;
             }
 
@@ -204,7 +203,7 @@ int copy_objects(const char* fnamein,
             {
                 if(H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0)
                 {
-                    error_msg(progname, "fail to set the number of shared object header message indexes\n");
+                    error_msg("fail to set the number of shared object header message indexes\n");
                     goto out;
                 }
 
@@ -212,7 +211,7 @@ int copy_objects(const char* fnamein,
                 for(i = 0; i < (nindex - 1); i++)
                 {
                     if(H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0) {
-                        error_msg(progname, "fail to configure the specified shared object header message index\n");
+                        error_msg("fail to configure the specified shared object header message index\n");
                         goto out;
                     } /* end if */
                 } /* end for */
@@ -221,13 +220,13 @@ int copy_objects(const char* fnamein,
             /* Create file access property list */
             if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             {
-                error_msg(progname, "Could not create file access property list\n");
+                error_msg("Could not create file access property list\n");
                 goto out;
             } /* end if */
 
             if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             {
-                error_msg(progname, "Could not set property for using latest version of the format\n");
+                error_msg("Could not set property for using latest version of the format\n");
                 goto out;
             } /* end if */
         } /* end if */
@@ -254,7 +253,7 @@ int copy_objects(const char* fnamein,
             /* set user block size */
             if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
             {
-                error_msg(progname, "failed to set userblock size\n");
+                error_msg("failed to set userblock size\n");
                 goto out;
             }
 
@@ -266,14 +265,14 @@ int copy_objects(const char* fnamein,
             /* create a file creation property list */
             if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
             {
-                error_msg(progname, "fail to create a file creation property list\n");
+                error_msg("fail to create a file creation property list\n");
                 goto out;
             }
 
             /* set user block size */
             if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
             {
-                error_msg(progname, "failed to set userblock size\n");
+                error_msg("failed to set userblock size\n");
                 goto out;
             }
 
@@ -298,7 +297,7 @@ int copy_objects(const char* fnamein,
 
             if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
             {
-                error_msg(progname, "failed to set alignment\n");
+                error_msg("failed to set alignment\n");
                 goto out;
             }
 
@@ -310,13 +309,13 @@ int copy_objects(const char* fnamein,
             /* create a file access property list */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             {
-                error_msg(progname, "Could not create file access property list\n");
+                error_msg("Could not create file access property list\n");
                 goto out;
             }
 
             if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
             {
-                error_msg(progname, "failed to set alignment\n");
+                error_msg("failed to set alignment\n");
                 goto out;
             }
 
@@ -330,7 +329,7 @@ int copy_objects(const char* fnamein,
 	/* set file space strategy and free space threshold */
 	if(H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0)
 	{
-	    error_msg(progname, "failed to set file space strategy & threshold\n");
+	    error_msg("failed to set file space strategy & threshold\n");
 	    goto out;
 	}
     }
@@ -339,14 +338,14 @@ int copy_objects(const char* fnamein,
 	/* create a file creation property list */
 	if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 	{
-	    error_msg(progname, "fail to create a file creation property list\n");
+	    error_msg("fail to create a file creation property list\n");
 	    goto out;
 	}
 
 	/* set file space strategy and free space threshold */
 	if(H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0)
 	{
-	    error_msg(progname, "failed to set file space strategy & threshold \n");
+	    error_msg("failed to set file space strategy & threshold \n");
 	    goto out;
 	}
     }
@@ -363,7 +362,7 @@ int copy_objects(const char* fnamein,
 
     if((fidout = H5Fcreate(fnameout,H5F_ACC_TRUNC, fcpl, fapl)) < 0)
     {
-        error_msg(progname, "<%s>: Could not create file\n", fnameout );
+        error_msg("<%s>: Could not create file\n", fnameout );
         goto out;
     }
 
@@ -376,7 +375,7 @@ int copy_objects(const char* fnamein,
     {
         if ( copy_user_block( options->ublock_filename, fnameout, options->ublock_size) < 0 )
         {
-            error_msg(progname, "Could not copy user block. Exiting...\n");
+            error_msg("Could not copy user block. Exiting...\n");
             goto out;
 
         }
@@ -400,7 +399,7 @@ int copy_objects(const char* fnamein,
     */
     if(do_copy_objects(fidin, fidout, travt, options) < 0)
     {
-        error_msg(progname, "<%s>: Could not copy data to: %s\n", fnamein, fnameout);
+        error_msg("<%s>: Could not copy data to: %s\n", fnamein, fnameout);
         goto out;
     } /* end if */
 
@@ -442,7 +441,7 @@ int copy_objects(const char* fnamein,
     {
         if ( copy_user_block(fnamein, fnameout, ub_size) < 0 )
         {
-            error_msg(progname, "Could not copy user block. Exiting...\n");
+            error_msg("Could not copy user block. Exiting...\n");
             goto out;
 
         }
@@ -1406,19 +1405,19 @@ void print_user_block(const char *filename, hid_t fid)
     /* get user block size */
     if(( fcpl = H5Fget_create_plist(fid)) < 0)
     {
-        error_msg(progname, "failed to retrieve file creation property list\n");
+        error_msg("failed to retrieve file creation property list\n");
         goto done;
     }
 
     if(H5Pget_userblock(fcpl, &ub_size) < 0)
     {
-        error_msg(progname, "failed to retrieve userblock size\n");
+        error_msg("failed to retrieve userblock size\n");
         goto done;
     }
 
     if(H5Pclose(fcpl) < 0)
     {
-        error_msg(progname, "failed to close property list\n");
+        error_msg("failed to close property list\n");
         goto done;
     }
 

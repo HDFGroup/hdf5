@@ -64,13 +64,13 @@ static void add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t 
  *-------------------------------------------------------------------------
  */
 void
-error_msg(const char *progname, const char *fmt, ...)
+error_msg(const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
     HDfflush(stdout);
-    HDfprintf(stderr, "%s error: ", progname);
+    HDfprintf(stderr, "%s error: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
 
     va_end(ap);
@@ -93,13 +93,13 @@ error_msg(const char *progname, const char *fmt, ...)
  *-------------------------------------------------------------------------
  */
 void
-warn_msg(const char *progname, const char *fmt, ...)
+warn_msg(const char *fmt, ...)
 {
     va_list ap;
 
     va_start(ap, fmt);
     HDfflush(stdout);
-    HDfprintf(stderr, "%s warning: ", progname);
+    HDfprintf(stderr, "%s warning: ", h5tools_getprogname());
     HDvfprintf(stderr, fmt, ap);
     va_end(ap);
 }

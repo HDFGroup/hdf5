@@ -14,9 +14,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5repack.h"
+#include "h5test.h"
 #include "h5tools_utils.h"
 
-extern char  *progname;
 static int verify_layout(hid_t pid, pack_info_t *obj);
 static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
 
@@ -211,26 +211,26 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
 
     /* Get file creation property list for input file */
     if((fcpl_in = H5Fget_create_plist(fidin)) < 0) {
-	error_msg(progname, "failed to retrieve file creation property list\n");
+	error_msg("failed to retrieve file creation property list\n");
 	goto error;
     }
 
     /* Get file space management info for input file */
     if(H5Pget_file_space(fcpl_in, &in_strat, &in_thresh) < 0) {
-	error_msg(progname, "failed to retrieve file space strategy & threshold\n");
+	error_msg("failed to retrieve file space strategy & threshold\n");
 	goto error;
     }
 
     /* Output file is already opened */
     /* Get file creation property list for output file */
     if((fcpl_out = H5Fget_create_plist(fidout)) < 0) {
-	error_msg(progname, "failed to retrieve file creation property list\n");
+	error_msg("failed to retrieve file creation property list\n");
 	goto error;
     }
 
     /* Get file space management info for output file */
     if(H5Pget_file_space(fcpl_out, &out_strat, &out_thresh) < 0) {
-	error_msg(progname, "failed to retrieve file space strategy & threshold\n");
+	error_msg("failed to retrieve file space strategy & threshold\n");
 	goto error;
     }
 
@@ -243,11 +243,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * as what is set via the strategy option
      */
     if(!options->fs_strategy && out_strat != in_strat) {
-	error_msg(progname, "file space strategy not set as unexpected\n");
+	error_msg("file space strategy not set as unexpected\n");
 	goto error;
 
     } else if(options->fs_strategy && out_strat!= options->fs_strategy)  {
-	error_msg(progname, "file space strategy not set as unexpectec\n");
+	error_msg("file space strategy not set as unexpectec\n");
 	goto error;
     }
 
@@ -260,11 +260,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
      * as what is set via the threshold option.
      */
     if(!options->fs_threshold && out_thresh != in_thresh) {
-	error_msg(progname, "free space threshold not set as unexpected\n");
+	error_msg("free space threshold not set as unexpected\n");
 	goto error;
 
     } else if(options->fs_threshold && out_thresh != options->fs_threshold) {
-	error_msg(progname, "free space threshold not set as unexpectec\n");
+	error_msg("free space threshold not set as unexpectec\n");
 	goto error;
     }
 
@@ -396,12 +396,12 @@ int h5repack_cmp_pl(const char *fname1,
         /* Open the files */
         if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
         {
-            error_msg(progname, "<%s>: %s\n", fname1, H5FOPENERROR );
+            error_msg("<%s>: %s\n", fname1, H5FOPENERROR );
             return -1;
         }
         if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
         {
-            error_msg(progname, "<%s>: %s\n", fname2, H5FOPENERROR );
+            error_msg("<%s>: %s\n", fname2, H5FOPENERROR );
             H5Fclose(fid1);
             return -1;
         }
@@ -450,7 +450,7 @@ int h5repack_cmp_pl(const char *fname1,
 
             if ( crt_order_flag1 != crt_order_flag2 )
             {
-                error_msg(progname, "property lists for <%s> are different\n",trav->objs[i].name);
+                error_msg("property lists for <%s> are different\n",trav->objs[i].name);
                 goto error;
             }
 
@@ -478,7 +478,7 @@ int h5repack_cmp_pl(const char *fname1,
 
             if(ret == 0)
             {
-                error_msg(progname, "property lists for <%s> are different\n",trav->objs[i].name);
+                error_msg("property lists for <%s> are different\n",trav->objs[i].name);
                 goto error;
             }
 

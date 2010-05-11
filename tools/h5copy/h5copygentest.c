@@ -21,6 +21,9 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5copygentest"
+
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
 #define HDF_FILE2                "h5copy_ref.h5"
@@ -888,6 +891,9 @@ out:
 
 int main(void)
 {
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();

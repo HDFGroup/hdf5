@@ -29,6 +29,9 @@
 #include "h5tools_utils.h"
 #include "h5trav.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5ls"
+
 #define NAME_BUF_SIZE   2048
 
 /* Struct to keep track of external link targets visited */
@@ -88,9 +91,6 @@ static struct dispatch_t {
 static void display_type(hid_t type, int ind);
 static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 
-const char *progname="h5ls";
-int   d_status;
-
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -135,7 +135,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       within the file then the contents of the root group are displayed).\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n",
-     progname);
+     h5tools_getprogname());
 }
 
 
@@ -2182,6 +2182,9 @@ main(int argc, const char *argv[])
     const char *preferred_driver = NULL;
     int err_openfile = 0;
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
     /* Initialize h5tools lib */
     h5tools_init();
 
@@ -2249,7 +2252,7 @@ main(int argc, const char *argv[])
         } else if(!HDstrcmp(argv[argno], "--verbose")) {
             verbose_g++;
         } else if(!HDstrcmp(argv[argno], "--version")) {
-            print_version(progname);
+            print_version(h5tools_getprogname());
             leave(EXIT_SUCCESS);
         } else if(!HDstrcmp(argv[argno], "--hexdump")) {
             hexdump_g = TRUE;
@@ -2325,7 +2328,7 @@ main(int argc, const char *argv[])
                         break;
 
                     case 'V': /* --version */
-                        print_version(progname);
+                        print_version(h5tools_getprogname());
                         leave(EXIT_SUCCESS);
 
                     case 'x': /* --hexdump */

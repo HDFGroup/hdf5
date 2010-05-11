@@ -23,10 +23,6 @@ static int check_n_input( const char* );
 static int check_p_input( const char* );
 static int check_d_input( const char* );
 
-
-/* module-scoped variables */
-const char  *progname = "h5diff";
-
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
@@ -90,7 +86,7 @@ void parse_command_line(int argc,
             usage();
             h5diff_exit(EXIT_SUCCESS);
         case 'V':
-            print_version(progname);
+            print_version(h5tools_getprogname());
             h5diff_exit(EXIT_SUCCESS);
         case 'v':
             options->m_verbose = 1;
@@ -174,7 +170,7 @@ void parse_command_line(int argc,
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
     {
-        error_msg(progname, "missing file names\n");
+        error_msg("missing file names\n");
         usage();
         h5diff_exit(EXIT_FAILURE);
     }

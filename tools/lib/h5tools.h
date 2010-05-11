@@ -521,10 +521,14 @@ struct subset_t {
 
 #include "h5tools_str.h"
 
-extern FILE   *rawdatastream;       /* output stream for raw data */
-extern int     bin_output;          /* binary output */
-extern int     bin_form;            /* binary form */
-extern int     region_output;       /* region output */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+H5TOOLS_DLLVAR FILE   *rawdatastream;       /* output stream for raw data */
+H5TOOLS_DLLVAR int     bin_output;          /* binary output */
+H5TOOLS_DLLVAR int     bin_form;            /* binary form */
+H5TOOLS_DLLVAR int     region_output;       /* region output */
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
@@ -532,26 +536,30 @@ extern int     region_output;       /* region output */
 #define H5_TOOLS_DATATYPE        "DATATYPE"
 
 /* Definitions of useful routines */
-extern void     h5tools_init(void);
-extern void     h5tools_close(void);
-extern hid_t    h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
+H5TOOLS_DLL const char *h5tools_getprogname(void);
+H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
+H5TOOLS_DLL int      h5tools_getstatus(void);
+H5TOOLS_DLL void     h5tools_setstatus(int d_status);
+H5TOOLS_DLL void     h5tools_init(void);
+H5TOOLS_DLL void     h5tools_close(void);
+H5TOOLS_DLL hid_t    h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                     const char *driver, char *drivername, size_t drivername_len);
-extern int      h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
+H5TOOLS_DLL int      h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);
-extern int      h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
+H5TOOLS_DLL int      h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
-extern hid_t    h5tools_get_native_type(hid_t type);
-extern hid_t    h5tools_get_little_endian_type(hid_t type);
-extern hid_t    h5tools_get_big_endian_type(hid_t type);
+H5TOOLS_DLL hid_t    h5tools_get_native_type(hid_t type);
+H5TOOLS_DLL hid_t    h5tools_get_little_endian_type(hid_t type);
+H5TOOLS_DLL hid_t    h5tools_get_big_endian_type(hid_t type);
 
 
-extern void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
+H5TOOLS_DLL void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem);
 
-extern int      h5tools_canreadf(const char* name,
+H5TOOLS_DLL int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
-extern int      h5tools_can_encode(H5Z_filter_t filtn);
+H5TOOLS_DLL int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
 /*
@@ -564,5 +572,10 @@ int             h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
                          const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
                          hid_t type);
 int             h5tools_print_enum(h5tools_str_t *buffer/*in,out*/, hid_t type);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* H5TOOLS_H__ */
 

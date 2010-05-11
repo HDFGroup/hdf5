@@ -45,9 +45,6 @@ typedef struct {
 static H5SL_t *ref_path_table = NULL;   /* the "table" (implemented with a skip list) */
 static hid_t thefile = (-1);
 
-extern char  *progname;
-extern int   d_status;
-
 static int ref_path_table_put(const char *, haddr_t objno);
 
 /*-------------------------------------------------------------------------
@@ -122,8 +119,8 @@ init_ref_path_table(void)
 
     /* Iterate over objects in this file */
     if(h5trav_visit(thefile, "/", TRUE, TRUE, init_ref_path_cb, NULL, NULL) < 0) {
-        error_msg(progname, "unable to construct reference path table\n");
-        d_status = EXIT_FAILURE;
+        error_msg("unable to construct reference path table\n");
+        h5tools_setstatus(EXIT_FAILURE);
     } /* end if */
 
     return(0);

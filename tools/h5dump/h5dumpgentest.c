@@ -28,6 +28,9 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5dumpgentest"
+
 #define FILE1 "tgroup.h5"
 #define FILE2 "tdset.h5"
 #define FILE3 "tattr.h5"
