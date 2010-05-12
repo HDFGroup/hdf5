@@ -17,7 +17,7 @@ SET (TEST_LIB_HEADERS
 #-----------------------------------------------------------------------------
 # Generate the H5srcdir_str.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-SET (srdir ${CMAKE_CURRENT_SOURCE_DIR})
+SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 CONFIGURE_FILE (${HDF5_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -163,34 +163,34 @@ ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
 #-- Copy all the HDF5 files from the test directory into the source directory
 SET (HDF5_REFERENCE_TEST_FILES
-    mergemsg.h5
-    tbogus.h5
-    tbad_msg_count.h5
-    deflate.h5
-    noencoder.h5
-    tmtimeo.h5
-    tmtimen.h5
-    fill_old.h5
-    tlayouto.h5
-    th5s.h5
-    tarrold.h5
-    group_old.h5
-    corrupt_stab_msg.h5
-    fixed_idx.h5
-    le_extlink2.h5
-    be_extlink2.h5
-    le_extlink1.h5
-    be_extlink1.h5
-    specmetaread.h5
-    test_filters_le.hdf5
-    test_filters_be.hdf5
-    vms_data.h5
-    le_data.h5
     be_data.h5
+    be_extlink1.h5
+    be_extlink2.h5
+    corrupt_stab_msg.h5
+    deflate.h5
     family_v16_00000.h5
     family_v16_00001.h5
     family_v16_00002.h5
     family_v16_00003.h5
+    fill_old.h5
+    fixed_idx.h5
+    group_old.h5
+    le_data.h5
+    le_extlink1.h5
+    le_extlink2.h5
+    mergemsg.h5
+    noencoder.h5
+    specmetaread.h5
+    tarrold.h5
+    tbad_msg_count.h5
+    tbogus.h5
+    test_filters_be.hdf5
+    test_filters_le.hdf5
+    th5s.h5
+    tlayouto.h5
+    tmtimen.h5
+    tmtimeo.h5
+    vms_data.h5
 )
 
 FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
