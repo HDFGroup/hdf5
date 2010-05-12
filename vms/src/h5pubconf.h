@@ -167,7 +167,7 @@
 /* #undef H5_HAVE_GPFS_H */
 
 /* Define if h5dump packed bits feature is enabled */
-#undef H5_HAVE_H5DUMP_PACKED_BITS
+#define H5_HAVE_H5DUMP_PACKED_BITS
 
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
