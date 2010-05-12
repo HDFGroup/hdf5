@@ -1,0 +1,168 @@
+cmake_minimum_required (VERSION 2.8)
+PROJECT (HDF5_TOOLS_H5LS)
+
+#-----------------------------------------------------------------------------
+# Setup include Directories
+#-----------------------------------------------------------------------------
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
+
+# --------------------------------------------------------------------
+# If testing was NOT enabled, then we need to build the tools library
+# --------------------------------------------------------------------
+#-- Add the h5ls executable
+ADD_EXECUTABLE (h5ls ${HDF5_TOOLS_H5LS_SOURCE_DIR}/h5ls.c)
+H5_NAMING (h5ls)
+TARGET_LINK_LIBRARIES (h5ls  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+
+SET (H5_DEP_EXECUTABLES
+    h5ls
+)
+
+IF (BUILD_TESTING)
+  #-- Copy all the HDF5 files from the test directory into the source directory
+  SET (HDF5_REFERENCE_FILES
+      help-1.ls
+      help-2.ls
+      help-3.ls
+      nosuchfile.ls
+      tall-1.ls
+      tall-2.ls
+      tarray1.ls
+      tattr2.ls
+      tcomp-1.ls
+      tdataregbe.ls
+      tdataregle.ls
+      tdset-1.ls
+      tempty.ls
+      textlink-1.ls
+      textlinksrc-1.ls
+      textlinksrc-2.ls
+      textlinksrc-3.ls
+      textlinksrc-4.ls
+      textlinksrc-5.ls
+      textlinksrc-6.ls
+      textlinksrc-7.ls
+      tgroup.ls
+      tgroup-1.ls
+      tgroup-2.ls
+      tgroup-3.ls
+      thlink-1.ls
+      tloop-1.ls
+      tnestcomp-1.ls
+      tsaf.ls
+      tslink-1.ls
+      tstr-1.ls
+      tudlink-1.ls
+      tvldtypes1.ls
+      tvldtypes2le.ls
+      tvldtypes2be.ls
+  )
+  SET (HDF5_REFERENCE_TEST_FILES
+      tall.h5
+      tarray1.h5
+      tattr2.h5
+      tcompound.h5
+      tdatareg.h5
+      tdset.h5
+      tempty.h5
+      textlink.h5
+      textlinksrc.h5
+      textlinktar.h5
+      tgroup.h5
+      thlink.h5
+      tloop.h5
+      tnestedcomp.h5
+      tsaf.h5
+      tslink.h5
+      tstr.h5
+      tudlink.h5
+      tvldtypes1.h5
+  )
+
+  FOREACH (ls_file ${HDF5_REFERENCE_FILES})
+    SET (lsdest "${PROJECT_BINARY_DIR}/${ls_file}")
+    #MESSAGE (STATUS " Translating ${ls_file}")
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5ls
+        POST_BUILD
+        COMMAND    ${XLATE_UTILITY}
+        ARGS       ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${ls_file} ${lsdest} -l3
+    )
+  ENDFOREACH (ls_file ${HDF5_REFERENCE_FILES})
+
+  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+    SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
+    #MESSAGE (STATUS " Copying ${h5_file}")
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5ls
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
+    )
+  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+
+  MACRO (ADD_H5_TEST resultfile resultcode)
+    ADD_TEST (
+        NAME H5LS-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+            -D "TEST_ARGS=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.ls"
+            -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+    )
+  ENDMACRO (ADD_H5_TEST file)
+
+  ADD_H5_TEST (help-1 0 -w80 -h)
+  ADD_H5_TEST (help-2 0 -w80 --help)
+  ADD_H5_TEST (help-3 0 -w80 -?)
+  ADD_H5_TEST (tall-1 0 -w80 tall.h5)
+  ADD_H5_TEST (tall-2 0 -w80 -r -d tall.h5)
+  ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
+  ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
+  ADD_H5_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
+  ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
+  ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
+  ADD_H5_TEST (tslink-1 0 -w80 -r tslink.h5)
+  ADD_H5_TEST (textlink-1 0 -w80 -r textlink.h5)
+  ADD_H5_TEST (textlinksrc-1 0 -w80 -Er textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-2 0 -w80 -Erv textlinksrc.h5/ext_link5)
+  ADD_H5_TEST (textlinksrc-3 0 -w80 -Er textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (textlinksrc-4 0 -w80 -r textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-5 0 -w80 -r textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (textlinksrc-6 0 -w80 -E textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-7 0 -w80 -E textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (tudlink-1 0 -w80 -r tudlink.h5)
+  ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
+  ADD_H5_TEST (tcomp-1 0 -w80 -r -d tcompound.h5)
+  ADD_H5_TEST (tnestcomp-1 0 -w80 -r -d tnestedcomp.h5)
+  ADD_H5_TEST (tloop-1 0 -w80 -r -d tloop.h5)
+  ADD_H5_TEST (tstr-1 0 -w80 -r -d tstr.h5)
+  ADD_H5_TEST (tsaf 0 -w80 -r -d tsaf.h5)
+  ADD_H5_TEST (tvldtypes1 0 -w80 -r -d tvldtypes1.h5)
+  ADD_H5_TEST (tarray1 0 -w80 -r -d tarray1.h5)
+  ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
+  ADD_H5_TEST (tattr2 0 -w80 -v -S tattr2.h5)
+  ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
+  IF (WORDS_BIGENDIAN)
+    ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
+    ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
+  ELSE (WORDS_BIGENDIAN)
+    ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
+    ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
+  ENDIF (WORDS_BIGENDIAN)
+
+ENDIF (BUILD_TESTING)
+
+#-----------------------------------------------------------------------------
+# Rules for Installation of tools using make Install target
+#-----------------------------------------------------------------------------
+INSTALL (
+    TARGETS
+        h5ls
+    RUNTIME DESTINATION
+        bin/tools
+)
