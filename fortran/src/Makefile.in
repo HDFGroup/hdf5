@@ -407,11 +407,11 @@ LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-H5CC = $(bindir)/h5cc
-H5CC_PP = $(bindir)/h5pcc
-H5FC = $(bindir)/h5fc
-H5FC_PP = $(bindir)/h5pfc
-H5CPP = $(bindir)/h5c++
+H5CC = ${DESTDIR}/$(bindir)/h5cc
+H5CC_PP = ${DESTDIR}/$(bindir)/h5pcc
+H5FC = ${DESTDIR}/$(bindir)/h5fc
+H5FC_PP = ${DESTDIR}/$(bindir)/h5pfc
+H5CPP = ${DESTDIR}/$(bindir)/h5c++
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.
@@ -927,8 +927,8 @@ install-data-local:
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
 
 uninstall-local:
-	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
+	@if test -n "$(DESTDIR)$(F9XMODEXT)" -a "X$(DESTDIR)$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(DESTDIR)$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(DESTDIR)$(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\

@@ -65,7 +65,7 @@ $(EXTLINK_DIRS):
 CHECK_CLEANFILES+=$(EXTLINK_DIRS)
 
 # Example directory
-EXAMPLEDIR=$(exec_prefix)/examples/c
+EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/c
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it

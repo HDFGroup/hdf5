@@ -152,6 +152,9 @@ uninstall-doc:
 # `make check-install' or `make installcheck' checks that examples can 
 #  be successfully built
 installcheck-local:
+	if test -n "${DESTDIR}"; then                                  \
+          (cd ${DESTDIR}/$(bindir) && pwd && ./h5redeploy -force);     \
+        fi
 	@(cd examples && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
 # check-install is just a synonym for installcheck

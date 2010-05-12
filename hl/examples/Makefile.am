@@ -26,7 +26,7 @@ if BUILD_PARALLEL_CONDITIONAL
 endif
 
 # Example directory
-EXAMPLEDIR=$(exec_prefix)/examples/hl/c
+EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/c
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,

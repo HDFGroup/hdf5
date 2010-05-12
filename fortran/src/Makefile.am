@@ -100,8 +100,8 @@ install-data-local:
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
 
 uninstall-local:
-	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
+	@if test -n "$(DESTDIR)$(F9XMODEXT)" -a "X$(DESTDIR)$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(DESTDIR)$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(DESTDIR)$(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
