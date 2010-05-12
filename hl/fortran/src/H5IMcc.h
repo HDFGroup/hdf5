@@ -18,7 +18,7 @@
 
 #include "H5LTprivate.h"
 #include "H5IMprivate.h"
-#include "../../fortran/src/H5f90i_gen.h"
+#include "H5f90i_gen.h"
 
 #ifdef __cplusplus
 extern "C" {
