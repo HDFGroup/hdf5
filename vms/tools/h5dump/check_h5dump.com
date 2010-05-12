@@ -218,6 +218,11 @@ $ CALL TOOLTEST torderattr1.ddl "-"""H""" --sort_by=name --sort_order=ascending 
 $ CALL TOOLTEST torderattr2.ddl "-"""H""" --sort_by=name --sort_order=descending torderattr.h5"
 $ CALL TOOLTEST torderattr3.ddl "-"""H""" --sort_by=creation_order --sort_order=ascending torderattr.h5"
 $ CALL TOOLTEST torderattr4.ddl "-"""H""" --sort_by=creation_order --sort_order=descending torderattr.h5"
+$
+$ ! Test for dataset packed bits
+$ CALL TOOLTEST tpackedbits.ddl "-d /dset1 -M 0,2 tdset.h5"
+$ CALL TOOLTEST tpackedbits2.ddl "-d /dset1 -M 0,2,2,1 tdset.h5"
+$
 $ !
 $TOOLTEST: SUBROUTINE
 $
