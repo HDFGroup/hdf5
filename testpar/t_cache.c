@@ -2793,7 +2793,7 @@ mark_entry_dirty(H5C_t * cache_ptr,
 
         entry_ptr = &(data[idx]);
 
-	HDassert ( entry_ptr->global_pinned );
+        HDassert ( entry_ptr->locked || entry_ptr->global_pinned );
 	HDassert ( ! (entry_ptr->local_pinned) );
 
         (entry_ptr->ver)++;
@@ -2810,7 +2810,7 @@ mark_entry_dirty(H5C_t * cache_ptr,
                           world_mpi_rank, fcn_name);
             }
         }
-	else
+	else if ( ! ( entry_ptr->locked ) )
 	{
 	    global_dirty_pins++;
 	}
