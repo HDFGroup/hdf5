@@ -101,13 +101,14 @@ static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order
 static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
-#define PACKED_BITS_LOOP_MAX         8
+#define PACKED_BITS_MAX         8	/* Maximum number of packed-bits to display */
+#define PACKED_BITS_SIZE_MAX    8	/* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
-static unsigned int packed_mask[PACKED_BITS_LOOP_MAX];  /* packed bits are restricted to 1 byte */
+static unsigned int packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 1 byte */
 
 /* packed bits display parameters */
-static int packed_offset[PACKED_BITS_LOOP_MAX];
-static int packed_length[PACKED_BITS_LOOP_MAX];
+static int packed_offset[PACKED_BITS_MAX];
+static int packed_length[PACKED_BITS_MAX];
 #endif
 
 /**
@@ -402,11 +403,14 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
+/* The following initialization makes use of C language cancatenating */
+/* "xxx" "yyy" into "xxxyyy". */
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R"
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RM:";
-#else
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R";
+"M:"
 #endif
+;	/* end of *s_opt initialization */
+
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -2243,11 +2247,6 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     hid_t       type, space;
     unsigned    attr_crt_order_flags;
     hid_t       dcpl_id;  /* dataset creation property list ID */
-#ifdef H5_HAVE_H5DUMP_PACKED_BITS
-    int         data_loop = 1;
-    int         i;
-#endif
-
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
     {
@@ -2281,8 +2280,10 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     if(display_data) {
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
+	int	data_loop = 1;
+	int	i;
         if(display_packed_bits)
-            data_loop = packed_output;
+            data_loop = packed_bits_num;
         for(i=0;i<data_loop;i++) {
         if(display_packed_bits) {
             dump_packed_bits(i);
@@ -3592,78 +3593,114 @@ parse_subset_params(char *dset)
  *              the packed_bits list and counter. The string being passed into this function
  *              should be at the start of the list you want to parse. 
  *
- * Return:      None
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        FAIL
+ *
  *
  *-------------------------------------------------------------------------
  */
-static void
+static int
 parse_mask_list(const char *h_list)
 {
     const char     *ptr;
-    unsigned int    size_count = 0, i = 0, last_digit = 0;
     int             offset_value = 0, length_value = 0;
 
+    /* sanity check */
+    HDassert(h_list);
+
     packed_counter = 0;
-    memset(packed_mask,0,8);
-    memset(packed_offset,0,8);
-    memset(packed_length,0,8);
+    HDmemset(packed_mask,0,sizeof(packed_mask));
+    HDmemset(packed_offset,0,sizeof(packed_offset));
+    HDmemset(packed_length,0,sizeof(packed_length));
     
-    if (!h_list || !*h_list || *h_list == ';')
-        return;
-
-    /* count how many integers do we have */
-    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
-        if (isdigit(*ptr)) {
-            if (!last_digit)
-                /* the last read character wasn't a digit */
-                size_count++;
-
-            last_digit = 1;
-        } 
-        else {
-            last_digit = 0;
-        }
-    }
-
-    if (size_count == 0) 
-        /* there aren't any integers to read */
-       return;
-
     offset_value = -1;
     length_value = -1;
-    packed_output = 0;
-    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
-        if(isdigit(*ptr)) {
-            i++;
-            /* we should have an integer now */
-            if(offset_value==-1)
-                offset_value = atoi(ptr);
-            else
-                length_value = atoi(ptr);
+    packed_bits_num = 0;
+    /* scan in pair of offset,length separated by commas. */
+    ptr = h_list;
+    while (*ptr) {
+	/* scan for an offset which is an unsigned int */
+	if (!HDisdigit(*ptr)){
+	    error_msg(h5tools_getprogname(), "Bad mask list(%s)\n", h_list);
+	    return FAIL;
+	}
+	offset_value = HDatoi(ptr);
+	if (offset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX){
+	    error_msg(h5tools_getprogname(), "Packed Bit offset value(%d) must be between 0 and %d\n",
+		offset_value, PACKED_BITS_SIZE_MAX - 1);
+	    return FAIL;
+	}
 
-            while (isdigit(*ptr))
-                /* scroll to end of integer */
-                ptr++;
-        }
-        if(length_value>=0) {
-            packed_offset[packed_output] = offset_value;
-            packed_length[packed_output] = length_value;
-            
-            packed_mask[packed_output] = 1 << offset_value;
-            while(length_value>1) {
-                packed_mask[packed_output] = packed_mask[packed_output] << 1;
-                packed_mask[packed_output] |= 1 << offset_value;
-                length_value--;
-            }
-            packed_output++;
-            offset_value = -1;
-            length_value = -1;
-        }
+	/* skip to end of integer */
+	while (HDisdigit(*++ptr))
+	    ;
+	/* Look for the common separator */
+	if (*ptr++ != ',') {
+	    error_msg(h5tools_getprogname(), "Bad mask list(%s), missing expected comma separator.\n", h_list);
+	    return FAIL;
+	}
+
+	/* scan for a length which is a positive int */
+	if (!HDisdigit(*ptr)){
+	    error_msg(h5tools_getprogname(), "Bad mask list(%s)\n", h_list);
+	    return FAIL;
+	}
+	length_value = HDatoi(ptr);
+	if (length_value <= 0){
+	    error_msg(h5tools_getprogname(), "Packed Bit length value(%d) must be positive.\n",
+		length_value);
+	    return FAIL;
+	};
+	if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX){
+	    error_msg(h5tools_getprogname(), "Packed Bit offset+length value(%d) too large. Max is %d\n",
+		offset_value+length_value, PACKED_BITS_SIZE_MAX);
+	    return FAIL;
+	};
+
+	/* skip to end of int */
+	while (HDisdigit(*++ptr))
+	    ;
+
+	/* store the offset,length pair */
+	if (packed_bits_num >= PACKED_BITS_MAX){
+	    /* too many requests */
+	    error_msg(h5tools_getprogname(), "Too many masks requested (max. %d). Mask list(%s)\n",
+		PACKED_BITS_MAX, h_list);
+	    return FAIL;
+	}
+	packed_offset[packed_bits_num] = offset_value;
+	packed_length[packed_bits_num] = length_value;
+	
+	packed_mask[packed_bits_num] = 1 << offset_value;
+	while(length_value>1) {
+	    packed_mask[packed_bits_num] = packed_mask[packed_bits_num] << 1;
+	    packed_mask[packed_bits_num] |= 1 << offset_value;
+	    length_value--;
+	}
+	packed_bits_num++;
+	offset_value = -1;
+	length_value = -1;
+
+	/* skip a possible comma separator */
+	if (*ptr == ','){
+	    if (!(*++ptr)){
+		/* unexpected end of string */
+		error_msg(h5tools_getprogname(), "Bad mask list(%s), unexpected end of string.\n", h_list);
+		return FAIL;
+	    }
+	}
     }
-    if(packed_output > PACKED_BITS_LOOP_MAX)
-        packed_output = PACKED_BITS_LOOP_MAX;
+    HDassert(packed_bits_num <= PACKED_BITS_MAX);
+    if (packed_bits_num == 0){
+	/* got no masks! */
+        error_msg(h5tools_getprogname(), "Bad mask list(%s)\n", h_list);
+        return FAIL;
+    }
     packed_counter = packed_mask[0];
+    return SUCCEED;
 }
+
 #endif
 
 /*-------------------------------------------------------------------------
@@ -4122,7 +4159,7 @@ parse_start:
             leave(EXIT_SUCCESS);
             break;
         case 'w':
-            nCols = atoi(opt_arg);
+            nCols = HDatoi(opt_arg);
             last_was_dset = FALSE;
             break;
         case 'a':
@@ -4254,7 +4291,10 @@ parse_start:
                           opt);
                 leave(EXIT_FAILURE);
             }
-            parse_mask_list(opt_arg);
+            if (parse_mask_list(opt_arg) != SUCCEED){
+		usage(h5tools_getprogname());
+                leave(EXIT_FAILURE);
+            }
             display_packed_bits = TRUE;
             break;
 #endif

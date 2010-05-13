@@ -488,8 +488,6 @@ if test -z "$HDF5_NOCLEANUP"; then
  rm -f $TESTDIR/out3.h5
 fi
 
-
-
 # test for dataset region references 
 TOOLTEST tdatareg.ddl tdatareg.h5
 TOOLTEST tdataregR.ddl -R tdatareg.h5
@@ -510,7 +508,6 @@ TOOLTEST torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
-
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 
@@ -518,17 +515,43 @@ TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
 TOOLTEST textlinksrc.ddl textlinksrc.h5
 TOOLTEST textlinkfar.ddl textlinkfar.h5
 
-
 # test for dataset packed bits 
+# Set up xCMD to test or skip.
 if test "$Have_Packed_Bits" = "yes"; then
-    TOOLTEST tpackedbits.ddl -d /dset1 -M 0,2 tdset.h5
-    TOOLTEST tpackedbits2.ddl -d /dset1 -M 0,2,2,1 tdset.h5
+    xCMD=TOOLTEST
 else
-    SKIP tpackedbits.ddl -d /dset1 -M 0,2 tdset.h5
-    SKIP tpackedbits2.ddl -d /dset1 -M 0,2,2,1 tdset.h5
+    xCMD=SKIP
 fi
+# Limits:
+# Maximum number of packed bits is 8 (for now).
+# Maximum integer size is 8 (for now).
+# Maximun Offset is 7 (Maximum size - 1).
+# Maximum Offset+Length is 8 (Maximum size).
+# Tests:
+# Normal operation on both signed and unsigned int datasets.
+# Their rawdata output should be the same.
+$xCMD tpbitsSigned.ddl -d /DS08BITS -M 0,2,2,6 packedbits.h5
+$xCMD tpbitsUnsigned.ddl -d /DU08BITS -M 0,2,2,6 packedbits.h5
+# Overlapped packed bits.
+$xCMD tpbitsOverlapped.ddl -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
+# Maximum number of packed bits.
+$xCMD tpbitsMax.ddl -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+# Test Error handling.
+# Too many packed bits requested. Max is 8 for now.
+$xCMD tpbitsMaxExceeded.ddl -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
+# Offset too large. Max is 7 (8-1) for now.
+$xCMD tpbitsOffsetExceeded.ddl -d /DS08BITS -M 8,1 packedbits.h5
+# Bad offset, must not be negative.
+$xCMD tpbitsOffsetNegative.ddl -d /DS08BITS -M -1,1 packedbits.h5
+# Bad length, must not be positive.
+$xCMD tpbitsLengthPositive.ddl -d /DS08BITS -M 4,0 packedbits.h5
+# Offset+Length is too large. Max is 8 for now.
+$xCMD tpbitsLengthExceeded.ddl -d /DS08BITS -M 2,7 packedbits.h5
+# Incomplete pair of packed bits request.
+$xCMD tpbitsIncomplete.ddl -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
 
 
+# Report test results and exit
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."
     exit $EXIT_SUCCESS
