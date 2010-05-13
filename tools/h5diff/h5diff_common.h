@@ -13,11 +13,25 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern unsigned char g_Parallel;
-extern int g_nTasks;
+#ifndef H5DIFFCOMMON_H__
+#define H5DIFFCOMMON_H__
+
+#include "h5tools.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+H5TOOLS_DLLVAR unsigned char g_Parallel;
+H5TOOLS_DLLVAR int g_nTasks;
 
 void usage(void);
 void parse_command_line(int argc, const char* argv[], const char** fname1, const char** fname2, const char** objname1, const char** objname2, diff_opt_t* options);
 void h5diff_exit(int status);
 void print_info(diff_opt_t* options);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* H5DIFFCOMMON_H__ */
