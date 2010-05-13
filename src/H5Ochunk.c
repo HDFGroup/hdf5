@@ -207,7 +207,7 @@ done:
  */
 herr_t
 H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_chunk_proxy_t *chk_proxy,
-    unsigned chk_flags)
+    hbool_t dirtied)
 {
     herr_t ret_value = SUCCEED;        /* Return value */
 
@@ -217,39 +217,70 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_chunk_proxy_t *chk_p
     HDassert(f);
     HDassert(oh);
     HDassert(chk_proxy);
-    HDassert(!(chk_flags & (unsigned)~(H5AC__DIRTIED_FLAG | H5AC__SIZE_CHANGED_FLAG)));
 
     /* Check for releasing first chunk */
     if(0 == chk_proxy->chunkno) {
-        /* Check for resizing the first chunk */
-        if(chk_flags & H5AC__SIZE_CHANGED_FLAG) {
-            /* Resize object header in cache */
-            if(H5AC_resize_entry(oh, oh->chunk[0].size) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize chunk in cache")
-        } /* end if */
         /* Check for dirtying the first chunk */
-        else if(chk_flags & H5AC__DIRTIED_FLAG) {
+        if(dirtied) {
             /* Mark object header as dirty in cache */
             if(H5AC_mark_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end else/if */
-        else {
-            /* Sanity check */
-            HDassert(0 && "Unknown chunk proxy flag(s)?!?");
-        } /* end else */
 
         /* Free fake chunk proxy */
         chk_proxy = H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);
     } /* end if */
     else {
-        /* Release the chunk proxy from the cache, marking it dirty */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[chk_proxy->chunkno].addr, oh->chunk[chk_proxy->chunkno].size, chk_proxy, chk_flags) < 0)
+        /* Release the chunk proxy from the cache, possibly marking it dirty */
+        if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[chk_proxy->chunkno].addr, chk_proxy, (dirtied ? H5AC__DIRTIED_FLAG : H5AC__NO_FLAGS_SET)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_chunk_unprotect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_chunk_resize
+ *
+ * Purpose:	Resize an object header chunk
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May  6 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy)
+{
+    herr_t ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_chunk_resize, FAIL)
+
+    /* check args */
+    HDassert(oh);
+    HDassert(chk_proxy);
+
+    /* Check for resizing first chunk */
+    if(0 == chk_proxy->chunkno) {
+        /* Resize object header in cache */
+        if(H5AC_resize_entry(oh, oh->chunk[0].size) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize chunk in cache")
+    } /* end if */
+    else {
+        /* Resize chunk in cache */
+        if(H5AC_resize_entry(chk_proxy, oh->chunk[chk_proxy->chunkno].size) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize chunk in cache")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_chunk_resize() */
 
 
 /*-------------------------------------------------------------------------
@@ -295,7 +326,7 @@ H5O_chunk_update_idx(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     chk_proxy->chunkno = idx;
 
     /* Release the chunk proxy from the cache, marking it deleted */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, (size_t)0, chk_proxy, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
 done:
@@ -347,7 +378,7 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDassert(chk_proxy->chunkno == idx);
 
     /* Release the chunk proxy from the cache, marking it deleted */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, (size_t)0, chk_proxy, (H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG)) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, (H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
 done:

@@ -280,7 +280,7 @@ H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
 done:
     /* Release B-tree header node */
-    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)0, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -344,7 +344,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     depth = shared->depth;
 
     /* Release header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)0, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
     bt2 = NULL;
 
@@ -372,7 +372,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
             next_node_ptr = internal->node_ptrs[idx];
 
             /* Unlock current node */
-            if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, (size_t)0, internal, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Set pointer to next node to load */
@@ -380,7 +380,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
         } /* end if */
         else {
             /* Unlock current node */
-            if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, (size_t)0, internal, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
             /* Fill in information about the node */
@@ -410,7 +410,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
         cmp = H5B2_locate_record(shared->type, leaf->nrec, shared->nat_off, leaf->leaf_native, udata, &idx);
 
         /* Unlock current node */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, (size_t)0, leaf, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
         /* Indicate the depth that the record was found */

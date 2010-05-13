@@ -282,7 +282,7 @@ H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     } /* end if */
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -493,9 +493,9 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     H5_buffer_dump(stream, indent, dblock->blk, marker, (size_t)0, dblock->size);
 
 done:
-    if(dblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, (size_t)0, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
     H5MM_xfree(marker);
 
@@ -629,7 +629,7 @@ H5HF_iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 done:
     if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -750,7 +750,7 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     } /* end if */
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

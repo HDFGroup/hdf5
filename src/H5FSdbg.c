@@ -167,7 +167,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
 	      fspace->alloc_sect_size);
 
 done:
-    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, addr, (size_t)0, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -267,7 +267,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     client = fspace->client;
 
     /* Release the free space header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
     fspace = NULL;
 
@@ -289,7 +289,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     } /* end switch */
 
 done:
-    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)

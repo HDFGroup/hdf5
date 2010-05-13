@@ -531,9 +531,9 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 #endif /* H5B2_DEBUG */
 
     /* Release child nodes (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, (size_t)0, left_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, (size_t)0, right_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
 
 done:
@@ -618,7 +618,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split old root node")
 
     /* Release new root node (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, (size_t)0, new_root, new_root_flags) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, bt2->root.addr, new_root, new_root_flags) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree internal node")
 
 done:
@@ -844,9 +844,9 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 #endif /* H5B2_DEBUG */
 
     /* Release child nodes (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, (size_t)0, left_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, (size_t)0, right_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1224,11 +1224,11 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
 #endif /* H5B2_DEBUG */
 
     /* Unlock child nodes (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, (size_t)0, left_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, middle_addr, (size_t)0, middle_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, (size_t)0, right_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1382,13 +1382,13 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
 #endif /* H5B2_DEBUG */
 
     /* Unlock left node (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, (size_t)0, left_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
     if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, (size_t)0, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1612,15 +1612,15 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
 #endif /* H5B2_DEBUG */
 
     /* Unlock left & middle nodes (marked as dirty) */
-    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, (size_t)0, left_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, left_addr, left_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, middle_addr, (size_t)0, middle_child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, middle_addr, middle_child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
     if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, (size_t)0, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1719,7 +1719,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
 #endif /* H5B2_DEBUG */
 
     /* Unlock child node */
-    if(H5AC_unprotect(f, dxpl_id, child_class, child_addr, (size_t)0, child, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, child_addr, child, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1805,7 +1805,7 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node (marked as dirty) */
-    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, (size_t)0, leaf, H5AC__DIRTIED_FLAG) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__DIRTIED_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1945,7 +1945,7 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, (size_t)0, internal, internal_flags) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, internal_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2241,7 +2241,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     HDmemcpy(native, node_native, (shared->type->nrec_size * curr_node->node_nrec));
 
     /* Unlock the node */
-    if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, (size_t)0, node, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     node = NULL;
 
@@ -2364,7 +2364,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node */
-    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, (size_t)0, leaf, leaf_flags) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2577,7 +2577,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, (size_t)0, internal, internal_flags) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, internal, internal_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2668,7 +2668,7 @@ H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree leaf node */
-    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, (size_t)0, leaf, leaf_flags) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, leaf, leaf_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release leaf B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2937,7 +2937,7 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, (size_t)0, internal, internal_flags) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, internal_addr, internal, internal_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3033,7 +3033,7 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, (size_t)0, leaf, H5AC__NO_FLAGS_SET) < 0)
+    if(leaf && H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3124,7 +3124,7 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 done:
     /* Release the B-tree internal node */
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, (size_t)0, internal, H5AC__NO_FLAGS_SET) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr->addr, internal, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release internal B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3220,7 +3220,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
 done:
     /* Unlock & delete current node */
     if(node)
-        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, (size_t)0, node, H5AC__DELETED_FLAG) < 0)
+        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3281,7 +3281,7 @@ H5B2_iterate_size_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned dep
     *btree_size += shared->node_size;
 
 done:
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node->addr, (size_t)0, internal, H5AC__NO_FLAGS_SET) < 0)
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node->addr, internal, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)

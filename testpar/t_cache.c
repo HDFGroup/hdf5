@@ -2101,7 +2101,6 @@ datum_free_icr(void * thing)
     HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
               ( entry_ptr->header.size == entry_ptr->local_len ) );
 
-    HDassert( !(entry_ptr->dirty) );
     HDassert( !(entry_ptr->header.is_dirty) );
     HDassert( !(entry_ptr->global_pinned) );
     HDassert( !(entry_ptr->local_pinned) );
@@ -2752,7 +2751,7 @@ mark_entry_dirty(H5C_t * cache_ptr,
 
         entry_ptr = &(data[idx]);
 
-	HDassert ( entry_ptr->global_pinned );
+        HDassert ( entry_ptr->locked || entry_ptr->global_pinned );
 	HDassert ( ! (entry_ptr->local_pinned) );
 
         (entry_ptr->ver)++;
@@ -2769,7 +2768,7 @@ mark_entry_dirty(H5C_t * cache_ptr,
                           world_mpi_rank, fcn_name);
             }
         }
-	else
+	else if ( ! ( entry_ptr->locked ) )
 	{
 	    global_dirty_pins++;
 	}
@@ -3604,8 +3603,7 @@ unlock_entry(H5C_t * cache_ptr,
         }
 
         result = H5AC_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
-			        entry_ptr->base_addr, entry_ptr->local_len,
-                                (void *)(&(entry_ptr->header)), flags);
+                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -4130,15 +4128,10 @@ smoke_check_1(void)
 	    fflush(stdout);
         }
 
-        /* verify that all instance of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instance of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         if ( show_progress ) { /* 9 */
             HDfprintf(stdout, "%d:%s - %0d -- success = %d\n",
@@ -4359,15 +4352,10 @@ smoke_check_2(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instance of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         /* compose the done message */
         mssg.req       = DONE_REQ_CODE;
@@ -4679,15 +4667,10 @@ smoke_check_3(void)
             }
         }
 
-        /* verify that all instances of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instances of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         /* compose the done message */
         mssg.req       = DONE_REQ_CODE;
@@ -4995,15 +4978,10 @@ smoke_check_4(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instance of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         /* compose the done message */
         mssg.req       = DONE_REQ_CODE;
@@ -5286,15 +5264,10 @@ smoke_check_5(void)
 	    fflush(stdout);
         }
 
-        /* verify that all instance of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instance of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         if ( show_progress ) { /* 9 */
             HDfprintf(stdout, "%d:%s - %0d -- success = %d\n",
@@ -5598,15 +5571,10 @@ trace_file_check(void)
             }
         }
 
-        /* verify that all instance of datum are back where the started
-         * and are clean.
-         */
+        /* verify that all instance of datum are back where the started.  */
 
         for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
-        {
             HDassert( data_index[i] == i );
-            HDassert( ! (data[i].dirty) );
-        }
 
         /* compose the done message */
         mssg.req       = DONE_REQ_CODE;

@@ -246,7 +246,7 @@ HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", 
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space sections")
 
         /* Unlock free space sections, now pinned */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, (size_t)0, sinfo, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space sections")
     } /* end else */
 #ifdef QAK

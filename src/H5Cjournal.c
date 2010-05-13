@@ -1042,10 +1042,17 @@ H5C_journal_transaction(H5F_t * f,
                                     "H5C_protect() failed.")
                     }
 
+                    result = H5C_resize_entry(thing, new_len);
+
+                    if ( result < 0 ) {
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                    "H5C_resize_entry() failed.")
+                    }
+
                     result = H5C_unprotect(f, dxpl_id,
                                             entry_ptr->type, entry_ptr->addr,
-                                            thing, H5C__SIZE_CHANGED_FLAG, 
-					    new_len);
+                                            thing, H5C__NO_FLAGS_SET);
 
                     if ( result < 0 ) {
 

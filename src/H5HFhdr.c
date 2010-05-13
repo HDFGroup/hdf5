@@ -1461,13 +1461,13 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
 
     /* Finished deleting header */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, (size_t)0, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
     hdr = NULL;
 
 done:
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

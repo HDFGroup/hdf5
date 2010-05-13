@@ -114,7 +114,7 @@ H5B2_stat_info(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
 done:
     /* Release B-tree header node */
-    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, (size_t)0, bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)

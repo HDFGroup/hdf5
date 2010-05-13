@@ -194,7 +194,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     ret_value = fh;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
@@ -268,7 +268,7 @@ HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fs
     ret_value = fh;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
@@ -920,7 +920,7 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 
 done:
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

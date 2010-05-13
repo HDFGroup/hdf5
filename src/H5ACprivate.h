@@ -248,7 +248,6 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__SET_FLUSH_MARKER_FLAG	  H5C__SET_FLUSH_MARKER_FLAG
 #define H5AC__DELETED_FLAG		  H5C__DELETED_FLAG
 #define H5AC__DIRTIED_FLAG		  H5C__DIRTIED_FLAG
-#define H5AC__SIZE_CHANGED_FLAG		  H5C__SIZE_CHANGED_FLAG
 #define H5AC__PIN_ENTRY_FLAG		  H5C__PIN_ENTRY_FLAG
 #define H5AC__UNPIN_ENTRY_FLAG		  H5C__UNPIN_ENTRY_FLAG
 #define H5AC__FLUSH_INVALIDATE_FLAG	  H5C__FLUSH_INVALIDATE_FLAG
@@ -312,7 +311,7 @@ H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
-			     size_t new_size, void *thing, unsigned flags);
+			     void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,

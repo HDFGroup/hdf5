@@ -382,7 +382,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     }
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -549,14 +549,14 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, unsigned *old_bt_flags,
 
 	tmp_bt->left = *new_addr_p;
 
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, old_bt->right, (size_t)0, tmp_bt, H5AC__DIRTIED_FLAG) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, old_bt->right, tmp_bt, H5AC__DIRTIED_FLAG) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     } /* end if */
 
     old_bt->right = *new_addr_p;
 
 done:
-    if(new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, (size_t)0, new_bt, new_bt_flags) < 0)
+    if(new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt, new_bt_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -633,7 +633,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     if(!lt_key_changed)
 	HDmemcpy(lt_key, H5B_NKEY(bt,shared,0), type->sizeof_nkey);
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release new child")
     bt = NULL;
 
@@ -644,7 +644,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     if(!rt_key_changed)
 	HDmemcpy(rt_key, H5B_NKEY(bt,shared,bt->nchildren), type->sizeof_nkey);
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child, bt, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release new child")
     bt = NULL;
 
@@ -663,7 +663,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 
     bt->left = old_root;
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child, (size_t)0, bt, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child, bt, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release new child")
     bt = NULL;    /* Make certain future references will be caught */
 
@@ -682,13 +682,13 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     if(NULL == (new_bt = H5B_copy(bt))) {
         HCOMMON_ERROR(H5E_BTREE, H5E_CANTCOPY, "unable to copy old root");
 
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__DIRTIED_FLAG) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__DIRTIED_FLAG) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release new child")
 
         HGOTO_DONE(FAIL)
     } /* end if */
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__DIRTIED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__DIRTIED_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release new child")
     bt = NULL;    /* Make certain future references will be caught */
 
@@ -1086,8 +1086,8 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
 done:
     {
-	herr_t e1 = (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, bt_flags) < 0);
-	herr_t e2 = (twin && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_node_p, (size_t)0, twin, twin_flags) < 0);
+	herr_t e1 = (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags) < 0);
+	herr_t e2 = (twin && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_node_p, twin, twin_flags) < 0);
 	if(e1 || e2)  /*use vars to prevent short-circuit of side effects */
 	    HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node(s)")
     }
@@ -1150,7 +1150,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
         haddr_t left_child = bt->child[0];     /* Address of left-most child in node */
 
         /* Release current node */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
         bt = NULL;
 
@@ -1177,7 +1177,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
         HDmemcpy(child, bt->child, (nchildren * sizeof(haddr_t)));
 
         /* Release current node */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
         bt = NULL;
 
@@ -1219,7 +1219,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
                     HDmemcpy(child, bt->child, nchildren * sizeof(haddr_t));
 
                     /* Unprotect node */
-                    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+                    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
                     bt = NULL;
                 } /* end if */
@@ -1231,7 +1231,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
     } /* end else */
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
     if(native)
         (void)H5FL_BLK_FREE(native_block, native);
@@ -1429,7 +1429,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
                     /* Make certain the native key for the right sibling is set up */
                     HDmemcpy(H5B_NKEY(sibling, shared, 0), H5B_NKEY(bt, shared, idx + 1), type->sizeof_nkey);
 
-                    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, (size_t)0, sibling, H5AC__DIRTIED_FLAG) < 0)
+                    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, H5AC__DIRTIED_FLAG) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree")
                     sibling = NULL;   /* Make certain future references will be caught */
                 } /* end if */
@@ -1456,7 +1456,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
 		sibling->right = bt->right;
 
-                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->left, (size_t)0, sibling, H5AC__DIRTIED_FLAG) < 0)
+                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->left, sibling, H5AC__DIRTIED_FLAG) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree")
                 sibling = NULL;   /* Make certain future references will be caught */
 	    } /* end if */
@@ -1469,7 +1469,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
 		sibling->left = bt->left;
 
-                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, (size_t)0, sibling, H5AC__DIRTIED_FLAG) < 0)
+                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, H5AC__DIRTIED_FLAG) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree")
                 sibling = NULL;   /* Make certain future references will be caught */
 	    } /* end if */
@@ -1477,7 +1477,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    bt->right = HADDR_UNDEF;
             H5_CHECK_OVERFLOW(shared->sizeof_rnode, size_t, hsize_t);
 	    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)shared->sizeof_rnode) < 0
-                    || H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, bt_flags | H5AC__DELETED_FLAG) < 0) {
+                    || H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags | H5AC__DELETED_FLAG) < 0) {
 		bt = NULL;
                 bt_flags = H5AC__NO_FLAGS_SET;
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to free B-tree node")
@@ -1528,7 +1528,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
                 HDmemcpy(H5B_NKEY(sibling, shared, 0), H5B_NKEY(bt, shared, bt->nchildren), type->sizeof_nkey);
 
-                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, (size_t)0, sibling, H5AC__DIRTIED_FLAG) < 0)
+                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, H5AC__DIRTIED_FLAG) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree")
                 sibling = NULL;   /* Make certain future references will be caught */
             } /* end if */
@@ -1557,7 +1557,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	ret_value = H5B_INS_NOOP;
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, bt_flags) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags) < 0)
 	HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1630,7 +1630,7 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
         bt_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, bt_flags) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release node")
     bt = NULL;    /* Make certain future references will be caught */
 
@@ -1714,7 +1714,7 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__DELETED_FLAG) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__DELETED_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node in cache")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1952,7 +1952,7 @@ H5B_get_info_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t ad
     info_udata->bt_info->num_nodes++;
 
     /* Release current node */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     bt = NULL;
 
@@ -1974,7 +1974,7 @@ H5B_get_info_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t ad
         info_udata->bt_info->num_nodes++;
 
         /* Unprotect node */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
         bt = NULL;
     } /* end while */
@@ -1987,7 +1987,7 @@ H5B_get_info_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t ad
     } /* end if */
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2188,7 +2188,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     } /* end for */
 
 done:
-    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2256,7 +2256,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
     cur->level = bt->level;
     head = tail = cur;
 
-    status = H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, (size_t)0, bt, H5AC__NO_FLAGS_SET);
+    status = H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET);
     HDassert(status >= 0);
     bt = NULL;    /* Make certain future references will be caught */
 
@@ -2307,7 +2307,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	} /* end if */
 
 	/* Release node */
-	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, (size_t)0, bt, H5AC__NO_FLAGS_SET);
+	status = H5AC_unprotect(f, dxpl_id, H5AC_BT, cur->addr, bt, H5AC__NO_FLAGS_SET);
 	HDassert(status >= 0);
         bt = NULL;    /* Make certain future references will be caught */
 

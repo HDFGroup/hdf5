@@ -1630,7 +1630,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
             HDassert(oh->nchunks == (chkcnt + 1));
 
             /* Release the chunk from the cache */
-            if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, (size_t)0, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header chunk")
 
             /* Advance to next continuation message */
@@ -1722,7 +1722,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
                     /* Unprotect chunk, marking it dirty */
-                    if(H5O_chunk_unprotect(loc->file, dxpl_id, oh, chk_proxy, H5AC__DIRTIED_FLAG) < 0)
+                    if(H5O_chunk_unprotect(loc->file, dxpl_id, oh, chk_proxy, TRUE) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect object header chunk")
                 } /* end if */
             } /* end for */
@@ -1741,7 +1741,7 @@ H5O_assert(oh);
 
 done:
     if(ret_value == NULL && oh) {
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, (size_t)0, oh, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
     } /* end if */
 
@@ -1845,7 +1845,7 @@ H5O_unprotect(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, unsigned oh_flags)
     HDassert(oh);
 
     /* Unprotect the object header */
-    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, oh->chunk[0].addr, (size_t)0, oh, oh_flags) < 0)
+    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, oh->chunk[0].addr, oh, oh_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
 done:
@@ -1871,7 +1871,7 @@ herr_t
 H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    hbool_t chk_dirtied = FALSE;        /* Flags for unprotecting chunk */
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1925,7 +1925,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
             /* Mark the message as dirty */
             oh->mesg[idx].dirty = TRUE;
-            chk_flags |= H5AC__DIRTIED_FLAG;
+            chk_dirtied = TRUE;
         } /* end if */
         else {
             /* XXX: For now, update access time & change fields in the object header */
@@ -1940,7 +1940,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
 done:
     /* Release chunk */
-    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)
+    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_dirtied) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)

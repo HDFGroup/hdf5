@@ -1277,7 +1277,7 @@ H5HF_sect_single_valid(const H5FS_section_class_t UNUSED *cls, const H5FS_sectio
                         (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
-                status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, (size_t)0, dblock, H5AC__NO_FLAGS_SET);
+                status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET);
                 HDassert(status >= 0);
             } /* end if */
         } /* end if */

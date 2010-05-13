@@ -651,7 +651,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     hobj->idx = idx;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, (size_t)0, heap, heap_flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -728,7 +728,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     ret_value = object;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, H5AC__NO_FLAGS_SET) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -794,7 +794,7 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, heap_flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -901,7 +901,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     } /* end else */
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, (size_t)0, heap, flags) < 0)
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);

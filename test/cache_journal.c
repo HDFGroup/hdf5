@@ -815,7 +815,7 @@ jrnl_col_major_scan_backward(H5F_t * file_ptr,
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
                 unprotect_entry(file_ptr, type, idx + lag,
-                                dirty_unprotects, H5C__NO_FLAGS_SET);
+                        (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
             }
 
             if ( verbose )
@@ -977,7 +977,7 @@ jrnl_col_major_scan_forward(H5F_t * file_ptr,
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
                 unprotect_entry(file_ptr, type, idx - lag,
-                                dirty_unprotects, H5C__NO_FLAGS_SET);
+                        (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
             }
 
             if ( verbose )
@@ -1155,8 +1155,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx - lag + 2));
 
-                    unprotect_entry(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+2, H5C__NO_FLAGS_SET);
                 }
 
 
@@ -1202,8 +1201,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx - lag + 5));
 
-                    unprotect_entry(file_ptr, type, idx-lag+5, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+5, H5C__NO_FLAGS_SET);
                 }
 
 	        if ( do_mult_ro_protects )
@@ -1261,8 +1259,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 7));
 
-		        unprotect_entry(file_ptr, type, (idx - lag + 7),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 7), H5C__NO_FLAGS_SET);
 		    }
 
 		    if ( ( pass ) && 
@@ -1276,8 +1273,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 8));
 
-		        unprotect_entry(file_ptr, type, (idx - lag + 8),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 8), H5C__NO_FLAGS_SET);
 		    }
 
 		    if ( ( pass ) && 
@@ -1291,8 +1287,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                             HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				      (idx - lag + 9));
 
-		        unprotect_entry(file_ptr, type, (idx - lag + 9),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx - lag + 9), H5C__NO_FLAGS_SET);
 		    }
 	        } /* if ( do_mult_ro_protects ) */
 
@@ -1320,8 +1315,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                         HDfprintf(stdout, "(u, %d, %d) ", 
 				  type, (idx + lag - 2));
 
-                    unprotect_entry(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-2, H5C__NO_FLAGS_SET);
                 }
 
                 if ( ( pass ) && 
@@ -1353,19 +1347,16 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                                 if ( (entries[type])[idx+lag].is_dirty ) {
 
                                     unprotect_entry(file_ptr, type, idx + lag,
-                                                     NO_CHANGE, 
 						     H5C__NO_FLAGS_SET);
                                 } else {
 
                                     unprotect_entry(file_ptr, type, idx + lag,
-                                                     dirty_unprotects,
-                                                     H5C__NO_FLAGS_SET);
+                                            (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                                 }
                                 break;
 
                             case 1: /* we just did an insert */
                                 unprotect_entry(file_ptr, type, idx + lag,
-                                                 NO_CHANGE, 
 						 H5C__NO_FLAGS_SET);
                                 break;
 
@@ -1373,19 +1364,17 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                                 if ( (entries[type])[idx + lag].is_dirty ) {
 
                                     unprotect_entry(file_ptr, type, idx + lag,
-                                                     NO_CHANGE, 
 						     H5C__DELETED_FLAG);
                                 } else {
 
                                     unprotect_entry(file_ptr, type, idx + lag,
-                                                     dirty_destroys,
-                                                     H5C__DELETED_FLAG);
+                                            (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET)
+                                            | H5C__DELETED_FLAG);
                                 }
                                 break;
 
                             case 3: /* we just did an insrt */
                                 unprotect_entry(file_ptr, type, idx + lag,
-                                                 NO_CHANGE, 
 						 H5C__DELETED_FLAG);
                                 break;
 
@@ -1407,8 +1396,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
 				      "(u, %d, %d) ", type, (idx + lag));
 
                         unprotect_entry(file_ptr, type, idx + lag,
-                                         dirty_unprotects, 
-					 H5C__NO_FLAGS_SET);
+                                (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                     }
                 }
 
@@ -1592,8 +1580,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 				  type, (idx + lag - 2));
 
 		    /*** unprotect entry idx + lag - 2 ***/
-                    unprotect_entry(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-2, H5C__NO_FLAGS_SET);
                 }
 
 
@@ -1643,8 +1630,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 
 		    /*** unprotect entry idx + lag - 5 ***/
-                    unprotect_entry(file_ptr, type, idx+lag-5, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx+lag-5, H5C__NO_FLAGS_SET);
                 }
 
 	        if ( do_mult_ro_protects )
@@ -1706,8 +1692,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 				      (idx + lag - 7));
 
 		        /*** unprotect ro entry idx + lag - 7 ***/
-		        unprotect_entry(file_ptr, type, (idx + lag - 7),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 7), H5C__NO_FLAGS_SET);
 		    }
 
 		    if ( ( pass ) && 
@@ -1722,8 +1707,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 				      (idx + lag - 8));
 
 		        /*** unprotect ro entry idx + lag - 8 ***/
-		        unprotect_entry(file_ptr, type, (idx + lag - 8),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 8), H5C__NO_FLAGS_SET);
 		    }
 
 		    if ( ( pass ) && 
@@ -1738,8 +1722,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 				      (idx + lag - 9));
 
 		        /*** unprotect ro entry idx + lag - 9 ***/
-		        unprotect_entry(file_ptr, type, (idx + lag - 9),
-				         FALSE, H5C__NO_FLAGS_SET);
+		        unprotect_entry(file_ptr, type, (idx + lag - 9), H5C__NO_FLAGS_SET);
 		    }
 	        } /* if ( do_mult_ro_protects ) */
 
@@ -1768,8 +1751,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 				  type, (idx - lag + 2));
 
 		    /*** unprotect entry idx - lag + 2 ***/
-                    unprotect_entry(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                     H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, type, idx-lag+2, H5C__NO_FLAGS_SET);
                 }
 
                 if ( ( pass ) && 
@@ -1806,7 +1788,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 			        /*** unprotect entry NC idx - lag ***/
                                 unprotect_entry(file_ptr, type, idx - lag,
-                                                 NO_CHANGE, H5C__NO_FLAGS_SET);
+                                                 H5C__NO_FLAGS_SET);
                                 break;
 
                             case 1:
@@ -1818,7 +1800,6 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 			            /*** unprotect entry NC idx - lag ***/
                                     unprotect_entry(file_ptr, type, idx - lag,
-                                                     NO_CHANGE, 
 						     H5C__NO_FLAGS_SET);
                                 } else {
 
@@ -1828,8 +1809,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 			            /*** unprotect entry idx - lag ***/
                                     unprotect_entry(file_ptr, type, idx - lag,
-                                                     dirty_unprotects,
-                                                     H5C__NO_FLAGS_SET);
+                                            (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                                 }
                                 break;
 
@@ -1841,7 +1821,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 			        /*** unprotect delete idx - lag ***/
                                 unprotect_entry(file_ptr, type, idx - lag,
-                                                 NO_CHANGE, H5C__DELETED_FLAG);
+                                                 H5C__DELETED_FLAG);
                                 break;
 
                             case 3:
@@ -1853,7 +1833,6 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 				    /*** unprotect delete idx - lag ***/
                                     unprotect_entry(file_ptr, type, idx - lag,
-                                                     NO_CHANGE, 
 						     H5C__DELETED_FLAG);
                                 } else {
 
@@ -1863,8 +1842,8 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 				    /*** unprotect delete idx - lag ***/
                                     unprotect_entry(file_ptr, type, idx - lag,
-                                                     dirty_destroys,
-                                                     H5C__DELETED_FLAG);
+                                            (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET)
+                                            | H5C__DELETED_FLAG);
                                 }
                                 break;
 
@@ -1888,7 +1867,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
 
 		        /*** unprotect idx - lag ***/
                         unprotect_entry(file_ptr, type, idx - lag,
-                                         dirty_unprotects, H5C__NO_FLAGS_SET);
+                                (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                     }
                 }
 
@@ -3431,7 +3410,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     protect_entry(file_ptr, 0, 0);
 
-    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
 
@@ -3468,16 +3447,16 @@ mdj_smoke_check_00(hbool_t human_readable,
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 0);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
     protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
     protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
     protect_entry_ro(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.1");
 
@@ -3497,21 +3476,21 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.1");
 
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 4);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 4, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 4, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 5);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 5, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, TINY_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.1");
 
@@ -3546,17 +3525,17 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.2");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, FALSE);
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 3, FALSE);
@@ -3587,17 +3566,17 @@ mdj_smoke_check_00(hbool_t human_readable,
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 2, TRUE);
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.2");
 
@@ -3627,25 +3606,25 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.2");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, FALSE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 2, H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, TRUE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG | H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, FALSE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 4, H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, TRUE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG | H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 7);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, H5C__DIRTIED_FLAG | H5C__PIN_ENTRY_FLAG);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 8);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, H5C__NO_FLAGS_SET);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 9);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.2");
 
@@ -3693,12 +3672,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
 
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, TRUE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 7, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 8, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 9, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)4, "transaction 4.2");
 
@@ -3781,14 +3760,14 @@ mdj_smoke_check_00(hbool_t human_readable,
     pin_protected_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
     pin_protected_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
 
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE, H5C__NO_FLAGS_SET);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE, H5C__PIN_ENTRY_FLAG);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE, H5C__PIN_ENTRY_FLAG);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, FALSE, H5C__PIN_ENTRY_FLAG);
-    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG | H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, H5C__PIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, H5C__DIRTIED_FLAG | H5C__PIN_ENTRY_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)6, "transaction 6.2");
 
@@ -3821,24 +3800,24 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)7, "transaction 7.2");
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 16) * 15));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+            ((VARIABLE_ENTRY_SIZE / 16) * 15), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 16) * 14));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1,
+            ((VARIABLE_ENTRY_SIZE / 16) * 14), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 16) * 13));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2,
+            ((VARIABLE_ENTRY_SIZE / 16) * 13), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 16) * 12));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+            ((VARIABLE_ENTRY_SIZE / 16) * 12), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, 
 		         ((VARIABLE_ENTRY_SIZE / 16) * 11), TRUE);
@@ -3882,27 +3861,23 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                    H5C__SIZE_CHANGED_FLAG, 
-				    VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
-				      VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, FALSE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-		                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
-				      VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, FALSE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE, TRUE);
@@ -3947,26 +3922,23 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-		                    H5C__SIZE_CHANGED_FLAG, VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-                                      H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG,
-	                              VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-		                    H5C__SIZE_CHANGED_FLAG|H5C__UNPIN_ENTRY_FLAG, 
-				    VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG | H5C__UNPIN_ENTRY_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3, TRUE);
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-	        H5C__SIZE_CHANGED_FLAG|H5C__DIRTIED_FLAG|H5C__UNPIN_ENTRY_FLAG,
-                VARIABLE_ENTRY_SIZE);
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, VARIABLE_ENTRY_SIZE, TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG | H5C__UNPIN_ENTRY_FLAG);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE, TRUE);
@@ -4025,19 +3997,19 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.3");
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 4) * 1));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10,
+        ((VARIABLE_ENTRY_SIZE / 4) * 1), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 4) * 2));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11,
+        ((VARIABLE_ENTRY_SIZE / 4) * 2), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
     protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-    unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-		                      H5C__SIZE_CHANGED_FLAG,
-				      ((VARIABLE_ENTRY_SIZE / 4) * 3));
+    resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12,
+        ((VARIABLE_ENTRY_SIZE / 4) * 3), TRUE);
+    unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.3");
 
@@ -4138,7 +4110,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.3");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 20);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 20, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 20, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)2, "transaction 2.3");
 
@@ -4167,7 +4139,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.3");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 24);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 24, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 24, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.3");
 
@@ -4198,7 +4170,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)4, "transaction 4.3");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 25);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 25, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 25, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)4, "transaction 4.3");
 
@@ -4239,7 +4211,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.4");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 39);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 39, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 39, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.4");
 
@@ -4250,7 +4222,7 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)2, "transaction 2.4");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 40);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 40, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 40, H5C__DIRTIED_FLAG);
 
     expunge_entry(file_ptr, MICRO_ENTRY_TYPE, 40);
 
@@ -4280,10 +4252,10 @@ mdj_smoke_check_00(hbool_t human_readable,
     begin_trans(cache_ptr, verbose, (uint64_t)3, "transaction 3.4");
 
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 41);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 41, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 41, H5C__DIRTIED_FLAG);
     expunge_entry(file_ptr, MICRO_ENTRY_TYPE, 41);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 42);
-    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 42, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, MICRO_ENTRY_TYPE, 42, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)3, "transaction 3.4");
 
@@ -4355,7 +4327,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     insert_entry(file_ptr, 0, 1, FALSE, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
-    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
 
@@ -4436,7 +4408,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     insert_entry(file_ptr, 0, 10, FALSE, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
-    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
 
@@ -4516,7 +4488,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     insert_entry(file_ptr, 0, 20, FALSE, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
-    unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+    unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
 

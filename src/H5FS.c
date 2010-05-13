@@ -216,7 +216,7 @@ HDfprintf(stderr, "%s: fspace->sinfo = %p\n", FUNC, fspace->sinfo);
     } /* end if */
 
     /* Unlock free space header, now pinned */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, NULL, "unable to release free space header")
 
     /* Set return value */
@@ -313,7 +313,7 @@ HDfprintf(stderr, "%s: Done expunging free space section info from cache\n", FUN
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space header")
 
     /* Release the free space header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space header")
     fspace = NULL;
 

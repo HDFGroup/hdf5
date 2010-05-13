@@ -489,77 +489,6 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
 
 /* misc type definitions */
 
-struct flush_cache_test_spec
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    hbool_t		dirty_flag;
-    unsigned int	flags;
-    hbool_t		expected_deserialized;
-    hbool_t		expected_serialized;
-    hbool_t		expected_destroyed;
-};
-
-struct pe_flush_cache_test_spec
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    hbool_t		dirty_flag;
-    unsigned int	flags;
-    int			num_pins;
-    int			pin_type[MAX_PINS];
-    int			pin_idx[MAX_PINS];
-    hbool_t		expected_deserialized;
-    hbool_t		expected_serialized;
-    hbool_t		expected_destroyed;
-};
-
-struct fo_flush_entry_check
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    size_t		expected_size;
-    hbool_t		in_cache;
-    hbool_t		at_main_addr;
-    hbool_t		is_dirty;
-    hbool_t		is_protected;
-    hbool_t		is_pinned;
-    hbool_t		expected_deserialized;
-    hbool_t		expected_serialized;
-    hbool_t		expected_destroyed;
-};
-
-struct fo_flush_cache_test_spec
-{
-    int				entry_num;
-    int				entry_type;
-    int				entry_index;
-    hbool_t			insert_flag;
-    unsigned int		flags;
-    size_t			new_size;
-    int				num_pins;
-    int				pin_type[MAX_PINS];
-    int				pin_idx[MAX_PINS];
-    int				num_flush_ops;
-    struct flush_op		flush_ops[MAX_FLUSH_OPS];
-    hbool_t			expected_deserialized;
-    hbool_t			expected_serialized;
-    hbool_t			expected_destroyed;
-};
-
-struct move_entry_test_spec
-{
-    int			entry_type;
-    int			entry_index;
-    hbool_t		is_dirty;
-    hbool_t		is_pinned;
-};
-
 struct expected_entry_status
 {
     int			entry_type;
@@ -907,14 +836,7 @@ void unpin_entry(H5F_t * file_ptr,
 void unprotect_entry(H5F_t * file_ptr,
                       int32_t type,
                       int32_t idx,
-                      int dirty,
                       unsigned int flags);
-
-void unprotect_entry_with_size_change(H5F_t * file_ptr,
-                                       int32_t type,
-                                       int32_t idx,
-                                       unsigned int flags,
-                                       size_t new_size);
 
 void verify_clean(void);
 
