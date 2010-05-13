@@ -203,7 +203,7 @@ IF (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
     )
-  ELSEIF (WIN32)
+  ELSE (WIN32)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
