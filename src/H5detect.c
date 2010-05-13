@@ -279,6 +279,9 @@ precision (detected_t *d)
  *		absence of implicit mantissa bit, and exponent bias and
  *		initializes a detected_t structure with those properties.
  *
+ * Note:	'volatile' is used for the variables below to prevent the
+ *		compiler from optimizing them away.
+ *
  * Return:	void
  *
  * Programmer:	Robb Matzke
