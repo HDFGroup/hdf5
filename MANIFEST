@@ -1296,9 +1296,18 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
-./tools/testfiles/tpackedbits.ddl
-./tools/testfiles/tpackedbits2.ddl
 ./tools/testfiles/tnofilename-with-packed-bits.ddl
+./tools/testfiles/tpbitsLengthPositive.ddl
+./tools/testfiles/tpbitsMaxExceeded.ddl
+./tools/testfiles/tpbitsSigned.ddl
+./tools/testfiles/tpbitsOffsetNegative.ddl
+./tools/testfiles/tpbitsUnsigned.ddl
+./tools/testfiles/tpbitsMax.ddl
+./tools/testfiles/packedbits.h5
+./tools/testfiles/tpbitsIncomplete.ddl
+./tools/testfiles/tpbitsOverlapped.ddl
+./tools/testfiles/tpbitsLengthExceeded.ddl
+./tools/testfiles/tpbitsOffsetExceeded.ddl
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
 ./tools/testfiles/tordergr.h5
