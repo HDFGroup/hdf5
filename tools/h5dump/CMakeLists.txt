@@ -113,8 +113,6 @@ IF (BUILD_TESTING)
       torderattr2.ddl
       torderattr3.ddl
       torderattr4.ddl
-      tpackedbits.ddl
-      tpackedbits2.ddl
       tperror.ddl
       treference.ddl
       tsaf.ddl
@@ -244,7 +242,49 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_file} ${dest}
     )
   ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  
+  IF (HDF5_USE_H5DUMP_PACKED_BITS)
+    #-- Copy all the HDF5 files from the test directory into the source directory
+    SET (HDF5_REFERENCE_PBITS
+        tpbitsIncomplete.ddl
+        tpbitsLengthExceeded.ddl
+        tpbitsLengthPositive.ddl
+        tpbitsMax.ddl
+        tpbitsMaxExceeded.ddl
+        tpbitsOffsetExceeded.ddl
+        tpbitsOffsetNegative.ddl
+        tpbitsOverlapped.ddl
+        tpbitsSigned.ddl
+        tpbitsUnsigned.ddl
+    )
+    SET (HDF5_REFERENCE_TEST_PBITS
+        packedbits.h5
+    )
 
+    FOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
+      SET (ddldest "${PROJECT_BINARY_DIR}/${ddl_pbits}")
+      #MESSAGE (STATUS " Translating ${ddl_pbits}")
+      ADD_CUSTOM_COMMAND (
+          TARGET     h5dump
+          POST_BUILD
+          COMMAND    ${XLATE_UTILITY}
+          ARGS       ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${ddl_pbits} ${ddldest} -l3
+      )
+    ENDFOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
+
+    FOREACH (h5_pbits ${HDF5_REFERENCE_TEST_PBITS})
+      SET (dest "${PROJECT_BINARY_DIR}/${h5_pbits}")
+      #MESSAGE (STATUS " Copying ${h5_pbits}")
+      ADD_CUSTOM_COMMAND (
+          TARGET     h5dump
+          POST_BUILD
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different ${HDF5_TOOLS_SOURCE_DIR}/testfiles/${h5_pbits} ${dest}
+      )
+    ENDFOREACH (h5_pbits ${HDF5_REFERENCE_TEST_PBITS})
+
+  ENDIF (HDF5_USE_H5DUMP_PACKED_BITS)
+  
   ADD_CUSTOM_COMMAND (
       TARGET     h5dump
       POST_BUILD
@@ -597,6 +637,33 @@ IF (BUILD_TESTING)
   ENDIF (NOT ${USE_PACKED_BITS})
   ADD_SKIP_H5_TEST (tpackedbits 0 ${TESTTYPE} -d /dset1 -M 0,2 tdset.h5)
   ADD_SKIP_H5_TEST (tpackedbits2 0 ${TESTTYPE} -d /dset1 -M 0,2,2,1 tdset.h5)
+  # Limits:
+  # Maximum number of packed bits is 8 (for now).
+  # Maximum integer size is 8 (for now).
+  # Maximun Offset is 7 (Maximum size - 1).
+  # Maximum Offset+Length is 8 (Maximum size).
+  # Tests:
+  # Normal operation on both signed and unsigned int datasets.
+  # Their rawdata output should be the same.
+  ADD_SKIP_H5_TEST (tpbitsSigned 0 ${TESTTYPE} -d /DS08BITS -M 0,2,2,6 packedbits.h5)
+  ADD_SKIP_H5_TEST (tpbitsUnsigned 0 ${TESTTYPE} -d /DU08BITS -M 0,2,2,6 packedbits.h5)
+  # Overlapped packed bits.
+  ADD_SKIP_H5_TEST (tpbitsOverlapped 0 ${TESTTYPE} -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5)
+  # Maximum number of packed bits.
+  ADD_SKIP_H5_TEST (tpbitsMax 0 ${TESTTYPE} -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
+  # Test Error handling.
+  # Too many packed bits requested. Max is 8 for now.
+  ADD_SKIP_H5_TEST (tpbitsMaxExceeded 1 ${TESTTYPE} -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
+  # Offset too large. Max is 7 (8-1) for now.
+  ADD_SKIP_H5_TEST (tpbitsOffsetExceeded 1 ${TESTTYPE} -d /DS08BITS -M 8,1 packedbits.h5)
+  # Bad offset, must not be negative.
+  ADD_SKIP_H5_TEST (tpbitsOffsetNegative 1 ${TESTTYPE} -d /DS08BITS -M -1,1 packedbits.h5)
+  # Bad length, must not be positive.
+  ADD_SKIP_H5_TEST (tpbitsLengthPositive 1 ${TESTTYPE} -d /DS08BITS -M 4,0 packedbits.h5)
+  # Offset+Length is too large. Max is 8 for now.
+  ADD_SKIP_H5_TEST (tpbitsLengthExceeded 1 ${TESTTYPE} -d /DS08BITS -M 2,7 packedbits.h5)
+  # Incomplete pair of packed bits request.
+  ADD_SKIP_H5_TEST (tpbitsIncomplete 1 ${TESTTYPE} -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5)
    
 ENDIF (BUILD_TESTING)
 
