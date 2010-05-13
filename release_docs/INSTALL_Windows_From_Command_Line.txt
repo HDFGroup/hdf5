@@ -5,12 +5,15 @@
 Note: This instruction is written for users who would like to build HDF5
       libraries and tools from the HDF5 source code package on command
       line. We no longer support building HDF5 using Microsoft Visual 
-	  Studio 2005.
+	  Studio .NET 2003 or Visual Studio VS2005 or Intel Fortran 91.
          
       Currently, we support:
       
       1. Building and testing HDF5 C/C++/Fortran libraries on command line with 
          Microsoft Visual Studio 2008 for 32- or 64-bit Windows.
+         
+      2. Building and testing HDF5 C/C++/Fortran libraries and utilities using
+         CMake tools. Refer to CMAKE_Windows.txt file for detailed information.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
@@ -42,7 +45,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
     This should output a path similar to:
     
         C:\Program Files\Microsoft Visual Studio 9\Common7\Tools\
-             
+        
    1.2 Run batch file copy_hdf.bat.
 
    Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat.
@@ -112,6 +115,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
               /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
               /ivf111           Build HDF5 Fortran using Intel Visual Fortran 11.1
               /nodebug          Build HDF5 release versions only
+                                Note: Default is to build debug and release versions
               /useenv           Build HDF5 using compiler settings defined
                                 in the environment, rather than the IDE.
               /?                Help information
