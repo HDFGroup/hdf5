@@ -3030,18 +3030,17 @@ H5C_resize_entry(void *thing, size_t new_size)
             }
         }
 
-        /* update the pinned or protected entry list */
+        /* update the pinned and/or protected entry list */
         if(entry_ptr->is_pinned) {
             H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
                                             (cache_ptr->pel_size), \
                                             (entry_ptr->size), (new_size));
         } /* end if */
-        else {
-            HDassert(entry_ptr->is_protected);
+        if(entry_ptr->is_protected) {
             H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
                                             (cache_ptr->pl_size), \
                                             (entry_ptr->size), (new_size));
-        } /* end else */
+        } /* end if */
 
         /* update the hash table */
 	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
