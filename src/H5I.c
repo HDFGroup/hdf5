@@ -362,8 +362,10 @@ H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
 
         /* Don't re-use IDs for property lists, as this causes problems
-         * with some virtual file drivers. */
-        if (type_id == H5I_GENPROP_LST)
+         * with some virtual file drivers. Also, open datatypes are not 
+         * getting reduced to zero before file close in some situations,
+         * resulting in memory leak, so skip them for now as well. */
+        if (type_id == H5I_GENPROP_LST || type_id == H5I_DATATYPE)
             type_ptr->reuse_ids = FALSE;
         else
             type_ptr->reuse_ids = TRUE;
@@ -1355,6 +1357,7 @@ H5I_remove(hid_t id)
             tmp_id_ptr = type_ptr->next_id_ptr->next;
             (void)H5FL_FREE(H5I_id_info_t, type_ptr->next_id_ptr);
             type_ptr->next_id_ptr = tmp_id_ptr;
+            type_ptr->free_count--;
 
         } /* end while */
 
