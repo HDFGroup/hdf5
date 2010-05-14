@@ -55,6 +55,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/run-hlfortran-ex.sh.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
@@ -66,7 +67,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = run-hlfortran-ex.sh
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -343,13 +344,14 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 TEST_PROG = exlite
 
 # List files to be installed here
-INSTALL_FILES = 
+INSTALL_FILES = exlite.f90
+INSTALL_SCRIPT_FILES = run-hlfortran-ex.sh
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes
 
 # Tell automake how to install examples
-EXAMPLEDIR = $(exec_prefix)/examples/hl/fortran
+EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/fortran
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -408,6 +410,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+run-hlfortran-ex.sh: $(top_builddir)/config.status $(srcdir)/run-hlfortran-ex.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -586,6 +590,8 @@ help:
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
+$(EXAMPLETOPDIR):
+	-$(top_srcdir)/bin/mkdirs $@
 
 # Install and uninstall rules.  We install the source files, not the
 # example programs themselves.
@@ -600,10 +606,26 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
+	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
+	  fi;                                                                \
+	done
 
 uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
+        fi
+	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+        fi
+	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
         fi
 
 installcheck-local:

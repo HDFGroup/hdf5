@@ -4204,6 +4204,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
                  examples/Makefile
+                 examples/run-c-ex.sh
                  examples/testh5cc.sh
                  c++/Makefile
                  c++/src/Makefile
@@ -4211,6 +4212,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  c++/test/Makefile
                  c++/test/H5srcdir_str.h
                  c++/examples/Makefile
+                 c++/examples/run-c++-ex.sh
                  c++/examples/testh5c++.sh
                  fortran/Makefile
                  fortran/src/h5fc
@@ -4218,6 +4220,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/test/Makefile
                  fortran/testpar/Makefile
                  fortran/examples/Makefile
+                 fortran/examples/run-fortran-ex.sh
                  fortran/examples/testh5fc.sh
                  hl/Makefile
                  hl/src/Makefile
@@ -4226,14 +4229,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/examples/Makefile
+                 hl/examples/run-hlc-ex.sh
                  hl/c++/Makefile
                  hl/c++/src/Makefile
                  hl/c++/test/Makefile
                  hl/c++/examples/Makefile
+                 hl/c++/examples/run-hlc++-ex.sh
                  hl/fortran/Makefile
                  hl/fortran/src/Makefile
                  hl/fortran/test/Makefile
-                 hl/fortran/examples/Makefile])
+                 hl/fortran/examples/Makefile
+                 hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
 no_create=$saved_no_create

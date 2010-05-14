@@ -962,7 +962,7 @@ uninstall-all:
 
 # Install examples in this directory and recursively
 install-examples uninstall-examples:
-	@@SETX@; for d in examples $(HDF5_INTERFACES); do               \
+	@@SETX@; for d in examples $(HDF5_INTERFACES) $(HL); do               \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	done
 
