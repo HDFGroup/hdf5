@@ -104,8 +104,12 @@ New Features
 
     C++ API
     -------
-    - New member function DataSet::getInMemDataSize() to simplify
-      getting the dataset's data size in memory.  (BMR - 2009/07/26)
+    - New member functions
+	+ Overloaded CommonFG::getObjnameByIdx to take char* for name
+	+ Overloaded CommonFG::getObjTypeByIdx to return type name as a char*.
+	  (BMR - 2010/05/10)
+	+ DataSet::getInMemDataSize() to simplify getting the dataset's
+	  data size in memory.  (BMR - 2009/07/26)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -168,6 +172,10 @@ Bug Fixes since HDF5-1.8.4
 
     C++ API
     ------
+    - The constructor PropList::PropList(id) was fixed to act properly
+      according to the nature of 'id'.  When 'id' is a property class id,
+      a new property list will be created.  When 'id' id a property list id,
+      a copy of the property list will be made. (BMR - 2010/5/9)
     - The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
       CommonFG::getComment, respectively, now have default values for
       user's convenience.  (BMR - 2009/10/23)
