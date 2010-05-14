@@ -101,7 +101,6 @@ IF (BUILD_TESTING)
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
-      tnofilename-with-packed-bits.ddl
       tnofilename.ddl
       tnullspace.ddl
       tordergr1.ddl
@@ -246,6 +245,7 @@ IF (BUILD_TESTING)
   IF (HDF5_USE_H5DUMP_PACKED_BITS)
     #-- Copy all the HDF5 files from the test directory into the source directory
     SET (HDF5_REFERENCE_PBITS
+        tnofilename-with-packed-bits.ddl
         tpbitsIncomplete.ddl
         tpbitsLengthExceeded.ddl
         tpbitsLengthPositive.ddl
