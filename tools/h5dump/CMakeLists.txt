@@ -101,7 +101,6 @@ IF (BUILD_TESTING)
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
       tnbit.ddl
-      tnofilename-with-packed-bits.ddl
       tnofilename.ddl
       tnullspace.ddl
       tordergr1.ddl
@@ -113,8 +112,6 @@ IF (BUILD_TESTING)
       torderattr2.ddl
       torderattr3.ddl
       torderattr4.ddl
-      tpackedbits.ddl
-      tpackedbits2.ddl
       tperror.ddl
       treference.ddl
       tsaf.ddl
