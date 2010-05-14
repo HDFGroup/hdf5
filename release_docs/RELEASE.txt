@@ -409,12 +409,6 @@ Known Problems
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO. CMC - 2009/04/28
 
-* There is a known issue in which HDF5 will change the timestamp on a file 
-  simply by opening it with read/write permissions, even if the file is not
-  modified in any way. This is due to the way in which HDF5 manages the file 
-  superblock. A fix is currently underway and should be included in the 1.8.4
-  release of HDF5. MAM - 2009/04/28
-
 * For gcc v4.3 and v4.4, with production mode, if -O3 is used, H5Tinit.c
   would fail to compile. Actually bad H5Tinit.c is produced.  If -O (same
   as -O1) is used, H5Tinit.c compiled okay but test/dt_arith would fail.
