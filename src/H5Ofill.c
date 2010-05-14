@@ -965,6 +965,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
 
         /* Update the fill message */
         if(buf != fill->buf) {
+            H5T_vlen_reclaim_elmt(fill->buf, fill->type, dxpl_id);
             H5MM_xfree(fill->buf);
             fill->buf = buf;
         } /* end if */

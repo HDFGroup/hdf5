@@ -225,6 +225,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed some memory leaks in VL datatype conversion when strings are
+            used as fill values. (MAM - 2010/05/12 - BZ# 1826)
       - Fixed a bug when copying objects with NULL references with the
             H5O_COPY_EXPAND_REFERENCE_FLAG flag set. (NAF - 2010/04/08 - 1815)
       - Files can now be concurrently opened more than once using the core file
