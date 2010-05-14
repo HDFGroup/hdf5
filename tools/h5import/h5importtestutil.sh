@@ -108,7 +108,7 @@ TOOLTEST $srcdir/testfiles/str.txt -c $srcdir/testfiles/textstr.conf -o test14.h
 TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
 TOOLTEST $srcdir/testfiles/in64.txt -c $srcdir/testfiles/textpfe.conf -o test15.h5
 
-rm -f  *.txt *.bin *.h5
+rm -f  txtin32.txt txtin16.txt *.bin *.h5
 rm -rf tmp_testfiles
 else
 	echo "** h5import or h5importtest not available ***"
