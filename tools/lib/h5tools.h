@@ -536,10 +536,6 @@ H5TOOLS_DLLVAR int     region_output;       /* region output */
 #define H5_TOOLS_DATATYPE        "DATATYPE"
 
 /* Definitions of useful routines */
-H5TOOLS_DLL const char *h5tools_getprogname(void);
-H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
-H5TOOLS_DLL int      h5tools_getstatus(void);
-H5TOOLS_DLL void     h5tools_setstatus(int d_status);
 H5TOOLS_DLL void     h5tools_init(void);
 H5TOOLS_DLL void     h5tools_close(void);
 H5TOOLS_DLL hid_t    h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,

@@ -152,6 +152,10 @@ typedef struct {
 
 /* Definitions of routines */
 H5TOOLS_DLL int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info);
+H5TOOLS_DLL const char *h5tools_getprogname(void);
+H5TOOLS_DLL void     h5tools_setprogname(const char*progname);
+H5TOOLS_DLL int      h5tools_getstatus(void);
+H5TOOLS_DLL void     h5tools_setstatus(int d_status);
 
 #ifdef __cplusplus
 }
