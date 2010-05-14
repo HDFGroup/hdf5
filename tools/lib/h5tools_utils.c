@@ -39,6 +39,8 @@ int   nCols = 80;
 int         opt_err = 1;    /*get_option prints errors if this is on */
 int         opt_ind = 1;    /*token pointer                          */
 const char *opt_arg;        /*flag argument (or value)               */
+static int  h5tools_d_status = 0;
+static const char  *h5tools_progname = "h5tools";
 
 /* local functions */
 static void init_table(table_t **tbl);
@@ -757,4 +759,32 @@ out:
     }
 
     return Ret;
+}
+
+/*-------------------------------------------------------------------------
+ * Audience:    Public
+ * Chapter:     H5Tools Library
+ * Purpose:     Initialize the name and operation status of the H5 Tools library
+ * Description:
+ *      These are utility functions to set/get the program name and operation status.
+ *-------------------------------------------------------------------------
+ */
+void h5tools_setprogname(const char *Progname)
+{
+    h5tools_progname = Progname;
+}
+
+void h5tools_setstatus(int D_status)
+{
+    h5tools_d_status = D_status;
+}
+
+const char*h5tools_getprogname()
+{
+   return h5tools_progname;
+}
+
+int h5tools_getstatus()
+{
+   return h5tools_d_status;
 }
