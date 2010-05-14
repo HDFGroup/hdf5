@@ -421,6 +421,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed h5ls to return exit code 1 (error) when non-existent file is
+          specified. bug#1793. (JKM 2010/04/27)
+        - h5copy failed to copy dangling link when the link is specified 
+          directly. bug#1817. (JKM 2010/04/22)
+        - h5repack lost attributes from a dataset of reference type. bug#1726.
+          (JKM 2010/3/25)
+        - h5repack sets NULL for object reference value for group or 
+          named datatype. bug#1814. (JKM 2010/03/19)
         - h5diff: fixed incorrect behavior (hang) in parallel mode when
                   specify invalid options (ex: -v and -q) (JKM 2010/02/17)
         - h5dump/h5ls display buffer resize fixed in tools library.  
