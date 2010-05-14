@@ -125,10 +125,6 @@ Bug Fixes since HDF5-1.8.4
     - Fixed various "strict aliasing" problems, allowing higher levels
         of compiler optimization (in particular, allowing '-O3' to work
         with recent versions of GCC).  QAK - 2010/04/26
-    - Fixed a bug where fractal heap IDs for attributes and shared object
-      header messages could be incorrectly encoded in the file for files
-      created on big-endian platforms.  Please see: <put URL here> if you
-      suspect you have a file with this problem.  QAK - 2010/02/23 - 1755
 
     Library
     -------
@@ -149,6 +145,11 @@ Bug Fixes since HDF5-1.8.4
         (NAF - 2010/03/05 - 1733)
     - Fixed a bug where the library, when traversing an external link, would
         reopen the source file if nothing else worked. (NAF - 2010/03/05)
+    - Fixed a bug where fractal heap IDs for attributes and shared object
+        header messages could be incorrectly encoded in the file for files
+        created on big-endian platforms.  
+        Please see http://www.hdfgroup.org/HDF5/release/known_problems if you 
+        suspect you have a file with this problem.  QAK - 2010/02/23 - 1755
     - Fixed an intermittent bug in the b-tree code which could be triggered
         by expanding and shrinking chunked datasets in certain ways.
         (NAF - 2010/02/16)
