@@ -703,7 +703,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
 
     /* Resize the chunk in the cache */
     if(H5O_chunk_resize(oh, chk_proxy) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRESIZE, FAIL, "unable to resize object header chunk")
 
     /* Set return value */
     *msg_idx = (unsigned)extend_msg;

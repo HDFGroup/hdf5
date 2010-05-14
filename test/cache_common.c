@@ -2780,12 +2780,7 @@ flush_cache(H5F_t * file_ptr,
 /*-------------------------------------------------------------------------
  * Function:	insert_entry()
  *
- * Purpose:	Insert the entry indicated by the type and index.  Mark
- *		it clean or dirty as indicated.
- *
- *		Note that I don't see much practical use for inserting
- *		a clean entry, but the interface permits it so we should
- *		test it.
+ * Purpose:	Insert the entry indicated by the type and index.
  *
  *		Do nothing if pass is false.
  *
@@ -2801,7 +2796,6 @@ void
 insert_entry(H5F_t * file_ptr,
              int32_t type,
              int32_t idx,
-             hbool_t UNUSED dirty,
              unsigned int flags)
 {
     H5C_t * cache_ptr;
@@ -3606,7 +3600,6 @@ row_major_scan_forward(H5F_t * file_ptr,
                        hbool_t display_stats,
                        hbool_t display_detailed_stats,
                        hbool_t do_inserts,
-                       hbool_t dirty_inserts,
                        hbool_t do_moves,
                        hbool_t move_to_main_addr,
                        hbool_t do_destroys,
@@ -3658,8 +3651,7 @@ row_major_scan_forward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
 
@@ -3940,8 +3932,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
                           hbool_t reset_stats,
                           hbool_t display_stats,
                           hbool_t display_detailed_stats,
-                          hbool_t do_inserts,
-                          hbool_t dirty_inserts)
+                          hbool_t do_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_forward";
     H5C_t * cache_ptr;
@@ -3985,8 +3976,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
             i = idx;
@@ -4050,7 +4040,6 @@ row_major_scan_backward(H5F_t * file_ptr,
                         hbool_t display_stats,
                         hbool_t display_detailed_stats,
                         hbool_t do_inserts,
-                        hbool_t dirty_inserts,
                         hbool_t do_moves,
                         hbool_t move_to_main_addr,
                         hbool_t do_destroys,
@@ -4098,8 +4087,7 @@ row_major_scan_backward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
             }
 
 
@@ -4368,8 +4356,7 @@ hl_row_major_scan_backward(H5F_t * file_ptr,
                            hbool_t reset_stats,
                            hbool_t display_stats,
                            hbool_t display_detailed_stats,
-                           hbool_t do_inserts,
-                           hbool_t dirty_inserts)
+                           hbool_t do_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_backward";
     H5C_t * cache_ptr;
@@ -4413,8 +4400,7 @@ hl_row_major_scan_backward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
             i = idx;
@@ -4478,7 +4464,6 @@ col_major_scan_forward(H5F_t * file_ptr,
                        hbool_t display_stats,
                        hbool_t display_detailed_stats,
                        hbool_t do_inserts,
-                       hbool_t dirty_inserts,
                        int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_forward()";
@@ -4525,8 +4510,7 @@ col_major_scan_forward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
             /*if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) { */
@@ -4593,7 +4577,6 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
                           hbool_t display_stats,
                           hbool_t display_detailed_stats,
                           hbool_t do_inserts,
-                          hbool_t dirty_inserts,
                           int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_forward()";
@@ -4645,8 +4628,7 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, i);
 
-                    insert_entry(file_ptr, type, i, dirty_inserts,
-                                  H5C__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
 
                 if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {
@@ -4714,7 +4696,6 @@ col_major_scan_backward(H5F_t * file_ptr,
                         hbool_t display_stats,
                         hbool_t display_detailed_stats,
                         hbool_t do_inserts,
-                        hbool_t dirty_inserts,
                         int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_backward()";
@@ -4769,8 +4750,7 @@ col_major_scan_backward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
             }
 
             /*if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) { */
@@ -4843,7 +4823,6 @@ hl_col_major_scan_backward(H5F_t * file_ptr,
                            hbool_t display_stats,
                            hbool_t display_detailed_stats,
                            hbool_t do_inserts,
-                           hbool_t dirty_inserts,
                            int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_backward()";
@@ -4894,8 +4873,7 @@ hl_col_major_scan_backward(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, i);
 
-                    insert_entry(file_ptr, type, i, dirty_inserts,
-                                  H5C__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
 
                 if ( ( pass ) && ( i >= 0 ) && ( i <= local_max_index ) ) {

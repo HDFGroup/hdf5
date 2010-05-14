@@ -76,7 +76,6 @@ static void jrnl_col_major_scan_backward(H5F_t * file_ptr,
                                           hbool_t display_stats,
                                           hbool_t display_detailed_stats,
                                           hbool_t do_inserts,
-                                          hbool_t dirty_inserts,
                                           int dirty_unprotects,
 			                  uint64_t trans_num);
 
@@ -88,7 +87,6 @@ static void jrnl_col_major_scan_forward(H5F_t * file_ptr,
                                          hbool_t display_stats,
                                          hbool_t display_detailed_stats,
                                          hbool_t do_inserts,
-                                         hbool_t dirty_inserts,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
 
@@ -100,7 +98,6 @@ static void jrnl_row_major_scan_backward(H5F_t * file_ptr,
                                           hbool_t display_stats,
                                           hbool_t display_detailed_stats,
                                           hbool_t do_inserts,
-                                          hbool_t dirty_inserts,
                                           hbool_t do_moves,
                                           hbool_t move_to_main_addr,
                                           hbool_t do_destroys,
@@ -117,7 +114,6 @@ static void jrnl_row_major_scan_forward(H5F_t * file_ptr,
                                          hbool_t display_stats,
                                          hbool_t display_detailed_stats,
                                          hbool_t do_inserts,
-                                         hbool_t dirty_inserts,
                                          hbool_t do_moves,
                                          hbool_t move_to_main_addr,
                                          hbool_t do_destroys,
@@ -725,7 +721,6 @@ jrnl_col_major_scan_backward(H5F_t * file_ptr,
                               hbool_t display_stats,
                               hbool_t display_detailed_stats,
                               hbool_t do_inserts,
-                              hbool_t dirty_inserts,
                               int dirty_unprotects,
 			      uint64_t trans_num)
 {
@@ -794,8 +789,7 @@ jrnl_col_major_scan_backward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
             }
 
             if ( ( pass ) &&
@@ -890,7 +884,6 @@ jrnl_col_major_scan_forward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              int dirty_unprotects,
 			     uint64_t trans_num)
 {
@@ -956,8 +949,7 @@ jrnl_col_major_scan_forward(H5F_t * file_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C__NO_FLAGS_SET);
+                insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
 
             if ( ( pass ) && 
@@ -1046,7 +1038,6 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                               hbool_t display_stats,
                               hbool_t display_detailed_stats,
                               hbool_t do_inserts,
-                              hbool_t dirty_inserts,
                               hbool_t do_moves,
                               hbool_t move_to_main_addr,
                               hbool_t do_destroys,
@@ -1125,8 +1116,7 @@ jrnl_row_major_scan_backward(H5F_t * file_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                    insert_entry(file_ptr, type, (idx - lag), dirty_inserts,
-                                  H5C__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
                 }
 
 
@@ -1467,7 +1457,6 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              hbool_t do_moves,
                              hbool_t move_to_main_addr,
                              hbool_t do_destroys,
@@ -1548,8 +1537,7 @@ jrnl_row_major_scan_forward(H5F_t * file_ptr,
                         HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
 
 		    /*** insert entry idx + lag (if not already present *** */
-                    insert_entry(file_ptr, type, (idx + lag), dirty_inserts,
-                                  H5C__NO_FLAGS_SET);
+                    insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
                 }
 
 
@@ -3406,7 +3394,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
 
-    insert_entry(file_ptr, 0, 1, FALSE, H5C__NO_FLAGS_SET); 
+    insert_entry(file_ptr, 0, 1, H5C__NO_FLAGS_SET); 
 
     protect_entry(file_ptr, 0, 0);
 
@@ -4325,7 +4313,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
 
-    insert_entry(file_ptr, 0, 1, FALSE, H5C__NO_FLAGS_SET); 
+    insert_entry(file_ptr, 0, 1, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
     unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
@@ -4406,7 +4394,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
 
-    insert_entry(file_ptr, 0, 10, FALSE, H5C__NO_FLAGS_SET); 
+    insert_entry(file_ptr, 0, 10, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
     unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
@@ -4486,7 +4474,7 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
 
-    insert_entry(file_ptr, 0, 20, FALSE, H5C__NO_FLAGS_SET); 
+    insert_entry(file_ptr, 0, 20, H5C__NO_FLAGS_SET); 
     protect_entry(file_ptr, 0, 0);
     unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
@@ -4639,7 +4627,6 @@ mdj_smoke_check_01(hbool_t human_readable,
     char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     hbool_t verbose = FALSE;
     hbool_t update_architypes;
     int dirty_unprotects = FALSE;
@@ -4753,7 +4740,6 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* do_moves             */ TRUE,
                                  /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
@@ -4798,7 +4784,6 @@ mdj_smoke_check_01(hbool_t human_readable,
                                   /* display_stats          */ display_stats,
                                   /* display_detailed_stats */ FALSE,
                                   /* do_inserts             */ FALSE,
-                                  /* dirty_inserts          */ dirty_inserts,
                                   /* do_moves             */ TRUE,
                                   /* move_to_main_addr    */ TRUE,
                                   /* do_destroys            */ FALSE,
@@ -4843,7 +4828,6 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* do_moves             */ TRUE,
                                  /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
@@ -4888,7 +4872,6 @@ mdj_smoke_check_01(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ TRUE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* dirty_unprotects       */ dirty_unprotects,
                                  /* trans_num              */ trans_num);
 
@@ -4928,7 +4911,6 @@ mdj_smoke_check_01(hbool_t human_readable,
                                   /* display_stats          */ display_stats,
                                   /* display_detailed_stats */ TRUE,
                                   /* do_inserts             */ TRUE,
-                                  /* dirty_inserts          */ dirty_inserts,
                                   /* dirty_unprotects       */ dirty_unprotects,
                                   /* trans_num              */ trans_num);
 
@@ -5047,7 +5029,6 @@ mdj_smoke_check_02(hbool_t human_readable,
     char journal_filename[H5AC__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     hbool_t verbose = FALSE;
     hbool_t update_architypes = FALSE;
     int dirty_unprotects = TRUE;
@@ -5158,7 +5139,6 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* do_moves             */ TRUE,
                                  /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ TRUE,
@@ -5203,7 +5183,6 @@ mdj_smoke_check_02(hbool_t human_readable,
                                   /* display_stats          */ display_stats,
                                   /* display_detailed_stats */ FALSE,
                                   /* do_inserts             */ FALSE,
-                                  /* dirty_inserts          */ dirty_inserts,
                                   /* do_moves             */ TRUE,
                                   /* move_to_main_addr    */ TRUE,
                                   /* do_destroys            */ FALSE,
@@ -5248,7 +5227,6 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ FALSE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* do_moves             */ TRUE,
                                  /* move_to_main_addr    */ FALSE,
                                  /* do_destroys            */ FALSE,
@@ -5293,7 +5271,6 @@ mdj_smoke_check_02(hbool_t human_readable,
                                  /* display_stats          */ display_stats,
                                  /* display_detailed_stats */ TRUE,
                                  /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
                                  /* dirty_unprotects       */ dirty_unprotects,
                                  /* trans_num              */ trans_num);
 
@@ -5333,7 +5310,6 @@ mdj_smoke_check_02(hbool_t human_readable,
                                   /* display_stats          */ display_stats,
                                   /* display_detailed_stats */ TRUE,
                                   /* do_inserts             */ TRUE,
-                                  /* dirty_inserts          */ dirty_inserts,
                                   /* dirty_unprotects       */ dirty_unprotects,
                                   /* trans_num              */ trans_num);
 

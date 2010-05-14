@@ -677,7 +677,6 @@ void expunge_entry(H5F_t * file_ptr,
 void insert_entry(H5F_t * file_ptr,
                    int32_t type,
                    int32_t idx,
-                   hbool_t dirty,
                    unsigned int flags);
 
 void mark_entry_dirty(H5F_t * file_ptr,
@@ -736,7 +735,6 @@ void row_major_scan_forward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              hbool_t do_moves,
                              hbool_t move_to_main_addr,
                              hbool_t do_destroys,
@@ -750,8 +748,7 @@ void hl_row_major_scan_forward(H5F_t * file_ptr,
                                 hbool_t reset_stats,
                                 hbool_t display_stats,
                                 hbool_t display_detailed_stats,
-                                hbool_t do_inserts,
-                                hbool_t dirty_inserts);
+                                hbool_t do_inserts);
 
 void row_major_scan_backward(H5F_t * file_ptr,
                               int32_t max_index,
@@ -761,7 +758,6 @@ void row_major_scan_backward(H5F_t * file_ptr,
                               hbool_t display_stats,
                               hbool_t display_detailed_stats,
                               hbool_t do_inserts,
-                              hbool_t dirty_inserts,
                               hbool_t do_moves,
                               hbool_t move_to_main_addr,
                               hbool_t do_destroys,
@@ -775,8 +771,7 @@ void hl_row_major_scan_backward(H5F_t * file_ptr,
                                  hbool_t reset_stats,
                                  hbool_t display_stats,
                                  hbool_t display_detailed_stats,
-                                 hbool_t do_inserts,
-                                 hbool_t dirty_inserts);
+                                 hbool_t do_inserts);
 
 void col_major_scan_forward(H5F_t * file_ptr,
                              int32_t max_index,
@@ -786,7 +781,6 @@ void col_major_scan_forward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              int dirty_unprotects);
 
 void hl_col_major_scan_forward(H5F_t * file_ptr,
@@ -796,7 +790,6 @@ void hl_col_major_scan_forward(H5F_t * file_ptr,
                                 hbool_t display_stats,
                                 hbool_t display_detailed_stats,
                                 hbool_t do_inserts,
-                                hbool_t dirty_inserts,
                                 int dirty_unprotects);
 
 void col_major_scan_backward(H5F_t * file_ptr,
@@ -807,7 +800,6 @@ void col_major_scan_backward(H5F_t * file_ptr,
                               hbool_t display_stats,
                               hbool_t display_detailed_stats,
                               hbool_t do_inserts,
-                              hbool_t dirty_inserts,
                               int dirty_unprotects);
 
 void hl_col_major_scan_backward(H5F_t * file_ptr,
@@ -817,7 +809,6 @@ void hl_col_major_scan_backward(H5F_t * file_ptr,
                                  hbool_t display_stats,
                                  hbool_t display_detailed_stats,
                                  hbool_t do_inserts,
-                                 hbool_t dirty_inserts,
                                  int dirty_unprotects);
 
 void takedown_cache(H5F_t * file_ptr,
