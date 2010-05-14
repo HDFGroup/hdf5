@@ -2966,7 +2966,7 @@ static void gent_array8(void)
     hsize_t sdims[] = {F64_DIM0};
     hsize_t tdims[] = {F64_DIM1};
     int         wdata[(F64_DIM1) * sizeof(int)];      /* Write buffer */
-    uint     i;
+    unsigned int i;
 
     /*
      * Initialize data.  i is the element in the dataspace, j and k the
@@ -6517,7 +6517,7 @@ gent_packedbits(void)
     int16_t dset16[F66_XDIM][F66_YDIM16], val16bits;
     int32_t dset32[F66_XDIM][F66_YDIM32], val32bits;
     double  dsetdbl[F66_XDIM][F66_YDIM8];
-    uint i, j;
+    unsigned int i, j;
 
     fid = H5Fcreate(FILE66, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -6526,7 +6526,7 @@ gent_packedbits(void)
     space = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU08, H5T_STD_U8LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu8bits = (uint8_t) ~0;	/* all 1s */
+    valu8bits = (uint8_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
 	dsetu8[i][0] = valu8bits;
 	for(j = 1; j < dims[1]; j++) {
@@ -6544,7 +6544,7 @@ gent_packedbits(void)
     space = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU16, H5T_STD_U16LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu16bits = (uint16_t) ~0;	/* all 1s */
+    valu16bits = (uint16_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
 	dsetu16[i][0] = valu16bits;
 	for(j = 1; j < dims[1]; j++) {
@@ -6562,7 +6562,7 @@ gent_packedbits(void)
     space = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU32, H5T_STD_U32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu32bits = (uint32_t) ~0;	/* all 1s */
+    valu32bits = (uint32_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
 	dsetu32[i][0] = valu32bits;
 	for(j = 1; j < dims[1]; j++) {
