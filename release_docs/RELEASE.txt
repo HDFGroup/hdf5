@@ -133,10 +133,12 @@ New Features
 
     C++ Library:
     ------------
-	- Added function CommonFG::getObjnameByIdx to take char* for name.
-	  (BMR - 2010/05/02)
-	- Added function CommonFG::getObjTypeByIdx to return type name as
-	  a char*.
+	- New member functions
+	  + Overloaded CommonFG::getObjnameByIdx to take char* for name
+	  + Overloaded CommonFG::getObjTypeByIdx to return type name as a char*.
+            (BMR - 2010/05/02)
+	  + DataSet::getInMemDataSize() to simplify getting the dataset's
+            data size in memory.  (BMR - 2009/07/26)
         - These member functions were added as wrapper for H5Rdereference to
           replace the incorrect IdComponent::dereference().
                 void H5Object::dereference(H5File& h5file, void* ref)
@@ -486,6 +488,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     C++ APIs
     --------
+	- The constructor PropList::PropList(id) was fixed to act properly
+	  according to the nature of 'id'.  When 'id' is a property class id,
+	  a new property list will be created.  When 'id' id a property list id,
+	  a copy of the property list will be made. (BMR - 2010/5/9)
+	- The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
+	  CommonFG::getComment, respectively, now have default values for
+	  user's convenience.  (BMR - 2009/10/23)
+	- NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
+	- read/write methods of DataSet and Attribute classes were fixed
+	  to handle string correctly.  (BMR - 2009/07/26)
         - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
         - Fixed bug in PropList::getClassName to use portable HDfree instead
             of free. (BMR - 2008/04/20)
