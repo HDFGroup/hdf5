@@ -96,7 +96,13 @@ New Features
 
     High-Level APIs
     ---------------
-    - None
+     - Fixed a bug in the H5DSdetach_scale function when 0 bytes   
+       were allocated after the last reference to a dim. scale         
+       was removed from the list of references in a VL element of the
+       DIMENSION_LIST attribute; modified the function to comply
+       with the Spec: DIMENSION_LIST attribute is deleted now when no
+       dimension scales left attached.
+                                     (EIP - 2010/05/14 -1822)
 
     F90 API
     -------
