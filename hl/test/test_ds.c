@@ -1264,11 +1264,11 @@ static int test_detachscales(void)
            if(H5Dclose(dsid) < 0)
                goto out;
         }
-    /* Check that attribute "REFERENCE_LIST" doesn't exist anymore */
-    if(H5Aexists(did, DIMENSION_LIST)!= 0)
-        goto out;
-    if(H5Dclose(did) < 0)
-        goto out;
+        /* Check that attribute "DIMENSION_LIST" doesn't exist anymore */
+        if(H5Aexists(did, DIMENSION_LIST)!= 0)
+            goto out;
+        if(H5Dclose(did) < 0)
+            goto out;
     }
     else
         goto out;
