@@ -2287,8 +2287,8 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         for(i=0;i<data_loop;i++) {
         if(display_packed_bits) {
             dump_packed_bits(i);
-            packed_counter = packed_mask[i];
-            packed_normalize = packed_offset[i];
+            packed_data_mask = packed_mask[i];
+            packed_data_offset = packed_offset[i];
         }
 #endif
 
@@ -3604,18 +3604,13 @@ static int
 parse_mask_list(const char *h_list)
 {
     const char     *ptr;
-    int             offset_value = 0, length_value = 0;
+    int             offset_value, length_value;
 
     /* sanity check */
     HDassert(h_list);
 
-    packed_counter = 0;
     HDmemset(packed_mask,0,sizeof(packed_mask));
-    HDmemset(packed_offset,0,sizeof(packed_offset));
-    HDmemset(packed_length,0,sizeof(packed_length));
     
-    offset_value = -1;
-    length_value = -1;
     packed_bits_num = 0;
     /* scan in pair of offset,length separated by commas. */
     ptr = h_list;
@@ -3671,16 +3666,11 @@ parse_mask_list(const char *h_list)
 	}
 	packed_offset[packed_bits_num] = offset_value;
 	packed_length[packed_bits_num] = length_value;
-	
-	packed_mask[packed_bits_num] = 1 << offset_value;
-	while(length_value>1) {
-	    packed_mask[packed_bits_num] = packed_mask[packed_bits_num] << 1;
-	    packed_mask[packed_bits_num] |= 1 << offset_value;
-	    length_value--;
-	}
+	/* create the bit mask by left shift 1's by length, then negate it. */
+	/* After packed_mask is calculated, packed_length is not needed but  */
+	/* keep it for debug purpose. */
+	packed_mask[packed_bits_num] = ~(~0<<length_value);
 	packed_bits_num++;
-	offset_value = -1;
-	length_value = -1;
 
 	/* skip a possible comma separator */
 	if (*ptr == ','){
@@ -3697,7 +3687,6 @@ parse_mask_list(const char *h_list)
         error_msg(h5tools_getprogname(), "Bad mask list(%s)\n", h_list);
         return FAIL;
     }
-    packed_counter = packed_mask[0];
     return SUCCEED;
 }
 

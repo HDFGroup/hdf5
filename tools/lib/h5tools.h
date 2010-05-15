@@ -527,8 +527,8 @@ extern "C" {
     
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
 H5TOOLS_DLLVAR int     packed_bits_num;       /* number of packed bits to display */
-H5TOOLS_DLLVAR int     packed_normalize; /* number of bits to shift right to display normalized */
-H5TOOLS_DLLVAR unsigned int  packed_counter;      /* counter for which packed bits to display */
+H5TOOLS_DLLVAR int         packed_data_offset; /* offset of packed bits to display */
+H5TOOLS_DLLVAR unsigned int packed_data_mask;  /* mask in which packed bits to display */
 #endif
 
 H5TOOLS_DLLVAR FILE   *rawdatastream;       /* output stream for raw data */

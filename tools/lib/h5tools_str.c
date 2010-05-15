@@ -785,7 +785,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempint, vp, sizeof(int));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempint = (tempint & packed_counter)>>packed_normalize;
+            tempint = (tempint >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
     }
@@ -793,7 +793,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempuint, vp, sizeof(unsigned int));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempuint = (tempuint & packed_counter)>>packed_normalize;
+            tempuint = (tempuint >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
@@ -802,7 +802,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempchar, cp_vp, sizeof(char));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempchar = (tempchar & packed_counter)>>packed_normalize;
+            tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_schar, "%d"), tempchar);
     }
@@ -811,7 +811,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempuchar = (tempuchar & packed_counter)>>packed_normalize;
+            tempuchar = (tempuchar >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), tempuchar);
     }
@@ -821,7 +821,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempshort, vp, sizeof(short));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempshort = (tempshort & packed_counter)>>packed_normalize;
+            tempshort = (tempshort >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
     }
@@ -831,7 +831,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempushort, vp, sizeof(unsigned short));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempushort = (tempushort & packed_counter)>>packed_normalize;
+            tempushort = (tempushort >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
     }
@@ -839,7 +839,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&templong, vp, sizeof(long));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            templong = (templong & packed_counter)>>packed_normalize;
+            templong = (templong >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
     }
@@ -847,7 +847,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
         if(packed_bits_num)
-            tempulong = (tempulong & packed_counter)>>packed_normalize;
+            tempulong = (tempulong >> packed_data_offset) & packed_data_mask;
 #endif
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     }
