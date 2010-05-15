@@ -469,6 +469,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+      - Fixed a bug in the H5DSdetach_scale function when 0 bytes  
+        were allocated after the last reference to a dim. scale  
+        was removed from the list of references in a VL element of the 
+        DIMENSION_LIST attribute; modified the function to comply
+        with the Spec: DIMENSION_LIST attribute is deleted now when no 
+        dimension scales left attached.
+                                     (EIP - 2010/05/14 -1822) 
       - Fixed a bug where the H5TB API would forget the order of fields when
           added out of offset order. (NAF - 2009/10/27 - 1582)
       - H5DSis_attached failed to account for different platform types. Added a
