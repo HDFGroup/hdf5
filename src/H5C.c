@@ -4763,14 +4763,12 @@ H5C_unprotect(H5F_t *		  f,
               const H5C_class_t * type,
               haddr_t		  addr,
               void *		  thing,
-              unsigned int        flags,
-              size_t              new_size)
+              unsigned int        flags)
 {
     H5C_t *             cache_ptr;
     hbool_t		deleted;
     hbool_t		dirtied;
     hbool_t             set_flush_marker;
-    hbool_t		size_changed;
     hbool_t		pin_entry;
     hbool_t		unpin_entry;
 #ifdef H5_HAVE_PARALLEL
@@ -4787,15 +4785,8 @@ H5C_unprotect(H5F_t *		  f,
     deleted          = ( (flags & H5C__DELETED_FLAG) != 0 );
     dirtied          = ( (flags & H5C__DIRTIED_FLAG) != 0 );
     set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
-    size_changed     = ( (flags & H5C__SIZE_CHANGED_FLAG) != 0 );
     pin_entry        = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     unpin_entry      = ( (flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
-
-    /* Changing the size of an entry dirties it.  Thus, set the
-     * dirtied flag if the size_changed flag is set.
-     */
-
-    dirtied |= size_changed;
 
     HDassert( f );
     HDassert( f->shared );
@@ -4810,9 +4801,6 @@ H5C_unprotect(H5F_t *		  f,
     HDassert( type->flush );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
-    HDassert( ( size_changed == TRUE ) || ( size_changed == FALSE ) );
-    HDassert( ( ! size_changed ) || ( dirtied ) );
-    HDassert( ( ! size_changed ) || ( new_size > 0 ) );
     HDassert( ! ( pin_entry && unpin_entry ) );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
@@ -4927,57 +4915,6 @@ H5C_unprotect(H5F_t *		  f,
 
         /* mark the entry as dirty if appropriate */
         entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
-
-        /* update for change in entry size if necessary */
-        if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
-
-            /* do a flash cache size increase if appropriate */
-            if ( cache_ptr->flash_size_increase_possible ) {
-
-                if ( new_size > entry_ptr->size ) {
-
-                    size_increase = new_size - entry_ptr->size;
-
-                    if ( size_increase >=
-                         cache_ptr->flash_size_increase_threshold ) {
-
-                        result = H5C__flash_increase_cache_size(cache_ptr,
-                                                              entry_ptr->size,
-                                                              new_size);
-
-                        if ( result < 0 ) {
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                                     "H5C__flash_increase_cache_size failed.")
-                        }
-                    }
-                }
-            }
-
-            /* update the protected list */
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
-                                            (cache_ptr->pl_size), \
-                                            (entry_ptr->size), (new_size));
-
-            /* update the hash table */
-	    H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                              (new_size));
-
-            /* if the entry is in the skip list, update that too */
-            if ( entry_ptr->in_slist ) {
-
-	        H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), \
-				                  (entry_ptr->size),\
-                                                  (new_size));
-            }
-
-            /* update statistics just before changing the entry size */
-	    H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
-                                                    (new_size));
-
-	    /* finally, update the entry size proper */
-	    entry_ptr->size = new_size;
-        }
 
         /* Pin or unpin the entry as requested. */
         if ( pin_entry ) {

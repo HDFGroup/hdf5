@@ -547,6 +547,7 @@ H5_DLL H5O_chunk_proxy_t *H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 H5_DLL herr_t H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_chunk_proxy_t *chk_proxy, unsigned chk_flags);
 H5_DLL herr_t H5O_chunk_update_idx(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
+H5_DLL herr_t H5O_chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_proxy);
 H5_DLL herr_t H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
 
 /* Collect storage info for btree and heap */

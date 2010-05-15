@@ -1713,7 +1713,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
                     /* Unprotect chunk, marking it dirty */
-                    if(H5O_chunk_unprotect(loc->file, dxpl_id, oh, chk_proxy, H5AC__DIRTIED_FLAG) < 0)
+                    if(H5O_chunk_unprotect(loc->file, dxpl_id, oh, chk_proxy, TRUE) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect object header chunk")
                 } /* end if */
             } /* end for */
@@ -1862,7 +1862,7 @@ herr_t
 H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1916,7 +1916,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
             /* Mark the message as dirty */
             oh->mesg[idx].dirty = TRUE;
-            chk_flags |= H5AC__DIRTIED_FLAG;
+            chk_dirtied = TRUE;
         } /* end if */
         else {
             /* XXX: For now, update access time & change fields in the object header */
@@ -1931,7 +1931,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
 done:
     /* Release chunk */
-    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_flags) < 0)
+    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, oh, chk_proxy, chk_dirtied) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
