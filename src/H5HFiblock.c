@@ -708,7 +708,6 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
 * QAK - 6/12/2006
 */
         /* Free previous indirect block disk space */
-        old_size = iblock->size;
         if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block file space")
     } /* end if */
@@ -721,6 +720,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
     /* Compute size of buffer needed for new indirect block */
     old_nrows = iblock->nrows;
     iblock->nrows = new_nrows;
+    old_size = iblock->size;
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Allocate [temporary] space for the new indirect block on disk */
