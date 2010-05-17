@@ -1,4 +1,4 @@
-HDF5 version 1.8.4-snap22 currently under development
+HDF5 version 1.8.4-snap23 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
