@@ -246,6 +246,8 @@ IF (BUILD_TESTING)
     #-- Copy all the HDF5 files from the test directory into the source directory
     SET (HDF5_REFERENCE_PBITS
         tnofilename-with-packed-bits.ddl
+        tpbitsArray.ddl
+        tpbitsCompound.ddl
         tpbitsIncomplete.ddl
         tpbitsLengthExceeded.ddl
         tpbitsLengthPositive.ddl
@@ -651,6 +653,10 @@ IF (BUILD_TESTING)
   ADD_SKIP_H5_TEST (tpbitsOverlapped 0 ${TESTTYPE} -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5)
   # Maximum number of packed bits.
   ADD_SKIP_H5_TEST (tpbitsMax 0 ${TESTTYPE} -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
+  # Compound type.
+  ADD_SKIP_H5_TEST (tpbitsCompound 0 ${TESTTYPE} -d /dset1 -M 0,1,1,1 tcompound.h5)
+  # Array type.
+  ADD_SKIP_H5_TEST (tpbitsArray 0 ${TESTTYPE} -d /Dataset1 -M 0,1,1,1 tarray1.h5)
   # Test Error handling.
   # Too many packed bits requested. Max is 8 for now.
   ADD_SKIP_H5_TEST (tpbitsMaxExceeded 1 ${TESTTYPE} -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5)
