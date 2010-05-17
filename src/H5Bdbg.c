@@ -189,7 +189,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5B_assert)
+    FUNC_ENTER_NOAPI_NOINIT(H5B_assert)
 
     if(0 == ncalls++) {
 	if(H5DEBUG(B))
@@ -281,6 +281,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	head = tmp;
     } /* end while */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_assert() */
 #endif /* H5B_DEBUG */
