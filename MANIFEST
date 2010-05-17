@@ -1306,10 +1306,12 @@
 ./tools/testfiles/tpbitsUnsigned.ddl
 ./tools/testfiles/tpbitsMax.ddl
 ./tools/testfiles/packedbits.h5
+./tools/testfiles/tpbitsArray.ddl
+./tools/testfiles/tpbitsCompound.ddl
 ./tools/testfiles/tpbitsIncomplete.ddl
-./tools/testfiles/tpbitsOverlapped.ddl
 ./tools/testfiles/tpbitsLengthExceeded.ddl
 ./tools/testfiles/tpbitsOffsetExceeded.ddl
+./tools/testfiles/tpbitsOverlapped.ddl
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
 ./tools/testfiles/tordergr.h5
