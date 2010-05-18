@@ -1,25 +1,25 @@
-HDF5 version 1.8.4-snap23 currently under development
+HDF5 version 1.8.5-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.4 and 
-HDF5 1.8.4-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.4-*. 
+This document describes the differences between HDF5-1.8.5 and 
+HDF5 1.8.5-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.5-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.4 source code, documentation, and additional materials
+Links to the HDF5 1.8.5 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.4 release can be obtained from:
+The HDF5 1.8.5 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.4 can be accessed directly at this location: 
+User documentation for 1.8.5 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,7 +30,7 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.4 (current 
+from Release to Release" document, in the section "Release 1.8.5 (current 
 release) versus Release 1.8.3":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.4
+- Bug Fixes since HDF5-1.8.5
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -56,27 +56,11 @@ New Features
 
     Configuration
     -------------
-    - Configure now adds appropriate defines for supporting large (64-bit)
-      files on all systems, where supported, by default, instead of only linux.
-      This largefile support is controllable with the --enable-largefile 
-      configure option. The linux-specific --enable-linux-lfs option has been 
-      deprecated in favor of this new option. (MAM - 2010/05/05 - 1772/1434)
-    - Upgraded versions of autotools used to generate configuration suite.
-      We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
-      (MAM 2010/04/15)
-    - Added the xlc-* and mpcc_r-* BASENAME patterns to be recognized as IBM
-      compilers so that the ibm compiler options can be added properly.  This
-      allows non-system-default compiler command names (e.g. xlc-m.n.k.l) be
-      recognized. AKC 2009/11/26.
+    - None MAM 2010/05/18
 
     Library
     -------
-    - Greatly improved performance of extending a dataset with early
-      allocation. (NAF - 2010/03/24 - 1637)
-    - Added support for filtering densely stored groups.  Many of the API
-      functions related to filters have been extended to support dense groups
-      as well as datasets.  Pipeline messages can now be stored in a group's
-      object header. (NAF/QAK - 2009/11/3)
+    - None
 
     Parallel Library
     ----------------
@@ -84,25 +68,11 @@ New Features
  
     Tools
     -----
-    - h5diff: fixed incorrect behavior (hang) in parallel mode when
-              specify invalid options (ex: -v and -q) (JKM 2010/02/17)
-    - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
-              (JKM - 2010/02/10) 
-    - h5diff: Add new flag --follow-links. (refer to --help for details)
-               (JKM - 2010/01/25)
-    - h5diff: fix for displaying garbage value on LE machine for BE data.
-      (JKM - 2009/11/20)
-
+    - None
 
     High-Level APIs
     ---------------
-     - Fixed a bug in the H5DSdetach_scale function when 0 bytes   
-       were allocated after the last reference to a dim. scale         
-       was removed from the list of references in a VL element of the
-       DIMENSION_LIST attribute; modified the function to comply
-       with the Spec: DIMENSION_LIST attribute is deleted now when no
-       dimension scales left attached.
-                                     (EIP - 2010/05/14 -1822)
+    - None
 
     F90 API
     -------
@@ -110,12 +80,7 @@ New Features
 
     C++ API
     -------
-    - New member functions
-	+ Overloaded CommonFG::getObjnameByIdx to take char* for name
-	+ Overloaded CommonFG::getObjTypeByIdx to return type name as a char*.
-	  (BMR - 2010/05/10)
-	+ DataSet::getInMemDataSize() to simplify getting the dataset's
-	  data size in memory.  (BMR - 2009/07/26)
+    - None
 
 
 Support for New Platforms, Languages, and Compilers
@@ -123,90 +88,41 @@ Support for New Platforms, Languages, and Compilers
     - None
 
 
-Bug Fixes since HDF5-1.8.4
+Bug Fixes since HDF5-1.8.5
 ==========================
 
     Configuration
     -------------
-    - Fixed various "strict aliasing" problems, allowing higher levels
-        of compiler optimization (in particular, allowing '-O3' to work
-        with recent versions of GCC).  QAK - 2010/04/26
+    - None MAM 2010/05/18
 
     Library
     -------
-    - Fixed some memory leaks in VL datatype conversion when strings are
-        used as fill values. (MAM - 2010/05/12 - BZ# 1826)
-    - Fixed a bug when copying objects with NULL references with the
-        H5O_COPY_EXPAND_REFERENCE_FLAG flag set. (NAF - 2010/04/08 - 1815)
-    - Added a mechanism to the H5I interface to save returned object ID 
-        structures for immediate re-use if needed. This addresses a
-        potential performance issue by delaying the case when the next ID to be
-        registered has grown so large that it wraps around and needs to be
-        checked to see if it is available for distribution.
-        (MAM - 2010/03/15 - 1730)
-    - Files can now be concurrently opened more than once using the core file
-        driver, as long as the backing store is used. (NAF - 2010/03/09)
-    - Added support for H5O_COPY_EXPAND_EXT_LINK_FLAG to H5Ocopy.  External
-        links will now be expanded if this flag is set.
-        (NAF - 2010/03/05 - 1733)
-    - Fixed a bug where the library, when traversing an external link, would
-        reopen the source file if nothing else worked. (NAF - 2010/03/05)
-    - Fixed a bug where fractal heap IDs for attributes and shared object
-        header messages could be incorrectly encoded in the file for files
-        created on big-endian platforms.  
-        Please see http://www.hdfgroup.org/HDF5/release/known_problems if you 
-        suspect you have a file with this problem.  QAK - 2010/02/23 - 1755
-    - Fixed an intermittent bug in the b-tree code which could be triggered
-        by expanding and shrinking chunked datasets in certain ways.
-        (NAF - 2010/02/16)
-    - H5Tdetect_class said a VL string is a string type.  But when it's in
-        a compound type, it said it's a VL type (Bug #1584).  I fixed it to
-        be consistent.  It always return string type. (SLU - 2009/12/10)
-    - Allow "child" files from external links to be correctly located when
-        relative to a "parent" file that is opened through a symbolic link.
-        (QAK - 2009/12/01)
+    - None
 
     Parallel Library
     ----------------
-    - None EIP - 2009/10/21
+    - None
 
     Tools
     -----
-    - Fixed h5ls to return exit code 1 (error) when non-existent file is
-      specified. bug#1793. (JKM 2010/04/27)
-    - h5copy failed to copy dangling link when the link is specified 
-      directly. bug#1817. (JKM 2010/04/22)
-    - h5repack lost attributes from a dataset of reference type. bug#1726.
-      (JKM 2010/3/25)
-    - h5repack sets NULL for object reference value for group or 
-      named datatype. bug#1814. (JKM 2010/03/19)
-    - None EIP - 2009/10/21
+    - None
 
 
     F90 API
     ------
-    - None EIP - 2009/10/21
+    - None
 
     C++ API
     ------
-    - The constructor PropList::PropList(id) was fixed to act properly
-      according to the nature of 'id'.  When 'id' is a property class id,
-      a new property list will be created.  When 'id' id a property list id,
-      a copy of the property list will be made. (BMR - 2010/5/9)
-    - The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
-      CommonFG::getComment, respectively, now have default values for
-      user's convenience.  (BMR - 2009/10/23)
-    - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
-    - read/write methods of DataSet and Attribute classes were fixed
-      to handle string correctly.  (BMR - 2009/07/26)
+    - None
 
     High-Level APIs:
     ------
-    - None EIP - 2009/10/21
+    - None
 
     Fortran High-Level APIs:
     ------
-    - None EIP - 2009/10/21
+    - None
 
 
 Platforms Tested
