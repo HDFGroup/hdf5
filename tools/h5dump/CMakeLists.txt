@@ -637,8 +637,6 @@ IF (BUILD_TESTING)
   IF (NOT ${USE_PACKED_BITS})
     SET (TESTTYPE "SKIP")
   ENDIF (NOT ${USE_PACKED_BITS})
-  ADD_SKIP_H5_TEST (tpackedbits 0 ${TESTTYPE} -d /dset1 -M 0,2 tdset.h5)
-  ADD_SKIP_H5_TEST (tpackedbits2 0 ${TESTTYPE} -d /dset1 -M 0,2,2,1 tdset.h5)
   # Limits:
   # Maximum number of packed bits is 8 (for now).
   # Maximum integer size is 8 (for now).
