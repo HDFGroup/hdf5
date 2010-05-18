@@ -155,9 +155,7 @@ static herr_t H5AC_log_deleted_entry(H5AC_t * cache_ptr,
                                      unsigned int flags);
 
 static herr_t H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
-                                     haddr_t addr,
-                                     hbool_t size_changed,
-                                     size_t new_size);
+                                     haddr_t addr);
 
 static herr_t H5AC_log_flushed_entry(H5C_t * cache_ptr,
                                      haddr_t addr,
@@ -1290,7 +1288,7 @@ H5AC_mark_entry_dirty(void *thing)
 
     if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
              (entry_ptr->is_pinned) && (NULL != cache_ptr->aux_ptr)) {
-        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr, FALSE, 0) < 0)
+        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
     } /* end if */
 }
@@ -1731,6 +1729,9 @@ H5AC_resize_entry(void *thing, size_t new_size)
 		(int)new_size);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    if(H5C_resize_entry(thing, new_size) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
+
 #ifdef H5_HAVE_PARALLEL
 {
     H5AC_info_t * entry_ptr = (H5AC_info_t *)thing;
@@ -1740,18 +1741,11 @@ H5AC_resize_entry(void *thing, size_t new_size)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr)) {
-        /* Check for usage errors */
-        if(!(entry_ptr->is_pinned || entry_ptr->is_protected))
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned or protected??")
-
-        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr, TRUE, new_size) < 0)
+        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
     } /* end if */
 }
 #endif /* H5_HAVE_PARALLEL */
-
-    if(H5C_resize_entry(thing, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
@@ -1958,7 +1952,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 {
     herr_t		result;
     hbool_t		dirtied;
-    size_t		new_size = 0;
+    hbool_t		deleted;
 #ifdef H5_HAVE_PARALLEL
     hbool_t		size_changed = FALSE;
     H5AC_aux_t        * aux_ptr = NULL;
@@ -2005,32 +1999,28 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
     dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
 		( ((H5AC_info_t *)thing)->dirtied ) );
+    deleted = (hbool_t)( (flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG );
 
-    if ( dirtied ) {
+    /* Check if the size changed out from underneath us, if we're not deleting
+     *  the entry.
+     */
+    if ( dirtied && !deleted ) {
+        size_t		curr_size = 0;
 
-        if ( (type->size)(f, thing, &new_size) < 0 ) {
+        if ( (type->size)(f, thing, &curr_size) < 0 ) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, \
                         "Can't get size of thing")
         }
 
-        if ( ((H5AC_info_t *)thing)->size != new_size ) {
-
-#ifdef H5_HAVE_PARALLEL
-            size_changed = TRUE;
-#endif /* H5_HAVE_PARALLEL */
-            flags = flags | H5AC__SIZE_CHANGED_FLAG;
-#if H5AC__TRACE_FILE_ENABLED
-	    trace_flags = flags;
-	    trace_new_size = new_size;
-#endif /* H5AC__TRACE_FILE_ENABLED */
-        }
+        if(((H5AC_info_t *)thing)->size != curr_size)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADSIZE, FAIL, "size of entry changed")
     }
 
 #ifdef H5_HAVE_PARALLEL
     if ( ( dirtied ) && ( ((H5AC_info_t *)thing)->is_dirty == FALSE ) &&
          ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) ) {
-        if(H5AC_log_dirtied_entry((H5AC_info_t *)thing, addr, size_changed, new_size) < 0)
+        if(H5AC_log_dirtied_entry((H5AC_info_t *)thing, addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
     }
 
@@ -2057,8 +2047,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
                            type,
                            addr,
                            thing,
-                           flags,
-                           new_size);
+                           flags);
 
     if ( result < 0 ) {
 
@@ -3476,9 +3465,7 @@ done:
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
-                       haddr_t addr,
-                       hbool_t size_changed,
-                       size_t new_size)
+                       haddr_t addr)
 {
     size_t		 entry_size;
     H5AC_t             * cache_ptr;
@@ -3501,14 +3488,7 @@ H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
 
-    if ( size_changed ) {
-
-        entry_size = new_size;
-
-    } else {
-
-        entry_size = entry_ptr->size;
-    }
+    entry_size = entry_ptr->size;
 
     if ( aux_ptr->mpi_rank == 0 ) {
         H5AC_slist_entry_t * slist_entry_ptr;

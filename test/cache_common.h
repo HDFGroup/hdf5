@@ -413,81 +413,6 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 
 /* misc type definitions */
 
-struct flush_cache_test_spec
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    hbool_t		dirty_flag;
-    unsigned int	flags;
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
-};
-
-struct pe_flush_cache_test_spec
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    hbool_t		insert_flag;
-    hbool_t		dirty_flag;
-    unsigned int	flags;
-    int			num_pins;
-    int			pin_type[MAX_PINS];
-    int			pin_idx[MAX_PINS];
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
-};
-
-struct fo_flush_entry_check
-{
-    int			entry_num;
-    int			entry_type;
-    int			entry_index;
-    size_t		expected_size;
-    hbool_t		in_cache;
-    hbool_t		at_main_addr;
-    hbool_t		is_dirty;
-    hbool_t		is_protected;
-    hbool_t		is_pinned;
-    hbool_t		expected_loaded;
-    hbool_t		expected_cleared;
-    hbool_t		expected_flushed;
-    hbool_t		expected_destroyed;
-};
-
-struct fo_flush_cache_test_spec
-{
-    int				entry_num;
-    int				entry_type;
-    int				entry_index;
-    hbool_t			insert_flag;
-    unsigned int		flags;
-    size_t			new_size;
-    int				num_pins;
-    int				pin_type[MAX_PINS];
-    int				pin_idx[MAX_PINS];
-    int				num_flush_ops;
-    struct flush_op		flush_ops[MAX_FLUSH_OPS];
-    hbool_t			expected_loaded;
-    hbool_t			expected_cleared;
-    hbool_t			expected_flushed;
-    hbool_t			expected_destroyed;
-};
-
-struct move_entry_test_spec
-{
-    int			entry_type;
-    int			entry_index;
-    hbool_t		is_dirty;
-    hbool_t		is_pinned;
-};
-
 struct expected_entry_status
 {
     int			entry_type;
@@ -664,7 +589,6 @@ void expunge_entry(H5F_t * file_ptr,
 void insert_entry(H5F_t * file_ptr,
                   int32_t type,
                   int32_t idx,
-                  hbool_t dirty,
                   unsigned int flags);
 
 void mark_entry_dirty(int32_t type,
@@ -702,7 +626,7 @@ void resize_entry(H5F_t * file_ptr,
                    int32_t type,
                    int32_t idx,
                    size_t new_size,
-                   hbool_t resize_pin);
+                   hbool_t in_cache);
 
 H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
 
@@ -713,7 +637,6 @@ void row_major_scan_forward(H5F_t * file_ptr,
                             hbool_t display_stats,
                             hbool_t display_detailed_stats,
                             hbool_t do_inserts,
-                            hbool_t dirty_inserts,
                             hbool_t do_moves,
                             hbool_t move_to_main_addr,
                             hbool_t do_destroys,
@@ -727,8 +650,7 @@ void hl_row_major_scan_forward(H5F_t * file_ptr,
                                hbool_t reset_stats,
                                hbool_t display_stats,
                                hbool_t display_detailed_stats,
-                               hbool_t do_inserts,
-                               hbool_t dirty_inserts);
+                               hbool_t do_inserts);
 
 void row_major_scan_backward(H5F_t * file_ptr,
                              int32_t lag,
@@ -737,7 +659,6 @@ void row_major_scan_backward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              hbool_t do_moves,
                              hbool_t move_to_main_addr,
                              hbool_t do_destroys,
@@ -751,8 +672,7 @@ void hl_row_major_scan_backward(H5F_t * file_ptr,
                                 hbool_t reset_stats,
                                 hbool_t display_stats,
                                 hbool_t display_detailed_stats,
-                                hbool_t do_inserts,
-                                hbool_t dirty_inserts);
+                                hbool_t do_inserts);
 
 void col_major_scan_forward(H5F_t * file_ptr,
                             int32_t lag,
@@ -761,7 +681,6 @@ void col_major_scan_forward(H5F_t * file_ptr,
                             hbool_t display_stats,
                             hbool_t display_detailed_stats,
                             hbool_t do_inserts,
-                            hbool_t dirty_inserts,
                             int dirty_unprotects);
 
 void hl_col_major_scan_forward(H5F_t * file_ptr,
@@ -771,7 +690,6 @@ void hl_col_major_scan_forward(H5F_t * file_ptr,
                                hbool_t display_stats,
                                hbool_t display_detailed_stats,
                                hbool_t do_inserts,
-                               hbool_t dirty_inserts,
                                int dirty_unprotects);
 
 void col_major_scan_backward(H5F_t * file_ptr,
@@ -781,7 +699,6 @@ void col_major_scan_backward(H5F_t * file_ptr,
                              hbool_t display_stats,
                              hbool_t display_detailed_stats,
                              hbool_t do_inserts,
-                             hbool_t dirty_inserts,
                              int dirty_unprotects);
 
 void hl_col_major_scan_backward(H5F_t * file_ptr,
@@ -791,7 +708,6 @@ void hl_col_major_scan_backward(H5F_t * file_ptr,
                                 hbool_t display_stats,
                                 hbool_t display_detailed_stats,
                                 hbool_t do_inserts,
-                                hbool_t dirty_inserts,
                                 int dirty_unprotects);
 
 void takedown_cache(H5F_t * file_ptr,
@@ -809,14 +725,7 @@ void unpin_entry(int32_t type,
 void unprotect_entry(H5F_t * file_ptr,
                      int32_t type,
                      int32_t idx,
-                     int dirty,
                      unsigned int flags);
-
-void unprotect_entry_with_size_change(H5F_t * file_ptr,
-                                      int32_t type,
-                                      int32_t idx,
-                                      unsigned int flags,
-                                      size_t new_size);
 
 void verify_clean(void);
 
