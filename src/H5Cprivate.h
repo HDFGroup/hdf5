@@ -940,7 +940,6 @@ typedef struct H5C_auto_size_ctl_t
  * 	H5C__SET_FLUSH_MARKER_FLAG
  * 	H5C__DELETED_FLAG
  * 	H5C__DIRTIED_FLAG
- * 	H5C__SIZE_CHANGED_FLAG
  * 	H5C__PIN_ENTRY_FLAG
  * 	H5C__UNPIN_ENTRY_FLAG
  * 	H5C__FREE_FILE_SPACE_FLAG
@@ -970,14 +969,13 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__SET_FLUSH_MARKER_FLAG		0x0001
 #define H5C__DELETED_FLAG			0x0002
 #define H5C__DIRTIED_FLAG			0x0004
-#define H5C__SIZE_CHANGED_FLAG			0x0008
-#define H5C__PIN_ENTRY_FLAG			0x0010
-#define H5C__UNPIN_ENTRY_FLAG			0x0020
-#define H5C__FLUSH_INVALIDATE_FLAG		0x0040
-#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0080
-#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0100
-#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
-#define H5C__READ_ONLY_FLAG			0x0400
+#define H5C__PIN_ENTRY_FLAG			0x0008
+#define H5C__UNPIN_ENTRY_FLAG			0x0010
+#define H5C__FLUSH_INVALIDATE_FLAG		0x0020
+#define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0040
+#define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0080
+#define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0100
+#define H5C__READ_ONLY_FLAG			0x0200
 #define H5C__FREE_FILE_SPACE_FLAG		0x0800
 #define H5C__TAKE_OWNERSHIP_FLAG		0x1000
 
@@ -1111,8 +1109,7 @@ H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             const H5C_class_t * type,
                             haddr_t             addr,
                             void *              thing,
-                            unsigned int        flags,
-                            size_t              new_size);
+                            unsigned int        flags);
 
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
                                          unsigned int tests);

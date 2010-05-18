@@ -25,6 +25,82 @@
 #include "H5ACprivate.h"
 #include "cache_common.h"
 
+/* private typedef declarations: */
+
+struct flush_cache_test_spec
+{
+    int			entry_num;
+    int			entry_type;
+    int			entry_index;
+    hbool_t		insert_flag;
+    unsigned int	flags;
+    hbool_t		expected_loaded;
+    hbool_t		expected_cleared;
+    hbool_t		expected_flushed;
+    hbool_t		expected_destroyed;
+};
+
+struct pe_flush_cache_test_spec
+{
+    int			entry_num;
+    int			entry_type;
+    int			entry_index;
+    hbool_t		insert_flag;
+    unsigned int	flags;
+    int			num_pins;
+    int			pin_type[MAX_PINS];
+    int			pin_idx[MAX_PINS];
+    hbool_t		expected_loaded;
+    hbool_t		expected_cleared;
+    hbool_t		expected_flushed;
+    hbool_t		expected_destroyed;
+};
+
+struct fo_flush_entry_check
+{
+    int			entry_num;
+    int			entry_type;
+    int			entry_index;
+    size_t		expected_size;
+    hbool_t		in_cache;
+    hbool_t		at_main_addr;
+    hbool_t		is_dirty;
+    hbool_t		is_protected;
+    hbool_t		is_pinned;
+    hbool_t		expected_loaded;
+    hbool_t		expected_cleared;
+    hbool_t		expected_flushed;
+    hbool_t		expected_destroyed;
+};
+
+struct fo_flush_cache_test_spec
+{
+    int				entry_num;
+    int				entry_type;
+    int				entry_index;
+    hbool_t			insert_flag;
+    unsigned int		flags;
+    hbool_t			resize_flag;
+    size_t			new_size;
+    int				num_pins;
+    int				pin_type[MAX_PINS];
+    int				pin_idx[MAX_PINS];
+    int				num_flush_ops;
+    struct flush_op		flush_ops[MAX_FLUSH_OPS];
+    hbool_t			expected_loaded;
+    hbool_t			expected_cleared;
+    hbool_t			expected_flushed;
+    hbool_t			expected_destroyed;
+};
+
+struct move_entry_test_spec
+{
+    int			entry_type;
+    int			entry_index;
+    hbool_t		is_dirty;
+    hbool_t		is_pinned;
+};
+
 
 /* private function declarations: */
 
@@ -59,7 +135,6 @@ static void check_flush_cache__single_entry_test(H5F_t * file_ptr,
                                                  int entry_type,
                                                  int entry_idx,
                                                  hbool_t insert_flag,
-                                                 hbool_t dirty_flag,
                                                  unsigned int flags,
                                                  unsigned int flush_flags,
                                                  hbool_t expected_loaded,
@@ -70,7 +145,6 @@ static void check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
                                                  int test_num,
                                                  int entry_type,
                                                  int entry_idx,
-                                                 hbool_t dirty_flag,
 					         hbool_t mark_dirty,
                                                  hbool_t pop_mark_dirty_prot,
                                                  hbool_t pop_mark_dirty_pinned,
@@ -158,7 +232,6 @@ smoke_check_1(void)
 {
     const char * fcn_name = "smoke_check_1";
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
@@ -200,7 +273,6 @@ smoke_check_1(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -219,7 +291,6 @@ smoke_check_1(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -238,7 +309,6 @@ smoke_check_1(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -268,7 +338,6 @@ smoke_check_1(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -293,7 +362,6 @@ smoke_check_1(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -349,7 +417,6 @@ smoke_check_2(void)
 {
     const char * fcn_name = "smoke_check_2";
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     int dirty_unprotects = TRUE;
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
@@ -391,7 +458,6 @@ smoke_check_2(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -410,7 +476,6 @@ smoke_check_2(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -429,7 +494,6 @@ smoke_check_2(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -459,7 +523,6 @@ smoke_check_2(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -484,7 +547,6 @@ smoke_check_2(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -539,7 +601,6 @@ smoke_check_3(void)
 {
     const char * fcn_name = "smoke_check_3";
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
@@ -581,7 +642,6 @@ smoke_check_3(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -600,7 +660,6 @@ smoke_check_3(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -619,7 +678,6 @@ smoke_check_3(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -649,7 +707,6 @@ smoke_check_3(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -674,7 +731,6 @@ smoke_check_3(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -730,7 +786,6 @@ smoke_check_4(void)
 {
     const char * fcn_name = "smoke_check_4";
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     int dirty_unprotects = TRUE;
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
@@ -772,7 +827,6 @@ smoke_check_4(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -791,7 +845,6 @@ smoke_check_4(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -810,7 +863,6 @@ smoke_check_4(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -840,7 +892,6 @@ smoke_check_4(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -865,7 +916,6 @@ smoke_check_4(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -922,7 +972,6 @@ smoke_check_5(void)
     const char * fcn_name = "smoke_check_5";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int32_t max_index = 1024;
@@ -1031,8 +1080,7 @@ smoke_check_5(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ FALSE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1044,8 +1092,7 @@ smoke_check_5(void)
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
-                               /* do_inserts             */ FALSE,
-                               /* dirty_inserts          */ dirty_inserts);
+                               /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1057,8 +1104,7 @@ smoke_check_5(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ TRUE);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1082,7 +1128,6 @@ smoke_check_5(void)
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
                               /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts,
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -1107,7 +1152,6 @@ smoke_check_5(void)
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
                                /* do_inserts             */ TRUE,
-                               /* dirty_inserts          */ dirty_inserts,
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -1164,7 +1208,6 @@ smoke_check_6(void)
     const char * fcn_name = "smoke_check_6";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
@@ -1270,8 +1313,7 @@ smoke_check_6(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ FALSE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1283,8 +1325,7 @@ smoke_check_6(void)
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
-                               /* do_inserts             */ FALSE,
-                               /* dirty_inserts          */ dirty_inserts);
+                               /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1296,8 +1337,7 @@ smoke_check_6(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ TRUE);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1321,7 +1361,6 @@ smoke_check_6(void)
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
                               /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts,
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -1346,7 +1385,6 @@ smoke_check_6(void)
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
                                /* do_inserts             */ TRUE,
-                               /* dirty_inserts          */ dirty_inserts,
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -1403,7 +1441,6 @@ smoke_check_7(void)
     const char * fcn_name = "smoke_check_7";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
@@ -1510,8 +1547,7 @@ smoke_check_7(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ FALSE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1523,8 +1559,7 @@ smoke_check_7(void)
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
-                               /* do_inserts             */ FALSE,
-                               /* dirty_inserts          */ dirty_inserts);
+                               /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1536,8 +1571,7 @@ smoke_check_7(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ TRUE);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1561,7 +1595,6 @@ smoke_check_7(void)
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
                               /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts,
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -1586,7 +1619,6 @@ smoke_check_7(void)
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
                                /* do_inserts             */ TRUE,
-                               /* dirty_inserts          */ dirty_inserts,
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -1643,7 +1675,6 @@ smoke_check_8(void)
     const char * fcn_name = "smoke_check_8";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     int dirty_unprotects = FALSE;
     hbool_t display_stats = FALSE;
     int mile_stone = 1;
@@ -1749,8 +1780,7 @@ smoke_check_8(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ FALSE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1762,8 +1792,7 @@ smoke_check_8(void)
                                /* reset_stats            */ TRUE,
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
-                               /* do_inserts             */ FALSE,
-                               /* dirty_inserts          */ dirty_inserts);
+                               /* do_inserts             */ FALSE);
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1775,8 +1804,7 @@ smoke_check_8(void)
                               /* reset_stats            */ TRUE,
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
-                              /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts);
+                              /* do_inserts             */ TRUE);
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -1800,7 +1828,6 @@ smoke_check_8(void)
                               /* display_stats          */ display_stats,
                               /* display_detailed_stats */ FALSE,
                               /* do_inserts             */ TRUE,
-                              /* dirty_inserts          */ dirty_inserts,
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 8 */
@@ -1825,7 +1852,6 @@ smoke_check_8(void)
                                /* display_stats          */ display_stats,
                                /* display_detailed_stats */ FALSE,
                                /* do_inserts             */ TRUE,
-                               /* dirty_inserts          */ dirty_inserts,
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 10 */
@@ -1883,7 +1909,6 @@ smoke_check_9(void)
     const char * fcn_name = "smoke_check_9";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = FALSE;
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
@@ -1945,7 +1970,6 @@ smoke_check_9(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -1981,7 +2005,6 @@ smoke_check_9(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -2015,7 +2038,6 @@ smoke_check_9(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -2075,7 +2097,6 @@ smoke_check_9(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 13 */
@@ -2115,7 +2136,6 @@ smoke_check_9(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 16 */
@@ -2189,7 +2209,6 @@ smoke_check_10(void)
     const char * fcn_name = "smoke_check_10";
     herr_t result;
     hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
     int dirty_unprotects = TRUE;
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
@@ -2234,7 +2253,6 @@ smoke_check_10(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -2268,7 +2286,6 @@ smoke_check_10(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -2302,7 +2319,6 @@ smoke_check_10(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -2362,7 +2378,6 @@ smoke_check_10(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ display_detailed_stats,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 12 */
@@ -2417,7 +2432,6 @@ smoke_check_10(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ display_detailed_stats,
                             /* do_inserts             */ TRUE,
-                            /* dirty_inserts          */ dirty_inserts,
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 16 */
@@ -2525,7 +2539,6 @@ write_permitted_check(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ TRUE,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
@@ -2546,7 +2559,6 @@ write_permitted_check(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ FALSE,
                             /* do_moves             */ TRUE,
                             /* move_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
@@ -2567,7 +2579,6 @@ write_permitted_check(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ TRUE,
                            /* do_moves             */ TRUE,
                            /* move_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
@@ -2597,7 +2608,6 @@ write_permitted_check(void)
                            /* display_stats          */ display_stats,
                            /* display_detailed_stats */ TRUE,
                            /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ TRUE,
                            /* dirty_unprotects       */ TRUE);
 
     if ( show_progress ) /* 8 */
@@ -2613,7 +2623,6 @@ write_permitted_check(void)
                             /* display_stats          */ display_stats,
                             /* display_detailed_stats */ TRUE,
                             /* do_inserts             */ FALSE,
-                            /* dirty_inserts          */ FALSE,
                             /* dirty_unprotects       */ NO_CHANGE);
 
     write_permitted = TRUE;
@@ -2717,10 +2726,10 @@ check_insert_entry(void)
 
     if ( pass ) {
 
-        insert_entry(file_ptr, entry_type, 0, TRUE, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, entry_type, 1, TRUE, H5C__SET_FLUSH_MARKER_FLAG);
-        insert_entry(file_ptr, entry_type, 2, TRUE, H5C__PIN_ENTRY_FLAG);
-        insert_entry(file_ptr, entry_type, 3, TRUE, (H5C__SET_FLUSH_MARKER_FLAG | H5C__PIN_ENTRY_FLAG));
+        insert_entry(file_ptr, entry_type, 0, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, entry_type, 1, H5C__SET_FLUSH_MARKER_FLAG);
+        insert_entry(file_ptr, entry_type, 2, H5C__PIN_ENTRY_FLAG);
+        insert_entry(file_ptr, entry_type, 3, (H5C__SET_FLUSH_MARKER_FLAG | H5C__PIN_ENTRY_FLAG));
     }
 
 
@@ -3216,7 +3225,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3228,8 +3236,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3240,7 +3247,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3252,8 +3258,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3264,7 +3269,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3276,8 +3280,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3288,7 +3291,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3300,8 +3302,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3326,7 +3327,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3338,8 +3338,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3350,7 +3349,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3362,8 +3360,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3374,7 +3371,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3386,8 +3382,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3398,7 +3393,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3410,8 +3404,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3436,7 +3429,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3448,8 +3440,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3460,7 +3451,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -3472,8 +3462,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3484,7 +3473,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3496,8 +3484,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3508,7 +3495,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -3520,8 +3506,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3546,7 +3531,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3558,8 +3542,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -3570,7 +3553,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3582,8 +3564,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -3594,7 +3575,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3606,8 +3586,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3618,7 +3597,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3630,8 +3608,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3657,7 +3634,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
@@ -3669,8 +3645,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3681,7 +3656,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -3693,8 +3667,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3705,7 +3678,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
@@ -3717,8 +3689,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3729,7 +3700,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -3741,8 +3711,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3768,7 +3737,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3780,8 +3748,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3792,7 +3759,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3804,8 +3770,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3816,7 +3781,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3828,8 +3792,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3840,7 +3803,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3852,8 +3814,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -3879,7 +3840,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3891,8 +3851,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -3903,7 +3862,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -3915,8 +3873,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ FALSE,
@@ -3927,7 +3884,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -3939,8 +3895,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3951,7 +3906,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -3963,8 +3917,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -3991,7 +3944,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
@@ -4003,8 +3955,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4015,7 +3966,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -4027,8 +3977,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4039,7 +3988,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
@@ -4051,8 +3999,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4063,7 +4010,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
@@ -4075,8 +4021,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ TRUE,
             /* expected_flushed   = */ FALSE,
@@ -4105,7 +4050,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -4117,8 +4061,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4129,7 +4072,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -4141,8 +4083,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4153,7 +4094,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
@@ -4165,8 +4105,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ TRUE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4177,7 +4116,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
@@ -4189,8 +4127,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* expected_loaded    = */ FALSE,
             /* expected_cleared   = */ FALSE,
             /* expected_flushed   = */ TRUE,
@@ -4220,7 +4157,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4235,8 +4171,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4251,7 +4186,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 2,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4268,8 +4202,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 3,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
@@ -4286,7 +4219,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 4,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4305,8 +4237,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 5,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
@@ -4325,7 +4256,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 6,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4346,8 +4276,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 7,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
@@ -4382,7 +4311,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4397,8 +4325,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4413,7 +4340,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 2,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4430,8 +4356,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 3,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        PICO_ENTRY_TYPE,
@@ -4448,7 +4373,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4463,8 +4387,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
 					-1, -1, -1, -1 -1, -1, -1},
@@ -4479,7 +4402,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 2,
 	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
@@ -4496,8 +4418,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 3,
 	    /* pin_type[MAX_PINS] = */ {MONSTER_ENTRY_TYPE,
 					MONSTER_ENTRY_TYPE,
@@ -4528,7 +4449,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4543,8 +4463,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4559,7 +4478,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4575,8 +4493,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4591,7 +4508,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4606,8 +4522,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4621,7 +4536,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4636,8 +4550,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4666,7 +4579,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4681,8 +4593,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4697,7 +4608,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4713,8 +4623,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4729,7 +4638,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4744,8 +4652,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 4,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
                                         PICO_ENTRY_TYPE,
@@ -4763,7 +4670,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 4,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4782,8 +4688,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
 	    /* pin_idx[MAX_PINS]  = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4813,7 +4718,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 100,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 0,
 	    /* pin_type[MAX_PINS] = */ {-1, -1, -1, -1, -1, -1, -1, -1},
@@ -4828,8 +4732,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 75,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4844,7 +4747,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 25,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__NO_FLAGS_SET,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4860,8 +4762,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ PICO_ENTRY_TYPE,
             /* entry_index        = */ 50,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__NO_FLAGS_SET,
+            /* flags              = */ H5C__DIRTIED_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4876,7 +4777,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 10,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4892,8 +4792,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 20,
             /* insert_flag        = */ FALSE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -4908,7 +4807,6 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 30,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ FALSE,
             /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
@@ -4924,8 +4822,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
             /* entry_type         = */ MONSTER_ENTRY_TYPE,
             /* entry_index        = */ 40,
             /* insert_flag        = */ TRUE,
-            /* dirty_flag         = */ TRUE,
-            /* flags              = */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags              = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
 	    /* num_pins           = */ 1,
 	    /* pin_type[MAX_PINS] = */ {PICO_ENTRY_TYPE,
 		                        -1, -1, -1, -1, -1, -1, -1},
@@ -5035,14 +4932,14 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         if ( spec[i].insert_flag ) {
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                         spec[i].dirty_flag, spec[i].flags);
+                         spec[i].flags);
 
         } else {
 
             protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
 
             unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                            (int)(spec[i].dirty_flag), spec[i].flags);
+                            spec[i].flags);
         }
 
         total_entry_size += entry_sizes[spec[i].entry_type];
@@ -5263,14 +5160,14 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         if ( spec[i].insert_flag ) {
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                         spec[i].dirty_flag, spec[i].flags);
+                         spec[i].flags);
 
         } else {
 
             protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
 
             unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                            (int)(spec[i].dirty_flag), spec[i].flags);
+                            spec[i].flags);
         }
 
         total_entry_size += entry_sizes[spec[i].entry_type];
@@ -5469,6 +5366,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5497,6 +5395,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5577,6 +5476,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5605,6 +5505,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5681,7 +5582,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5760,7 +5662,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5841,6 +5744,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -5953,6 +5857,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6066,7 +5971,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6178,7 +6084,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6294,6 +6201,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6392,6 +6300,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6489,6 +6398,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6586,6 +6496,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6683,6 +6594,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6812,6 +6724,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6953,6 +6866,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -6981,6 +6895,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 11,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7009,6 +6924,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7037,6 +6953,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7168,6 +7085,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7196,6 +7114,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 11,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7224,6 +7143,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7252,6 +7172,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7280,6 +7201,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 10,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7308,6 +7230,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 20,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7438,6 +7361,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7466,6 +7390,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 11,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7494,6 +7419,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 0,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7522,6 +7448,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7550,6 +7477,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 10,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7578,6 +7506,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 20,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7704,6 +7633,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7732,6 +7662,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 50,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -7760,6 +7691,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 150,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -7838,6 +7770,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -7866,6 +7799,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 50,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -7894,6 +7828,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 150,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {PICO_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -8042,6 +7977,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 200,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8070,6 +8006,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8098,6 +8035,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2300,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8126,6 +8064,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1000,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8154,6 +8093,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2000,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8182,6 +8122,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 350,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8210,6 +8151,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 450,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8238,6 +8180,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 650,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8266,6 +8209,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 750,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8294,6 +8238,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 500,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8479,6 +8424,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 200,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8507,6 +8453,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8535,6 +8482,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2300,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8563,6 +8511,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 1000,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8591,6 +8540,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 2000,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8619,6 +8569,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 350,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8647,6 +8598,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 450,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8675,6 +8627,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 650,
 	    /* insert_flag        = */ TRUE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8703,6 +8656,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 750,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 2,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0},
@@ -8731,6 +8685,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 500,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8841,6 +8796,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8868,7 +8824,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 200,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -8896,7 +8853,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 300,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -8925,6 +8883,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 400,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -8952,7 +8911,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 500,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -9034,6 +8994,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 100,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -9061,7 +9022,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 200,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 2,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -9089,7 +9051,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 300,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -9118,6 +9081,7 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
 	    /* entry_index        = */ 400,
 	    /* insert_flag        = */ FALSE,
 	    /* flags		  = */ H5C__NO_FLAGS_SET,
+	    /* resize_flag        = */ FALSE,
 	    /* new_size           = */ 0,
 	    /* num_pins           = */ 0,
 	    /* pin_type           = */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -9145,7 +9109,8 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 500,
 	    /* insert_flag        = */ FALSE,
-	    /* flags		  = */ H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
+	    /* flags		  = */ H5C__DIRTIED_FLAG,
+	    /* resize_flag        = */ TRUE,
 	    /* new_size           = */ VARIABLE_ENTRY_SIZE / 4,
 	    /* num_pins           = */ 1,
 	    /* pin_type           = */ {VARIABLE_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
@@ -9383,7 +9348,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 	    }
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                         TRUE, spec[i].flags);
+                         spec[i].flags);
 
         } else {
 
@@ -9409,9 +9374,12 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 		    (int)(spec[i].new_size));
 	    }
 
-            unprotect_entry_with_size_change(file_ptr, spec[i].entry_type,
-			                     spec[i].entry_index,
-					     spec[i].flags, spec[i].new_size);
+            if(spec[i].resize_flag)
+                resize_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+					     spec[i].new_size, TRUE);
+
+            unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+					     spec[i].flags);
         }
 
 	for ( j = 0; j < spec[i].num_pins; j++ )
@@ -9917,40 +9885,36 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 */
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 0,
-			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
-				   (VARIABLE_ENTRY_SIZE / 2));
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0,
+                (VARIABLE_ENTRY_SIZE / 2), TRUE);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 0, H5C__DIRTIED_FLAG);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 1,
-			                 H5C__NO_FLAGS_SET, (size_t)0);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 2,
-			                 H5C__NO_FLAGS_SET, (size_t)0);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 3,
-			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
-				   (VARIABLE_ENTRY_SIZE / 2));
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3,
+                (VARIABLE_ENTRY_SIZE / 2), TRUE);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 4,
-			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
-				   (VARIABLE_ENTRY_SIZE / 2));
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4,
+                (VARIABLE_ENTRY_SIZE / 2), TRUE);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 5,
-			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
-				   (VARIABLE_ENTRY_SIZE / 2));
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5,
+                (VARIABLE_ENTRY_SIZE / 2), TRUE);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, H5C__DIRTIED_FLAG);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 6,
-			                 H5C__NO_FLAGS_SET, (size_t)0);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
 
 	protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
-	unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 7,
-			                 H5C__NO_FLAGS_SET, (size_t)0);
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, H5C__NO_FLAGS_SET);
 
 	if ( ( cache_ptr->index_len != 8 ) ||
              ( cache_ptr->index_size != (4 * (VARIABLE_ENTRY_SIZE / 2)) +
@@ -9996,20 +9960,20 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE,
+                     VARIABLE_ENTRY_TYPE, 0, TRUE,
 		     3 * VARIABLE_ENTRY_SIZE / 4);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE);
+                     VARIABLE_ENTRY_TYPE, 0, TRUE, VARIABLE_ENTRY_SIZE);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__MOVE,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__RESIZE,
-                     VARIABLE_ENTRY_TYPE, 3, FALSE, VARIABLE_ENTRY_SIZE);
+                     VARIABLE_ENTRY_TYPE, 3, TRUE, VARIABLE_ENTRY_SIZE);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 7, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 6, FALSE, (size_t)0);
@@ -10052,15 +10016,13 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	for ( i = 0; i < 1; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	/* The cache should now be exactly full */
@@ -10127,8 +10089,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 2;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 1,
-                                         H5C__DIRTIED_FLAG, (size_t)0);
+	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
@@ -10193,8 +10154,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 3;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 2,
-                                         H5C__DIRTIED_FLAG, (size_t)0);
+	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DIRTIED_FLAG);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
              ( cache_ptr->index_size != (2 * 1024 * 1024) -
@@ -10266,12 +10226,10 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         num_large_entries = 5;
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 3,
-                                         H5C__DIRTIED_FLAG, (size_t)0);
+	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__DIRTIED_FLAG);
 
 	protect_entry(file_ptr, LARGE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, 4,
-                                         H5C__DIRTIED_FLAG, (size_t)0);
+	unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 4, H5C__DIRTIED_FLAG);
 
         /* verify cache size */
 	if ( ( cache_ptr->index_len != 41 ) ||
@@ -10307,15 +10265,13 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	for ( i = 0; i < 5; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size */
@@ -10374,8 +10330,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 5; i < 8; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size */
@@ -10436,8 +10391,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 8; i < 9; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size */
@@ -10502,8 +10456,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 9; i < 10; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size */
@@ -10538,15 +10491,13 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	for ( i = 0; i < 10; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size */
@@ -10649,8 +10600,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 10; i < 12; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size  */
@@ -10682,15 +10632,13 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 0; i < num_monster_entries; i++ )
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, MONSTER_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	for ( i = 0; i < num_large_entries; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
 	/* update the expected array to mark all these entries dirty again. */
@@ -10776,8 +10724,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	for ( i = 12; i < 14; i++ )
 	{
 	    protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(file_ptr, LARGE_ENTRY_TYPE, i,
-			                     H5C__DIRTIED_FLAG, (size_t)0);
+	    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__DIRTIED_FLAG);
 	}
 
         /* verify cache size  */
@@ -10973,7 +10920,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ TRUE,
@@ -11000,8 +10946,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11027,7 +10972,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11054,8 +10998,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ TRUE,
@@ -11081,7 +11024,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11108,8 +11050,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11135,7 +11076,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11162,8 +11102,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11189,7 +11128,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -11217,8 +11155,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11245,7 +11182,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -11273,8 +11209,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11301,7 +11236,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
@@ -11329,8 +11263,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11357,7 +11290,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
@@ -11386,8 +11318,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
                                        H5C__FLUSH_MARKED_ENTRIES_FLAG,
@@ -11415,7 +11346,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ TRUE,
@@ -11442,8 +11372,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11469,7 +11398,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11496,8 +11424,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ TRUE,
@@ -11523,7 +11450,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11550,8 +11476,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11577,7 +11502,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11604,8 +11528,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ TRUE,
             /* expected_cleared     */ FALSE,
@@ -11631,7 +11554,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -11659,8 +11581,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11687,7 +11608,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -11715,8 +11635,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11743,7 +11662,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
@@ -11771,8 +11689,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ TRUE,
@@ -11799,7 +11716,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
@@ -11828,8 +11744,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ FALSE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
                                        H5C__FLUSH_MARKED_ENTRIES_FLAG,
@@ -11857,7 +11772,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
@@ -11884,8 +11798,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -11911,7 +11824,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -11938,8 +11850,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ TRUE,
@@ -11965,7 +11876,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
@@ -11992,8 +11902,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -12019,7 +11928,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12046,8 +11954,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -12073,7 +11980,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -12101,8 +12007,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12129,7 +12034,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -12157,8 +12061,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12185,7 +12088,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
@@ -12213,8 +12115,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12241,7 +12142,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__NO_FLAGS_SET,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
@@ -12270,8 +12170,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__NO_FLAGS_SET,
+            /* flags                */ H5C__DIRTIED_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
                                        H5C__FLUSH_MARKED_ENTRIES_FLAG,
@@ -12299,7 +12198,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
@@ -12326,8 +12224,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__NO_FLAGS_SET,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -12353,7 +12250,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12380,8 +12276,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ TRUE,
@@ -12407,7 +12302,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12434,8 +12328,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -12461,7 +12354,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12488,8 +12380,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG,
             /* expected_loaded      */ FALSE,
             /* expected_cleared     */ FALSE,
@@ -12515,7 +12406,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -12543,8 +12433,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12571,7 +12460,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
@@ -12599,8 +12487,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12627,7 +12514,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
@@ -12655,8 +12541,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_MARKED_ENTRIES_FLAG |
                                        H5C__FLUSH_INVALIDATE_FLAG,
             /* expected_loaded      */ FALSE,
@@ -12683,7 +12568,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ FALSE,
             /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
@@ -12712,8 +12596,7 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             /* entry_type           */ PICO_ENTRY_TYPE,
             /* entry_idx            */ 0,
             /* insert_flag          */ TRUE,
-            /* dirty_flag           */ TRUE,
-            /* flags                */ H5C__SET_FLUSH_MARKER_FLAG,
+            /* flags                */ H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG,
             /* flush_flags          */ H5C__FLUSH_INVALIDATE_FLAG |
                                        H5C__FLUSH_CLEAR_ONLY_FLAG |
                                        H5C__FLUSH_MARKED_ENTRIES_FLAG,
@@ -12797,7 +12680,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             int 		test_num;
             int			entry_type;
             int			entry_idx;
-            hbool_t		dirty_flag;
             hbool_t		mark_dirty;
             hbool_t		pop_mark_dirty_prot;
             hbool_t		pop_mark_dirty_pinned;
@@ -12808,267 +12690,267 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
             hbool_t		expected_flushed;
             hbool_t		expected_destroyed;
 	} spec[256] =
-	/*                                           pop    pop
-	 *                         ent               mark   mark
-	 *  test  entry            -ry dirty  mark   dirty  dirty  unprot                             flush                                                        expect  expect expect
-         *  num   type             idx  flag  dirty  prot   pinned unpin  flags                       flags                                                        clear   flush  destroy
+	/*                                    pop    pop
+	 *                         ent        mark   mark
+	 *  test  entry            -ry mark   dirty  dirty  unprot                             flush                                                        expect  expect expect
+         *  num   type             idx dirty  prot   pinned unpin  flags                       flags                                                        clear   flush  destroy
 	 */
-	{ {   1,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {   2,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {   3,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   4,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   5,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   6,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   7,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   8,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {   9,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  10,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  11,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  12,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  13,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  14,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  15,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  16,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  17,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  18,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  19,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  20,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  21,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  22,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  23,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  24,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  25,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  26,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  27,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  28,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  29,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  30,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  31,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  32,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  33,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {  34,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
-	  {  35,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  36,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  37,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  38,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  39,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  40,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  41,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  42,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  43,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  44,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  45,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  46,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  47,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  48,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  49,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  50,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  51,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  52,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  53,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  54,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  55,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  56,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  57,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  58,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  59,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  60,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  61,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  62,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  63,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  64,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
-	  {  65,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  66,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  67,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  68,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  69,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  70,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  71,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  72,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  73,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  74,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  75,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  76,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  77,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  78,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  79,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  80,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  81,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  82,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  83,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  84,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  85,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  86,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  87,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  88,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  89,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  90,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  91,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  92,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  93,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  94,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  95,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  96,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  97,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  98,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  {  99,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 100,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 101,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 102,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 103,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 104,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 105,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 106,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 107,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 108,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
-	  { 109,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 110,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 111,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 112,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 113,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 114,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 115,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 116,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 117,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 118,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 119,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 120,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 121,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 122,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 123,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 124,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 125,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 126,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 127,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 128,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
-	  { 129,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 130,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 131,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 132,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 133,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 134,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 135,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 136,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 137,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 138,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 139,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 140,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 141,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 142,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 143,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 144,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 145,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 146,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 147,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 148,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 149,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 150,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 151,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 152,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 153,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 154,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 155,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 156,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 157,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 158,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 159,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 160,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 161,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 162,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
-	  { 163,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 164,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 165,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 166,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 167,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 168,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 169,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 170,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 171,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 172,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 173,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 174,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 175,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 176,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 177,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 178,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 179,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 180,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 181,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 182,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 183,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 184,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 185,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 186,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 187,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 188,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 189,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 190,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 191,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 192,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
-	  { 193,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 194,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 195,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 196,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 197,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 198,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 199,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 200,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 201,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 202,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 203,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 204,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 205,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 206,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 207,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 208,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 209,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 210,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 211,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 212,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 213,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 214,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 215,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 216,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 217,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 218,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 219,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 220,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 221,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 222,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 223,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 224,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 225,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 226,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 227,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 228,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 229,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 230,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 231,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 232,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 233,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 234,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 235,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 236,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
-	  { 237,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 238,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 239,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 240,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 241,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 242,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 243,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 244,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 245,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 246,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 247,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 248,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 249,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 250,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 251,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 252,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 253,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 254,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 255,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
-	  { 256,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE } };
+	{ {   1,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+	  {   2,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+	  {   3,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   4,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   5,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   6,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   7,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   8,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {   9,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  10,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  11,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  12,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  13,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  14,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  15,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  16,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  17,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  18,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  19,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  20,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  21,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  22,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  23,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  24,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  25,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  26,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  27,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  28,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  29,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  30,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  31,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  32,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  33,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+	  {  34,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE, FALSE, FALSE },
+	  {  35,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  36,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  37,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  38,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  39,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  40,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  41,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  42,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  43,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  44,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  45,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  46,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  47,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  48,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  49,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  50,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  51,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  52,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  53,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  54,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  55,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  56,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  57,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  58,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  59,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  60,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  61,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  62,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  63,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  64,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__NO_FLAGS_SET,                                           FALSE,  TRUE, FALSE },
+	  {  65,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  66,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  67,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  68,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  69,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  70,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  71,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  72,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  73,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  74,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  75,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  76,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  77,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  78,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  79,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  80,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  81,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  82,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  83,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  84,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  85,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  86,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  87,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  88,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  89,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  90,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  91,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  92,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  93,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  94,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  95,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  96,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  97,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  98,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  {  99,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 100,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 101,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 102,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 103,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 104,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 105,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 106,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 107,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 108,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE, FALSE, FALSE },
+	  { 109,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 110,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 111,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 112,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 113,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 114,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 115,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 116,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 117,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 118,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 119,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 120,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 121,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 122,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 123,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 124,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 125,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 126,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 127,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 128,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG,                              FALSE,  TRUE, FALSE },
+	  { 129,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+	  { 130,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+	  { 131,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 132,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 133,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 134,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 135,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 136,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 137,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 138,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 139,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 140,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 141,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 142,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 143,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 144,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 145,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 146,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 147,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 148,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 149,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 150,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 151,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 152,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 153,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 154,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 155,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 156,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 157,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 158,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 159,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 160,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 161,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+	  { 162,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                  FALSE, FALSE, FALSE },
+	  { 163,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 164,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 165,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 166,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 167,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 168,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 169,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 170,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 171,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 172,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 173,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 174,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 175,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 176,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 177,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 178,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 179,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 180,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 181,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 182,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 183,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 184,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 185,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 186,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 187,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 188,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 189,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 190,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 191,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 192,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_CLEAR_ONLY_FLAG,                                   TRUE, FALSE, FALSE },
+	  { 193,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 194,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 195,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 196,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 197,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 198,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 199,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 200,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 201,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 202,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 203,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 204,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 205,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 206,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 207,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 208,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__NO_FLAGS_SET,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 209,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 210,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 211,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 212,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 213,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 214,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 215,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 216,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 217,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 218,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 219,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 220,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 221,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 222,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 223,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 224,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG,          H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 225,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 226,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 227,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 228,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 229,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 230,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 231,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 232,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 233,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 234,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 235,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 236,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG, FALSE, FALSE, FALSE },
+	  { 237,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 238,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 239,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 240,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 241,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 242,  PICO_ENTRY_TYPE,  0, FALSE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 243,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 244,  PICO_ENTRY_TYPE,  0, FALSE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 245,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 246,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 247,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 248,  PICO_ENTRY_TYPE,  0, FALSE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 249,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 250,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 251,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 252,  PICO_ENTRY_TYPE,  0,  TRUE, FALSE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 253,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 254,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE, FALSE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 255,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE, FALSE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE },
+	  { 256,  PICO_ENTRY_TYPE,  0,  TRUE,  TRUE,  TRUE,  TRUE, H5C__DIRTIED_FLAG | H5C__SET_FLUSH_MARKER_FLAG, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,  TRUE, FALSE, FALSE } };
 
 	i = 0;
 	while ( ( pass ) && ( i < 256 ) )
@@ -13084,7 +12966,6 @@ check_flush_cache__single_entry(H5F_t * file_ptr)
                 /* test_num              */ spec[i].test_num,
                 /* entry_type            */ spec[i].entry_type,
                 /* entry_idx             */ spec[i].entry_idx,
-                /* dirty_flag            */ spec[i].dirty_flag,
 	        /* mark_dirty            */ spec[i].mark_dirty,
                 /* pop_mark_dirty_prot   */ spec[i].pop_mark_dirty_prot,
                 /* pop_mark_dirty_pinned */ spec[i].pop_mark_dirty_pinned,
@@ -13125,7 +13006,6 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
                                      int entry_type,
                                      int entry_idx,
                                      hbool_t insert_flag,
-                                     hbool_t dirty_flag,
                                      unsigned int flags,
                                      unsigned int flush_flags,
                                      hbool_t expected_loaded,
@@ -13174,14 +13054,13 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 
         if ( insert_flag ) {
 
-            insert_entry(file_ptr, entry_type, entry_idx, dirty_flag, flags);
+            insert_entry(file_ptr, entry_type, entry_idx, flags);
 
         } else {
 
             protect_entry(file_ptr, entry_type, entry_idx);
 
-            unprotect_entry(file_ptr, entry_type, entry_idx,
-                            (int)dirty_flag, flags);
+            unprotect_entry(file_ptr, entry_type, entry_idx, flags);
         }
     }
 
@@ -13312,7 +13191,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
                                             int test_num,
                                             int entry_type,
                                             int entry_idx,
-                                            hbool_t dirty_flag,
 					    hbool_t mark_dirty,
 					    hbool_t pop_mark_dirty_prot,
 					    hbool_t pop_mark_dirty_pinned,
@@ -13370,8 +13248,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 	    mark_entry_dirty(entry_type, entry_idx);
 	}
 
-        unprotect_entry(file_ptr, entry_type, entry_idx,
-                        (int)dirty_flag, (flags | H5C__PIN_ENTRY_FLAG));
+        unprotect_entry(file_ptr, entry_type, entry_idx, (flags | H5C__PIN_ENTRY_FLAG));
 
 	if ( mark_dirty ) {
 
@@ -13453,7 +13330,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
             protect_entry(file_ptr, entry_type, entry_idx);
 
             unprotect_entry(file_ptr, entry_type, entry_idx,
-                            (int)dirty_flag, H5C__UNPIN_ENTRY_FLAG);
+                    (flags & H5C__DIRTIED_FLAG) | H5C__UNPIN_ENTRY_FLAG);
 
         } else {
 
@@ -13581,7 +13458,7 @@ check_get_entry_status(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -13633,7 +13510,7 @@ check_get_entry_status(void)
 
     if ( pass ) {
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
     }
 
@@ -13817,7 +13694,7 @@ check_expunge_entry(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -13945,7 +13822,7 @@ check_expunge_entry(void)
 
         protect_entry(file_ptr, 0, 1);
 
-        unprotect_entry(file_ptr, 0, 1, TRUE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 1, H5C__DIRTIED_FLAG);
 
     }
 
@@ -14170,7 +14047,7 @@ check_multiple_read_protect(void)
 
     if ( pass )
     {
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
@@ -14239,7 +14116,7 @@ check_multiple_read_protect(void)
 
     if ( pass )
     {
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
@@ -14262,7 +14139,7 @@ check_multiple_read_protect(void)
 
     if ( pass )
     {
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
@@ -14285,7 +14162,7 @@ check_multiple_read_protect(void)
 
     if ( pass )
     {
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( entry_ptr->header.is_protected ) ||
  	     ( entry_ptr->header.is_read_only ) ||
@@ -14336,7 +14213,7 @@ check_multiple_read_protect(void)
 
     if ( pass )
     {
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         if ( ( entry_ptr->header.is_protected ) ||
  	     ( entry_ptr->header.is_read_only ) ||
@@ -14372,7 +14249,7 @@ check_multiple_read_protect(void)
         protect_entry_ro(file_ptr, 0, 4);      /* (0,4) read only (1) */
 	protect_entry(file_ptr, 0, 6);		/* (0,6) write */
 
-        unprotect_entry(file_ptr, 0, 2, FALSE, /* (0,2) unprotect */
+        unprotect_entry(file_ptr, 0, 2,         /* (0,2) unprotect */
 			H5C__NO_FLAGS_SET);
 
         protect_entry_ro(file_ptr, 0, 2);	/* (0,2) read only (1) */
@@ -14381,16 +14258,16 @@ check_multiple_read_protect(void)
 	protect_entry(file_ptr, 0, 0);		/* (0,0) write */
         protect_entry_ro(file_ptr, 0, 2);	/* (0,2) read only (2) */
 
-        unprotect_entry(file_ptr, 0, 2, FALSE, /* (0,2) read only (1) pin */
+        unprotect_entry(file_ptr, 0, 2,         /* (0,2) read only (1) pin */
 			H5C__PIN_ENTRY_FLAG);
-        unprotect_entry(file_ptr, 0, 6, FALSE, /* (0,6) unprotect */
+        unprotect_entry(file_ptr, 0, 6,         /* (0,6) unprotect */
 			H5C__NO_FLAGS_SET);
 
         protect_entry_ro(file_ptr, 0, 4);	/* (0,4) read only (3) */
 
-        unprotect_entry(file_ptr, 0, 2, FALSE, /* (0,2) unprotect */
+        unprotect_entry(file_ptr, 0, 2,         /* (0,2) unprotect */
 			H5C__NO_FLAGS_SET);
-        unprotect_entry(file_ptr, 0, 1, FALSE, /* (0,1) unprotect */
+        unprotect_entry(file_ptr, 0, 1,         /* (0,1) unprotect */
 			H5C__NO_FLAGS_SET);
 
 	if ( pass ) {
@@ -14415,9 +14292,9 @@ check_multiple_read_protect(void)
 	    }
 	}
 
-        unprotect_entry(file_ptr, 0, 4, FALSE, /* (0,4) read only (2) */
+        unprotect_entry(file_ptr, 0, 4,         /* (0,4) read only (2) */
 			H5C__NO_FLAGS_SET);
-        unprotect_entry(file_ptr, 0, 4, FALSE, /* (0,4) read only (1) */
+        unprotect_entry(file_ptr, 0, 4,         /* (0,4) read only (1) */
 			H5C__UNPIN_ENTRY_FLAG);
 
         if ( ( pass ) && ( entry_ptr->header.is_pinned ) ) {
@@ -14427,9 +14304,9 @@ check_multiple_read_protect(void)
 
 	}
 
-        unprotect_entry(file_ptr, 0, 4, FALSE, /* (0,4) unprotect */
+        unprotect_entry(file_ptr, 0, 4,         /* (0,4) unprotect */
 			H5C__NO_FLAGS_SET);
-        unprotect_entry(file_ptr, 0, 0, FALSE, /* (0,0) unprotect */
+        unprotect_entry(file_ptr, 0, 0,         /* (0,0) unprotect */
 			H5C__NO_FLAGS_SET);
 
 	unpin_entry(0, 2);
@@ -14639,8 +14516,10 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
         protect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
 
-        unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index,
-                        (int)(spec_ptr->is_dirty), flags);
+        if(spec_ptr->is_dirty)
+            flags |= H5C__DIRTIED_FLAG;
+
+        unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
 
         move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
 
@@ -14798,7 +14677,7 @@ check_pin_protected_entry(void)
 	}
     }
 
-    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__UNPIN_ENTRY_FLAG);
+    unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
 
     if ( pass ) {
 
@@ -14978,25 +14857,36 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG, (LARGE_ENTRY_SIZE / 2));
+        result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 2));
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 1.");
+            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
 
-	} else {
+        } else {
 
-	    /* tidy up so we play nice with the standard protect / unprotect
-	     * calls.
-	     */
-	    entry_ptr->is_protected = FALSE;
-	    entry_ptr->is_dirty = TRUE;
-	    entry_ptr->size = LARGE_ENTRY_SIZE / 2;
-	}
+            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+                    &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
+                    H5C__DIRTIED_FLAG);
+
+            if ( result < 0 ) {
+
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 1.");
+                failure_mssg = msg;
+
+            } else {
+
+                /* tidy up so we play nice with the standard protect / unprotect
+                 * calls.
+                 */
+                entry_ptr->is_protected = FALSE;
+                entry_ptr->is_dirty = TRUE;
+                entry_ptr->size = LARGE_ENTRY_SIZE / 2;
+            }
+        }
     }
 
     if ( pass ) {
@@ -15053,25 +14943,36 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
-                (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG), LARGE_ENTRY_SIZE);
+        result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 2.");
+            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
 
-	} else {
+        } else {
 
-	    /* tidy up so we play nice with the standard protect / unprotect
-	     * calls.
-	     */
-	    entry_ptr->is_protected = FALSE;
-	    entry_ptr->is_dirty = TRUE;
-	    entry_ptr->size = LARGE_ENTRY_SIZE;
-	}
+            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+                    &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
+                    H5C__DIRTIED_FLAG);
+
+            if ( result < 0 ) {
+
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 2.");
+                failure_mssg = msg;
+
+            } else {
+
+                /* tidy up so we play nice with the standard protect / unprotect
+                 * calls.
+                 */
+                entry_ptr->is_protected = FALSE;
+                entry_ptr->is_dirty = TRUE;
+                entry_ptr->size = LARGE_ENTRY_SIZE;
+            }
+        }
     }
 
     if ( pass ) {
@@ -15124,7 +15025,7 @@ check_resize_entry(void)
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
 
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__PIN_ENTRY_FLAG);
 
     }
 
@@ -15252,7 +15153,7 @@ check_resize_entry(void)
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
 
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0,
                         H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     }
@@ -15303,7 +15204,7 @@ check_resize_entry(void)
     }
 
 
-    /* now repreat the above tests with several entries in the cache: */
+    /* now repeat the above tests with several entries in the cache: */
 
     if ( pass ) {
 
@@ -15325,13 +15226,13 @@ check_resize_entry(void)
     if ( pass ) {
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
 
     }
 
@@ -15404,25 +15305,36 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG, (LARGE_ENTRY_SIZE / 2));
+        result = H5C_resize_entry((void *)entry_ptr, (LARGE_ENTRY_SIZE / 2));
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 3.");
+            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
 
-	} else {
+        } else {
 
-	    /* tidy up so we play nice with the standard protect / unprotect
-	     * calls.
-	     */
-	    entry_ptr->is_protected = FALSE;
-	    entry_ptr->is_dirty = TRUE;
-	    entry_ptr->size = LARGE_ENTRY_SIZE / 2;
-	}
+            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+                    &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
+                    H5C__DIRTIED_FLAG);
+
+            if ( result < 0 ) {
+
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 3.");
+                failure_mssg = msg;
+
+            } else {
+
+                /* tidy up so we play nice with the standard protect / unprotect
+                 * calls.
+                 */
+                entry_ptr->is_protected = FALSE;
+                entry_ptr->is_dirty = TRUE;
+                entry_ptr->size = LARGE_ENTRY_SIZE / 2;
+            }
+        }
     }
 
     if ( pass ) {
@@ -15481,25 +15393,36 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
-                &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
-                (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG), LARGE_ENTRY_SIZE);
+        result = H5C_resize_entry((void *)entry_ptr, LARGE_ENTRY_SIZE);
 
-	if ( result < 0 ) {
+        if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 4.");
+            HDsnprintf(msg, (size_t)128, "error(s) in H5C_resize_entry().");
             failure_mssg = msg;
 
-	} else {
+        } else {
 
-	    /* tidy up so we play nice with the standard protect / unprotect
-	     * calls.
-	     */
-	    entry_ptr->is_protected = FALSE;
-	    entry_ptr->is_dirty = TRUE;
-	    entry_ptr->size = LARGE_ENTRY_SIZE;
-	}
+            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+                    &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr, (void *)entry_ptr,
+                    H5C__DIRTIED_FLAG);
+
+            if ( result < 0 ) {
+
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128, "H5C_unprotect() reports failure 4.");
+                failure_mssg = msg;
+
+            } else {
+
+                /* tidy up so we play nice with the standard protect / unprotect
+                 * calls.
+                 */
+                entry_ptr->is_protected = FALSE;
+                entry_ptr->is_dirty = TRUE;
+                entry_ptr->size = LARGE_ENTRY_SIZE;
+            }
+        }
     }
 
     if ( pass ) {
@@ -15552,7 +15475,7 @@ check_resize_entry(void)
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
 
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, FALSE, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__PIN_ENTRY_FLAG);
 
     }
 
@@ -15682,7 +15605,7 @@ check_resize_entry(void)
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
 
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, FALSE, 
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, 
                         H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     }
@@ -15733,15 +15656,14 @@ check_resize_entry(void)
     }
 
     if ( pass ) {
-
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, FALSE, H5C__DELETED_FLAG);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DELETED_FLAG);
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, FALSE, H5C__DELETED_FLAG);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DELETED_FLAG);
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, FALSE, H5C__DELETED_FLAG);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__DELETED_FLAG);
 
     }
 
@@ -15922,8 +15844,7 @@ check_evictions_enabled(void)
         for ( i = 0; i < 16 ; i++ )
         {
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-            unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, 
-                            FALSE, H5C__NO_FLAGS_SET);
+            unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
         }
 
     }
@@ -15957,8 +15878,7 @@ check_evictions_enabled(void)
 
         /* protect and unprotect another entry */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16, 
-                        FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16025,7 +15945,7 @@ check_evictions_enabled(void)
     if ( pass ) {
 
         /* insert an entry */
-        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 17, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 17, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16130,8 +16050,7 @@ check_evictions_enabled(void)
 
         /* protect and unprotect another entry */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18, 
-                        FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16162,7 +16081,7 @@ check_evictions_enabled(void)
     if ( pass ) {
 
         /* insert another entry */
-        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16211,8 +16130,7 @@ check_evictions_enabled(void)
 
         /* protect and unprotect an entry that is in the cache */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, 
-                        FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16244,8 +16162,7 @@ check_evictions_enabled(void)
 
         /* protect and unprotect an entry that isn't in the cache */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20, 
-                        FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16371,8 +16288,7 @@ check_evictions_enabled(void)
          * the cache to grow.
          */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21, 
-                        FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16420,7 +16336,7 @@ check_evictions_enabled(void)
     if ( pass ) {
 
         /* insert an entry */
-        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 22, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 22, H5C__NO_FLAGS_SET);
 
     }
 
@@ -16571,7 +16487,7 @@ check_flush_protected_err(void)
 
         } else {
 
-            unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+            unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
             if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                     H5C__NO_FLAGS_SET) < 0 ) {
@@ -16641,7 +16557,7 @@ check_destroy_pinned_err(void)
                                 (size_t)(1 * 1024));
 
         protect_entry(file_ptr, 0, 0);
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
         if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT) >= 0 ) {
 
@@ -16737,7 +16653,7 @@ check_destroy_protected_err(void)
 
         } else {
 
-            unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+            unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
             if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT) < 0 ) {
 
@@ -16834,7 +16750,7 @@ check_duplicate_insert_err(void)
 
             } else {
 
-                unprotect_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
                 takedown_cache(file_ptr, FALSE, FALSE);
             }
@@ -16898,9 +16814,9 @@ check_move_err(void)
                                 (size_t)(1 * 1024));
         cache_ptr = file_ptr->shared->cache;
 
-        insert_entry(file_ptr, 0, 0, TRUE, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, 0, 1, TRUE, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, 1, 0, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, 0, 1, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, 1, 0, H5C__NO_FLAGS_SET);
 
         entry_0_0_ptr = &((entries[0])[0]);
         entry_0_1_ptr = &((entries[0])[1]);
@@ -16994,7 +16910,7 @@ check_double_pin_err(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, 0, 0);
 
@@ -17005,7 +16921,7 @@ check_double_pin_err(void)
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__PIN_ENTRY_FLAG, (size_t)0);
+                H5C__PIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
 
@@ -17015,7 +16931,7 @@ check_double_pin_err(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__UNPIN_ENTRY_FLAG);
+	    unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
 	}
     }
 
@@ -17091,7 +17007,7 @@ check_double_unpin_err(void)
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__UNPIN_ENTRY_FLAG, (size_t)0);
+                H5C__UNPIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
 
@@ -17101,7 +17017,7 @@ check_double_unpin_err(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 	}
     }
 
@@ -17187,7 +17103,7 @@ check_pin_entry_errs(void)
 
         protect_entry(file_ptr, 0, 0);
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
@@ -17206,7 +17122,7 @@ check_pin_entry_errs(void)
 
             protect_entry(file_ptr, 0, 0);
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
             protect_entry(file_ptr, 0, 0);
 	}
@@ -17224,7 +17140,7 @@ check_pin_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__UNPIN_ENTRY_FLAG);
+	    unprotect_entry(file_ptr, 0, 0, H5C__UNPIN_ENTRY_FLAG);
 
 	}
     }
@@ -17311,7 +17227,7 @@ check_double_protect_err(void)
 
     if ( pass ) {
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
     }
 
     if ( pass ) {
@@ -17382,7 +17298,7 @@ check_double_unprotect_err(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
@@ -17391,7 +17307,7 @@ check_double_unprotect_err(void)
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__NO_FLAGS_SET, (size_t)0);
+                H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 
@@ -17463,7 +17379,7 @@ check_mark_entry_dirty_errs(void)
 
         protect_entry(file_ptr, 0, 0);
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
         entry_ptr = &((entries[0])[0]);
     }
@@ -17567,7 +17483,7 @@ check_expunge_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
 	}
     }
@@ -17685,7 +17601,7 @@ check_resize_entry_errs(void)
 
         } else {
 
-	    unprotect_entry(file_ptr, 0, 0, FALSE, H5C__PIN_ENTRY_FLAG);
+	    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
 	}
     }
@@ -17776,7 +17692,7 @@ check_unprotect_ro_dirty_err(void)
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__DIRTIED_FLAG, (size_t)0);
+                H5C__DIRTIED_FLAG);
 
         if ( result >= 0 ) {
 
@@ -17788,7 +17704,7 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -17820,7 +17736,7 @@ check_unprotect_ro_dirty_err(void)
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                 &(types[0]), entry_ptr->addr, (void *)entry_ptr,
-                H5C__DIRTIED_FLAG, (size_t)0);
+                H5C__DIRTIED_FLAG);
 
         if ( result > 0 ) {
 
@@ -17832,8 +17748,8 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
 
     }
 
@@ -17917,7 +17833,7 @@ check_protect_ro_rw_err(void)
 
     if ( pass ) {
 
-	unprotect_entry(file_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
     }
 
     if ( pass ) {
@@ -18226,8 +18142,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, PICO_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18256,8 +18171,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18286,8 +18200,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, PICO_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18316,8 +18229,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18346,8 +18258,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18376,8 +18287,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18407,8 +18317,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18437,8 +18346,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18467,8 +18375,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18498,8 +18405,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18597,8 +18503,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18628,8 +18533,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18659,8 +18563,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18690,8 +18593,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18720,8 +18622,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18750,8 +18651,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18780,8 +18680,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18791,8 +18690,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i + 1000);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i + 1000,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i + 1000, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18821,8 +18719,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18851,8 +18748,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18950,8 +18846,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -18980,8 +18875,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19010,8 +18904,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19040,8 +18933,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19147,8 +19039,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19174,8 +19065,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19201,8 +19091,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19232,8 +19121,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19262,8 +19150,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19291,8 +19178,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19320,8 +19206,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19350,8 +19235,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19381,8 +19265,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19408,8 +19291,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19435,8 +19317,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19465,8 +19346,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19574,8 +19454,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19601,8 +19480,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19628,8 +19506,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19659,8 +19536,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19689,8 +19565,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19718,8 +19593,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19747,8 +19621,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19776,8 +19649,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19805,8 +19677,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19834,8 +19705,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19863,8 +19733,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19893,8 +19762,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19924,8 +19792,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19951,8 +19818,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -19980,8 +19846,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20010,8 +19875,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20118,8 +19982,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20145,8 +20008,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20172,8 +20034,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20203,8 +20064,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20233,8 +20093,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20262,8 +20121,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20291,8 +20149,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20321,8 +20178,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20352,8 +20208,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20379,8 +20234,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20406,8 +20260,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20436,8 +20289,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20543,8 +20395,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20570,8 +20421,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20597,8 +20447,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20625,8 +20474,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20653,8 +20501,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20681,8 +20528,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20710,8 +20556,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20812,8 +20657,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20839,8 +20683,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20874,8 +20717,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20905,8 +20747,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20936,8 +20777,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20968,8 +20808,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -20998,8 +20837,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, LARGE_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21029,8 +20867,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21061,8 +20898,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21093,8 +20929,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21125,8 +20960,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21155,8 +20989,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21185,8 +21018,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21215,8 +21047,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21245,8 +21076,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21275,8 +21105,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -21406,8 +21235,7 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 0);
 
         if ( pass ) {
-            unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 0,
-                            NO_CHANGE, H5C__NO_FLAGS_SET);
+            unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
         }
 
 	if ( ( pass ) &&
@@ -21434,8 +21262,7 @@ check_auto_cache_resize(void)
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
         if ( pass ) {
-            unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                            NO_CHANGE, H5C__NO_FLAGS_SET);
+            unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
         }
 
 	if ( ( pass ) &&
@@ -21462,8 +21289,7 @@ check_auto_cache_resize(void)
 
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1);
 
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1,
-                        NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
@@ -21487,8 +21313,7 @@ check_auto_cache_resize(void)
 
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 2);
 
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 2,
-                        NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
@@ -21544,14 +21369,13 @@ check_auto_cache_resize(void)
     /* insert a huge entry into the cache */
     if ( pass ) {
 
-        insert_entry(file_ptr, HUGE_ENTRY_TYPE, 1, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+
 	/* protect and unprotect a couple times to increment cache_accesses */
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1,
-                        NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1,
-                        NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
@@ -21574,7 +21398,7 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 4, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 4, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
@@ -21595,7 +21419,7 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 5, TRUE, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 5, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
@@ -21619,8 +21443,7 @@ check_auto_cache_resize(void)
 
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 6);
 
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 6,
-                        NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 6, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
@@ -21647,20 +21470,20 @@ check_auto_cache_resize(void)
 	expunge_entry(file_ptr, MONSTER_ENTRY_TYPE, 6);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 13,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, H5C__DIRTIED_FLAG);
 
 	flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
@@ -21695,20 +21518,16 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__NO_FLAGS_SET);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, NO_CHANGE,
-                        H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 13, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (6 * 1024) ) ||
@@ -21730,8 +21549,8 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 3 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 3 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
 
 	if ( ( pass ) &&
@@ -21755,8 +21574,8 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 10 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 10 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
 
 
 	if ( ( pass ) &&
@@ -21779,8 +21598,8 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 10 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
 
 
 	if ( ( pass ) &&
@@ -21803,8 +21622,8 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 10 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
 
 	if ( ( pass ) &&
@@ -21828,14 +21647,16 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         if ( pass ) {
 
@@ -21868,8 +21689,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -21907,8 +21727,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -21928,8 +21747,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -21952,16 +21770,13 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
@@ -21984,14 +21799,16 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 10,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__DIRTIED_FLAG);
+
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 11,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__DIRTIED_FLAG);
+
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry_with_size_change(file_ptr, VARIABLE_ENTRY_TYPE, 12,
-                        H5C__DIRTIED_FLAG|H5C__SIZE_CHANGED_FLAG, 1 * 1024);
+	resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 1 * 1024, TRUE);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__DIRTIED_FLAG);
 
         if ( pass ) {
 
@@ -22020,8 +21837,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -22059,8 +21875,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -22080,8 +21895,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
-			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__PIN_ENTRY_FLAG);
         resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
 	if ( ( pass ) &&
@@ -22104,16 +21918,13 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 10, H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 11, H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
-			H5C__UNPIN_ENTRY_FLAG);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 12, H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (22 * 1024) ) ||
@@ -22233,8 +22044,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (4 * 1024) ) ||
@@ -22260,8 +22070,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
@@ -22286,11 +22095,9 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (12 * 1024) ) ||
@@ -22319,8 +22126,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, TINY_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, TINY_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22343,8 +22149,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
-			H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (4 * 1024 + 128) ) ||
@@ -22373,8 +22178,7 @@ check_auto_cache_resize(void)
             protect_entry(file_ptr, TINY_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, TINY_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, TINY_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22626,8 +22430,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22657,8 +22460,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22687,8 +22489,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22786,8 +22587,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22817,8 +22617,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22847,8 +22646,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22947,8 +22745,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -22978,8 +22775,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23008,8 +22804,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23109,8 +22904,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23138,8 +22932,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23168,8 +22961,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23267,8 +23059,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23297,8 +23088,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23327,8 +23117,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23426,8 +23215,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23456,8 +23244,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23486,8 +23273,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23595,8 +23381,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23625,8 +23410,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23657,8 +23441,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23687,8 +23470,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23719,8 +23501,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23826,8 +23607,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23856,8 +23636,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23888,8 +23667,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23918,8 +23696,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -23950,8 +23727,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24064,8 +23840,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24094,8 +23869,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24128,8 +23902,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24160,8 +23933,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24194,8 +23966,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 999);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 999,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 999, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24298,8 +24069,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24330,8 +24100,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24427,8 +24196,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24459,8 +24227,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24556,8 +24323,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24588,8 +24354,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24685,8 +24450,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24717,8 +24481,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24815,8 +24578,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24847,8 +24609,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24945,8 +24706,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -24977,8 +24737,7 @@ check_auto_cache_resize_disable(void)
             protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -25098,8 +24857,7 @@ check_auto_cache_resize_disable(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
         if ( ( pass ) &&
              ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
@@ -25138,8 +24896,7 @@ check_auto_cache_resize_disable(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
         if ( ( pass ) &&
              ( ( ( cache_ptr->max_cache_size != (64 * 1024) ) ||
@@ -25388,8 +25145,7 @@ check_auto_cache_resize_epoch_markers(void)
             protect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, MEDIUM_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -25421,8 +25177,7 @@ check_auto_cache_resize_epoch_markers(void)
                 protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
                 if ( pass ) {
-                    unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                    NO_CHANGE, H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
                 }
                 i++;
             }
@@ -25453,8 +25208,7 @@ check_auto_cache_resize_epoch_markers(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -25567,8 +25321,7 @@ check_auto_cache_resize_epoch_markers(void)
             protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
             if ( pass ) {
-                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -25759,8 +25512,7 @@ check_auto_cache_resize_epoch_markers(void)
                 protect_entry(file_ptr, SMALL_ENTRY_TYPE, i);
 
                 if ( pass ) {
-                    unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i,
-                                    NO_CHANGE, H5C__NO_FLAGS_SET);
+                    unprotect_entry(file_ptr, SMALL_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
                 }
                 i++;
             }
@@ -28497,8 +28249,7 @@ check_auto_cache_resize_aux_fcns(void)
 
             if ( pass ) {
 
-                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -28543,8 +28294,7 @@ check_auto_cache_resize_aux_fcns(void)
 
             if ( pass ) {
 
-                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, 0,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -28626,8 +28376,7 @@ check_auto_cache_resize_aux_fcns(void)
 
             if ( pass ) {
 
-                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i + 500,
-                                NO_CHANGE, H5C__NO_FLAGS_SET);
+                unprotect_entry(file_ptr, PICO_ENTRY_TYPE, i + 500, H5C__NO_FLAGS_SET);
             }
             i++;
         }
@@ -28731,8 +28480,7 @@ check_auto_cache_resize_aux_fcns(void)
     }
 
     if ( pass ) {
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, NO_CHANGE,
-                        H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
     }
 
     if ( pass ) {
@@ -29155,7 +28903,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
                              entry_type,          /* int32_t type */
                              entry_idx,            /* int32_t idx */
-                             TRUE,                /* hbool_t dirty */
                              H5C__NO_FLAGS_SET);  /* unsigned int flags */
 
             } else {
@@ -29166,8 +28913,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,           /* int32_t idx */
-                                TRUE,               /* int321_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+                                H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
             /* Change expected values, and verify the status of the entries
@@ -29216,7 +28962,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             insert_entry(file_ptr,           /* H5F_t * file_ptr */
                          entry_type,          /* int32_t type */
                          entry_idx++,          /* int32_t idx */
-                         TRUE,                /* hbool_t dirty */
                          H5C__NO_FLAGS_SET);  /* unsigned int flags */
         } else {
             protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29226,8 +28971,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                             entry_type,         /* int32_t type */
                             entry_idx++,           /* int32_t idx */
-                            TRUE,               /* int321_t dirty */
-                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+                            H5C__DIRTIED_FLAG); /* unsigned int flags */
         }
 
         /* Verify the status of the entries.
@@ -29272,7 +29016,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             insert_entry(file_ptr,           /* H5F_t * file_ptr */
                          entry_type,          /* int32_t type */
                          entry_idx++,          /* int32_t idx */
-                         TRUE,                /* hbool_t dirty */
                          H5C__NO_FLAGS_SET);  /* unsigned int flags */
         } else {
             protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29282,8 +29025,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                             entry_type,         /* int32_t type */
                             entry_idx++,        /* int32_t idx */
-                            TRUE,               /* int321_t dirty */
-                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+                            H5C__DIRTIED_FLAG); /* unsigned int flags */
         }
 
         /* Verify the status of the entries.
@@ -29326,7 +29068,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
                              entry_type,          /* int32_t type */
                              entry_idx,            /* int32_t idx */
-                             TRUE,                /* hbool_t dirty */
                              H5C__NO_FLAGS_SET);  /* unsigned int flags */
             } else {
                 protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29336,8 +29077,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,           /* int32_t idx */
-                                TRUE,               /* int321_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+                                H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
             /* Expected staus is that after each insertion, the entry
@@ -29400,7 +29140,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             insert_entry(file_ptr,           /* H5F_t * file_ptr */
                          entry_type,          /* int32_t type */
                          entry_idx++,          /* int32_t idx */
-                         TRUE,                /* hbool_t dirty */
                          H5C__NO_FLAGS_SET);  /* unsigned int flags */
         } else {
             protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29410,8 +29149,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                             entry_type,         /* int32_t type */
                             entry_idx++,        /* int32_t idx */
-                            TRUE,               /* int321_t dirty */
-                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+                            H5C__DIRTIED_FLAG); /* unsigned int flags */
         }
 
         /* Verify the status of the entries.
@@ -29465,7 +29203,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
                              entry_type,          /* int32_t type */
                              entry_idx,          /* int32_t idx */
-                             TRUE,                /* hbool_t dirty */
                              H5C__NO_FLAGS_SET);  /* unsigned int flags */
             } else {
                 protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29475,8 +29212,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,        /* int32_t idx */
-                                TRUE,               /* int321_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+                                H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
             /* This past inserted entry is now in the cache and dirty */
@@ -29597,7 +29333,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
                              entry_type,          /* int32_t type */
                              entry_idx,            /* int32_t idx */
-                             TRUE,                /* hbool_t dirty */
                              H5C__NO_FLAGS_SET);  /* unsigned int flags */
 
             } else {
@@ -29608,8 +29343,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,           /* int32_t idx */
-                                TRUE,               /* int321_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+                                H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
             /* This past inserted entry is now in the cache and dirty */
@@ -29640,7 +29374,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             insert_entry(file_ptr,           /* H5F_t * file_ptr */
                          entry_type,          /* int32_t type */
                          entry_idx++,          /* int32_t idx */
-                         TRUE,                /* hbool_t dirty */
                          H5C__NO_FLAGS_SET);  /* unsigned int flags */
         } else {
             protect_entry(file_ptr,   /* H5F_t * file_ptr */
@@ -29650,8 +29383,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
             unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                             entry_type,         /* int32_t type */
                             entry_idx++,           /* int32_t idx */
-                            TRUE,               /* int321_t dirty */
-                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+                            H5C__DIRTIED_FLAG); /* unsigned int flags */
         }
 
         /* Verify the status of the entries.
@@ -29695,7 +29427,6 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
                              entry_type,          /* int32_t type */
                              entry_idx,            /* int32_t idx */
-                             TRUE,                /* hbool_t dirty */
                              H5C__NO_FLAGS_SET);  /* unsigned int flags */
 
             } else {
@@ -29706,8 +29437,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
                 unprotect_entry(file_ptr,          /* H5F_t * file_ptr */
                                 entry_type,         /* int32_t type */
                                 entry_idx,           /* int32_t idx */
-                                TRUE,               /* int321_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+                                H5C__DIRTIED_FLAG); /* unsigned int flags */
             }
 
             /* This past inserted entry is now in the cache and dirty */
