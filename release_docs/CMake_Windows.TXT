@@ -19,10 +19,6 @@ Notes: This short instruction is written for users who want to quickly build
             have attempted to provide error-free files, please understand that
             this development with CMake has just began.
             
-         2. Testing of some tools have issues.
-            The following are failing sometimes on windows
-               hl_test_ds
-            
 
 ========================================================================
                             Preconditions                                                           

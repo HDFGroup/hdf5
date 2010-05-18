@@ -56,6 +56,10 @@ New Features
 
     Configuration
     -------------
+    - CMake Early Access, this release adds support for building hdf5 using
+      the CMake system. Initial work has targeted Windows, but other platforms
+      can be used. See the CMake_Windows.TXT file for more information. Version
+      2.8.1 of CMake is required.
     - Configure now adds appropriate defines for supporting large (64-bit)
       files on all systems, where supported, by default, instead of only linux.
       This largefile support is controllable with the --enable-largefile 
@@ -172,6 +176,8 @@ Bug Fixes since HDF5-1.8.4
 
     Tools
     -----
+    - Fixed H5Rcreate fails if passing in a -1 for the dataspace identifier 
+      (ADB 2010/4/28)
     - Fixed h5ls to return exit code 1 (error) when non-existent file is
       specified. bug#1793. (JKM 2010/04/27)
     - h5copy failed to copy dangling link when the link is specified 
@@ -302,14 +308,15 @@ The following platforms and compilers have been tested for this release.
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
     (SNL Glory)                   Versions 10.1.
     
-    Windows XP                    Visual Studio .NET
-                                  Visual Studio 2005 w/ Intel Fortran 9.1
-                                  Cygwin(native gcc compiler and g95)
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
+                                  Cygwin(native gcc compiler and gfortran)
                                   MinGW(5.1.6 with gcc 4.4.0)
 
-    Windows XP x64                Visual Studio 2005 w/ Intel Fortran 9.1
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
 
-    Windows Vista                 Visual Studio 2005
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1
+
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
 
     MAC OS  10.5.6 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
@@ -360,6 +367,7 @@ Solaris2.10 64-bit                   y       y         y         y
 Windows XP                           y       y(4)      y         y        
 Windows XP x64                       y       y(4)      y         y        
 Windows Vista                        y       n         n         y        
+Windows Vista x64                    y       n         n         y        
 Mac OS X 10.5                        y       n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
@@ -378,7 +386,7 @@ Cray XT3 2.0.62                      n       n         n         n
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
-           (4) Using Visual Studio 2005 or Cygwin
+           (4) Using Visual Studio 2008 or Cygwin
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
