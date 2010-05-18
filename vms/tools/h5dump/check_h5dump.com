@@ -220,8 +220,36 @@ $ CALL TOOLTEST torderattr3.ddl "-"""H""" --sort_by=creation_order --sort_order=
 $ CALL TOOLTEST torderattr4.ddl "-"""H""" --sort_by=creation_order --sort_order=descending torderattr.h5"
 $
 $ ! Test for dataset packed bits
-$ CALL TOOLTEST tpackedbits.ddl "-d /dset1 -M 0,2 tdset.h5"
-$ CALL TOOLTEST tpackedbits2.ddl "-d /dset1 -M 0,2,2,1 tdset.h5"
+$ ! Limits:
+$ ! Maximum number of packed bits is 8 (for now).
+$ ! Maximum integer size is 8 (for now).
+$ ! Maximun Offset is 7 (Maximum size - 1).
+$ ! Maximum Offset+Length is 8 (Maximum size).
+$ ! Test Normal operation on both signed and unsigned int datasets.
+$ ! Their rawdata output should be the same.
+$ CALL TOOLTEST tpbitsSigned.ddl "-d /DS08BITS -M 0,2,2,6 packedbits.h5"
+$ CALL TOOLTEST tpbitsUnsigned.ddl "-d /DU08BITS -M 0,2,2,6 packedbits.h5"
+$ ! Overlapped packed bits.
+$ CALL TOOLTEST tpbitsOverlapped.ddl "-d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5"
+$ ! Maximum number of packed bits.
+$ CALL TOOLTEST tpbitsMax.ddl "-d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5"
+$ ! Compound type.
+$ CALL TOOLTEST tpbitsCompound.ddl "-d /dset1 -M 0,1,1,1 tcompound.h5"
+$ ! Array type.
+$ CALL TOOLTEST tpbitsArray.ddl "-d /Dataset1 -M 0,1,1,1 tarray1.h5"
+$ ! Test Error handling.
+$ ! Too many packed bits requested. Max is 8 for now.
+$ CALL TOOLTEST tpbitsMaxExceeded.ddl "-d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5"
+$ ! Offset too large. Max is 7 (8-1) for now.
+$ CALL TOOLTEST tpbitsOffsetExceeded.ddl "-d /DS08BITS -M 8,1 packedbits.h5"
+$ ! Bad offset, must not be negative.
+$ CALL TOOLTEST tpbitsOffsetNegative.ddl "-d /DS08BITS -M -1,1 packedbits.h5"
+$ ! Bad length, must not be positive.
+$ CALL TOOLTEST tpbitsLengthPositive.ddl "-d /DS08BITS -M 4,0 packedbits.h5"
+$ ! Offset+Length is too large. Max is 8 for now.
+$ CALL TOOLTEST tpbitsLengthExceeded.ddl "-d /DS08BITS -M 2,7 packedbits.h5"
+$ ! Incomplete pair of packed bits request.
+$ CALL TOOLTEST tpbitsIncomplete.ddl "-d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5"
 $
 $ !
 $TOOLTEST: SUBROUTINE
