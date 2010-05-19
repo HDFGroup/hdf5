@@ -243,8 +243,7 @@ herr_t create_char_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = 3;
     int     rankds = 1;
     hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};
-    char   buf[DIM_DATA*3] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+    char   buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -297,8 +296,7 @@ herr_t create_short_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = 3;
     int     rankds = 1;
     hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};
-    short   buf[DIM_DATA*3] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+    short   buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -352,7 +350,7 @@ herr_t create_int_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = RANK;
     int     rankds = 1;
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};
-    int     buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};
+    int     buf[DIM1_SIZE*DIM2_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     int     s1_wbuf[DIM1_SIZE] = {10,20,30};
@@ -394,10 +392,7 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
     int     rank = 4;
     int     rankds = 1;
     hsize_t dims[4]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE,DIM4_SIZE};
-    long    buf[DIM_DATA*3*2] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12};
+    long    buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE*DIM4_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -463,7 +458,7 @@ herr_t create_float_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = RANK;
     int     rankds = 1;
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};
-    float   buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};
+    float   buf[DIM1_SIZE*DIM2_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     float   s1_wbuf[DIM1_SIZE] = {10,20,30};
