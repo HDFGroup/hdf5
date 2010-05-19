@@ -651,6 +651,8 @@ INSTALL (
         ${H5_PRIVATE_HEADERS}
     DESTINATION
         include
+    COMPONENT
+        headers
 )
 
 #-----------------------------------------------------------------------------
@@ -662,8 +664,8 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib COMPONENT libraries
+      ARCHIVE DESTINATION lib COMPONENT libraries
+      RUNTIME DESTINATION bin COMPONENT libraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)

@@ -165,4 +165,6 @@ INSTALL (
         h5ls
     RUNTIME DESTINATION
         bin/tools
+    COMPONENT
+        toolsapplications
 )

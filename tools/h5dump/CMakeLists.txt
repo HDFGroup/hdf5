@@ -679,4 +679,6 @@ INSTALL (
         h5dump
     RUNTIME DESTINATION
         bin/tools
+    COMPONENT
+        toolsapplications
 )
