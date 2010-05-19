@@ -528,4 +528,6 @@ INSTALL (
         h5repack
     RUNTIME DESTINATION
         bin/tools
+    COMPONENT
+        toolsapplications
 )

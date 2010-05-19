@@ -94,6 +94,8 @@ INSTALL (
         ${CPP_HDRS}
     DESTINATION
         include/cpp
+    COMPONENT
+        cppheaders
 )
 
 #-----------------------------------------------------------------------------
@@ -105,9 +107,9 @@ IF (HDF5_EXPORTED_TARGETS)
           ${HDF5_CPP_LIB_TARGET}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib COMPONENT cpplibraries
+      ARCHIVE DESTINATION lib COMPONENT cpplibraries
+      RUNTIME DESTINATION bin COMPONENT cpplibraries
   )
 ENDIF (HDF5_EXPORTED_TARGETS)
 

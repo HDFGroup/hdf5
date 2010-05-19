@@ -52,4 +52,6 @@ INSTALL (
         hdf2gif
     RUNTIME DESTINATION
         bin/tools
+    COMPONENT
+        hltoolsapplications
 )
