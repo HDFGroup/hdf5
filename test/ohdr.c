@@ -264,6 +264,8 @@ main(void)
             envval = "nomatch";
         if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
             hid_t file2;                    /* File ID for 'bogus' object file */
+            hid_t sid;                      /* Dataspace ID */
+            hid_t aid;                      /* Attribute ID */
             char testpath[512] = "";
             char testfile[512] = "";
             char *srcdir = HDgetenv("srcdir");
@@ -343,6 +345,22 @@ main(void)
             /* Open the dataset with the "mark if unknown" message */
             if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
+
+            /* Create data space */
+            if((sid = H5Screate(H5S_SCALAR)) < 0)
+                FAIL_STACK_ERROR
+
+            /* Create an attribute, to get the object header into write access */
+            if((aid = H5Acreate2(dset, "Attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+
+            /* Close dataspace */
+            if(H5Sclose(sid) < 0)
+                FAIL_STACK_ERROR
+
+            /* Close attribute */
+            if(H5Aclose(aid) < 0)
+                FAIL_STACK_ERROR
 
             /* Close the dataset */
             if(H5Dclose(dset) < 0)

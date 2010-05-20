@@ -396,7 +396,7 @@ H5HF_man_iter_reset(H5HF_block_iter_t *biter)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
 
             /* Free the current location context */
-            H5FL_FREE(H5HF_block_loc_t, curr_loc);
+            curr_loc = H5FL_FREE(H5HF_block_loc_t, curr_loc);
 
             /* Advance to next location */
             curr_loc = next_loc;
@@ -488,7 +488,7 @@ H5HF_man_iter_up(H5HF_block_iter_t *biter)
     up_loc = biter->curr->up;
 
     /* Release this location */
-    H5FL_FREE(H5HF_block_loc_t, biter->curr);
+    biter->curr = H5FL_FREE(H5HF_block_loc_t, biter->curr);
 
     /* Point location to next location up */
     biter->curr = up_loc;

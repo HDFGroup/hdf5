@@ -221,9 +221,15 @@ typedef struct {
     hid_t dxpl_id;
 } H5SM_incr_ref_opdata;
 
-/* Callback info for loading a shared message index into the cache */
+/* Callback info for loading a shared message table index into the cache */
+typedef struct H5SM_table_cache_ud_t {
+    H5F_t *f;                   /* File that shared message index stored as a table is in */
+    size_t table_size;          /* Size of SOHM master table in file */
+} H5SM_table_cache_ud_t;
+
+/* Callback info for loading a shared message list index into the cache */
 typedef struct H5SM_list_cache_ud_t {
-    H5F_t *f;  /* File that shared message index stored as a list is in */
+    H5F_t *f;                   /* File that shared message index stored as a table is in */
     H5SM_index_header_t *header; /* Index header for this list */
 } H5SM_list_cache_ud_t;
 

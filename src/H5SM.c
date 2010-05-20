@@ -234,7 +234,7 @@ done:
         if(table_addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
         if(table != NULL)
-            H5FL_FREE(H5SM_master_table_t, table);
+            table = H5FL_FREE(H5SM_master_table_t, table);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -355,7 +355,13 @@ H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id)
 
     /* Look up the master SOHM table */
     if(H5F_addr_defined(f->shared->sohm_addr)) {
-        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
+        H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
+
+        /* Set up user data for callback */
+        cache_udata.f = f;
+        cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
+        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
     } /* end if */
     else
@@ -395,6 +401,7 @@ herr_t
 H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_addr)
 {
     H5SM_master_table_t *table = NULL;  /* Shared object master table */
+    H5SM_table_cache_ud_t cache_udata;  /* User-data for callback */
     ssize_t index_num;                  /* Which index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -404,8 +411,12 @@ H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_ad
     HDassert(f);
     HDassert(fheap_addr);
 
+    /* Set up user data for callback */
+    cache_udata.f = f;
+    cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Look up index for message type */
@@ -637,7 +648,7 @@ done:
         if(list != NULL) {
             if(list->messages != NULL)
                 H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-            H5FL_FREE(H5SM_list_t, list);
+            list = H5FL_FREE(H5SM_list_t, list);
         } /* end if */
         if(addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, addr, size);
@@ -895,7 +906,13 @@ H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table,
     if(table)
         my_table = table;
     else {
-        if(NULL == (my_table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
+        H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
+
+        /* Set up user data for callback */
+        cache_udata.f = f;
+        cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
+        if(NULL == (my_table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
     } /* end if */
 
@@ -985,6 +1002,7 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     void *mesg, unsigned *mesg_flags)
 {
     H5SM_master_table_t *table = NULL;
+    H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
@@ -1000,8 +1018,12 @@ H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     if(tri_ret == FALSE)
         HGOTO_DONE(FALSE)
 
+    /* Set up user data for callback */
+    cache_udata.f = f;
+    cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_WRITE)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* "complex" sharing checks */
@@ -1364,6 +1386,7 @@ H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
 {
     H5SM_master_table_t  *table = NULL;
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
+    H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
     ssize_t               index_num;
     void                 *mesg_buf = NULL;
     void                 *native_mesg = NULL;
@@ -1379,8 +1402,12 @@ H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     /* Get message type */
     type_id = sh_mesg->msg_type_id;
 
+    /* Set up user data for callback */
+    cache_udata.f = f;
+    cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_WRITE)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the correct index and try to delete from it */
@@ -1790,6 +1817,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
     } /* end if */
     else {
+        H5SM_table_cache_ud_t cache_udata;      /* User-data for callback */
         unsigned index_flags[H5O_SHMESG_MAX_NINDEXES];  /* Message flags for each index */
         unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];     /* Minimum message size for each index */
         unsigned sohm_l2b;           /* SOHM list-to-btree cutoff */
@@ -1807,8 +1835,12 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
         HDassert(H5F_addr_defined(shared->sohm_addr));
         HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5O_SHMESG_MAX_NINDEXES);
 
+        /* Set up user data for callback */
+        cache_udata.f = f;
+        cache_udata.table_size = H5SM_TABLE_SIZE(f) + (shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
         /* Read the rest of the SOHM table information from the cache */
-        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, shared->sohm_addr, f, H5AC_READ)))
+        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, shared->sohm_addr, &cache_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Get index conversion limits */
@@ -2017,6 +2049,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 {
     H5HF_t *fheap = NULL;               /* Fractal heap that contains shared messages */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    H5SM_table_cache_ud_t tbl_cache_udata;  /* User-data for callback */
     H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
     H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
@@ -2033,8 +2066,12 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     HDassert(sh_mesg);
     HDassert(ref_count);
 
+    /* Set up user data for callback */
+    tbl_cache_udata.f = f;
+    tbl_cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &tbl_cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the correct index and find the message in it */
@@ -2065,15 +2102,15 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {
-        H5SM_list_cache_ud_t cache_udata;  /* User-data for metadata cache callback */
+        H5SM_list_cache_ud_t lst_cache_udata;  /* User-data for metadata cache callback */
         size_t list_pos;        /* Position of the message in the list */
 
         /* Set up user data for metadata cache callback */
-        cache_udata.f = f;
-        cache_udata.header = header;
+        lst_cache_udata.f = f;
+        lst_cache_udata.header = header;
 
         /* If the index is stored as a list, get it from the cache */
-        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, &cache_udata, H5AC_READ)))
+        if(NULL == (list = (H5SM_list_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, &lst_cache_udata, H5AC_READ)))
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
@@ -2333,7 +2370,7 @@ H5SM_table_free(H5SM_master_table_t *table)
 
     H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
 
-    H5FL_FREE(H5SM_master_table_t, table);
+    table = H5FL_FREE(H5SM_master_table_t, table);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_table_free() */
@@ -2361,7 +2398,7 @@ H5SM_list_free(H5SM_list_t *list)
 
     H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
 
-    H5FL_FREE(H5SM_list_t, list);
+    list = H5FL_FREE(H5SM_list_t, list);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_list_free() */
@@ -2388,6 +2425,7 @@ H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
                          unsigned table_vers, unsigned num_indexes)
 {
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    H5SM_table_cache_ud_t cache_udata;  /* User-data for callback */
     unsigned x;                         /* Counter variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2417,8 +2455,12 @@ H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
     if(num_indexes == 0 || num_indexes > H5O_SHMESG_MAX_NINDEXES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of indexes must be between 1 and H5O_SHMESG_MAX_NINDEXES")
 
+    /* Set up user data for callback */
+    cache_udata.f = f;
+    cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, f, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     HDfprintf(stream, "%*sShared Message Master Table...\n", indent, "");
@@ -2563,6 +2605,7 @@ herr_t
 H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 {
     H5SM_master_table_t *table = NULL;          /* SOHM master table */
+    H5SM_table_cache_ud_t cache_udata;          /* User-data for callback */
     H5HF_t              *fheap = NULL;          /* Fractal heap handle */
     unsigned    	u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -2574,8 +2617,12 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
     HDassert(H5F_addr_defined(f->shared->sohm_addr));
     HDassert(finfo);
 
+    /* Set up user data for callback */
+    cache_udata.f = f;
+    cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
     /* Look up the master SOHM table */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, f, H5AC_READ)))
+    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Get SOHM header size */

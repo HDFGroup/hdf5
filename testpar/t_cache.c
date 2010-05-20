@@ -3557,8 +3557,7 @@ unlock_entry(H5C_t * cache_ptr,
         }
 
         result = H5AC_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
-			        entry_ptr->base_addr,
-                                (void *)(&(entry_ptr->header)), flags);
+                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -4193,7 +4192,7 @@ smoke_check_2(void)
 	/* we can't move pinned entries, so release any local pins now. */
 	local_unpin_all_entries(cache_ptr, file_ptr, FALSE);
 
-        /* move the first half of the entries... */
+        /* Move the first half of the entries... */
         for ( i = 0; i < (virt_num_data_entries / 2); i++ )
         {
 	    lock_entry(cache_ptr, file_ptr, i);
@@ -5048,10 +5047,7 @@ smoke_check_5(void)
 		    resize_entry(i, data[i].len / 2);
 		}
 
-		if ( i % 4 == 0 )
-		    mark_entry_dirty(cache_ptr, file_ptr, i);
-		else
-		    mark_entry_dirty(cache_ptr, file_ptr, i);
+                mark_entry_dirty(cache_ptr, file_ptr, i);
 
 		if ( i % 8 <= 4 ) {
 

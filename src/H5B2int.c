@@ -271,11 +271,11 @@ H5B2_shared_free(void *_shared)
 
     /* Free the B-tree node buffer */
     if(shared->page)
-        (void)H5FL_BLK_FREE(node_page, shared->page);
+        shared->page = H5FL_BLK_FREE(node_page, shared->page);
 
     /* Free the array of offsets into the native key block */
     if(shared->nat_off)
-        H5FL_SEQ_FREE(size_t, shared->nat_off);
+        shared->nat_off = H5FL_SEQ_FREE(size_t, shared->nat_off);
 
     /* Release the node info */
     if(shared->node_info) {
@@ -292,11 +292,11 @@ H5B2_shared_free(void *_shared)
         } /* end for */
 
         /* Free the array of node info structs */
-        H5FL_SEQ_FREE(H5B2_node_info_t, shared->node_info);
+        shared->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, shared->node_info);
     } /* end if */
 
     /* Free the shared B-tree info itself */
-    H5FL_FREE(H5B2_shared_t, shared);
+    shared = H5FL_FREE(H5B2_shared_t, shared);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

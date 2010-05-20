@@ -680,8 +680,8 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
                 (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
             H5O_chunk_proxy_t *chk_proxy2 = NULL;       /* Chunk that continuation message is in */
-            unsigned cont_chunkno = oh->mesg[u].chunkno;    /* Chunk # for continuation message */
             hbool_t chk_dirtied2 = FALSE;               /* Flag for unprotecting chunk */
+            unsigned cont_chunkno = oh->mesg[u].chunkno;    /* Chunk # for continuation message */
 
             /* Protect chunk containing continuation message */
             if(NULL == (chk_proxy2 = H5O_chunk_protect(f, dxpl_id, oh, cont_chunkno)))

@@ -1129,7 +1129,7 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
         cache_udata.nrows = &iblock_nrows;
 
         /* Protect the indirect block */
-        if(NULL == (iblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &cache_udata, rw)))
+        if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &cache_udata, rw)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
 
         /* Set the indirect block's address */
@@ -1602,11 +1602,11 @@ H5HF_man_iblock_dest(H5HF_indirect_t *iblock)
 
     /* Release entry tables */
     if(iblock->ents)
-        H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
+        iblock->ents = H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
     if(iblock->filt_ents)
-        H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
+        iblock->filt_ents = H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
     if(iblock->child_iblocks)
-        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+        iblock->child_iblocks = H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
     iblock = H5FL_FREE(H5HF_indirect_t, iblock);
