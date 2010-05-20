@@ -550,6 +550,13 @@ typedef struct H5HF_iblock_cache_ud_t {
 typedef struct H5HF_dblock_cache_ud_t {
     H5HF_parent_t par_info;     /* Parent info */
     H5F_t * f;                  /* File pointer */
+    size_t odi_size;		/* On disk image size of the direct block.
+				 * Note that there is no necessary relation
+				 * between this value, and the actual
+				 * direct block size, as conpression may
+				 * reduce the size of the on disk image,
+				 * and check sums may increase it.
+				 */
     size_t dblock_size;		/* size of the direct block, which bears
 				 * no necessary relation to the block
 				 * odi_size -- the size of the on disk

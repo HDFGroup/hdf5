@@ -51,12 +51,6 @@
 #define H5HF_DBLOCK_VERSION     0               /* Direct block */
 #define H5HF_IBLOCK_VERSION     0               /* Indirect block */
 
-/* Size of stack buffer for serialized headers */
-#define H5HF_HDR_BUF_SIZE       512
-
-/* Size of stack buffer for serialized indirect blocks */
-#define H5HF_IBLOCK_BUF_SIZE    4096
-
 
 /******************/
 /* Local Typedefs */
@@ -77,6 +71,7 @@ static herr_t H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dt
 static herr_t H5HF_dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
 /* Metadata cache (H5AC) callbacks */
+static herr_t H5HF_cache_hdr_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF_cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_hdr_image_len(const void *thing, size_t *image_len_ptr);
@@ -85,6 +80,7 @@ static herr_t H5HF_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5HF_cache_hdr_free_icr(void *thing);
 
+static herr_t H5HF_cache_iblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF_cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_iblock_serialize(const H5F_t * f, hid_t dxpl_id,
@@ -92,6 +88,7 @@ static herr_t H5HF_cache_iblock_serialize(const H5F_t * f, hid_t dxpl_id,
     haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5HF_cache_iblock_free_icr(void *thing);
 
+static herr_t H5HF_cache_dblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF_cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HF_cache_dblock_serialize(const H5F_t * f, hid_t dxpl_id,
@@ -109,6 +106,7 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     H5AC_FHEAP_HDR_ID,
     "fractal heap header",
     H5FD_MEM_FHEAP_HDR,
+    H5HF_cache_hdr_get_load_size,
     H5HF_cache_hdr_deserialize,
     H5HF_cache_hdr_image_len,
     H5HF_cache_hdr_serialize,
@@ -120,6 +118,7 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     H5AC_FHEAP_IBLOCK_ID,
     "fractal heap indirect block",
     H5FD_MEM_FHEAP_IBLOCK,
+    H5HF_cache_iblock_get_load_size,
     H5HF_cache_iblock_deserialize,
     NULL,
     H5HF_cache_iblock_serialize,
@@ -131,6 +130,7 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5AC_FHEAP_DBLOCK_ID,
     "fractal head direct block",
     H5FD_MEM_FHEAP_DBLOCK,
+    H5HF_cache_dblock_get_load_size,
     H5HF_cache_dblock_deserialize,
     NULL,
     H5HF_cache_dblock_serialize,
@@ -253,6 +253,37 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5HF_cache_hdr_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_hdr_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HF_hdr_cache_ud_t *udata = (const H5HF_hdr_cache_ud_t *)_udata;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HF_SPEC_READ_SIZE(udata->f);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_cache_hdr_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_cache_hdr_deserialize
  *
  * Purpose:	Deserialize the data structure from disk.
@@ -292,7 +323,7 @@ H5HF_cache_hdr_deserialize(const void *image, size_t UNUSED len,
     size = H5HF_HEADER_SIZE(hdr);
 
     /* Get temporary pointer to serialized header */
-    p = image;
+    p = (const uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
@@ -343,7 +374,7 @@ H5HF_cache_hdr_deserialize(const void *image, size_t UNUSED len,
 
     /* Check for I/O filter information to decode */
     if(hdr->filter_len > 0) {
-        size_t filter_info_off;     /* Offset in header of filter information */
+        ptrdiff_t filter_info_off;     /* Offset in header of filter information */
         size_t filter_info_size;    /* Size of filter information */
         H5O_pline_t *pline;         /* Pipeline information from the header on disk */
 
@@ -492,7 +523,7 @@ H5HF_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     size = hdr->heap_size;
 
     /* Get temporary pointer to serialized header */
-    p = image;
+    p = (uint8_t *)image;
 
     /* Magic number */
     HDmemcpy(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
@@ -595,12 +626,43 @@ H5HF_cache_hdr_free_icr(void *thing)
     HDassert(thing);
 
     /* Destroy fractal heap header */
-    if(H5HF_hdr_dest(thing) < 0)
+    if(H5HF_hdr_dest((H5HF_hdr_t *)thing) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF_cache_iblock_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_iblock_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HF_iblock_cache_ud_t *udata = (const H5HF_iblock_cache_ud_t *)_udata; /* user data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HF_IBLOCK_SIZE(udata->par_info->hdr, *udata->nrows);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_cache_iblock_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -660,8 +722,9 @@ H5HF_cache_iblock_deserialize(const void *image, size_t UNUSED len,
 
     /* Compute size of indirect block */
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
+
     /* Get temporary pointer to serialized indirect block */
-    p = image;
+    p = (const uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
@@ -819,7 +882,6 @@ H5HF_cache_iblock_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
 #endif /* NDEBUG */
     uint32_t metadata_chksum;       /* Computed metadata checksum value */
     size_t u;                       /* Local index variable */
-    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_iblock_serialize)
 
@@ -835,7 +897,7 @@ H5HF_cache_iblock_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     hdr->f = f;
 
     /* Get temporary pointer to buffer for serialized indirect block */
-    p = image;
+    p = (uint8_t *)image;
 
     /* Magic number */
     HDmemcpy(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
@@ -906,8 +968,7 @@ H5HF_cache_iblock_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     HDassert(max_child == iblock->max_child);
 #endif /* NDEBUG */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_iblock_serialize() */
 
 
@@ -936,12 +997,43 @@ H5HF_cache_iblock_free_icr(void *thing)
     HDassert(thing);
 
     /* Destroy fractal heap indirect block */
-    if(H5HF_man_iblock_dest(thing) < 0)
+    if(H5HF_man_iblock_dest((H5HF_indirect_t *)thing) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HF_cache_iblock_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF_cache_dblock_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HF_cache_dblock_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HF_dblock_cache_ud_t *udata = (const H5HF_dblock_cache_ud_t *)_udata; /* pointer to user data */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_dblock_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = udata->odi_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_cache_dblock_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1401,7 +1493,7 @@ H5HF_cache_dblock_free_icr(void *thing)
     HDassert(thing);
 
     /* Destroy fractal heap direct block */
-    if(H5HF_man_dblock_dest(thing) < 0)
+    if(H5HF_man_dblock_dest((H5HF_direct_t *)thing) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
 done:

@@ -1027,14 +1027,13 @@ H5C_journal_transaction(H5F_t * f,
 
 	        if ( resized ) 
                 {
-                    /* in the following protect/unprotect, the dxpl_id
-		     * is irrelement, as we know that the entry is in cache,
+                    /* in the following protect/unprotect, the dxpl_id & udata
+		     * are irrelement, as we know that the entry is in cache,
 	             * and thus no I/O will take place.
 	             */
 	            thing = H5C_protect(f, dxpl_id,
 	                                 entry_ptr->type, entry_ptr->addr,
-				         entry_ptr->size, NULL, 
-				         H5C__NO_FLAGS_SET);
+				         NULL, H5C__NO_FLAGS_SET);
 
                     if ( thing == NULL ) {
 
@@ -3283,8 +3282,6 @@ done:
 static herr_t 
 H5C_jb_aio__make_space_in_ring_buffer(H5C_jbrb_t * struct_ptr)
 {
-    hbool_t done = FALSE;
-    hbool_t buf_write_complete;
     herr_t ret_value = SUCCEED;
     herr_t result;
     uint64_t last_trans_in_ring_buffer;
@@ -3368,6 +3365,9 @@ H5C_jb_aio__make_space_in_ring_buffer(H5C_jbrb_t * struct_ptr)
     }
 
 #else /* delete this branch if all goes well -- JRM */
+{
+    hbool_t done = FALSE;
+    hbool_t buf_write_complete;
 
     while ( ! done ) {
 
@@ -3431,6 +3431,7 @@ H5C_jb_aio__make_space_in_ring_buffer(H5C_jbrb_t * struct_ptr)
         }
     }
 
+}
 #endif /* JRM */
 
     HDassert( struct_ptr->writes_in_progress == struct_ptr->bufs_in_use );
@@ -3938,7 +3939,6 @@ H5C_jb_aio__queue_buffer_write(H5C_jbrb_t * struct_ptr,
 		 	        int buf_num,
                                 hbool_t partial_write_ok)
 {
-    hbool_t write_queued = FALSE;
     int result;
     int retries = -1;
 #if H5C_JB_AIO__QUEUE_BUFFER_WRITE__DEBUG
@@ -3947,7 +3947,7 @@ H5C_jb_aio__queue_buffer_write(H5C_jbrb_t * struct_ptr,
     uint64_t last_trans_in_buf;
     herr_t herr_result;
     herr_t ret_value = SUCCEED;
-    hsize_t bytes_to_write;
+    size_t bytes_to_write;
     void * buf_ptr = NULL;
     struct aiocb * aiocb_ptr = NULL;
 

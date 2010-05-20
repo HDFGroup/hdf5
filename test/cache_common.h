@@ -545,100 +545,6 @@ herr_t check_write_permitted(const H5F_t UNUSED * f,
                               hbool_t * write_permitted_ptr);
 
 
-void * pico_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * nano_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * micro_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * tiny_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * small_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * medium_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * large_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * huge_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * monster_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-void * variable_deserialize(const void * image_ptr, size_t len, void * udata_ptr,
-    hbool_t * dirty_ptr);
-
-herr_t pico_image_len(void *thing, size_t *image_len_ptr);
-herr_t nano_image_len(void *thing, size_t *image_len_ptr);
-herr_t micro_image_len(void *thing, size_t *image_len_ptr);
-herr_t tiny_image_len(void *thing, size_t *image_len_ptr);
-herr_t small_image_len(void *thing, size_t *image_len_ptr);
-herr_t medium_image_len(void *thing, size_t *image_len_ptr);
-herr_t large_image_len(void *thing, size_t *image_len_ptr);
-herr_t huge_image_len(void *thing, size_t *image_len_ptr);
-herr_t monster_image_len(void *thing, size_t *image_len_ptr);
-herr_t variable_image_len(void *thing, size_t *image_len_ptr);
-
-herr_t pico_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		      size_t len, void * image_ptr,
-		      void * thing, unsigned * flags_ptr,
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		      void ** new_image_ptr_ptr);
-herr_t nano_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		      size_t len, void * image_ptr,
-		      void * thing, unsigned * flags_ptr,
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		      void ** new_image_ptr_ptr);
-herr_t micro_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		       size_t len, void * image_ptr,
-		       void * thing, unsigned * flags_ptr,
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		       void ** new_image_ptr_ptr);
-herr_t tiny_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		      size_t len, void * image_ptr,
-		      void * thing, unsigned * flags_ptr,
-		      haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		      void ** new_image_ptr_ptr);
-herr_t small_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		       size_t len, void * image_ptr,
-		       void * thing, unsigned * flags_ptr,
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		       void ** new_image_ptr_ptr);
-herr_t medium_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		        size_t len, void * image_ptr,
-	  	        void * thing, unsigned * flags_ptr,
-		        haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		        void ** new_image_ptr_ptr);
-herr_t large_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		       size_t len, void * image_ptr,
-		       void * thing, unsigned * flags_ptr,
-		       haddr_t * new_addr_ptr, size_t * new_len_ptr,
-		       void ** new_image_ptr_ptr);
-herr_t huge_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		      size_t len, void * image_ptr,
-	              void * thing, unsigned * flags_ptr,
-	              haddr_t * new_addr_ptr, size_t * new_len_ptr,
-	              void ** new_image_ptr_ptr);
-herr_t monster_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		         size_t len, void * image_ptr,
-	                 void * thing, unsigned * flags_ptr,
-	                 haddr_t * new_addr_ptr, size_t * new_len_ptr,
-	                 void ** new_image_ptr_ptr);
-herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
-		          size_t len, void * image_ptr,
-	                  void * thing, unsigned * flags_ptr,
-	                  haddr_t * new_addr_ptr, size_t * new_len_ptr,
-	                  void ** new_image_ptr_ptr);
-
-herr_t pico_free_icr(void * thing);
-herr_t nano_free_icr(void * thing);
-herr_t micro_free_icr(void * thing);
-herr_t tiny_free_icr(void * thing);
-herr_t small_free_icr(void * thing);
-herr_t medium_free_icr(void * thing);
-herr_t large_free_icr(void * thing);
-herr_t huge_free_icr(void * thing);
-herr_t monster_free_icr(void * thing);
-herr_t variable_free_icr(void * thing);
-
 
 /* callback table extern */
 
@@ -648,67 +554,67 @@ extern const H5C_class_t types[NUMBER_OF_ENTRY_TYPES];
 /* function declarations: */
 
 void add_flush_op(int target_type,
-                   int target_idx,
-                   int op_code,
-                   int type,
-                   int idx,
-                   hbool_t flag,
-                   size_t size);
+                  int target_idx,
+                  int op_code,
+                  int type,
+                  int idx,
+                  hbool_t flag,
+                  size_t size);
 
 
 void addr_to_type_and_index(haddr_t addr,
-                             int32_t * type_ptr,
-                             int32_t * index_ptr);
+                            int32_t * type_ptr,
+                            int32_t * index_ptr);
 
 #if 0 /* keep this for a while -- it may be useful */
 haddr_t type_and_index_to_addr(int32_t type,
-                                int32_t idx);
+                               int32_t idx);
 #endif
 
 void dirty_entry(H5F_t * file_ptr,
-                  int32_t type,
-                  int32_t idx,
-                  hbool_t dirty_pin);
+                 int32_t type,
+                 int32_t idx,
+                 hbool_t dirty_pin);
 
 void expunge_entry(H5F_t * file_ptr,
-                    int32_t type,
-                    int32_t idx);
+                   int32_t type,
+                   int32_t idx);
 
 void insert_entry(H5F_t * file_ptr,
-                   int32_t type,
-                   int32_t idx,
-                   unsigned int flags);
+                  int32_t type,
+                  int32_t idx,
+                  unsigned int flags);
 
 void mark_entry_dirty(H5F_t * file_ptr,
 	                      int32_t type,
 		              int32_t idx);
 
 void move_entry(H5C_t * cache_ptr,
-                   int32_t type,
-                   int32_t idx,
-                   hbool_t main_addr);
+                int32_t type,
+                int32_t idx,
+                hbool_t main_addr);
 
 void pin_protected_entry(H5F_t * file_ptr,
-                          int32_t type,
-                          int32_t idx);
+                         int32_t type,
+                         int32_t idx);
 
 void protect_entry(H5F_t * file_ptr,
-                    int32_t type,
-                    int32_t idx);
+                   int32_t type,
+                   int32_t idx);
 
 void protect_entry_ro(H5F_t * file_ptr,
+                      int32_t type,
+                      int32_t idx);
+
+hbool_t entry_in_cache(H5C_t * cache_ptr,
                        int32_t type,
                        int32_t idx);
 
-hbool_t entry_in_cache(H5C_t * cache_ptr,
-                        int32_t type,
-                        int32_t idx);
-
 void create_pinned_entry_dependency(H5F_t * file_ptr,
-		                     int pinning_type,
-		                     int pinning_idx,
-		                     int pinned_type,
-		                     int pinned_idx);
+		                    int pinning_type,
+		                    int pinning_idx,
+		                    int pinned_type,
+		                    int pinned_idx);
 
 void execute_flush_op(H5F_t * file_ptr,
 		      struct test_entry_t * entry_ptr,
@@ -720,14 +626,37 @@ hbool_t recommend_core_file_driver(void);
 void reset_entries(void);
 
 void resize_entry(H5F_t * file_ptr,
-                          int32_t type,
-                          int32_t idx,
-                          size_t new_size,
-                          hbool_t resize_pin);
+                  int32_t type,
+                  int32_t idx,
+                  size_t new_size,
+                  hbool_t in_cache);
 
-H5F_t * setup_cache(size_t max_cache_size, size_t min_clean_size);
+H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
 
 void row_major_scan_forward(H5F_t * file_ptr,
+                            int32_t max_index,
+                            int32_t lag,
+                            hbool_t verbose,
+                            hbool_t reset_stats,
+                            hbool_t display_stats,
+                            hbool_t display_detailed_stats,
+                            hbool_t do_inserts,
+                            hbool_t do_moves,
+                            hbool_t move_to_main_addr,
+                            hbool_t do_destroys,
+                            hbool_t do_mult_ro_protects,
+                            int dirty_destroys,
+                            int dirty_unprotects);
+
+void hl_row_major_scan_forward(H5F_t * file_ptr,
+                               int32_t max_index,
+                               hbool_t verbose,
+                               hbool_t reset_stats,
+                               hbool_t display_stats,
+                               hbool_t display_detailed_stats,
+                               hbool_t do_inserts);
+
+void row_major_scan_backward(H5F_t * file_ptr,
                              int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -742,7 +671,7 @@ void row_major_scan_forward(H5F_t * file_ptr,
                              int dirty_destroys,
                              int dirty_unprotects);
 
-void hl_row_major_scan_forward(H5F_t * file_ptr,
+void hl_row_major_scan_backward(H5F_t * file_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -750,30 +679,26 @@ void hl_row_major_scan_forward(H5F_t * file_ptr,
                                 hbool_t display_detailed_stats,
                                 hbool_t do_inserts);
 
-void row_major_scan_backward(H5F_t * file_ptr,
-                              int32_t max_index,
-                              int32_t lag,
-                              hbool_t verbose,
-                              hbool_t reset_stats,
-                              hbool_t display_stats,
-                              hbool_t display_detailed_stats,
-                              hbool_t do_inserts,
-                              hbool_t do_moves,
-                              hbool_t move_to_main_addr,
-                              hbool_t do_destroys,
-                              hbool_t do_mult_ro_protects,
-                              int dirty_destroys,
-                              int dirty_unprotects);
-
-void hl_row_major_scan_backward(H5F_t * file_ptr,
-                                 int32_t max_index,
-                                 hbool_t verbose,
-                                 hbool_t reset_stats,
-                                 hbool_t display_stats,
-                                 hbool_t display_detailed_stats,
-                                 hbool_t do_inserts);
-
 void col_major_scan_forward(H5F_t * file_ptr,
+                            int32_t max_index,
+                            int32_t lag,
+                            hbool_t verbose,
+                            hbool_t reset_stats,
+                            hbool_t display_stats,
+                            hbool_t display_detailed_stats,
+                            hbool_t do_inserts,
+                            int dirty_unprotects);
+
+void hl_col_major_scan_forward(H5F_t * file_ptr,
+                               int32_t max_index,
+                               hbool_t verbose,
+                               hbool_t reset_stats,
+                               hbool_t display_stats,
+                               hbool_t display_detailed_stats,
+                               hbool_t do_inserts,
+                               int dirty_unprotects);
+
+void col_major_scan_backward(H5F_t * file_ptr,
                              int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -783,7 +708,7 @@ void col_major_scan_forward(H5F_t * file_ptr,
                              hbool_t do_inserts,
                              int dirty_unprotects);
 
-void hl_col_major_scan_forward(H5F_t * file_ptr,
+void hl_col_major_scan_backward(H5F_t * file_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -792,49 +717,30 @@ void hl_col_major_scan_forward(H5F_t * file_ptr,
                                 hbool_t do_inserts,
                                 int dirty_unprotects);
 
-void col_major_scan_backward(H5F_t * file_ptr,
-                              int32_t max_index,
-                              int32_t lag,
-                              hbool_t verbose,
-                              hbool_t reset_stats,
-                              hbool_t display_stats,
-                              hbool_t display_detailed_stats,
-                              hbool_t do_inserts,
-                              int dirty_unprotects);
-
-void hl_col_major_scan_backward(H5F_t * file_ptr,
-                                 int32_t max_index,
-                                 hbool_t verbose,
-                                 hbool_t reset_stats,
-                                 hbool_t display_stats,
-                                 hbool_t display_detailed_stats,
-                                 hbool_t do_inserts,
-                                 int dirty_unprotects);
-
 void takedown_cache(H5F_t * file_ptr,
-                     hbool_t dump_stats,
-                     hbool_t dump_detailed_stats);
+                    hbool_t dump_stats,
+                    hbool_t dump_detailed_stats);
 
 void flush_cache(H5F_t * file_ptr,
-                  hbool_t destroy_entries,
-                  hbool_t dump_stats,
-                  hbool_t dump_detailed_stats);
+                 hbool_t destroy_entries,
+                 hbool_t dump_stats,
+                 hbool_t dump_detailed_stats);
 
 void unpin_entry(H5F_t * file_ptr,
-                  int32_t type,
-                  int32_t idx);
+                 int32_t type,
+                 int32_t idx);
 
 void unprotect_entry(H5F_t * file_ptr,
-                      int32_t type,
-                      int32_t idx,
-                      unsigned int flags);
+                     int32_t type,
+                     int32_t idx,
+                     unsigned int flags);
 
 void verify_clean(void);
 
 void verify_entry_status(H5C_t * cache_ptr,
-		          int tag,
-                          int num_entries,
-                          struct expected_entry_status expected[]);
+		         int tag,
+                         int num_entries,
+                         struct expected_entry_status expected[]);
 
 void verify_unprotected(void);
 

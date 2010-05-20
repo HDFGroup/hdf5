@@ -117,7 +117,6 @@ H5FL_BLK_EXTERN(gheap_chunk);
 #define H5HG_NOBJS(f,z) (int)((((z)-H5HG_SIZEOF_HDR(f))/		      \
 			       H5HG_SIZEOF_OBJHDR(f)+2))
 
-#define H5HG_SPEC_READ_SIZE 4096
 
 /****************************/
 /* Package Private Typedefs */

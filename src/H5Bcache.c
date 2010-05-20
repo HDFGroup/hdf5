@@ -54,6 +54,7 @@
 /********************/
 
 /* Metadata cache callbacks */
+static herr_t H5B_get_load_size(const void *udata, size_t *image_len);
 static void *H5B_deserialize( const void *image, size_t len, void *udata,
     hbool_t *dirty);
 static herr_t H5B_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
@@ -71,6 +72,7 @@ const H5AC_class_t H5AC_BT[1] = {{
     H5AC_BT_ID,
     "v1 B-tree",
     H5FD_MEM_BTREE,
+    H5B_get_load_size,
     H5B_deserialize,
     NULL,
     H5B_serialize,
@@ -81,6 +83,42 @@ const H5AC_class_t H5AC_BT[1] = {{
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5B_cache_ud_t *udata = (const H5B_cache_ud_t *)_udata;       /* User data for callback */
+    H5B_shared_t *shared;       /* Pointer to shared B-tree info */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Get shared info for B-tree */
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(udata->rc_shared);
+    HDassert(shared);
+
+    /* Set the image length size */
+    *image_len = shared->sizeof_rnode;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -134,7 +172,7 @@ H5B_deserialize(const void *image, size_t UNUSED len, void *_udata,
 	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate buffer for child addresses")
 
     /* Set the pointer into the image */
-    p = image;
+    p = (const uint8_t *)image;
 
     /* magic number */
     if(HDmemcmp(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC))
@@ -224,7 +262,7 @@ H5B_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     HDassert(shared);
 
     /* Set the local pointer into the serialized image */
-    p = image;
+    p = (uint8_t *)image;
 
     /* magic number */
     HDmemcpy(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC);
@@ -295,7 +333,7 @@ H5B_free_icr(void *thing)
     HDassert(thing);
 
     /* Destroy B-tree node */
-    if(H5B_node_dest(thing) < 0)
+    if(H5B_node_dest((H5B_t *)thing) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
 done:

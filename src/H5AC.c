@@ -24,22 +24,6 @@
  *                      with a particular HDF file share the same cache; each
  *                      HDF file has it's own cache.
  *
- * Modifications:
- *
- *      Robb Matzke, 4 Aug 1997
- *      Added calls to H5E.
- *
- *      Quincey Koziol, 22 Apr 2000
- *      Turned on "H5AC_SORT_BY_ADDR"
- *
- *	John Mainzer, 5/19/04
- * 	Complete redesign and rewrite.  See the header comments for
- *      H5AC_t for an overview of what is going on.
- *
- *	John Mainzer, 6/4/04
- *	Factored the new cache code into a separate file (H5C.c) to
- *	facilitate re-use.  Re-worked this file again to use H5C.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -210,8 +194,6 @@ static herr_t H5AC_set_cache_config(H5AC_t * cache_ptr,
  * Programmer:	Quincey Koziol
  *              Saturday, January 18, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -236,8 +218,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, July 18, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -358,8 +338,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, July 18, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -420,70 +398,6 @@ H5AC_term_interface(void)
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
  *              Jul  9 1997
- *
- * Modifications:
- *
- *		Complete re-design and re-write to support the re-designed
- *		metadata cache.
- *
- *		At present, the size_hint is ignored, and the
- *		max_cache_size and min_clean_size fields are hard
- *		coded.  This should be fixed, but a parameter
- *		list change will be required, so I will leave it
- *		for now.
- *
- *		Since no-one seems to care, the function now returns
- *		one on success.
- *						JRM - 4/28/04
- *
- *		Reworked the function again after abstracting its guts to
- *		the similar function in H5C.c.  The function is now a
- *		wrapper for H5C_create().
- *						JRM - 6/4/04
- *
- *		Deleted the old size_hint parameter and added the
- *		max_cache_size, and min_clean_size parameters.
- *
- *                                              JRM - 3/10/05
- *
- *		Deleted the max_cache_size, and min_clean_size parameters,
- *		and added the config_ptr parameter.  Added code to
- *		validate the resize configuration before we do anything.
- *
- *						JRM - 3/24/05
- *
- *		Changed the type of config_ptr from H5AC_auto_size_ctl_t *
- *		to H5AC_cache_config_t *.  Propagated associated changes
- *		through the function.
- *						JRM - 4/7/05
- *
- *		Added code allocating and initializing the auxilary
- *		structure (an instance of H5AC_aux_t), and linking it
- *		to the instance of H5C_t created by H5C_create().  At
- *		present, the auxilary structure is only used in PHDF5.
- *
- *						JRM - 6/28/05
- *
- *		Added code to set the prefix if required.
- *
- *						JRM - 1/20/06
- *
- *		Added code to initialize the new write_done field.
- *
- *						JRM - 5/11/06
- *
- *              Reworked code to conform with changes in the cache
- *              API.
- *              				JRM - 10/18/07
- *
- *		Added the dxpl_id parameter, and updated for parameter
- *		list changes in H5C_create().
- *						JRM - 3/26/08
- *
- *		Updated code for the removal of the f, dxpl_id, and
- *		journal_recovered parameters for H5C_create().
- *
- *						JRM 7/10/08
  *
  *-------------------------------------------------------------------------
  */
@@ -748,29 +662,6 @@ done:
  *              matzke@llnl.gov
  *              Jul  9 1997
  *
- * Modifications:
- *
- *		Complete re-design and re-write to support the re-designed
- *		metadata cache.
- *                                                 JRM - 5/12/04
- *
- *		Abstracted the guts of the function to H5C_dest() in H5C.c,
- *		and then re-wrote the function as a wrapper for H5C_dest().
- *
- *                                                 JRM - 6/7/04
- *
- *		Added code to free the auxiliary structure and its
- *		associated slist if present.
- *						   JRM - 6/28/05
- *
- *		Added code to close the trace file if it is present.
- *
- *						    JRM - 6/8/06
- *
- *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -849,13 +740,8 @@ done:
  * Programmer:  John Mainzer
  *              4/12/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_begin_transaction(hid_t id,
 		        hbool_t * do_transaction_ptr,
@@ -997,13 +883,8 @@ done:
  * Programmer:  John Mainzer
  *              7/4/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_check_for_journaling(H5F_t * f,
                            hid_t dxpl_id,
@@ -1076,13 +957,8 @@ done:
  * Programmer:  John Mainzer
  *              8/15/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_deregister_mdjsc_callback(H5F_t * file_ptr,
                                 int32_t idx)
@@ -1153,13 +1029,8 @@ done:
  * Programmer:  John Mainzer
  *              4/12/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_end_transaction(hbool_t do_transaction,
                       H5O_loc_t * id_oloc_ptr,
@@ -1263,13 +1134,8 @@ done:
  * Programmer:  John Mainzer
  *              8/15/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_register_mdjsc_callback(const H5F_t * file_ptr,
                               H5C_mdj_status_change_func_t fcn_ptr,
@@ -1359,12 +1225,6 @@ done:
  * Programmer:  John Mainzer
  *              6/30/06
  *
- * Modifications:
- *
- *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1408,9 +1268,9 @@ H5AC_expunge_entry(H5F_t *f,
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     result = H5C_expunge_entry(f,
-		                dxpl_id,
-				type,
-				addr);
+		               dxpl_id,
+			       type,
+			       addr);
 
     if ( result < 0 ) {
 
@@ -1481,33 +1341,6 @@ done:
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
  *              Jul  9 1997
- *
- * Modifications:
- * 		Robb Matzke, 1999-07-27
- *		The ADDR argument is passed by value.
- *
- *		Complete re-write. See above for details.  -- JRM 5/11/04
- *
- *		Abstracted the guts of the function to H5C_flush_cache()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_flush_cache().
- *
- *                                                 JRM - 6/7/04
- *
- *		JRM - 7/5/05
- *		Modified function as part of a fix for a cache coherency
- *		bug in PHDF5.  See the header comments on the H5AC_aux_t
- *		structure for details.
- *
- *		JRM -- 5/11/06
- *		Added call to the write_done callback.
- *
- *		JRM -- 6/6/06
- * 		Added trace file support.
- *
- *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
  *
  *-------------------------------------------------------------------------
  */
@@ -1590,8 +1423,8 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 	    aux_ptr->write_permitted = TRUE;
 
             status = H5C_flush_cache(f,
-                                      dxpl_id,
-                                      init_flush_flags);
+                                     dxpl_id,
+                                     init_flush_flags);
 
 	    aux_ptr->write_permitted = FALSE;
 
@@ -1615,8 +1448,8 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 #endif /* H5_HAVE_PARALLEL */
 
     status = H5C_flush_cache(f,
-		              dxpl_id,
-			      flags);
+		             dxpl_id,
+			     flags);
 
     if ( status < 0 ) {
 
@@ -1655,12 +1488,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              4/27/06
- *
- * Modifications:
- *
- *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
  *
  *-------------------------------------------------------------------------
  */
@@ -1734,60 +1561,11 @@ done:
  *              matzke@llnl.gov
  *              Jul  9 1997
  *
- * Modifications:
- * 		Robb Matzke, 1999-07-27
- *		The ADDR argument is passed by value.
- *
- *		Bill Wendling, 2003-09-16
- *		Added automatic "flush" if the FPHDF5 driver is being
- *		used. This'll write the metadata to the SAP where other,
- *		lesser processes can grab it.
- *
- *		JRM - 5/13/04
- *		Complete re-write for the new metadata cache.  The new
- *		code is functionally almost identical to the old, although
- *		the sanity check for a protected entry is now an assert
- *		at the beginning of the function.
- *
- *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_insert_entry()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_insert_entry().
- *
- *		JRM - 1/6/05
- *		Added the flags parameter.  At present, this parameter is
- *		only used to set the new flush_marker field on the new
- *		entry.  Since this doesn't apply to the SAP code, no change
- *		is needed there.  Thus the only change to the body of the
- *		code is to pass the flags parameter through to
- *		H5C_insert_entry().
- *
- *		JRM - 6/6/05
- *		Added code to force newly inserted entries to be dirty
- *		in the flexible parallel case.  The normal case is handled
- *		in H5C.c.  This is part of a series of changes directed at
- *		moving management of the dirty flag on cache entries into
- *		the cache code.
- *
- *              JRM - 7/5/05
- *              Added code to track dirty byte generation, and to trigger
- *              clean entry list propagation when it exceeds a user
- *              specified threshold.  Note that this code only applies in
- *              the PHDF5 case.  It should have no effect on either the
- *              serial or FPHSD5 cases.
- *
- *              JRM - 6/6/06
- *              Added trace file support.
- *
- *              JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, size_t len, void *thing, unsigned int flags)
+H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+    size_t len, void *thing, unsigned int flags)
 {
     herr_t		result;
     H5AC_info_t        *info;
@@ -1844,11 +1622,11 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, size_t
     if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
 
         result = H5AC_log_inserted_entry(f,
-                                          f->shared->cache,
-                                          (H5AC_info_t *)thing,
-                                          type,
-                                          addr,
-                                          len);
+                                         f->shared->cache,
+                                         (H5AC_info_t *)thing,
+                                         type,
+                                         addr,
+                                         len);
 
         if ( result < 0 ) {
 
@@ -1859,12 +1637,12 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, size_t
 #endif /* H5_HAVE_PARALLEL */
 
     result = H5C_insert_entry(f,
-		               dxpl_id,
-			       type,
-			       addr,
-			       len,
-			       thing,
-			       flags);
+		              dxpl_id,
+			      type,
+			      addr,
+			      len,
+			      thing,
+			      flags);
 
     if ( result < 0 ) {
 
@@ -2145,72 +1923,23 @@ done:
  *		or flushed -- nor may it be accessed by another call to
  *		H5AC_protect.  Any attempt to do so will result in a failure.
  *
- *		This comment is a re-write of the original Purpose: section.
- *		For historical interest, the original version is reproduced
- *		below:
- *
- *		Original Purpose section:
- *
- *              Similar to H5AC_find() except the object is removed from
- *              the cache and given to the caller, preventing other parts
- *              of the program from modifying the protected object or
- *              preempting it from the cache.
- *
- *              The caller must call H5AC_unprotect() when finished with
- *              the pointer.
- *
  * Return:      Success:        Ptr to the object.
- *
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
  *              Sep  2 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-27
- *		The ADDR argument is passed by value.
- *
- *              Bill Wendling, 2003-09-10
- *              Added parameter to indicate whether this is a READ or
- *              WRITE type of protect.
- *
- *		JRM -- 5/17/04
- *		Complete re-write for the new client cache.  See revised
- *		Purpose section above.
- *
- *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_protect()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_protect().
- *
- *		JRM - 6/6/06
- *		Added trace file support.
- *
- *		JRM - 3/18/07
- *		Modified code to support the new flags parameter for
- *		H5C_protect().  For now, that means passing in the
- *		H5C_READ_ONLY_FLAG if rw == H5AC_READ.
- *
- *		Also updated the trace file output to save the
- *		rw parameter, since we are now doing something with it.
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5AC_protect(H5F_t *f,
-              hid_t dxpl_id,
-              const H5AC_class_t *type,
-              haddr_t addr,
-	      size_t len,
-	      void *udata,
-              H5AC_protect_t rw)
+             hid_t dxpl_id,
+             const H5AC_class_t *type,
+             haddr_t addr,
+	     void *udata,
+             H5AC_protect_t rw)
 {
-    /* char *		fcn_name = "H5AC_protect"; */
     unsigned		protect_flags = H5C__NO_FLAGS_SET;
     void *		thing = (void *)NULL;
     void *		ret_value;      /* Return value */
@@ -2261,9 +1990,8 @@ H5AC_protect(H5F_t *f,
 	    rw_string = "???";
 	}
 
-        sprintf(trace, "H5AC_protect 0x%lx %ld %d %s",
+        sprintf(trace, "H5AC_protect 0x%lx %d %s",
 	        (unsigned long)addr,
-		(long)len,
 		(int)(type->id),
 		rw_string);
     }
@@ -2275,12 +2003,11 @@ H5AC_protect(H5F_t *f,
     }
 
     thing = H5C_protect(f,
-		         dxpl_id,
-			 type,
-			 addr,
-			 len,
-			 udata,
-			 protect_flags);
+		        dxpl_id,
+			type,
+			addr,
+			udata,
+			protect_flags);
 
     if ( thing == NULL ) {
 
@@ -2466,61 +2193,6 @@ done:
  *              matzke@llnl.gov
  *              Sep  2 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-27
- *		The ADDR argument is passed by value.
- *
- *		Quincey Koziol, 2003-03-19
- *		Added "deleted" argument
- *
- *              Bill Wendling, 2003-09-18
- *              If this is an FPHDF5 driver and the data is dirty,
- *              perform a "flush" that writes the data to the SAP.
- *
- *		John Mainzer 5/19/04
- *		Complete re-write for the new metadata cache.
- *
- *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_unprotect()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_unprotect().
- *
- *		JRM - 1/6/05
- *		Replaced the deleted parameter with the new flags parameter.
- *		Since the deleted parameter is not used by the FPHDF5 code,
- *		the only change in the body is to replace the deleted
- *		parameter with the flags parameter in the call to
- *		H5C_unprotect().
- *
- *		JRM - 6/6/05
- *		Added the dirtied flag and supporting code.  This is
- *		part of a collection of changes directed at moving
- *		management of cache entry dirty flags into the H5C code.
- *
- *		JRM - 7/5/05
- *		Added code to track dirty byte generation, and to trigger
- *		clean entry list propagation when it exceeds a user
- *		specified threshold.  Note that this code only applies in
- *		the PHDF5 case.  It should have no effect on either the
- *		serial or FPHSD5 cases.
- *
- *		JRM - 9/8/05
- *		Added code to track entry size changes.  This is necessary
- *		as it can effect dirty byte creation counts, thereby
- *		throwing the caches out of sync in the PHDF5 case.
- *
- *		JRM - 5/16/06
- *		Added code to use the new dirtied field in
- *		H5C_cache_entry_t in the test to see if the entry has
- *		been dirtied.
- *
- *		JRM - 6/7/06
- *		Added support for the trace file.
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2534,7 +2206,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5_HAVE_PARALLEL */
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
-    unsigned		trace_flags = 0;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
     herr_t              ret_value=SUCCEED;      /* Return value */
@@ -2565,8 +2236,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         sprintf(trace, "H5AC_unprotect 0x%lx %d",
 	        (unsigned long)addr,
 		(int)(type->id));
-
-	trace_flags = flags;
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
@@ -2598,11 +2267,11 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5_HAVE_PARALLEL */
 
     result = H5C_unprotect(f,
-		            dxpl_id,
-			    type,
-			    addr,
-			    thing,
-			    flags);
+		           dxpl_id,
+			   type,
+			   addr,
+			   thing,
+			   flags);
 
     if ( result < 0 ) {
 
@@ -2656,15 +2325,8 @@ done:
  * Programmer:  John Mainzer
  *              5/11/06
  *
- * Modifications:
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 herr_t
 H5AC_set_write_done_callback(H5C_t * cache_ptr,
@@ -2707,19 +2369,6 @@ done:
  * Programmer:  Robb Matzke
  *              Thursday, October 30, 1997
  *
- * Modifications:
- *		John Mainzer 5/19/04
- *		Re-write to support the new metadata cache.
- *
- *		JRM - 6/7/04
- *		Abstracted the guts of the function to H5C_stats()
- *		in H5C.c, and then re-wrote the function as a wrapper for
- *		H5C_stats().
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2752,46 +2401,8 @@ done:
  * Programmer:  John Mainzer
  *              3/10/05
  *
- * Modifications:
- *
- *		JRM - 4/6/05
- *              Reworked for the addition of struct H5AC_cache_config_t.
- *
- *		JRM - 10/25/05
- *		Added support for the new dirty_bytes_threshold field of
- *		both H5AC_cache_config_t and H5AC_aux_t.
- *
- *		JRM - 6/8/06
- *		Added support for the new trace file related fields.
- *
- *		JRM - 7/28/07
- *		Added support for the new evictions enabled related fields.
- *
- *		Observe that H5AC_get_cache_auto_resize_config() and
- *		H5AC_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain
- *		switches for functions that are only tenuously related
- *		to auto resize configuration.
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
- *              JRM - 1/2/08
- *              Added support for the new flash cache increment related
- *              fields.
- *
- *              JRM -- 4/12/08
- *              Added support for the new journaling control fields.
- *
- *              JRM - 8/1/08
- *              Removed support for the new journaling control fields.
- *              This functionality is now handled through the
- *              H5AC_jnl_config_t structure and the related calls.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
                                   H5AC_cache_config_t *config_ptr)
@@ -2916,15 +2527,8 @@ done:
  * Programmer:  John Mainzer
  *              7/31/08
  *
- * Modifications:
- *
- *		JRM -- 8/14/08
- *		Reworked for change in argument list to
- *		H5C_get_journal_config().
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_get_jnl_config(H5AC_t * cache_ptr,
                      H5AC_jnl_config_t * config_ptr)
@@ -3007,12 +2611,6 @@ done:
  * Programmer:  John Mainzer
  *              3/11/05
  *
- * Modifications:
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3056,12 +2654,6 @@ done:
  * Programmer:  John Mainzer
  *              3/10/05
  *
- * Modifications:
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3089,15 +2681,8 @@ done:
  *
  * Programmer:  John Mainzer, 3/10/05
  *
- * Modifications:
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_reset_cache_hit_rate_stats(H5AC_t * cache_ptr)
 {
@@ -3130,43 +2715,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/10/05
- *
- * Modifications:
- *
- *              John Mainzer -- 4/6/05
- *              Updated for the addition of H5AC_cache_config_t.
- *
- *		John Mainzer -- 10/25/05
- *		Added support for the new dirty_bytes_threshold field of
- *		both H5AC_cache_config_t and H5AC_aux_t.
- *
- *		John Mainzer -- 6/7/06
- *		Added trace file support.
- *
- *		John Mainzer -- 7/28/07
- *		Added support for the new evictions enabled related fields.
- *
- *		Observe that H5AC_get_cache_auto_resize_config() and
- *		H5AC_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain
- *		switches for functions that are only tenuously related
- *		to auto resize configuration.
- *
- * 		JRM - 10/18/07
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *
- *              John Mainzer -- 1/3/07
- *              Updated trace file code to record the new flash cache
- *              size increase related fields.
- *
- *              John Mainzer -- 4/13/08
- *              Added code to allow control of metadata journaling.
- *              This required the addition of the dxpl_id parameter.
- *
- *              John Mainzer -- 8/1/08
- *              Pulled journaling configuration back out of the
- *              function, and teh dxpl_id parameter with it.
  *
  *-------------------------------------------------------------------------
  */
@@ -3295,22 +2843,6 @@ done:
  * Programmer:  John Mainzer
  *              7/31/08
  *
- * Modifications:
- *
- * 		JRM -- 8/14/08
- * 		Revised code for the use of the H5C_mdj_config_t
- * 		structure in H5C_get_journal_config() and
- *		H5C_begin_journaling().
- *
- *		Per Quincey's request, also added code to
- *		throw an error if journaling is requested when
- *		it is already enabled, or if the end of journaling
- *		is requested when it is already disabled.
- *
- *		Note that this required the addition of the
- *		initializing parameter, which allows us to
- *		avoid generating an error on startup.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3319,7 +2851,6 @@ H5AC_set_jnl_config(H5F_t * f,
                      const H5AC_jnl_config_t *config_ptr,
 		     hbool_t initializing)
 {
-    /* const char *        fcn_name = "H5AC_set_jnl_config"; */
     H5AC_t *           cache_ptr;
     herr_t              result;
     H5C_mdj_config_t	internal_config;
@@ -3472,18 +3003,12 @@ done:
  * Programmer:  John Mainzer
  *              7/7/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_set_cache_config(H5AC_t * cache_ptr,
                        H5AC_cache_config_t *config_ptr)
 {
-    /* const char *        fcn_name = "H5AC_set_cache_config"; */
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
     H5C_auto_size_ctl_t internal_config;
@@ -3613,29 +3138,6 @@ done:
  * Programmer:  John Mainzer
  *              4/6/05
  *
- * Modifications:
- *
- *            - Added code testing the trace file configuration fields.
- *              These tests are not comprehensive, as many errors cannot
- *              be caught until the directives contained in these fields
- *              are applied.
- *              					JRM - 5/15/06
- *
- *	      - Added code testing the evictions enabled field.  At
- *	        present this consists of verifying that if
- *	        evictions_enabled is FALSE, then automatic cache
- *		resizing in disabled.
- *
- *	        					JRM - 7/28/07
- *
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *              					JRM - 10/18/07
- *
- *              Pulled journaling related code out of this function.
- *
- *              					JRM - 8/1/08
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3763,10 +3265,6 @@ done:
  * Programmer:  John Mainzer
  *              7/31/08
  *
- * Modifications:
- *
- *            - None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3875,10 +3373,6 @@ done:
  * Programmer:  John Mainzer
  *              8/13/08
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -3900,10 +3394,6 @@ H5AC_validate_jnl_config_ver(int version_num)
  *
  * Programmer:  John Mainzer
  *              8/13/08
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3930,15 +3420,8 @@ H5AC_validate_cache_config_ver(int version_num)
  * Programmer:  John Mainzer
  *              6/2/06
  *
- * Modifications:
- *
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *              					JRM - 10/18/07
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC_close_trace_file(H5AC_t * cache_ptr)
 
@@ -3994,12 +3477,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              6/1/06
- *
- * Modifications:
- *
- *              Modified code in support of revised cache API needed
- *              to permit journaling.
- *              					JRM - 10/18/07
  *
  *-------------------------------------------------------------------------
  */
@@ -4120,11 +3597,8 @@ done:
  *
  * Programmer:  John Mainzer, 7/1/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_broadcast_clean_list(H5AC_t * cache_ptr)
@@ -4297,21 +3771,8 @@ done:
  *
  * Programmer:  John Mainzer, 5/15/04
  *
- * Modifications:
- *
- *		John Mainzer, 9/23/05
- *		Rewrote function to return the value of the
- *		write_permitted field in aux structure if the structure
- *		exists and mpi_rank is 0.
- *
- *		If the aux structure exists, but mpi_rank isn't 0, the
- *		function now returns FALSE.
- *
- *		In all other cases, the function returns TRUE.
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_check_if_write_permitted(const H5F_t *f,
@@ -4379,12 +3840,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              1/26/06
- *
- * Modifications:
- *
- *              Updated function for flash cache increment fields.
- *
- *                                              JRM -- 1/2/08
  *
  *-------------------------------------------------------------------------
  */
@@ -4459,11 +3914,8 @@ done:
  *
  * Programmer:  John Mainzer, 6/29/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_log_deleted_entry(H5AC_t * cache_ptr,
@@ -4699,11 +4151,8 @@ done:
  *
  * Programmer:  John Mainzer, 6/29/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 #if 0 /* This is useful debugging code. -- JRM */
 static herr_t
@@ -4861,14 +4310,8 @@ done:
  *
  * Programmer:  John Mainzer, 6/30/05
  *
- * Modifications:
- *
- *		JRM -- 10/24/07
- *		Added the size parameter.
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_log_inserted_entry(H5F_t * f,
@@ -4995,8 +4438,6 @@ done:
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 6/30/05
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5224,14 +4665,8 @@ done:
  * Programmer:  John Mainzer
  *              July 5, 2005
  *
- * Modifications:
- *
- * 		JRM -- 5/11/06
- * 		Added code to call the write_done callback.
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 herr_t
 H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
@@ -5310,7 +4745,7 @@ H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
     } else {
 
         if ( H5AC_receive_and_apply_clean_list(f, dxpl_id,
-                                                cache_ptr) < 0 ) {
+                                               cache_ptr) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "Can't receive and/or process clean slist broadcast.")
@@ -5352,15 +4787,8 @@ done:
  *
  * Programmer:  John Mainzer, 7/4/05
  *
- * Modifications:
- *
- *		JRM --10/24/07
- *		Reworked parameter list in support of the revised cache
- *		API.
- *
  *-------------------------------------------------------------------------
  */
-
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_receive_and_apply_clean_list(H5F_t  * f,

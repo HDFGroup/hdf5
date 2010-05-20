@@ -16735,13 +16735,6 @@ check_pin_entry_errs(void)
  * Programmer:	John Mainzer
  *              6/24/04
  *
- * Modifications:
- *
- *    - Modified call to H5C_protect() to pass H5C__NO_FLAGS_SET in the
- *      the new flags parameter.
- *
- *      					JRM -- 3/28/07
- *
  *-------------------------------------------------------------------------
  */
 
@@ -16780,8 +16773,7 @@ check_double_protect_err(void)
 
         cache_entry_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			               &(types[0]), entry_ptr->addr,
-				       entry_ptr->size, &entry_ptr->addr,
-				       H5C__NO_FLAGS_SET);
+				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( cache_entry_ptr != NULL ) {
 
@@ -17428,7 +17420,7 @@ check_protect_ro_rw_err(void)
 
         thing_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			         &(types[0]), entry_ptr->addr,
-				 entry_ptr->size, &entry_ptr->addr, H5C__NO_FLAGS_SET);
+				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( thing_ptr != NULL ) {
 

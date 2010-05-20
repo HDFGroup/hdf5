@@ -110,6 +110,39 @@ typedef struct H5C_t H5C_t;
  * mem_type:  Instance of H5FD_mem_t, that is used to supply the
  * 	mem type passed into H5F_block_read().
  *
+ * get_load_size: Pointer to the 'get load size' function.
+ *
+ * 	This function must be able to determing the size of a disk image for
+ *      a metadata cache entry, given the 'udata' that will be passed to the
+ *      'deserialize' callback.
+ *
+ *	The typedef for the deserialize callback is as follows:
+ *
+ * 	   typedef herr_t (*H5C_get_load_size_func_t)(void *udata_ptr,
+ * 	                                           size_t *image_len_ptr);
+ *
+ *	The parameters of the deserialize callback are as follows:
+ *
+ *	udata_ptr: Pointer to user data provided in the protect call, which
+ *         	will also be passed through to the deserialize callback.
+ *
+ *	image_len_ptr: Length in bytes of the in file image to be deserialized.
+ *
+ *              This parameter is used by the cache to determine the size of
+ *              the disk image for the metadata, in order to read the disk
+ *              image from the file.
+ *
+ *	Processing in the get_load_size function should proceed as follows:
+ *
+ *	If successful, the function will place the length of the on disk
+ *	image associated with the in core representation provided in the
+ *	thing parameter in *image_len_ptr, and then return SUCCEED.
+ *
+ *	On failure, the function must return FAIL and push error information
+ *	onto the error stack with the error API routines, without modifying
+ *      the value pointed to by the image_len_ptr.
+ *
+ *
  * deserialize: Pointer to the deserialize function.
  *
  * 	This function must be able to read an on disk image of a metadata
@@ -200,7 +233,8 @@ typedef struct H5C_t H5C_t;
  *	thing parameter in *image_len_ptr, and then return SUCCEED.
  *
  *	On failure, the function must return FAIL and push error information
- *	onto the error stack with the error API routines.
+ *	onto the error stack with the error API routines, without modifying
+ *      the value pointed to by the image_len_ptr.
  *
  *
  * serialize: Pointer to the serialize callback.
@@ -371,10 +405,13 @@ typedef struct H5C_t H5C_t;
  *	modified since the last serialize of clear callback.
  *
  ***************************************************************************/
+typedef herr_t (*H5C_get_load_size_func_t)(const void *udata_ptr,
+                                        size_t *image_len_ptr);
+
 typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
                                         size_t len,
-                                        void * udata_ptr,
-					hbool_t * dirty_ptr);
+                                        void *udata_ptr,
+					hbool_t *dirty_ptr);
 
 typedef herr_t (*H5C_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
@@ -386,23 +423,20 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 		                        hid_t dxpl_id,
                                         haddr_t addr,
                                         size_t len,
-                                        void * image_ptr,
-                                        void * thing,
-                                        unsigned * flags_ptr,
-				        haddr_t * new_addr_ptr,
-				        size_t * new_len_ptr,
-				        void ** new_image_ptr_ptr);
+                                        void *image_ptr,
+                                        void *thing,
+                                        unsigned *flags_ptr,
+				        haddr_t *new_addr_ptr,
+				        size_t *new_len_ptr,
+				        void **new_image_ptr_ptr);
 
-typedef herr_t (*H5C_free_icr_func_t)(void * thing);
-
-typedef herr_t (*H5C_clear_dirty_bits_func_t)(haddr_t addr,
-                                               size_t len,
-                                               void * thing);
+typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 
 typedef struct H5C_class_t {
     int					id;
     const char *			name;
     H5FD_mem_t				mem_type;
+    H5C_get_load_size_func_t 		get_load_size;
     H5C_deserialize_func_t 		deserialize;
     H5C_image_len_func_t		image_len;
     H5C_serialize_func_t		serialize;
@@ -1410,7 +1444,6 @@ H5_DLL void * H5C_protect(H5F_t *             f,
 		          hid_t               dxpl_id,
 			  const H5C_class_t * type,
                           haddr_t             addr,
-			  size_t	      len,
                           void *              udata,
                           unsigned            flags);
 

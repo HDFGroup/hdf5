@@ -173,9 +173,10 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
         HDmemset(&chk_udata, 0, sizeof(chk_udata));
         chk_udata.oh = oh;
         chk_udata.chunkno = idx;
+        chk_udata.size = oh->chunk[idx].size;
 
         /* Get the chunk proxy */
-        if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, oh->chunk[idx].size, &chk_udata, H5AC_WRITE)))
+        if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, &chk_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
         /* Sanity check */
@@ -317,9 +318,10 @@ H5O_chunk_update_idx(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDmemset(&chk_udata, 0, sizeof(chk_udata));
     chk_udata.oh = oh;
     chk_udata.chunkno = idx;
+    chk_udata.size = oh->chunk[idx].size;
 
     /* Get the chunk proxy */
-    if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, oh->chunk[idx].size, &chk_udata, H5AC_WRITE)))
+    if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, &chk_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Update index for chunk proxy in cache */
@@ -368,9 +370,10 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDmemset(&chk_udata, 0, sizeof(chk_udata));
     chk_udata.oh = oh;
     chk_udata.chunkno = idx;
+    chk_udata.size = oh->chunk[idx].size;
 
     /* Get the chunk proxy */
-    if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, oh->chunk[idx].size, &chk_udata, H5AC_WRITE)))
+    if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, &chk_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Sanity check */

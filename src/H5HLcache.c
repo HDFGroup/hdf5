@@ -49,6 +49,12 @@
 /* Value indicating end of free list on disk */
 #define H5HL_FREE_NULL	1
 
+/* Set the local heap size to speculatively read in */
+/* (needs to be more than the local heap prefix size to work at all and
+ *      should be larger than the default local heap size to save the
+ *      extra I/O operations) */
+#define H5HL_SPEC_READ_SIZE 512
+
 
 /******************/
 /* Local Typedefs */
@@ -65,6 +71,7 @@
 /********************/
 
 /* Metadata cache callbacks */
+static herr_t H5HL_prfx_get_load_size(const void *_udata, size_t *image_len);
 static void *H5HL_prfx_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr);
@@ -73,6 +80,7 @@ static herr_t H5HL_prfx_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, s
     size_t *new_len, void **new_image);
 static herr_t H5HL_prfx_free_icr(void *thing);
 
+static herr_t H5HL_dblk_get_load_size(const void *_udata, size_t *image_len);
 static void *H5HL_dblk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
@@ -92,6 +100,7 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     H5AC_LHEAP_PRFX_ID,
     "local heap prefix",
     H5FD_MEM_LHEAP,
+    H5HL_prfx_get_load_size,
     H5HL_prfx_deserialize,
     H5HL_prfx_image_len,
     H5HL_prfx_serialize,
@@ -105,6 +114,7 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     H5AC_LHEAP_DBLK_ID,
     "local heap data block",
     H5FD_MEM_LHEAP,
+    H5HL_dblk_get_load_size,
     H5HL_dblk_deserialize,
     NULL,
     H5HL_dblk_serialize,
@@ -227,6 +237,37 @@ H5HL_fl_serialize(const H5HL_t *heap)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5HL_fl_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_prfx_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_prfx_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HL_cache_prfx_ud_t *udata = (const H5HL_cache_prfx_ud_t *)_udata;       /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HL_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_prfx_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -488,6 +529,37 @@ H5HL_prfx_free_icr(void *thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HL_prfx_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_dblk_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_dblk_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5HL_cache_dblk_ud_t *udata = (const H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = udata->heap->dblk_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_dblk_get_load_size() */
 
 
 /*-------------------------------------------------------------------------

@@ -234,7 +234,7 @@ H5O_eliminate_gap(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
     hbool_t chk_dirtied = FALSE;        /* Flags for unprotecting chunk */
     uint8_t *move_start, *move_end;     /* Pointers to area of messages to move */
-    hbool_t null_before_gap;    /* Flag whether the null message is before the gap or not */
+    hbool_t null_before_gap;            /* Flag whether the null message is before the gap or not */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_eliminate_gap)
@@ -520,8 +520,8 @@ static htri_t
 H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     size_t size, unsigned * msg_idx)
 {
-    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    hbool_t     chk_dirtied = FALSE;    /* Flags for unprotecting chunk */
+    H5O_chunk_proxy_t *chk_proxy = NULL;    /* Chunk that message is in */
+    hbool_t     chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     size_t      delta;          /* Change in chunk's size */
     size_t      aligned_size = H5O_ALIGN_OH(oh, size);
     uint8_t     *old_image;     /* Old address of chunk's image in memory */
@@ -680,7 +680,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
         if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
                 (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
             H5O_chunk_proxy_t *chk_proxy2 = NULL;       /* Chunk that continuation message is in */
-            hbool_t chk_dirtied2 = FALSE;               /* Flags for unprotecting chunk */
+            hbool_t chk_dirtied2 = FALSE;               /* Flag for unprotecting chunk */
             unsigned cont_chunkno = oh->mesg[u].chunkno;    /* Chunk # for continuation message */
 
             /* Protect chunk containing continuation message */
@@ -1150,9 +1150,9 @@ herr_t
 H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     hbool_t adj_link)
 {
-    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    hbool_t chk_dirtied = FALSE;        /* Flags for unprotecting chunk */
-    herr_t ret_value = SUCCEED; 	                /* Return value */
+    H5O_chunk_proxy_t *chk_proxy = NULL;    /* Chunk that message is in */
+    hbool_t chk_dirtied = FALSE;            /* Flag for unprotecting chunk */
+    herr_t ret_value = SUCCEED; 	    /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_release_mesg, FAIL)
 

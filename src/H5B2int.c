@@ -271,11 +271,11 @@ H5B2_shared_free(void *_shared)
 
     /* Free the B-tree node buffer */
     if(shared->page)
-        (void)H5FL_BLK_FREE(node_page, shared->page);
+        shared->page = H5FL_BLK_FREE(node_page, shared->page);
 
     /* Free the array of offsets into the native key block */
     if(shared->nat_off)
-        H5FL_SEQ_FREE(size_t, shared->nat_off);
+        shared->nat_off = H5FL_SEQ_FREE(size_t, shared->nat_off);
 
     /* Release the node info */
     if(shared->node_info) {
@@ -292,11 +292,11 @@ H5B2_shared_free(void *_shared)
         } /* end for */
 
         /* Free the array of node info structs */
-        H5FL_SEQ_FREE(H5B2_node_info_t, shared->node_info);
+        shared->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, shared->node_info);
     } /* end if */
 
     /* Free the shared B-tree info itself */
-    H5FL_FREE(H5B2_shared_t, shared);
+    shared = H5FL_FREE(H5B2_shared_t, shared);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -444,11 +444,11 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx + 1].node_nrec);
-        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -703,11 +703,11 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx + 1].node_nrec);
-        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -949,15 +949,15 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx-1].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
-        if(NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx+1].node_nrec);
-        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -1317,11 +1317,11 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx+1].node_nrec);
-        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1493,15 +1493,15 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx-1].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
-        if(NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx+1].node_nrec);
-        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1694,7 +1694,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(internal->node_ptrs[idx].node_nrec);
         cache_leaf_udata.bt2_shared = internal->shared;
-        if(NULL == (child_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, child_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (child_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, child_addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1767,7 +1767,7 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     cache_leaf_udata.f = f;
     cache_leaf_udata.nrec = &(curr_node_ptr->node_nrec);
     cache_leaf_udata.bt2_shared = bt2_shared;
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &cache_leaf_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Must have a leaf node with enough space to insert a record now */
@@ -2124,7 +2124,6 @@ H5B2_protect_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, haddr_t addr,
     unsigned nrec, unsigned depth, H5AC_protect_t rw)
 {
     H5B2_internal_cache_ud_t udata;          /* User data to pass through to cache 'deserialize' callback */
-    H5B2_shared_t *shared;              /* B-tree's shared info */
     H5B2_internal_t *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_protect_internal)
@@ -2141,12 +2140,8 @@ H5B2_protect_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, haddr_t addr,
     udata.depth = depth;
     udata.f = f;
 
-    /* Get the pointer to the shared B-tree info */
-    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
-
     /* Protect the internal node */
-    if(NULL == (ret_value = (H5B2_internal_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, (size_t)shared->node_size, &udata, rw)))
+    if(NULL == (ret_value = (H5B2_internal_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &udata, rw)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree internal node")
 
 done:
@@ -2224,7 +2219,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(curr_node->node_nrec);
         cache_leaf_udata.bt2_shared = bt2_shared;
-        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_READ)))
+        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &cache_leaf_udata, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* Set up information about current node */
@@ -2320,7 +2315,7 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     cache_leaf_udata.f = f;
     cache_leaf_udata.nrec = &(curr_node_ptr->node_nrec);
     cache_leaf_udata.bt2_shared = bt2_shared;
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &cache_leaf_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Sanity check number of records */
@@ -2627,7 +2622,7 @@ H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     cache_leaf_udata.f = f;
     cache_leaf_udata.nrec = &(curr_node_ptr->node_nrec);
     cache_leaf_udata.bt2_shared = bt2_shared;
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &cache_leaf_udata, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Sanity check number of records */
@@ -2999,7 +2994,7 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     cache_leaf_udata.f = f;
     cache_leaf_udata.nrec = &(curr_node_ptr->node_nrec);
     cache_leaf_udata.bt2_shared = bt2_shared;
-    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_READ)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &cache_leaf_udata, H5AC_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Locate node pointer for child */
@@ -3192,7 +3187,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         cache_leaf_udata.f = f;
         cache_leaf_udata.nrec = &(curr_node->node_nrec);
         cache_leaf_udata.bt2_shared = bt2_shared;
-        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, (size_t)shared->node_size, &cache_leaf_udata, H5AC_WRITE)))
+        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &cache_leaf_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* Set up information about current node */

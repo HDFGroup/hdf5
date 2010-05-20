@@ -238,7 +238,7 @@ HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", 
         cache_udata.fspace = fspace;
         cache_udata.f = f;
         cache_udata.dxpl_id = dxpl_id;
-        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, (size_t)fspace->alloc_sect_size, &cache_udata, H5AC_WRITE)))
+        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC_WRITE)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
 
         /* Pin them in the cache */

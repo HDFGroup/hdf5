@@ -315,6 +315,9 @@ hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
+static herr_t datum_get_load_size(const void * udata_ptr,
+                                size_t *image_len_ptr);
+
 static void * datum_deserialize(const void * image_ptr,
                                 size_t len,
                                 void * udata_ptr,
@@ -346,6 +349,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     DATUM_ENTRY_TYPE,
     "datum",
     H5FD_MEM_DEFAULT,
+    (H5C_get_load_size_func_t)datum_get_load_size,
     (H5C_deserialize_func_t)datum_deserialize,
     (H5C_image_len_func_t)datum_image_len,
     (H5C_serialize_func_t)datum_serialize,
@@ -1664,6 +1668,57 @@ serve_write_request(struct mssg_t * mssg_ptr)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	datum_get_load_size
+ *
+ * Purpose:	Query the image size for an entry before deserializing it
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	Quincey Koziol
+ *              5/18/10
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datum_get_load_size(const void * udata_ptr,
+                  size_t *image_len_ptr)
+{
+    const char * fcn_name = "datum_get_load_size()";
+    haddr_t addr = *(haddr_t *)udata_ptr;
+    int idx;
+    struct datum * entry_ptr;
+
+    HDassert( udata_ptr );
+    HDassert( image_len_ptr );
+
+    idx = addr_to_datum_index(addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+
+    entry_ptr = &(data[idx]);
+
+    HDassert( addr == entry_ptr->base_addr );
+    HDassert( ! entry_ptr->global_pinned );
+    HDassert( ! entry_ptr->local_pinned );
+
+    if ( callbacks_verbose ) {
+
+        HDfprintf(stdout,
+	  "%d: get_load_size() idx = %d, addr = %ld, len = %d.\n",
+              world_mpi_rank, idx, (long)addr, (int)entry_ptr->local_len);
+	fflush(stdout);
+    }
+
+    /* Set image length size */
+    *image_len_ptr = entry_ptr->local_len;
+
+    return(SUCCEED);
+} /* get_load_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	datum_deserialize
  *
  * Purpose:	deserialize the entry.
@@ -2692,7 +2747,7 @@ lock_entry(H5C_t * cache_ptr,
 
         cache_entry_ptr = H5AC_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                         &(types[0]), entry_ptr->base_addr,
-                                        entry_ptr->local_len, &entry_ptr->base_addr, H5AC_WRITE);
+                                        &entry_ptr->base_addr, H5AC_WRITE);
 
         if ( ( cache_entry_ptr != (void *)(&(entry_ptr->header)) ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -3178,7 +3233,7 @@ setup_cache_for_test(hid_t * fid_ptr,
     }
 
     if ( file_ptr == NULL ) {
-
+        nerrors++;
         if ( verbose ) {
 	    HDfprintf(stdout, "%d:%s: Can't get file_ptr.\n",
                       world_mpi_rank, fcn_name);
@@ -5394,15 +5449,15 @@ trace_file_check(void)
       "H5AC_set 0x402 2 16 0x0 2 0\n",
       "H5AC_set 0x404 4 16 0x0 4 0\n",
       "H5AC_set 0x408 6 16 0x0 6 0\n",
-      "H5AC_protect 0x400 2 16 H5AC_WRITE 2 1\n",
+      "H5AC_protect 0x400 2 H5AC_WRITE 2 1\n",
       "H5AC_mark_entry_dirty 0x400 0\n",
       "H5AC_unprotect 0x400 16 2 0 0\n",
-      "H5AC_protect 0x402 2 16 H5AC_WRITE 2 1\n",
+      "H5AC_protect 0x402 2 H5AC_WRITE 2 1\n",
       "H5AC_pin_protected_entry 0x402 0\n",
       "H5AC_unprotect 0x402 16 2 0 0\n",
       "H5AC_unpin_entry 0x402 0\n",
       "H5AC_expunge_entry 0x402 16 0\n",
-      "H5AC_protect 0x404 4 16 H5AC_WRITE 4 1\n",
+      "H5AC_protect 0x404 4 H5AC_WRITE 4 1\n",
       "H5AC_pin_protected_entry 0x404 0\n",
       "H5AC_unprotect 0x404 16 4 0 0\n",
       "H5AC_mark_entry_dirty 0x404 0\n",

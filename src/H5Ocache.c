@@ -44,6 +44,12 @@
 /* Local Macros */
 /****************/
 
+/* Set the object header size to speculatively read in */
+/* (needs to be more than the object header prefix size to work at all and
+ *      should be larger than the largest object type's default object header
+ *      size to save the extra I/O operations) */
+#define H5O_SPEC_READ_SIZE 512
+
 
 /******************/
 /* Local Typedefs */
@@ -60,6 +66,7 @@
 /********************/
 
 /* Metadata cache callbacks */
+static herr_t H5O_cache_get_load_size(const void *_udata, size_t *image_len);
 static void *H5O_cache_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_image_len(const void *thing, size_t *image_len_ptr);
@@ -68,6 +75,7 @@ static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t *new_len, void **new_image);
 static herr_t H5O_cache_free_icr(void *thing);
 
+static herr_t H5O_cache_chk_get_load_size(const void *_udata, size_t *image_len);
 static void *H5O_cache_chk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5O_cache_chk_serialize(const H5F_t *f, hid_t dxpl_id,
@@ -98,6 +106,7 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     H5AC_OHDR_ID,
     "object header",
     H5FD_MEM_OHDR,
+    H5O_cache_get_load_size,
     H5O_cache_deserialize,
     H5O_cache_image_len,
     H5O_cache_serialize,
@@ -109,6 +118,7 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     H5AC_OHDR_CHK_ID,
     "object header chunk",
     H5FD_MEM_OHDR,
+    H5O_cache_chk_get_load_size,
     H5O_cache_chk_deserialize,
     NULL,
     H5O_cache_chk_serialize,
@@ -134,6 +144,37 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_cache_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_cache_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5O_cache_ud_t *udata = (const H5O_cache_ud_t *)_udata;       /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5O_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_cache_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -178,7 +219,7 @@ H5O_cache_deserialize(const void *image, size_t len, void *_udata,
     oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
 
     /* Get temporary pointer to serialized header */
-    p = image;
+    p = (const uint8_t *)image;
 
     /* Check for presence of magic number */
     /* (indicates version 2 or later) */
@@ -297,7 +338,7 @@ H5O_cache_deserialize(const void *image, size_t len, void *_udata,
      */
     if(len >= (oh->chunk0_size + H5O_SIZEOF_HDR(oh))) {
         /* Parse the first chunk */
-        if(H5O_chunk_deserialize(oh, udata->common.addr, oh->chunk0_size, image, &(udata->common), dirty) < 0)
+        if(H5O_chunk_deserialize(oh, udata->common.addr, oh->chunk0_size, (const uint8_t *)image, &(udata->common), dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
     } /* end if */
     else
@@ -366,7 +407,7 @@ H5O_cache_image_len(const void *thing, size_t *image_len_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
+H5O_cache_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
@@ -473,7 +514,7 @@ H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr,
     HDassert((size_t)(p - (uint8_t *)oh->chunk[0].image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Serialize messages for this chunk */
-    if(H5O_chunk_serialize(f, oh, (unsigned)0, image) < 0)
+    if(H5O_chunk_serialize(f, oh, (unsigned)0, (uint8_t *)image) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "unable to serialize first object header chunk")
 
     /* Reset the cache flags for this operation */
@@ -521,6 +562,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_cache_chk_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_cache_chk_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5O_chk_cache_ud_t *udata = (const H5O_chk_cache_ud_t *)_udata;       /* User data for callback */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_chk_get_load_size)
+
+    /* Check arguments */
+    HDassert(udata);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = udata->size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_cache_chk_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_cache_chk_deserialize
  *
  * Purpose:	Deserializes an object header continuation chunk
@@ -562,7 +634,7 @@ H5O_cache_chk_deserialize(const void *image, size_t len, void *_udata,
         HDassert(udata->common.cont_msg_info);
 
         /* Parse the chunk */
-        if(H5O_chunk_deserialize(udata->oh, udata->common.addr, len, image, &(udata->common), dirty) < 0)
+        if(H5O_chunk_deserialize(udata->oh, udata->common.addr, len, (const uint8_t *)image, &(udata->common), dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize object header chunk")
 
         /* Set the fields for the chunk proxy */
@@ -631,7 +703,7 @@ H5O_cache_chk_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     HDassert(flags);
 
     /* Serialize messages for this chunk */
-    if(H5O_chunk_serialize(f, chk_proxy->oh, chk_proxy->chunkno, image) < 0)
+    if(H5O_chunk_serialize(f, chk_proxy->oh, chk_proxy->chunkno, (uint8_t *)image) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL, "unable to serialize object header chunk")
 
     /* Reset the cache flags for this operation */

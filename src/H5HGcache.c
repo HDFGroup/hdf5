@@ -46,6 +46,8 @@
 /* Local Macros */
 /****************/
 
+#define H5HG_SPEC_READ_SIZE 4096
+
 
 /******************/
 /* Local Typedefs */
@@ -62,6 +64,7 @@
 /********************/
 
 /* Metadata cache callbacks */
+static herr_t H5HG_get_load_size(const void *udata, size_t *image_len);
 static void *H5HG_deserialize(const void *image, size_t len, void *udata,
     hbool_t *dirty);
 static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
@@ -82,6 +85,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
     "global heap",
     H5FD_MEM_GHEAP,
+    H5HG_get_load_size,
     H5HG_deserialize,
     H5HG_image_len,
     H5HG_serialize,
@@ -98,6 +102,37 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HG_get_load_size
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 18, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_get_load_size(const void *_udata, size_t *image_len)
+{
+    const H5F_t *f = (const H5F_t *)_udata;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_get_load_size)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5HG_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HG_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -134,7 +169,7 @@ H5HG_deserialize(const void *image, size_t UNUSED len, void *_udata,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
     heap->shared = f->shared;
 
-    p = image;
+    p = (uint8_t *)image;
 
     /* Magic number */
     if(HDmemcmp(p, H5HG_MAGIC, (size_t)H5HG_SIZEOF_MAGIC))
@@ -163,10 +198,11 @@ H5HG_deserialize(const void *image, size_t UNUSED len, void *_udata,
 
         /* Decode each object */
         p = heap->chunk + H5HG_SIZEOF_HDR(f);
-        nalloc = H5HG_NOBJS(f, heap->size);
+
         /* Calloc the obj array because the file format spec makes no guarantee
          * about the order of the objects, and unused slots must be set to zero.
          */
+        nalloc = H5HG_NOBJS(f, heap->size);
         if(NULL == (heap->obj = H5FL_SEQ_CALLOC(H5HG_obj_t, nalloc)))
     	    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
         heap->nalloc = nalloc;
@@ -398,7 +434,7 @@ H5HG_free_icr(void *thing)
     HDassert(thing);
 
     /* Destroy global heap collection */
-    if(H5HG_free(thing) < 0)
+    if(H5HG_free((H5HG_heap_t *)thing) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy global heap")
 
 done:

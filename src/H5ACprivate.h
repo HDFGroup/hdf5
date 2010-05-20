@@ -118,11 +118,11 @@ typedef enum {
 #define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
 
+typedef H5C_get_load_size_func_t	H5AC_get_load_size_func_t;
 typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
 typedef H5C_image_len_func_t		H5AC_image_len_func_t;
 typedef H5C_serialize_func_t		H5AC_serialize_func_t;
 typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
-typedef H5C_clear_dirty_bits_func_t	H5AC_clear_dirty_bits_func_t;
 
 typedef H5C_class_t			H5AC_class_t;
 
@@ -274,39 +274,38 @@ struct H5O_loc_t;               /* Defined in H5Oprivate.h */
 H5_DLL herr_t H5AC_init(void);
 
 H5_DLL herr_t H5AC_check_for_journaling(H5F_t * f,
-                                         hid_t dxpl_id,
-                                         H5C_t * cache_ptr,
-                                         hbool_t journal_recovered);
+                                        hid_t dxpl_id,
+                                        H5C_t * cache_ptr,
+                                        hbool_t journal_recovered);
 
 H5_DLL herr_t H5AC_deregister_mdjsc_callback(H5F_t * file_ptr,
-                                              int32_t idx);
+                                             int32_t idx);
 
 H5_DLL herr_t H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_begin_transaction(hid_t id,
-                                      hbool_t * do_transaction_ptr,
-                                      struct H5O_loc_t * id_oloc_ptr,
-                                      hbool_t * id_oloc_open_ptr,
-                                      hbool_t * transaction_begun_ptr,
-                                      uint64_t * trans_num_ptr,
-                                      const char * api_call_name);
+                                     hbool_t * do_transaction_ptr,
+                                     struct H5O_loc_t * id_oloc_ptr,
+                                     hbool_t * id_oloc_open_ptr,
+                                     hbool_t * transaction_begun_ptr,
+                                     uint64_t * trans_num_ptr,
+                                     const char * api_call_name);
 
 H5_DLL herr_t H5AC_end_transaction(hbool_t do_transaction,
-                                    struct H5O_loc_t * id_oloc_ptr,
-                                    hbool_t id_oloc_open,
-                                    hbool_t transaction_begun,
-				    hid_t dxpl_id,
-                                    uint64_t trans_num,
-                                    const char * api_call_name);
+                                   struct H5O_loc_t * id_oloc_ptr,
+                                   hbool_t id_oloc_open,
+                                   hbool_t transaction_begun,
+				   hid_t dxpl_id,
+                                   uint64_t trans_num,
+                                   const char * api_call_name);
 
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
 				    unsigned * status_ptr);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-                        haddr_t addr, size_t len, void *thing, unsigned int flags);
+                       haddr_t addr, size_t len, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-                           haddr_t addr, size_t len, void *udata,
-                           H5AC_protect_t rw);
+                           haddr_t addr, void *udata, H5AC_protect_t rw);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
@@ -353,9 +352,9 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
                                                H5AC_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC_set_jnl_config(H5F_t * f,
-                                   hid_t dxpl_id,
-                                   const H5AC_jnl_config_t *config_ptr,
-				   hbool_t initializing);
+                                  hid_t dxpl_id,
+                                  const H5AC_jnl_config_t *config_ptr,
+				  hbool_t initializing);
 
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t * config_ptr);
 
