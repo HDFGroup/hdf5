@@ -35,6 +35,6 @@ ARCH=${ARCH:='-arch host -tune host'}
 
 # DEC MPI-IO implementation has a bug, it cannot generate correct MPI
 # derived datatype.
-hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}  
+hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}  
 # It does not do all collective IO correctly.
-hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'} 
+hdf5_cv_mpi_special_collective_io_works=${hdf5_cv_mpi_special_collective_io_works='no'} 

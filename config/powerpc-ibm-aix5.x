@@ -147,7 +147,7 @@ fi
 # With poe version 3.2.0.19 or lower(using lpp -l all | grep ppe.poe to check the version number, 
 # IBM MPI-IO implementation has a bug, 
 #it cannot generate correct MPI derived datatype. Please uncomment the following line:
-#hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+#hdf5_cv_mpi_complex_derived_datatype_works=${hdf5_cv_mpi_complex_derived_datatype_works='no'}
 
 # The default C++ compiler
 
