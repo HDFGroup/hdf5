@@ -47,6 +47,32 @@
         supports error detection for chunked datasets only.
 
   <p>
+  <dt><strong>Note:</strong>
+    <dd>The Fletcher32 EDC checksum filter, set with
+        <a href="#Property-SetFletcher32"><code>H5Pset_fletcher32</code></a>,
+        was added in HDF5 Release 1.6.0. 
+        In the original implementation, however, the checksum value was 
+        calculated incorrectly on little-endian systems. 
+        The error was fixed in HDF5 Release 1.6.3. 
+        <p>
+        As a result of this fix, an HDF5 Library of Release 1.6.0 through 
+        Release 1.6.2 cannot read a dataset created or written with 
+        Release 1.6.3 or later if the dataset was created with the checksum 
+        filter and the filter is enabled in the reading library.
+        (Libraries of Release 1.6.3 and later understand the earlier error 
+        and comensate appropriately.)
+        <p>
+        <strong>Work-around:</strong> 
+        An HDF5 Library of Release 1.6.2 or earlier will be able to read 
+        a dataset created or written with the checksum filter by an 
+        HDF5 Library of Release 1.6.3 or later if the checksum filter is 
+        disabled for the read operation. This can be accomplished via an
+        <code>H5Pset_edc_check</code> call with the value 
+        <code>H5Z_DISABLE_EDC</code> in the second parameter. 
+        This has the obvious drawback that the application will be unable 
+        to verify the checksum, but the data does remain accessible. 
+
+  <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -89,11 +115,16 @@ END SUBROUTINE h5pset_edc_check_f
           <td valign="top" align="left" width="10%">
             <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-            <strong>C</strong></td></tr>
+            <strong>Change</strong></td></tr>
         <tr>
           <td valign="top">1.6.0</td>
           <td valign="top">
             Function introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.3</td>
+          <td valign="top">
+            Error in checksum calculation on little-endian systems corrected
+            in this release.</td></tr>
     </table></ul>
 </dl>
 
