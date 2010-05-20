@@ -225,6 +225,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a file corruption bug that could happen when shrinking a
+            compressed dataset. (NAF - 2010/05/20)
       - Fixed some memory leaks in VL datatype conversion when strings are
             used as fill values. (MAM - 2010/05/12 - BZ# 1826)
       - Fixed a bug when copying objects with NULL references with the

@@ -76,6 +76,7 @@ const char *FILENAME[] = {
 #define DIME2 7
 #define ISTORE_IK  64
 #define RAND4_NITER 100
+#define RAND4_SPARSE_SWITCH 10
 #define RAND4_FAIL_DUMP(NDIM_SETS, J, K, L, M) {                               \
     H5_FAILED(); AT();                                                         \
     test_random_rank4_dump(NDIM_SETS, dim_log, cdims, J, K, L, M);             \
@@ -99,7 +100,8 @@ static int test_rank3( hid_t fapl,
                        hbool_t set_istore_k);
 static int test_random_rank4( hid_t fapl,
                               hid_t dcpl,
-                              hbool_t do_fillvalue);
+                              hbool_t do_fillvalue,
+                              hbool_t do_sparse);
 
 static int test_external( hid_t fapl );
 static int test_layouts( H5D_layout_t layout, hid_t fapl );
@@ -128,8 +130,11 @@ int main( void )
     /* Copy the file access property list */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
+    /* Set chunk cache so only part of the chunks can be cached on fapl */
+    if(H5Pset_cache(fapl, 0, 8, 256 * sizeof(int), 0.75) < 0) TEST_ERROR
+
     /* Disable chunk caching on fapl2 */
-    if(H5Pset_cache(fapl2, 521, 0, 0, 0.) < 0) TEST_ERROR
+    if(H5Pset_cache(fapl2, 0, 0, 0, 0.) < 0) TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
@@ -320,10 +325,16 @@ static int do_ranks( hid_t fapl )
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0)
             TEST_ERROR
 
-        if(test_random_rank4(fapl, dcpl, do_fillvalue) < 0) {
+        if(test_random_rank4(fapl, dcpl, do_fillvalue, FALSE) < 0) {
             DO_RANKS_PRINT_CONFIG("Randomized rank 4")
             goto error;
         } /* end if */
+
+        if(!(config & CONFIG_EARLY_ALLOC))
+            if(test_random_rank4(fapl, dcpl, do_fillvalue, TRUE) < 0) {
+                DO_RANKS_PRINT_CONFIG("Randomized rank 4 with sparse allocation")
+                goto error;
+            } /* end if */
 
         /* Close dcpl */
         if(H5Pclose(dcpl) < 0)
@@ -2658,7 +2669,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue )
+static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
+    hbool_t do_sparse )
 {
     hid_t       file = -1;
     hid_t       dset = -1;
@@ -2667,12 +2679,16 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue )
     hid_t       my_dcpl = -1;
     hsize_t     dims[4];                        /* Dataset's dimensions */
     hsize_t     old_dims[4];                    /* Old dataset dimensions */
+    hsize_t     min_unwritten_dims[4];          /* Minimum dimensions since last write */
+    hsize_t     *valid_dims = old_dims;         /* Dimensions of region still containing written data */
     hsize_t     cdims[4];                       /* Chunk dimensions */
     const hsize_t mdims[4] = {10, 10, 10, 10};  /* Memory buffer dimensions */
     const hsize_t start[4] = {0, 0, 0, 0};      /* Start for hyperslabe operations on memory */
     static int  rbuf[10][10][10][10];           /* Read buffer */
     static int  wbuf[10][10][10][10];           /* Write buffer */
     static hsize_t dim_log[RAND4_NITER+1][4];   /* Log of dataset dimensions */
+    hbool_t     zero_dim = FALSE;               /* Whether a dimension is 0 */
+    hbool_t     writing = TRUE;                 /* Whether we're writing to the dset */
     volatile unsigned i, j, k, l, m;            /* Local indices */
     char        filename[NAME_BUF_SIZE];
 
@@ -2681,9 +2697,9 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue )
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
-    /* Generate random chunk dimensions, 2-6 */
+    /* Generate random chunk dimensions, 2-4 */
     for(i=0; i<4; i++)
-        cdims[i] = (hsize_t)((HDrandom() % 5) + 2);
+        cdims[i] = (hsize_t)((HDrandom() % 3) + 2);
 
     /* Generate initial dataset size, 1-10 */
     for(i=0; i<4; i++) {
@@ -2713,60 +2729,86 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue )
 
     /* Main loop */
     for(i=0; i<RAND4_NITER; i++) {
-        /* Generate random write buffer */
-        for(j=0; j<dims[0]; j++)
-            for(k=0; k<dims[1]; k++)
-                for(l=0; l<dims[2]; l++)
-                    for(m=0; m<dims[3]; m++)
-                        wbuf[j][k][l][m] = HDrandom();
+        if(writing && !zero_dim) {
+            /* Generate random write buffer */
+            for(j=0; j<dims[0]; j++)
+                for(k=0; k<dims[1]; k++)
+                    for(l=0; l<dims[2]; l++)
+                        for(m=0; m<dims[3]; m++)
+                            wbuf[j][k][l][m] = HDrandom();
 
-        /* Write data */
-        if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, H5S_ALL, H5P_DEFAULT, wbuf)
-                < 0)
-            RAND4_FAIL_DUMP(i+1, -1, -1, -1, -1)
+            /* Write data */
+            if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, H5S_ALL, H5P_DEFAULT,
+                    wbuf) < 0)
+                RAND4_FAIL_DUMP(i+1, -1, -1, -1, -1)
+        } /* end if */
 
-        /* Generate new dataset size, 1-10 */
+        /* Generate new dataset size, 0-10 (0 much less likely) */
+        zero_dim = FALSE;
         for(j=0; j<4; j++) {
             old_dims[j] = dims[j];
-            dims[j] = (hsize_t)((HDrandom() % 10) + 1);
+            if((dims[j] = (hsize_t)(HDrandom() % 11)) == 0)
+                if((dims[j] = (hsize_t)(HDrandom() % 11)) == 0)
+                    zero_dim = TRUE;
             dim_log[i+1][j] = dims[j];
         } /* end for */
+
+        /* If writing is disabled, update min_unwritten_dims */
+        if(!writing)
+            for(j=0; j<4; j++)
+                if(old_dims[j] < min_unwritten_dims[j])
+                    min_unwritten_dims[j] = old_dims[j];
 
         /* Resize dataset */
         if(H5Dset_extent(dset, dims) < 0)
             RAND4_FAIL_DUMP(i+2, -1, -1, -1, -1)
 
-        /* Read data from resized dataset */
-        if(H5Sselect_hyperslab(mspace, H5S_SELECT_SET, start, NULL, dims, NULL)
-                < 0)
-            RAND4_FAIL_DUMP(i+2, -1, -1, -1, -1)
-        if(H5Dread(dset, H5T_NATIVE_INT, mspace, H5S_ALL, H5P_DEFAULT, rbuf)
-                < 0)
-            RAND4_FAIL_DUMP(i+2, -1, -1, -1, -1)
+        if(!zero_dim) {
+            /* Read data from resized dataset */
+            if(H5Sselect_hyperslab(mspace, H5S_SELECT_SET, start, NULL, dims,
+                    NULL) < 0)
+                RAND4_FAIL_DUMP(i+2, -1, -1, -1, -1)
+            if(H5Dread(dset, H5T_NATIVE_INT, mspace, H5S_ALL, H5P_DEFAULT, rbuf)
+                    < 0)
+                RAND4_FAIL_DUMP(i+2, -1, -1, -1, -1)
 
-        /* Verify correctness of read data */
-        if(do_fillvalue) {
-            for(j=0; j<dims[0]; j++)
-                for(k=0; k<dims[1]; k++)
-                    for(l=0; l<dims[2]; l++)
-                        for(m=0; m<dims[3]; m++)
-                            if(j >= old_dims[0] || k >= old_dims[1]
-                                    || l >= old_dims[2] || m >= old_dims[3]) {
-                                if(FILL_VALUE != rbuf[j][k][l][m])
-                                    RAND4_FAIL_DUMP(i+2, (int)j, (int)k, (int)l, (int)m)
-                            } /* end if */
-                            else
+            /* Verify correctness of read data */
+            if(do_fillvalue) {
+                for(j=0; j<dims[0]; j++)
+                    for(k=0; k<dims[1]; k++)
+                        for(l=0; l<dims[2]; l++)
+                            for(m=0; m<dims[3]; m++)
+                                if(j >= valid_dims[0] || k >= valid_dims[1]
+                                        || l >= valid_dims[2]
+                                        || m >= valid_dims[3]) {
+                                    if(FILL_VALUE != rbuf[j][k][l][m])
+                                        RAND4_FAIL_DUMP(i+2, (int)j, (int)k, (int)l, (int)m)
+                                } /* end if */
+                                else
+                                    if(wbuf[j][k][l][m] != rbuf[j][k][l][m])
+                                        RAND4_FAIL_DUMP(i+2, (int)j, (int)k, (int)l, (int)m)
+            } /* end if */
+            else {
+                for(j=0; j<MIN(dims[0],valid_dims[0]); j++)
+                    for(k=0; k<MIN(dims[1],valid_dims[1]); k++)
+                        for(l=0; l<MIN(dims[2],valid_dims[2]); l++)
+                            for(m=0; m<MIN(dims[3],valid_dims[3]); m++)
                                 if(wbuf[j][k][l][m] != rbuf[j][k][l][m])
                                     RAND4_FAIL_DUMP(i+2, (int)j, (int)k, (int)l, (int)m)
+            } /* end else */
         } /* end if */
-        else {
-            for(j=0; j<MIN(dims[0],old_dims[0]); j++)
-                for(k=0; k<MIN(dims[1],old_dims[1]); k++)
-                    for(l=0; l<MIN(dims[2],old_dims[2]); l++)
-                        for(m=0; m<MIN(dims[3],old_dims[3]); m++)
-                            if(wbuf[j][k][l][m] != rbuf[j][k][l][m])
-                                RAND4_FAIL_DUMP(i+2, (int)j, (int)k, (int)l, (int)m)
-        } /* end else */
+
+        /* Handle the switch between writing and not writing */
+        if(do_sparse && !(i % RAND4_SPARSE_SWITCH)) {
+            writing = !writing;
+            if(!writing) {
+                for(j=0; j<4; j++)
+                    min_unwritten_dims[j] = old_dims[j];
+                valid_dims = min_unwritten_dims;
+            } /* end if */
+            else
+                valid_dims = old_dims;
+        } /* end if */
     } /* end for */
 
     /* Close */
