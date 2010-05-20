@@ -374,7 +374,7 @@ typedef struct H5O_chk_cache_ud_t {
     hbool_t decoding;                   /* Whether the object header is being decoded */
     H5O_t *oh;                          /* Object header for this chunk */
     unsigned chunkno;                   /* Index of chunk being brought in (for re-loads) */
-    size_t chunk_size;			/* Chunk size */
+    size_t size;                        /* Size of chunk in the file */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 

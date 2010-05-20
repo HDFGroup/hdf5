@@ -1035,7 +1035,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    hbool_t chk_dirtied = FALSE;        /* Flags for unprotecting chunk */
+    hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename_mod_cb)
