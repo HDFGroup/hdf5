@@ -1049,7 +1049,7 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 
 /* `S' is the name of a function which is being tested to check if its */
 /*      an API function */
-#define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
+#define H5_IS_API(S) ('_'!=((const char *)S)[2] && '_'!=((const char *)S)[3] && (!((const char *)S)[4] || '_'!=((const char *)S)[4]))
 
 /* global library version information string */
 extern char	H5_lib_vers_info_g[];
