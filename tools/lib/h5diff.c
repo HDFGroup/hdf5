@@ -209,10 +209,10 @@ static int is_valid_options(diff_opt_t *options)
     }
 
     /* -------------------------------------------------------
-     * only allow --no-dangling-links along with --follow-links */
+     * only allow --no-dangling-links along with --follow-symlinks */
     if(options->no_dangle_links && !options->follow_links)
     {
-        parallel_print("Error: --no-dangling-links must be used along with --follow-links option.\n");
+        parallel_print("Error: --no-dangling-links must be used along with --follow-symlinks option.\n");
         options->err_stat=1;
         ret = 0;
         goto out;
