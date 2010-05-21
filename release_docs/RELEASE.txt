@@ -161,7 +161,7 @@ New Features
     ------
      - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
                (JKM - 2010/02/10) 
-     - h5diff: Add new flag --follow-links. (refer to --help for details)
+     - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
 	   (JKM - 2009/11/20)

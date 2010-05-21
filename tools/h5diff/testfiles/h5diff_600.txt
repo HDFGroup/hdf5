@@ -10,7 +10,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -r, --report            Report mode. Print differences.
    -v, --verbose           Verbose mode. Print differences, list of objects.
    -q, --quiet             Quiet mode. Do not produce output.
-   --follow-links          Follow symbolic links (soft links and external links)
+   --follow-symlinks       Follow symbolic links (soft links and external links)
                            and compare the links' target objects.
                            If symbolic link(s) with the same name exist in the
                            files being compared, then determine whether the 
@@ -21,13 +21,13 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
                            - If both symbolic links are dangling links, they
                              are treated as being the same; by default, h5diff
                              returns an exit code of 0. If, however, 
-                             --no-dangling-links is used with --follow-links, 
+                             --no-dangling-links is used with --follow-symlinks,
                              this situation is treated as an error and h5diff 
                              returns an exit code of 2.
                            - If only one of the two links is a dangling link,
                              they are treated as being different and h5diff 
                              returns an exit code of 1. If, however, 
-                             --no-dangling-links is used with --follow-links, 
+                             --no-dangling-links is used with --follow-symlinks,
                              this situation is treated as an error and h5diff 
                              returns an exit code of 2.
                            - If both symbolic links point to existing objects,
@@ -35,7 +35,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
                            If any symbolic link specified in the call to h5diff
                            does not exist, h5diff treats it as an error and
                            returns an exit code of 2.
-   --no-dangling-links     Must be used with --follow-links option;
+   --no-dangling-links     Must be used with --follow-symlinks option;
                            otherwise, h5diff shows error message and returns
                            an exit code of 2.
                            Check for any symbolic links (soft links or external
@@ -78,7 +78,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
   2) groups: name string difference
   3) datatypes: the return value of H5Tequal
   4) links: name string difference of the linked value as default
-            (refer to --follow-links option).
+            (refer to --follow-symlinks option).
 
  Exit code:
   0 if no differences, 1 if differences found, 2 if error

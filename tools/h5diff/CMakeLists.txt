@@ -521,125 +521,125 @@ ADD_H5_TEST (h5diff_206 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
 ADD_H5_TEST (h5diff_207 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
 
 # ##############################################################################
-# # Links compare without --follow-links nor --no-dangling-links
+# # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
 # test for bug1749
 ADD_H5_TEST (h5diff_300 1 -v ${FILE12} ${FILE12} /link_g1 /link_g2)
 
 # ##############################################################################
-# # Links compare with --follow-links Only
+# # Links compare with --follow-symlinks Only
 # ##############################################################################
 # soft links file to file
-ADD_H5_TEST (h5diff_400 0 --follow-links -v ${FILE13} ${FILE13})
+ADD_H5_TEST (h5diff_400 0 --follow-symlinks -v ${FILE13} ${FILE13})
 
 # softlink vs dset"
-ADD_H5_TEST (h5diff_401 1 --follow-links -v ${FILE13} ${FILE13} /softlink_dset1_1 /target_dset2)
+ADD_H5_TEST (h5diff_401 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /target_dset2)
 
 # dset vs softlink"
-ADD_H5_TEST (h5diff_402 1 --follow-links -v ${FILE13} ${FILE13} /target_dset2 /softlink_dset1_1)
+ADD_H5_TEST (h5diff_402 1 --follow-symlinks -v ${FILE13} ${FILE13} /target_dset2 /softlink_dset1_1)
 
 # softlink vs softlink"
-ADD_H5_TEST (h5diff_403 1 --follow-links -v ${FILE13} ${FILE13} /softlink_dset1_1 /softlink_dset2)
+ADD_H5_TEST (h5diff_403 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /softlink_dset2)
 
 # extlink vs extlink (FILE)"
-ADD_H5_TEST (h5diff_404 0 --follow-links -v ${FILE15} ${FILE15})
+ADD_H5_TEST (h5diff_404 0 --follow-symlinks -v ${FILE15} ${FILE15})
 
 # extlink vs dset"
-ADD_H5_TEST (h5diff_405 1 --follow-links -v ${FILE15} ${FILE16} /ext_link_dset1 /target_group2/x_dset)
+ADD_H5_TEST (h5diff_405 1 --follow-symlinks -v ${FILE15} ${FILE16} /ext_link_dset1 /target_group2/x_dset)
 
 # dset vs extlink"
-ADD_H5_TEST (h5diff_406 1 --follow-links -v ${FILE16} ${FILE15} /target_group2/x_dset /ext_link_dset1)
+ADD_H5_TEST (h5diff_406 1 --follow-symlinks -v ${FILE16} ${FILE15} /target_group2/x_dset /ext_link_dset1)
 
 # extlink vs extlink"
-ADD_H5_TEST (h5diff_407 1 --follow-links -v ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_407 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_dset2)
 
 # softlink vs extlink"
-ADD_H5_TEST (h5diff_408 1 --follow-links -v ${FILE13} ${FILE15} /softlink_dset1_1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_408 1 --follow-symlinks -v ${FILE13} ${FILE15} /softlink_dset1_1 /ext_link_dset2)
 
 # extlink vs softlink "
-ADD_H5_TEST (h5diff_409 1 --follow-links -v ${FILE15} ${FILE13} /ext_link_dset2 /softlink_dset1_1)
+ADD_H5_TEST (h5diff_409 1 --follow-symlinks -v ${FILE15} ${FILE13} /ext_link_dset2 /softlink_dset1_1)
 
 # linked_softlink vs linked_softlink (FILE)"
-ADD_H5_TEST (h5diff_410 0 --follow-links -v ${FILE14} ${FILE14})
+ADD_H5_TEST (h5diff_410 0 --follow-symlinks -v ${FILE14} ${FILE14})
 
 # dset2 vs linked_softlink_dset1"
-ADD_H5_TEST (h5diff_411 1 --follow-links -v ${FILE14} ${FILE14} /target_dset2 /softlink1_to_slink2)
+ADD_H5_TEST (h5diff_411 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_dset2 /softlink1_to_slink2)
 
 # linked_softlink_dset1 vs dset2"
-ADD_H5_TEST (h5diff_412 1 --follow-links -v ${FILE14} ${FILE14} /softlink1_to_slink2 /target_dset2)
+ADD_H5_TEST (h5diff_412 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /target_dset2)
 
 # linked_softlink_to_dset1 vs linked_softlink_to_dset2"
-ADD_H5_TEST (h5diff_413 1 --follow-links -v ${FILE14} ${FILE14} /softlink1_to_slink2 /softlink2_to_slink2)
+ADD_H5_TEST (h5diff_413 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /softlink2_to_slink2)
 
 # group vs linked_softlink_group1"
-ADD_H5_TEST (h5diff_414 1 --follow-links -v ${FILE14} ${FILE14} /target_group /softlink3_to_slink2)
+ADD_H5_TEST (h5diff_414 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_group /softlink3_to_slink2)
 
 # linked_softlink_group1 vs group"
-ADD_H5_TEST (h5diff_415 1 --follow-links -v ${FILE14} ${FILE14} /softlink3_to_slink2 /target_group)
+ADD_H5_TEST (h5diff_415 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /target_group)
 
 # linked_softlink_to_group1 vs linked_softlink_to_group2"
-ADD_H5_TEST (h5diff_416 1 --follow-links -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
+ADD_H5_TEST (h5diff_416 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
 
 # non-exist-softlink vs softlink"
-ADD_H5_TEST (h5diff_417 1 --follow-links -v ${FILE13} ${FILE13} /softlink_noexist /softlink_dset2)
+ADD_H5_TEST (h5diff_417 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_noexist /softlink_dset2)
 
 # softlink vs non-exist-softlink"
-ADD_H5_TEST (h5diff_418 1 --follow-links -v ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
+ADD_H5_TEST (h5diff_418 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
 
 # non-exist-extlink_file vs extlink"
-ADD_H5_TEST (h5diff_419 1 --follow-links -v ${FILE15} ${FILE15} /ext_link_noexist2 /ext_link_dset2)
+ADD_H5_TEST (h5diff_419 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist2 /ext_link_dset2)
 
 # exlink vs non-exist-extlink_file"
-ADD_H5_TEST (h5diff_420 1 --follow-links -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist2)
+ADD_H5_TEST (h5diff_420 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist2)
 
 # extlink vs non-exist-extlink_obj"
-ADD_H5_TEST (h5diff_421 1 --follow-links -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist1)
+ADD_H5_TEST (h5diff_421 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist1)
 
 # non-exist-extlink_obj vs extlink"
-ADD_H5_TEST (h5diff_422 1 --follow-links -v ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_422 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_dset2)
 
 # extlink_to_softlink_to_dset1 vs dset2"
-ADD_H5_TEST (h5diff_423 1 --follow-links -v ${FILE17} ${FILE18} /ext_link_to_slink1 /dset2)
+ADD_H5_TEST (h5diff_423 1 --follow-symlinks -v ${FILE17} ${FILE18} /ext_link_to_slink1 /dset2)
 
 # dset2 vs extlink_to_softlink_to_dset1"
-ADD_H5_TEST (h5diff_424 1 --follow-links -v ${FILE18} ${FILE17} /dset2 /ext_link_to_slink1)
+ADD_H5_TEST (h5diff_424 1 --follow-symlinks -v ${FILE18} ${FILE17} /dset2 /ext_link_to_slink1)
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-ADD_H5_TEST (h5diff_425 1 --follow-links -v ${FILE17} ${FILE17} /ext_link_to_slink1 /ext_link_to_slink2)
+ADD_H5_TEST (h5diff_425 1 --follow-symlinks -v ${FILE17} ${FILE17} /ext_link_to_slink1 /ext_link_to_slink2)
 
 
 # ##############################################################################
-# # Dangling links compare (--follow-links and --no-dangling-links)
+# # Dangling links compare (--follow-symlinks and --no-dangling-links)
 # ##############################################################################
-# dangling links --follow-links (FILE to FILE)
-ADD_H5_TEST (h5diff_450 1  --follow-links -v ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
+# dangling links --follow-symlinks (FILE to FILE)
+ADD_H5_TEST (h5diff_450 1  --follow-symlinks -v ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
 
-# dangling links --follow-links and --no-dangling-links (FILE to FILE)
-ADD_H5_TEST (h5diff_451 2  --follow-links -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2}) 
+# dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
+ADD_H5_TEST (h5diff_451 2  --follow-symlinks -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2}) 
 
-# try --no-dangling-links without --follow-links options
+# try --no-dangling-links without --follow-symlinks options
 ADD_H5_TEST (h5diff_452 2  --no-dangling-links  ${FILE13} ${FILE13})
 
 # dangling link found for soft links (FILE to FILE)
-ADD_H5_TEST (h5diff_453 2  --follow-links -v --no-dangling-links  ${FILE13} ${FILE13})  
+ADD_H5_TEST (h5diff_453 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13})  
 
 # dangling link found for soft links (obj to obj)
-ADD_H5_TEST (h5diff_454 2  --follow-links -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist) 
+ADD_H5_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist) 
 
 # dangling link found for soft links (obj to obj) Both dangle links
-ADD_H5_TEST (h5diff_455 2  --follow-links -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist) 
+ADD_H5_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist) 
 
 # dangling link found for ext links (FILE to FILE)
-ADD_H5_TEST (h5diff_456 2  --follow-links -v --no-dangling-links  ${FILE15} ${FILE15}) 
+ADD_H5_TEST (h5diff_456 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15}) 
 
 # dangling link found for ext links (obj to obj). target file exist
-ADD_H5_TEST (h5diff_457 2  --follow-links -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1) 
+ADD_H5_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1) 
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-ADD_H5_TEST (h5diff_458 2  --follow-links -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)  
+ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)  
 
 # dangling link found for ext links (obj to obj). Both dangle links
-ADD_H5_TEST (h5diff_459 2  --follow-links -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
+ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
   
 ENDIF (BUILD_TESTING)
 
