@@ -2229,7 +2229,7 @@ out:
 *
 * Return: Type identifier on success and negative on failure
 *
-* Programmer: epourmal@hdfgorup.org
+* Programmer: epourmal@hdfgroup.org
 *
 * Date: May 22, 2010
 *
