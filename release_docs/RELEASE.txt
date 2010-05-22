@@ -100,17 +100,11 @@ New Features
 
     High-Level APIs
     ---------------
-     - Fixed a bug in the H5DSdetach_scale function when 0 bytes   
-       were allocated after the last reference to a dim. scale         
-       was removed from the list of references in a VL element of the
-       DIMENSION_LIST attribute; modified the function to comply
-       with the Spec: DIMENSION_LIST attribute is deleted now when no
-       dimension scales left attached.
-                                     (EIP - 2010/05/14 -1822)
+    - None
 
     F90 API
     -------
-     - None
+    - None
 
     C++ API
     -------
@@ -210,7 +204,19 @@ Bug Fixes since HDF5-1.8.4
 
     High-Level APIs:
     ------
-    - None EIP - 2009/10/21
+    - Fixed a bug in H5DSattach_scale, H5DSis_attached and H5DSdetach_scale
+      caused by using H5Tget_native_type function to determine the native
+      type for reading REFERENCE_LIST attribute. The bug was exposed
+      on Mac PPC.
+                                    (EIP - 2010/05/22 -1851) 
+    - Fixed a bug in the H5DSdetach_scale function when 0 bytes   
+      were allocated after the last reference to a dim. scale         
+      was removed from the list of references in a VL element of the
+      DIMENSION_LIST attribute; modified the function to comply
+      with the Spec: DIMENSION_LIST attribute is deleted now when no
+      dimension scales left attached.
+                                    (EIP - 2010/05/14 -1822)
+
 
     Fortran High-Level APIs:
     ------

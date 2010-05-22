@@ -132,7 +132,7 @@ herr_t H5DSattach_scale(hid_t did,
     hid_t      ntid = -1;    /* attribute native type ID */
     hid_t      aid = -1;     /* attribute ID */
     int        rank;         /* rank of dataset */
-    hsize_t    *dims=NULL;   /* dimension of the "REFERENCE_LIST" array */
+    hsize_t    dims[1];   /* dimension of the "REFERENCE_LIST" array */
     ds_list_t  dsl;          /* attribute data in the DS pointing to the dataset */
     ds_list_t  *dsbuf=NULL;  /* array of attribute data in the DS pointing to the dataset */
     hobj_ref_t ref_to_ds;    /* reference to the DS */
@@ -238,11 +238,6 @@ herr_t H5DSattach_scale(hid_t did,
     */
     if (has_dimlist == 0)
     {
-        /* create one entry array */
-        dims = (hsize_t*) malloc (1 * sizeof (hsize_t));
-
-        if(dims == NULL)
-            return FAIL;
 
         dims[0] = rank;
 
@@ -288,11 +283,6 @@ herr_t H5DSattach_scale(hid_t did,
         if (H5Aclose(aid) < 0)
             goto out;
 
-        if (dims)
-        {
-            free(dims);
-            dims = NULL;
-        }
         if (buf)
         {
             free(buf);
@@ -411,11 +401,6 @@ herr_t H5DSattach_scale(hid_t did,
     */
     if (has_reflist == 0)
     {
-        /* create one entry array */
-        dims = (hsize_t*) malloc (1 * sizeof (hsize_t));
-
-        if (dims == NULL)
-            goto out;
 
         dims[0] = 1;
 
@@ -454,11 +439,6 @@ herr_t H5DSattach_scale(hid_t did,
         if(H5Aclose(aid) < 0)
             goto out;
 
-        if(dims)
-        {
-            free(dims);
-            dims = NULL;
-        }
     }
 
     /*-------------------------------------------------------------------------
@@ -474,7 +454,8 @@ herr_t H5DSattach_scale(hid_t did,
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
 
-        if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+        /* get native type to read attribute REFERENCE_LIST */
+        if((ntid = H5DS_get_REFLIST_type()) < 0)
             goto out;
 
         /* get and save the old reference(s) */
@@ -499,8 +480,6 @@ herr_t H5DSattach_scale(hid_t did,
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        if (H5Tclose(ntid) < 0)
-            goto out;
 
         /*-------------------------------------------------------------------------
         * create a new attribute
@@ -516,26 +495,17 @@ herr_t H5DSattach_scale(hid_t did,
         dsbuf[nelmts-1] = dsl;
 
         /* create a new data space for the new references array */
-        dims = (hsize_t *)malloc((size_t)nelmts * sizeof(hsize_t));
-        if(dims == NULL)
-            goto out;
         dims[0] = nelmts;
 
         if((sid = H5Screate_simple(1, dims, NULL)) < 0)
             goto out;
-
-        if (dims)
-        {
-            free(dims);
-            dims = NULL;
-        }
 
         /* create the attribute again with the changes of space */
         if((aid = H5Acreate2(dsid, REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
 
         /* write the attribute with the new references */
-        if(H5Awrite(aid, tid, dsbuf) < 0)
+        if(H5Awrite(aid, ntid, dsbuf) < 0)
             goto out;
 
         /* close */
@@ -544,6 +514,8 @@ herr_t H5DSattach_scale(hid_t did,
         if(H5Tclose(tid) < 0)
             goto out;
         if(H5Aclose(aid) < 0)
+            goto out;
+        if (H5Tclose(ntid) < 0)
             goto out;
 
         if (dsbuf)
@@ -573,11 +545,6 @@ herr_t H5DSattach_scale(hid_t did,
     /* error zone */
 out:
 
-    if (dims)
-    {
-        free(dims);
-        dims = NULL;
-    }
     if (buf)
     {
         free(buf);
@@ -844,7 +811,8 @@ herr_t H5DSdetach_scale(hid_t did,
     if((tid = H5Aget_type(aid)) < 0)
         goto out;
 
-    if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+    /* get native type to read attribute REFERENCE_LIST */
+    if((ntid = H5DS_get_REFLIST_type()) < 0)
         goto out;
 
     /* get and save the old reference(s) */
@@ -897,8 +865,6 @@ herr_t H5DSdetach_scale(hid_t did,
         goto out;
     if (H5Aclose(aid) < 0)
         goto out;
-    if (H5Tclose(ntid) < 0)
-        goto out;
 
     /*-------------------------------------------------------------------------
     * check if we found the pointed dataset
@@ -932,7 +898,7 @@ herr_t H5DSdetach_scale(hid_t did,
             goto out;
 
         /* write the new attribute with the new references */
-        if(H5Awrite(aid, tid, dsbuf) < 0)
+        if(H5Awrite(aid, ntid, dsbuf) < 0)
             goto out;
 
         /* close space and attribute */
@@ -944,6 +910,8 @@ herr_t H5DSdetach_scale(hid_t did,
 
     /* close type */
     if (H5Tclose(tid) < 0)
+        goto out;
+    if (H5Tclose(ntid) < 0)
         goto out;
 
     if (dsbuf)
@@ -1185,7 +1153,8 @@ htri_t H5DSis_attached(hid_t did,
         if((tid = H5Aget_type(aid)) < 0)
             goto out;
 
-        if((ntid = H5Tget_native_type(tid, H5T_DIR_DEFAULT)) < 0)
+        /* get native type to read REFERENCE_LIST attribute */
+        if((ntid = H5DS_get_REFLIST_type()) < 0)
             goto out;
 
         /* get and save the old reference(s) */
@@ -1266,6 +1235,7 @@ out:
         H5Sclose(sid);
         H5Aclose(aid);
         H5Tclose(tid);
+        H5Tclose(ntid);
     } H5E_END_TRY;
 
     if (buf)
@@ -2251,6 +2221,47 @@ out:
     return FAIL;
 }
 
+/*-------------------------------------------------------------------------
+* Function: H5DS_get_REFLIST_type
+*
+* Purpose: This is a helper function to return a native type for
+*          the REFERENCE_LIST attribute.
+*
+* Return: Type identifier on success and negative on failure
+*
+* Programmer: epourmal@hdfgroup.org
+*
+* Date: May 22, 2010
+*
+* Comments:
+*
+* Modifications:
+*
+*-------------------------------------------------------------------------
+*/
 
+hid_t H5DS_get_REFLIST_type(void)
+{
+    hid_t ntid_t = -1; 
+    
+    /* Build native type that corresponds to compound datatype
+       used to store ds_list_t structure in the REFERENCE_LIST
+       attribute */
 
+    if((ntid_t = H5Tcreate(H5T_COMPOUND, sizeof(ds_list_t))) < 0)
+        goto out;
+
+    if(H5Tinsert(ntid_t, "dataset", HOFFSET(ds_list_t,ref), H5T_STD_REF_OBJ) < 0)
+        goto out;
+
+    if(H5Tinsert(ntid_t, "dimension", HOFFSET(ds_list_t, dim_idx), H5T_NATIVE_INT) < 0)
+        goto out;
+
+    return ntid_t;
+out:
+    H5E_BEGIN_TRY {
+        H5Tclose(ntid_t);
+    } H5E_END_TRY;
+    return FAIL;
+}    
 
