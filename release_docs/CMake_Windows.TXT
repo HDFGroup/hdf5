@@ -74,7 +74,7 @@ Notes: This short instruction is written for users who want to quickly build
 
       To test the build, navigate to your build directory and execute;
       
-              ctest .
+              ctest . -C {Debug | Release}
               
    5. The files that support building HDF5 with CMake are all the files in the Resources
       folder, the CMakeLists.txt files in each source folder, and two additional files, 
