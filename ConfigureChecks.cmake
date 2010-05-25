@@ -367,15 +367,6 @@ CHECK_FUNCTION_EXISTS (ftello            H5_HAVE_FTELLO)
 CHECK_FUNCTION_EXISTS (fstat64           H5_HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            H5_HAVE_STAT64)
 
-# MPI checks
-SET (CMAKE_REQUIRED_INCLUDES "${MPI_INCLUDE_PATH}/mpi.h" )
-SET (CMAKE_REQUIRED_LIBRARIES "${MPI_LIBRARY}" )
-CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE)
-
-# For Fortran+MPI
-CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
-CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
-
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
