@@ -450,7 +450,6 @@ typedef struct {
 
 /* Typedef for filling a buffer with a fill value */
 typedef struct H5D_fill_buf_info_t {
-    hbool_t     alloc_vl_during_refill; /* Whether to allocate VL-datatype fill buffer during refill */
     H5MM_allocate_t fill_alloc_func;    /* Routine to call for allocating fill buffer */
     void        *fill_alloc_info;       /* Extra info for allocation routine */
     H5MM_free_t fill_free_func;         /* Routine to call for freeing fill buffer */
@@ -645,7 +644,6 @@ H5_DLL herr_t H5D_efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl,
 H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
 H5_DLL herr_t H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
-    hbool_t alloc_vl_during_refill,
     H5MM_allocate_t alloc_func, void *alloc_info,
     H5MM_free_t free_func, void *free_info,
     const H5O_fill_t *fill, const H5T_t *dset_type, hid_t dset_type_id,

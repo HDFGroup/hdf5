@@ -55,11 +55,10 @@ const char *FILENAME[] = {
 #define DO_RANKS_PRINT_CONFIG(TEST) {                                          \
     printf("  Config:\n");                                                     \
     printf("   Test: %s\n", TEST);                                             \
-    printf("   Compression: %s\n", (config & CONFIG_COMPRESS ? "yes"           \
-            : "no"));                                                          \
+    printf("   Compression: %s\n", (config & CONFIG_COMPRESS ? "yes" : "no")); \
     printf("   Fill value: %s\n", (do_fillvalue ? "yes" : "no"));              \
-    printf("   Early allocation: %s\n", (config & CONFIG_EARLY_ALLOC           \
-                    ? "yes" : "no"));                                          \
+    printf("   Early allocation: %s\n", (config & CONFIG_EARLY_ALLOC ? "yes"   \
+            : "no"));                                                          \
 } /* end DO_RANKS_PRINT_CONFIG */
 
 #define RANK1 1
