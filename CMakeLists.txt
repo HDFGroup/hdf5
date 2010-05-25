@@ -454,7 +454,7 @@ ENDIF (HDF5_ENABLE_SZIP_SUPPORT)
 #-----------------------------------------------------------------------------
 # Option to use PACKED BITS SUPPORT
 #-----------------------------------------------------------------------------
-OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" OFF)
+OPTION (HDF5_USE_H5DUMP_PACKED_BITS "Use the PACKED BITS feature in h5dump" ON)
 SET (H5_HAVE_H5DUMP_PACKED_BITS 0)
 IF (HDF5_USE_H5DUMP_PACKED_BITS)
   SET (H5_HAVE_H5DUMP_PACKED_BITS 1)
