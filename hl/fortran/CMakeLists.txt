@@ -12,6 +12,16 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY})
 LINK_DIRECTORIES (${HDF5_SRC_DIR} ${HDF5_FORTRAN_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 #-----------------------------------------------------------------------------
+# Add debug information (intel Fortran : JB)
+#-----------------------------------------------------------------------------
+IF (CMAKE_Fortran_COMPILER MATCHES ifort)
+    IF (WIN32)
+        SET (CMAKE_Fortran_FLAGS_DEBUG "/debug:full /dbglibs " CACHE "flags" STRING FORCE)
+        SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG" CACHE "flags" STRING FORCE)
+    ENDIF (WIN32)
+ENDIF (CMAKE_Fortran_COMPILER MATCHES ifort)
+
+#-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
 ADD_SUBDIRECTORY (${HDF5_HL_F90_SOURCE_DIR}/src ${HDF5_HL_F90_BINARY_DIR}/src)
