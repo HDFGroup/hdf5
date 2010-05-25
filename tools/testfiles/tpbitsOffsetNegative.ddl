@@ -28,8 +28,12 @@ usage: h5dump [OPTIONS] file
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
-     -M M, --packedbits=M Print packed bits using mask format M for dataset P given
-                          in option d. Where M is (offset,length)[,(offset,length)].
+     -M L, --packedbits=L Print packed bits as unsigned integers, using mask
+                          format L for an integer dataset specified with
+                          option -d. L is a list of offset,length values,
+                          separated by commas. Offset is the beginning bit in
+                          the data value and length is the number of bits of
+                          the mask.
      -R, --region         Print dataset pointed by region references
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
@@ -69,8 +73,6 @@ usage: h5dump [OPTIONS] file
         -d (dataset) is used. B is an optional argument, defaults to NATIVE
   Q - is the sort index type. It can be "creation_order" or "name" (default)
   Z - is the sort order type. It can be "descending" or "ascending" (default)
-  M - is a paired list of integers the first number of which is the offset and the
-        second number is the length of the its being queried
 
   Examples:
 
@@ -86,5 +88,9 @@ usage: h5dump [OPTIONS] file
         using a little-endian type
 
       h5dump -d /dset -b LE -o out.bin quux.h5
+
+  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
+
+      h5dump -d /dset -M 0,1,4,3 quux.h5
 
 h5dump error: Bad mask list(-1,1)

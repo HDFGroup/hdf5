@@ -682,8 +682,14 @@ usage(const char *prog)
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
 #ifdef H5_HAVE_H5DUMP_PACKED_BITS
-    fprintf(stdout, "     -M M, --packedbits=M Print packed bits using mask format M for dataset P given\n");
-    fprintf(stdout, "                          in option d. Where M is (offset,length)[,(offset,length)].\n");
+    fprintf(stdout,
+	"     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n"
+	"                          format L for an integer dataset specified with\n"
+	"                          option -d. L is a list of offset,length values,\n"
+	"                          separated by commas. Offset is the beginning bit in\n"
+	"                          the data value and length is the number of bits of\n"
+	"                          the mask.\n"
+	);
 #endif
     fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -724,10 +730,6 @@ usage(const char *prog)
     fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
     fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
-#ifdef H5_HAVE_H5DUMP_PACKED_BITS
-    fprintf(stdout, "  M - is a paired list of integers the first number of which is the offset and the\n");
-    fprintf(stdout, "        second number is the length of the its being queried\n");
-#endif
     fprintf(stdout, "\n");
     fprintf(stdout, "  Examples:\n");
     fprintf(stdout, "\n");
@@ -743,6 +745,12 @@ usage(const char *prog)
     fprintf(stdout, "        using a little-endian type\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
+#ifdef H5_HAVE_H5DUMP_PACKED_BITS
+    fprintf(stdout, "\n");
+    fprintf(stdout, "  4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
+#endif
     fprintf(stdout, "\n");
 }
 
