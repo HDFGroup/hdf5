@@ -353,6 +353,14 @@ IF (HDF5_ENABLE_PARALLEL)
   INCLUDE_DIRECTORIES (${MPI_INCLUDE_PATH})
   IF (MPI_FOUND)
     SET (H5_HAVE_PARALLEL 1)
+    # MPI checks, only do these if MPI_FOUND is true, otherwise they always fail
+    # and once set, they are cached as false and not regenerated
+    SET (CMAKE_REQUIRED_INCLUDES "${MPI_INCLUDE_PATH}/mpi.h" )
+    SET (CMAKE_REQUIRED_LIBRARIES "${MPI_LIBRARY}" )
+    CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE) 
+    # Used by Fortran + MPI
+    CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
+    CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
   ENDIF (MPI_FOUND)
 ENDIF (HDF5_ENABLE_PARALLEL)
 
@@ -461,8 +469,10 @@ ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 #-----------------------------------------------------------------------------
 # Build utility to copy and strip X lines of file
 #-----------------------------------------------------------------------------
-SET (XLATE_UTILITY "xlatefile")
-ADD_EXECUTABLE(${XLATE_UTILITY} ${HDF5_SOURCE_DIR}/Resources/xlatefile.c)
+IF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
+  SET (XLATE_UTILITY "xlatefile")
+  ADD_EXECUTABLE(${XLATE_UTILITY} ${HDF5_SOURCE_DIR}/Resources/xlatefile.c)
+ENDIF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
@@ -558,6 +568,14 @@ INSTALL (
     FILE
         HDF5-config.cmake
 )
+
+# The install rule below copies compiled module files to the install location
+# using a "code" rule. The code string should not be broken up, it must be on one line
+IF (HDF5_BUILD_FORTRAN)
+    INSTALL ( CODE
+        "EXECUTE_PROCESS (COMMAND \"${CMAKE_COMMAND}\" -E copy_directory \"${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}\" \"${CMAKE_INSTALL_PREFIX}/fortran\")"
+    )
+ENDIF (HDF5_BUILD_FORTRAN)
 
 #-----------------------------------------------------------------------------
 # Export all exported targets to the build tree for use by parent project
