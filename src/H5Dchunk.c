@@ -188,6 +188,8 @@ static herr_t H5D_chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims
     const hsize_t *curr_dims);
 static void *H5D_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_chunk_xfree(void *chk, const H5O_pline_t *pline);
+static void *H5D_chunk_realloc(void *chk, size_t size,
+    const H5O_pline_t *pline);
 static herr_t H5D_chunk_cinfo_cache_update(H5D_chunk_cached_t *last,
     const H5D_chunk_ud_t *udata);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
@@ -887,6 +889,39 @@ H5D_chunk_xfree(void *chk, const H5O_pline_t *pline)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D_chunk_xfree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_chunk_realloc
+ *
+ * Purpose:     Reallocate space for a chunk in memory.  This routine allocates
+ *              memory space for non-filtered chunks from a block free list
+ *              and uses malloc()/free() for filtered chunks.
+ *
+ * Return:      Pointer to memory for chunk on success/NULL on failure
+ *
+ * Programmer:  Neil Fortner
+ *              May 3, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5D_chunk_realloc(void *chk, size_t size, const H5O_pline_t *pline)
+{
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_realloc)
+
+    HDassert(size);
+    HDassert(pline);
+
+    if(pline->nused > 0)
+        ret_value = H5MM_realloc(chk, size);
+    else
+        ret_value = H5FL_BLK_REALLOC(chunk, chk, size);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_chunk_realloc() */
 
 
 /*--------------------------------------------------------------------------
@@ -2744,6 +2779,9 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         else {
             H5D_fill_value_t	fill_status;
 
+            /* Sanity check */
+            HDassert(fill->alloc_time != H5D_ALLOC_TIME_EARLY);
+
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             if(NULL == (chunk = H5D_chunk_alloc(chunk_size, pline)))
@@ -2761,8 +2799,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
 
                 /* Initialize the fill value buffer */
                 /* (use the compact dataset storage buffer as the fill value buffer) */
-                if(H5D_fill_init(&fb_info, chunk, FALSE,
-                        NULL, NULL, NULL, NULL,
+                if(H5D_fill_init(&fb_info, chunk, NULL, NULL, NULL, NULL,
                         &dset->shared->dcpl_cache.fill, dset->shared->type,
                         dset->shared->type_id, (size_t)0, chunk_size, io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize fill buffer info")
@@ -3124,6 +3161,9 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
     space_dim[space_ndims] = layout->u.chunk.dim[space_ndims];
 
+    /* The last dimension in chunk_offset is always 0 */
+    chunk_offset[space_ndims] = (hsize_t)0;
+
     /* Check if any space dimensions are 0, if so we do not have to do anything
      */
     for(op_dim=0; op_dim<space_ndims; op_dim++)
@@ -3184,30 +3224,29 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         /* Initialize the fill value buffer */
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
-        if(H5D_fill_init(&fb_info, NULL, (hbool_t)(pline->nused > 0),
-                (H5MM_allocate_t)H5D_chunk_alloc, (void *)pline,
-                (H5MM_free_t)H5D_chunk_xfree, (void *)pline,
+        if(H5D_fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D_chunk_alloc,
+                (void *)pline, (H5MM_free_t)H5D_chunk_xfree, (void *)pline,
                 &dset->shared->dcpl_cache.fill, dset->shared->type,
                 dset->shared->type_id, (size_t)0, orig_chunk_size, data_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
 
-       /* Check if there are filters which need to be applied to the chunk */
-       /* (only do this in advance when the chunk info can be re-used (i.e.
-        *      it doesn't contain any non-default VL datatype fill values)
-        */
-       if(!fb_info.has_vlen_fill_type && pline->nused > 0) {
-           size_t buf_size = orig_chunk_size;
+        /* Check if there are filters which need to be applied to the chunk */
+        /* (only do this in advance when the chunk info can be re-used (i.e.
+         *      it doesn't contain any non-default VL datatype fill values)
+         */
+        if(!fb_info.has_vlen_fill_type && pline->nused > 0) {
+            size_t buf_size = orig_chunk_size;
 
-           /* Push the chunk through the filters */
-           if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf) < 0)
-               HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
+            /* Push the chunk through the filters */
+            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf) < 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 #if H5_SIZEOF_SIZE_T > 4
             /* Check for the chunk expanding too much to encode in a 32-bit value */
             if(orig_chunk_size > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
-       } /* end if */
+        } /* end if */
     } /* end if */
 
     /* Compose chunked index info struct */
@@ -3217,15 +3256,14 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
-    /* Calculate the minimum and maximum chunk offsets in each dimension */
+    /* Calculate the minimum and maximum chunk offsets in each dimension.  Note
+     * that we assume here that all elements of space_dim are > 0.  This is
+     * checked at the top of this function */
     for(op_dim=0; op_dim<space_ndims; op_dim++) {
         min_unalloc[op_dim] = ((old_dim[op_dim] + chunk_dim[op_dim] - 1)
                 / chunk_dim[op_dim]) * chunk_dim[op_dim];
-        if(space_dim[op_dim] == 0)
-            max_unalloc[op_dim] = 0;
-        else
-            max_unalloc[op_dim] = ((space_dim[op_dim] - 1) / chunk_dim[op_dim])
-                    * chunk_dim[op_dim];
+        max_unalloc[op_dim] = ((space_dim[op_dim] - 1) / chunk_dim[op_dim])
+                * chunk_dim[op_dim];
     } /* end for */
 
     /* Loop over all chunks */
@@ -3255,14 +3293,15 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             continue;
         else {
             /* Reset the chunk offset indices */
-            HDmemset(chunk_offset, 0, (layout->u.chunk.ndims * sizeof(chunk_offset[0])));
+            HDmemset(chunk_offset, 0, ((unsigned)space_ndims
+                    * sizeof(chunk_offset[0])));
             chunk_offset[op_dim] = min_unalloc[op_dim];
 
             carry = FALSE;
         } /* end if */
 
         while(!carry) {
-            size_t chunk_size;      /* Size of chunk in bytes, possibly filtered */
+            size_t chunk_size = orig_chunk_size; /* Size of chunk in bytes, possibly filtered */
 
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
@@ -3288,17 +3327,26 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 /* Sanity check */
                 HDassert(should_fill);
 
+                /* Check to make sure the buffer is large enough.  It is
+                 * possible (though ill-advised) for the filter to shrink the
+                 * buffer. */
+                if(fb_info.fill_buf_size < orig_chunk_size) {
+                    if(NULL == (fb_info.fill_buf = H5D_chunk_realloc(
+                            fb_info.fill_buf, orig_chunk_size, pline)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for raw data chunk")
+                    fb_info.fill_buf_size = orig_chunk_size;
+                } /* end if */
+
                 /* Fill the buffer with VL datatype fill values */
                 if(H5D_fill_refill_vl(&fb_info, fb_info.elmts_per_buf, data_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
                 /* Check if there are filters which need to be applied to the chunk */
                 if(pline->nused > 0) {
-                    size_t buf_size = orig_chunk_size;
-                    size_t nbytes = fb_info.fill_buf_size;
+                    size_t nbytes = orig_chunk_size;
 
                     /* Push the chunk through the filters */
-                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &buf_size, &fb_info.fill_buf) < 0)
+                    if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &fb_info.fill_buf_size, &fb_info.fill_buf) < 0)
                         HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
 #if H5_SIZEOF_SIZE_T > 4
@@ -3310,11 +3358,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     /* Keep the number of bytes the chunk turned in to */
                     chunk_size = nbytes;
                 } /* end if */
-                else
-                    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
             } /* end if */
-            else
-                chunk_size = orig_chunk_size;
 
             /* Initialize the chunk information */
             udata.common.layout = &layout->u.chunk;
@@ -3356,10 +3400,6 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 #endif /* H5_HAVE_PARALLEL */
             } /* end if */
 
-            /* Release the fill buffer if we need to re-allocate it each time */
-            if(fb_info_init && fb_info.has_vlen_fill_type && pline->nused > 0)
-                H5D_fill_release(&fb_info);
-
             /* Increment indices */
             carry = TRUE;
             for(i = (int)(space_ndims - 1); i >= 0; --i) {
@@ -3377,8 +3417,8 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         } /* end while(!carry) */
 
         /* Adjust max_unalloc_dim_idx so we don't allocate the same chunk twice.
-        * Also check if this dimension started from 0 (and hence allocated all
-        * of the chunks. */
+         * Also check if this dimension started from 0 (and hence allocated all
+         * of the chunks. */
         if(min_unalloc[op_dim] == 0)
             break;
         else
@@ -3457,7 +3497,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     /* Initialize the fill value buffer, if necessary */
     if(!udata->fb_info_init) {
         H5_CHECK_OVERFLOW(udata->elmts_per_chunk, uint32_t, size_t);
-        if(H5D_fill_init(&udata->fb_info, NULL, FALSE, NULL, NULL, NULL, NULL,
+        if(H5D_fill_init(&udata->fb_info, NULL, NULL, NULL, NULL, NULL,
                 &dset->shared->dcpl_cache.fill,
                 dset->shared->type, dset->shared->type_id, (size_t)udata->elmts_per_chunk,
                 io_info->dxpl_cache->max_temp_buf, io_info->dxpl_id) < 0)
@@ -4990,8 +5030,7 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
         buf = (unsigned char *)io_info->u.rbuf + mem_offset_arr[u];
 
 	/* Initialize the fill value buffer */
-	if(H5D_fill_init(&fb_info, buf, FALSE,
-		NULL, NULL, NULL, NULL,
+	if(H5D_fill_init(&fb_info, buf, NULL, NULL, NULL, NULL,
 		&dset->shared->dcpl_cache.fill, dset->shared->type,
 		dset->shared->type_id, (size_t)0, size, io_info->dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
