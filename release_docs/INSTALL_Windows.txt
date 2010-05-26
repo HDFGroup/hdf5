@@ -180,7 +180,7 @@ Notes:
       line, please read INSTALL_Windows_From_Command_Line.txt.
 
    5. For users who would like to build and test HDF5 package using CMake, 
-      please read INSTALL_Windows_Using_CMake.txt.
+      please read CMake.txt.
 
    6. HDF4-related tools are not built and released with HDF5 library packages 
       any more. To obtain HDF4 related tools, please check

@@ -58,7 +58,7 @@ New Features
     -------------
     - CMake Early Access, this release adds support for building hdf5 using
       the CMake system. Initial work has targeted Windows, but other platforms
-      can be used. See the CMake_Windows.TXT file for more information. Version
+      can be used. See the CMake.TXT file for more information. Version
       2.8.1 of CMake is required.
     - Configure now adds appropriate defines for supporting large (64-bit)
       files on all systems, where supported, by default, instead of only linux.
