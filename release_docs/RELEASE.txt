@@ -331,6 +331,9 @@ The following platforms and compilers have been tested for this release.
                                   G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
                                   Intel C, C++ and Fortran compilers 10.1
 
+    OpenVMS Alpha V8.3            HP C V7.3-009
+                                  HP C++ V7.3-009
+                                  HP Fortran V8.0-1-104669-48GBT      
 
 Supported Configuration Features Summary
 ========================================
@@ -366,7 +369,7 @@ SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
 RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
 SuSe Linux 2.4.21 ia64 Intel      C  y        y      y        y     y     n
 Cray XT3 2.0.62                      y        y      y        y     y     n
-
+OpenVMS Alpha V8.3                   n        y      n        y     y     n
 
 Platform                           Shared  Shared    Shared    Thread-  
                                    C libs  F90 libs  C++ libs  safe     
@@ -390,6 +393,7 @@ SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n
 RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
 SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n        
 Cray XT3 2.0.62                      n       n         n         n
+OpenVMS Alpha V8.3                   n       n         n         n
 
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
