@@ -361,7 +361,7 @@ INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 FORTRAN_API = yes
 
 # Tell automake how to install examples
-EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/fortran
+EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/fortran
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.

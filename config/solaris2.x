@@ -116,7 +116,7 @@ fi
 case $CC in
     *cc*)
         cc_version_info=`$CC $CFLAGS $H5_CFLAGS -V 2>&1 | grep 'Sun' |\
-            sed 's/.*\(Sun.*\)/\1 /'`
+            sed 's/.*\(Sun .*\)/\1 /'`
         ;;
 
     *)
@@ -129,7 +129,7 @@ case $FC in
     # The PGI and Intel compilers are automatically detected below
     *f90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Sun' |\
-            sed 's/.*\(Sun.*\)/\1 /'`
+            sed 's/.*\(Sun .*\)/\1 /'`
         ;;
 
      *)
@@ -142,7 +142,7 @@ echo "Fortran compiler '$FC' is $fc_version_info"
 case $CXX in
     *CC*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Sun' |\
-            sed 's/.*\(Sun.*\)/\1 /'`
+            sed 's/.*\(Sun .*\)/\1 /'`
         ;;
 
     *)

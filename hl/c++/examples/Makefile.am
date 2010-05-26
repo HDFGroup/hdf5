@@ -33,7 +33,7 @@ INSTALL_SCRIPT_FILES = run-hlc++-ex.sh
 CXX_API=yes
 
 # Where to install examples
-EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/c++
+EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

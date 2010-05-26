@@ -346,7 +346,7 @@ INSTALL_SCRIPT_FILES = run-hlc++-ex.sh
 CXX_API = yes
 
 # Where to install examples
-EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/c++
+EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl/c++
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.

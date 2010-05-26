@@ -361,8 +361,8 @@ INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
 EXTLINK_DIRS = red blue u2w
 
 # Example directory
-EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/c
-EXAMPLETOPDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples
+EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/c
+EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.

@@ -249,63 +249,43 @@ The following platforms and compilers have been tested for this release.
                                   g++ 4.4.1 20090421
                                   gfortran 4.4.1 20090421
 
-    Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2
-    #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
-    (jam)                         GNU Fortran (GCC) 4.1.2 20080704 
-                                  (Red Hat 4.1.2-46)
-                                  PGI C, Fortran, C++ 7.2-1 32-bit
-                                  PGI C, Fortran, C++ 8.0-1 32-bit
-                                  Intel(R) C Compiler for 32-bit
-                                      applications, Versions 10.1, 11.0
-                                  Intel(R) C++ Compiler for 32-bit
-                                      applications, Version 10.1, 11.0
-                                  Intel(R) Fortran Compiler for 32-bit
-                                      applications, Version 10.1, 11.0
+    Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2 20080704 and 4.4.2
+    #1 SMP i686 i686 i386         GNU Fortran (GCC) 4.1.2 20080704 and 4.4.2
+    (jam)                         g++ (GCC) 4.1.2 20080704 and 4.4.2
+                                  G95 (GCC 4.0.3 (g95 0.93!) Apr 21 2010)
                                   Absoft 32-bit Fortran 95 10.0.7
+                                  PGI C, Fortran, C++ 10.4-0 32-bit
+                                  Intel(R) C, C++, Fortran Compilers for 32-bit
+                                     applications, Version 11.1 Build 20090827
                                   MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+                                     gcc 4.1.2 and GNU Fortran (GCC) 4.1.2
 
-    Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
-    SMP i686 i686 i386            G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
-    (kagiso)                      MPICH mpich2-1.0.8 compiled with
-                                  gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!)
-
-    Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704
-    x86_64 GNU/Linux              G95 (GCC 4.0.3 (g95 0.92!) Jun 24 2009)
-    (amani)                       tested for both 32- and 64-bit binaries
+    Linux 2.6.18-164.el5 #1 SMP   gcc 4.1.2 20080704 and gcc 4.4.2 
+    x86_64 GNU/Linux              GNU Fortran (GCC) 4.1.2 20080704 and 4.4.2
+    (amani)                       g++ (GCC) 4.1.2 20080704 and 4.4.2 
+                                  G95 (GCC 4.0.3 (g95 0.93!) Apr 21 2010)
                                   Intel(R) C, C++, Fortran Compilers for 
-                                  applications running on Intel(R) 64, 
-                                  Versions 11.1.
-                                  PGI C, Fortran, C++ Version 9.0-4
-                                         for 64-bit target on x86-64
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+                                     applications running on Intel(R) 64, 
+                                     Version 11.1 Build 20090827.
+                                  PGI C, Fortran, C++ Version 10.4-0
+                                         for 32 & 64-bit target on x86-64
                                   MPICH mpich2-1.0.8 compiled with
-                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
-                                  GNU Fortran (GCC) 4.1.2 20080704
-                                  (Red Hat 4.1.2-46)
-
+                                     gcc 4.1.2 and GNU Fortran (GCC) 4.1.2
 
     Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
     SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
     (cobalt)                      SGI MPI 1.38
 
-    SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.9 Patch 124867-09
-    (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.3 
-                                  Patch 127000-07
-                                  Sun WorkShop 6 update 2 C++ 5.9 
-                                  Patch 124863-16 2009/09/15 
-
-    Intel Xeon Linux 2.6.18-      gcc 3.4.6 20060404
-    92.1.10.el5_lustre.1.6.6smp-  Intel(R) C++ Version 10.0.026
-    perfctr #2 SMP                Intel(R) Fortran Compiler Version 10.0.026
-    (abe)                         Open MPI 1.2.2
-                                  MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
+    SunOS 5.10 32- and 64-bit     Sun C 5.9 SunOS_sparc Patch 124867-14
+    (linew)                       Sun Fortran 95 8.3 SunOS_sparc 
+                                     Patch 127000-13 
+                                  Sun C++ 5.9 SunOS_sparc Patch 124863-23
+                                  
+    Intel Xeon Linux 2.6.18-      Intel(R) C++ Version 10.0.026
+    92.1.10.el5_lustre.1.6.6smp-  Intel(R) Fortran Compiler Version 10.0.026
+    perfctr #7 SMP                Open MPI 1.2.2
+    (abe)                         MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
                                   compiled with icc v10.0.026 and ifort 10.0.026
-
-    IA-64 Linux 2.4.21-309.tg1    gcc (GCC) 3.2.2
-    #1 SMP ia64                   Intel(R) C++ Version 8.1.037
-    (NCSA tg-login)               Intel(R) Fortran Compiler Version 8.1.033
-                                  mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
     Linux 2.6.9-55.0.9.EL_lustre  Intel(R) C, C++, Fortran Compilers for 
     .1.4.11.1smp #1 SMP           applications running on Intel(R) 64, 
@@ -367,7 +347,6 @@ SuSe Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
 SuSe Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
 RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
-SuSe Linux 2.4.21 ia64 Intel      C  y        y      y        y     y     n
 Cray XT3 2.0.62                      y        y      y        y     y     n
 OpenVMS Alpha V8.3                   n        y      n        y     y     n
 
@@ -389,9 +368,8 @@ RedHat EL5 2.6.18-128 i686 PGI    W  y       y         y         n
 SuSe Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y        
 SuSe Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
 SuSe Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
-SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n        
+SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n 
 RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
-SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n        
 Cray XT3 2.0.62                      n       n         n         n
 OpenVMS Alpha V8.3                   n       n         n         n
 
@@ -529,3 +507,11 @@ Known Problems
 
 * There is also a configure error on Altix machines that incorrectly reports 
   when a version of Szip without an encoder is being used.
+
+* On FREE-BSD systems when shared libraries are disabled, make install fails
+  in install-examples with the error '"Makefile", line 635: Need an operator'.
+  When this error occurs removing or commenting out the line "export
+  LD_LIBRARY_PATH=$(LL_PATH)" (line 635 in examples/Makefile). will allow make
+  install to finish installing examples.  The problem will be fixed in the
+  next release.
+  LRK - 2010/05/26
