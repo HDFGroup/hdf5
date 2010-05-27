@@ -1757,6 +1757,9 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
         /* Check for any messages that were modified while being read in */
         if(udata.common.mesgs_modified && prot != H5AC_WRITE)
             oh->mesgs_modified = TRUE;
+
+        /* Reset the field that contained chunk 0's size during speculative load */
+        oh->chunk0_size = 0;
     } /* end if */
 
     /* Take care of loose ends for modifications made while bringing in the

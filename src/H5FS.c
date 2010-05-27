@@ -123,7 +123,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     /*
      * Allocate free space structure
      */
-    if(NULL == (fspace = H5FS_new(nclasses, classes, cls_init_udata)))
+    if(NULL == (fspace = H5FS_new(f, nclasses, classes, cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
 
     /* Initialize creation information for free space manager */
@@ -139,7 +139,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     /* Check if the free space tracker is supposed to be persistant */
     if(fs_addr) {
         /* Allocate space for the free space header */
-        if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, dxpl_id, (hsize_t)H5FS_HEADER_SIZE(f))))
+        if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, dxpl_id, (hsize_t)fspace->hdr_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
 
         /* Cache the new free space header (pinned) */
@@ -515,7 +515,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_va
  *-------------------------------------------------------------------------
  */
 H5FS_t *
-H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
+H5FS_new(const H5F_t *f, size_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata)
 {
     H5FS_t *fspace = NULL;      /* Free space manager */
@@ -560,6 +560,7 @@ H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
 
     /* Initialize non-zero information for new free space manager */
     fspace->addr = HADDR_UNDEF;
+    fspace->hdr_size = H5FS_HEADER_SIZE(f);
     fspace->sect_addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -606,7 +607,7 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
     HDassert(meta_size);
 
     /* Get the free space size info */
-    *meta_size += H5FS_HEADER_SIZE(f) + (fspace->sinfo ? fspace->sect_size : fspace->alloc_sect_size);
+    *meta_size += fspace->hdr_size + (fspace->sinfo ? fspace->sect_size : fspace->alloc_sect_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_size() */

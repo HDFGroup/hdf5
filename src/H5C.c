@@ -2003,13 +2003,10 @@ H5C_insert_entry(H5F_t *             f,
     /* not protected, so can't be dirtied */
     entry_ptr->dirtied  = FALSE;
 
-    if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, \
-                    "Can't get size of thing")
-    }
-
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    /* Retrieve the size of the thing */
+    if((type->size)(f, thing, &(entry_ptr->size)) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
+    HDassert(entry_ptr->size > 0 &&  entry_ptr->size < H5C_MAX_ENTRY_SIZE);
 
     entry_ptr->in_slist = FALSE;
 
@@ -4583,8 +4580,6 @@ H5C_unprotect(H5F_t *		  f,
 #ifdef H5_HAVE_PARALLEL
     hbool_t		clear_entry = FALSE;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t              result;
-    size_t              size_increase = 0;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -7907,29 +7902,28 @@ H5C_load_entry(H5F_t *             f,
                hbool_t UNUSED	   skip_file_checks)
 #endif /* NDEBUG */
 {
-    void *		thing = NULL;
-    H5C_cache_entry_t *	entry_ptr = NULL;
-    unsigned            u;                      /* Local index variable */
-    void *		ret_value = NULL;       /* Return value */
+    void *		thing = NULL;   /* Pointer to thing loaded */
+    H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
+    unsigned            u;              /* Local index variable */
+    void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
 
-    HDassert( f );
-    HDassert( f->shared );
-    HDassert( f->shared->cache );
-    HDassert( skip_file_checks || f );
-    HDassert( type );
-    HDassert( type->load );
-    HDassert( type->size );
-    HDassert( H5F_addr_defined(addr) );
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert(skip_file_checks || f);
+    HDassert(type);
+    HDassert(type->load);
+    HDassert(type->size);
+    HDassert(H5F_addr_defined(addr));
 
-    if ( NULL == (thing = (type->load)(f, dxpl_id, addr, udata)) ) {
+    if(NULL == (thing = (type->load)(f, dxpl_id, addr, udata)))
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load entry")
 
-    }
 
-    entry_ptr = (H5C_cache_entry_t *)thing;
+    entry = (H5C_cache_entry_t *)thing;
 
     /* In general, an entry should be clean just after it is loaded.
      *
@@ -7940,11 +7934,11 @@ H5C_load_entry(H5F_t *             f,
      *
      * To support this bug fix, I have replace the old assert:
      *
-     * 	HDassert( entry_ptr->is_dirty == FALSE );
+     * 	HDassert( entry->is_dirty == FALSE );
      *
      * with:
      *
-     * 	HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
+     * 	HDassert( ( entry->is_dirty == FALSE ) || ( type->id == 5 ) );
      *
      * Note that type id 5 is associated with object headers in the metadata
      * cache.
@@ -7954,56 +7948,52 @@ H5C_load_entry(H5F_t *             f,
      * metadata cache.
      */
 
-    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
+    HDassert( ( entry->is_dirty == FALSE ) || ( type->id == 5 ) );
 #ifndef NDEBUG
-    entry_ptr->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
+    entry->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
-    entry_ptr->cache_ptr            = f->shared->cache;
-    entry_ptr->addr                 = addr;
-    entry_ptr->type                 = type;
-    entry_ptr->is_protected         = FALSE;
-    entry_ptr->is_read_only         = FALSE;
-    entry_ptr->ro_ref_count         = 0;
-    entry_ptr->in_slist             = FALSE;
-    entry_ptr->flush_marker         = FALSE;
+    entry->cache_ptr            = f->shared->cache;
+    entry->addr                 = addr;
+    entry->type                 = type;
+    entry->is_protected         = FALSE;
+    entry->is_read_only         = FALSE;
+    entry->ro_ref_count         = 0;
+    entry->in_slist             = FALSE;
+    entry->flush_marker         = FALSE;
 #ifdef H5_HAVE_PARALLEL
-    entry_ptr->clear_on_unprotect   = FALSE;
+    entry->clear_on_unprotect   = FALSE;
 #endif /* H5_HAVE_PARALLEL */
-    entry_ptr->flush_in_progress    = FALSE;
-    entry_ptr->destroy_in_progress  = FALSE;
-    entry_ptr->free_file_space_on_destroy = FALSE;
+    entry->flush_in_progress    = FALSE;
+    entry->destroy_in_progress  = FALSE;
+    entry->free_file_space_on_destroy = FALSE;
 
-    if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
+    if((type->size)(f, thing, &(entry->size)) < 0)
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, \
-                    "Can't get size of thing")
-    }
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, "Can't get size of thing")
 
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    HDassert( entry->size < H5C_MAX_ENTRY_SIZE );
 
     /* Initialize flush dependency height fields */
-    entry_ptr->flush_dep_parent = NULL;
+    entry->flush_dep_parent = NULL;
     for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++)
-        entry_ptr->child_flush_dep_height_rc[u] = 0;
-    entry_ptr->flush_dep_height = 0;
+        entry->child_flush_dep_height_rc[u] = 0;
+    entry->flush_dep_height = 0;
+    entry->ht_next              = NULL;
+    entry->ht_prev              = NULL;
 
-    entry_ptr->ht_next = NULL;
-    entry_ptr->ht_prev = NULL;
+    entry->next                 = NULL;
+    entry->prev                 = NULL;
 
-    entry_ptr->next                 = NULL;
-    entry_ptr->prev                 = NULL;
+    entry->aux_next             = NULL;
+    entry->aux_prev             = NULL;
 
-    entry_ptr->aux_next             = NULL;
-    entry_ptr->aux_prev             = NULL;
-
-    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr);
+    H5C__RESET_CACHE_ENTRY_STATS(entry);
 
     ret_value = thing;
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_load_entry() */
 
 
