@@ -636,11 +636,11 @@ LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
 # shared libraries instead of static libraries
-H5CC = ${DESTDIR}/$(bindir)/h5cc
-H5CC_PP = ${DESTDIR}/$(bindir)/h5pcc
-H5FC = ${DESTDIR}/$(bindir)/h5fc
-H5FC_PP = ${DESTDIR}/$(bindir)/h5pfc
-H5CPP = ${DESTDIR}/$(bindir)/h5c++
+H5CC = ${DESTDIR}$(bindir)/h5cc
+H5CC_PP = ${DESTDIR}$(bindir)/h5pcc
+H5FC = ${DESTDIR}$(bindir)/h5fc
+H5FC_PP = ${DESTDIR}$(bindir)/h5pfc
+H5CPP = ${DESTDIR}$(bindir)/h5c++
 
 # The trace script; this is used on source files from the C library to
 # insert tracing macros.
@@ -655,8 +655,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 # specifying a file prefix or low-level driver.  Changing the file
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
-	compact_dataset.h5 dataset.h5 dset_offset.h5 \
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(TEST_PROG) *.o *.exe \
+	cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
 	max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
 	huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
 	copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 \

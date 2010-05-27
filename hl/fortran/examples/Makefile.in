@@ -333,7 +333,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.exe
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(TEST_PROG) *.o *.exe \
+	*.h5
 
 # Compile parallel fortran examples only if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = 
