@@ -32,7 +32,7 @@ EXIT_SUCCESS=0
 EXIT_FAILURE=1
  
 # Where the tool is installed.
-prefix="${prefix:-${DESTDIR}/@prefix@}"
+prefix="${prefix:-${DESTDIR}@prefix@}"
 PARALLEL=@PARALLEL@             # Am I in parallel mode?
 AR="@AR@"
 RANLIB="@RANLIB@"
@@ -50,13 +50,14 @@ RunTest()
 
     echo
     echo "#################  $1  #################"
-    ${H5TOOL_BIN} $Test
+    ${H5TOOL_BIN} $Test -o $1
     if [ $? -ne 0 ]
     then
         echo "messed up compiling $Test"
         exit 1
     fi
-    ./a.out
+    ./$1
+    rm -f $1 $1.exe
 }
 
 
@@ -98,7 +99,6 @@ then
 fi
 
 # Cleanup
-rm a.out
 rm *.o
 rm *.h5
 rm -rf red blue u2w
