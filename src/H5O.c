@@ -1186,7 +1186,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     oh->mesg[0].chunkno = 0;
 
     /* Cache object header */
-    if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, (size_t)oh_size, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_OHDR, oh_addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh = NULL;
 
@@ -1681,6 +1681,9 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
         /* Check for any messages that were modified while being read in */
         if(udata.common.mesgs_modified && prot != H5AC_WRITE)
             oh->mesgs_modified = TRUE;
+
+        /* Reset the field that contained chunk 0's size during speculative load */
+        oh->chunk0_size = 0;
     } /* end if */
 
     /* Take care of loose ends for modifications made while bringing in the

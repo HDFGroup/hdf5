@@ -159,10 +159,7 @@ static herr_t H5AC_log_flushed_entry_dummy(H5C_t * cache_ptr,
 
 static herr_t H5AC_log_inserted_entry(H5F_t * f,
                                       H5AC_t * cache_ptr,
-                                      H5AC_info_t * entry_ptr,
-                                      const H5AC_class_t * type,
-                                      haddr_t addr,
-                                      size_t size);
+                                      H5AC_info_t * entry_ptr);
 
 static herr_t H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
                                                            hid_t dxpl_id,
@@ -1565,11 +1562,8 @@ done:
  */
 herr_t
 H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-    size_t len, void *thing, unsigned int flags)
+    void *thing, unsigned int flags)
 {
-    herr_t		result;
-    H5AC_info_t        *info;
-    herr_t ret_value=SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1578,6 +1572,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     size_t              trace_entry_size = 0;
     FILE *        	trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set, FAIL)
 
@@ -1603,81 +1598,40 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_set 0x%lx %ld %d 0x%x",
+        sprintf(trace, "H5AC_set 0x%lx %d 0x%x",
 	        (unsigned long)addr,
-		(long)len,
 		type->id,
 		flags);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    /* Get local copy of this information */
-    info = (H5AC_info_t *)thing;
-
-    info->addr = addr;
-    info->type = type;
-    info->is_protected = FALSE;
-
-#ifdef H5_HAVE_PARALLEL
-    if ( NULL != (aux_ptr = f->shared->cache->aux_ptr) ) {
-
-        result = H5AC_log_inserted_entry(f,
-                                         f->shared->cache,
-                                         (H5AC_info_t *)thing,
-                                         type,
-                                         addr,
-                                         len);
-
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                    "H5AC_log_inserted_entry() failed.")
-        }
-    }
-#endif /* H5_HAVE_PARALLEL */
-
-    result = H5C_insert_entry(f,
-		              dxpl_id,
-			      type,
-			      addr,
-			      len,
-			      thing,
-			      flags);
-
-    if ( result < 0 ) {
-
+    /* Insert entry into metadata cache */
+    if(H5C_insert_entry(f, dxpl_id, type, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
-    }
 
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
+    if(trace_file_ptr != NULL) {
         /* make note of the entry size */
         trace_entry_size = ((H5C_cache_entry_t *)thing)->size;
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    if ( ( aux_ptr != NULL ) &&
-         ( aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold ) ) {
+    if(NULL != (aux_ptr = f->shared->cache->aux_ptr)) {
+        if(H5AC_log_inserted_entry(f, f->shared->cache, (H5AC_info_t *)thing) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC_log_inserted_entry() failed")
 
-        result = H5AC_propagate_flushed_and_still_clean_entries_list(f,
-                                                          H5AC_noblock_dxpl_id,
-                                                          f->shared->cache,
-                                                          TRUE);
-        if ( result < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Can't propagate clean entries list.")
-        }
-    }
+        if(aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold) {
+            if(H5AC_propagate_flushed_and_still_clean_entries_list(f, H5AC_noblock_dxpl_id,
+                    f->shared->cache, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't propagate clean entries list")
+        } /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
+    if(trace_file_ptr != NULL) {
 	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
                   (int)trace_entry_size,
 		  (int)ret_value);
@@ -1685,7 +1639,6 @@ done:
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_set() */
 
 
@@ -4316,10 +4269,7 @@ done:
 static herr_t
 H5AC_log_inserted_entry(H5F_t * f,
                         H5AC_t * cache_ptr,
-                        H5AC_info_t * entry_ptr,
-                        const H5AC_class_t * type,
-                        haddr_t addr,
-                        size_t size)
+                        H5AC_info_t * entry_ptr)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
     H5AC_aux_t         * aux_ptr = NULL;
@@ -4336,15 +4286,13 @@ H5AC_log_inserted_entry(H5F_t * f,
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
 
     HDassert( entry_ptr != NULL );
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->type == type );
 
     if ( aux_ptr->mpi_rank == 0 ) {
 
         HDassert( aux_ptr->d_slist_ptr != NULL );
         HDassert( aux_ptr->c_slist_ptr != NULL );
 
-        if ( H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr)) == NULL ) {
+        if ( H5SL_search(aux_ptr->d_slist_ptr, (void *)(&entry_ptr->addr)) == NULL ) {
 
             /* insert the address of the entry in the dirty entry list, and
              * add its size to the dirty_bytes count.
@@ -4356,7 +4304,7 @@ H5AC_log_inserted_entry(H5F_t * f,
             }
 
             slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
-            slist_entry_ptr->addr  = addr;
+            slist_entry_ptr->addr  = entry_ptr->addr;
 
             if ( H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr,
                              &(slist_entry_ptr->addr)) < 0 ) {
@@ -4373,14 +4321,14 @@ H5AC_log_inserted_entry(H5F_t * f,
                         "Inserted entry already in dirty slist.")
         }
 
-        if ( H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr)) != NULL ) {
+        if ( H5SL_search(aux_ptr->c_slist_ptr, (void *)(&entry_ptr->addr)) != NULL ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "Inserted entry in clean slist.")
         }
     }
 
-    aux_ptr->dirty_bytes += size;
+    aux_ptr->dirty_bytes += entry_ptr->size;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
     aux_ptr->insert_dirty_bytes += size;

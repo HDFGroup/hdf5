@@ -85,6 +85,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     H5AC_GHEAP_ID,
     "global heap",
     H5FD_MEM_GHEAP,
+    H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
     H5HG_get_load_size,
     H5HG_deserialize,
     H5HG_image_len,
@@ -320,6 +321,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5HG_image_len
+ *
+ * Purpose:     Tell the metadata cache about the actual size
+ *              of the global heap
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              mcgreevy@hdfgroup.org
+ *              July 28, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_image_len(const void *thing, size_t *image_len_ptr)
+{
+    const H5HG_heap_t    *heap = (const H5HG_heap_t *)thing;    /* Global heap */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_image_len)
+
+    /* Check arguments */
+    HDassert(heap);
+    HDassert(image_len_ptr);
+
+    /* Report the global heap's total size */
+    *image_len_ptr = heap->size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HG_image_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HG_serialize
  *
  * Purpose:	Serialize the data structure for writing to disk.
@@ -376,38 +409,6 @@ H5HG_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_serialize() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5HG_image_len
- *
- * Purpose:     Tell the metadata cache about the actual size
- *              of the global heap
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Mike McGreevy
- *              mcgreevy@hdfgroup.org
- *              July 28, 2008
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HG_image_len(const void *thing, size_t *image_len_ptr)
-{
-    const H5HG_heap_t    *heap = (const H5HG_heap_t *)thing;    /* Global heap */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_image_len)
-
-    /* Check arguments */
-    HDassert(heap);
-    HDassert(image_len_ptr);
-
-    /* Report the global heap's total size */
-    *image_len_ptr = heap->size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HG_image_len() */
 
 
 /*-------------------------------------------------------------------------

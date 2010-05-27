@@ -120,11 +120,11 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     /*
      * Allocate free space structure
      */
-    if(NULL == (fspace = H5FS_new(nclasses, classes, cls_init_udata)))
+    if(NULL == (fspace = H5FS_new(f, nclasses, classes, cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
 
     /* Allocate space for the free space header */
-    if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, dxpl_id, (hsize_t)H5FS_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, dxpl_id, (hsize_t)fspace->hdr_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
     *fs_addr = fspace->addr;
 
@@ -136,7 +136,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     fspace->max_sect_size = fs_create->max_sect_size;
 
     /* Cache the new free space header (pinned) */
-    if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, H5FS_HEADER_SIZE(f), fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache")
 
     /* Set the return value */
@@ -309,7 +309,7 @@ HDfprintf(stderr, "%s: Done expunging free space section info from cache\n", FUN
     } /* end if */
 
     /* Release header's disk space */
-    if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, fs_addr, (hsize_t)H5FS_HEADER_SIZE(f))<0)
+    if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, dxpl_id, fs_addr, (hsize_t)fspace->hdr_size) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space header")
 
     /* Release the free space header */
@@ -431,7 +431,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5FS_t *
-H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
+H5FS_new(const H5F_t *f, size_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata)
 {
     H5FS_t *fspace;             /* Free space manager */
@@ -472,6 +472,7 @@ H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
 
     /* Initialize non-zero information for new free space manager */
     fspace->addr = HADDR_UNDEF;
+    fspace->hdr_size = H5FS_HEADER_SIZE(f);
     fspace->sect_addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -508,7 +509,7 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
     HDassert(meta_size);
 
     /* Get the free space size info */
-    *meta_size += H5FS_HEADER_SIZE(f) + fspace->alloc_sect_size;
+    *meta_size += fspace->hdr_size + fspace->alloc_sect_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_size() */

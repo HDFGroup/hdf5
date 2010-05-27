@@ -89,13 +89,6 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_SOHM_TABLE     H5FD_MEM_OHDR
 #define H5FD_MEM_SOHM_INDEX     H5FD_MEM_BTREE
 
-/* Per discussion with Quincey, I'm mapping the metadata journaling
- * configuration block to super.
- *
- * 						JRM -- 3/20/08
- */
-#define H5FD_MEM_MDJCONFIG 	H5FD_MEM_SUPER
-
 /*
  * A free-list map which maps all types of allocation requests to a single
  * free list.  This is useful for drivers that don't really care about

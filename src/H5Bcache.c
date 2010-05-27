@@ -57,6 +57,7 @@
 static herr_t H5B_get_load_size(const void *udata, size_t *image_len);
 static void *H5B_deserialize( const void *image, size_t len, void *udata,
     hbool_t *dirty);
+static herr_t H5B_image_len(const void *thing, size_t *image_len);
 static herr_t H5B_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -72,9 +73,10 @@ const H5AC_class_t H5AC_BT[1] = {{
     H5AC_BT_ID,
     "v1 B-tree",
     H5FD_MEM_BTREE,
+    H5AC__CLASS_NO_FLAGS_SET,
     H5B_get_load_size,
     H5B_deserialize,
-    NULL,
+    H5B_image_len,
     H5B_serialize,
     H5B_free_icr,
 }};
@@ -224,6 +226,42 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_deserialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_image_len
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_image_len(const void *_thing, size_t *image_len)
+{
+    H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
+    H5B_shared_t *shared;       /* Pointer to shared B-tree info */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_image_len)
+
+    /* Check arguments */
+    HDassert(bt);
+    HDassert(image_len);
+
+    /* Get shared info for B-tree */
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
+
+    /* Set the image length size */
+    *image_len = shared->sizeof_rnode;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5B_image_len() */
 
 
 /*-------------------------------------------------------------------------

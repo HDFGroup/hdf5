@@ -69,7 +69,7 @@
 static herr_t H5O_cache_get_load_size(const void *_udata, size_t *image_len);
 static void *H5O_cache_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5O_cache_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t H5O_cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O_cache_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
     size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -78,6 +78,7 @@ static herr_t H5O_cache_free_icr(void *thing);
 static herr_t H5O_cache_chk_get_load_size(const void *_udata, size_t *image_len);
 static void *H5O_cache_chk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
+static herr_t H5O_cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O_cache_chk_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -106,6 +107,7 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     H5AC_OHDR_ID,
     "object header",
     H5FD_MEM_OHDR,
+    H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
     H5O_cache_get_load_size,
     H5O_cache_deserialize,
     H5O_cache_image_len,
@@ -118,9 +120,10 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     H5AC_OHDR_CHK_ID,
     "object header chunk",
     H5FD_MEM_OHDR,
+    H5AC__CLASS_NO_FLAGS_SET,
     H5O_cache_chk_get_load_size,
     H5O_cache_chk_deserialize,
-    NULL,
+    H5O_cache_chk_image_len,
     H5O_cache_chk_serialize,
     H5O_cache_chk_free_icr,
 }};
@@ -365,7 +368,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5O_cache_image_len
  *
- * Purpose:	Tell the metadata cache about the actual size of the object
+ * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -376,7 +379,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_image_len(const void *thing, size_t *image_len_ptr)
+H5O_cache_image_len(const void *thing, size_t *image_len)
 {
     const H5O_t		*oh = (const H5O_t *)thing;     /* The object header */
 
@@ -384,10 +387,13 @@ H5O_cache_image_len(const void *thing, size_t *image_len_ptr)
 
     /* Check arguments */
     HDassert(oh);
-    HDassert(image_len_ptr);
+    HDassert(image_len);
 
     /* Report the object header's prefix+first chunk length */
-    *image_len_ptr = H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
+    if(oh->chunk0_size)
+       *image_len = H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
+    else
+       *image_len = oh->chunk[0].size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_cache_image_len() */
@@ -670,6 +676,37 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cache_chk_deserialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_cache_chk_image_len
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 20 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_cache_chk_image_len(const void *_thing, size_t *image_len)
+{
+    const H5O_chunk_proxy_t *chk_proxy = (const H5O_chunk_proxy_t *)_thing;  /* Pointer to the object header chunk proxy */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cache_chk_image_len)
+
+    /* Check arguments */
+    HDassert(chk_proxy);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = chk_proxy->oh->chunk[chk_proxy->chunkno].size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_cache_chk_image_len() */
 
 
 /*-------------------------------------------------------------------------

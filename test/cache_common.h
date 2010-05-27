@@ -23,7 +23,7 @@
 #include "H5Iprivate.h"
 #include "H5ACprivate.h"
 
-#define H5C_PACKAGE             /*suppress error about including H5pkg   */
+#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 
 #include "H5Cpkg.h"
 
@@ -319,7 +319,7 @@ typedef struct test_entry_t
 } test_entry_t;
 
 /* The following are cut down test versions of the hash table manipulation
- * macros from H5Cpkg.c, which have been further modified to avoid references
+ * macros from H5Cpkg.h, which have been further modified to avoid references
  * to the error reporting macros.  Needless to say, these macros must be
  * updated as necessary.
  */
@@ -540,11 +540,9 @@ extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 
 /* call back function declarations: */
 
-herr_t check_write_permitted(const H5F_t UNUSED * f,
-                              hid_t UNUSED dxpl_id,
-                              hbool_t * write_permitted_ptr);
-
-
+herr_t check_write_permitted(const H5F_t * f,
+                             hid_t dxpl_id,
+                             hbool_t * write_permitted_ptr);
 
 /* callback table extern */
 
@@ -585,9 +583,8 @@ void insert_entry(H5F_t * file_ptr,
                   int32_t idx,
                   unsigned int flags);
 
-void mark_entry_dirty(H5F_t * file_ptr,
-	                      int32_t type,
-		              int32_t idx);
+void mark_entry_dirty(int32_t type,
+		      int32_t idx);
 
 void move_entry(H5C_t * cache_ptr,
                 int32_t type,
@@ -726,8 +723,7 @@ void flush_cache(H5F_t * file_ptr,
                  hbool_t dump_stats,
                  hbool_t dump_detailed_stats);
 
-void unpin_entry(H5F_t * file_ptr,
-                 int32_t type,
+void unpin_entry(int32_t type,
                  int32_t idx);
 
 void unprotect_entry(H5F_t * file_ptr,

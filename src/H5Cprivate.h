@@ -39,6 +39,15 @@
 
 #define H5C_DO_SANITY_CHECKS		1
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
+/* Note: The memory sanity checks aren't going to work until I/O filters are
+ *      changed to call a particular alloc/free routine for their buffers,
+ *      because the H5AC__SERIALIZE_RESIZED_FLAG set by the fractal heap
+ *      direct block serialize callback calls H5Z_pipeline().  When the I/O
+ *      filters are changed, then we should implement "cache image alloc/free"
+ *      routines that the fractal heap direct block (and global heap) serialize
+ *      calls can use when resizing (and re-allocating) their image in the
+ *      cache. -QAK */
+#define H5C_DO_MEMORY_SANITY_CHECKS	0
 
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
@@ -109,6 +118,8 @@ typedef struct H5C_t H5C_t;
  *
  * mem_type:  Instance of H5FD_mem_t, that is used to supply the
  * 	mem type passed into H5F_block_read().
+ *
+ * flags:  Flags indicating class-specific behavior.
  *
  * get_load_size: Pointer to the 'get load size' function.
  *
@@ -432,10 +443,15 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
 
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 
+#define H5C__CLASS_NO_FLAGS_SET			0x0
+#define H5C__CLASS_SPECULATIVE_LOAD_FLAG	0x1
+#define H5C__CLASS_COMPRESSED_FLAG		0x2
+
 typedef struct H5C_class_t {
     int					id;
     const char *			name;
     H5FD_mem_t				mem_type;
+    unsigned				flags;
     H5C_get_load_size_func_t 		get_load_size;
     H5C_deserialize_func_t 		deserialize;
     H5C_image_len_func_t		image_len;
@@ -1422,7 +1438,6 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               dxpl_id,
                                const H5C_class_t * type,
                                haddr_t             addr,
-			       size_t              len,
                                void *              thing,
                                unsigned int        flags);
 

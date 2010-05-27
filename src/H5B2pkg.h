@@ -188,6 +188,7 @@ typedef struct H5B2_t {
 
     /* Internal B-tree information */
     H5B2_node_ptr_t root;       /* Node pointer to root node in B-tree        */
+    size_t      hdr_size;       /* Size of the B-tree header on disk          */
     H5RC_t	*shared;	/* Ref-counted shared info	              */
 } H5B2_t;
 

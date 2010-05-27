@@ -78,6 +78,7 @@ static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *
 static herr_t H5FS_cache_hdr_get_load_size(const void *udata, size_t *image_len);
 static void *H5FS_cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
+static herr_t H5FS_cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -86,6 +87,7 @@ static herr_t H5FS_cache_hdr_free_icr(void *thing);
 static herr_t H5FS_cache_sinfo_get_load_size(const void *udata, size_t *image_len);
 static void *H5FS_cache_sinfo_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
+static herr_t H5FS_cache_sinfo_image_len(const void *thing, size_t *image_len);
 static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
     haddr_t addr, size_t len, void *image, void *thing, unsigned *flags,
     haddr_t *new_addr, size_t *new_len, void **new_image);
@@ -101,9 +103,10 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     H5AC_FSPACE_HDR_ID,
     "Free space header",
     H5FD_MEM_FSPACE_HDR,
+    H5AC__CLASS_NO_FLAGS_SET,
     H5FS_cache_hdr_get_load_size,
     H5FS_cache_hdr_deserialize,
-    NULL,
+    H5FS_cache_hdr_image_len,
     H5FS_cache_hdr_serialize,
     H5FS_cache_hdr_free_icr,
 }};
@@ -113,9 +116,10 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     H5AC_FSPACE_SINFO_ID,
     "Free space section info",
     H5FD_MEM_FSPACE_SINFO,
+    H5AC__CLASS_NO_FLAGS_SET,
     H5FS_cache_sinfo_get_load_size,
     H5FS_cache_sinfo_deserialize,
-    NULL,
+    H5FS_cache_sinfo_image_len,
     H5FS_cache_sinfo_serialize,
     H5FS_cache_sinfo_free_icr,
 }};
@@ -183,7 +187,6 @@ H5FS_cache_hdr_deserialize(const void *image, size_t UNUSED len,
 {
     H5FS_t		*fspace = NULL; /* Free space header info */
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* user data for callback */
-    size_t		size;           /* Header size */
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
@@ -197,14 +200,11 @@ H5FS_cache_hdr_deserialize(const void *image, size_t UNUSED len,
     HDassert(udata);
 
     /* Allocate a new free space manager */
-    if(NULL == (fspace = H5FS_new(udata->fs_prot->nclasses, udata->fs_prot->classes, udata->fs_prot->cls_init_udata)))
+    if(NULL == (fspace = H5FS_new(udata->f, udata->fs_prot->nclasses, udata->fs_prot->classes, udata->fs_prot->cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
     fspace->addr = udata->addr;
-
-    /* Compute the size of the free space header on disk */
-    size = H5FS_HEADER_SIZE(udata->f);
 
     p = (const uint8_t *)image;
 
@@ -288,6 +288,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_hdr_image_len
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FS_cache_hdr_image_len(const void *_thing, size_t *image_len)
+{
+    H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_image_len)
+
+    /* Check arguments */
+    HDassert(fspace);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = fspace->hdr_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FS_cache_hdr_image_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FS_cache_hdr_serialize
  *
  * Purpose:     Serializes the data structure for writing to disk.
@@ -309,7 +340,6 @@ H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
     uint8_t *p;                           /* Pointer into raw data buffer */
     uint32_t metadata_chksum;             /* Computed metadata checksum value */
-    size_t	size;                     /* Header size on disk */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_hdr_serialize)
 
@@ -318,9 +348,6 @@ H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     HDassert(image);
     HDassert(fspace);
     HDassert(flags);
-
-    /* Compute the size of the free space header on disk */
-    size = H5FS_HEADER_SIZE(f);
 
     /* Get temporary pointer to header */
     p = (uint8_t *)image;
@@ -713,6 +740,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_sinfo_image_len
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FS_cache_sinfo_image_len(const void *_thing, size_t *image_len)
+{
+    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FS_cache_sinfo_image_len)
+
+    /* Check arguments */
+    HDassert(sinfo);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = sinfo->fspace->alloc_sect_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FS_cache_sinfo_image_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FS_cache_sinfo_serialize
  *
  * Purpose:     Serialize the data structure for writing to disk.
@@ -730,12 +788,12 @@ H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED
     size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    H5FS_sinfo_t * sinfo = (H5FS_sinfo_t *)_thing;
+    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;       /* Pointer to section info */
     H5FS_iter_ud_t udata;       /* User data for callbacks */
     uint8_t *p;                 /* Pointer into raw data buffer */
     uint32_t metadata_chksum;   /* Computed metadata checksum value */
     unsigned bin;               /* Current bin we are on */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_serialize)
 
@@ -751,8 +809,7 @@ H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED
     if(H5F_addr_ne(addr, sinfo->fspace->sect_addr))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "incorrect address for free space sections")
 
-    /* Allocate temporary buffer */
-
+    /* Point to disk image buffer */
     p = (uint8_t *)image;
 
     /* Magic number */

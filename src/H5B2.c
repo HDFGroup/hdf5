@@ -124,6 +124,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 
     /* Assign internal information */
     HDmemset(&bt2->cache_info, 0, sizeof(H5AC_info_t));
+    bt2->hdr_size = H5B2_HEADER_SIZE(f);
     bt2->root.addr = HADDR_UNDEF;
     bt2->root.node_nrec = 0;
     bt2->root.all_nrec = 0;
@@ -133,11 +134,11 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)H5B2_HEADER_SIZE(f))))
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)bt2->hdr_size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree header")
 
     /* Cache the new B-tree node */
-    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, *addr_p, (size_t)H5B2_HEADER_SIZE(f), bt2, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_BT2_HDR, *addr_p, bt2, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree header to cache")
 
 done:
@@ -1029,7 +1030,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
     /* Release space for B-tree node on disk */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5B2_HEADER_SIZE(f))<0)
+    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)bt2->hdr_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree header info")
 
 done:
@@ -1282,7 +1283,7 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     HDassert(shared);
 
     /* Add size of header to B-tree metadata total */
-    *btree_size += H5B2_HEADER_SIZE(f);
+    *btree_size += bt2->hdr_size;
 
     /* Make copy of the root node pointer */
     root_ptr = bt2->root;

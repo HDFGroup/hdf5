@@ -94,29 +94,15 @@ typedef enum {
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
  * have a constant variable with permanent life-span that describes how
- * to cache the object.	 That variable will be of type H5AC_class_t and
- * have the following required fields...
- *
- * LOAD:	Loads an object from disk to memory.  The function
- *		should allocate some data structure and return it.
- *
- * FLUSH:	Writes some data structure back to disk.  It would be
- *		wise for the data structure to include dirty flags to
- *		indicate whether it really needs to be written.	 This
- *		function is also responsible for freeing memory allocated
- *		by the LOAD method if the DEST argument is non-zero (by
- *              calling the DEST method).
- *
- * DEST:	Just frees memory allocated by the LOAD method.
- *
- * CLEAR:	Just marks object as non-dirty.
- *
- * SIZE:	Report the size (on disk) of the specified cache object.
- *		Note that the space allocated on disk may not be contiguous.
+ * to cache the object.
  */
 
 #define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
+
+#define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
+#define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
+#define H5AC__CLASS_COMPRESSED_FLAG	 H5C__CLASS_COMPRESSED_FLAG
 
 typedef H5C_get_load_size_func_t	H5AC_get_load_size_func_t;
 typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
@@ -126,8 +112,7 @@ typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
 
 typedef H5C_class_t			H5AC_class_t;
 
-
-
+/* Cache entry info */
 typedef H5C_cache_entry_t		H5AC_info_t;
 
 
@@ -302,7 +287,7 @@ H5_DLL herr_t H5AC_end_transaction(hbool_t do_transaction,
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
 				    unsigned * status_ptr);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-                       haddr_t addr, size_t len, void *thing, unsigned int flags);
+                       haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, void *udata, H5AC_protect_t rw);

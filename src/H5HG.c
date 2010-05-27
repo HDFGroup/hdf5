@@ -140,7 +140,7 @@ H5FL_BLK_DEFINE(gheap_chunk);
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
+H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
     uint8_t	*p = NULL;
@@ -227,7 +227,7 @@ HDmemset(heap->chunk, 0, size);
     } /* end else */
 
     /* Add the heap to the cache */
-    if(H5AC_set(f, dxpl_id, H5AC_GHEAP, addr, (size_t)size, heap, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_GHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to cache global heap collection")
 
     ret_value = addr;

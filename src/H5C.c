@@ -90,6 +90,16 @@
 
 
 /*
+ * Private macros.
+ */
+#if H5C_DO_MEMORY_SANITY_CHECKS
+#define H5C_IMAGE_EXTRA_SPACE 8
+#define H5C_IMAGE_SANITY_VALUE "DeadBeef"
+#else /* H5C_DO_MEMORY_SANITY_CHECKS */
+#define H5C_IMAGE_EXTRA_SPACE 0
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
+/*
  * Private file-scope variables.
  */
 
@@ -199,6 +209,7 @@ const H5C_class_t epoch_marker_class =
     /* id               = */ H5C__EPOCH_MARKER_TYPE,
     /* name             = */ "epoch marker",
     /* mem_type         = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
+    /* flags		= */ H5AC__CLASS_NO_FLAGS_SET,
     /* get_load_size    = */ &H5C_epoch_marker_get_load_size,
     /* deserialize      = */ &H5C_epoch_marker_deserialize,
     /* image_len        = */ &H5C_epoch_marker_image_len,
@@ -2008,7 +2019,6 @@ H5C_insert_entry(H5F_t *             f,
                  hid_t		     dxpl_id,
                  const H5C_class_t * type,
                  haddr_t 	     addr,
-	       	 size_t              len,
                  void *		     thing,
                  unsigned int        flags)
 {
@@ -2072,9 +2082,10 @@ H5C_insert_entry(H5F_t *             f,
     /* not protected, so can't be dirtied */
     entry_ptr->dirtied  = FALSE;
 
-    entry_ptr->size = len;
-
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    /* Retrieve the size of the thing */
+    if((type->image_len)(thing, &(entry_ptr->size)) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
+    HDassert(entry_ptr->size > 0 &&  entry_ptr->size < H5C_MAX_ENTRY_SIZE);
 
     entry_ptr->in_slist = FALSE;
 
@@ -2582,7 +2593,6 @@ H5C_mark_entry_dirty(void *thing)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if ( entry_ptr->is_protected ) {
-
 	HDassert( ! ((entry_ptr)->is_read_only) );
 
         /* set the dirtied flag */
@@ -7141,11 +7151,9 @@ H5C_flush_single_entry(const H5F_t *	   f,
         }
 
         /* Clear the dirty flag only, if requested */
-        if ( clear_only ) {
+        if(clear_only)
 	    entry_ptr->is_dirty = FALSE;
-        }
-	else if ( entry_ptr->is_dirty )
-	{
+	else if(entry_ptr->is_dirty) {
 	    /* The entry is dirty, and we are doing either a flush,
 	     * or a flush destroy.  In either case, serialize the
 	     * entry and write it to disk.
@@ -7155,61 +7163,35 @@ H5C_flush_single_entry(const H5F_t *	   f,
 	     * will have to touch up the cache to account for the
 	     * change(s).
 	     */
-
 #if H5C_DO_SANITY_CHECKS
-            if ( ( cache_ptr->check_write_permitted == NULL ) &&
-                 ( ! (cache_ptr->write_permitted) ) ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "Write when writes are always forbidden!?!?!")
-            }
+            if((cache_ptr->check_write_permitted == NULL) && !(cache_ptr->write_permitted))
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Write when writes are always forbidden!?!?!")
 #endif /* H5C_DO_SANITY_CHECKS */
 
-	    if ( entry_ptr->image_ptr == NULL )
-            {
-                entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size);
+	    if(NULL == entry_ptr->image_ptr) {
+                if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for on disk image buffer")
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+	    } /* end if */
 
-		if ( entry_ptr->image_ptr == NULL )
-	        {
+	    if(!(entry_ptr->image_up_to_date)) {
+	        if(entry_ptr->type->serialize(f, dxpl_id, entry_ptr->addr,
+                        entry_ptr->size, entry_ptr->image_ptr, (void *)entry_ptr,
+                        &serialize_flags, &new_addr, &new_len, &new_image_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to serialize entry")
 
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                        "memory allocation failed for on disk image buffer.")
-		}
-	    }
-
-	    if ( ! ( entry_ptr->image_up_to_date ) ) {
-
-	        if ( entry_ptr->type->serialize(f,
-					        dxpl_id,
-                                                entry_ptr->addr,
-				                entry_ptr->size,
-					        entry_ptr->image_ptr,
-					        (void *)entry_ptr,
-					        &serialize_flags,
-					        &new_addr,
-					        &new_len,
-					        &new_image_ptr) != SUCCEED )
-                {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                "unable to serialize entry")
-	        }
-
-	        if ( serialize_flags != 0 )
-                {
-
+	        if(serialize_flags != 0) {
                     /* Check for unexpected flags from serialize callback */
                     if(serialize_flags & ~(H5C__SERIALIZE_RESIZED_FLAG | H5C__SERIALIZE_MOVED_FLAG))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unknown serialize flag(s)")
 
-                    if ( destroy )
-		    {
-		        if ( cache_ptr->mdj_enabled ) {
+                    /* Check for move/resize when journaling is enabled */
+                    if(cache_ptr->mdj_enabled)
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "move/resize when journaling enabled")
 
-                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                               "move/resize on destroy when journaling enabled.")
-                        }
-
+                    if(destroy) {
                         /* We have already removed the entry from the
 		         * cache's data structures, so no need to update
 		         * them for the re-size and/or move.  All we need
@@ -7221,38 +7203,20 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		         * size of the disk image of the entry, it must
 		         * deallocate the old image, and allocate a new.
 		         */
-
                         if(serialize_flags & H5C__SERIALIZE_RESIZED_FLAG) {
                             H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, \
-                                                              entry_ptr, \
-                                                              new_len)
-
-                            /* Check for resize+move */
-                            if(serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
-                                H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, \
-                                                              entry_ptr)
-			        entry_ptr->addr = new_addr;
-                            } /* end if */
-
+                                    entry_ptr, new_len)
                             entry_ptr->size = new_len;
                             entry_ptr->image_ptr = new_image_ptr;
                         } /* end if */
-                        else {
-                            HDassert(serialize_flags & H5C__SERIALIZE_MOVED_FLAG);
 
-                            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, \
-                                                          entry_ptr)
+                        /* Check for move */
+                        if(serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
+                            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
                             entry_ptr->addr = new_addr;
-                        } /* end else */
-		    }
-		    else
-		    {
-		        if ( cache_ptr->mdj_enabled ) {
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "move/resize on flush when journaling enabled.");
-                        }
-
+                        } /* end if */
+		    } /* end if */
+		    else {
 		        /* The entry is not being destroyed, and thus has not
 		         * been removed from the cache's data structures.
 		         *
@@ -7260,31 +7224,15 @@ H5C_flush_single_entry(const H5F_t *	   f,
 		         * re-size and/or move, we must also update the
 		         * cache data structures.
 		         */
-
                         if(serialize_flags & H5C__SERIALIZE_RESIZED_FLAG) {
-
-                            H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
-                                                               cache_ptr, \
-                                                               entry_ptr, \
-                                                               new_len)
+                            H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, \
+                                    entry_ptr, new_len)
 
                             /* The replacement policy code thinks the
                              * entry is already clean, so modify is_dirty
                              * to meet this expectation.
                              */
                             entry_ptr->is_dirty = FALSE;
-
-                            /* Check for resize+move */
-                            if(serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
-                                H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, \
-                                                              entry_ptr)
-
-			        /* update the hash table for the move */
-			        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
-		                entry_ptr->addr = new_addr;
-			        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, \
-						      FAIL)
-                            } /* end if */
 
                             /* update the hash table for the size change*/
                             H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
@@ -7313,40 +7261,37 @@ H5C_flush_single_entry(const H5F_t *	   f,
                             entry_ptr->size = new_len;
                             entry_ptr->image_ptr = new_image_ptr;
                         } /* end if */
-                        else {
-                            HDassert(serialize_flags & H5C__SERIALIZE_MOVED_FLAG);
 
+                        /* Check for move */
+                        if(serialize_flags & H5C__SERIALIZE_MOVED_FLAG) {
                             /* The replacement policy code thinks the
                              * entry is already clean, so modify is_dirty
                              * to meet this expectation.
                              */
                             entry_ptr->is_dirty = FALSE;
 
-                            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, \
-                                                          entry_ptr)
+                            H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
 
                             /* first update the hash table for the move */
                             H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
                             entry_ptr->addr = new_addr;
-                            H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, \
-                                                  FAIL)
+                            H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
                             /* finally, set is_dirty to TRUE again */
                             entry_ptr->is_dirty = TRUE;
-                        } /* end else */
-		    }
-                }
+                        } /* end if */
+		    } /* end else */
+                } /* end if */
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                HDassert(0 == HDmemcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE));
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 		entry_ptr->image_up_to_date = TRUE;
-            }
+            } /* end if */
 
 	    /* now write the image to disk */
-	    if ( H5F_block_write(f, type_ptr->mem_type, entry_ptr->addr,
-				 entry_ptr->size, dxpl_id,
-				 entry_ptr->image_ptr) < 0 )
-	    {
-		    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-			        "Can't write image to file.")
-            }
+	    if(H5F_block_write(f, type_ptr->mem_type, entry_ptr->addr,
+                    entry_ptr->size, dxpl_id, entry_ptr->image_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file.")
 
 #ifdef H5_HAVE_PARALLEL
 	    /* note that we initialized the serialize_flags to 0, so if
@@ -7472,12 +7417,12 @@ H5C_load_entry(H5F_t *             f,
                haddr_t             addr,
                void *              udata)
 {
-    hbool_t		dirty = FALSE;          /* Flag indicating whether thing was dirtied during deserialize */
-    void *		image_ptr = NULL;       /* Buffer for disk image */
-    void *		thing = NULL;           /* Pointer to thing loaded */
-    H5C_cache_entry_t *	entry_ptr;              /* Alias for thing loaded, as cache entry */
-    size_t              len;                    /* Size of image in file */
-    void *		ret_value;              /* Return value */
+    hbool_t		dirty = FALSE;  /* Flag indicating whether thing was dirtied during deserialize */
+    void *		image = NULL;   /* Buffer for disk image */
+    void *		thing = NULL;   /* Pointer to thing loaded */
+    H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
+    size_t              len;            /* Size of image in file */
+    void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
 
@@ -7494,10 +7439,7 @@ H5C_load_entry(H5F_t *             f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size")
 
     /* Check for possible speculative read off the end of the file */
-    /* (Assume speculative reads will only occur if an image_len callback is defined) */
-    if ( type->image_len )
-    {
-
+    if(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
         haddr_t eoa;                /* End-of-allocation in the file */
         haddr_t base_addr;          /* Base address of file data */
 
@@ -7510,93 +7452,88 @@ H5C_load_entry(H5F_t *             f,
         HDassert(H5F_addr_defined(base_addr));
 
         /* Check for bad address in general */
-        if ( (addr + base_addr) > eoa )
-        {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
-                        "address of object past end of allocation")
-
-        }
+        if((addr + base_addr) > eoa)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "address of object past end of allocation")
 
         /* Check if the amount of data to read will be past the eoa */
-        if ( ( addr + base_addr + len ) > eoa )
-        {
-
+        if((addr + base_addr + len) > eoa)
             /* Trim down the length of the metadata */
             len = (size_t)(eoa - (addr + base_addr));
+    } /* end if */
 
-        }
-    }
+    /* Allocate the buffer for reading the on-disk entry image */
+    if(NULL == (image = H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer.")
+#if H5C_DO_MEMORY_SANITY_CHECKS
+    HDmemcpy(((uint8_t *)image) + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
-    image_ptr = H5MM_malloc(len);
+    /* Get the on-disk entry image */
+    if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
 
-    if ( image_ptr == NULL ) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
-                    "memory allocation failed for on disk image buffer.")
-    }
-
-    if ( H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image*")
-    }
-
-    thing = type->deserialize(image_ptr, len, udata, &dirty);
-
-    if ( thing == NULL ) {
-
+    /* Deserialize the on-disk image into the native memory form */
+    if(NULL == (thing = type->deserialize(image, len, udata, &dirty)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
-    }
 
     /* If the client's cache has an image_len callback, check it */
-    if ( type->image_len )
+    if(type->image_len) {
+        size_t	new_len;        /* New size of on-disk image */
+
+        /* Get the actual image size for the thing */
+        if(type->image_len(thing, &new_len) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image length")
+	else if(new_len == 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "image length is 0")
+	else if(new_len != len) {
+            /* Check for size changing on non-speculatively loaded, non-compressed thing */
+            if(type->flags & ~(H5C__CLASS_SPECULATIVE_LOAD_FLAG | H5C__CLASS_COMPRESSED_FLAG))
+                HGOTO_ERROR(H5E_CACHE, H5E_UNSUPPORTED, NULL, "size of non-speculative, non-compressed object changed")
+            else {
+                void *new_image;       /* Buffer for disk image */
+
+                /* Allocate differently sized buffer */
+                if(NULL == (new_image = H5MM_realloc(image, new_len + H5C_IMAGE_EXTRA_SPACE)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
+                image = new_image;
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                HDmemcpy(((uint8_t *)image) + new_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
+                /* If the thing's image needs to be bigger for a speculatively
+                 *      loaded thing, free the thing and retry with new length
+                 */
+                if((type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) && new_len > len) {
+                    /* Release previous (possibly partially initialized) thing */
+                    if(type->free_icr(thing) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
+
+                    /* Go get the on-disk image again */
+                    if(H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
+
+                    /* Deserialize on-disk image into native memory form again */
+                    if(NULL == (thing = type->deserialize(image, new_len, udata, &dirty)))
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
+
+#ifndef NDEBUG
     {
-        size_t			new_len;
+                    size_t new_new_len;
 
-        if ( type->image_len(thing, &new_len) != SUCCEED ) {
-
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "image_len() failed.\n");
-
-	} else if ( new_len == 0 ) {
-
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len == 0\n")
-	}
-	else if ( new_len != len)
-	{
-	    image_ptr = H5MM_realloc(image_ptr, new_len);
-
-	    if ( image_ptr == NULL ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
-                            "image_ptr null after H5MM_realloc().")
-	    }
-
-            /* If the thing's image needs to be bigger, free the thing
-             * and retry with new length
-             */
-            if(new_len > len) {
-                if(type->free_icr(thing) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed.")
-
-                if(H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image_ptr) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
-
-                thing = type->deserialize(image_ptr, new_len, udata, &dirty);
-
-                if ( thing == NULL ) {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
-                                "Can't deserialize image")
-                }
-
-            }
+                    /* Get the actual image size for the thing again */
+                    type->image_len(thing, &new_new_len);
+                    HDassert(new_new_len == new_len);
+    }
+#endif /* NDEBUG */
+                } /* end else */
+            } /* end if */
 
             /* Retain adjusted size */
             len = new_len;
-	}
-    }
+	} /* end if */
+    } /* end if */
 
-    entry_ptr = (H5C_cache_entry_t *)thing;
+    entry = (H5C_cache_entry_t *)thing;
 
     /* In general, an entry should be clean just after it is loaded.
      *
@@ -7618,51 +7555,58 @@ H5C_load_entry(H5F_t *             f,
      */
 
     HDassert( ( dirty == FALSE ) || ( type->id == 5 || type->id == 6) );
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    HDassert( entry->size < H5C_MAX_ENTRY_SIZE );
 #ifndef NDEBUG
-    entry_ptr->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
+    entry->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
-    entry_ptr->cache_ptr            = f->shared->cache;
-    entry_ptr->addr                 = addr;
-    entry_ptr->size                 = len;
-    entry_ptr->image_ptr            = image_ptr;
-    entry_ptr->image_up_to_date     = TRUE;
-    entry_ptr->type                 = type;
-    entry_ptr->is_dirty	            = dirty;
-    entry_ptr->dirtied              = FALSE;
-    entry_ptr->is_protected         = FALSE;
-    entry_ptr->is_read_only         = FALSE;
-    entry_ptr->ro_ref_count         = 0;
-    entry_ptr->is_pinned            = FALSE;
-    entry_ptr->in_slist             = FALSE;
-    entry_ptr->flush_marker         = FALSE;
+    entry->cache_ptr            = f->shared->cache;
+    entry->addr                 = addr;
+    entry->size                 = len;
+    entry->image_ptr            = image;
+    entry->image_up_to_date     = TRUE;
+    entry->type                 = type;
+    entry->is_dirty	        = dirty;
+    entry->dirtied              = FALSE;
+    entry->is_protected         = FALSE;
+    entry->is_read_only         = FALSE;
+    entry->ro_ref_count         = 0;
+    entry->is_pinned            = FALSE;
+    entry->in_slist             = FALSE;
+    entry->flush_marker         = FALSE;
 #ifdef H5_HAVE_PARALLEL
-    entry_ptr->clear_on_unprotect   = FALSE;
+    entry->clear_on_unprotect   = FALSE;
 #endif /* H5_HAVE_PARALLEL */
-    entry_ptr->flush_in_progress    = FALSE;
-    entry_ptr->destroy_in_progress  = FALSE;
+    entry->flush_in_progress    = FALSE;
+    entry->destroy_in_progress  = FALSE;
 
-    entry_ptr->ht_next              = NULL;
-    entry_ptr->ht_prev              = NULL;
+    entry->ht_next              = NULL;
+    entry->ht_prev              = NULL;
 
-    entry_ptr->next                 = NULL;
-    entry_ptr->prev                 = NULL;
+    entry->next                 = NULL;
+    entry->prev                 = NULL;
 
-    entry_ptr->aux_next             = NULL;
-    entry_ptr->aux_prev             = NULL;
+    entry->aux_next             = NULL;
+    entry->aux_prev             = NULL;
 
-    entry_ptr->last_trans           = 0;
-    entry_ptr->trans_next           = NULL;
-    entry_ptr->trans_prev           = NULL;
+    entry->last_trans           = 0;
+    entry->trans_next           = NULL;
+    entry->trans_prev           = NULL;
 
-    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr);
+    H5C__RESET_CACHE_ENTRY_STATS(entry);
 
     ret_value = thing;
 
 done:
+    /* Cleanup on error */
+    if(NULL == ret_value) {
+        /* Release resources */
+        if(thing && type->free_icr(thing) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
+        if(image)
+            image = H5MM_xfree(image);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_load_entry() */
 
 

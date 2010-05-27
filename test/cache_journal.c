@@ -3650,12 +3650,12 @@ mdj_smoke_check_00(hbool_t human_readable,
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 8);
     protect_entry(file_ptr, MICRO_ENTRY_TYPE, 9);
 
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 0);
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 1);
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 2);
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 3);
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 6);
-    mark_entry_dirty(file_ptr, MICRO_ENTRY_TYPE, 7);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 0);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 1);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 2);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 3);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 6);
+    mark_entry_dirty(MICRO_ENTRY_TYPE, 7);
 
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, FALSE);
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, FALSE);
@@ -3695,16 +3695,16 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     begin_trans(cache_ptr, verbose, (uint64_t)5, "transaction 5.2");
 
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 2);
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 3);
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 4);
+    unpin_entry(MICRO_ENTRY_TYPE, 2);
+    unpin_entry(MICRO_ENTRY_TYPE, 3);
+    unpin_entry(MICRO_ENTRY_TYPE, 4);
 
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 4, TRUE);
     move_entry(cache_ptr, MICRO_ENTRY_TYPE, 5, TRUE);
 
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 5);
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 6);
-    unpin_entry(file_ptr, MICRO_ENTRY_TYPE, 7);
+    unpin_entry(MICRO_ENTRY_TYPE, 5);
+    unpin_entry(MICRO_ENTRY_TYPE, 6);
+    unpin_entry(MICRO_ENTRY_TYPE, 7);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)5, "transaction 5.2");
 
@@ -3930,19 +3930,19 @@ mdj_smoke_check_00(hbool_t human_readable,
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4, TRUE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4, VARIABLE_ENTRY_SIZE, TRUE);
-    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 4);
+    unpin_entry(VARIABLE_ENTRY_TYPE, 4);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5, TRUE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5, VARIABLE_ENTRY_SIZE, TRUE);
-    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 5);
+    unpin_entry(VARIABLE_ENTRY_TYPE, 5);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6, TRUE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6, VARIABLE_ENTRY_SIZE, TRUE);
-    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 6);
+    unpin_entry(VARIABLE_ENTRY_TYPE, 6);
 
     move_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7, TRUE);
     resize_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7, VARIABLE_ENTRY_SIZE, TRUE);
-    unpin_entry(file_ptr, VARIABLE_ENTRY_TYPE, 7);
+    unpin_entry(VARIABLE_ENTRY_TYPE, 7);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)9, "transaction 9.2");
 

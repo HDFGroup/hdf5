@@ -2136,14 +2136,14 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 {
     size_t new_size;    /* New size of the accumulator buffer */
     size_t old_offset;  /* Offset of old data within the accumulator buffer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_write, FAIL)
 
-    assert(file && file->cls);
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(buf);
+    HDassert(file && file->cls);
+    HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
+    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(buf);
 
 #ifndef H5_HAVE_PARALLEL
     /* Do not return early for Parallel mode since the I/O could be a */

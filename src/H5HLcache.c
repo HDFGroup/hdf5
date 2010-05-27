@@ -83,6 +83,7 @@ static herr_t H5HL_prfx_free_icr(void *thing);
 static herr_t H5HL_dblk_get_load_size(const void *_udata, size_t *image_len);
 static void *H5HL_dblk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
+static herr_t H5HL_dblk_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HL_dblk_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -100,6 +101,7 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     H5AC_LHEAP_PRFX_ID,
     "local heap prefix",
     H5FD_MEM_LHEAP,
+    H5AC__CLASS_SPECULATIVE_LOAD_FLAG,
     H5HL_prfx_get_load_size,
     H5HL_prfx_deserialize,
     H5HL_prfx_image_len,
@@ -114,9 +116,10 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     H5AC_LHEAP_DBLK_ID,
     "local heap data block",
     H5FD_MEM_LHEAP,
+    H5AC__CLASS_NO_FLAGS_SET,
     H5HL_dblk_get_load_size,
     H5HL_dblk_deserialize,
-    NULL,
+    H5HL_dblk_image_len,
     H5HL_dblk_serialize,
     H5HL_dblk_free_icr,
 }};
@@ -401,7 +404,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5HL_prfx_image_len
  *
- * Purpose:	Tell the metadata cache about the actual size of the object
+ * Purpose:     Compute the size of the data structure on disk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -412,22 +415,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prfx_image_len(const void *thing, size_t *image_len_ptr)
+H5HL_prfx_image_len(const void *_thing, size_t *image_len)
 {
-    const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)thing;     /* The local heap prefix */
+    const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)_thing;     /* The local heap prefix */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_prfx_image_len)
 
     /* Check arguments */
     HDassert(prfx);
     HDassert(prfx->heap);
-    HDassert(image_len_ptr);
+    HDassert(image_len);
 
     /* Report the local heap's size, including the data block, if it's contiguous w/prefix */
     if(prfx->heap->single_cache_obj)
-        *image_len_ptr = prfx->heap->prfx_size + prfx->heap->dblk_size;
+        *image_len = prfx->heap->prfx_size + prfx->heap->dblk_size;
     else
-        *image_len_ptr = prfx->heap->prfx_size;
+        *image_len = prfx->heap->prfx_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL_prfx_image_len() */
@@ -625,6 +628,37 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_dblk_deserialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_dblk_image_len
+ *
+ * Purpose:     Compute the size of the data structure on disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 20 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_dblk_image_len(const void *_thing, size_t *image_len)
+{
+    const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing;  /* Pointer to the local heap data block */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dblk_image_len)
+
+    /* Check arguments */
+    HDassert(dblk);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = dblk->heap->dblk_size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HL_dblk_image_len() */
 
 
 /*-------------------------------------------------------------------------
