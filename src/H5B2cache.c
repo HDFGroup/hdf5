@@ -151,7 +151,6 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void  *_udata)
     size_t node_size, rrec_size;        /* Size info for B-tree */
     uint8_t split_percent, merge_percent;      /* Split & merge %s for B-tree */
     H5B2_t		*bt2 = NULL;    /* B-tree info */
-    size_t		size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
@@ -177,14 +176,14 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void  *_udata)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the size of the serialized B-tree header on disk */
-    size = H5B2_HEADER_SIZE(udata->f);
+    bt2->hdr_size = H5B2_HEADER_SIZE(udata->f);
 
     /* Get a pointer to a buffer that's large enough for header */
-    if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
+    if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, bt2->hdr_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, hdr) < 0)
+    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, bt2->hdr_size, dxpl_id, hdr) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree header")
 
     /* Get temporary pointer to serialized header */
@@ -225,10 +224,10 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void  *_udata)
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(p - (const uint8_t *)hdr) == size);
+    HDassert((size_t)(p - (const uint8_t *)hdr) == bt2->hdr_size);
 
     /* Compute checksum on entire header */
-    computed_chksum = H5_checksum_metadata(hdr, (size - H5B2_SIZEOF_CHKSUM), 0);
+    computed_chksum = H5_checksum_metadata(hdr, (bt2->hdr_size - H5B2_SIZEOF_CHKSUM), 0);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
@@ -284,7 +283,6 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         H5B2_shared_t *shared;  /* Shared B-tree information */
         uint8_t	*hdr;           /* Pointer to header buffer */
         uint8_t *p;             /* Pointer into raw data buffer */
-        size_t	size;           /* Header size on disk */
         uint32_t metadata_chksum; /* Computed metadata checksum value */
 
         /* Get the pointer to the shared B-tree info */
@@ -295,11 +293,8 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
-        /* Compute the size of the serialized B-tree header on disk */
-        size = H5B2_HEADER_SIZE(f);
-
         /* Get a pointer to a buffer that's large enough for header */
-        if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
+        if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, bt2->hdr_size)))
             HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to serialized header */
@@ -336,14 +331,14 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         H5F_ENCODE_LENGTH(f, p, bt2->root.all_nrec);
 
         /* Compute metadata checksum */
-        metadata_chksum = H5_checksum_metadata(hdr, (size - H5B2_SIZEOF_CHKSUM), 0);
+        metadata_chksum = H5_checksum_metadata(hdr, (bt2->hdr_size - H5B2_SIZEOF_CHKSUM), 0);
 
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
 
 	/* Write the B-tree header. */
-        HDassert((size_t)(p - hdr) == size);
-	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, hdr) < 0)
+        HDassert((size_t)(p - hdr) == bt2->hdr_size);
+	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, bt2->hdr_size, dxpl_id, hdr) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree header to disk")
 
 	bt2->cache_info.is_dirty = FALSE;
@@ -449,7 +444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t UNUSED *bt2, size_t *size_ptr)
+H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_t *bt2, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_size)
 
@@ -458,7 +453,7 @@ H5B2_cache_hdr_size(const H5F_t *f, const H5B2_t UNUSED *bt2, size_t *size_ptr)
     HDassert(size_ptr);
 
     /* Set size value */
-    *size_ptr = H5B2_HEADER_SIZE(f);
+    *size_ptr = bt2->hdr_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_hdr_size() */

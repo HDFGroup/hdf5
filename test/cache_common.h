@@ -297,8 +297,8 @@ typedef struct test_entry_t
                                          */
 } test_entry_t;
 
-/* The following is a cut down copy of the hash table manipulation
- * macros from H5C.c, which have been further modified to avoid references
+/* The following are cut down test versions of the hash table manipulation
+ * macros from H5Cpkg.h, which have been further modified to avoid references
  * to the error reporting macros.  Needless to say, these macros must be
  * updated as necessary.
  */
@@ -306,42 +306,42 @@ typedef struct test_entry_t
 #define H5C__HASH_MASK          ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
 #define H5C__HASH_FCN(x)        (int)(((x) & H5C__HASH_MASK) >> 3)
 
-#define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr)          \
-if ( ( (cache_ptr) == NULL ) ||                         \
+#define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)      \
+if ( ( (cache_ptr) == NULL ) ||                           \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||      \
-     ( ! H5F_addr_defined(Addr) ) ||                    \
-     ( H5C__HASH_FCN(Addr) < 0 ) ||                     \
+     ( ! H5F_addr_defined(Addr) ) ||                      \
+     ( H5C__HASH_FCN(Addr) < 0 ) ||                      \
      ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) { \
-    HDfprintf(stdout, "Pre HT search SC failed.\n");    \
+    HDfprintf(stdout, "Pre HT search SC failed.\n");      \
 }
 
-#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
-if ( ( (cache_ptr) == NULL ) ||                                   \
-     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                \
-     ( (cache_ptr)->index_len < 1 ) ||                            \
-     ( (entry_ptr) == NULL ) ||                                   \
-     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||           \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                \
-     ( (entry_ptr)->size <= 0 ) ||                                \
-     ( ((cache_ptr)->index)[k] == NULL ) ||                       \
-     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&              \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                      \
-     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&              \
-       ( (entry_ptr)->ht_prev != NULL ) ) ||                      \
-     ( ( (entry_ptr)->ht_prev != NULL ) &&                        \
-       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||      \
-     ( ( (entry_ptr)->ht_next != NULL ) &&                        \
-       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {     \
-    HDfprintf(stdout, "Post successful HT search SC failed.\n");  \
+#define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+if ( ( (cache_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                    \
+     ( (cache_ptr)->index_len < 1 ) ||                                  \
+     ( (entry_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                      \
+     ( (entry_ptr)->size <= 0 ) ||                                      \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                             \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                    \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                    \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                            \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                              \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||            \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                              \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {           \
+    HDfprintf(stdout, "Post successful HT search SC failed.\n");        \
 }
 
 
-#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                   \
+#define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)             \
 {                                                                       \
     int k;                                                              \
     int depth = 0;                                                      \
-    H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr)                              \
-    k = H5C__HASH_FCN(Addr);                                            \
+    H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                        \
+    k = H5C__HASH_FCN(Addr);                                           \
     entry_ptr = ((cache_ptr)->index)[k];                                \
     while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
     {                                                                   \
@@ -350,7 +350,7 @@ if ( ( (cache_ptr) == NULL ) ||                                   \
     }                                                                   \
     if ( entry_ptr )                                                    \
     {                                                                   \
-        H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)       \
+        H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
         if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
         {                                                               \
             if ( (entry_ptr)->ht_next )                                 \
@@ -365,6 +365,104 @@ if ( ( (cache_ptr) == NULL ) ||                                   \
             ((cache_ptr)->index)[k] = (entry_ptr);                      \
         }                                                               \
     }                                                                   \
+}
+
+/* Macros used in H5AC level tests */
+
+#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)       \
+  ( ( (a).version                == (b).version ) &&                 \
+    ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&         \
+    ( (a).open_trace_file        == (b).open_trace_file ) &&         \
+    ( (a).close_trace_file       == (b).close_trace_file ) &&        \
+    ( ( (a).open_trace_file == FALSE ) ||                            \
+      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) && \
+    ( (a).evictions_enabled      == (b).evictions_enabled ) &&       \
+    ( ( ! cmp_set_init ) ||                                          \
+      ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
+    ( ( ! cmp_init_size ) ||                                         \
+      ( (a).initial_size         == (b).initial_size ) ) &&          \
+    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&      \
+    ( (a).max_size               == (b).max_size ) &&                \
+    ( (a).min_size               == (b).min_size ) &&                \
+    ( (a).epoch_length           == (b).epoch_length ) &&            \
+    ( (a).incr_mode              == (b).incr_mode ) &&               \
+    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&      \
+    ( (a).increment              == (b).increment ) &&               \
+    ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
+    ( (a).max_increment          == (b).max_increment ) &&           \
+    ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
+    ( (a).flash_multiple         == (b).flash_multiple ) &&          \
+    ( (a).flash_threshold        == (b).flash_threshold ) &&         \
+    ( (a).decr_mode              == (b).decr_mode ) &&               \
+    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
+    ( (a).decrement              == (b).decrement ) &&               \
+    ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
+    ( (a).max_decrement          == (b).max_decrement ) &&           \
+    ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
+    ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
+    ( (a).empty_reserve          == (b).empty_reserve ) )
+
+#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
+( ( (a).version                == (b).version ) &&                \
+  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
+  ( ( ! compare_init ) ||                                         \
+    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
+  ( ( ! compare_init ) ||                                         \
+    ( (a).initial_size         == (b).initial_size ) ) &&         \
+  ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&     \
+  ( (a).max_size               == (b).max_size ) &&               \
+  ( (a).min_size               == (b).min_size ) &&               \
+  ( (a).epoch_length           == (b).epoch_length ) &&           \
+  ( (a).incr_mode              == (b).incr_mode ) &&              \
+  ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&     \
+  ( (a).increment              == (b).increment ) &&              \
+  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
+  ( (a).max_increment          == (b).max_increment ) &&          \
+  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
+  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
+  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
+  ( (a).decr_mode              == (b).decr_mode ) &&              \
+  ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
+  ( (a).decrement              == (b).decrement ) &&              \
+  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
+  ( (a).max_decrement          == (b).max_decrement ) &&          \
+  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
+  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
+  ( (a).empty_reserve          == (b).empty_reserve ) )
+
+
+#define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
+{                                                                   \
+    (i).version                = H5C__CURR_AUTO_SIZE_CTL_VER;       \
+    if ( (e).rpt_fcn_enabled )                                      \
+        (i).rpt_fcn            = H5C_def_auto_resize_rpt_fcn;       \
+    else                                                            \
+        (i).rpt_fcn            = NULL;                              \
+    (i).set_initial_size       = (e).set_initial_size;              \
+    (i).initial_size           = (e).initial_size;                  \
+    (i).min_clean_fraction     = (e).min_clean_fraction;            \
+    (i).max_size               = (e).max_size;                      \
+    (i).min_size               = (e).min_size;                      \
+    (i).epoch_length           = (long int)((e).epoch_length);      \
+    (i).incr_mode              = (e).incr_mode;                     \
+    (i).lower_hr_threshold     = (e).lower_hr_threshold;            \
+    (i).increment              = (e).increment;                     \
+    (i).apply_max_increment    = (e).apply_max_increment;           \
+    (i).max_increment          = (e).max_increment;                 \
+    (i).flash_incr_mode        = (e).flash_incr_mode;               \
+    (i).flash_multiple         = (e).flash_multiple;                \
+    (i).flash_threshold        = (e).flash_threshold;               \
+    (i).decr_mode              = (e).decr_mode;                     \
+    (i).upper_hr_threshold     = (e).upper_hr_threshold;            \
+    (i).flash_incr_mode        = (e).flash_incr_mode;               \
+    (i).flash_multiple         = (e).flash_multiple;                \
+    (i).flash_threshold        = (e).flash_threshold;               \
+    (i).decrement              = (e).decrement;                     \
+    (i).apply_max_decrement    = (e).apply_max_decrement;           \
+    (i).max_decrement          = (e).max_decrement;                 \
+    (i).epochs_before_eviction = (int)((e).epochs_before_eviction); \
+    (i).apply_empty_reserve    = (e).apply_empty_reserve;           \
+    (i).empty_reserve          = (e).empty_reserve;                 \
 }
 
 
@@ -463,7 +561,7 @@ void insert_entry(H5F_t * file_ptr,
                   unsigned int flags);
 
 void mark_entry_dirty(int32_t type,
-		              int32_t idx);
+		      int32_t idx);
 
 void move_entry(H5C_t * cache_ptr,
                 int32_t type,
@@ -603,4 +701,25 @@ void verify_entry_status(H5C_t * cache_ptr,
                          struct expected_entry_status expected[]);
 
 void verify_unprotected(void);
+
+
+/*** H5AC level utility functions ***/
+
+void check_and_validate_cache_hit_rate(hid_t file_id,
+                                       double * hit_rate_ptr,
+                                       hbool_t dump_data,
+                                       int64_t min_accesses,
+                                       double min_hit_rate);
+
+void check_and_validate_cache_size(hid_t file_id,
+                                   size_t * max_size_ptr,
+                                   size_t * min_clean_size_ptr,
+                                   size_t * cur_size_ptr,
+                                   int32_t * cur_num_entries_ptr,
+                                   hbool_t dump_data);
+
+void validate_mdc_config(hid_t file_id,
+                         H5AC_cache_config_t * ext_config_ptr,
+                         hbool_t compare_init,
+                         int test_num);
 

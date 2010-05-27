@@ -24,7 +24,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#ifdef H5_HAVE_PARALLEL
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#endif /* H5_HAVE_PARALLEL */
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
