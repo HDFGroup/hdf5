@@ -167,9 +167,9 @@ int main(int argc, char *argv[])
     int curr_arg;       /* Current command line argument being processed */
     int rank;           /* Number of dimensions of the dataset */
     hsize_t dim_size;   /* Dimension size of each dimension */
-    hsize_t *dims;      /* Pointer to array of dimensions */
-    hssize_t *start;    /* Pointer to array of starting locations for hyperslab selection */
-    hsize_t *count;     /* Pointer to array of counts for hyperslab selection */
+    hsize_t dims[H5S_MAX_RANK];      /* Pointer to array of dimensions */
+    hsize_t start[H5S_MAX_RANK];     /* Pointer to array of starting locations for hyperslab selection */
+    hsize_t count[H5S_MAX_RANK];     /* Pointer to array of counts for hyperslab selection */
     unsigned slice_dim; /* Dimension to slice up */
     char *file_name=NULL;    /* Name of file to put data into */
     hid_t fcpl;         /* HDF5 File creation property list ID */
@@ -365,8 +365,6 @@ int main(int argc, char *argv[])
         assert(ret>=0);
 
         /* Create dataspace for dataset on disk */
-        dims=malloc(sizeof(hsize_t)*rank);
-        assert(dims);
         for(i=0; i<rank; i++)
             dims[i]=dim_size;
 
@@ -394,10 +392,6 @@ int main(int argc, char *argv[])
         assert(ret>=0);
 
         /* Select hyperslab for file dataspace */
-        start=malloc(sizeof(hssize_t)*rank);
-        assert(start);
-        count=malloc(sizeof(hsize_t)*rank);
-        assert(count);
         for(i=0; i<rank; i++) {
             start[i]=0;
             count[i]=dim_size;
@@ -494,12 +488,6 @@ done:
         free(file_name);
     if(buf)
         free(buf);
-    if(dims)
-        free(dims);
-    if(start)
-        free(start);
-    if(count)
-        free(count);
 
     /* MPI termination */
     MPI_Finalize();

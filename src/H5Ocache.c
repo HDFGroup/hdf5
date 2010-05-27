@@ -616,7 +616,10 @@ H5O_size(const H5F_t UNUSED *f, const H5O_t *oh, size_t *size_ptr)
     HDassert(size_ptr);
 
     /* Report the object header's prefix+first chunk length */
-    *size_ptr = (size_t)H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
+    if(oh->chunk0_size)
+       *size_ptr = H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
+    else
+       *size_ptr = oh->chunk[0].size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O_size() */

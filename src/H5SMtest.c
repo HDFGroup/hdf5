@@ -96,7 +96,6 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 
         /* Set up user data for callback */
         cache_udata.f = f;
-        cache_udata.table_size = H5SM_TABLE_SIZE(f) + (f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
 
         /* Look up the master SOHM table */
         if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, &cache_udata, H5AC_READ)))

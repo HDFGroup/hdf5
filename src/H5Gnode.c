@@ -55,8 +55,6 @@ typedef struct H5G_node_key_t {
 
 /* Private macros */
 
-#define H5G_NODE_SIZEOF_HDR(F) (H5_SIZEOF_MAGIC + 4)
-
 /* PRIVATE PROTOTYPES */
 
 /* B-tree callbacks */
@@ -238,31 +236,6 @@ H5G_node_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_size_real
- *
- * Purpose:	Returns the total size of a symbol table node.
- *
- * Return:	Success:	Total size of the node in bytes.
- *
- *		Failure:	Never fails.
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5G_node_size_real(const H5F_t *f)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size_real);
-
-    FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
-                     (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
-} /* end H5G_node_size_real() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_node_free
  *
  * Purpose:	Destroy a symbol table node in memory.
@@ -322,7 +295,6 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
     H5G_node_t		*sym = NULL;
-    hsize_t		size = 0;
     herr_t              ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_create)
@@ -335,9 +307,8 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
 
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    size = H5G_node_size_real(f);
-    HDassert(size);
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
+    sym->node_size = H5G_NODE_SIZE(f);
+    if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)sym->node_size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space")
     if(NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, FAIL, "memory allocation failed")
@@ -1430,7 +1401,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5G_node_iterate_size
  *
- * Purpose:     This function gets called by H5B_iterate_btree_size()
+ * Purpose:     This function gets called by H5B_iterate_helper()
  *              to gather storage info for SNODs.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1452,10 +1423,10 @@ H5G_node_iterate_size(H5F_t *f, hid_t UNUSED dxpl_id, const void UNUSED *_lt_key
     HDassert(f);
     HDassert(stab_size);
 
-    *stab_size += H5G_node_size_real(f);
+    *stab_size += H5G_NODE_SIZE(f);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_btree_node_iterate() */
+} /* end H5G_node_iterate_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1515,7 +1486,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
                 "Dirty:",
                 sn->cache_info.is_dirty ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                "Size of Node (in bytes):", (unsigned)H5G_node_size_real(f));
+                "Size of Node (in bytes):", (unsigned)sn->node_size);
         fprintf(stream, "%*s%-*s %u of %u\n", indent, "", fwidth,
                 "Number of Symbols:",
                 sn->nsyms, (unsigned)(2 * H5F_SYM_LEAF_K(f)));
