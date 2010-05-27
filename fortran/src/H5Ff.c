@@ -444,32 +444,36 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
  *              number of open objects
  *              Thursday, September 25, 2008 EIP
  *---------------------------------------------------------------------------*/
-
 int_f
-nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, hid_t_f *obj_ids, size_t_f *num_objs)
+nh5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs,
+    hid_t_f *obj_ids, size_t_f *num_objs)
 {
-  int ret_value = 0;
-  hid_t c_file_id;
-  unsigned c_obj_type;
-  int i;
-  size_t c_max_objs;
-  ssize_t c_num_objs;
-  hid_t *c_obj_ids;
+    int ret_value = 0;
+    hid_t c_file_id;
+    unsigned c_obj_type;
+    size_t u;
+    size_t c_max_objs;
+    ssize_t c_num_objs;
+    hid_t *c_obj_ids;
 
-  c_file_id = (hid_t)*file_id;
-  c_obj_type = (unsigned) *obj_type;
-  c_max_objs = (size_t)*max_objs;
-  c_obj_ids = (hid_t *)HDmalloc(sizeof(hid_t)*c_max_objs);
+    c_file_id = (hid_t)*file_id;
+    c_obj_type = (unsigned) *obj_type;
+    c_max_objs = (size_t)*max_objs;
+    c_obj_ids = (hid_t *)HDmalloc(sizeof(hid_t)*c_max_objs);
 
-  c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
-  if ( c_num_objs < 0  ) ret_value = -1;
-  for (i=0; i< c_max_objs; i++) obj_ids[i] = (hid_t_f)c_obj_ids[i];
+    c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
+    if(c_num_objs < 0)
+        ret_value = -1;
+    for(u = 0; u < c_max_objs; u++)
+        obj_ids[u] = (hid_t_f)c_obj_ids[u];
 
-  HDfree(c_obj_ids);
-  *num_objs = (size_t_f)c_num_objs;
+    HDfree(c_obj_ids);
+    *num_objs = (size_t_f)c_num_objs;
 
-  return ret_value;
+    return ret_value;
 }
+
+
 /*----------------------------------------------------------------------------
  * Name:        h5fget_freespace_c
  * Purpose:     Call H5Fget_freespace to get amount of free space within a file
