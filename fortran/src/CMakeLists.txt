@@ -213,6 +213,31 @@ SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
 
 #-----------------------------------------------------------------------------
+# Add file(s) to CMake Install
+#-----------------------------------------------------------------------------
+INSTALL (
+    FILES 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h 
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h 
+        ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+        ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
+    DESTINATION 
+        include/fortran 
+    COMPONENT 
+        fortheaders
+)
+
+INSTALL (
+    DIRECTORY
+        ${CMAKE_Fortran_MODULE_DIRECTORY}/${BUILD_TYPE}/
+    DESTINATION
+        include/fortran
+    COMPONENT
+        fortheaders
+)
+
+#-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
