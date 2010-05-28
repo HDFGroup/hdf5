@@ -569,14 +569,6 @@ INSTALL (
         HDF5-config.cmake
 )
 
-# The install rule below copies compiled module files to the install location
-# using a "code" rule. The code string should not be broken up, it must be on one line
-IF (HDF5_BUILD_FORTRAN)
-    INSTALL ( CODE
-        "EXECUTE_PROCESS (COMMAND \"${CMAKE_COMMAND}\" -E copy_directory \"${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}\" \"${CMAKE_INSTALL_PREFIX}/fortran\")"
-    )
-ENDIF (HDF5_BUILD_FORTRAN)
-
 #-----------------------------------------------------------------------------
 # Export all exported targets to the build tree for use by parent project
 #-----------------------------------------------------------------------------
@@ -627,6 +619,11 @@ IF (HDF5_BUILD_FORTRAN)
       DISPLAY_NAME "HDF5 Fortran Libraries" 
       DEPENDS libraries
       GROUP Runtime
+  )
+  CPACK_ADD_COMPONENT (fortheaders 
+      DISPLAY_NAME "HDF5 Fortran Headers" 
+      DEPENDS fortlibraries
+      GROUP Development
   )
 ENDIF (HDF5_BUILD_FORTRAN)
 
