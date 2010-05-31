@@ -263,8 +263,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(default_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;
@@ -412,8 +412,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(mod_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;

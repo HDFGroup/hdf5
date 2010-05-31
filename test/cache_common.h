@@ -445,35 +445,6 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
     ( (a).empty_reserve          == (b).empty_reserve ) )
 
-#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
-( ( (a).version                == (b).version ) &&                \
-  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) &&     \
-  ( (a).max_size               == (b).max_size ) &&               \
-  ( (a).min_size               == (b).min_size ) &&               \
-  ( (a).epoch_length           == (b).epoch_length ) &&           \
-  ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-  ( (a).max_increment          == (b).max_increment ) &&          \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) &&     \
-  ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-  ( (a).max_decrement          == (b).max_decrement ) &&          \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
-
-
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
 {                                                                   \
     (i).version                = H5C__CURR_AUTO_SIZE_CTL_VER;       \
@@ -507,6 +478,9 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     (i).apply_empty_reserve    = (e).apply_empty_reserve;           \
     (i).empty_reserve          = (e).empty_reserve;                 \
 }
+
+/* Epsilon for floating-point comparisons */
+#define FP_EPSILON 0.000001
 
 
 /* misc type definitions */
@@ -759,6 +733,9 @@ void destroy_flush_dependency(int32_t parent_type,
              int32_t child_idx);
 
 /*** H5AC level utility functions ***/
+
+hbool_t resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
+    const H5C_auto_size_ctl_t *b, hbool_t compare_init);
 
 void check_and_validate_cache_hit_rate(hid_t file_id,
                                        double * hit_rate_ptr,
