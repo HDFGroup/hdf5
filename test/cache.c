@@ -25641,37 +25641,6 @@ check_auto_cache_resize_epoch_markers(void)
  *-------------------------------------------------------------------------
  */
 
-/* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001
-
-#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
-( ( (a).version                == (b).version ) &&                \
-  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( HDfabs((a).min_clean_fraction - (b).min_clean_fraction) < FP_EPSILON ) &&     \
-  ( (a).max_size               == (b).max_size ) &&               \
-  ( (a).min_size               == (b).min_size ) &&               \
-  ( (a).epoch_length           == (b).epoch_length ) &&           \
-  ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( HDfabs((a).lower_hr_threshold - (b).lower_hr_threshold) < FP_EPSILON ) &&     \
-  ( HDfabs((a).increment - (b).increment) < FP_EPSILON ) &&              \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-  ( (a).max_increment          == (b).max_increment ) &&          \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( HDfabs((a).flash_multiple - (b).flash_multiple) < FP_EPSILON ) &&         \
-  ( HDfabs((a).flash_threshold - (b).flash_threshold) < FP_EPSILON ) &&        \
-  ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( HDfabs((a).upper_hr_threshold - (b).upper_hr_threshold) < FP_EPSILON ) &&     \
-  ( HDfabs((a).decrement - (b).decrement) < FP_EPSILON ) &&              \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-  ( (a).max_decrement          == (b).max_decrement ) &&          \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( HDfabs((a).empty_reserve - (b).empty_reserve) < FP_EPSILON ) )
-
 static unsigned
 check_auto_cache_resize_input_errs(void)
 {
@@ -25778,8 +25747,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 1.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 1.";
@@ -25850,8 +25819,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 2.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 2.";
@@ -25925,8 +25894,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 3.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 3.";
@@ -26001,8 +25970,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 4.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 4.";
@@ -26074,8 +26043,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 5.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 5.";
@@ -26149,8 +26118,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 6.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 6.";
@@ -26221,8 +26190,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 7.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 7.";
@@ -26297,8 +26266,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 8.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 8.";
@@ -26369,8 +26338,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 9.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 9.";
@@ -26441,8 +26410,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 10.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 10.";
@@ -26516,8 +26485,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 11.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 11.";
@@ -26588,8 +26557,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 12.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 12.";
@@ -26664,8 +26633,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 13.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 13.";
@@ -26737,8 +26706,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 14.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 14.";
@@ -26812,8 +26781,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 15.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 15.";
@@ -26884,8 +26853,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 16.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 16.";
@@ -26956,8 +26925,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 17.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 17.";
@@ -27032,8 +27001,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 18.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 18.";
@@ -27107,8 +27076,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 19.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 19.";
@@ -27182,8 +27151,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 20.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 20.";
@@ -27255,8 +27224,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 21.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 21.";
@@ -27330,8 +27299,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 22.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 22.";
@@ -27403,8 +27372,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 23.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 23.";
@@ -27479,8 +27448,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 24.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 24.";
@@ -27552,8 +27521,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 25.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 25.";
@@ -27627,8 +27596,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 26.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 26.";
@@ -27699,8 +27668,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 27.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 27.";
@@ -27773,8 +27742,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 28.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 28.";
@@ -27845,8 +27814,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 29.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 29.";
@@ -27919,8 +27888,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 30.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 30.";
@@ -27991,8 +27960,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 31.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 31.";

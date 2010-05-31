@@ -4802,6 +4802,62 @@ check_and_validate_cache_size(hid_t file_id,
 
 } /* check_and_validate_cache_size() */
 
+hbool_t
+resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
+    const H5C_auto_size_ctl_t *b,
+    hbool_t compare_init)
+{
+    if(a->version != b->version)
+        return(FALSE);
+    else if(a->rpt_fcn != b->rpt_fcn)
+        return(FALSE);
+    else if(compare_init && (a->set_initial_size != b->set_initial_size))
+        return(FALSE);
+    else if(compare_init && (a->initial_size != b->initial_size))
+        return(FALSE);
+    else if(HDfabs(a->min_clean_fraction - b->min_clean_fraction) > FP_EPSILON)
+        return(FALSE);
+    else if(a->max_size != b->max_size)
+        return(FALSE);
+    else if(a->min_size != b->min_size)
+        return(FALSE);
+    else if(a->epoch_length != b->epoch_length)
+        return(FALSE);
+    else if(a->incr_mode != b->incr_mode)
+        return(FALSE);
+    else if(HDfabs(a->lower_hr_threshold - b->lower_hr_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->increment - b->increment) > FP_EPSILON)
+        return(FALSE);
+    else if(a->apply_max_increment != b->apply_max_increment)
+        return(FALSE);
+    else if(a->max_increment != b->max_increment)
+        return(FALSE);
+    else if(a->flash_incr_mode != b->flash_incr_mode)
+        return(FALSE);
+    else if(HDfabs(a->flash_multiple - b->flash_multiple) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->flash_threshold - b->flash_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(a->decr_mode != b->decr_mode)
+        return(FALSE);
+    else if(HDfabs(a->upper_hr_threshold - b->upper_hr_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->decrement - b->decrement) > FP_EPSILON)
+        return(FALSE);
+    else if(a->apply_max_decrement != b->apply_max_decrement)
+        return(FALSE);
+    else if(a->max_decrement != b->max_decrement)
+        return(FALSE);
+    else if(a->epochs_before_eviction != b->epochs_before_eviction)
+        return(FALSE);
+    else if(a->apply_empty_reserve != b->apply_empty_reserve)
+        return(FALSE);
+    else if(HDfabs(a->empty_reserve - b->empty_reserve) > FP_EPSILON)
+        return(FALSE);
+    return(TRUE);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	validate_mdc_config()
@@ -4871,7 +4927,7 @@ validate_mdc_config(hid_t file_id,
     /* compare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(int_config, cache_ptr->resize_ctl,
+	if ( ! resize_configs_are_equal(&int_config, &cache_ptr->resize_ctl,
                                         compare_init) ) {
 
             pass = FALSE;
