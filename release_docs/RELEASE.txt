@@ -583,15 +583,15 @@ Platforms Tested
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    
-				  Visual Studio .NET
-                                  Visual Studio 2005 w/ Intel Fortran 9.1
-                                  Cygwin(native gcc compiler and g95)
-				  MinGW(native gcc compiler and g95)
-    Windows XP x64                
-			          Visual Studio 2005 w/ Intel Fortran 9.1
-    Windows Vista			
-			          Visual Studio 2005
+				  
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
+                                  Cygwin(1.7.5 native gcc compiler and gfortran)
+
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
+
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1
+
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -620,7 +620,8 @@ Cray XT3 (not tested
           for this release)        n        n      n        n     n     n
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        n      n        y     y     y
+Windows Vista                      n        y(3)   n(3)     y     y     y
+Windows Vista x64                  n        y(3)   n(3)     y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 6.2 32-bit                 n        n      n        y     y     y
 FreeBSD 6.2 64-bit
@@ -648,9 +649,10 @@ AIX-5.2 32-bit                      n        n         n         x        n
 AIX-5.2 64-bit                      n        n         n         x        n
 Cray XT3 (not tested
           for this release)         n        n         n         x        n
-Windows XP                          y        y(3)      y         y        y
-Windows XP x64                      y        y(3)      y         y        y
-Windows Vista                       y        n         n         y        y
+Windows XP                          y        y(3)      y         y        n
+Windows XP x64                      y        y(3)      y         y        n
+Windows Vista                       y        y(3)      y         y        n
+Windows Vista x64                   y        y(3)      y         y        n
 Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
@@ -669,7 +671,7 @@ SuSe Linux 2.6.5
 
     Notes: (1)  Using mpich 1.2.6.
            (2) Using mpich2 1.0.6.
-           (3) Using Visual Studio 2005 or Cygwin
+           (3) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
            (4) With PGI and Absoft compilers.
            (5) AMD Opteron x86_64
     Compiler versions for each platform are listed in the preceding
