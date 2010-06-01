@@ -297,7 +297,7 @@ The following platforms and compilers have been tested for this release.
     (SNL Glory)                   Versions 10.1.
     
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
-                                  Cygwin(native gcc compiler and gfortran)
+                                  Cygwin(1.7.5 native gcc compiler and gfortran)
                                   MinGW(5.1.6 with gcc 4.4.0)
 
     Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
@@ -334,7 +334,8 @@ Solaris2.10 32-bit                   n        y      n        y     y     y
 Solaris2.10 64-bit                   n        y      n        y     y     y
 Windows XP                           n        y(4)   n(4)     y     y     y
 Windows XP x64                       n        y(4)   n(4)     y     y     y
-Windows Vista                        n        n      n        y     y     y
+Windows Vista                        n        y(4)   n(4)     y     y     y
+Windows Vista x64                    n        y(4)   n(4)     y     y     y
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
@@ -354,10 +355,10 @@ Platform                           Shared  Shared    Shared    Thread-
                                    C libs  F90 libs  C++ libs  safe     
 Solaris2.10 32-bit                   y       y         y         y        
 Solaris2.10 64-bit                   y       y         y         y        
-Windows XP                           y       y(4)      y         y        
-Windows XP x64                       y       y(4)      y         y        
-Windows Vista                        y       n         n         y        
-Windows Vista x64                    y       n         n         y        
+Windows XP                           y       y(4)      y         n        
+Windows XP x64                       y       y(4)      y         n        
+Windows Vista                        y       y(4)      y         n        
+Windows Vista x64                    y       y(4)      y         n        
 Mac OS X 10.5                        y       n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
@@ -376,7 +377,7 @@ OpenVMS Alpha V8.3                   n       n         n         n
            (1) Fortran compiled with g95.
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
-           (4) Using Visual Studio 2008 or Cygwin
+           (4) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
