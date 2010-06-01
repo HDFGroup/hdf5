@@ -5,21 +5,21 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.4 and 
-HDF5 1.8.4-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.4-*. 
+HDF5 1.8.5, and contains information on the platforms tested and 
+known problems in HDF5-1.8.5. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.4 source code, documentation, and additional materials
+Links to the HDF5 1.8.5 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.4 release can be obtained from:
+The HDF5 1.8.5 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.4 can be accessed directly at this location: 
+User documentation for 1.8.5 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.4 (current 
-release) versus Release 1.8.3":
+from Release to Release" document, in the section "Release 1.8.5 (current 
+release) versus Release 1.8.4":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -168,7 +168,7 @@ Bug Fixes since HDF5-1.8.4
 
     Parallel Library
     ----------------
-    - None EIP - 2009/10/21
+    - None 
 
     Tools
     -----
@@ -187,7 +187,7 @@ Bug Fixes since HDF5-1.8.4
 
     F90 API
     ------
-    - None EIP - 2009/10/21
+    - None 
 
     C++ API
     ------
@@ -220,7 +220,7 @@ Bug Fixes since HDF5-1.8.4
 
     Fortran High-Level APIs:
     ------
-    - None EIP - 2009/10/21
+    - None 
 
 
 Platforms Tested
@@ -305,10 +305,16 @@ The following platforms and compilers have been tested for this release.
 
     Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
 
-    MAC OS  10.5.6 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
-                                  GNU Fortran (GCC) 4.3.0 20070810
-                                  G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
-                                  Intel C, C++ and Fortran compilers 10.1
+    MAC OS  10.6.3 (Intel)        i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 
+    (pahra)                       GNU Fortran (GCC) 4.5.0 20090910
+                                  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 
+                                  Intel C, C++ and Fortran compilers 11.1
+    
+    MAC OS  10.5.8 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
+    (tejeda)
+
+    MAC OS  10.5 (PPC)            powerpc-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
+    (juniper-w)
 
     OpenVMS Alpha V8.3            HP C V7.3-009
                                   HP C++ V7.3-009
@@ -335,7 +341,9 @@ Windows XP                           n        y(4)   n(4)     y     y     y
 Windows XP x64                       n        y(4)   n(4)     y     y     y
 Windows Vista                        n        y(4)   n(4)     y     y     y
 Windows Vista x64                    n        y(4)   n(4)     y     y     y
+Mac OS X 10.5 PPC                    n        n      n        n     y     n 
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
+Mac OS X 10.6 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
@@ -358,7 +366,9 @@ Windows XP                           y       y(4)      y         n
 Windows XP x64                       y       y(4)      y         n        
 Windows Vista                        y       y(4)      y         n        
 Windows Vista x64                    y       y(4)      y         n        
-Mac OS X 10.5                        y       n         y         n        
+Mac OS X 10.5 PPC                    y       n         n         n        
+Mac OS X 10.5 (Intel)                y(5)    n         y         n        
+Mac OS X 10.6 (Intel)                y(5)    n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
@@ -377,6 +387,7 @@ OpenVMS Alpha V8.3                   n       n         n         n
            (2) With PGI and Absoft compilers.
            (3) With PGI compiler for Fortran.
            (4) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
+           (5) Shared C and C++ are disabled when fortran is configured in.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
