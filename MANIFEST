@@ -399,7 +399,6 @@
 ./release_docs/HISTORY-1_9.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
-./release_docs/INSTALL_MinGW.txt
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/CMake.txt
