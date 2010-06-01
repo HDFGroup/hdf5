@@ -187,8 +187,8 @@ The following platforms and compilers have been tested for this release.
                                   (Red Hat 4.1.2-46)
 
 
-    Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
-    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
+    Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 11.0.074
+    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 11.0.074
     (cobalt)                      SGI MPI 1.38
 
     SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.9 Patch 124867-09
@@ -425,3 +425,11 @@ Known Problems
 
 * There is also a configure error on Altix machines that incorrectly reports 
   when a version of Szip without an encoder is being used.
+
+* On cobalt, an SGI Altix SMP ia64 system, Intel compiler version 10.1 (which
+  is the default on that system) does not work properly, and results in
+  failures during make check (in a static build) and make installcheck (during
+  a shared build). This appears to be a compiler optimization problem.
+  Reducing optimization by setting CFLAGS to -O1 or below resolves the issue.
+  Alternatively, using a newer version of the compiler (11.0) also works as
+  intended. MAM - 2010/06/01
