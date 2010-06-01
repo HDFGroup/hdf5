@@ -2,6 +2,14 @@
          HDF5 Build and Install Instructions for MinGW
 ************************************************************************
 
+NOTE:
+We are no longer actively supporting MinGW as of this release, 1.8.5. 
+Below are the instructions from the last release.
+
+************************************************************************
+************************************************************************
+************************************************************************
+
 Preconditions:
 --------------
 
