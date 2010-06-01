@@ -220,7 +220,6 @@ The following platforms and compilers have been tested for this release.
     
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
                                   Cygwin(1.7.5 native gcc compiler and gfortran)
-                                  MinGW(5.1.6 with gcc 4.4.0)
 
     Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
 
