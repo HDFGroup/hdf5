@@ -172,16 +172,32 @@ rem ############################################################################
     rem test for displaying soft links
     call :tooltest tslink-1.ls 0 -w80 -r tslink.h5
 
-    rem test for displaying external and user-defined links
+    rem test for displaying more soft links with --follow-symlinks
+    call :tooltest tsoftlinks-1.ls 0 --follow-symlinks tsoftlinks.h5
+    call :tooltest tsoftlinks-2.ls 0 --follow-symlinks -r tsoftlinks.h5
+    call :tooltest tsoftlinks-3.ls 0 --follow-symlinks tsoftlinks.h5/group1
+    call :tooltest tsoftlinks-4.ls 0 --follow-symlinks -r tsoftlinks.h5/group1
+    call :tooltest tsoftlinks-5.ls 0 --follow-symlinks tsoftlinks.h5/soft_dset1
+
+    rem test for displaying external and user-defined links with 
+    rem --follow-symlinks
     call :tooltest textlink-1.ls 0 -w80 -r textlink.h5
-    call :tooltest textlinksrc-1.ls 0 -w80 -Er textlinksrc.h5
-    call :tooltest textlinksrc-2.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
-    call :tooltest textlinksrc-3.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+    call :tooltest textlinksrc-1.ls 0 -w80 --follow-symlinks -r textlinksrc.h5
+    call :tooltest textlinksrc-2.ls 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5
+    call :tooltest textlinksrc-3.ls 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1
     call :tooltest textlinksrc-4.ls 0 -w80 -r textlinksrc.h5
     call :tooltest textlinksrc-5.ls 0 -w80 -r textlinksrc.h5/ext_link1
-    call :tooltest textlinksrc-6.ls 0 -w80 -E textlinksrc.h5
-    call :tooltest textlinksrc-7.ls 0 -w80 -E textlinksrc.h5/ext_link1
+    call :tooltest textlinksrc-6.ls 0 -w80 --follow-symlinks textlinksrc.h5
+    call :tooltest textlinksrc-7.ls 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1
     call :tooltest tudlink-1.ls 0 -w80 -r tudlink.h5
+
+    rem test for displaying external links with -E
+    rem the option -E will be depriciated but keep it for backward compatibility
+    call :tooltest textlinksrc-1-old.ls 0 -w80 -Er textlinksrc.h5
+    call :tooltest textlinksrc-2-old.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
+    call :tooltest textlinksrc-3-old.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+    call :tooltest textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
+    call :tooltest textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
 
     rem tests for hard links
     call :tooltest thlink-1.ls 0 -w80 thlink.h5
