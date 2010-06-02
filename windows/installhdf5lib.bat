@@ -14,7 +14,7 @@ rem access to either file, you may request a copy from help@hdfgroup.org.
 
 
 rem This batch file is used to install HDF5 libraries and tools
-rem Last Updated: 2/12/2007
+rem Last Updated: 3/3/08
 
 setlocal enabledelayedexpansion
 pushd %~dp0
@@ -27,7 +27,7 @@ rem Create the directory structure that we'll need to install
 :create_directories
 
     for %%a in (debug release) do (
-        for %%b in (bin bindll dll lib include modsdll) do (
+        for %%b in (bin bindll dll lib include mods modsdll) do (
             if not exist hdf5lib\%%a\%%b (
                 mkdir hdf5lib\%%a\%%b
             )
@@ -220,7 +220,7 @@ rem Install Fortran Libraries and Tools
     
     rem ===DEBUG===
     rem include
-    call :safe_copy proj\hdf5_fortran\debug\*.mod hdf5lib\debug\include
+    call :safe_copy proj\hdf5_fortran\debug\*.mod hdf5lib\debug\mods
     rem lib
     call :safe_copy proj\hdf5_fortran\debug\hdf5_fortrand.lib hdf5lib\debug\lib
     call :safe_copy proj\hdf5_f90cstub\debug\hdf5_f90cstubd.lib hdf5lib\debug\lib
@@ -234,7 +234,7 @@ rem Install Fortran Libraries and Tools
 
     rem ===RELEASE===
     rem include
-    call :safe_copy proj\hdf5_fortran\release\*.mod hdf5lib\release\include
+    call :safe_copy proj\hdf5_fortran\release\*.mod hdf5lib\release\mods
     rem lib
     call :safe_copy proj\hdf5_fortran\release\hdf5_fortran.lib hdf5lib\release\lib
     call :safe_copy proj\hdf5_f90cstub\release\hdf5_f90cstub.lib hdf5lib\release\lib
@@ -255,7 +255,7 @@ rem Install HL Fortran Libraries and Tools
     
     rem ===DEBUG===
     rem include
-    call :safe_copy proj\hdf5_hl_fortran\debug\*.mod  hdf5lib\debug\include
+    call :safe_copy proj\hdf5_hl_fortran\debug\*.mod  hdf5lib\debug\mods
     rem lib
     call :safe_copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortrand.lib hdf5lib\debug\lib
     call :safe_copy proj\hdf5_hl_f90cstub\debug\hdf5_hl_f90cstubd.lib hdf5lib\debug\lib
@@ -269,7 +269,7 @@ rem Install HL Fortran Libraries and Tools
 
     rem ===RELEASE===
     rem include
-    call :safe_copy proj\hdf5_hl_fortran\release\*.mod  hdf5lib\release\include
+    call :safe_copy proj\hdf5_hl_fortran\release\*.mod  hdf5lib\release\mods
     rem lib
     call :safe_copy proj\hdf5_hl_fortran\release\hdf5_hl_fortran.lib hdf5lib\release\lib
     call :safe_copy proj\hdf5_hl_f90cstub\release\hdf5_hl_f90cstub.lib hdf5lib\release\lib
