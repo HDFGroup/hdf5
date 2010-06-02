@@ -159,6 +159,8 @@ New Features
 
     Tools:
     ------
+     - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
+               (JKM - 2010/05/25)
      - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
                (JKM - 2010/02/10) 
      - h5diff: Add new flag --follow-symlinks. (refer to --help for details)

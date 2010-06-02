@@ -35,6 +35,7 @@
 #define FILE2 "tdset.h5"
 #define FILE3 "tattr.h5"
 #define FILE4 "tslink.h5"
+#define FILE4_1 "tsoftlinks.h5"
 #define FILE5 "thlink.h5"
 #define FILE6 "tcompound.h5"
 #define FILE7 "tall.h5"
@@ -94,7 +95,7 @@
 #define FILE61  "textlinksrc.h5"
 #define FILE62  "textlinktar.h5"
 #define FILE63  "textlinkfar.h5"
-#define FILE64  "tarray8.h5"
+/*#define FILE64  "tarray8.h5"*/
 #define FILE65  "tattrreg.h5"
 #define FILE66  "file_space.h5"
 
@@ -213,7 +214,8 @@ typedef struct s1_t {
 #define ARRAY3_DIM2 3
 
 /* VL string datatype name */
-#define VLSTR_TYPE      "vl_string_type"
+/* TODO remove complier error not used, remove the link when everything is OK */
+/* #define VLSTR_TYPE      "vl_string_type" */
 
 /* "File 41" macros */
 /* Name of dataset to create in datafile                              */
@@ -464,6 +466,246 @@ static void gent_softlink(void)
 
     H5Gclose(root);
     H5Fclose(fid);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: gent_softlink2
+ *
+ * Purpose: Create soft links to various objects.
+ * Return: 
+ *    SUCCEED
+ *    FAIL
+ * Programmer: Jonathan Kim
+ * Date: May 26, 2010
+ *-------------------------------------------------------------------------*/
+#define NX 4
+#define NY 2
+static int gent_softlink2(void)
+{
+    hid_t       fileid1;
+    hid_t       grp1=0, grp2=0;
+    hid_t       tid;
+    hid_t       dset1, dset2;
+    hid_t       datatype, dataspace;   
+    hsize_t     dimsf[2];              /* dataset dimensions */
+    herr_t      status=SUCCEED;
+    int data1[NX][NY] = {{0,0},{1,1},{2,2},{3,3}};
+    int data2[NX][NY] = {{0,0},{0,1},{0,2},{3,3}};
+
+   /*-----------------------------------------------------------------------
+    * FILE
+    *------------------------------------------------------------------------*/
+    /* Create a new file */
+    fileid1 = H5Fcreate(FILE4_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (fileid1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*-----------------------------------------------------------------------
+    * Groups
+    *------------------------------------------------------------------------*/
+    grp1 = H5Gcreate2(fileid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    grp2 = H5Gcreate2(fileid1, "group_empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (grp2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*-----------------------------------------------------------------------
+    * Named datatype
+    *------------------------------------------------------------------------*/
+     tid = H5Tcopy(H5T_NATIVE_INT);
+     status = H5Tcommit2(fileid1, "dtype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1); 
+        status = FAIL;
+        goto out;
+    }
+
+   /*-----------------------------------------------------------------------
+    * Datasets
+    *------------------------------------------------------------------------*/
+    /*
+     * Describe the size of the array and create the data space for fixed
+     * size dataset.
+     */
+    dimsf[0] = NX;
+    dimsf[1] = NY;
+    dataspace = H5Screate_simple(2, dimsf, NULL);
+
+    /*
+     * Define datatype for the data in the file.
+     * We will store little endian INT numbers.
+     */
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+
+    /*---------------
+     * dset1
+     */
+    /* Create a new dataset as sample object */
+    dset1 = H5Dcreate2(fileid1, "/dset1", datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (dset1 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*---------------
+     * dset2
+     */
+    /* Create a new dataset as sample object */
+    dset2 = H5Dcreate2(fileid1, "/dset2", datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (dset2 < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+   /*-----------------------------------------------------------------------
+    * Soft links
+    *------------------------------------------------------------------------*/
+    /*
+     * create various soft links under  '/' root
+     */
+    /* link to dset1 */
+    status = H5Lcreate_soft("/dset1", fileid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to data type */
+    status = H5Lcreate_soft("/dtype", fileid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to group1 */
+    status = H5Lcreate_soft("/group1", fileid1, "soft_group1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to empty group */
+    status = H5Lcreate_soft("/group_empty", fileid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* dangling link */
+    status = H5Lcreate_soft("not_yet", fileid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /*-----------------------------------------
+     * create various soft links under a group
+     */
+    /* link to dset1 */
+    status = H5Lcreate_soft("/dset1", grp1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to dset2 */
+    status = H5Lcreate_soft("/dset2", grp1, "soft_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to data type */
+    status = H5Lcreate_soft("/dtype", grp1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* link to empty group */
+    status = H5Lcreate_soft("/group_empty", grp1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+    /* dangling link  */
+    status = H5Lcreate_soft("not_yet", grp1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        status = FAIL;
+        goto out;
+    }
+
+out:
+    /*
+     * Close/release resources.
+     */
+    H5Sclose(dataspace);
+    H5Gclose(grp1);
+    H5Gclose(grp2);
+    H5Tclose(datatype);
+    H5Dclose(dset1);
+    H5Dclose(dset2);
+    H5Fclose(fileid1);
+
+    return status;
 }
 
 /*
@@ -1661,7 +1903,7 @@ static void gent_objref(void)
     hid_t  sid1;       /* Dataspace ID   */
     hid_t  tid1;       /* Datatype ID   */
     hsize_t  dims1[] = {SPACE1_DIM1};
-    hobj_ref_t      *wbuf,      /* buffer to write to disk */
+    hobj_ref_t *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
@@ -1669,9 +1911,9 @@ static void gent_objref(void)
     const char *write_comment = "Foo!"; /* Comments for group */
 
     /* Allocate write & read buffers */
-    wbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    rbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    tbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    wbuf = (hobj_ref_t*) malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    rbuf = (hobj_ref_t*) malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    tbuf = (hobj_ref_t*) malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE16, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1779,10 +2021,10 @@ static void gent_datareg(void)
     int        i;          /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
+    wbuf = (hdset_reg_ref_t*) calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf = (hdset_reg_ref_t*) malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    dwbuf = (uint8_t*) malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    drbuf = (uint8_t*) calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE17, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1888,10 +2130,10 @@ static void gent_attrreg(void)
     int        i;           /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
+    wbuf = (hdset_reg_ref_t*) calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    rbuf = (hdset_reg_ref_t*) malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    dwbuf = (uint8_t*) malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
+    drbuf = (uint8_t*) calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE65, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2961,7 +3203,7 @@ static void gent_array8(void)
     hsize_t sdims[] = {F64_DIM0};
     hsize_t tdims[] = {F64_DIM1};
     int         wdata[(F64_DIM1) * sizeof(int)];      /* Write buffer */
-    int     i;
+    unsigned int     i;
 
     /*
      * Initialize data.  i is the element in the dataspace, j and k the
@@ -5655,7 +5897,7 @@ static void gent_longlinks(void)
     assert(gid >= 0);
 
     /* Construct very long file name */
-    objname = HDmalloc((size_t)(F51_MAX_NAME_LEN + 1));
+    objname = (char*) HDmalloc((size_t)(F51_MAX_NAME_LEN + 1));
     assert(objname);
     for(u = 0; u < F51_MAX_NAME_LEN; u++)
         objname[u] = 'a';
@@ -5919,7 +6161,7 @@ gent_hyperslab(void)
     double   *buf;
     int      i, ret;
 
-    buf = malloc(32 * 4097 * sizeof(double) );
+    buf = (double*) malloc(32 * 4097 * sizeof(double) );
     for(i = 0; i < 32 * 4097; i++)
         buf[i] = 1;
 
@@ -6526,6 +6768,7 @@ int main(void)
     gent_group();
     gent_attribute();
     gent_softlink();
+    gent_softlink2();
     gent_dataset();
     gent_hardlink();
     gent_extlink();
