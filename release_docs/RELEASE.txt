@@ -219,7 +219,7 @@ The following platforms and compilers have been tested for this release.
     (SNL Glory)                   Versions 10.1.
     
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
-                                  Cygwin(1.7.5 native gcc compiler and gfortran)
+                                  Cygwin(1.7.5 native gcc(4.3.4) compiler and gfortran)
 
     Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
 
