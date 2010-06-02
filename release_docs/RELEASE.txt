@@ -56,7 +56,10 @@ New Features
 
     Configuration
     -------------
-    - None MAM 2010/05/18
+    - Changed configure default setting to --disable-production (was
+      --enable-production). This affects all unoffical releases such as
+      snapshot releases. It will be set to --enable-production for all
+      official releases. AKC 2010/5/28
 
     Library
     -------
