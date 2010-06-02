@@ -43,6 +43,16 @@ IF (BUILD_TESTING)
       textlinksrc-5.ls
       textlinksrc-6.ls
       textlinksrc-7.ls
+      textlinksrc-1-old.ls
+      textlinksrc-2-old.ls
+      textlinksrc-3-old.ls
+      textlinksrc-6-old.ls
+      textlinksrc-7-old.ls
+      tsoftlinks-1.ls
+      tsoftlinks-2.ls
+      tsoftlinks-3.ls
+      tsoftlinks-4.ls
+      tsoftlinks-5.ls
       tgroup.ls
       tgroup-1.ls
       tgroup-2.ls
@@ -75,6 +85,7 @@ IF (BUILD_TESTING)
       tnestedcomp.h5
       tsaf.h5
       tslink.h5
+      tsoftlinks.h5
       tstr.h5
       tudlink.h5
       tvldtypes1.h5
@@ -116,39 +127,93 @@ IF (BUILD_TESTING)
     )
   ENDMACRO (ADD_H5_TEST file)
 
+  # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
   ADD_H5_TEST (help-2 0 -w80 --help)
   ADD_H5_TEST (help-3 0 -w80 -?)
+
+  # test simple command
   ADD_H5_TEST (tall-1 0 -w80 tall.h5)
   ADD_H5_TEST (tall-2 0 -w80 -r -d tall.h5)
   ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
   ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
+
+  # test for displaying groups
+  # The following combination of arguments is expected to return an error message
+  # and return value 1
   ADD_H5_TEST (tgroup-1 1 -w80 -r -g tgroup.h5)
   ADD_H5_TEST (tgroup-2 0 -w80 -g tgroup.h5/g1)
+
+  # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
+
+  # test for displaying soft links (dangle)
   ADD_H5_TEST (tslink-1 0 -w80 -r tslink.h5)
+
+  # test for displaying more soft links with --follow-symlinks
+  ADD_H5_TEST (tsoftlinks-1 0 --follow-symlinks tsoftlinks.h5)
+  ADD_H5_TEST (tsoftlinks-2 0 --follow-symlinks -r tsoftlinks.h5)
+  ADD_H5_TEST (tsoftlinks-3 0 --follow-symlinks tsoftlinks.h5/group1)
+  ADD_H5_TEST (tsoftlinks-4 0 --follow-symlinks -r tsoftlinks.h5/group1)
+  ADD_H5_TEST (tsoftlinks-5 0 --follow-symlinks tsoftlinks.h5/soft_dset1)
+
+  # test for displaying external and user-defined links with --follow-symlinks
   ADD_H5_TEST (textlink-1 0 -w80 -r textlink.h5)
-  ADD_H5_TEST (textlinksrc-1 0 -w80 -Er textlinksrc.h5)
-  ADD_H5_TEST (textlinksrc-2 0 -w80 -Erv textlinksrc.h5/ext_link5)
-  ADD_H5_TEST (textlinksrc-3 0 -w80 -Er textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (textlinksrc-1 0 -w80 --follow-symlinks -r textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-2 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5)
+  ADD_H5_TEST (textlinksrc-3 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1)
   ADD_H5_TEST (textlinksrc-4 0 -w80 -r textlinksrc.h5)
   ADD_H5_TEST (textlinksrc-5 0 -w80 -r textlinksrc.h5/ext_link1)
-  ADD_H5_TEST (textlinksrc-6 0 -w80 -E textlinksrc.h5)
-  ADD_H5_TEST (textlinksrc-7 0 -w80 -E textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (textlinksrc-6 0 -w80 --follow-symlinks textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-7 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1)
   ADD_H5_TEST (tudlink-1 0 -w80 -r tudlink.h5)
+
+  # test for displaying external links with -E
+  # the option -E will be depriciated but keep it for backward compatibility
+  ADD_H5_TEST (textlinksrc-1-old 0 -w80 -Er textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-2-old 0 -w80 -Erv textlinksrc.h5/ext_link5)
+  ADD_H5_TEST (textlinksrc-3-old 0 -w80 -Er textlinksrc.h5/ext_link1)
+  ADD_H5_TEST (textlinksrc-6-old 0 -w80 -E textlinksrc.h5)
+  ADD_H5_TEST (textlinksrc-7-old 0 -w80 -E textlinksrc.h5/ext_link1)
+
+  # tests for hard links
   ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
+
+  # tests for compound data types
   ADD_H5_TEST (tcomp-1 0 -w80 -r -d tcompound.h5)
+
+  #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 -w80 -r -d tnestedcomp.h5)
+
+  # test for loop detection
   ADD_H5_TEST (tloop-1 0 -w80 -r -d tloop.h5)
+
+  # test for string
   ADD_H5_TEST (tstr-1 0 -w80 -r -d tstr.h5)
+
+  # test test file created from lib SAF team
   ADD_H5_TEST (tsaf 0 -w80 -r -d tsaf.h5)
+
+  # test for variable length data types
   ADD_H5_TEST (tvldtypes1 0 -w80 -r -d tvldtypes1.h5)
+
+  # test for array data types
   ADD_H5_TEST (tarray1 0 -w80 -r -d tarray1.h5)
+
+  # test for empty data
   ADD_H5_TEST (tempty 0 -w80 -d tempty.h5)
+
+  # test for all dataset types written to attributes
+  # enable -S for avoiding printing NATIVE types
   ADD_H5_TEST (tattr2 0 -w80 -v -S tattr2.h5)
+
+  # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
+
   IF (WORDS_BIGENDIAN)
+    # test for variable length data types in verbose mode
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
+    # test for dataset region references data types in verbose mode
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
   ELSE (WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)

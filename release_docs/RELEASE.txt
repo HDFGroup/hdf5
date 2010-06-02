@@ -68,7 +68,8 @@ New Features
  
     Tools
     -----
-    - None
+    - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
+               (JKM - 2010/05/25)
 
     High-Level APIs
     ---------------

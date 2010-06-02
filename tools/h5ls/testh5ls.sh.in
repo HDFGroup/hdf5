@@ -133,16 +133,31 @@ TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 # test for displaying soft links
 TOOLTEST tslink-1.ls 0 -w80 -r tslink.h5
 
-# test for displaying external and user-defined links
+# test for displaying more soft links with --follow-symlinks
+TOOLTEST tsoftlinks-1.ls 0 --follow-symlinks tsoftlinks.h5
+TOOLTEST tsoftlinks-2.ls 0 --follow-symlinks -r tsoftlinks.h5
+TOOLTEST tsoftlinks-3.ls 0 --follow-symlinks tsoftlinks.h5/group1
+TOOLTEST tsoftlinks-4.ls 0 --follow-symlinks -r tsoftlinks.h5/group1
+TOOLTEST tsoftlinks-5.ls 0 --follow-symlinks tsoftlinks.h5/soft_dset1
+
+# test for displaying external and user-defined links with --follow-symlinks
 TOOLTEST textlink-1.ls 0 -w80 -r textlink.h5
-TOOLTEST textlinksrc-1.ls 0 -w80 -Er textlinksrc.h5
-TOOLTEST textlinksrc-2.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
-TOOLTEST textlinksrc-3.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-1.ls 0 -w80 --follow-symlinks -r textlinksrc.h5
+TOOLTEST textlinksrc-2.ls 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5
+TOOLTEST textlinksrc-3.ls 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1
 TOOLTEST textlinksrc-4.ls 0 -w80 -r textlinksrc.h5
 TOOLTEST textlinksrc-5.ls 0 -w80 -r textlinksrc.h5/ext_link1
-TOOLTEST textlinksrc-6.ls 0 -w80 -E textlinksrc.h5
-TOOLTEST textlinksrc-7.ls 0 -w80 -E textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-6.ls 0 -w80 --follow-symlinks textlinksrc.h5
+TOOLTEST textlinksrc-7.ls 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1
 TOOLTEST tudlink-1.ls 0 -w80 -r tudlink.h5
+
+# test for displaying external links with -E
+# the option -E will be depriciated but keep it for backward compatibility
+TOOLTEST textlinksrc-1-old.ls 0 -w80 -Er textlinksrc.h5
+TOOLTEST textlinksrc-2-old.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
+TOOLTEST textlinksrc-3-old.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+TOOLTEST textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
+TOOLTEST textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
 
 # tests for hard links
 TOOLTEST thlink-1.ls 0 -w80 thlink.h5
