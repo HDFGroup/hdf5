@@ -22,6 +22,7 @@
 
 ./.autom4te.cfg             		_DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini			_DO_NOT_DISTRIBUTE_
+./ACKNOWLEDGMENTS
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
