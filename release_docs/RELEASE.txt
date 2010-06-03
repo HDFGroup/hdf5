@@ -64,7 +64,11 @@ New Features
       files on all systems, where supported, by default, instead of only linux.
       This largefile support is controllable with the --enable-largefile 
       configure option. The linux-specific --enable-linux-lfs option has been 
-      deprecated in favor of this new option. (MAM - 2010/05/05 - 1772/1434)
+      deprecated in favor of this new option. Please note that specifying
+      --disable-large does NOT attempt to "turn off" largefile support if it
+      is natively supported by the compiler, but rather just disables 
+      configure from actively trying to add any additional compiler flags.
+      (MAM - 2010/05/05 - 1772/1434)
     - Upgraded versions of autotools used to generate configuration suite.
       We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
       (MAM 2010/04/15)
