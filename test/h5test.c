@@ -30,7 +30,7 @@
 #ifdef _WIN32
 #include <process.h>
 #include <direct.h>
-#include <winsock.h>
+#include <winsock2.h>
 #endif  /* _WIN32 */
 
 /*

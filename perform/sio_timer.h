@@ -27,7 +27,7 @@
 #endif
 
 #ifdef _WIN32
-#	include <winsock.h>
+#	include <winsock2.h>
 #endif /* _WIN32 */
 
 /* The different types of timers we can have */
