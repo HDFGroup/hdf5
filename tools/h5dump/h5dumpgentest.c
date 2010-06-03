@@ -487,7 +487,7 @@ static void gent_softlink(void)
 static int gent_softlink2(void)
 {
     hid_t       fileid1;
-    hid_t       grp1=0, grp2=0;
+    hid_t       gid1=0, gid2=0;
     hid_t       tid;
     hid_t       dset1, dset2;
     hid_t       datatype, dataspace;   
@@ -511,16 +511,16 @@ static int gent_softlink2(void)
    /*-----------------------------------------------------------------------
     * Groups
     *------------------------------------------------------------------------*/
-    grp1 = H5Gcreate2(fileid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (grp1 < 0)
+    gid1 = H5Gcreate2(fileid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid1 < 0)
     {
         fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
 
-    grp2 = H5Gcreate2(fileid1, "group_empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (grp2 < 0)
+    gid2 = H5Gcreate2(fileid1, "group_empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid2 < 0)
     {
         fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
@@ -653,7 +653,7 @@ static int gent_softlink2(void)
      * create various soft links under a group
      */
     /* link to dset1 */
-    status = H5Lcreate_soft("/dset1", grp1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("/dset1", gid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
@@ -662,7 +662,7 @@ static int gent_softlink2(void)
     }
 
     /* link to dset2 */
-    status = H5Lcreate_soft("/dset2", grp1, "soft_dset2", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("/dset2", gid1, "soft_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
@@ -671,7 +671,7 @@ static int gent_softlink2(void)
     }
 
     /* link to data type */
-    status = H5Lcreate_soft("/dtype", grp1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("/dtype", gid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
@@ -680,7 +680,7 @@ static int gent_softlink2(void)
     }
 
     /* link to empty group */
-    status = H5Lcreate_soft("/group_empty", grp1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("/group_empty", gid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
@@ -689,7 +689,7 @@ static int gent_softlink2(void)
     }
 
     /* dangling link  */
-    status = H5Lcreate_soft("not_yet", grp1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("not_yet", gid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
@@ -702,8 +702,8 @@ out:
      * Close/release resources.
      */
     H5Sclose(dataspace);
-    H5Gclose(grp1);
-    H5Gclose(grp2);
+    H5Gclose(gid1);
+    H5Gclose(gid2);
     H5Tclose(datatype);
     H5Dclose(dset1);
     H5Dclose(dset2);
