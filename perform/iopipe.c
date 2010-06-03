@@ -21,13 +21,6 @@
 /* See H5private.h for how to include headers */
 #include "hdf5.h"
 
-#ifdef H5_HAVE_WINSOCK_H
-#include <Winsock.h>
-#endif
-
-/*Winsock.h includes windows.h, due to the different value of
-WINVER, windows.h should be put before H5private.h. Kent yang 6/21/2001*/
-
 #if defined (__MWERKS__)
 #ifdef H5_HAVE_SYS_TIMEB
 #undef H5_HAVE_SYS_TIMEB
