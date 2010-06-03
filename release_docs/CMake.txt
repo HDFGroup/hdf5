@@ -49,16 +49,32 @@
 
    2. Configure the cache settings.
 
-      Click the Configure button. If this is the first time cmake-gui has been
-      run in this directory, you will be prompted for the generator you wish to 
-      use (for example on Windows, Visual Studio 9 2008).  CMake will read in 
-      the CMakeLists.txt files from the source directory and display options for 
-      the HDF5 project. After the first configure you can adjust the cache 
-      settings and/or specify locations of other programs.
+      Click the Configure button. 
 
-      Any conflicts or new values will be highlighted in red by the configure
-      process. Once you are happy with all the settings and there are no more
-      values in red, click the Generate button to produce the appropriate 
+      If this is the first time cmake-gui has been run in this directory, you 
+      will be prompted for the generator you wish to use (for example on 
+      Windows, Visual Studio 9 2008).  CMake will read in the CMakeLists.txt 
+      files from the source directory and display options for the HDF5 project. 
+
+      The first time you click Configure, CMake displays the default settings; 
+      since nothing has yet been confirmed, they will all be displayed in red.  
+
+      Review these settings, changing them as appropriate for your environment.
+
+      After each configure you can adjust the cache settings and/or specify 
+      locations of other programs.
+
+      Click Configure a second time.  
+
+      Each time you click configure, any new values and any conflicts detected 
+      by CMake will be highlighted in red.  
+
+      Review and change the settings as appropriate, and click configure again.
+
+      Repeat this review-change-click, review-change-click cycle until you are 
+      happy with all the settings and there are no more values in red.
+
+      Then, and only then, click the Generate button to produce the appropriate 
       build files. 
 
       On Windows, if you are using a Visual Studio generator, the solution and 
