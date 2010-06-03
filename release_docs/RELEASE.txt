@@ -133,11 +133,15 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3                       xlc 7.0.0.8, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.8, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.8
+    AIX 5.3                       xlc 7.0.0.9, 8.0.0.20, 9.0.0.4
+    (LLNL Up)                     xlC 7.0.0.9, 8.0.0.20, 9.0.0.4
+                                  xlf 9.1.0.9, 10.1.0.9, 11.1.0.7
+                                  mpcc_r 7.0.0.9
                                   mpxlf_r 09.01.0000.0008
+
+    AIX 6.1                       xlc 10.1.0.6
+    (NCSA BP)                     xlC 10.1.0.6
+                                  xlf 12.1.0.7
 
     Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
     (SNL red storm)               ftn (pgf90) 7.1-4
@@ -260,6 +264,7 @@ Windows Vista                        n        y(4)   n(4)     y     y     y
 Windows Vista x64                    n        y(4)   n(4)     y     y     y
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
+AIX 6.1 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y        y(2)   y        y     y     y
@@ -283,6 +288,7 @@ Windows Vista                        y       y(4)      y         n
 Windows Vista x64                    y       y(4)      y         n        
 Mac OS X 10.5                        y       n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
+AIX 6.1 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
@@ -324,10 +330,6 @@ Known Problems
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
   
-* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
-  it treats "exit(134) the same as if process 0 had received an abort signal.
-  This is fixed and will be available in the next release. AKC - 2009/11/3
-
 * Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
   The error is due to insufficient memory requested. Request a large amount
   of runtime memory by setting the following environment variable for more
