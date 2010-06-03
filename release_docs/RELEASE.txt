@@ -69,6 +69,12 @@ New Features
       is natively supported by the compiler, but rather just disables 
       configure from actively trying to add any additional compiler flags.
       (MAM - 2010/05/05 - 1772/1434)
+    - Fixed an signal handling mask error in H5detect that might result in
+      SIGBUS or SIGSEGV failures in some platforms such as Linux on Sparc
+      (bug# 1764).  AKC - 2010/4/28
+    - Fixed various "strict aliasing" problems, allowing higher levels
+      of compiler optimization (in particular, allowing '-O3' to work
+      with recent versions of GCC).  QAK - 2010/04/26
     - Upgraded versions of autotools used to generate configuration suite.
       We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
       (MAM 2010/04/15)
@@ -122,7 +128,7 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - None
+    - AIX 6.1 is added. (AKC - 2010/1/4)
 
 
 Bug Fixes since HDF5-1.8.4
@@ -172,7 +178,10 @@ Bug Fixes since HDF5-1.8.4
 
     Parallel Library
     ----------------
-    - None 
+    - Parallel mode in AIX will fail some of the testcheck_version.sh tests
+      where it treats "exit(134) the same as if process 0 had received an abort
+      signal.  Fixed.  (AKC - 2009/11/3)
+
 
     Tools
     -----
@@ -186,7 +195,6 @@ Bug Fixes since HDF5-1.8.4
       (JKM 2010/3/25)
     - h5repack sets NULL for object reference value for group or 
       named datatype. bug#1814. (JKM 2010/03/19)
-    - None EIP - 2009/10/21
 
 
     F90 API
@@ -231,11 +239,15 @@ Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3                       xlc 7.0.0.8, 8.0.0.20, 9.0.0.4
-    (LLNL Up)                     xlC 7.0.0.8, 8.0.0.20, 9.0.0.4
-                                  xlf 9.1.0.8, 10.1.0.9, 11.1.0.7
-                                  mpcc_r 7.0.0.8
+    AIX 5.3                       xlc 7.0.0.9, 8.0.0.20, 9.0.0.4
+    (LLNL Up)                     xlC 7.0.0.9, 8.0.0.20, 9.0.0.4
+                                  xlf 9.1.0.9, 10.1.0.9, 11.1.0.7
+                                  mpcc_r 7.0.0.9
                                   mpxlf_r 09.01.0000.0008
+
+    AIX 6.1                       xlc 10.1.0.6
+    (NCSA BP)                     xlC 10.1.0.6
+                                  xlf 12.1.0.7
 
     Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
     (SNL red storm)               ftn (pgf90) 7.1-4
@@ -349,6 +361,7 @@ Mac OS X 10.5 PPC                    n        n      n        n     y     n
 Mac OS X 10.5 Intel                  n        y      n        y     y     y
 Mac OS X 10.6 Intel                  n        y      n        y     y     y
 AIX 5.3 32- and 64-bit               n        y      n        y     y     n
+AIX 6.1 32- and 64-bit               n        y      n        y     y     n
 FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y        y(2)   y        y     y     y
@@ -374,6 +387,7 @@ Mac OS X 10.5 PPC                    y       n         n         n
 Mac OS X 10.5 (Intel)                y(5)    n         y         n        
 Mac OS X 10.6 (Intel)                y(5)    n         y         n        
 AIX 5.3 32- and 64-bit               n       n         n         n        
+AIX 6.1 32- and 64-bit               n       n         n         n        
 FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
 RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
@@ -416,10 +430,6 @@ Known Problems
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
   the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
   
-* Parallel mode in AIX will fail some of the testcheck_version.sh tests where
-  it treats "exit(134) the same as if process 0 had received an abort signal.
-  This is fixed and will be available in the next release. AKC - 2009/11/3
-
 * Some tests in tools/h5repack may fail in AIX systems when -q32 mode is used.
   The error is due to insufficient memory requested. Request a large amount
   of runtime memory by setting the following environment variable for more
