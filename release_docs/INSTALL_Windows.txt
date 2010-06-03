@@ -123,7 +123,7 @@ Preconditions:
 
       Similarly, you can set:
 
-      HDF5_EXT_SZIP environment variable as szlibdll.lib
+      HDF5_EXT_SZIP environment variable as szip.lib
 
       Notes:
 
@@ -985,7 +985,7 @@ project, you may choose one of the following two methods.
     1. In Visual Studio, go to the Project menu and choose "Properties".
 
     2. Find the "Link" option and "Input" category.  In the "Additional
-       Dependencies" field, insert "zlib1.lib, szlibdll.lib, hdf5.lib".
+       Dependencies" field, insert "zlib.lib, libszip.lib, hdf5.lib".
 
     3. (Optional) Also insert "hdf5_cpp.lib" if you want to use HDF5 C++ 
        static library.
