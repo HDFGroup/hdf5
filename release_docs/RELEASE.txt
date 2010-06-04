@@ -98,12 +98,14 @@ New Features
  
     Tools
     -----
-    - h5diff: fixed incorrect behavior (hang) in parallel mode when
-              specify invalid options (ex: -v and -q) (JKM 2010/02/17)
+    - h5dump: Added the new packedbits feature which prints packed bits stored
+      in an integer dataset. (AKC/ADB - 2010/5/7) 
+    - h5diff: fixed incorrect behavior (hang) in parallel mode when specify
+      invalid options (ex: -v and -q) (JKM 2010/02/17)
     - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
-              (JKM - 2010/02/10) 
+      (JKM - 2010/02/10) 
     - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
-               (JKM - 2010/01/25)
+      (JKM - 2010/01/25)
     - h5diff: fix for displaying garbage value on LE machine for BE data.
       (JKM - 2009/11/20)
 
