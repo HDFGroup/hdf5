@@ -249,9 +249,9 @@ The following platforms and compilers have been tested for this release.
     (NCSA BP)                     xlC 10.1.0.6
                                   xlf 12.1.0.7
 
-    Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
-    (SNL red storm)               ftn (pgf90) 7.1-4
-                                  CC (pgCC) 7.1-4
+    Cray XT3 (2.1.56)             cc (pgcc) 10.0-0
+    (SNL red storm)               ftn (pgf90) 10.0-0
+                                  CC (pgCC) 10.0-0
 
     FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
@@ -372,7 +372,7 @@ SuSe Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
 SuSe Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
 RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
-Cray XT3 2.0.62                      y        y      y        y     y     n
+Cray XT3 2.1.56                      y        y      y        y     y     n
 OpenVMS Alpha V8.3                   n        y      n        y     y     n
 
 Platform                           Shared  Shared    Shared    Thread-  
@@ -398,7 +398,7 @@ SuSe Linux 2.6.16 x86_64 Intel    W  y       y         y         n
 SuSe Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
 SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n 
 RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
-Cray XT3 2.0.62                      n       n         n         n
+Cray XT3 2.1.56                      n       n         n         n
 OpenVMS Alpha V8.3                   n       n         n         n
 
            (1) Fortran compiled with g95.
