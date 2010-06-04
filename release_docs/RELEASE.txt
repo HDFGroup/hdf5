@@ -97,7 +97,7 @@ New Features
  
     Tools
     -----
-    - h5dump: Added the new packedbits feature which prints packed bits stored
+    - h5dump: Added the new packed bits feature which prints packed bits stored
       in an integer dataset. (AKC/ADB - 2010/5/7) 
     - h5diff: Fixed incorrect behavior (hang) in parallel mode when specifying 
       invalid options (ex: -v and -q). (JKM - 2010/02/17)
