@@ -1365,7 +1365,18 @@ case "$host_cpu-$host_vendor-$host_os" in
 
     dnl Add POSIX support on Linux systems, so <features.h> defines
     dnl __USE_POSIX, which is required to get the prototype for fdopen
-    dnl defined correctly in <stdio.h>
+    dnl defined correctly in <stdio.h>. 
+    dnl This flag was removed from h5cc as of 2009-10-17 when it was found
+    dnl that the flag broke compiling netCDF-4 code with h5cc, but kept in 
+    dnl H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
+    dnl is used only by H5_debug_mask which is used only when debugging in
+    dnl H5_init_library (all in H5.c).  When the flag was removed this was
+    dnl the only compile failure noted;  however, defining the Macro 
+    dnl makes available the functionality from the POSIX.1 standard as well
+    dnl as all or the ISO C facilities, according to a discussion of 
+    dnl defining the _POSIX_SOURCE, _BSD_SOURCE, and _POSIX_C_SOURCE Macros
+    dnl and their interaction found at 
+    dnl http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html.
     H5_CPPFLAGS="-D_POSIX_SOURCE $H5_CPPFLAGS"
 
     dnl Also add BSD support on Linux systems, so <features.h> defines
