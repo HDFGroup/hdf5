@@ -302,15 +302,10 @@ The following platforms and compilers have been tested for this release.
     perfctr #7 SMP                Open MPI 1.2.2
     (abe)                         MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
                                   compiled with icc v10.0.026 and ifort 10.0.026
-
-    Linux 2.6.9-55.0.9.EL_lustre  Intel(R) C, C++, Fortran Compilers for 
-    .1.4.11.1smp #1 SMP           applications running on Intel(R) 64, 
-    SMP x86_64 GNU/Linux          Versions 10.1.
-    (SNL Thunderbird)             
                                   
     Linux 2.6.18-76chaos #1 SMP   Intel(R) C, C++, Fortran Compilers for 
     SMP x86_64 GNU/Linux          applications running on Intel(R) 64, 
-    (SNL Glory)                   Versions 10.1.
+    (SNL Glory)                   Versions 11.1.
     
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
                                   Cygwin(1.7.5 native gcc(4.3.4) compiler and gfortran)
