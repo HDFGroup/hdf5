@@ -15,6 +15,10 @@
 #
 # Tests for the h5ls tool
 
+TESTNAME=h5ls
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 H5LS=h5ls               # The tool name
 H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
 
@@ -207,7 +211,9 @@ fi
 
 
 if test $nerrors -eq 0 ; then
-	echo "All h5ls tests passed."
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
 fi
-
-exit $nerrors
