@@ -24,6 +24,7 @@
 Shared_Lib=@enable_shared@
 Static_Lib=@enable_static@
 Static_exec=@STATIC_EXEC@
+h5haveexitcode=yes	# default is yes
 
 CMP='cmp -s'
 DIFF='diff -c'
@@ -175,7 +176,7 @@ TESTING() {
     ret_code=$?
     cat $actual_err >> $actual
     
-    if [ \( $expect_code -ne $ret_code \) ]; then
+    if [ $h5haveexitcode = 'yes' -a \( $expect_code -ne $ret_code \) ]; then
 	echo "*FAILED*"
 	echo "    Expected exit code ($expect_code) differs from actual code ($ret_code)"
 	nerrors="`expr $nerrors + 1`"
@@ -233,6 +234,13 @@ case "$h5versmajor$h5versminor$h5versrelease" in
         exit 1
         ;;
 esac
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
 
 # Three Categories of tests:
 # Normal: where the version numbers all matched (wrong_version == none).

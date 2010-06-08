@@ -30,12 +30,20 @@ WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 
 nerrors=0
 verbose=yes
+h5haveexitcode=yes	    # default is yes
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
     srcdir=.
 fi
 test -d ../testfiles || mkdir ../testfiles
+
+# RUNSERIAL is used. Check if it can return exit code from executalbe correctly.
+if [ -n "$RUNSERIAL_NOEXITCODE" ]; then
+    echo "***Warning*** Serial Exit Code is not passed back to shell corretly."
+    echo "***Warning*** Exit code checking is skipped."
+    h5haveexitcode=no
+fi
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -74,7 +82,7 @@ TOOLTEST() {
     
     exitcode=$?
     cat $actual_err >> $actual
-    if [ $exitcode -ne $retvalexpect ]; then
+    if [ $h5haveexitcode = 'yes' -a $exitcode -ne $retvalexpect ]; then
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	if [ yes = "$verbose" ]; then
