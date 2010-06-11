@@ -681,7 +681,7 @@ dnl    RUNSERIAL	-- This is a command which will be prepended to
 dnl			   the executable name to run the executable using
 dnl			   a single process. For serial versions of the
 dnl			   library this will normally be empty. For parallel
-dnl			   versions it might be something like `mpirun -np 1'.
+dnl			   versions it might be something like `mpiexec -n 1'.
 dnl			   The value of this variable is substituted in *.in
 dnl			   files.
 dnl
@@ -706,15 +706,15 @@ dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
 dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
 dnl the name of the compiler might tell us how to run the resulting
-dnl executable. For `mpicc' the executable should be run with `mpirun' from
+dnl executable. For `mpicc' the executable should be run with `mpiexec' from
 dnl the same directory as mpicc if it exists.
 dnl
 case "$CC_BASENAME" in
   mpicc)
-    dnl The mpich compiler. Use mpirun from the same directory if it
+    dnl The mpich compiler. Use mpiexec from the same directory if it
     dnl exists.
     PARALLEL=mpicc
-    AC_MSG_CHECKING([for mpirun])
+    AC_MSG_CHECKING([for mpiexec])
 
     dnl Find the path where mpicc is located.
     cmd="`echo $CC | cut -f1 -d' '`"
@@ -728,13 +728,13 @@ case "$CC_BASENAME" in
       done
     fi
 
-    dnl Is there an mpirun at that path?
-    if test -x $path/mpirun; then
-      AC_MSG_RESULT([$path/mpirun])
+    dnl Is there an mpiexec at that path?
+    if test -x $path/mpiexec; then
+      AC_MSG_RESULT([$path/mpiexec])
       RUNSERIAL="${RUNSERIAL:-none}"
 
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
+        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=3}"
       fi
     else
       AC_MSG_RESULT([none])
@@ -811,7 +811,7 @@ dnl If the Fortran compiler is obviously a parallel compiler then we're
 dnl building a parallel version of hdf5 and should define HAVE_PARALLEL.
 dnl Furthermore, the name of the compiler might tell us how to run the
 dnl resulting executable. For `mpif90' the executable should be run with
-dnl `mpirun' from the same directory as mpif90 if it exists.
+dnl `mpiexec' from the same directory as mpif90 if it exists.
 dnl
 if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl Change to the Fortran 90 language
@@ -819,10 +819,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   case "$FC" in
     *mpif90*)
-      dnl The Fortran mpich compiler. Use mpirun from the same directory
+      dnl The Fortran mpich compiler. Use mpiexec from the same directory
       dnl if it exists.
       PARALLEL=mpif90
-      AC_MSG_CHECKING([for mpirun])
+      AC_MSG_CHECKING([for mpiexec])
 
       dnl Find the path where mpif90 is located.
       cmd=`echo $FC |cut -f1 -d' '`
@@ -836,13 +836,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
         done
       fi
 
-      dnl Is there an mpirun at that path?
-      if test -x $path/mpirun; then
-        AC_MSG_RESULT([$path/mpirun])
+      dnl Is there an mpiexec at that path?
+      if test -x $path/mpiexec; then
+        AC_MSG_RESULT([$path/mpiexec])
         RUNSERIAL="${RUNSERIAL:-none}"
 
         if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=2}"
         fi
       else
         AC_MSG_RESULT([none])
@@ -2593,9 +2593,9 @@ case "X-$enable_parallel" in
       AC_LANG_POP(Fortran)
     fi
 
-    dnl Set RUNPARALLEL to mpirun if not set yet.
+    dnl Set RUNPARALLEL to mpiexec if not set yet.
     dnl Check for building on Cray if RUNPARALLEL is not yet set by checking
-    dnl for 'aprun' command (which is the parallel job launcher, like mpirun).
+    dnl for 'aprun' command (which is the parallel job launcher, like mpiexec).
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
         dnl Find the path where aprun is located.
   	for path in `echo $PATH | ${TR} ":" " "`; do
@@ -2606,9 +2606,9 @@ case "X-$enable_parallel" in
 	done
     fi
 
-    dnl Set RUNPARALLEL to mpirun if not set yet.
+    dnl Set RUNPARALLEL to mpiexec if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
+      RUNPARALLEL="mpiexec -n \$\${NPROCS:=3}"
     fi
     ;;
 

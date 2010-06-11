@@ -39,6 +39,9 @@ New Features
 
     Configuration:
     -------------
+    - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
+      applications startup command as defined in the MPI-2 definition, section
+      4.1. (AKC - 2010/6/11 - Bug 1921)
     - Configure now adds appropriate defines for supporting large (64-bit)
       files on all systems, where supported, by default, instead of only linux.
       This largefile support is controllable with the --enable-largefile 
