@@ -998,6 +998,9 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
  * Programmer:	Quincey Koziol
  *		Thursday, January 31, 2008
  *
+ * Modifications:
+ *	Vailin Choi; June 2010
+ *	Fix for window failures manifested from tests in mf.c.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1022,6 +1025,9 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 #ifdef _WIN32
             HFILE filehandle;   /* Windows file handle */
             LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
+
+	    /* Reset seek offset to beginning of file, so that file isn't re-extended later */
+            rewind(file->fp);
 
             /* Map the posix file handle to a Windows file handle */
             filehandle = _get_osfhandle(fd);
