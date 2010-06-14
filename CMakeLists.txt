@@ -197,7 +197,6 @@ SET (LIB_TYPE STATIC)
 IF (BUILD_SHARED_LIBS)
   SET (LIB_TYPE SHARED)
   SET (H5_BUILT_AS_DYNAMIC_LIB 1)
-  SET (LIBPOSTFIX "")
   IF (MSVC)
     SET (CMAKE_MFC_FLAG 0)
     FOREACH (flag_var
@@ -215,7 +214,6 @@ ELSE (BUILD_SHARED_LIBS)
     # should this be a user setting : Everyone uses it anyway ?
     ADD_DEFINITIONS(-DPIC)
   ENDIF (NOT WIN32)
-  SET (LIBPOSTFIX "")
   IF (MSVC)
     SET (CMAKE_MFC_FLAG 0)
     FOREACH (flag_var
@@ -233,28 +231,18 @@ ENDIF (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 # Set the target names of all the libraries
 #-----------------------------------------------------------------------------
-SET (HDF5_LIB_TARGET              ${HDF5_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_TEST_LIB_TARGET         ${HDF5_TEST_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_CPP_LIB_TARGET          ${HDF5_CPP_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_HL_LIB_TARGET           ${HDF5_HL_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_HL_CPP_LIB_TARGET       ${HDF5_HL_CPP_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_TOOLS_LIB_TARGET        ${HDF5_TOOLS_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_F90_LIB_TARGET          ${HDF5_F90_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_F90_C_LIB_TARGET        ${HDF5_F90_C_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_F90_TEST_LIB_TARGET     ${HDF5_F90_TEST_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_F90_C_TEST_LIB_TARGET   ${HDF5_F90_C_TEST_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_HL_F90_LIB_TARGET       ${HDF5_HL_F90_LIB_NAME}${LIBPOSTFIX})
-SET (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_NAME}${LIBPOSTFIX})
-
-#-----------------------------------------------------------------------------
-# Include the main src and config directories
-#-----------------------------------------------------------------------------
-SET (HDF5_INCLUDE_DIRECTORIES
-    ${HDF5_SRC_DIR}
-    ${HDF5_SOURCE_DIR}
-    ${HDF5_BINARY_DIR}
-)
-INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRECTORIES})
+SET (HDF5_LIB_TARGET              ${HDF5_LIB_CORENAME})
+SET (HDF5_TEST_LIB_TARGET         ${HDF5_TEST_LIB_CORENAME})
+SET (HDF5_CPP_LIB_TARGET          ${HDF5_CPP_LIB_CORENAME})
+SET (HDF5_HL_LIB_TARGET           ${HDF5_HL_LIB_CORENAME})
+SET (HDF5_HL_CPP_LIB_TARGET       ${HDF5_HL_CPP_LIB_CORENAME})
+SET (HDF5_TOOLS_LIB_TARGET        ${HDF5_TOOLS_LIB_CORENAME})
+SET (HDF5_F90_LIB_TARGET          ${HDF5_F90_LIB_CORENAME})
+SET (HDF5_F90_C_LIB_TARGET        ${HDF5_F90_C_LIB_CORENAME})
+SET (HDF5_F90_TEST_LIB_TARGET     ${HDF5_F90_TEST_LIB_CORENAME})
+SET (HDF5_F90_C_TEST_LIB_TARGET   ${HDF5_F90_C_TEST_LIB_CORENAME})
+SET (HDF5_HL_F90_LIB_TARGET       ${HDF5_HL_F90_LIB_CORENAME})
+SET (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_CORENAME})
 
 #-----------------------------------------------------------------------------
 # When building utility executables that generate other (source) files :
@@ -301,9 +289,9 @@ ENDIF (CMAKE_BUILD_TYPE MATCHES Debug)
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
-IF (NOT WIN32)
+IF (CMAKE_COMPILER_IS_GNUCC)
   SET (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
-ENDIF (NOT WIN32)
+ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
 #-----------------------------------------------------------------------------
 # Option to allow the user to disable compiler warnings
@@ -343,6 +331,11 @@ ENDIF (CMAKE_COMPILER_IS_GNUCC)
 IF (CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+#-----------------------------------------------------------------------------
+# All libs/tests/examples need the main include directories
+#-----------------------------------------------------------------------------
+INCLUDE_DIRECTORIES (${HDF5_BINARY_DIR} ${HDF5_SRC_DIR})
 
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
@@ -566,7 +559,7 @@ INSTALL (
     DESTINATION
         lib
     FILE
-        HDF5-config.cmake
+        HDF5-targets.cmake
 )
 
 #-----------------------------------------------------------------------------
@@ -576,7 +569,36 @@ EXPORT (
     TARGETS
         ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
     FILE
-        HDF5-config.cmake
+        HDF5-targets.cmake
+)
+
+#-----------------------------------------------------------------------------
+# Configure the HDF5-config.cmake file for the build directory
+#-----------------------------------------------------------------------------
+SET (HDF5_INCLUDES_BUILD_TIME
+    ${HDF5_SRC_DIR} ${HDF5_CPP_SOURCE_DIR} ${HDF5_HL_SOURCE_DIR}
+    ${HDF5_TOOLS_SOURCE_DIR} ${HDF5_BINARY_DIR}
+)
+SET (HDF5_VERSION_STRING @HDF5_PACKAGE_VERSION@)
+SET (HDF5_VERSION_MAJOR  @HDF5_PACKAGE_VERSION_MAJOR@)
+SET (HDF5_VERSION_MINOR  @HDF5_PACKAGE_VERSION_MINOR@)
+
+CONFIGURE_FILE (
+    ${HDF5_SOURCE_DIR}/Resources/HDF5-config.cmake.build.in 
+    ${HDF5_BINARY_DIR}/HDF5-config.cmake @ONLY
+)
+
+#-----------------------------------------------------------------------------
+# Configure the HDF5-config.cmake file for the install directory
+#-----------------------------------------------------------------------------
+INSTALL (CODE
+    "SET (HDF5_INSTALL_SKIP_TARGETS 1)
+     INCLUDE (${HDF5_BINARY_DIR}/HDF5-config.cmake) 
+     CONFIGURE_FILE (
+         \"${HDF5_SOURCE_DIR}/Resources/HDF5-config.cmake.install.in\" 
+         \"${CMAKE_INSTALL_PREFIX}/lib/HDF5-config.cmake\" @ONLY
+     )
+    "
 )
 
 #-----------------------------------------------------------------------------
