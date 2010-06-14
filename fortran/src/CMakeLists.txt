@@ -230,7 +230,7 @@ INSTALL (
 
 INSTALL (
     DIRECTORY
-        ${CMAKE_Fortran_MODULE_DIRECTORY}/${BUILD_TYPE}/
+        ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
     DESTINATION
         include/fortran
     COMPONENT
