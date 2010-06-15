@@ -76,6 +76,8 @@ New Features
 
     Library:
     --------
+    - Improved performance of the chunk cache by avoiding unnecessary b-tree
+      lookups of chunks already in cache. (NAF - 2010/06/15) 
     - Greatly improved performance of extending a dataset with early
       allocation. (NAF - 2010/03/24 - 1637)
     - Added support for filtering densely stored groups.  Many of the API

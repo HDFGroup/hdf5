@@ -1607,53 +1607,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_in_cache
- *
- * Purpose:	Check if a chunk is in the cache.
- *
- * Return:	TRUE or FALSE
- *
- * Programmer:	Quincey Koziol
- *		1 April 2008
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-H5D_chunk_in_cache(const H5D_t *dset, const hsize_t *chunk_offset,
-    hsize_t chunk_idx)
-{
-    H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);/*raw data chunk cache*/
-    hbool_t	found = FALSE;		/*already in cache?	*/
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_in_cache)
-
-    /* Sanity checks */
-    HDassert(dset);
-    HDassert(chunk_offset);
-
-    /* Check if the chunk is in the cache (but hasn't been written to disk yet) */
-    if(rdcc->nslots > 0) {
-        unsigned idx = H5D_CHUNK_HASH(dset->shared, chunk_idx); /* Cache entry index */
-        H5D_rdcc_ent_t	*ent = rdcc->slot[idx]; /* Cache entry */
-
-        /* Potential match... */
-        if(ent) {
-            size_t u;           /* Local index variable */
-
-            for(u = 0, found = TRUE; u < dset->shared->layout.u.chunk.ndims; u++) {
-                if(chunk_offset[u] != ent->offset[u]) {
-                    found = FALSE;
-                    break;
-                } /* end if */
-            } /* end for */
-        } /* end if */
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(found)
-} /* end H5D_chunk_in_cache() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_chunk_read
  *
  * Purpose:	Read from a chunked dataset.
@@ -1679,7 +1632,6 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hbool_t     cpt_dirty;              /* Temporary placeholder for compact storage "dirty" flag */
     uint32_t    src_accessed_bytes = 0; /* Total accessed size in a chunk */
     hbool_t     skip_missing_chunks = FALSE;    /* Whether to skip missing chunks */
-    unsigned    idx_hint = 0;           /* Cache index hint      */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1739,11 +1691,12 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
 
         /* Get the info for the chunk in the file */
-        if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata) < 0)
+        if(H5D_chunk_lookup(io_info->dset, io_info->dxpl_id,
+                chunk_info->coords, chunk_info->index, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
         /* Check for non-existant chunk & skip it if appropriate */
-        if(H5F_addr_defined(udata.addr) || H5D_chunk_in_cache(io_info->dset, chunk_info->coords, chunk_info->index)
+        if(H5F_addr_defined(udata.addr) || UINT_MAX != udata.idx_hint
                 || !skip_missing_chunks) {
             /* Load the chunk into cache and lock it. */
             if((cacheable = H5D_chunk_cacheable(io_info, udata.addr, FALSE)) < 0)
@@ -1758,7 +1711,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 src_accessed_bytes = chunk_info->chunk_points * (uint32_t)type_info->src_type_size;
 
                 /* Lock the chunk into the cache */
-                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, FALSE, &idx_hint)))
+                if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, FALSE)))
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
                 /* Set up the storage buffer information for this chunk */
@@ -1791,7 +1744,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
 
             /* Release the cache lock on the chunk. */
-            if(chunk && H5D_chunk_unlock(io_info, &udata, FALSE, idx_hint, chunk, src_accessed_bytes) < 0)
+            if(chunk && H5D_chunk_unlock(io_info, &udata, FALSE, chunk, src_accessed_bytes) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
 
@@ -1834,7 +1787,6 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_storage_t cpt_store;            /* Chunk storage information as compact dataset */
     hbool_t     cpt_dirty;              /* Temporary placeholder for compact storage "dirty" flag */
     uint32_t    dst_accessed_bytes = 0; /* Total accessed size in a chunk */
-    unsigned    idx_hint = 0;           /* Cache index hint      */
     herr_t	ret_value = SUCCEED;	/* Return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
@@ -1875,7 +1827,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
         /* Load the chunk into cache.  But if the whole chunk is written,
          * simply allocate space instead of load the chunk. */
-        if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata) < 0)
+        if(H5D_chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords,
+                chunk_info->index, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
         if((cacheable = H5D_chunk_cacheable(io_info, udata.addr, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
@@ -1896,7 +1849,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 entire_chunk = FALSE;
 
             /* Lock the chunk into the cache */
-            if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk, &idx_hint)))
+            if(NULL == (chunk = H5D_chunk_lock(io_info, &udata, entire_chunk)))
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 
             /* Set up the storage buffer information for this chunk */
@@ -1948,7 +1901,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
         /* Release the cache lock on the chunk. */
-        if(chunk && H5D_chunk_unlock(io_info, &udata, TRUE, idx_hint, chunk, dst_accessed_bytes) < 0)
+        if(chunk && H5D_chunk_unlock(io_info, &udata, TRUE, chunk, dst_accessed_bytes) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 
         /* Advance to next chunk in list */
@@ -2262,11 +2215,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_get_info
+ * Function:	H5D_chunk_lookup
  *
- * Purpose:	Get the info about a chunk if file space has been
- *		assigned.  Save the retrieved information in the udata
- *		supplied.
+ * Purpose:	Loops up a chunk in cache and on disk, and retrieves
+ *              information about that chunk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2276,12 +2228,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
-    H5D_chunk_ud_t *udata)
+H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
+    hsize_t chunk_idx, H5D_chunk_ud_t *udata)
 {
+    H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
+    hbool_t         found = FALSE;      /* In cache? */
+    unsigned        u;                  /* Counter */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_get_info)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_lookup)
 
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
@@ -2298,28 +2253,49 @@ H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset
     udata->filter_mask = 0;
     udata->addr = HADDR_UNDEF;
 
-    /* Check for cached information */
-    if(!H5D_chunk_cinfo_cache_found(&dset->shared->cache.chunk.last, udata)) {
-        H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    /* Check for chunk in cache */
+    if(dset->shared->cache.chunk.nslots > 0) {
+        udata->idx_hint = H5D_CHUNK_HASH(dset->shared, chunk_idx);
+        ent = dset->shared->cache.chunk.slot[udata->idx_hint];
 
-        /* Compose chunked index info struct */
-        idx_info.f = dset->oloc.file;
-        idx_info.dxpl_id = dxpl_id;
-        idx_info.pline = &dset->shared->dcpl_cache.pline;
-        idx_info.layout = &dset->shared->layout.u.chunk;
-        idx_info.storage = &dset->shared->layout.storage.u.chunk;
-
-        /* Go get the chunk information */
-        if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
-
-        /* Cache the information retrieved */
-        H5D_chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
+        if(ent)
+            for(u = 0, found = TRUE; u < dset->shared->layout.u.chunk.ndims; u++)
+                if(chunk_offset[u] != ent->offset[u]) {
+                    found = FALSE;
+                    break;
+                } /* end if */
     } /* end if */
+
+    /* Find chunk addr */
+    if(found)
+        udata->addr = ent->chunk_addr;
+    else {
+        /* Invalidate idx_hint, to signal that the chunk is not in cache */
+        udata->idx_hint = UINT_MAX;
+
+        /* Check for cached information */
+        if(!H5D_chunk_cinfo_cache_found(&dset->shared->cache.chunk.last, udata)) {
+            H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+
+            /* Compose chunked index info struct */
+            idx_info.f = dset->oloc.file;
+            idx_info.dxpl_id = dxpl_id;
+            idx_info.pline = &dset->shared->dcpl_cache.pline;
+            idx_info.layout = &dset->shared->layout.u.chunk;
+            idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+            /* Go get the chunk information */
+            if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
+
+            /* Cache the information retrieved */
+            H5D_chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
+        } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_chunk_get_info() */
+} /* H5D_chunk_lookup() */
 
 
 /*-------------------------------------------------------------------------
@@ -2679,7 +2655,7 @@ done:
  */
 void *
 H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
-    hbool_t relax, unsigned *idx_hint/*in,out*/)
+    hbool_t relax)
 {
     H5D_t *dset = io_info->dset;                /* Local pointer to the dataset info */
     const H5O_pline_t  *pline = &(dset->shared->dcpl_cache.pline);    /* I/O pipeline info */
@@ -2689,7 +2665,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     H5D_rdcc_t		*rdcc = &(dset->shared->cache.chunk);   /*raw data chunk cache*/
     H5D_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
-    unsigned		idx = 0;		/*hash index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
     haddr_t             chunk_addr = HADDR_UNDEF; /* Address of chunk on disk */
     size_t		chunk_size;		/*size of a chunk	*/
@@ -2710,20 +2685,21 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     HDassert(layout->u.chunk.size > 0);
     H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
 
-    /* Search for the chunk in the cache */
-    if(rdcc->nslots > 0) {
-        idx = H5D_CHUNK_HASH(dset->shared, io_info->store->chunk.index);
-        ent = rdcc->slot[idx];
+    /* Check if the chunk is in the cache */
+    if(UINT_MAX != udata->idx_hint) {
+        /* Sanity check */
+        HDassert(udata->idx_hint < rdcc->nslots);
+        HDassert(rdcc->slot[udata->idx_hint]);
 
-        if(ent)
-            for(u = 0, found = TRUE; u < layout->u.chunk.ndims; u++)
-                if(io_info->store->chunk.offset[u] != ent->offset[u]) {
-                    found = FALSE;
-                    break;
-                } /* end if */
-    } /* end if */
+        /* Get the entry */
+        ent = rdcc->slot[udata->idx_hint];
 
-    if(found) {
+#ifndef NDEBUG
+        /* Make sure this is the right chunk */
+        for(u = 0; u < layout->u.chunk.ndims; u++)
+            HDassert(io_info->store->chunk.offset[u] == ent->offset[u]);
+#endif /* NDEBUG */
+
         /*
          * Already in the cache.  Count a hit.
          */
@@ -2823,63 +2799,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     } /* end else */
     HDassert(found || chunk_size > 0);
 
-    if(!found && rdcc->nslots > 0 && chunk_size <= rdcc->nbytes_max &&
-            (!ent || !ent->locked)) {
-        /*
-         * Add the chunk to the cache only if the slot is not already locked.
-         * Preempt enough things from the cache to make room.
-         */
-        if(ent) {
-            if(H5D_chunk_cache_evict(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, ent, TRUE) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache")
-        } /* end if */
-        if(H5D_chunk_cache_prune(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, chunk_size) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache")
-
-        /* Create a new entry */
-        if(NULL == (ent = H5FL_MALLOC(H5D_rdcc_ent_t)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate raw data chunk entry")
-
-        ent->locked = 0;
-        ent->dirty = FALSE;
-        ent->deleted = FALSE;
-        ent->chunk_addr = chunk_addr;
-        for(u = 0; u < layout->u.chunk.ndims; u++)
-            ent->offset[u] = io_info->store->chunk.offset[u];
-        H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
-        H5_ASSIGN_OVERFLOW(ent->wr_count, chunk_size, size_t, uint32_t);
-        ent->chunk = (uint8_t *)chunk;
-
-        /* Add it to the cache */
-        HDassert(NULL == rdcc->slot[idx]);
-        rdcc->slot[idx] = ent;
-        ent->idx = idx;
-        rdcc->nbytes_used += chunk_size;
-        rdcc->nused++;
-
-        /* Add it to the linked list */
-        ent->next = NULL;
-        if(rdcc->tail) {
-            rdcc->tail->next = ent;
-            ent->prev = rdcc->tail;
-            rdcc->tail = ent;
-        } /* end if */
-        else {
-            rdcc->head = rdcc->tail = ent;
-            ent->prev = NULL;
-        } /* end else */
-
-        /* Indicate that the chunk is in the cache now */
-        found = TRUE;
-    } else if(!found) {
-        /*
-         * The chunk is larger than the entire cache so we don't cache it.
-         * This is the reason all those arguments have to be repeated for the
-         * unlock function.
-         */
-        ent = NULL;
-        idx = UINT_MAX;
-    } else {
+    if(ent) {
         /*
          * The chunk is not at the beginning of the cache; move it backward
          * by one slot.  This is how we implement the LRU preemption
@@ -2900,7 +2820,67 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             ent->next = ent->next->next;
             ent->prev->next = ent;
         } /* end if */
+    } /* end if */
+    else if(rdcc->nslots > 0 && chunk_size <= rdcc->nbytes_max) {
+        /* Calculate the index */
+        udata->idx_hint = H5D_CHUNK_HASH(dset->shared, io_info->store->chunk.index);
+
+        /* Add the chunk to the cache only if the slot is not already locked */
+        ent = rdcc->slot[udata->idx_hint];
+        if(!ent || !ent->locked) {
+            /* Preempt enough things from the cache to make room */
+            if(ent) {
+                if(H5D_chunk_cache_evict(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, ent, TRUE) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache")
+            } /* end if */
+            if(H5D_chunk_cache_prune(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, chunk_size) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache")
+
+            /* Create a new entry */
+            if(NULL == (ent = H5FL_MALLOC(H5D_rdcc_ent_t)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate raw data chunk entry")
+
+            ent->locked = 0;
+            ent->dirty = FALSE;
+            ent->deleted = FALSE;
+            ent->chunk_addr = chunk_addr;
+            for(u = 0; u < layout->u.chunk.ndims; u++)
+                ent->offset[u] = io_info->store->chunk.offset[u];
+            H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
+            H5_ASSIGN_OVERFLOW(ent->wr_count, chunk_size, size_t, uint32_t);
+            ent->chunk = (uint8_t *)chunk;
+
+            /* Add it to the cache */
+            HDassert(NULL == rdcc->slot[udata->idx_hint]);
+            rdcc->slot[udata->idx_hint] = ent;
+            ent->idx = udata->idx_hint;
+            rdcc->nbytes_used += chunk_size;
+            rdcc->nused++;
+
+            /* Add it to the linked list */
+            ent->next = NULL;
+            if(rdcc->tail) {
+                rdcc->tail->next = ent;
+                ent->prev = rdcc->tail;
+                rdcc->tail = ent;
+            } /* end if */
+            else {
+                rdcc->head = rdcc->tail = ent;
+                ent->prev = NULL;
+            } /* end else */
+        } /* end if */
+        else
+            /* We did not add the chunk to cache */
+            ent = NULL;
     } /* end else */
+
+    if(!ent)
+        /*
+         * The chunk cannot be placed in cache so we don't cache it. This is the
+         * reason all those arguments have to be repeated for the unlock
+         * function.
+         */
+        udata->idx_hint = UINT_MAX;
 
     /* Lock the chunk into the cache */
     if(ent) {
@@ -2908,9 +2888,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         ent->locked = TRUE;
         chunk = ent->chunk;
     } /* end if */
-
-    if(idx_hint)
-        *idx_hint = idx;
 
     /* Set return value */
     ret_value = chunk;
@@ -2953,7 +2930,7 @@ done:
  */
 herr_t
 H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
-    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed)
+    hbool_t dirty, void *chunk, uint32_t naccessed)
 {
     const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
@@ -2964,7 +2941,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     HDassert(io_info);
     HDassert(udata);
 
-    if(UINT_MAX == idx_hint) {
+    if(UINT_MAX == udata->idx_hint) {
         /*
          * It's not in the cache, probably because it's too big.  If it's
          * dirty then flush it to disk.  In any case, free the chunk.
@@ -2993,14 +2970,14 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         H5D_rdcc_ent_t	*ent;   /* Chunk's entry in the cache */
 
         /* Sanity check */
-	HDassert(idx_hint < rdcc->nslots);
-	HDassert(rdcc->slot[idx_hint]);
-	HDassert(rdcc->slot[idx_hint]->chunk == chunk);
+	HDassert(udata->idx_hint < rdcc->nslots);
+	HDassert(rdcc->slot[udata->idx_hint]);
+	HDassert(rdcc->slot[udata->idx_hint]->chunk == chunk);
 
         /*
          * It's in the cache so unlock it.
          */
-        ent = rdcc->slot[idx_hint];
+        ent = rdcc->slot[udata->idx_hint];
         HDassert(ent->locked);
         if(dirty) {
             ent->dirty = TRUE;
@@ -3308,9 +3285,21 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-            if(H5D_chunk_get_info(dset, dxpl_id, chunk_offset, &udata) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-            HDassert(!H5F_addr_defined(udata.addr));
+            {
+                hsize_t chunk_idx;
+
+                /* Calculate the index of this chunk */
+                if(H5V_chunk_index((unsigned)space_ndims, chunk_offset,
+                        layout->u.chunk.dim, layout->u.chunk.down_chunks,
+                        &chunk_idx) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
+
+                if(H5D_chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx,
+                        &udata) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
+
+                HDassert(!H5F_addr_defined(udata.addr));
+            } /* end block */
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -3478,7 +3467,6 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     hssize_t    sel_nelmts;             /* Number of elements in selection */
     hsize_t     count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     void        *chunk;	                /* The file chunk  */
-    unsigned    idx_hint;               /* Which chunk we're dealing with */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
     unsigned    u;                      /* Local index variable */
@@ -3487,14 +3475,13 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_prune_fill)
 
     /* Get the info for the chunk in the file */
-    if(H5D_chunk_get_info(dset, io_info->dxpl_id, chunk_offset, &chk_udata) < 0)
+    if(H5D_chunk_lookup(dset, io_info->dxpl_id, chunk_offset,
+            io_info->store->chunk.index, &chk_udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
     /* If this chunk does not exist in cache or on disk, no need to do anything
      */
-    if(!H5F_addr_defined(chk_udata.addr)
-            && !H5D_chunk_in_cache(dset, chunk_offset,
-            io_info->store->chunk.index))
+    if(!H5F_addr_defined(chk_udata.addr) && UINT_MAX == chk_udata.idx_hint)
         HGOTO_DONE(SUCCEED)
 
     /* Initialize the fill value buffer, if necessary */
@@ -3524,8 +3511,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "unable to select hyperslab")
 
     /* Lock the chunk into the cache, to get a pointer to the chunk buffer */
-    if(NULL == (chunk = (void *)H5D_chunk_lock(io_info, &chk_udata, FALSE,
-            &idx_hint)))
+    if(NULL == (chunk = (void *)H5D_chunk_lock(io_info, &chk_udata, FALSE)))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to lock raw data chunk")
 
 
@@ -3566,7 +3552,7 @@ H5D_chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
-    if(H5D_chunk_unlock(io_info, &chk_udata, TRUE, idx_hint, chunk, bytes_accessed) < 0)
+    if(H5D_chunk_unlock(io_info, &chk_udata, TRUE, chunk, bytes_accessed) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:
@@ -3699,7 +3685,6 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     const H5O_layout_t     *layout = &(dset->shared->layout);   /* Dataset's layout */
     const H5D_rdcc_t       *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t         *ent = NULL;	        /* Cache entry  */
-    unsigned                idx = 0;            /* Hash index number     */
     int                     space_ndims;        /* Dataset's space rank */
     hsize_t                 space_dim[H5O_LAYOUT_NDIMS]; /* Current dataspace dimensions */
     int                     op_dim;             /* Current operationg dimension */
@@ -3713,7 +3698,6 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     hsize_t                 chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
     hsize_t                 hyper_start[H5O_LAYOUT_NDIMS];  /* Starting location of hyperslab */
     uint32_t                elmts_per_chunk;    /* Elements in chunk */
-    hbool_t                 chk_on_disk;        /* Whether a chunk exists on disk */
     hbool_t                 carry;              /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     int                     i;	        /* Local index variable */
     herr_t                  ret_value = SUCCEED;       /* Return value */
@@ -3892,8 +3876,6 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write fill value")
             } /* end if */
             else {
-                chk_on_disk = FALSE;
-
 #ifndef NDEBUG
                 /* Make sure this chunk is really outside the new dimensions */
                 {
@@ -3908,48 +3890,21 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 } /* end block */
 #endif /* NDEBUG */
 
-                /* Search for the chunk in the cache */
-                if(rdcc->nslots > 0) {
-                    idx = H5D_CHUNK_HASH(dset->shared,
-                            chk_io_info.store->chunk.index);
-                    ent = rdcc->slot[idx];
+                /* Check if the chunk exists in cache or on disk */
+                if(H5D_chunk_lookup(dset, dxpl_id, chunk_offset,
+                        chk_io_info.store->chunk.index, &chk_udata) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk")
 
-                    if(ent)
-                        for(i=0; i<space_ndims; i++)
-                            if(chunk_offset[i]
-                                    != ent->offset[i]) {
-                                ent = NULL;
-                                break;
-                            } /* end if */
-                } /* end if */
-
-                /* Evict the entry from the cache, but do not flush it to disk
-                 */
-                if(ent) {
-                    /* Determine if the chunk is allocated on disk, and
-                     * therefore needs to be removed from disk */
-                    chk_on_disk = H5F_addr_defined(ent->chunk_addr);
-
-                    /* Remove the chunk from cache */
-                    if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent,
-                            FALSE) < 0)
+                /* Evict the entry from the cache if present, but do not flush
+                 * it to disk */
+                if(UINT_MAX != chk_udata.idx_hint) {
+                    if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache,
+                            rdcc->slot[chk_udata.idx_hint], FALSE) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
-
-                    ent = NULL;
                 } /* end if */
-                else {
-                    /* Determine if the chunk is allocated on disk, and
-                     * therefore needs to be removed from disk */
-                    /* Get the info for the chunk in the file */
-                    if(H5D_chunk_get_info(dset, dxpl_id, chunk_offset,
-                            &chk_udata) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-
-                    chk_on_disk = H5F_addr_defined(chk_udata.addr);
-                } /* end else */
 
                 /* Remove the chunk from disk, if present */
-                if(chk_on_disk) {
+                if(H5F_addr_defined(chk_udata.addr)) {
                     /* Update the offset in idx_udata */
                     idx_udata.offset = chunk_offset;
 
