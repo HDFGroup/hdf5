@@ -107,6 +107,11 @@ create_file(hid_t *file, H5F_t **f, hid_t fapl)
     if(NULL == (*f = (H5F_t *)H5I_object(*file)))
         STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(*f) < 0) {
+        STACK_ERROR
+    }
+
     /* Success */
     return(0);
 
@@ -2804,6 +2809,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
         TEST_ERROR
@@ -2837,6 +2847,11 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
 
     /* Re-open v2 B-tree */
     if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
@@ -6363,6 +6378,11 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, bt2_addr) < 0)
         TEST_ERROR
@@ -6514,6 +6534,11 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Re-shuffle record #'s */
     for(u = 0; u < INSERT_MANY; u++) {
         hsize_t     temp_rec;               /* Temporary record */
@@ -6605,6 +6630,11 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Re-open v2 B-tree */
     if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
         FAIL_STACK_ERROR
@@ -6689,6 +6719,11 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Re-open v2 B-tree */
     if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
         FAIL_STACK_ERROR
@@ -6769,6 +6804,11 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
 
     /* Re-open v2 B-tree */
     if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
@@ -7116,6 +7156,11 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
         TEST_ERROR
@@ -7155,6 +7200,11 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
 
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
@@ -7209,6 +7259,11 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
+
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
         TEST_ERROR
@@ -7261,6 +7316,11 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0) {
+        STACK_ERROR
+    }
 
     /* Create the v2 B-tree & get its address */
     if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)

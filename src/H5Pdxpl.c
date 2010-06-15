@@ -34,6 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"    /* Cache */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -194,6 +195,7 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     hid_t def_vfl_id = H5D_XFER_VFL_ID_DEF;                     /* Default value for file driver ID */
     void *def_vfl_info = H5D_XFER_VFL_INFO_DEF;                 /* Default value for file driver info */
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
+    haddr_t metadata_tag = H5AC_METADATA_TAG_DEF;              /* Default value for metadata tag */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
     H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
@@ -211,6 +213,10 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the max. temp buffer size property */
     if(H5P_register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &def_max_temp_buf, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the metadata tag property */
+    if(H5P_register_real(pclass, H5AC_METADATA_TAG_NAME, H5AC_METADATA_TAG_SIZE, &metadata_tag, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion buffer property */

@@ -193,10 +193,16 @@ H5O_is_attr_empty_test(hid_t oid)
             if(H5F_addr_defined(ainfo.fheap_addr)) {
                 /* Check for any messages in object header */
                 HDassert(nattrs == 0);
+            
+                /* Set metadata tag in dxpl_id */
+                H5_BEGIN_TAG(H5AC_ind_dxpl_id, loc->addr, FAIL);
 
                 /* Open the name index v2 B-tree */
                 if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
+                /* Reset metadata tag in dxpl_id */
+                H5_END_TAG(FAIL);
 
                 /* Retrieve # of records in name index */
                 if(H5B2_get_nrec(bt2_name, &nattrs) < 0)
@@ -281,9 +287,15 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
             /* Check for any messages in object header */
             HDassert(obj_nattrs == 0);
 
+            /* Set metadata tag in dxpl_id */
+            H5_BEGIN_TAG(H5AC_ind_dxpl_id, loc->addr, FAIL);
+
             /* Open the name index v2 B-tree */
             if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
+
+            /* Reset metadata tag in dxpl_id */
+            H5_END_TAG(FAIL);
 
             /* Retrieve # of records in name index */
             if(H5B2_get_nrec(bt2_name, &obj_nattrs) < 0)
@@ -345,6 +357,9 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     if(NULL == (loc = H5O_get_loc(oid)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
+    /* Set metadata tag in dxpl_id */
+    H5_BEGIN_TAG(H5AC_ind_dxpl_id, loc->addr, FAIL);
+
     /* Get the object header */
     if(NULL == (oh = H5O_protect(loc, H5AC_ind_dxpl_id, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
@@ -392,6 +407,9 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    /* Reset metadata tag in dxpl_id */
+    H5_END_TAG(FAIL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_dense_info_test() */

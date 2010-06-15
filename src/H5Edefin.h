@@ -152,6 +152,7 @@ hid_t H5E_NOIDS_g          = FAIL;      /* Out of IDs for group */
 /* Cache related errors */
 hid_t H5E_CANTFLUSH_g      = FAIL;      /* Unable to flush data from cache */
 hid_t H5E_CANTSERIALIZE_g  = FAIL;      /* Unable to serialize data from cache */
+hid_t H5E_CANTTAG_g        = FAIL;      /* Unable to tag metadata in the cache */
 hid_t H5E_CANTLOAD_g       = FAIL;      /* Unable to load metadata into cache */
 hid_t H5E_PROTECT_g        = FAIL;      /* Protected metadata error */
 hid_t H5E_NOTCACHED_g      = FAIL;      /* Metadata not currently cached */

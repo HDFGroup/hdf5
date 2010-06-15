@@ -322,6 +322,11 @@ create_file(hid_t fapl, hid_t *file, H5F_t **f)
     if(NULL == (*f = (H5F_t *)H5I_object(*file)))
         FAIL_STACK_ERROR
 
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(*f) < 0) {
+        FAIL_STACK_ERROR
+    }
+
     /* Success */
     return(0);
 
@@ -448,6 +453,11 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
         /* Get a pointer to the internal file object */
         if(NULL == (*f = (H5F_t *)H5I_object(*file)))
             FAIL_STACK_ERROR
+
+        /* Ignore metadata tags in the file's cache */
+        if(H5AC_ignore_tags(*f) < 0) {
+            FAIL_STACK_ERROR
+        }
 
         /* Re-open array, if given */
         if(ea) {

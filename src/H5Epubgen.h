@@ -256,6 +256,7 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 /* Cache related errors */
 #define H5E_CANTFLUSH        (H5OPEN H5E_CANTFLUSH_g)
 #define H5E_CANTSERIALIZE    (H5OPEN H5E_CANTSERIALIZE_g)
+#define H5E_CANTTAG          (H5OPEN H5E_CANTTAG_g)
 #define H5E_CANTLOAD         (H5OPEN H5E_CANTLOAD_g)
 #define H5E_PROTECT          (H5OPEN H5E_PROTECT_g)
 #define H5E_NOTCACHED        (H5OPEN H5E_NOTCACHED_g)
@@ -274,6 +275,7 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTNOTIFY       (H5OPEN H5E_CANTNOTIFY_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g; /* Unable to serialize data from cache */
+H5_DLLVAR hid_t H5E_CANTTAG_g;       /* Unable to tag metadata in the cache */
 H5_DLLVAR hid_t H5E_CANTLOAD_g;      /* Unable to load metadata into cache */
 H5_DLLVAR hid_t H5E_PROTECT_g;       /* Protected metadata error */
 H5_DLLVAR hid_t H5E_NOTCACHED_g;     /* Metadata not currently cached */

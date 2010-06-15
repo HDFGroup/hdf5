@@ -328,10 +328,16 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     /* Get the old local heap's size and use that as the hint for the new heap */
     if(H5HL_get_size(file_src, dxpl_id, stab_src->heap_addr, &size_hint) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, NULL, "can't query local heap size")
+        
+    /* Set copy metadata tag */
+    H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
     /* Create components of symbol table message */
     if(H5G_stab_create_components(file_dst, stab_dst, size_hint, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components")
+
+    /* Reset metadata tag */
+    H5_END_TAG(NULL);
 
     /* Set return value */
     ret_value = stab_dst;

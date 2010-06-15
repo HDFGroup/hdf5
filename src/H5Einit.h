@@ -562,6 +562,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to serialize data from cache"))
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTSERIALIZE_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTTAG_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to tag metadata in the cache"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTTAG_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_CANTLOAD_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to load metadata into cache"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")

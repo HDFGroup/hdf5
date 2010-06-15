@@ -318,7 +318,7 @@ H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_write_oh, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5O_msg_write_oh, dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check args */
     HDassert(f);
@@ -335,7 +335,7 @@ H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
         HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_msg_write_oh() */
 
 
@@ -467,7 +467,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     H5O_t *oh = NULL;                   /* Object header to use */
     void *ret_value;                    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_read, NULL)
+    FUNC_ENTER_NOAPI_TAG(H5O_msg_read, dxpl_id, loc->addr, NULL)
 
     /* check args */
     HDassert(loc);
@@ -487,7 +487,7 @@ done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* end H5O_msg_read() */
 
 
@@ -875,7 +875,7 @@ H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     H5O_t	*oh = NULL;             /* Object header for location */
     htri_t      ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_exists, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5O_msg_exists, dxpl_id, loc->addr, FAIL)
 
     HDassert(loc);
     HDassert(loc->file);
@@ -893,7 +893,7 @@ done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_msg_exists() */
 
 

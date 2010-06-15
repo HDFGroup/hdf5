@@ -369,7 +369,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     htri_t      tri_ret;        /* htri_t return value */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_create)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5A_create, dxpl_id, loc->oloc->addr, FAIL)
 
     /* check args */
     HDassert(loc);
@@ -500,7 +500,7 @@ done:
     if(ret_value < 0 && attr && H5A_close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5A_create() */
 
 
@@ -959,7 +959,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     size_t		buf_size;		/* desired buffer size	*/
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_write)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5A_write, dxpl_id, attr->oloc.addr, FAIL)
 
     HDassert(attr);
     HDassert(mem_type);
@@ -1038,7 +1038,7 @@ done:
     if(bkg_buf)
         bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5A_write() */
 
 

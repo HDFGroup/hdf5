@@ -892,6 +892,7 @@ struct H5C_t
     size_t			dirty_index_size;
     H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
 
+    hbool_t                     ignore_tags;
 
     int32_t                     slist_len;
     size_t                      slist_size;

@@ -307,7 +307,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     size_t                 msghdr_size;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_copy_header_real)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5O_copy_header_real, dxpl_id, oloc_src->addr, FAIL)
 
     HDassert(oloc_src);
     HDassert(oloc_src->file);
@@ -727,10 +727,20 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
+    /* Set metadata tag for destination object's object header */
+    H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
+
     /* Insert destination object header in cache */
     if(H5AC_set(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh_dst = NULL;
+    
+    /* Reset metadat tag */
+    H5_END_TAG(FAIL);
+
+    /* Retag all copied metadata to apply the destination object's tag */
+    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
 
 done:
     /* Free deleted array */
@@ -752,7 +762,7 @@ done:
         (obj_class->free_copy_file_udata)(udata);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5O_copy_header_real() */
 
 

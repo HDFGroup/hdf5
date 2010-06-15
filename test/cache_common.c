@@ -2689,6 +2689,9 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) {
 
+        /* Need to set this else all cache tests will fail */
+        cache_ptr->ignore_tags = TRUE;
+
         H5C_stats__reset(cache_ptr);
 
         H5C_set_skip_flags(cache_ptr, TRUE, TRUE);

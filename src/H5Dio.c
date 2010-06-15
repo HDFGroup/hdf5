@@ -302,7 +302,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_read)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_read, dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -417,7 +417,7 @@ done:
     if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_read() */
 
 
@@ -453,7 +453,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_write)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5D_write, dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -608,7 +608,7 @@ done:
     if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D_write() */
 
 

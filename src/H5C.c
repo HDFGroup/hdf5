@@ -159,6 +159,29 @@ static herr_t H5C_make_space_in_cache(H5F_t * f,
                                       size_t  space_needed,
                                       hbool_t write_permitted,
                                       hbool_t * first_flush_ptr);
+
+static herr_t H5C_tag_entry(H5C_t * cache_ptr, 
+                            H5C_cache_entry_t * entry_ptr,
+                            hid_t dxpl_id);
+
+static herr_t H5C_flush_tagged_entries(H5F_t * f, 
+                                       hid_t primary_dxpl_id, 
+                                       hid_t secondary_dxpl_id, 
+                                       H5C_t * cache_ptr, 
+                                       haddr_t tag);
+
+static herr_t H5C_mark_tagged_entries(H5C_t * cache_ptr, 
+                                      haddr_t tag);
+
+static herr_t H5C_flush_marked_entries(H5F_t * f, 
+                                       hid_t primary_dxpl_id, 
+                                       hid_t secondary_dxpl_id, 
+                                       H5C_t * cache_ptr);
+
+#if H5C_DO_TAGGING_SANITY_CHECKS
+static herr_t H5C_verify_tag(int id, haddr_t tag);
+#endif
+
 #if H5C_DO_EXTREME_SANITY_CHECKS
 static herr_t H5C_validate_lru_list(H5C_t * cache_ptr);
 static herr_t H5C_verify_not_in_index(H5C_t * cache_ptr,
@@ -412,6 +435,9 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->index_size			= (size_t)0;
     cache_ptr->clean_index_size			= (size_t)0;
     cache_ptr->dirty_index_size			= (size_t)0;
+
+    /* Tagging Field Initializations */
+    cache_ptr->ignore_tags                      = FALSE;
 
     cache_ptr->slist_len			= 0;
     cache_ptr->slist_size			= (size_t)0;
@@ -1989,6 +2015,10 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->cache_ptr = cache_ptr;
     entry_ptr->addr  = addr;
     entry_ptr->type  = type;
+ 
+    /* Apply tag to newly inserted entry */
+    if(H5C_tag_entry(cache_ptr, entry_ptr, primary_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
 
     entry_ptr->is_protected = FALSE;
     entry_ptr->is_read_only = FALSE;
@@ -3046,8 +3076,35 @@ H5C_protect(H5F_t *		f,
         if(entry_ptr->type != type)
             HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "incorrect cache entry type")
 
+        #if H5C_DO_TAGGING_SANITY_CHECKS
+        /* The entry is already in the cache, but make sure that the tag value 
+           being passed in via dxpl is still legal. This will ensure that had
+           the entry NOT been in the cache, tagging was still set up correctly
+           and it would have received a legal tag value after getting loaded
+           from disk. */
+        haddr_t tag = HADDR_UNDEF;
+        H5P_genplist_t *dxpl;    /* dataset transfer property list */
+
+        /* Get the dataset transfer property list */
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(primary_dxpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+
+        /* Get the tag from the DXPL */
+        if( (H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0 )
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value");
+    
+        /* Verify tag value */
+        if (cache_ptr->ignore_tags != TRUE) {
+
+            /* Verify legal tag value */
+            if ( (H5C_verify_tag(entry_ptr->type->id, tag)) < 0 )
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed");
+
+        } /* end if */
+        #endif
+	
         hit = TRUE;
-	thing = (void *)entry_ptr;
+        thing = (void *)entry_ptr;
 
     } else {
 
@@ -3063,6 +3120,10 @@ H5C_protect(H5F_t *		f,
         }
 
         entry_ptr = (H5C_cache_entry_t *)thing;
+
+        /* Apply tag to newly protected entry */
+        if(H5C_tag_entry(cache_ptr, entry_ptr, primary_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag metadata entry")
 
         /* If the entry is very large, and we are configured to allow it,
          * we may wish to perform a flash cache size increase.
@@ -8531,3 +8592,431 @@ done:
 
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_ignore_tags
+ *
+ * Purpose:     Override all assertion frameworks associated with making
+ *              sure proper tags are applied to metadata. 
+ *
+ *              NOTE: This should really only be used in tests that need 
+ *              to access internal functions without going through 
+ *              standard API paths. Since tags are set inside dxpl_id's
+ *              before coming into the cache, any external functions that
+ *              use the internal library functions (i.e., tests) should
+ *              use this function if they don't plan on setting up proper
+ *              metadata tags.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              December 1, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_ignore_tags(H5C_t * cache_ptr)
+{
+    /* Variable Declarations */
+    herr_t    ret_value = SUCCEED;      /* Return value */
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_ignore_tags, FAIL)
+
+    /* Assertions */
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+
+    /* Set variable to ignore tag values upon assignment */
+    cache_ptr->ignore_tags = TRUE;
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_ignore_tags */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_tag_entry
+ *
+ * Purpose:     Tags an entry with the provided tag (contained in the dxpl_id).
+ *              If sanity checking is enabled, this function will perform 
+ *              validation that a proper tag is contained within the provided 
+ *              data access property list id before application.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              January 14, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
+{
+    /* Variable Declarations */
+    hid_t ret_value = SUCCEED;
+    haddr_t tag;
+    H5P_genplist_t *dxpl;    /* dataset transfer property list */
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_tag_entry, FAIL)
+
+    /* Assertions */
+    HDassert( cache_ptr != NULL );
+    HDassert( entry_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+
+    /* Get the dataset transfer property list */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the tag from the DXPL */
+    if( (H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0 )
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value");
+
+    if (cache_ptr->ignore_tags != TRUE) {
+
+        /* Perform some sanity checks to ensure that 
+           a correct tag is being applied */
+        #if H5C_DO_TAGGING_SANITY_CHECKS
+        if ( (H5C_verify_tag(entry_ptr->type->id, tag)) < 0 )
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed");
+        #endif
+
+    } else {
+
+        /* if we're ignoring tags, it's because we're running
+           tests on internal functions and may not have inserted a tag 
+           value into a given dxpl_id before creating some metadata. Thus,
+           in this case only, if a tag value has not been set, we can
+           arbitrarily set it to something for the sake of passing the tests. 
+           If the tag value is set, then we'll just let it get assigned without
+           additional checking for correctness. */
+
+        if (!tag) tag = H5AC__IGNORE_TAG;
+
+    } /* end if */
+
+    /* Apply the tag to the entry */
+    entry_ptr->tag = tag;
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_tag_entry */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_flush_tagged_entries
+ *
+ * WARNING:     Not yet tested or used anywhere. (written awhile ago,
+ *              will keep it around in anticipation of being used in
+ *              subsequent changes to support flushing individual objects).
+ *
+ * Purpose:     Flushes all entries with the specified tag to disk.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              November 3, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr, haddr_t tag)
+{
+    /* Variable Declarations */
+    herr_t      result;
+    herr_t      ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_flush_tagged_entries, FAIL)
+
+    /* Assertions */
+    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+
+    /* Mark all entries with specified tag */
+    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag)) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+
+    /* Flush all marked entries */
+    if ( (result = H5C_flush_marked_entries(f,
+                                            primary_dxpl_id,
+                                            secondary_dxpl_id,
+                                            cache_ptr)) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
+
+done:
+ 
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_flush_tagged_entries */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_mark_tagged_entries
+ *
+ * WARNING:     Not yet tested or used anywhere. (written awhile ago,
+ *              will keep it around in anticipation of being used in
+ *              subsequent changes to support flushing individual objects).
+ *
+ * Purpose:     Set the flush marker on entries in the cache that have
+ *              the specified tag.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              November 3, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag) 
+{
+    /* Variable Declarations */
+    int i;                          /* Iterator */
+    herr_t result;                  /* Result */
+    H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
+    herr_t ret_value = SUCCEED;     /* Return Value */
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_mark_tagged_entries, FAIL)
+
+    /* Assertions */
+    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+
+    /* Iterate through entries, marking those with specified tag. */
+    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+
+        next_entry_ptr = cache_ptr->index[i];
+
+        while ( next_entry_ptr != NULL ) {
+
+            if ( next_entry_ptr->tag == tag )  {
+
+                next_entry_ptr->flush_marker = TRUE;
+
+            } /* end if */
+
+            next_entry_ptr = next_entry_ptr->ht_next;
+
+        } /* end while */
+
+    } /* for */
+
+done:
+ 
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value); 
+
+} /* H5C_mark_tagged_entries */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_flush_marked_entries
+ *
+ * WARNING:     Not yet tested or used anywhere. (written awhile ago,
+ *              will keep it around in anticipation of being used in
+ *              subsequent changes to support flushing individual objects).
+ *
+ * Purpose:     Flushes all marked entries in the cache.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              November 3, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C_flush_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr)
+{ 
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_flush_marked_entries, FAIL)
+
+    /* Assertions */
+    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+
+    /* Flush all marked entries */
+    if (H5C_flush_cache(f,
+                        primary_dxpl_id,
+                        secondary_dxpl_id,
+                        H5C__FLUSH_MARKED_ENTRIES_FLAG |
+                        H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
+
+    } /* end if */
+
+done:
+ 
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5C_flush_marked_entries */
+
+#if H5C_DO_TAGGING_SANITY_CHECKS
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_verify_tag
+ *
+ * Purpose:     Performs sanity checking on an entrytype/tag pair.
+ *
+ * Return:      SUCCEED or FAIL.
+ *
+ * Programmer:  Mike McGreevy
+ *              January 14, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C_verify_tag(int id, haddr_t tag) 
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_verify_tag, FAIL)
+
+    /* Perform some sanity checks on tag value. Certain entry
+     * types require certain tag values, so check that these
+     * constraints are met. */
+    if (tag == H5AC__IGNORE_TAG) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.");
+
+    } else if (tag == H5AC__INVALID_TAG) {
+    
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided");
+
+    } else {
+
+        /* Perform some sanity checks on tag value. Certain entry
+         * types require certain tag values, so check that these
+         * constraints are met. */
+
+        /* Superblock */
+        if (id == H5AC_SUPERBLOCK_ID) {
+            if (tag != H5AC__SUPERBLOCK_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG");
+        }
+        else {
+            if (tag == H5AC__SUPERBLOCK_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__SUPERBLOCK_TAG applied to non-superblock entry");
+        }
+    
+        /* Free Space Manager */
+        if ((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
+            if (tag != H5AC__FREESPACE_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG");
+        }
+        else {
+            if (tag == H5AC__FREESPACE_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry");
+        }
+    
+        /* SOHM */
+        if ((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
+            if (tag != H5AC__SOHM_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG");
+        }
+    
+        /* Global Heap */
+        if (id == H5AC_GHEAP_ID) {
+            if (tag != H5AC__GLOBALHEAP_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG");
+        }
+        else {
+            if (tag == H5AC__GLOBALHEAP_TAG)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry");
+        }
+    }
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5C_verify_tag */
+#endif
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_retag_copied_metadata
+ *
+ * Purpose:     Searches through cache index for all entries with the
+ *              H5AC__COPIED_TAG, indicating that it was created as a 
+ *              result of an object copy, and applies the provided tag.
+ *
+ * Return:      SUCCEED or FAIL.
+ *
+ * Programmer:  Mike McGreevy
+ *              March 17, 2010
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag) 
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED; /* Return Value */
+    int i = 0; /* Iterator */
+    H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
+
+    /* Assertions */
+    HDassert(cache_ptr);
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5C_retag_copied_metadata, FAIL)
+
+    /* Iterate through entries, retagging those with the H5AC__COPIED_TAG tag */
+    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+
+        next_entry_ptr = cache_ptr->index[i];
+
+        while ( next_entry_ptr != NULL ) {
+            if (cache_ptr->index[i] != NULL) {
+                if ((cache_ptr->index[i])->tag == H5AC__COPIED_TAG) {
+                    (cache_ptr->index[i])->tag = metadata_tag;
+                } /* end if */
+            } /* end if */
+            next_entry_ptr = next_entry_ptr->ht_next;
+        } /* end while */
+
+    } /* end for */
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5C_retag_copied_metadata */

@@ -81,6 +81,7 @@ SET (H5_TESTS
     gheap
     #cache
     #cache_api
+    #cache_tagging
     pool
     hyperslab
     istore
@@ -141,11 +142,19 @@ TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
 
+#-- Adding test for cache_api
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 H5_NAMING (cache_api)
 TARGET_LINK_LIBRARIES (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_api COMMAND $<TARGET_FILE:cache_api>)
+
+#-- Adding test for cache_tagging
+ADD_EXECUTABLE (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
+H5_NAMING (cache_tagging)
+TARGET_LINK_LIBRARIES (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+
+ADD_TEST (NAME cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)
 
 #-- Adding test for ttsafe
 SET (ttsafe_SRCS

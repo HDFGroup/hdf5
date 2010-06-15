@@ -148,7 +148,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
     size_t	n;
     haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5HG_create)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5HG_create, dxpl_id, H5AC__GLOBALHEAP_TAG, HADDR_UNDEF)
 
     /* Check args */
     HDassert(f);
@@ -248,7 +248,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI_TAG(ret_value, HADDR_UNDEF);
 } /* H5HG_create() */
 
 
@@ -545,7 +545,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     hbool_t     found = FALSE;          /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_insert, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5HG_insert, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -659,7 +659,7 @@ done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to unprotect heap.")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5HG_insert() */
 
 
@@ -690,7 +690,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     void        *orig_object = object;  /* Keep a copy of the original object pointer */
     void	*ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_read, NULL)
+    FUNC_ENTER_NOAPI_TAG(H5HG_read, dxpl_id, H5AC__GLOBALHEAP_TAG, NULL)
 
     /* Check args */
     HDassert(f);
@@ -741,7 +741,7 @@ done:
     if(NULL == ret_value && NULL == orig_object && object)
         H5MM_free(object);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* end H5HG_read() */
 
 
@@ -770,7 +770,7 @@ H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
     unsigned heap_flags = H5AC__NO_FLAGS_SET;
     int ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_link, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5HG_link, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
 
     /* Check args */
     HDassert(f);
@@ -800,7 +800,7 @@ done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, heap_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5HG_link() */
 
 
@@ -833,7 +833,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     unsigned    flags = H5AC__NO_FLAGS_SET;/* Whether the heap gets deleted */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HG_remove, FAIL);
+    FUNC_ENTER_NOAPI_TAG(H5HG_remove, dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL);
 
     /* Check args */
     HDassert(f);
@@ -905,7 +905,7 @@ done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL);
 } /* end H5HG_remove() */
 
 

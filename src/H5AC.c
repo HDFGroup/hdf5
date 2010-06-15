@@ -4037,3 +4037,129 @@ done:
 } /* H5AC_flush_entries() */
 #endif /* H5_HAVE_PARALLEL */
 
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_ignore_tags()
+ *
+ * Purpose:     Override all assertion frameworks and force application of 
+ *              global tag everywhere. This should really only be used in the
+ *              tests that need to access functions without going through 
+ *              API paths.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              December 1, 2009
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_ignore_tags(H5F_t * f)
+{
+    /* Variable Declarations */
+    H5AC_t *    cache_ptr = NULL;
+    herr_t      ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(H5AC_ignore_tags, FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
+
+    /* Set up a new metadata tag */
+    if (H5C_ignore_tags(cache_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "H5C_ignore_tags() failed.")
+            
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_ignore_tags() */
+
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_tag()
+ *
+ * Purpose:     Sets the metadata tag property in the provided property list.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              December 1, 2009
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t * prev_tag)
+{
+    /* Variable Declarations */
+    H5P_genplist_t *dxpl;    /* dataset transfer property list */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_tag)
+
+    /* Check Arguments */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the current tag value and return that (if prev_tag is NOT null)*/
+    if (prev_tag) {
+        if( (H5P_get(dxpl, "H5AC_metadata_tag", prev_tag)) < 0 )
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query dxpl");    
+    }
+
+    /* Set the provided tag value in the dxpl_id. */
+    if(H5P_set(dxpl, "H5AC_metadata_tag", &metadata_tag) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property in dxpl")
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5AC_tag */
+
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_retag_copied_metadata()
+ *
+ * Purpose:     Searches through cache index for all entries with the
+ *              H5AC__COPIED_TAG, indicating that it was created as a 
+ *              result of an object copy, and applies the provided tag.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              March 17, 2010
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_retag_copied_metadata(H5F_t * f, haddr_t metadata_tag) 
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_retag_copied_metadata)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+     
+    /* Call cache-level function to retag entries */
+    H5C_retag_copied_metadata(f->shared->cache, metadata_tag);   
+
+done:
+
+    /* Function Leave Macro */
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5AC_retag_copied_metadata */

@@ -1934,6 +1934,30 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \
     {
 
+/* Use the following two macros as replacements for the FUNC_ENTER_NOAPI 
+ * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
+ * up a metadata tag. */
+#define FUNC_ENTER_NOAPI_TAG(func_name, dxpl_id, tag, err) {                     \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
+                                                                                 \
+    haddr_t prev_tag = HADDR_UNDEF;                                              \
+    hid_t tag_dxpl_id = dxpl_id;                                                 \
+    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                                  \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+                                                                                 \
+    FUNC_ENTER_NOAPI_INIT(func_name,err)		                                 \
+    {
+
+#define FUNC_ENTER_NOAPI_NOINIT_TAG(func_name, dxpl_id, tag, err) {              \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
+    haddr_t prev_tag = HADDR_UNDEF;                                              \
+    hid_t tag_dxpl_id = dxpl_id;                                                 \
+    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                                  \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+    H5_PUSH_FUNC(#func_name)                                                     \
+    {
+
+
 /*-------------------------------------------------------------------------
  * Purpose:	Register function exit for code profiling.  This should be
  *		the last statement executed by a function.
@@ -1989,6 +2013,16 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
+/* Use this macro when exiting a function that set up a metadata tag */
+#define FUNC_LEAVE_NOAPI_TAG(ret_value, err)                                         \
+                                                                                     \
+        if(H5AC_tag(tag_dxpl_id, prev_tag, NULL)<0)                                  \
+            HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+                                                                                     \
+        H5_POP_FUNC                                                                  \
+        return(ret_value);						                                     \
+    } /*end scope from end of FUNC_ENTER*/                                           \
+} /*end scope from beginning of FUNC_ENTER*/
 
 /****************************************/
 /* Revisions to FUNC_ENTER/LEAVE Macros */
@@ -2252,6 +2286,17 @@ func_init_failed:							      \
     /* Close Function */						      \
 }
 
+/* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient) */
+#define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
+    haddr_t prv_tag = HADDR_UNDEF;                                               \
+    hid_t my_dxpl_id = dxpl;                                                     \
+    if(H5AC_tag(my_dxpl_id, tag, &prv_tag) < 0)                                  \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag")
+
+#define H5_END_TAG(err)                                                          \
+    if(H5AC_tag(my_dxpl_id, prv_tag, NULL) <0)                                   \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+}
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */

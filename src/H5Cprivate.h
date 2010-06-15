@@ -38,6 +38,7 @@
 
 
 #define H5C_DO_SANITY_CHECKS		0
+#define H5C_DO_TAGGING_SANITY_CHECKS	1
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -569,6 +570,7 @@ typedef struct H5C_cache_entry_t
     haddr_t			addr;
     size_t			size;
     const H5C_class_t *		type;
+    haddr_t		    tag;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1172,6 +1174,10 @@ H5_DLL herr_t H5C_unprotect(H5F_t *             f,
 
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
                                          unsigned int tests);
+
+H5_DLL herr_t H5C_ignore_tags(H5C_t * cache_ptr);
+
+H5_DLL herr_t H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag);
 
 #endif /* !_H5Cprivate_H */
 
