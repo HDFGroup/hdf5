@@ -63,7 +63,8 @@ New Features
 
     Library
     -------
-    - None
+    - Improved performance of the chunk cache by avoiding unnecessary b-tree
+      lookups of chunks already in cache. (NAF - 2010/06/15) 
 
     Parallel Library
     ----------------
