@@ -2353,7 +2353,7 @@ H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5L_delete_by_idx_cb)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5L_delete_by_idx_cb, udata->dxpl_id, obj_loc->oloc->addr, FAIL)
 
     /* Check if the name of the group resolved to a valid object */
     if(obj_loc == NULL)
@@ -2369,7 +2369,7 @@ done:
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5L_delete_by_idx_cb() */
 
 

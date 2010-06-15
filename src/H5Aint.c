@@ -688,7 +688,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5A_get_ainfo, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5A_get_ainfo, dxpl_id, oh->cache_info.addr, FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -727,7 +727,7 @@ done:
     if(bt2_name && H5B2_close(bt2_name, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5A_get_ainfo() */
 
 
@@ -1157,9 +1157,15 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
     if(H5O_msg_reset_share(H5O_ATTR_ID, attr_dst) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing")
 
+    /* Set COPIED tag for destination object's metadata */
+    H5_BEGIN_TAG(udata->dxpl_id, H5AC__COPIED_TAG, H5_ITER_ERROR);
+
     /* Insert attribute into dense storage */
     if(H5A_dense_insert(udata->file, udata->dxpl_id, udata->ainfo, attr_dst) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to add to dense storage")
+
+    /* Reset metadata tag */
+    H5_END_TAG(H5_ITER_ERROR);
 
 done:
     if(attr_dst) {

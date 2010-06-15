@@ -81,6 +81,11 @@ main(void)
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
+    if (H5AC_ignore_tags(f) < 0) {
+	H5_FAILED();
+	H5Eprint2(H5E_DEFAULT, stdout);
+	goto error;
+    }
     if(H5HL_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)0, &heap_addr/*out*/) < 0) {
 	H5_FAILED();
 	H5Eprint2(H5E_DEFAULT, stdout);
@@ -123,6 +128,11 @@ main(void)
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
+    }
+    if (H5AC_ignore_tags(f) < 0) {
+	H5_FAILED();
+	H5Eprint2(H5E_DEFAULT, stdout);
+	goto error;
     }
     for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);

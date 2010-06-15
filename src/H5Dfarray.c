@@ -1481,10 +1481,16 @@ H5D_farray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
     } /* end if */
 
+    /* Set copied metadata tag */
+    H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
+
     /* Create the fixed array that describes chunked storage in the dest. file */
     if(H5D_farray_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
     HDassert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
+
+    /* Reset metadata tag */
+    H5_END_TAG(FAIL);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

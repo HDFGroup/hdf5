@@ -156,6 +156,7 @@ MINOR, ATOM, H5E_NOIDS, Out of IDs for group
 # Cache related errors
 MINOR, CACHE, H5E_CANTFLUSH, Unable to flush data from cache
 MINOR, CACHE, H5E_CANTSERIALIZE, Unable to serialize data from cache
+MINOR, CACHE, H5E_CANTTAG, Unable to tag metadata in the cache
 MINOR, CACHE, H5E_CANTLOAD, Unable to load metadata into cache
 MINOR, CACHE, H5E_PROTECT, Protected metadata error
 MINOR, CACHE, H5E_NOTCACHED, Metadata not currently cached

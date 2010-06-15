@@ -427,9 +427,15 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
         /* copy dense attribute */
+        
+        /* Set copied metadata tag */
+        H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
         if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+
+        /* Reset metadata tag */
+        H5_END_TAG(NULL);
 
         if((H5A_dense_copy_file_all(file_src, ainfo_src, file_dst, ainfo_dst, recompute_size, cpy_info, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")

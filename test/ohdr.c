@@ -71,6 +71,11 @@ test_cont(char *filename, hid_t fapl)
     /* Create the file to operate on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
     if(NULL == (f = (H5F_t *)H5I_object(file))) FAIL_STACK_ERROR
+    if (H5AC_ignore_tags(f) < 0) {
+	H5_FAILED();
+	H5Eprint2(H5E_DEFAULT, stdout);
+	goto error;
+    }
 
     HDmemset(&oh_locA, 0, sizeof(oh_locA));
     HDmemset(&oh_locB, 0, sizeof(oh_locB));
@@ -198,6 +203,11 @@ main(void)
             TEST_ERROR
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
+        if (H5AC_ignore_tags(f) < 0) {
+	    H5_FAILED();
+	    H5Eprint2(H5E_DEFAULT, stdout);
+	    goto error;
+        }
 
 
         /*
@@ -291,6 +301,8 @@ main(void)
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
             FAIL_STACK_ERROR
         if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+        if (H5AC_ignore_tags(f) < 0)
             FAIL_STACK_ERROR
         oh_loc.file = f;
         if(H5O_open(&oh_loc) < 0)

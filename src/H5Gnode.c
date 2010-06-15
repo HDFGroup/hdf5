@@ -1335,10 +1335,17 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
         name = (const char *)H5HL_offset_into(heap, src_ent->name_off);
 	HDassert(name);
 
+        /* Set copied metadata tag */
+        H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, H5_ITER_ERROR);
+
         /* Insert the new object in the destination file's group */
         /* (Don't increment the link count - that's already done above for hard links) */
         if(H5G_stab_insert_real(udata->dst_file, udata->dst_stab, name, &lnk, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
+
+        /* Reset metadata tag */
+        H5_END_TAG(H5_ITER_ERROR);
+
     } /* end of for (i=0; i<sn->nsyms; i++) */
 
 done:

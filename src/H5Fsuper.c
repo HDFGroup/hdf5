@@ -300,7 +300,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
     hbool_t             dirtied = FALSE;    /* Bool for sblock protect call                 */
     herr_t              ret_value = SUCCEED; /* return value                                */
 
-    FUNC_ENTER_NOAPI(H5F_super_read, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5F_super_read, dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Find the superblock */
     if(HADDR_UNDEF == (super_addr = H5F_locate_signature(f->shared->lf, dxpl_id)))
@@ -339,7 +339,7 @@ done:
     if(sblock && H5AC_unprotect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5F_super_read() */
 
 
@@ -372,7 +372,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     hbool_t         need_ext;           /* Whether the superblock extension is needed */
     herr_t          ret_value = SUCCEED; /* Return Value                              */
 
-    FUNC_ENTER_NOAPI(H5F_super_init, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5F_super_init, dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Allocate space for the superblock */
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
@@ -627,7 +627,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5F_super_init() */
 
 

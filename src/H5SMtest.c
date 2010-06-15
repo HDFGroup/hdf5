@@ -82,7 +82,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5SM_get_mesg_count_test)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(H5SM_get_mesg_count_test, dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -114,6 +114,6 @@ done:
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5SM_get_mesg_count_test() */
 

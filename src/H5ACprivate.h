@@ -41,6 +41,14 @@
 #define H5AC__TRACE_FILE_ENABLED	0
 #endif /* H5_METADATA_TRACE_FILE */
 
+#define H5AC__INVALID_TAG      (haddr_t)0
+#define H5AC__IGNORE_TAG       (haddr_t)1
+#define H5AC__SUPERBLOCK_TAG   (haddr_t)2
+#define H5AC__FREESPACE_TAG    (haddr_t)3
+#define H5AC__SOHM_TAG         (haddr_t)4
+#define H5AC__GLOBALHEAP_TAG   (haddr_t)5
+#define H5AC__COPIED_TAG       (haddr_t)6
+
 /* Types of metadata objects cached */
 typedef enum {
     H5AC_BT_ID = 0, 	/*B-tree nodes				     */
@@ -197,6 +205,10 @@ typedef H5C_t	H5AC_t;
 #define H5AC_LIBRARY_INTERNAL_SIZE       sizeof(unsigned)
 #define H5AC_LIBRARY_INTERNAL_DEF        0
 #endif /* H5_HAVE_PARALLEL */
+
+#define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
+#define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
+#define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
 
 /* Dataset transfer property list for flush calls */
 /* (Collective set, "block before metadata write" set and "library internal" set) */
@@ -377,6 +389,10 @@ H5_DLL herr_t H5AC_close_trace_file( H5AC_t * cache_ptr);
 
 H5_DLL herr_t H5AC_open_trace_file(H5AC_t * cache_ptr,
 		                   const char * trace_file_name);
+
+H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t * prev_tag);
+
+H5_DLL herr_t H5AC_retag_copied_metadata(H5F_t * f, haddr_t metadata_tag);
 
 #endif /* !_H5ACprivate_H */
 
