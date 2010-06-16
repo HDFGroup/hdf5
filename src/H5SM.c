@@ -133,7 +133,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     unsigned x;                         /* Local index variable */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_TAG(H5SM_init, dxpl_id, H5AC__SOHM_TAG, NULL)
+    FUNC_ENTER_NOAPI_TAG(H5SM_init, dxpl_id, H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
     /* File should not already have a SOHM table */
