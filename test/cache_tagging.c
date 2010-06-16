@@ -782,7 +782,7 @@ check_group_creation_tags(hid_t fcpl, int type)
     /* TEST: Create a Group */
     /* ==================== */
 
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* =================================== */
     /* Verification of Metadata Tag Values */
@@ -894,7 +894,7 @@ check_multi_group_creation_tags(hid_t fcpl, int type)
     for (i = 0; i < MULTIGROUPS; i++) {
 
         sprintf(gname, "%d", i);
-        if ( (gid = H5Gcreate(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+        if ( (gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
         if ( H5Gclose(gid) < 0 ) TEST_ERROR;
 
     } /* end for */
@@ -1281,7 +1281,7 @@ check_group_open_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -1397,7 +1397,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -1537,7 +1537,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -1681,7 +1681,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -1847,7 +1847,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -2525,7 +2525,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -3089,7 +3089,7 @@ check_object_info_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -3203,7 +3203,7 @@ check_object_copy_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -3331,7 +3331,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -3490,7 +3490,7 @@ check_link_getname_tags(hid_t fcpl, int type)
     } /* end if */
 
     /* Create group */
-    if ( (gid = H5Gcreate(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Retrieve group tag */
     if ( get_new_object_header_tag(fid, &g_tag) < 0 ) TEST_ERROR;
@@ -3640,7 +3640,7 @@ check_external_link_creation_tags(hid_t fcpl, int type)
     if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Create group in second file */
-    if ( (gid = H5Gcreate(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Close out second file */
     if ( (H5Gclose(gid)) < 0 ) TEST_ERROR;
@@ -3744,7 +3744,7 @@ check_external_link_open_tags(hid_t fcpl, int type)
     if ( (fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Create group in second file */
-    if ( (gid = H5Gcreate(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
+    if ( (gid = H5Gcreate2(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* Close out second file */
     if ( (H5Gclose(gid)) < 0 ) TEST_ERROR;
