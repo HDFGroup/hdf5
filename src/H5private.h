@@ -1938,20 +1938,18 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
 #define FUNC_ENTER_NOAPI_TAG(func_name, dxpl_id, tag, err) {                     \
-    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
-                                                                                 \
     haddr_t prev_tag = HADDR_UNDEF;                                              \
     hid_t tag_dxpl_id = dxpl_id;                                                 \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
     if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                                  \
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
-                                                                                 \
     FUNC_ENTER_NOAPI_INIT(func_name,err)		                                 \
     {
 
 #define FUNC_ENTER_NOAPI_NOINIT_TAG(func_name, dxpl_id, tag, err) {              \
-    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
     haddr_t prev_tag = HADDR_UNDEF;                                              \
     hid_t tag_dxpl_id = dxpl_id;                                                 \
+    FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                        \
     if(H5AC_tag(tag_dxpl_id, tag, &prev_tag)<0)                                  \
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
     H5_PUSH_FUNC(#func_name)                                                     \
@@ -2015,10 +2013,8 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 /* Use this macro when exiting a function that set up a metadata tag */
 #define FUNC_LEAVE_NOAPI_TAG(ret_value, err)                                         \
-                                                                                     \
         if(H5AC_tag(tag_dxpl_id, prev_tag, NULL)<0)                                  \
             HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
-                                                                                     \
         H5_POP_FUNC                                                                  \
         return(ret_value);						                                     \
     } /*end scope from end of FUNC_ENTER*/                                           \

@@ -3035,6 +3035,8 @@ H5C_protect(H5F_t *		f,
     size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
+    haddr_t     tag = HADDR_UNDEF;
+    H5P_genplist_t *dxpl;    /* dataset transfer property list */
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_protect, NULL)
@@ -3082,8 +3084,6 @@ H5C_protect(H5F_t *		f,
            the entry NOT been in the cache, tagging was still set up correctly
            and it would have received a legal tag value after getting loaded
            from disk. */
-        haddr_t tag = HADDR_UNDEF;
-        H5P_genplist_t *dxpl;    /* dataset transfer property list */
 
         /* Get the dataset transfer property list */
         if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(primary_dxpl_id, H5I_GENPROP_LST)))
