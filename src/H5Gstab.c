@@ -1005,7 +1005,7 @@ H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
     hbool_t     changed = FALSE;        /* Whether stab has been modified */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_stab_valid, FAIL)
+    FUNC_ENTER_NOAPI_TAG(H5G_stab_valid, dxpl_id, grp_oloc->addr, FAIL)
 
     /* Read the symbol table message */
     if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab, dxpl_id))
@@ -1051,7 +1051,7 @@ done:
     if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5G_stab_valid */
 #endif /* H5_STRICT_FORMAT_CHECKS */
 
