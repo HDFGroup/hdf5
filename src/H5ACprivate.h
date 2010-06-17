@@ -390,5 +390,7 @@ H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t * prev_tag);
 
 H5_DLL herr_t H5AC_retag_copied_metadata(H5F_t * f, haddr_t metadata_tag);
 
+H5_DLL herr_t H5AC_ignore_tags(H5F_t * f);
+
 #endif /* !_H5ACprivate_H */
 

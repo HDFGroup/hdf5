@@ -397,7 +397,6 @@ error:
 static int verify_tag(hid_t fid, int id, haddr_t tag)
 {
     int i = 0;                           /* Iterator */
-    H5C_cache_entry_t *entry_ptr = NULL; /* Entry Pointer */
     int found = FALSE;                   /* If Entry Found */
     H5F_t * f = NULL;         /* File Pointer */
     H5C_t * cache_ptr = NULL; /* Cache Pointer */
@@ -3835,17 +3834,17 @@ check_invalid_tag_application(void)
     if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
 
     /* Create dxpl */
-    if ( dxpl_id = H5Pcreate(H5P_DATASET_XFER) < 0) TEST_ERROR;
+    if ( (dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
 
     /* Call H5HL_create, an internal function that calls H5AC_set without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
-    if ( H5HL_create(f, H5AC_ind_dxpl_id, 1024, &addr) >= 0) TEST_ERROR;
+    if ( H5HL_create(f, H5AC_ind_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
 
     /* Now set up a tag in the dxpl */
     if ( H5AC_tag(H5AC_ind_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
 
     /* Verify the same call to H5HL_create now works as intended, with a tag set up. */
-    if ( H5HL_create(f, H5AC_ind_dxpl_id, 1024, &addr) < 0) TEST_ERROR;
+    if ( H5HL_create(f, H5AC_ind_dxpl_id, (size_t)1024, &addr) < 0) TEST_ERROR;
 
     /* Reset dxpl to use invalid tag. */
     if ( H5AC_tag(H5AC_ind_dxpl_id, H5AC__INVALID_TAG, NULL) < 0) TEST_ERROR;
