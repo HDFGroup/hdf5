@@ -378,23 +378,10 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c btree2.c \
-	cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c earray.c enum.c err_compat.c \
-	error_test.c extend.c external.c farray.c fheap.c fillval.c \
-	flush1.c flush2.c freespace.c gen_bad_ohdr.c gen_bogus.c \
-	gen_cross.c gen_deflate.c gen_filespace.c gen_filters.c \
-	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
-	gen_new_super.c gen_noencoder.c gen_nullspace.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c mf.c mount.c mtime.c ntypes.c \
-	objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
-	btree2.c cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
-	dsets.c dt_arith.c dtransform.c dtypes.c earray.c enum.c \
-	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
-	fillval.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
+	cache.c cache_api.c cache_tagging.c cmpd_dset.c cross_read.c \
+	dangle.c dsets.c dt_arith.c dtransform.c dtypes.c earray.c \
+	enum.c err_compat.c error_test.c extend.c external.c farray.c \
+	fheap.c fillval.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
 	gen_bogus.c gen_cross.c gen_deflate.c gen_filespace.c \
 	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
@@ -410,15 +397,14 @@ DIST_SOURCES = $(libh5test_la_SOURCES) app_ref.c big.c bittests.c \
 	earray.c enum.c err_compat.c error_test.c extend.c external.c \
 	farray.c fheap.c fillval.c flush1.c flush2.c freespace.c \
 	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
-	gen_filespace.c gen_filters.c gen_idx.c gen_new_array.c \
-	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
 	gen_noencoder.c gen_nullspace.c gen_specmetaread.c \
 	gen_udlinks.c getname.c gheap.c hyperslab.c istore.c lheap.c \
 	links.c mf.c mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c \
 	reserved.c set_extent.c space_overflow.c stab.c \
-	swmr_generator.c swmr_reader.c swmr_writer.c tcheck_version.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
