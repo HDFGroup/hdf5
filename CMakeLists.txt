@@ -229,6 +229,16 @@ ELSE (BUILD_SHARED_LIBS)
 ENDIF (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
+# Option to use code coverage
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
+IF (HDF5_ENABLE_COVERAGE)
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    SET (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")   
+ENDIF (HDF5_ENABLE_COVERAGE)
+
+#-----------------------------------------------------------------------------
 # Set the target names of all the libraries
 #-----------------------------------------------------------------------------
 SET (HDF5_LIB_TARGET              ${HDF5_LIB_CORENAME})
