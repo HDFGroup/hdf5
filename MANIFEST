@@ -1880,7 +1880,9 @@
 ./Resources/HDF5-config.cmake.install.in
 ./Resources/HDF5Macros.cmake
 ./Resources/libhdf5.settings.cmake.in
+./Resources/cacheinit.cmake
 ./Resources/runTest.cmake
+./Resources/CTestCustom.ctest
 ./CMakeLists.txt
 ./ConfigureChecks.cmake
 ./CTestConfig.cmake
