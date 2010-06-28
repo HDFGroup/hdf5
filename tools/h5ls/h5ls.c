@@ -170,6 +170,8 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
  *              Thursday, November  5, 1998
  *
  * Modifications:
+ *   Add _H5LS_CONVERT_SPECIAL_CHAR_ #ifdef section and make it not to
+ *   convert special chars to visible chars. (Jonathan Kim  06/24/2010)
  *
  *-------------------------------------------------------------------------
  */
@@ -178,6 +180,27 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
 {
     int  nprint=0;
 
+#ifdef _H5LS_CONVERT_SPECIAL_CHAR_
+    /*-------------------------------------------------------------------
+     * _H5LS_CONVERT_SPECIAL_CHAR_ is not defined, so this code section 
+     * will not be compiled. 
+     * This code section is due to be removed after verifying no problem 
+     * at customer sites. (However we may keep it just for the future
+     * reference as it survived over ten years)
+     *
+     * Reason for Obsolete: 
+     *  This portion of code converts special characters or '\' to string, 
+     *  so when those characters are in object or attribute name, h5ls display
+     *  as visible characters.     
+     *  However if a user come up with object or attribute name with special 
+     *  character in programming, this code takes away control over '\' 
+     *  (escape character) from the user and causes confusion for the output, 
+     *  also it’s not possible to handle all the cases in this way. 
+     *  This also causes discrepancy from how the string data saved in 
+     *  HDF5 file.
+     *  Also other HDF tools don’t convert characters like this, so this 
+     *  causes inconsistent output among tools.
+     *-------------------------------------------------------------/
     for (/*void*/; s && *s; s++) {
         switch (*s) {
             case '"':
@@ -230,6 +253,17 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
                 break;
         }
     }
+#else
+    if (stream)
+    {
+        nprint = fprintf(stream,s);
+    }
+    else
+    {
+        nprint = strlen(s);
+    }
+#endif /* _H5LS_CONVERT_SPECIAL_CHAR_ */
+
     return nprint;
 }
 

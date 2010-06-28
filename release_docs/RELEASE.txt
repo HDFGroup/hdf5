@@ -112,7 +112,8 @@ Bug Fixes since HDF5-1.8.5
 
     Tools
     -----
-    - None
+    - Change h5ls not to manipulate special characters in object name or 
+      attribute name for smart display.  bug#1784 (JKM 2010/06/28)
 
 
     F90 API
