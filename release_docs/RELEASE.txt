@@ -430,6 +430,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Change h5ls not to manipulate special characters in object name or 
+          attribute name for smart display.  bug#1784 (JKM 2010/06/28)
         - Fixed h5ls to return exit code 1 (error) when non-existent file is
           specified. bug#1793. (JKM 2010/04/27)
         - h5copy failed to copy dangling link when the link is specified 
