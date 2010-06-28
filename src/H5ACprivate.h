@@ -217,7 +217,7 @@ extern hid_t H5AC_dxpl_id;
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable declaration, definition is in H5AC.c) */
-extern hid_t H5AC_ind_dxpl_id;
+H5_DLLVAR hid_t H5AC_ind_dxpl_id;
 
 
 /* Default cache configuration. */
