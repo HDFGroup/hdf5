@@ -19,17 +19,22 @@ SET (examples
 FOREACH (example ${examples})
   ADD_EXECUTABLE (hl_f90_ex_${example} ${HDF5_HL_EXAMPLES_SOURCE_DIR}/${example}.f90)
   H5_NAMING (hl_f90_ex_${example})
-  IF (BUILD_SHARED_LIBS)
-    IF (WIN32)
-      IF (MSVC)
+  IF (WIN32)
+    IF (MSVC)
+      IF (BUILD_SHARED_LIBS)
         SET_TARGET_PROPERTIES (hl_f90_ex_${example}
             PROPERTIES
                 COMPILE_FLAGS "/dll"
                 LINK_FLAGS "/SUBSYSTEM:CONSOLE"
         ) 
-      ENDIF (MSVC)
-    ENDIF (WIN32)
-  ENDIF (BUILD_SHARED_LIBS)
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (hl_f90_ex_${example}
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+      ENDIF (BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
   TARGET_LINK_LIBRARIES (hl_f90_ex_${example} 
       ${HDF5_HL_F90_LIB_TARGET}
       ${HDF5_F90_LIB_TARGET}

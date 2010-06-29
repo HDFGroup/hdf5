@@ -62,6 +62,16 @@ SET (testhdf5_SRCS
 #-- Adding test for testhdf5
 ADD_EXECUTABLE (testhdf5 ${testhdf5_SRCS})
 H5_NAMING (testhdf5)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (testhdf5
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
@@ -69,6 +79,16 @@ ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
 MACRO (ADD_H5_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
   H5_NAMING (${file})
+  IF (WIN32)
+    IF (MSVC)
+      IF (NOT BUILD_SHARED_LIBS)
+        SET_TARGET_PROPERTIES (${file}
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
@@ -132,12 +152,22 @@ ENDFOREACH (chktest ${H5_CHECK_TESTS})
 
 #-- Allow extra time for fheap to complete 30min
 IF (WIN32)
-  SET_TESTS_PROPERTIES (fheap PROPERTIES TIMEOUT 1800)
+  SET_TESTS_PROPERTIES (fheap PROPERTIES TIMEOUT 2500)
 ENDIF (WIN32)
 
 #-- Adding test for cache
 ADD_EXECUTABLE (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 H5_NAMING (cache)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (cache
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
@@ -145,6 +175,16 @@ ADD_TEST (NAME cache COMMAND $<TARGET_FILE:cache>)
 #-- Adding test for cache_api
 ADD_EXECUTABLE (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 H5_NAMING (cache_api)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (cache_api
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_api COMMAND $<TARGET_FILE:cache_api>)
@@ -152,6 +192,16 @@ ADD_TEST (NAME cache_api COMMAND $<TARGET_FILE:cache_api>)
 #-- Adding test for cache_tagging
 ADD_EXECUTABLE (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 H5_NAMING (cache_tagging)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (cache_tagging
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 
 ADD_TEST (NAME cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)

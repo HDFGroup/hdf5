@@ -89,6 +89,11 @@ IF (WIN32)
               COMPILE_FLAGS "/dll"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE"
       )
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (testhdf5_fortran
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
     ENDIF (BUILD_SHARED_LIBS)
   ENDIF (MSVC)
 ENDIF (WIN32)
@@ -119,6 +124,11 @@ IF (WIN32)
               COMPILE_FLAGS "/dll"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE"
       )
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (testhdf5_fortran_1_8
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
     ENDIF (BUILD_SHARED_LIBS)
   ENDIF (MSVC)
 ENDIF (WIN32)
@@ -143,6 +153,11 @@ IF (WIN32)
               COMPILE_FLAGS "/dll"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE"
       )
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (fflush1
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
     ENDIF (BUILD_SHARED_LIBS)
   ENDIF (MSVC)
 ENDIF (WIN32)
@@ -167,6 +182,11 @@ IF (WIN32)
               COMPILE_FLAGS "/dll"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE"
       )
+    ELSE (BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (fflush2
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
     ENDIF (BUILD_SHARED_LIBS)
   ENDIF (MSVC)
 ENDIF (WIN32)

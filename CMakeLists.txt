@@ -78,11 +78,15 @@ PROJECT (HDF5 C CXX)
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
 #-----------------------------------------------------------------------------
+SET (H5_VERS_MAJOR 1)
+SET (H5_VERS_MINOR 9)
+SET (H5_VERS_RELEASE 72)
+#-----------------------------------------------------------------------------
 SET (HDF5_PACKAGE "hdf5")
 SET (HDF5_PACKAGE_NAME "HDF5")
-SET (HDF5_PACKAGE_VERSION 1.9)
-SET (HDF5_PACKAGE_VERSION_MAJOR 1.9)
-SET (HDF5_PACKAGE_VERSION_MINOR 0)
+SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
+SET (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
+SET (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
 SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION}")
 SET (HDF5_PACKAGE_TARNAME "hdf5")
 SET (HDF5_PACKAGE_URL "htt://www.hdfgroup.org")

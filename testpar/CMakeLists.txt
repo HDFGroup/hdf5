@@ -20,6 +20,16 @@ SET (testphdf5_SRCS
 #-- Adding test for testhdf5
 ADD_EXECUTABLE (testphdf5 ${testphdf5_SRCS})
 H5_NAMING (testphdf5)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (testphdf5
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 ADD_TEST (NAME testphdf5 COMMAND $<TARGET_FILE:testphdf5>)
@@ -27,6 +37,16 @@ ADD_TEST (NAME testphdf5 COMMAND $<TARGET_FILE:testphdf5>)
 MACRO (ADD_H5P_TEST file)
   ADD_EXECUTABLE (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
   H5_NAMING (${file})
+  IF (WIN32)
+    IF (MSVC)
+      IF (NOT BUILD_SHARED_LIBS)
+        SET_TARGET_PROPERTIES (${file}
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (MSVC)
+  ENDIF (WIN32)
   TARGET_LINK_LIBRARIES (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 
   ADD_TEST (NAME ${file} COMMAND $<TARGET_FILE:${file}>)
