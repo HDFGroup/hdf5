@@ -12,6 +12,16 @@ INCLUDE_DIRECTORIES (${HDF5_PROJECT_DIR}/test)
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
 H5_NAMING (h5stat)
+IF (WIN32)
+  IF (MSVC)
+    IF (NOT BUILD_SHARED_LIBS)
+      SET_TARGET_PROPERTIES (h5stat
+          PROPERTIES
+              LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+      ) 
+    ENDIF (NOT BUILD_SHARED_LIBS)
+  ENDIF (MSVC)
+ENDIF (WIN32)
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 
 SET (H5_DEP_EXECUTABLES h5stat)
@@ -20,6 +30,14 @@ IF (BUILD_TESTING)
   IF (NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
     H5_NAMING (h5stat_gentest)
+    IF (WIN32)
+      IF (MSVC)
+        SET_TARGET_PROPERTIES (h5stat_gentest
+            PROPERTIES
+                LINK_FLAGS "/NODEFAULTLIB:MSVCRT"
+        ) 
+      ENDIF (MSVC)
+    ENDIF (WIN32)
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     
     #ADD_TEST (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
