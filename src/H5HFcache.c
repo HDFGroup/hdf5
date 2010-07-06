@@ -288,9 +288,6 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Set the heap header's address */
-    hdr->heap_addr = addr;
-
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(hdr_buf, sizeof(hdr_buf))))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't wrap buffer")
@@ -745,7 +742,6 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Set block's internal information */
     iblock->rc = 0;
     iblock->nrows = *udata->nrows;
-    iblock->addr = addr;
     iblock->nchildren = 0;
 
     /* Wrap the local buffer for serialized indirect block */
@@ -753,7 +749,7 @@ H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute size of indirect block */
-    iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
+    iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock->nrows);
 
     /* Get a pointer to a buffer that's large enough for serialized indirect block */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, iblock->size)))
@@ -1024,8 +1020,8 @@ H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
             HDassert(!H5F_addr_eq(iblock->addr, addr));
 
             /* Let the metadata cache know the block moved */
-            if(H5AC_rename(f, H5AC_FHEAP_IBLOCK, iblock->addr, addr) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move indirect block")
+            if(H5AC_move_entry(f, H5AC_FHEAP_IBLOCK, iblock->addr, addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move indirect block")
 
             /* Update the internal address for the block */
             iblock->addr = addr;
@@ -1498,8 +1494,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
                     /* Let the metadata cache know, if the block moved */
                     if(!H5F_addr_eq(hdr->man_dtable.table_addr, addr))
-                        if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
-                            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+                        if(H5AC_move_entry(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                     /* Update information about compressed direct block's location & size */
                     hdr->man_dtable.table_addr = addr;
@@ -1549,8 +1545,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
                     /* Let the metadata cache know, if the block moved */
                     if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr))
-                        if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
-                            HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+                        if(H5AC_move_entry(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                     /* Update information about compressed direct block's location & size */
                     par_iblock->ents[par_entry].addr = addr;
@@ -1585,8 +1581,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
                     HDassert(!H5F_addr_eq(hdr->man_dtable.table_addr, addr));
 
                     /* Let the metadata cache know the block moved */
-                    if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+                    if(H5AC_move_entry(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                     /* Update information about direct block's location */
                     hdr->man_dtable.table_addr = addr;
@@ -1614,8 +1610,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
                     HDassert(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
 
                     /* Let the metadata cache know the block moved */
-                    if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+                    if(H5AC_move_entry(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                     /* Update information about direct block's location */
                     par_iblock->ents[par_entry].addr = addr;

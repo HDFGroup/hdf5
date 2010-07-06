@@ -22,6 +22,9 @@
 #include "h5trav.h"
 #include "hdf5.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5stat"
+
 /* Parameters to control statistics gathered */
 #define SIZE_SMALL_GROUPS       10
 #define SIZE_SMALL_ATTRS	10
@@ -114,10 +117,6 @@ typedef struct iter_t {
 } iter_t;
 
 
-const char *progname = "h5stat";
-int               d_status = EXIT_SUCCESS;
-
-/* Enable the printing of everything */
 static int        display_all = TRUE;
 
 /* Enable the printing of selected statistics */
@@ -812,11 +811,11 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
-                usage(progname);
+                usage(h5tools_getprogname());
                 leave(EXIT_SUCCESS);
 
             case 'V':
-                print_version(progname);
+                print_version(h5tools_getprogname());
                 leave(EXIT_SUCCESS);
                 break;
 
@@ -881,15 +880,15 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             default:
-                usage(progname);
+                usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
         } /* end switch */
     } /* end while */
 
     /* check for file name to be processed */
     if (argc <= opt_ind) {
-        error_msg(progname, "missing file name\n");
-        usage(progname);
+        error_msg("missing file name\n");
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -1541,6 +1540,9 @@ main(int argc, const char *argv[])
     struct handler_t   *hand;
     H5F_info2_t      	finfo;
 
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
     /* Disable error reporting */
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -1548,7 +1550,7 @@ main(int argc, const char *argv[])
     h5tools_init();
     hand = parse_command_line (argc, argv);
     if(!hand) {
-        error_msg(progname, "unable to parse command line arguments \n");
+        error_msg("unable to parse command line arguments \n");
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -1558,7 +1560,7 @@ main(int argc, const char *argv[])
 
     fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
     if(fid < 0) {
-        error_msg(progname, "unable to open file \"%s\"\n", fname);
+        error_msg("unable to open file \"%s\"\n", fname);
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -1566,12 +1568,12 @@ main(int argc, const char *argv[])
     iter_init(&iter, fid);
 
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
-	warn_msg(progname, "Unable to retrieve file size\n");
+	warn_msg("Unable to retrieve file size\n");
     assert(iter.filesize != 0);
 
     /* Get storge info for file-level structures */
     if(H5Fget_info2(fid, &finfo) < 0)
-	warn_msg(progname, "Unable to retrieve file info\n");
+	warn_msg("Unable to retrieve file info\n");
     else {
 	iter.super_size = finfo.super.super_size;
 	iter.super_ext_size = finfo.super.super_ext_size;
@@ -1583,18 +1585,18 @@ main(int argc, const char *argv[])
     } /* end else */
 
     if((fcpl = H5Fget_create_plist(fid)) < 0)
-	warn_msg(progname, "Unable to retrieve file creation property\n");
+        warn_msg("Unable to retrieve file creation property\n");
 
     if(H5Pget_userblock(fcpl, &iter.ublk_size) < 0)
-        warn_msg(progname, "Unable to retrieve userblock size\n");
+        warn_msg("Unable to retrieve userblock size\n");
 
     if(H5Pget_file_space(fcpl, &iter.fs_strategy, &iter.fs_threshold) < 0)
-        warn_msg(progname, "Unable to retrieve file space information\n");
+        warn_msg("Unable to retrieve file space information\n");
     assert(iter.fs_strategy != 0 && iter.fs_strategy < H5F_FILE_SPACE_NTYPES);
 
     /* get information for free-space sections */
     if(freespace_stats(fid, &iter) < 0)
-        warn_msg(progname, "Unable to retrieve freespace info\n");
+        warn_msg("Unable to retrieve freespace info\n");
 
     /* Walk the objects or all file */
     if(display_object) {
@@ -1603,7 +1605,7 @@ main(int argc, const char *argv[])
         u = 0;
         while(hand[u].obj) {
             if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
-		warn_msg(progname, "Unable to traverse object \"%s\"\n", hand[u].obj);
+		warn_msg("Unable to traverse object \"%s\"\n", hand[u].obj);
 	    else
 		print_statistics(hand[u].obj, &iter);
             u++;
@@ -1611,7 +1613,7 @@ main(int argc, const char *argv[])
     } /* end if */
     else {
         if (h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
-	    warn_msg(progname, "Unable to traverse objects/links in file \"%s\"\n", fname);
+	    warn_msg("Unable to traverse objects/links in file \"%s\"\n", fname);
 	else
 	    print_statistics("/", &iter);
     } /* end else */
@@ -1619,7 +1621,7 @@ main(int argc, const char *argv[])
     if (hand) free(hand);
 
     if(H5Fclose(fid) < 0) {
-        error_msg(progname, "unable to close file \"%s\"\n", fname);
+        error_msg("unable to close file \"%s\"\n", fname);
         leave(EXIT_FAILURE);
     }
 

@@ -272,6 +272,7 @@ typedef struct H5D_chunk_ud_t {
     H5D_chunk_common_ud_t common;       /* Common info for B-tree user data (must be first) */
 
     /* Upward */
+    unsigned    idx_hint;               /*index of chunk in cache, if present */
     uint32_t	nbytes;			/*size of stored data	*/
     unsigned	filter_mask;		/*excluded filters	*/
     haddr_t	addr;			/*file address of chunk */
@@ -471,7 +472,6 @@ typedef struct {
 
 /* Typedef for filling a buffer with a fill value */
 typedef struct H5D_fill_buf_info_t {
-    hbool_t     alloc_vl_during_refill; /* Whether to allocate VL-datatype fill buffer during refill */
     H5MM_allocate_t fill_alloc_func;    /* Routine to call for allocating fill buffer */
     void        *fill_alloc_info;       /* Extra info for allocation routine */
     H5MM_free_t fill_free_func;         /* Routine to call for freeing fill buffer */
@@ -509,6 +509,7 @@ typedef struct {
 typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
+    hbool_t     deleted;        /*chunk about to be deleted (do not flush) */
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
@@ -636,12 +637,12 @@ H5_DLL herr_t H5D_chunk_set_info(const H5D_t *dset);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_storage_t *storage);
-H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
-    const hsize_t *chunk_offset, H5D_chunk_ud_t *udata);
+H5_DLL herr_t H5D_chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
+    const hsize_t *chunk_offset, hsize_t chunk_idx, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
-    H5D_chunk_ud_t *udata, hbool_t relax, unsigned *idx_hint/*in,out*/);
+    H5D_chunk_ud_t *udata, hbool_t relax);
 H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
-    const H5D_chunk_ud_t *udata, hbool_t dirty, unsigned idx_hint, void *chunk,
+    const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk,
     uint32_t naccessed);
 H5_DLL herr_t H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
@@ -649,7 +650,7 @@ H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id,
     hbool_t full_overwrite, hsize_t old_dim[]);
 H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
-    const hsize_t *old_dims);
+    const hsize_t *old_dim);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
@@ -681,7 +682,6 @@ H5_DLL herr_t H5D_efl_bh_info(H5F_t *f, hid_t dxpl_id, H5O_efl_t *efl,
 H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
 H5_DLL herr_t H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
-    hbool_t alloc_vl_during_refill,
     H5MM_allocate_t alloc_func, void *alloc_info,
     H5MM_free_t free_func, void *free_info,
     const H5O_fill_t *fill, const H5T_t *dset_type, hid_t dset_type_id,

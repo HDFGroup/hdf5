@@ -1037,6 +1037,9 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
             HFILE filehandle;   /* Windows file handle */
             LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
 
+            /* Reset seek offset to beginning of file, so that file isn't re-extended later */
+            rewind(file->fp);
+
             /* Map the posix file handle to a Windows file handle */
             filehandle = _get_osfhandle(fd);
 

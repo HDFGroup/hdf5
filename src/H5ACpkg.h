@@ -107,7 +107,7 @@
  *
  * Maintaining this count is easy for all processes not on process 0 --
  * all that is necessary is to add the size of the entry to the total
- * whenever there is an insertion, a rename of a previously clean entry,
+ * whenever there is an insertion, a move of a previously clean entry,
  * or whever a previously clean entry is marked dirty in an unprotect.
  *
  * On process 0, we have to be careful not to count dirty bytes twice.
@@ -197,18 +197,18 @@
  *		been created via insert operations since the last time
  *		the cleaned list was propagated.
  *
- * rename_dirty_bytes:  This field only exists when the
+ * move_dirty_bytes:  This field only exists when the
  *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of dirty bytes created
- *		via rename operations since the last time the cleaned
+ *		via move operations since the last time the cleaned
  *		list was propagated.
  *
- * rename_dirty_bytes_updates:  This field only exists when the
+ * move_dirty_bytes_updates:  This field only exists when the
  *              H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
  *
  *		It is used to track the number of times dirty bytes have
- *		been created via rename operations since the last time
+ *		been created via move operations since the last time
  *		the cleaned list was propagated.
  *
  * d_slist_ptr:  Pointer to an instance of H5SL_t used to maintain a list
@@ -224,7 +224,7 @@
  *
  *		1) an entry is inserted in the metadata cache, or
  *
- *		2) a previously clean entry is renamed, and it does not
+ *		2) a previously clean entry is moved, and it does not
  *		   already appear in the dirty entry list, or
  *
  *		3) a previously clean entry is unprotected with the
@@ -234,7 +234,7 @@
  *		Entries are added to the dirty entry list whever they cause
  *		the dirty bytes count to be increased.  They are removed
  *		when they appear in a clean entries broadcast.  Note that
- *		renames must be reflected in the dirty entry list.
+ *		moves must be reflected in the dirty entry list.
  *
  *		To reitterate, this field is only used on process 0 -- it
  *		should be NULL on all other processes.
@@ -303,8 +303,8 @@ typedef struct H5AC_aux_t
     int32_t     insert_dirty_bytes;
     int32_t     insert_dirty_bytes_updates;
 
-    int32_t     rename_dirty_bytes;
-    int32_t     rename_dirty_bytes_updates;
+    int32_t     move_dirty_bytes;
+    int32_t     move_dirty_bytes_updates;
 
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 

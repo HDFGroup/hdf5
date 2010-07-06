@@ -215,12 +215,12 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+LARGEFILE = @LARGEFILE@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
-LINUX_LFS = @LINUX_LFS@
 LIPO = @LIPO@
 LL_PATH = @LL_PATH@
 LN_S = @LN_S@
@@ -383,7 +383,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files.  These files are the ones created by running `make test'.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog combine_tables[1-2].h5 \
 	test_ds[1-9].h5 test_image[1-3].h5 test_lite[1-2].h5 \
-	test_table.h5 test_packet_table.h5 test_packet_compress.h5
+	test_table.h5 test_packet_table.h5 test_packet_compress.h5 \
+	test_detach.h5
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)

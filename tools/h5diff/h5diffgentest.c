@@ -20,6 +20,9 @@
 #include "h5tools.h"
 
 
+/* Name of tool */
+#define PROGRAMNAME "h5diffgentest"
+
 /*-------------------------------------------------------------------------
 * Program: h5diffgentest
 *
@@ -116,9 +119,6 @@ static int gen_dataset_idx(const char *file, int format);
 *
 *-------------------------------------------------------------------------
 */
-
-/* module-scoped variables */
-int d_status = EXIT_SUCCESS;
 
 int main(void)
 {
@@ -1432,7 +1432,7 @@ static int test_external_links(const char *fname1, const char *fname2)
     /*-----------------------------------------------------------------------
     * External Links
     *------------------------------------------------------------------------*/
-    /*--------------
+    /*--------------*/
     /* source file */
     status = H5Lcreate_external(fname2, "/target_group/x_dset", fid1, "ext_link_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)

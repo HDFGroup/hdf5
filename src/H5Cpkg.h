@@ -44,7 +44,7 @@
 #include "H5SLprivate.h"        /* Skip lists */
 
 /* With the introduction of the fractal heap, it is now possible for
- * entries to be dirtied, resized, and/or renamed in the flush callbacks.
+ * entries to be dirtied, resized, and/or moved in the flush callbacks.
  * As a result, on flushes, it may be necessary to make multiple passes
  * through the slist before it is empty.  The H5C__MAX_PASSES_ON_FLUSH
  * #define is used to set an upper limit on the number of passes.
@@ -283,7 +283,7 @@
  *                 some optimizations when I get to it.
  *
  * With the addition of the fractal heap, the cache must now deal with
- * the case in which entries may be dirtied, renamed, or have their sizes
+ * the case in which entries may be dirtied, moved, or have their sizes
  * changed during a flush.  To allow sanity checks in this situation, the
  * following two fields have been added.  They are only compiled in when
  * H5C_DO_SANITY_CHECKS is TRUE.
@@ -669,19 +669,19 @@
  *		equal to the array index has been evicted from the cache in
  *		the current epoch.
  *
- * renames:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ * moves:     Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
  *		are used to record the number of times an entry with type
- *		id equal to the array index has been renamed in the current
+ *		id equal to the array index has been moved in the current
  *		epoch.
  *
- * entry_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * entry_flush_moves: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
  * 		The cells are used to record the number of times an entry
- * 		with type id equal to the array index has been renamed
+ * 		with type id equal to the array index has been moved
  * 		during its flush callback in the current epoch.
  *
- * cache_flush_renames: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * cache_flush_moves: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1. 
  * 		The cells are used to record the number of times an entry
- * 		with type id equal to the array index has been renamed
+ * 		with type id equal to the array index has been moved
  * 		during a cache flush in the current epoch.
  *
  * pins:        Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
@@ -960,9 +960,9 @@ struct H5C_t
     int64_t                     clears[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     flushes[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS + 1];
-    int64_t                     renames[H5C__MAX_NUM_TYPE_IDS + 1];
-    int64_t                     entry_flush_renames[H5C__MAX_NUM_TYPE_IDS + 1];
-    int64_t                     cache_flush_renames[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     moves[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     entry_flush_moves[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     cache_flush_moves[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     pins[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     unpins[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     dirty_pins[H5C__MAX_NUM_TYPE_IDS + 1];
@@ -1493,14 +1493,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size )     \
 	    (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;
 
-#define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)               \
+#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)               \
 	if ( cache_ptr->flush_in_progress ) {                            \
-            ((cache_ptr)->cache_flush_renames[(entry_ptr)->type->id])++; \
+            ((cache_ptr)->cache_flush_moves[(entry_ptr)->type->id])++; \
 	}                                                                \
         if ( entry_ptr->flush_in_progress ) {                            \
-            ((cache_ptr)->entry_flush_renames[(entry_ptr)->type->id])++; \
+            ((cache_ptr)->entry_flush_moves[(entry_ptr)->type->id])++; \
 	}                                                                \
-	(((cache_ptr)->renames)[(entry_ptr)->type->id])++;
+	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
 	if ( cache_ptr->flush_in_progress ) {                                  \
@@ -1728,7 +1728,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 #define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
+#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)
 #define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)
@@ -2173,7 +2173,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		checks in the flush routines.
  *
  *		All this is needed as the fractal heap needs to be
- *		able to dirty, resize and/or rename entries during the
+ *		able to dirty, resize and/or move entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -2312,7 +2312,7 @@ if ( (cache_ptr)->index_size !=                                             \
  *		that are used in sanity checks in the flush routines.
  *
  *		All this is needed as the fractal heap needs to be
- *		able to dirty, resize and/or rename entries during the
+ *		able to dirty, resize and/or move entries during the
  *		flush.
  *
  *-------------------------------------------------------------------------
@@ -3057,10 +3057,10 @@ if ( (cache_ptr)->index_size !=                                             \
 
 /*-------------------------------------------------------------------------
  *
- * Macro:	H5C__UPDATE_RP_FOR_RENAME
+ * Macro:	H5C__UPDATE_RP_FOR_MOVE
  *
  * Purpose:     Update the replacement policy data structures for a
- *		rename of the specified cache entry.
+ *		move of the specified cache entry.
  *
  *		At present, we only support the modified LRU policy, so
  *		this function deals with that case unconditionally.  If
@@ -3071,49 +3071,12 @@ if ( (cache_ptr)->index_size !=                                             \
  *
  * Programmer:  John Mainzer, 5/17/04
  *
- * Modifications:
- *
- *		JRM - 7/27/04
- *		Converted the function H5C_update_rp_for_rename() to the
- *		macro H5C__UPDATE_RP_FOR_RENAME in an effort to squeeze
- *		a bit more performance out of the cache.
- *
- *		At least for the first cut, I am leaving the comments and
- *		white space in the macro.  If they cause dificulties with
- *		pre-processor, I'll have to remove them.
- *
- *		JRM - 7/28/04
- *		Split macro into two version, one supporting the clean and
- *		dirty LRU lists, and the other not.  Yet another attempt
- *		at optimization.
- *
- *		JRM - 6/23/05
- *		Added the was_dirty parameter.  It is possible that
- *		the entry was clean when it was renamed -- if so it
- *		it is in the clean LRU regardless of the current
- *		value of the is_dirty field.
- *
- *		At present, all renamed entries are forced to be
- *		dirty.  This macro is a bit more general that that,
- *		to allow it to function correctly should that policy
- *		be relaxed in the future.
- *
- *		JRM - 3/17/06
- *		Modified macro to do nothing if the entry is pinned.
- *		In this case, the entry is on the pinned entry list, not
- *		in the replacement policy data structures, so there is
- *		nothing to be done.
- *
- *		JRM - 3/28/07
- *		Added sanity checks using the new is_read_only and
- *		ro_ref_count fields of struct H5C_cache_entry_t.
- *
  *-------------------------------------------------------------------------
  */
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty, fail_val) \
+#define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val) \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
@@ -3187,11 +3150,11 @@ if ( (cache_ptr)->index_size !=                                             \
                                                                              \
             /* End modified LRU specific code. */                            \
         }                                                                    \
-} /* H5C__UPDATE_RP_FOR_RENAME */
+} /* H5C__UPDATE_RP_FOR_MOVE */
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-#define H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty, fail_val) \
+#define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val) \
 {                                                                            \
     HDassert( (cache_ptr) );                                                 \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
@@ -3220,7 +3183,7 @@ if ( (cache_ptr)->index_size !=                                             \
                                                                              \
             /* End modified LRU specific code. */                            \
         }                                                                    \
-} /* H5C__UPDATE_RP_FOR_RENAME */
+} /* H5C__UPDATE_RP_FOR_MOVE */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 

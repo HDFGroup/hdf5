@@ -23,10 +23,6 @@ static int check_n_input( const char* );
 static int check_p_input( const char* );
 static int check_d_input( const char* );
 
-
-/* module-scoped variables */
-const char  *progname = "h5diff";
-
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
@@ -44,7 +40,7 @@ static struct long_options l_opts[] = {
     { "nan", no_arg, 'N' },
     { "compare", no_arg, 'c' },
     { "use-system-epsilon", no_arg, 'e' },
-    { "follow-links", no_arg, 'l' },
+    { "follow-symlinks", no_arg, 'l' },
     { "no-dangling-links", no_arg, 'x' },
     { NULL, 0, '\0' }
 };
@@ -90,7 +86,7 @@ void parse_command_line(int argc,
             usage();
             h5diff_exit(EXIT_SUCCESS);
         case 'V':
-            print_version(progname);
+            print_version(h5tools_getprogname());
             h5diff_exit(EXIT_SUCCESS);
         case 'v':
             options->m_verbose = 1;
@@ -174,7 +170,7 @@ void parse_command_line(int argc,
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
     {
-        error_msg(progname, "missing file names\n");
+        error_msg("missing file names\n");
         usage();
         h5diff_exit(EXIT_FAILURE);
     }
@@ -367,7 +363,7 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences.\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects.\n");
  printf("   -q, --quiet             Quiet mode. Do not produce output.\n");
- printf("   --follow-links          Follow symbolic links (soft links and external links)\n");
+ printf("   --follow-symlinks       Follow symbolic links (soft links and external links)\n");
  printf("                           and compare the links' target objects.\n");
  printf("                           If symbolic link(s) with the same name exist in the\n");
  printf("                           files being compared, then determine whether the \n");
@@ -378,13 +374,13 @@ void usage(void)
  printf("                           - If both symbolic links are dangling links, they\n");
  printf("                             are treated as being the same; by default, h5diff\n");
  printf("                             returns an exit code of 0. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             --no-dangling-links is used with --follow-symlinks,\n");
  printf("                             this situation is treated as an error and h5diff \n");
  printf("                             returns an exit code of 2.\n");
  printf("                           - If only one of the two links is a dangling link,\n");
  printf("                             they are treated as being different and h5diff \n");
  printf("                             returns an exit code of 1. If, however, \n");
- printf("                             --no-dangling-links is used with --follow-links, \n");
+ printf("                             --no-dangling-links is used with --follow-symlinks,\n");
  printf("                             this situation is treated as an error and h5diff \n");
  printf("                             returns an exit code of 2.\n");
  printf("                           - If both symbolic links point to existing objects,\n");
@@ -392,7 +388,7 @@ void usage(void)
  printf("                           If any symbolic link specified in the call to h5diff\n");
  printf("                           does not exist, h5diff treats it as an error and\n");
  printf("                           returns an exit code of 2.\n");
- printf("   --no-dangling-links     Must be used with --follow-links option;\n");
+ printf("   --no-dangling-links     Must be used with --follow-symlinks option;\n");
  printf("                           otherwise, h5diff shows error message and returns\n");
  printf("                           an exit code of 2.\n");
  printf("                           Check for any symbolic links (soft links or external\n");
@@ -439,7 +435,7 @@ void usage(void)
  printf("  2) groups: name string difference\n");
  printf("  3) datatypes: the return value of H5Tequal\n");
  printf("  4) links: name string difference of the linked value as default\n");
- printf("            (refer to --follow-links option).\n");
+ printf("            (refer to --follow-symlinks option).\n");
  printf("\n");
  printf(" Exit code:\n");
  printf("  0 if no differences, 1 if differences found, 2 if error\n");

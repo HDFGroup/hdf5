@@ -120,7 +120,7 @@ TOOLTEST $srcdir/testfiles/in64.txt -c $srcdir/testfiles/textpfe.conf -o test15.
 
 
 
-rm -f  *.txt *.bin *.h5
+rm -f  txtin32.txt txtin16.txt *.bin *.h5
 rm -rf tmp_testfiles
 else
 	echo "** h5import or h5importtest not available ***"

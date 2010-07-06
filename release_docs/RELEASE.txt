@@ -1,4 +1,4 @@
-HDF5 version 1.9.69-FA_a4 currently under development
+HDF5 version 1.9.73-FA_a4 currently under development
 ================================================================================
 
 
@@ -39,6 +39,15 @@ New Features
 
     Configuration:
     -------------
+    - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
+      applications startup command as defined in the MPI-2 definition, section
+      4.1. (AKC - 2010/6/11 - Bug 1921)
+    - Configure now adds appropriate defines for supporting large (64-bit)
+      files on all systems, where supported, by default, instead of only linux.
+      This largefile support is controllable with the --enable-largefile 
+      configure option. This is replacing the linux-specific --enable-linux-lfs
+      option, which has been removed from configure. 
+      (MAM - 2010/05/05 - 1772/1434)
     - Upgraded versions of autotools used to generate configuration suite.
       We now use Automake 1.11.1, Autoconf 2.65, and Libtool 2.2.6b. 
       MAM 2010/04/15.
@@ -67,6 +76,8 @@ New Features
 
     Library:
     --------
+    - Improved performance of the chunk cache by avoiding unnecessary b-tree
+      lookups of chunks already in cache. (NAF - 2010/06/15) 
     - Greatly improved performance of extending a dataset with early
       allocation. (NAF - 2010/03/24 - 1637)
     - Added support for filtering densely stored groups.  Many of the API
@@ -127,10 +138,12 @@ New Features
 
     C++ Library:
     ------------
-	- Added function CommonFG::getObjnameByIdx to take char* for name.
-	  (BMR - 2010/05/02)
-	- Added function CommonFG::getObjTypeByIdx to return type name as
-	  a char*.
+	- New member functions
+	  + Overloaded CommonFG::getObjnameByIdx to take char* for name
+	  + Overloaded CommonFG::getObjTypeByIdx to return type name as a char*.
+            (BMR - 2010/05/02)
+	  + DataSet::getInMemDataSize() to simplify getting the dataset's
+            data size in memory.  (BMR - 2009/07/26)
         - These member functions were added as wrapper for H5Rdereference to
           replace the incorrect IdComponent::dereference().
                 void H5Object::dereference(H5File& h5file, void* ref)
@@ -151,9 +164,11 @@ New Features
 
     Tools:
     ------
+     - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
+               (JKM - 2010/05/25)
      - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
                (JKM - 2010/02/10) 
-     - h5diff: Add new flag --follow-links. (refer to --help for details)
+     - h5diff: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/01/25) 
      - h5diff: fix for displaying garbage value on LE machine for BE data.
 	   (JKM - 2009/11/20)
@@ -217,6 +232,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a file corruption bug that could happen when shrinking a
+            compressed dataset. (NAF - 2010/05/20)
+      - Fixed some memory leaks in VL datatype conversion when strings are
+            used as fill values. (MAM - 2010/05/12 - BZ# 1826)
       - Fixed a bug when copying objects with NULL references with the
             H5O_COPY_EXPAND_REFERENCE_FLAG flag set. (NAF - 2010/04/08 - 1815)
       - Files can now be concurrently opened more than once using the core file
@@ -411,6 +430,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Change h5ls not to manipulate special characters in object name or 
+          attribute name for smart display.  bug#1784 (JKM 2010/06/28)
+        - Fixed h5ls to return exit code 1 (error) when non-existent file is
+          specified. bug#1793. (JKM 2010/04/27)
+        - h5copy failed to copy dangling link when the link is specified 
+          directly. bug#1817. (JKM 2010/04/22)
+        - h5repack lost attributes from a dataset of reference type. bug#1726.
+          (JKM 2010/3/25)
+        - h5repack sets NULL for object reference value for group or 
+          named datatype. bug#1814. (JKM 2010/03/19)
         - h5diff: fixed incorrect behavior (hang) in parallel mode when
                   specify invalid options (ex: -v and -q) (JKM 2010/02/17)
         - h5dump/h5ls display buffer resize fixed in tools library.  
@@ -451,6 +480,18 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+      - Fixed a bug in H5DSattach_scale, H5DSis_attached and H5DSdetach_scale
+        caused by using H5Tget_native_type function to determine the native
+        type for reading REFERENCE_LIST attribute. The bug was exposed
+        on Mac PPC.
+                                     (EIP - 2010/05/22 -1851) 
+      - Fixed a bug in the H5DSdetach_scale function when 0 bytes  
+        were allocated after the last reference to a dim. scale  
+        was removed from the list of references in a VL element of the 
+        DIMENSION_LIST attribute; modified the function to comply
+        with the Spec: DIMENSION_LIST attribute is deleted now when no 
+        dimension scales left attached.
+                                     (EIP - 2010/05/14 -1822) 
       - Fixed a bug where the H5TB API would forget the order of fields when
           added out of offset order. (NAF - 2009/10/27 - 1582)
       - H5DSis_attached failed to account for different platform types. Added a
@@ -480,6 +521,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     C++ APIs
     --------
+	- The constructor PropList::PropList(id) was fixed to act properly
+	  according to the nature of 'id'.  When 'id' is a property class id,
+	  a new property list will be created.  When 'id' id a property list id,
+	  a copy of the property list will be made. (BMR - 2010/5/9)
+	- The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
+	  CommonFG::getComment, respectively, now have default values for
+	  user's convenience.  (BMR - 2009/10/23)
+	- NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
+	- read/write methods of DataSet and Attribute classes were fixed
+	  to handle string correctly.  (BMR - 2009/07/26)
         - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
         - Fixed bug in PropList::getClassName to use portable HDfree instead
             of free. (BMR - 2008/04/20)
@@ -541,15 +592,15 @@ Platforms Tested
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    
-				  Visual Studio .NET
-                                  Visual Studio 2005 w/ Intel Fortran 9.1
-                                  Cygwin(native gcc compiler and g95)
-				  MinGW(native gcc compiler and g95)
-    Windows XP x64                
-			          Visual Studio 2005 w/ Intel Fortran 9.1
-    Windows Vista			
-			          Visual Studio 2005
+				  
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1
+                                  Cygwin(1.7.5 native gcc compiler and gfortran)
+
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1
+
+    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 10.1
+
+    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 10.1
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -578,7 +629,8 @@ Cray XT3 (not tested
           for this release)        n        n      n        n     n     n
 Windows XP                         n        y(3)   n(3)     y     y     y
 Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        n      n        y     y     y
+Windows Vista                      n        y(3)   n(3)     y     y     y
+Windows Vista x64                  n        y(3)   n(3)     y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 6.2 32-bit                 n        n      n        y     y     y
 FreeBSD 6.2 64-bit
@@ -606,9 +658,10 @@ AIX-5.2 32-bit                      n        n         n         x        n
 AIX-5.2 64-bit                      n        n         n         x        n
 Cray XT3 (not tested
           for this release)         n        n         n         x        n
-Windows XP                          y        y(3)      y         y        y
-Windows XP x64                      y        y(3)      y         y        y
-Windows Vista                       y        n         n         y        y
+Windows XP                          y        y(3)      y         y        n
+Windows XP x64                      y        y(3)      y         y        n
+Windows Vista                       y        y(3)      y         y        n
+Windows Vista x64                   y        y(3)      y         y        n
 Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 6.2 32-bit                  y        y         y         x        n
 FreeBSD 6.2 64-bit                  y        y         y         x        n
@@ -627,7 +680,7 @@ SuSe Linux 2.6.5
 
     Notes: (1)  Using mpich 1.2.6.
            (2) Using mpich2 1.0.6.
-           (3) Using Visual Studio 2005 or Cygwin
+           (3) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
            (4) With PGI and Absoft compilers.
            (5) AMD Opteron x86_64
     Compiler versions for each platform are listed in the preceding

@@ -1489,7 +1489,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *deleted)
             oh->nlink += adjust;
 
             /* Mark object header as dirty in cache */
-            if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+            if(H5AC_mark_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
 
             /* Check if the object should be deleted */
@@ -1521,7 +1521,7 @@ H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *deleted)
             oh->nlink += adjust;
 
             /* Mark object header as dirty in cache */
-            if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+            if(H5AC_mark_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end if */
 
@@ -1660,6 +1660,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
     udata.common.mesgs_modified = FALSE;
     HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
+    udata.common.addr = loc->addr;
 
     /* Lock the object header into the cache */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, &udata, prot)))
@@ -1696,7 +1697,8 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
 
             /* Bring the chunk into the cache */
             /* (which adds to the object header) */
-            chk_udata.chunk_size = cont_msg_info.msgs[curr_msg].size;
+            chk_udata.common.addr = cont_msg_info.msgs[curr_msg].addr;
+            chk_udata.size = cont_msg_info.msgs[curr_msg].size;
             if(NULL == (chk_proxy = (H5O_chunk_proxy_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR_CHK, cont_msg_info.msgs[curr_msg].addr, &chk_udata, prot)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
@@ -1762,6 +1764,9 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
         /* Check for any messages that were modified while being read in */
         if(udata.common.mesgs_modified && prot != H5AC_WRITE)
             oh->mesgs_modified = TRUE;
+
+        /* Reset the field that contained chunk 0's size during speculative load */
+        oh->chunk0_size = 0;
     } /* end if */
 
     /* Take care of loose ends for modifications made while bringing in the
@@ -1772,7 +1777,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
         /* (usually through updating the # of object header messages) */
         if(oh->prefix_modified) {
             /* Mark the header as dirty now */
-            if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+            if(H5AC_mark_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, NULL, "unable to mark object header as dirty")
 
             /* Reset flag */
@@ -1798,7 +1803,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
 
                     /* Unprotect chunk, marking it dirty */
-                    if(H5O_chunk_unprotect(loc->file, dxpl_id, chk_proxy, H5AC__DIRTIED_FLAG) < 0)
+                    if(H5O_chunk_unprotect(loc->file, dxpl_id, chk_proxy, TRUE) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect object header chunk")
                 } /* end if */
             } /* end for */
@@ -1962,7 +1967,7 @@ herr_t
 H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
-    unsigned chk_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
+    hbool_t chk_dirtied = FALSE;        /* Flag for unprotecting chunk */
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2016,7 +2021,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
             /* Mark the message as dirty */
             oh->mesg[idx].dirty = TRUE;
-            chk_flags |= H5AC__DIRTIED_FLAG;
+            chk_dirtied = TRUE;
         } /* end if */
         else {
             /* XXX: For now, update access time & change fields in the object header */
@@ -2024,14 +2029,14 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
             oh->atime = oh->ctime = now;
 
             /* Mark object header as dirty in cache */
-            if(H5AC_mark_pinned_or_protected_entry_dirty(oh) < 0)
+            if(H5AC_mark_entry_dirty(oh) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end else */
     } /* end if */
 
 done:
     /* Release chunk */
-    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, chk_proxy, chk_flags) < 0)
+    if(chk_proxy && H5O_chunk_unprotect(f, dxpl_id, chk_proxy, chk_dirtied) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)

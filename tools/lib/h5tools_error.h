@@ -22,9 +22,9 @@
 #include "H5Epublic.h"
 
 /* tools-HDF5 Error variables */
-extern hid_t H5tools_ERR_CLS_g;
-extern hid_t H5E_tools_g;
-extern hid_t H5E_tools_min_id_g;
+H5TOOLS_DLLVAR hid_t H5tools_ERR_CLS_g;
+H5TOOLS_DLLVAR hid_t H5E_tools_g;
+H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 
 /* Use FUNC to safely handle variations of C99 __func__ keyword handling */
 #ifdef H5_HAVE_C99_FUNC

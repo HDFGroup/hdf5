@@ -21,6 +21,9 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5copygentest"
+
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
 #define HDF_FILE1_NEW            "h5copytst_new.h5"
@@ -420,6 +423,10 @@ static herr_t gen_obj_ref(hid_t loc_id)
     hsize_t dims2[1]={2};
     int data[3] = {10,20,30};
     int status;
+    /*---------------------
+     * create obj references to the previously created objects.
+     * Passing -1 as reference is an object.*/
+    hobj_ref_t or_data[2];  /* write buffer */
     herr_t ret = SUCCEED;
 
     /*--------------
@@ -461,11 +468,6 @@ static herr_t gen_obj_ref(hid_t loc_id)
         goto out;
     }
      H5Gclose(oid);
-
-    /*---------------------
-     * create obj references to the previously created objects.
-     * Passing -1 as reference is an object.*/
-     hobj_ref_t or_data[2];  /* write buffer */
 
     status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, -1);
     if (status < 0)
@@ -914,6 +916,9 @@ out:
 
 int main(void)
 {
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
+
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();

@@ -486,7 +486,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a, dirty = %t\n", FUNC, ent->proxy_add
 
     /* Check whether to mark the proxy as dirty */
     if(dirty) {
-        if(H5AC_mark_pinned_or_protected_entry_dirty(ent->proxy) < 0)
+        if(H5AC_mark_entry_dirty(ent->proxy) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark chunk proxy entry in metadata cache as dirty")
     } /* end if */
 

@@ -466,6 +466,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
      */
     if(hdr->filter_len > 0) {
         if(par_iblock == NULL) {
+	    udata.odi_size = hdr->pline_root_direct_size;
 	    udata.filter_mask = hdr->pline_root_direct_filter_mask;
 	} /* end if */
         else {
@@ -473,11 +474,14 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
 	    HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
 
 	    /* Set up parameters to read filtered direct block */
+	    udata.odi_size = par_iblock->filt_ents[par_entry].size;
             udata.filter_mask = par_iblock->filt_ents[par_entry].filter_mask;
 	} /* end else */
     } /* end if */
-    else
+    else {
+	udata.odi_size = dblock_size;
         udata.filter_mask = 0;
+    } /* end else */
 
     /* Protect the direct block */
     if(NULL == (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, rw)))

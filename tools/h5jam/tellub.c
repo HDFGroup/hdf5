@@ -26,7 +26,8 @@
 #define TRUE 1
 #define FALSE 0
 
-const char *progname = "tellub";
+/* Name of tool */
+#define PROGRAMNAME "tellub"
 
 /*
  * Command-line options: The user can specify short or long-named
@@ -91,11 +92,11 @@ parse_command_line (int argc, const char *argv[])
       switch ((char) opt)
 	{
 	case 'h':
-	  usage (progname);
+	  usage (h5tools_getprogname());
 	  exit (EXIT_SUCCESS);
 	case '?':
 	default:
-	  usage (progname);
+	  usage (h5tools_getprogname());
 	  exit (EXIT_FAILURE);
 	}
     }
@@ -103,8 +104,8 @@ parse_command_line (int argc, const char *argv[])
   /* check for file name to be processed */
   if (argc <= opt_ind)
     {
-      error_msg (progname, "missing file name\n");
-      usage (progname);
+      error_msg(h5tools_getprogname(), "missing file name\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
 }
@@ -135,6 +136,9 @@ main (int argc, const char *argv[])
   herr_t status;
   hid_t plist;
 
+  h5tools_setprogname(PROGRAMNAME);
+  h5tools_setstatus(EXIT_SUCCESS);
+
   /* Disable error reporting */
   H5Eget_auto2(H5E_DEFAULT, &func, &edata);
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -143,8 +147,8 @@ main (int argc, const char *argv[])
 
   if (argc <= (opt_ind))
     {
-      error_msg (progname, "missing file name\n");
-      usage (progname);
+      error_msg("missing file name\n");
+      usage (h5tools_getprogname());
       return (EXIT_FAILURE);
     }
 
@@ -154,7 +158,7 @@ main (int argc, const char *argv[])
 
   if (testval <= 0)
     {
-      error_msg (progname, "Input HDF5 file is not HDF \"%s\"\n", ifname);
+      error_msg("Input HDF5 file is not HDF \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 
@@ -162,14 +166,14 @@ main (int argc, const char *argv[])
 
   if (ifile < 0)
     {
-      error_msg (progname, "Can't open input HDF5 file \"%s\"\n", ifname);
+      error_msg("Can't open input HDF5 file \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 
   plist = H5Fget_create_plist (ifile);
   if (plist < 0)
     {
-      error_msg (progname, "Can't get file creation plist for file \"%s\"\n",
+      error_msg("Can't get file creation plist for file \"%s\"\n",
 		 ifname);
       return (EXIT_FAILURE);
     }
@@ -177,7 +181,7 @@ main (int argc, const char *argv[])
   status = H5Pget_userblock (plist, &usize);
   if (status < 0)
     {
-      error_msg (progname, "Can't get user block for file \"%s\"\n", ifname);
+      error_msg("Can't get user block for file \"%s\"\n", ifname);
       return (EXIT_FAILURE);
     }
 

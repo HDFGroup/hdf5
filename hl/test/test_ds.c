@@ -71,6 +71,7 @@ static int test_long_scalenames(const char *fileext);
 static int test_samelong_scalenames(const char *fileext);
 static int test_float_scalenames(const char *fileext);
 static int test_foreign_scaleattached(const char *fileforeign);
+static int test_detachscales(void);
 
 static int test_simple(void);
 static int test_errors(void);
@@ -136,6 +137,9 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define FILE6          "test_ds8.h5"
 #define FILE7          "test_ds9.h5"
 
+#define DIMENSION_LIST "DIMENSION_LIST"
+#define REFERENCE_LIST "REFERENCE_LIST"
+
 /*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
@@ -169,6 +173,7 @@ int main(void)
     nerrors += test_samelong_scalenames("2") < 0  ? 1 : 0;
     nerrors += test_foreign_scaleattached(FOREIGN_FILE1) < 0  ? 1 : 0;
     nerrors += test_foreign_scaleattached(FOREIGN_FILE2) < 0  ? 1 : 0;
+    nerrors += test_detachscales() < 0  ? 1 : 0;
 
 /*  the following tests have not been rewritten to match those above */
     nerrors += test_simple() < 0  ?1:0;
@@ -238,8 +243,7 @@ herr_t create_char_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = 3;
     int     rankds = 1;
     hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};
-    char   buf[DIM_DATA*3] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+    char   buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -292,8 +296,7 @@ herr_t create_short_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = 3;
     int     rankds = 1;
     hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};
-    short   buf[DIM_DATA*3] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12};
+    short   buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -347,7 +350,7 @@ herr_t create_int_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = RANK;
     int     rankds = 1;
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};
-    int     buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};
+    int     buf[DIM1_SIZE*DIM2_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     int     s1_wbuf[DIM1_SIZE] = {10,20,30};
@@ -389,10 +392,7 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
     int     rank = 4;
     int     rankds = 1;
     hsize_t dims[4]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE,DIM4_SIZE};
-    long    buf[DIM_DATA*3*2] = {1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11,12,
-            1,2,3,4,5,6,7,8,9,10,11,12};
+    long    buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE*DIM4_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -458,7 +458,7 @@ herr_t create_float_dataset(hid_t fid, const char *dsidx, int fulldims)
     int     rank = RANK;
     int     rankds = 1;
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};
-    float   buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};
+    float   buf[DIM1_SIZE*DIM2_SIZE];
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     float   s1_wbuf[DIM1_SIZE] = {10,20,30};
@@ -1142,6 +1142,148 @@ herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *sc
     }
 
     return ret_value;
+}
+
+static int test_detachscales(void)
+{
+    hid_t   fid = -1;
+    hid_t   did = -1;
+    hid_t   dsid = -1;
+    int     rank1 = 1;
+    int     rank3 = 3;
+    hsize_t dims[] = {1,2,3}; /*some bogus numbers, not important for the test*/
+    int     *buf = NULL;
+    char    dname[10];
+    int     i;
+
+    /* This tests creates two three dimensional datasets; then it creates
+       four integer datasets that are used as dim. scales; we will attach
+       and detach them to check that at the end there is no attributes
+       REFERENCE_LIST on a dimension scale and DIMENSION_LIST on a dataset */
+
+    TESTING2("test_detachscales");
+
+    if((fid = H5Fcreate("test_detach.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* make datasets; they are three dimensional*/
+    for (i=0; i < 2; i++) {
+        sprintf(dname,"D%d", i);
+        if(H5LTmake_dataset_int(fid, dname, rank3, dims, buf) < 0)
+            goto out;
+    } 
+    /* create datasets and make them dim. scales */
+
+    for (i=0; i < 4; i++) {
+        sprintf(dname, "DS%d", i);
+        if(H5LTmake_dataset_int(fid, dname, rank1, dims, buf) < 0)
+            goto out;
+    }
+    /* attach scales to the first dataset; first dimension will have 
+       two scales attached  */
+    if((did = H5Dopen2(fid, "D0", H5P_DEFAULT)) >= 0) {
+        for (i=0; i<4; i++) {
+           sprintf(dname, "DS%d", i);
+           if((dsid = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
+               goto out;
+           if(H5DSattach_scale(did, dsid, (unsigned int) i%3) < 0)
+               goto out;
+           if(H5Dclose(dsid) < 0)
+               goto out;
+        }
+        if(H5Dclose(did) < 0)
+            goto out;
+    }
+    else
+        goto out;
+
+   /* attach scales to the second dataset */
+    if((did = H5Dopen2(fid, "D1", H5P_DEFAULT)) >= 0) {
+        for (i=0; i<3; i++) {
+           sprintf(dname, "DS%d", i);
+           if((dsid = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
+               goto out;
+           if(H5DSattach_scale(did, dsid, (unsigned int) i) < 0)
+               goto out;
+           if(H5Dclose(dsid) < 0)
+               goto out;
+        }
+        if(H5Dclose(did) < 0)
+            goto out;
+    }
+    else
+        goto out;
+
+    /* detach DS0 from first dimension of D0 and D1; then check
+       that DS0 doesn't have attribute REFERENCE _LIST */
+
+    if((dsid = H5Dopen2(fid, "DS0", H5P_DEFAULT)) < 0)
+               goto out;
+
+    for (i=0; i<2; i++) {
+        sprintf(dname, "D%d", i);
+        if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
+            goto out;
+        if(H5DSdetach_scale(did, dsid, (unsigned int)0) < 0)
+            goto out;
+        if(H5Dclose(did) < 0)
+            goto out;
+    } 
+    /* Check that attribute "REFERENCE_LIST" doesn't exist anymore */
+    if(H5Aexists(dsid, REFERENCE_LIST)!= 0)
+        goto out;
+    if(H5Dclose(dsid) < 0)
+        goto out;
+    /* Check that DS3 is the only dim. scale attached to the first 
+       dimension of D0 */
+    if((did = H5Dopen2(fid, "D0", H5P_DEFAULT)) < 0)
+        goto out;
+    if((dsid = H5Dopen2(fid, "DS3", H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5DSis_attached(did, dsid, (unsigned int) 0) <= 0)
+        goto out;
+    if(H5Dclose(did) < 0)
+        goto out;
+    if(H5Dclose(dsid) < 0)
+        goto out;
+
+    /* Detach the rest of the scales DS3, DS1, DS2 from D0 and make 
+       sure that attribute "DIMENSION_LIST" doesn't exist anymore */
+    if((did = H5Dopen2(fid, "D0", H5P_DEFAULT)) >= 0) {
+        for (i=1; i<4; i++) {
+           sprintf(dname, "DS%d", i);
+           if((dsid = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0)
+               goto out;
+           if(H5DSdetach_scale(did, dsid, (unsigned int) i%3) < 0)
+               goto out;
+           if(H5Dclose(dsid) < 0)
+               goto out;
+        }
+        /* Check that attribute "DIMENSION_LIST" doesn't exist anymore */
+        if(H5Aexists(did, DIMENSION_LIST)!= 0)
+            goto out;
+        if(H5Dclose(did) < 0)
+            goto out;
+    }
+    else
+        goto out;
+
+    
+    PASSED();
+
+    H5Fclose(fid);
+    return SUCCEED;
+
+out:
+    H5E_BEGIN_TRY  {
+        H5Dclose(did);
+        H5Dclose(dsid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    H5_FAILED();
+
+    return FAIL;
 }
 
 static int test_char_attachscales(const char *fileext)

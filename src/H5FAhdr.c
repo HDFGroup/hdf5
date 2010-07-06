@@ -384,7 +384,7 @@ H5FA__hdr_modified(H5FA_hdr_t *hdr))
     HDassert(hdr);
 
     /* Mark header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr) < 0)
+    if(H5AC_mark_entry_dirty(hdr) < 0)
         H5E_THROW(H5E_CANTMARKDIRTY, "unable to mark fixed array header as dirty")
 
 CATCH

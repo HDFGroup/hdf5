@@ -24,6 +24,9 @@
 #include "H5private.h"
 #include "h5tools_utils.h"
 
+/* Name of tool */
+#define PROGRAMNAME "h5jam"
+
 #define TRUE 1
 #define FALSE 0
 
@@ -32,8 +35,6 @@ hsize_t compute_user_block_size (hsize_t);
 hsize_t copy_some_to_file (int, int, hsize_t, hsize_t, ssize_t);
 void parse_command_line (int, const char *[]);
 
-const char *progname = "h5jam";
-int d_status = EXIT_SUCCESS;
 int do_clobber = FALSE;
 char *output_file = NULL;
 char *input_file = NULL;
@@ -131,14 +132,14 @@ parse_command_line (int argc, const char *argv[])
 	  do_clobber = TRUE;
 	  break;
 	case 'h':
-	  usage (progname);
+	  usage (h5tools_getprogname());
 	  exit (EXIT_SUCCESS);
     case 'V':
-	  print_version (progname);
+	  print_version (h5tools_getprogname());
 	  exit (EXIT_SUCCESS);
 	case '?':
 	default:
-	  usage (progname);
+	  usage (h5tools_getprogname());
 	  exit (EXIT_FAILURE);
 	}
     }
@@ -180,6 +181,9 @@ main (int argc, const char *argv[])
   struct stat sbuf2;
   int res;
 
+  h5tools_setprogname(PROGRAMNAME);
+  h5tools_setstatus(EXIT_SUCCESS);
+
   /* Disable error reporting */
   H5Eget_auto2(H5E_DEFAULT, &func, &edata);
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -189,16 +193,16 @@ main (int argc, const char *argv[])
   if (ub_file == NULL)
     {
       /* no user block */
-      error_msg (progname, "no user block file name\n");
-      usage (progname);
+      error_msg("no user block file name\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
 
   if (input_file == NULL)
     {
       /* no user block */
-      error_msg (progname, "no HDF5 file\n");
-      usage (progname);
+      error_msg("no HDF5 file\n");
+      usage (h5tools_getprogname());
       exit (EXIT_FAILURE);
     }
 
@@ -206,7 +210,7 @@ main (int argc, const char *argv[])
 
   if (testval <= 0)
     {
-      error_msg (progname, "Input HDF5 file is not HDF \"%s\"\n", input_file);
+      error_msg("Input HDF5 file is not HDF \"%s\"\n", input_file);
       exit (EXIT_FAILURE);
     }
 
@@ -214,14 +218,14 @@ main (int argc, const char *argv[])
 
   if (ifile < 0)
     {
-      error_msg (progname, "Can't open input HDF5 file \"%s\"\n", input_file);
+      error_msg("Can't open input HDF5 file \"%s\"\n", input_file);
       exit (EXIT_FAILURE);
     }
 
   plist = H5Fget_create_plist (ifile);
   if (plist < 0)
     {
-      error_msg (progname, "Can't get file creation plist for file \"%s\"\n",
+      error_msg("Can't get file creation plist for file \"%s\"\n",
 		 input_file);
       exit (EXIT_FAILURE);
     }
@@ -229,7 +233,7 @@ main (int argc, const char *argv[])
   status = H5Pget_userblock (plist, &usize);
   if (status < 0)
     {
-      error_msg (progname, "Can't get user block for file \"%s\"\n",
+      error_msg("Can't get user block for file \"%s\"\n",
 		 input_file);
       exit (EXIT_FAILURE);
     }
@@ -241,7 +245,7 @@ main (int argc, const char *argv[])
 
   if (ufid < 0)
     {
-      error_msg (progname, "unable to open user block file \"%s\"\n",
+      error_msg("unable to open user block file \"%s\"\n",
 		 ub_file);
       exit (EXIT_FAILURE);
     }
@@ -250,7 +254,7 @@ main (int argc, const char *argv[])
 
   if (res < 0)
     {
-      error_msg (progname, "Can't stat file \"%s\"\n", ub_file);
+      error_msg("Can't stat file \"%s\"\n", ub_file);
       exit (EXIT_FAILURE);
     }
 
@@ -260,7 +264,7 @@ main (int argc, const char *argv[])
 
   if (h5fid < 0)
     {
-      error_msg (progname, "unable to open HDF5 file for read \"%s\"\n",
+      error_msg("unable to open HDF5 file for read \"%s\"\n",
 		 input_file);
       exit (EXIT_FAILURE);
     }
@@ -269,7 +273,7 @@ main (int argc, const char *argv[])
 
   if (res < 0)
     {
-      error_msg (progname, "Can't stat file \"%s\"\n", input_file);
+      error_msg("Can't stat file \"%s\"\n", input_file);
       exit (EXIT_FAILURE);
     }
 
@@ -281,7 +285,7 @@ main (int argc, const char *argv[])
 
       if (ofid < 0)
 	{
-	  error_msg (progname, "unable to open output file \"%s\"\n",
+	  error_msg("unable to open output file \"%s\"\n",
 		     output_file);
 	  exit (EXIT_FAILURE);
 	}
@@ -292,7 +296,7 @@ main (int argc, const char *argv[])
 
       if (ofid < 0)
 	{
-	  error_msg (progname, "unable to create output file \"%s\"\n",
+	  error_msg("unable to create output file \"%s\"\n",
 		     output_file);
 	  exit (EXIT_FAILURE);
 	}
@@ -346,7 +350,7 @@ main (int argc, const char *argv[])
   HDclose (h5fid);
   HDclose (ofid);
 
-  return d_status;
+  return h5tools_getstatus();
 }
 
 /*-------------------------------------------------------------------------
@@ -395,7 +399,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
   if (startin > startout)
     {
       /* this case is prohibited */
-      error_msg (progname, "copy_some_to_file: panic: startin > startout?\n");
+      error_msg("copy_some_to_file: panic: startin > startout?\n");
       exit (EXIT_FAILURE);
     }
 
@@ -405,7 +409,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
 
       if (res < 0)
 	{
-	  error_msg (progname, "Can't stat file \n");
+	  error_msg("Can't stat file \n");
 	  exit (EXIT_FAILURE);
 	}
 

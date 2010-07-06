@@ -30,58 +30,11 @@
 
 /* macro definitions */
 
-#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
-( ( (a).version                == (b).version ) &&                \
-  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&     \
-  ( (a).max_size               == (b).max_size ) &&               \
-  ( (a).min_size               == (b).min_size ) &&               \
-  ( (a).epoch_length           == (b).epoch_length ) &&           \
-  ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&     \
-  ( (a).increment              == (b).increment ) &&              \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-  ( (a).max_increment          == (b).max_increment ) &&          \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
-  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
-  ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
-  ( (a).decrement              == (b).decrement ) &&              \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-  ( (a).max_decrement          == (b).max_decrement ) &&          \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( (a).empty_reserve          == (b).empty_reserve ) )
-
-
 /* private function declarations: */
 
 static void check_fapl_mdc_api_calls(void);
 
-static void validate_mdc_config(hid_t file_id,
-                                H5AC_cache_config_t * ext_config_ptr,
-                                hbool_t compare_init,
-                                int test_num);
-
 static void check_file_mdc_api_calls(void);
-
-static void check_and_validate_cache_hit_rate(hid_t file_id,
-                                              double * hit_rate_ptr,
-                                              hbool_t dump_data,
-                                              int64_t min_accesses,
-                                              double min_hit_rate);
-
-static void check_and_validate_cache_size(hid_t file_id,
-                                          size_t * max_size_ptr,
-                                          size_t * min_clean_size_ptr,
-                                          size_t * cur_size_ptr,
-                                          int32_t * cur_num_entries_ptr,
-                                          hbool_t dump_data);
 
 static void mdc_api_call_smoke_check(int express_test);
 
@@ -116,73 +69,6 @@ static void check_file_mdc_api_errs(void);
  *
  *-------------------------------------------------------------------------
  */
-
-#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)       \
-  ( ( (a).version                == (b).version ) &&                 \
-    ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&         \
-    ( (a).open_trace_file        == (b).open_trace_file ) &&         \
-    ( (a).close_trace_file       == (b).close_trace_file ) &&        \
-    ( ( (a).open_trace_file == FALSE ) ||                            \
-      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) && \
-    ( (a).evictions_enabled      == (b).evictions_enabled ) &&       \
-    ( ( ! cmp_set_init ) ||                                          \
-      ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
-    ( ( ! cmp_init_size ) ||                                         \
-      ( (a).initial_size         == (b).initial_size ) ) &&          \
-    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&      \
-    ( (a).max_size               == (b).max_size ) &&                \
-    ( (a).min_size               == (b).min_size ) &&                \
-    ( (a).epoch_length           == (b).epoch_length ) &&            \
-    ( (a).incr_mode              == (b).incr_mode ) &&               \
-    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&      \
-    ( (a).increment              == (b).increment ) &&               \
-    ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
-    ( (a).max_increment          == (b).max_increment ) &&           \
-    ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
-    ( (a).flash_multiple         == (b).flash_multiple ) &&          \
-    ( (a).flash_threshold        == (b).flash_threshold ) &&         \
-    ( (a).decr_mode              == (b).decr_mode ) &&               \
-    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
-    ( (a).decrement              == (b).decrement ) &&               \
-    ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
-    ( (a).max_decrement          == (b).max_decrement ) &&           \
-    ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
-    ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
-    ( (a).empty_reserve          == (b).empty_reserve ) )
-
-#define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
-{                                                                   \
-    (i).version                = H5C__CURR_AUTO_SIZE_CTL_VER;       \
-    if ( (e).rpt_fcn_enabled )                                      \
-        (i).rpt_fcn            = H5C_def_auto_resize_rpt_fcn;       \
-    else                                                            \
-        (i).rpt_fcn            = NULL;                              \
-    (i).set_initial_size       = (e).set_initial_size;              \
-    (i).initial_size           = (e).initial_size;                  \
-    (i).min_clean_fraction     = (e).min_clean_fraction;            \
-    (i).max_size               = (e).max_size;                      \
-    (i).min_size               = (e).min_size;                      \
-    (i).epoch_length           = (long int)((e).epoch_length);      \
-    (i).incr_mode              = (e).incr_mode;                     \
-    (i).lower_hr_threshold     = (e).lower_hr_threshold;            \
-    (i).increment              = (e).increment;                     \
-    (i).apply_max_increment    = (e).apply_max_increment;           \
-    (i).max_increment          = (e).max_increment;                 \
-    (i).flash_incr_mode        = (e).flash_incr_mode;               \
-    (i).flash_multiple         = (e).flash_multiple;                \
-    (i).flash_threshold        = (e).flash_threshold;               \
-    (i).decr_mode              = (e).decr_mode;                     \
-    (i).upper_hr_threshold     = (e).upper_hr_threshold;            \
-    (i).flash_incr_mode        = (e).flash_incr_mode;               \
-    (i).flash_multiple         = (e).flash_multiple;                \
-    (i).flash_threshold        = (e).flash_threshold;               \
-    (i).decrement              = (e).decrement;                     \
-    (i).apply_max_decrement    = (e).apply_max_decrement;           \
-    (i).max_decrement          = (e).max_decrement;                 \
-    (i).epochs_before_eviction = (int)((e).epochs_before_eviction); \
-    (i).apply_empty_reserve    = (e).apply_empty_reserve;           \
-    (i).empty_reserve          = (e).empty_reserve;                 \
-}
 
 static void
 check_fapl_mdc_api_calls(void)
@@ -377,12 +263,12 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(default_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;
-            failure_mssg = "Unexpected value(s) in cache resize_ctl.\n";
+            failure_mssg = "Unexpected value(s) in cache resize_ctl 1.\n";
         }
     }
 
@@ -526,12 +412,12 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(mod_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;
-            failure_mssg = "Unexpected value(s) in cache resize_ctl.\n";
+            failure_mssg = "Unexpected value(s) in cache resize_ctl 2.\n";
         }
     }
 
@@ -605,128 +491,6 @@ check_fapl_mdc_api_calls(void)
                   fcn_name, failure_mssg);
 
 } /* check_fapl_mdc_api_calls() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	validate_mdc_config()
- *
- * Purpose:	Verify that the file indicated by the file_id parameter
- *		has both internal and external configuration matching
- *		*config_ptr.
- *
- *		Do nothin on success.  On failure, set pass to FALSE, and
- *		load an error message into failue_mssg.  Note that
- *		failure_msg is assumed to be at least 128 bytes in length.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              4/14/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-validate_mdc_config(hid_t file_id,
-                    H5AC_cache_config_t * ext_config_ptr,
-                    hbool_t compare_init,
-                    int test_num)
-{
-    /* const char * fcn_name = "validate_mdc_config()"; */
-    static char msg[256];
-    H5F_t * file_ptr = NULL;
-    H5C_t * cache_ptr = NULL;
-    H5AC_cache_config_t scratch;
-    H5C_auto_size_ctl_t int_config;
-
-    XLATE_EXT_TO_INT_MDC_CONFIG(int_config, (*ext_config_ptr))
-
-    /* get a pointer to the files internal data structure */
-    if ( pass ) {
-
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128, "Can't get file_ptr #%d.", test_num);
-            failure_mssg = msg;
-
-        } else {
-
-            cache_ptr = file_ptr->shared->cache;
-        }
-    }
-
-    /* verify that we can access the internal version of the cache config */
-    if ( pass ) {
-
-        if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-             ( cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER ) ){
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "Can't access cache resize_ctl #%d.", test_num);
-            failure_mssg = msg;
-        }
-    }
-
-    /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
-
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(int_config, cache_ptr->resize_ctl,
-                                        compare_init) ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected internal config #%d.", test_num);
-            failure_mssg = msg;
-        }
-    }
-
-    /* obtain external cache config */
-    if ( pass ) {
-
-        scratch.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-
-        if ( H5Fget_mdc_config(file_id, &scratch) < 0 ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "H5Fget_mdc_config() failed #%d.", test_num);
-            failure_mssg = msg;
-        }
-    }
-
-    if ( pass ) {
-
-        /* Recall that in any configuration supplied by the cache
-         * at run time, the set_initial_size field will always
-         * be FALSE, regardless of the value passed in.  Thus we
-         * always presume that this field need not match that of
-         * the supplied external configuration.
-         *
-         * The cache also sets the initial_size field to the current
-         * cache max size instead of the value initialy supplied.
-         * Depending on circumstances, this may or may not match
-         * the original.  Hence the compare_init parameter.
-         */
-        if ( ! CACHE_CONFIGS_EQUAL((*ext_config_ptr), scratch, \
-                                   FALSE, compare_init) ) {
-
-            pass = FALSE;
-            HDsnprintf(msg, (size_t)128,
-                       "Unexpected external config #%d.", test_num);
-            failure_mssg = msg;
-        }
-    }
-
-    return;
-
-} /* validate_mdc_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -1069,282 +833,6 @@ check_file_mdc_api_calls(void)
                   fcn_name, failure_mssg);
 
 } /* check_file_mdc_api_calls() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	check_and_validate_cache_hit_rate()
- *
- * Purpose:	Use the API functions to get and reset the cache hit rate.
- *		Verify that the value returned by the API call agrees with
- *		the cache internal data structures.
- *
- *		If the number of cache accesses exceeds the value provided
- *		in the min_accesses parameter, and the hit rate is less than
- *		min_hit_rate, set pass to FALSE, and set failure_mssg to
- *		a string indicating that hit rate was unexpectedly low.
- *
- *		Return hit rate in *hit_rate_ptr, and print the data to
- *		stdout if requested.
- *
- *		If an error is detected, set pass to FALSE, and set
- *		failure_mssg to an appropriate value.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              4/18/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-check_and_validate_cache_hit_rate(hid_t file_id,
-                                  double * hit_rate_ptr,
-                                  hbool_t dump_data,
-                                  int64_t min_accesses,
-                                  double min_hit_rate)
-{
-    /* const char * fcn_name = "check_and_validate_cache_hit_rate()"; */
-    herr_t result;
-    int64_t cache_hits = 0;
-    int64_t cache_accesses = 0;
-    double expected_hit_rate;
-    double hit_rate;
-    H5F_t * file_ptr = NULL;
-    H5C_t * cache_ptr = NULL;
-
-    /* get a pointer to the files internal data structure */
-    if ( pass ) {
-
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass = FALSE;
-            failure_mssg = "Can't get file_ptr.";
-
-        } else {
-
-            cache_ptr = file_ptr->shared->cache;
-        }
-    }
-
-    /* verify that we can access the cache data structure */
-    if ( pass ) {
-
-        if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.";
-        }
-    }
-
-    /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
-
-        cache_hits     = cache_ptr->cache_hits;
-        cache_accesses = cache_ptr->cache_accesses;
-
-        if ( cache_accesses > 0 ) {
-
-            expected_hit_rate = ((double)cache_hits) / ((double)cache_accesses);
-
-        } else {
-
-            expected_hit_rate = 0.0;
-        }
-
-        result = H5Fget_mdc_hit_rate(file_id, &hit_rate);
-
-        if ( result < 0 ) {
-
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_hit_rate() failed.";
-
-        } else if ( hit_rate != expected_hit_rate ) {
-
-            pass = FALSE;
-            failure_mssg = "unexpected hit rate.";
-        }
-    }
-
-    if ( pass ) { /* reset the hit rate */
-
-        result = H5Freset_mdc_hit_rate_stats(file_id);
-
-        if ( result < 0 ) {
-
-            pass = FALSE;
-            failure_mssg = "H5Freset_mdc_hit_rate_stats() failed.";
-        }
-    }
-
-    /* set *hit_rate_ptr if appropriate */
-    if ( ( pass ) && ( hit_rate_ptr != NULL ) ) {
-
-        *hit_rate_ptr = hit_rate;
-    }
-
-    /* dump data to stdout if requested */
-    if ( ( pass ) && ( dump_data ) ) {
-
-        HDfprintf(stdout,
-                  "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n",
-                  (long)cache_hits, (long)cache_accesses, hit_rate);
-    }
-
-    if ( ( pass ) &&
-         ( cache_accesses > min_accesses ) &&
-         ( hit_rate < min_hit_rate ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Unexpectedly low hit rate.";
-    }
-
-    return;
-
-} /* check_and_validate_cache_hit_rate() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	check_and_validate_cache_size()
- *
- * Purpose:	Use the API function to get the cache size data.  Verify
- *		that the values returned by the API call agree with
- *		the cache internal data structures.
- *
- *		Return size data in the locations specified by the pointer
- *		parameters if these parameters are not NULL.  Print the
- *		data to stdout if requested.
- *
- *		If an error is detected, set pass to FALSE, and set
- *		failure_mssg to an appropriate value.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              4/18/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-check_and_validate_cache_size(hid_t file_id,
-                              size_t * max_size_ptr,
-                              size_t * min_clean_size_ptr,
-                              size_t * cur_size_ptr,
-                              int32_t * cur_num_entries_ptr,
-                              hbool_t dump_data)
-{
-    /* const char * fcn_name = "check_and_validate_cache_size()"; */
-    herr_t result;
-    size_t expected_max_size;
-    size_t max_size;
-    size_t expected_min_clean_size;
-    size_t min_clean_size;
-    size_t expected_cur_size;
-    size_t cur_size;
-    int32_t expected_cur_num_entries;
-    int cur_num_entries;
-    H5F_t * file_ptr = NULL;
-    H5C_t * cache_ptr = NULL;
-
-    /* get a pointer to the files internal data structure */
-    if ( pass ) {
-
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass = FALSE;
-            failure_mssg = "Can't get file_ptr.";
-
-        } else {
-
-            cache_ptr = file_ptr->shared->cache;
-        }
-    }
-
-    /* verify that we can access the cache data structure */
-    if ( pass ) {
-
-        if ( ( cache_ptr == NULL ) ||
-             ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
-
-            pass = FALSE;
-            failure_mssg = "Can't access cache data structure.";
-        }
-    }
-
-    /* compare the cache's internal configuration with the expected value */
-    if ( pass ) {
-
-        expected_max_size        = cache_ptr->max_cache_size;
-        expected_min_clean_size  = cache_ptr->min_clean_size;
-        expected_cur_size        = cache_ptr->index_size;
-        expected_cur_num_entries = cache_ptr->index_len;
-
-        result = H5Fget_mdc_size(file_id,
-                                 &max_size,
-                                 &min_clean_size,
-                                 &cur_size,
-                                 &cur_num_entries);
-
-        if ( result < 0 ) {
-
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() failed.";
-
-        } else if ( ( max_size != expected_max_size ) ||
-                    ( min_clean_size != expected_min_clean_size ) ||
-                    ( cur_size != expected_cur_size ) ||
-                    ( cur_num_entries != (int)expected_cur_num_entries ) ) {
-
-            pass = FALSE;
-            failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).";
-
-        }
-    }
-
-    /* return size values if requested */
-    if ( ( pass ) && ( max_size_ptr != NULL ) ) {
-
-        *max_size_ptr = max_size;
-    }
-
-    if ( ( pass ) && ( min_clean_size_ptr != NULL ) ) {
-
-        *min_clean_size_ptr = min_clean_size;
-    }
-
-    if ( ( pass ) && ( cur_size_ptr != NULL ) ) {
-
-        *cur_size_ptr = cur_size;
-    }
-
-    if ( ( pass ) && ( cur_num_entries_ptr != NULL ) ) {
-
-        *cur_num_entries_ptr = cur_num_entries;
-    }
-
-
-    /* dump data to stdout if requested */
-    if ( ( pass ) && ( dump_data ) ) {
-
-        HDfprintf(stdout,
-                  "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n",
-                  (long)max_size, (long)min_clean_size, (long)cur_size,
-                  (long)cur_num_entries);
-    }
-
-    return;
-
-} /* check_and_validate_cache_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -3424,7 +2912,9 @@ check_fapl_mdc_api_errs(void)
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if  ( pass ) {
 
-        H5E_BEGIN_TRY { result = H5Pget_mdc_config(-1, &scratch); } H5E_END_TRY;
+        H5E_BEGIN_TRY {
+	    result = H5Pget_mdc_config(-1, &scratch);
+	} H5E_END_TRY;
 
         if ( result >= 0 ) {
 

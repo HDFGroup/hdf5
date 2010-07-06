@@ -22,6 +22,7 @@
 
 ./.autom4te.cfg             		_DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini			_DO_NOT_DISTRIBUTE_
+./ACKNOWLEDGMENTS
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
@@ -90,6 +91,7 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/ibm-aix
+./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/irix6.x
@@ -398,12 +400,13 @@
 ./release_docs/HISTORY-1_9.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
-./release_docs/INSTALL_MinGW.txt
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
+./release_docs/CMake.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
 ./release_docs/INSTALL_Windows_Short_NET.TXT
 ./release_docs/INSTALL_Windows_Short_VS2005.TXT
+./release_docs/INSTALL_Windows_Short_VS2008.TXT
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
 
@@ -1228,7 +1231,18 @@
 ./tools/testfiles/textlinksrc-5.ls
 ./tools/testfiles/textlinksrc-6.ls
 ./tools/testfiles/textlinksrc-7.ls
+./tools/testfiles/textlinksrc-1-old.ls
+./tools/testfiles/textlinksrc-2-old.ls
+./tools/testfiles/textlinksrc-3-old.ls
+./tools/testfiles/textlinksrc-6-old.ls
+./tools/testfiles/textlinksrc-7-old.ls
 ./tools/testfiles/textlinktar.h5
+./tools/testfiles/tsoftlinks.h5
+./tools/testfiles/tsoftlinks-1.ls
+./tools/testfiles/tsoftlinks-2.ls
+./tools/testfiles/tsoftlinks-3.ls
+./tools/testfiles/tsoftlinks-4.ls
+./tools/testfiles/tsoftlinks-5.ls
 ./tools/testfiles/tfamily.ddl
 ./tools/testfiles/tfamily00000.h5
 ./tools/testfiles/tfamily00001.h5
@@ -1538,7 +1552,9 @@
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
+./tools/h5diff/testfiles/h5diff_101w.txt
 ./tools/h5diff/testfiles/h5diff_102.txt
+./tools/h5diff/testfiles/h5diff_102w.txt
 ./tools/h5diff/testfiles/h5diff_200.txt
 ./tools/h5diff/testfiles/h5diff_201.txt
 ./tools/h5diff/testfiles/h5diff_202.txt
@@ -1871,6 +1887,66 @@
 ./vms/tools/testfiles/tdset-2.ddl
 ./vms/tools/testfiles/tgroup-2.ddl
 ./vms/tools/testfiles/tperror.ddl
+
+# CMake-specific Files
+./Resources/CMake/FindSZIP.cmake
+./Resources/ConversionTests.c
+./Resources/GetTimeOfDayTest.cpp
+./Resources/HDF5Tests.c
+./Resources/xlatefile.c
+./Resources/CheckTypeSize.cmake
+./Resources/H5cxx_config.h.in
+./Resources/H5pubconf.h.in
+./Resources/hdf5_zlib.h.in
+./Resources/FindHDF5.cmake
+./Resources/HDF5-config.cmake.build.in
+./Resources/HDF5-config.cmake.install.in
+./Resources/HDF5Macros.cmake
+./Resources/libhdf5.settings.cmake.in
+./Resources/cacheinit.cmake
+./Resources/runTest.cmake
+./Resources/CTestCustom.ctest
+./CMakeLists.txt
+./ConfigureChecks.cmake
+./CTestConfig.cmake
+./c++/CMakeLists.txt
+./c++/examples/CMakeLists.txt
+./c++/src/CMakeLists.txt
+./c++/test/CMakeLists.txt
+./examples/CMakeLists.txt
+./fortran/CMakeLists.txt
+./fortran/examples/CMakeLists.txt
+./fortran/src/CMakeLists.txt
+./fortran/test/CMakeLists.txt
+./hl/CMakeLists.txt
+./hl/c++/CMakeLists.txt
+./hl/c++/examples/CMakeLists.txt
+./hl/c++/src/CMakeLists.txt
+./hl/c++/test/CMakeLists.txt
+./hl/examples/CMakeLists.txt
+./hl/fortran/CMakeLists.txt
+./hl/fortran/examples/CMakeLists.txt
+./hl/fortran/src/CMakeLists.txt
+./hl/fortran/test/CMakeLists.txt
+./hl/src/CMakeLists.txt
+./hl/test/CMakeLists.txt
+./hl/tools/CMakeLists.txt
+./perform/CMakeLists.txt
+./src/CMakeLists.txt
+./test/CMakeLists.txt
+./testpar/CMakeLists.txt
+./tools/CMakeLists.txt
+./tools/h5copy/CMakeLists.txt
+./tools/h5diff/CMakeLists.txt
+./tools/h5dump/CMakeLists.txt
+./tools/h5import/CMakeLists.txt
+./tools/h5jam/CMakeLists.txt
+./tools/h5ls/CMakeLists.txt
+./tools/h5repack/CMakeLists.txt
+./tools/h5stat/CMakeLists.txt
+./tools/lib/CMakeLists.txt
+./tools/misc/CMakeLists.txt
+
 
 # Windows-specific Files.
 # Batch scripts

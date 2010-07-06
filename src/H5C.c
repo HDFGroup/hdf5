@@ -32,24 +32,6 @@
  *		For a detailed overview of the cache, please see the
  *		header comment for H5C_t in H5Cpkg.h.
  *
- * Modifications:
- *
- *              QAK - 11/27/2004
- *              Switched over to using skip list routines instead of TBBT
- *              routines.
- *
- *		JRM - 12/15/04
- *		Added code supporting manual and automatic cache resizing.
- *		See the header for H5C_auto_size_ctl_t in H5Cprivate.h for
- *		an overview.
- *
- *		Some elements of the automatic cache resize code depend on
- *		the LRU list.  Thus if we ever choose to support a new
- *		replacement policy, we will either have to disable those
- *		elements of the auto resize code when running the new
- *		policy, or modify them to make use of similar information
- *		maintained by the new policy code.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -62,13 +44,6 @@
  *	 - Remove extra functionality in H5C_flush_single_entry()?
  *
  *	 - Change protect/unprotect to lock/unlock.
- *
- *	 - Change the way the dirty flag is set.  Probably pass it in
- *	   as a parameter in unprotect & insert.
- *
- *	 - Size should also be passed in as a parameter in insert and
- *	   unprotect -- or some other way should be found to advise the
- *	   cache of changes in entry size.
  *
  *	 - Flush entries in increasing address order in
  *	   H5C_make_space_in_cache().
@@ -358,7 +333,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_create
@@ -382,70 +356,12 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/20/04
- *		Updated for the addition of the hash table.
- *
- *		JRM -- 10/5/04
- *		Added call to H5C_reset_cache_hit_rate_stats().  Also
- *		added initialization for cache_is_full flag and for
- *		resize_ctl.
- *
- *		JRM -- 11/12/04
- *		Added initialization for the new size_decreased field.
- *
- *		JRM -- 11/17/04
- *		Added/updated initialization for the automatic cache
- *		size control data structures.
- *
- *		JRM -- 6/24/05
- *		Added support for the new write_permitted field of
- *		the H5C_t structure.
- *
- *		JRM -- 7/5/05
- *		Added the new log_flush parameter and supporting code.
- *
- *		JRM -- 9/21/05
- *		Added the new aux_ptr parameter and supporting code.
- *
- *		JRM -- 1/20/06
- *		Added initialization of the new prefix field in H5C_t.
- *
- *		JRM -- 3/16/06
- *		Added initialization for the pinned entry related fields.
- *
- *		JRM -- 5/31/06
- *		Added initialization for the trace_file_ptr field.
- *
- *		JRM -- 8/19/06
- *		Added initialization for the flush_in_progress field.
- *
- *		JRM -- 8/25/06
- *		Added initialization for the slist_len_increase and
- *		slist_size_increase fields.  These fields are used
- *		for sanity checking in the flush process, and are not
- *		compiled in unless H5C_DO_SANITY_CHECKS is TRUE.
- *
- *		JRM -- 3/28/07
- *		Added initialization for the new is_read_only and
- *		ro_ref_count fields.
- *
- *		JRM -- 7/27/07
- *		Added initialization for the new evictions_enabled
- *		field of H5C_t.
- *
- *		JRM -- 12/31/07
- *		Added initialization for the new flash cache size increase
- *		related fields of H5C_t.
- *
  *		JRM -- 11/5/08
  *              Added initialization for the new clean_index_size and
  *              dirty_index_size fields of H5C_t.
  *
  *-------------------------------------------------------------------------
  */
-
 H5C_t *
 H5C_create(size_t		      max_cache_size,
            size_t		      min_clean_size,
@@ -668,19 +584,6 @@ done:
  *
  * Programmer:  John Mainzer
  *		10/27/04
- *
- * Modifications:
- *
- *		JRM -- 11/22/04
- *		Reworked function to adapt it to the addition of the
- *		ageout method of cache size reduction.
- *
- *		JRM -- 1/19/06
- *		Updated function for display the new prefix field of
- *		H5C_t in output.
- *
- *		JRM 12/31/07
- *              Updated function to handle flash size increases.
  *
  *-------------------------------------------------------------------------
  */
@@ -926,10 +829,6 @@ done:
  * Programmer:  John Mainzer
  *              6/29/06
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1052,77 +951,6 @@ done:
  * Programmer:  John Mainzer
  *		6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/20/04
- *		Modified the function for the addition of the hash table.
- *
- *		JRM -- 11/22/04
- *		Added code to remove all epoch markers (if any) from the
- *		LRU list before a destroy.  Strictly speaking, this isn't
- *		necessary, as the marker entries reside only in the LRU
- *		list, never in the index or in the tree.  However, it
- *		never hurts to tidy up.
- *
- *		JRM -- 1/6/05
- *		Reworked code to support the new
- *		H5C__FLUSH_MARKED_ENTRIES_FLAG, and for the replacement of
- *		H5F_FLUSH_INVALIDATE flag with H5C__FLUSH_INVALIDATE_FLAG.
- *
- *		Note that the H5C__FLUSH_INVALIDATE_FLAG takes precidence
- *		over the H5C__FLUSH_MARKED_ENTRIES_FLAG.  Thus if both are
- *		set, the functions behaves as if just the
- *		H5C__FLUSH_INVALIDATE_FLAG was set.
- *
- *		The H5C__FLUSH_CLEAR_ONLY_FLAG flag can co-exist with
- *		either the H5C__FLUSH_MARKED_ENTRIES_FLAG, or the
- *		H5C__FLUSH_INVALIDATE_FLAG.  In all cases, it is simply
- *		passed along to H5C_flush_single_entry().  In the case of
- *		H5C__FLUSH_MARKED_ENTRIES_FLAG, it will only apply to
- *		the marked entries.
- *
- *		JRM -- 10/15/05
- *		Added code supporting the new
- *		H5C__FLUSH_IGNORE_PROTECTED_FLAG.  We need this flag, as
- *		we now use this function to flush large number of entries
- *		in increasing address order.  We do this by marking the
- *		entries to be flushed, calling this function to flush them,
- *		and then restoring LRU order.
- *
- *		However, it is possible that the cache will contain other,
- *		unmarked protected entries, when we make this call.  This
- *		new flag allows us to ignore them.
- *
- *		Note that even with this flag set, it is still an error
- *		to try to flush a protected entry.
- *
- *		JRM -- 3/25/06
- *		Updated function to handle pinned entries.
- *
- *		JRM -- 8/19/06
- *		Added code managing the new flush_in_progress field of
- *		H5C_t.
- *
- *		Also reworked function to allow for the possibility that
- *		entries will be dirtied, resized, or renamed during flush
- *		callbacks.  As a result, we may have to make multiple
- *		passes through the skip list before the cache is flushed.
- *
- *              JRM -- 10/13/07
- *              Added code to detect and manage the case in which a
- *              flush callback changes the s-list out from under
- *              the function.  The only way I can think of in which this
- *              can happen is if a flush function loads an entry
- *              into the cache that isn't there already.  Quincey tells
- *              me that this will never happen, but I'm not sure I
- *              believe him.
- *
- *              Note that this is a pretty bad scenario if it ever
- *              happens.  The code I have added should allow us to
- *              handle the situation under all but the worst conditions,
- *              but one can argue that I should just scream and die if I
- *              ever detect the condidtion.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1235,7 +1063,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
                  *
                  * To make things more entertaining, with the advent of the
                  * fractal heap, the entry flush callback can cause entries
-                 * to be dirtied, resized, and/or renamed.
+                 * to be dirtied, resized, and/or moved.
                  *
                  * To deal with this, we first make note of the initial
                  * skip list length and size:
@@ -1505,34 +1333,6 @@ done:
  * Programmer:  John Mainzer
  *		9/16/05
  *
- * Modifications:
- *
- *		Re-wrote function to flush dirty entries in increasing
- *		address order, while maintaining LRU order in the LRU list
- *		upon return.
- *
- *		Do this by scanning up the dirty LRU list for entries to
- *		flush to reach min clean size, setting their flush_marker
- *		flags, and recording their addresses in the order
- *		encountered.
- *
- *		Then call H5C_flush_cache() to flush the marked entries.
- *
- *		Finally, use the list of marked entries to force the
- *		correct LRU list order after the flush.
- *
- *						JRM - 10/13/05
- *
- *		This change had the oposite of the desired effect.  Lets
- *		leave it in (albeit commented out for now).  If we can't
- *		find a case where it helps, lets get rid of it.
- *
- *
- *		Added some sanity checks to the change which verify the
- *		expected values of the new is_read_only and ro_ref_count
- *		fields.
- *						JRM - 3/29/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1720,10 +1520,6 @@ done:
  * Programmer:  John Mainzer
  *		10/8/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1769,10 +1565,6 @@ done:
  *
  * Programmer:  John Mainzer
  *		10/8/04
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1832,10 +1624,6 @@ done:
  *
  * Programmer:  John Mainzer
  *		10/7/04
- *
- * Modifications:
- *
- *		None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1897,11 +1685,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              7/1/05
- *
- * Modifications:
- *
- * 		JRM -- 4/26/06
- * 		Added the is_pinned_ptr parameter and supporting code.
  *
  *-------------------------------------------------------------------------
  */
@@ -2001,10 +1784,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              7/27/07
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2123,59 +1902,6 @@ H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
  *
  * Programmer:  John Mainzer
  *		6/2/04
- *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM -- 10/28/04
- *		Added code to set the cache_full flag to TRUE when ever
- *		we need to make space in the cache.
- *
- *		JRM -- 11/22/04
- *		Updated function for the addition of the first_flush_ptr
- *		parameter to H5C_make_space_in_cache().
- *
- *		JRM -- 1/6/05
- *		Added the flags parameter, and code supporting
- *		H5C__SET_FLUSH_MARKER_FLAG.  Note that this flag is
- *		ignored unless the new entry is dirty.
- *
- *		JRM -- 6/6/05
- *		Added code to force all inserted entries to be dirty.
- *		This is part of a set of changes moving management of the
- *		is_dirty field of H5C_cache_entry_t into the H5C code.
- *
- *		JRM -- 6/24/05
- *		Added support for the new write_permitted field of
- *		the H5C_t structure.
- *
- *		JRM -- 3/16/06
- *		Added initialization for the new is_pinned field of the
- *		H5C_cache_entry_t structure.
- *
- *		JRM -- 5/3/06
- *		Added initialization for the new dirtied field of the
- *		H5C_cache_entry_t structure.
- *
- *		JRM -- 8/9/06
- *		Added code supporting insertion of pinned entries.
- *
- *		JRM -- 8/21/06
- *		Added initialization for the new flush_in_progress and
- *		destroy_in_progress fields.
- *
- *		JRM -- 3/29/07
- *		Added initialization for the new is_read_only and
- *		ro_ref_count fields.
- *
- *		JRM -- 8/1/07
- *		Added code to disable evictions when the new
- *		evictions_enabled field is FALSE.
- *
- *		JRM -- 12/31/07
- *		Added code supporting flash cache size increases.
  *
  *		QAK -- 1/31/08
  *		Added initialization for the new free_file_space_on_destroy
@@ -2307,13 +2033,10 @@ H5C_insert_entry(H5F_t *             f,
     /* not protected, so can't be dirtied */
     entry_ptr->dirtied  = FALSE;
 
-    if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
-
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, \
-                    "Can't get size of thing")
-    }
-
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    /* Retrieve the size of the thing */
+    if((type->size)(f, thing, &(entry_ptr->size)) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
+    HDassert(entry_ptr->size > 0 &&  entry_ptr->size < H5C_MAX_ENTRY_SIZE);
 
     entry_ptr->in_slist = FALSE;
 
@@ -2526,20 +2249,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              7/5/05
- *
- * Modifications:
- *
- *		Reworked function to flush entries in LRU order instead
- *		of increasing address order.  The hope is that this will
- *		improve the hit rate on the slave caches.
- *
- *						JRM - 10/13/05
- *
- *		Leave the old code in place for now (commented out) for
- *		benchmarking.
- *
- *		JRM -- 4/13/06
- *		Updated function to deal with pinned entries.
  *
  *-------------------------------------------------------------------------
  */
@@ -2806,119 +2515,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_mark_pinned_entry_dirty
- *
- * Purpose:	Mark a pinned entry as dirty.  The target entry MUST be
- * 		be pinned, and MUST be unprotected.
- *
- * 		If the entry has changed size, the function updates
- * 		data structures for the size change.
- *
- * 		If the entry is not already dirty, the function places
- * 		the entry on the skip list.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              3/22/06
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_mark_pinned_entry_dirty(void *thing, hbool_t size_changed, size_t new_size)
-{
-    H5C_t *             cache_ptr;
-    H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
-    hbool_t		was_clean;
-    size_t		size_increase;
-    herr_t              ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_mark_pinned_entry_dirty, FAIL)
-
-    /* Sanity checks */
-    HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
-    cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    /* Check for usage errors */
-    if(!entry_ptr->is_pinned)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry isn't pinned??")
-    if(entry_ptr->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is protected??")
-
-    /* make note of whether the entry was dirty to begin with */
-    was_clean = ! ( entry_ptr->is_dirty );
-
-    /* mark the entry as dirty if it isn't already */
-    entry_ptr->is_dirty = TRUE;
-
-    /* update for change in entry size if necessary */
-    if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
-
-        /* do a flash cache size increase if appropriate */
-        if ( cache_ptr->flash_size_increase_possible ) {
-
-            if ( new_size > entry_ptr->size ) {
-
-                size_increase = new_size - entry_ptr->size;
-
-                if ( size_increase >=
-                        cache_ptr->flash_size_increase_threshold ) {
-                    if(H5C__flash_increase_cache_size(cache_ptr, entry_ptr->size, new_size) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "flash cache increase failed")
-                }
-            }
-        }
-
-        /* update the pinned entry list */
-        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
-                                        (cache_ptr->pel_size), \
-                                        (entry_ptr->size), (new_size));
-
-        /* update the hash table */
-	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size), \
-                                          (new_size), (entry_ptr), (was_clean));
-
-        /* if the entry is in the skip list, update that too */
-        if ( entry_ptr->in_slist ) {
-
-	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                              (new_size));
-        }
-
-        /* update statistics just before changing the entry size */
-	H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
-                                                (new_size));
-
-	/* finally, update the entry size proper */
-	entry_ptr->size = new_size;
-
-    } else if ( ( was_clean ) && ( entry_ptr->is_dirty ) ) {
-
-        H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
-    }
-
-    if ( ! (entry_ptr->in_slist) ) {
-
-	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-    }
-
-    H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_mark_pinned_entry_dirty() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_mark_pinned_or_protected_entry_dirty
+ * Function:    H5C_mark_entry_dirty
  *
  * Purpose:	Mark a pinned or protected entry as dirty.  The target entry
  * 		MUST be either pinned or protected, and MAY be both.
- *
- * 		At present, this funtion does not support size change.
  *
  * 		In the protected case, this call is the functional
  * 		equivalent of setting the H5C__DIRTIED_FLAG on an unprotect
@@ -2942,13 +2542,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_mark_pinned_or_protected_entry_dirty(void *thing)
+H5C_mark_entry_dirty(void *thing)
 {
     H5C_t *             cache_ptr;
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_mark_pinned_or_protected_entry_dirty, FAIL)
+    FUNC_ENTER_NOAPI(H5C_mark_entry_dirty, FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -2958,9 +2558,8 @@ H5C_mark_pinned_or_protected_entry_dirty(void *thing)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if ( entry_ptr->is_protected ) {
-#if 0 /* JRM - uncomment this when possible */
 	HDassert( ! ((entry_ptr)->is_read_only) );
-#endif
+
         /* set the dirtied flag */
         entry_ptr->dirtied = TRUE;
 
@@ -2992,12 +2591,12 @@ H5C_mark_pinned_or_protected_entry_dirty(void *thing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_mark_pinned_or_protected_entry_dirty() */
+} /* H5C_mark_entry_dirty() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_rename_entry
+ * Function:    H5C_move_entry
  *
  * Purpose:     Use this function to notify the cache that an entry's
  *              file address changed.
@@ -3007,32 +2606,6 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM -- 6/6/05
- *		Updated function to force all renamed entries to be
- *		dirty.  This is part of a series of code modifications
- *		moving management of the is_dirty field of
- *		H5C_cache_entry_t into the H5C code.
- *
- *		JRM -- 4/3/06
- *		Updated function to disallow renaming of pinned entries.
- *
- *		JRM -- 4/27/06
- *		Updated function to support renaming of pinned entries.
- *
- *		JRM -- 8/24/06
- *		Updated function to refrain from altering the index, the
- *		replacement policy data structures, and skip list when
- *              the function is called within the flush callback for the
- *              target entry and the target entry is being destroyed.
- *
- *              Note that in this case H5C_flush_single_entry() will handle
- *              all these details for us.
- *
  *              JRM -- 11/5/08
  *              On review this function looks like no change is needed to
  *              support the new clean_index_size and dirty_index_size
@@ -3041,7 +2614,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_rename_entry(H5C_t *	     cache_ptr,
+H5C_move_entry(H5C_t *	     cache_ptr,
                  const H5C_class_t * type,
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
@@ -3054,7 +2627,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 #endif /* H5C_DO_SANITY_CHECKS */
     herr_t			ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_rename_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_move_entry, FAIL)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
@@ -3084,7 +2657,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
     if ( entry_ptr->is_protected ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
 		    "Target entry is protected.")
     }
 
@@ -3094,12 +2667,12 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
         if ( test_entry_ptr->type == type ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
-                        "Target already renamed & reinserted???.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
+                        "Target already moved & reinserted???.")
 
         } else {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, \
                         "New address already in use?.")
 
         }
@@ -3110,7 +2683,7 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
      * new address, mark it as dirty (if it isn't already) and then re-insert.
      *
      * Update the replacement policy for a hit to avoid an eviction before
-     * the renamed entry is touched.  Update stats for a rename.
+     * the moved entry is touched.  Update stats for a move.
      *
      * Note that we do not check the size of the cache, or evict anything.
      * Since this is a simple re-name, cache size should be unaffected.
@@ -3174,11 +2747,11 @@ H5C_rename_entry(H5C_t *	     cache_ptr,
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
-            H5C__UPDATE_RP_FOR_RENAME(cache_ptr, entry_ptr, was_dirty, FAIL)
+            H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL)
 	}
     }
 
-    H5C__UPDATE_STATS_FOR_RENAME(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)
 
 done:
 
@@ -3192,14 +2765,13 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C_rename_entry() */
+} /* H5C_move_entry() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_resize_pinned_entry
+ * Function:    H5C_resize_entry
  *
- * Purpose:	Resize a pinned entry.  The target entry MUST be
- * 		be pinned, and MUST be unprotected.
+ * Purpose:	Resize a pinned or protected entry.
  *
  * 		Resizing an entry dirties it, so if the entry is not
  * 		already dirty, the function places the entry on the
@@ -3213,15 +2785,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_resize_pinned_entry(void *thing, size_t new_size)
+H5C_resize_entry(void *thing, size_t new_size)
 {
     H5C_t             * cache_ptr;
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
-    size_t             	size_increase;
-    hbool_t		was_clean;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C_resize_pinned_entry, FAIL)
+    FUNC_ENTER_NOAPI(H5C_resize_entry, FAIL)
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -3232,41 +2802,46 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
     /* Check for usage errors */
     if(new_size <= 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "New size is non-positive.")
-    if(!entry_ptr->is_pinned)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry isn't pinned??")
-    if(entry_ptr->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "Entry is protected??")
-
-    /* make note of whether the entry was clean to begin with */
-    was_clean = ! ( entry_ptr->is_dirty );
-
-    /* resizing dirties entries -- mark the entry as dirty if it
-     * isn't already
-     */
-    entry_ptr->is_dirty = TRUE;
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "New size is non-positive.")
+    if(!(entry_ptr->is_pinned || entry_ptr->is_protected))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "Entry isn't pinned or protected??")
 
     /* update for change in entry size if necessary */
     if ( entry_ptr->size != new_size ) {
+        hbool_t		was_clean;
+
+        /* make note of whether the entry was clean to begin with */
+        was_clean = ! ( entry_ptr->is_dirty );
+
+        /* mark the entry as dirty if it isn't already */
+        entry_ptr->is_dirty = TRUE;
 
         /* do a flash cache size increase if appropriate */
         if ( cache_ptr->flash_size_increase_possible ) {
 
             if ( new_size > entry_ptr->size ) {
+                size_t             	size_increase;
 
                 size_increase = new_size - entry_ptr->size;
 
                 if(size_increase >= cache_ptr->flash_size_increase_threshold) {
                     if(H5C__flash_increase_cache_size(cache_ptr, entry_ptr->size, new_size) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "flash cache increase failed")
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "flash cache increase failed")
                 }
             }
         }
 
-        /* update the protected entry list */
-        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
-                                        (cache_ptr->pel_size), \
-                                        (entry_ptr->size), (new_size));
+        /* update the pinned and/or protected entry list */
+        if(entry_ptr->is_pinned) {
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
+                                            (cache_ptr->pel_size), \
+                                            (entry_ptr->size), (new_size))
+        } /* end if */
+        if(entry_ptr->is_protected) {
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
+                                            (cache_ptr->pl_size), \
+                                            (entry_ptr->size), (new_size))
+        } /* end if */
 
         /* update the hash table */
 	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
@@ -3274,10 +2849,9 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 
         /* if the entry is in the skip list, update that too */
         if ( entry_ptr->in_slist ) {
-
 	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
                                               (new_size));
-        }
+        } /* end if */
 
         /* update statistics just before changing the entry size */
 	H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
@@ -3286,22 +2860,18 @@ H5C_resize_pinned_entry(void *thing, size_t new_size)
 	/* finally, update the entry size proper */
 	entry_ptr->size = new_size;
 
-    } else if ( was_clean ) {
+        if(!entry_ptr->in_slist) {
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+        } /* end if */
 
-	H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
-    }
-
-
-    if ( ! (entry_ptr->in_slist) ) {
-
-	H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-    }
-
-    H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+        if(entry_ptr->is_pinned) {
+            H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_resize_pinned_entry() */
+} /* H5C_resize_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -3424,61 +2994,9 @@ done:
  *		check_write_permitted function if it is called.
  *
  * Return:      Success:        Ptr to the desired entry
- *
  *              Failure:        NULL
  *
  * Programmer:  John Mainzer -  6/2/04
- *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated for the addition of the hash table.
- *
- *		JRM -- 10/28/04
- *		Added code to set cache_full to TRUE whenever we try to
- *		make space in the cache.
- *
- *		JRM -- 11/12/04
- *		Added code to call to H5C_make_space_in_cache()
- *		after the call to H5C__auto_adjust_cache_size() if that
- *		function sets the size_decreased flag is TRUE.
- *
- *		JRM -- 4/25/05
- *		The size_decreased flag can also be set to TRUE in
- *		H5C_set_cache_auto_resize_config() if a new configuration
- *		forces an immediate reduction in cache size.  Modified
- *		the code to deal with this eventuallity.
- *
- *		JRM -- 6/24/05
- *		Added support for the new write_permitted field of H5C_t.
- *
- *		JRM -- 10/22/05
- *		Hand optimizations.
- *
- *		JRM -- 5/3/06
- *		Added code to set the new dirtied field in
- *		H5C_cache_entry_t to FALSE prior to return.
- *
- *		JRM -- 6/23/06
- *		Modified code to allow dirty entries to be loaded from
- *		disk.  This is necessary as a bug fix in the object
- *		header code requires us to modify a header as it is read.
- *
- *		JRM -- 3/28/07
- *		Added the flags parameter and supporting code.  At least
- *		for now, this parameter is used to allow the entry to
- *		be protected read only, thus allowing multiple protects.
- *
- * 		Also added code to allow multiple read only protects
- * 		of cache entries.
- *
- * 		JRM -- 7/27/07
- * 		Added code supporting the new evictions_enabled field
- * 		in H5C_t.
- *
- * 		JRM -- 1/3/08
- * 		Added to do a flash cache size increase if appropriate
- * 		when a large entry is loaded.
  *
  * 		JRM -- 11/13/08
  * 		Modified function to call H5C_make_space_in_cache() when
@@ -3919,13 +3437,8 @@ done:
  *
  * Programmer:  John Mainzer, 10/5/04
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr)
 {
@@ -3964,21 +3477,6 @@ done:
  *
  * Programmer:  John Mainzer
  *		10/8/04
- *
- * Modifications:
- *
- *		JRM -- 11/18/04
- *		Reworked function to match major changes in
- *		H5C_auto_size_ctl_t.
- *
- *		JRM -- 4/25/05
- *		Added code to set cache_ptr->size_decreased to TRUE
- *		if the new configuration forces an immediate reduction
- *		in cache size.
- *
- *		JRM -- 12/31/07
- *              Added code supporting the new flash cache size increase
- *              code.
  *
  *-------------------------------------------------------------------------
  */
@@ -4257,10 +3755,6 @@ done:
  * Programmer:  John Mainzer
  *              7/27/07
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4316,11 +3810,8 @@ done:
  * Programmer:  John Mainzer
  *              1/20/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_set_prefix(H5C_t * cache_ptr,
                char * prefix)
@@ -4362,11 +3853,8 @@ done:
  * Programmer:  John Mainzer
  *              6/11/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_set_skip_flags(H5C_t * cache_ptr,
                    hbool_t skip_file_checks,
@@ -4407,11 +3895,8 @@ done:
  * Programmer:  John Mainzer
  *              1/20/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_set_trace_file_ptr(H5C_t * cache_ptr,
                        FILE * trace_file_ptr)
@@ -4446,32 +3931,6 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM -- 9/8/05
- *		Updated function for the addition of cache entry size
- *		change statistics.
- *
- *		JRM -- 1/13/06
- *		Added code to use the prefix field of H5C_t to allow
- *		tagging of statistics output.
- *
- *		JRM -- 3/21/06
- *		Added code supporting the pinned entry related stats.
- *
- *		JRM -- 8/9/06
- *		More code supporting pinned entry related stats.
- *
- *		JRM -- 8/23/06
- *		Added code supporting new flush related statistics.
- *
- *		JRM -- 3/31/07
- *		Added code supporting the new write_protects,
- *		read_protects, and max_read_protects fields.
- *
  *		JRM -- 11/13/08
  *		Added code displaying the max_clean_index_size and
  *		max_dirty_index_size.
@@ -4483,7 +3942,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_stats(H5C_t * cache_ptr,
           const char *  cache_name,
@@ -4507,9 +3965,9 @@ H5C_stats(H5C_t * cache_ptr,
     int64_t     total_clears = 0;
     int64_t     total_flushes = 0;
     int64_t     total_evictions = 0;
-    int64_t     total_renames = 0;
-    int64_t     total_entry_flush_renames = 0;
-    int64_t     total_cache_flush_renames = 0;
+    int64_t     total_moves = 0;
+    int64_t     total_entry_flush_moves = 0;
+    int64_t     total_cache_flush_moves = 0;
     int64_t	total_size_increases = 0;
     int64_t	total_size_decreases = 0;
     int64_t	total_entry_flush_size_changes = 0;
@@ -4560,11 +4018,11 @@ H5C_stats(H5C_t * cache_ptr,
         total_clears            += cache_ptr->clears[i];
         total_flushes           += cache_ptr->flushes[i];
         total_evictions         += cache_ptr->evictions[i];
-        total_renames           += cache_ptr->renames[i];
-	total_entry_flush_renames
-				+= cache_ptr->entry_flush_renames[i];
-	total_cache_flush_renames
-				+= cache_ptr->cache_flush_renames[i];
+        total_moves           += cache_ptr->moves[i];
+	total_entry_flush_moves
+				+= cache_ptr->entry_flush_moves[i];
+	total_cache_flush_moves
+				+= cache_ptr->cache_flush_moves[i];
         total_size_increases    += cache_ptr->size_increases[i];
         total_size_decreases    += cache_ptr->size_decreases[i];
     	total_entry_flush_size_changes
@@ -4720,17 +4178,17 @@ H5C_stats(H5C_t * cache_ptr,
               (long)total_evictions);
 
     HDfprintf(stdout,
-	      "%s  Total insertions(pinned) / renames = %ld(%ld) / %ld\n",
+	      "%s  Total insertions(pinned) / moves = %ld(%ld) / %ld\n",
               cache_ptr->prefix,
               (long)total_insertions,
               (long)total_pinned_insertions,
-              (long)total_renames);
+              (long)total_moves);
 
     HDfprintf(stdout,
-	      "%s  Total entry / cache flush renames  = %ld / %ld\n",
+	      "%s  Total entry / cache flush moves  = %ld / %ld\n",
               cache_ptr->prefix,
-              (long)total_entry_flush_renames,
-              (long)total_cache_flush_renames);
+              (long)total_entry_flush_moves,
+              (long)total_cache_flush_moves);
 
     HDfprintf(stdout, "%s  Total entry size incrs / decrs     = %ld / %ld\n",
               cache_ptr->prefix,
@@ -4849,17 +4307,17 @@ H5C_stats(H5C_t * cache_ptr,
                       (long)(cache_ptr->evictions[i]));
 
             HDfprintf(stdout,
-                      "%s    insertions(pinned) / renames   = %ld(%ld) / %ld\n",
+                      "%s    insertions(pinned) / moves   = %ld(%ld) / %ld\n",
                       cache_ptr->prefix,
                       (long)(cache_ptr->insertions[i]),
                       (long)(cache_ptr->pinned_insertions[i]),
-                      (long)(cache_ptr->renames[i]));
+                      (long)(cache_ptr->moves[i]));
 
             HDfprintf(stdout,
-                      "%s    entry / cache flush renames    = %ld / %ld\n",
+                      "%s    entry / cache flush moves    = %ld / %ld\n",
                       cache_ptr->prefix,
-                      (long)(cache_ptr->entry_flush_renames[i]),
-                      (long)(cache_ptr->cache_flush_renames[i]));
+                      (long)(cache_ptr->entry_flush_moves[i]),
+                      (long)(cache_ptr->cache_flush_moves[i]));
 
             HDfprintf(stdout,
                       "%s    size increases / decreases     = %ld / %ld\n",
@@ -4932,31 +4390,6 @@ done:
  *
  * Programmer:  John Mainzer, 4/28/04
  *
- * Modifications:
- *
- *		JRM - 7/21/04
- *		Updated for hash table related statistics.
- *
- *		JRM - 9/8/05
- *		Updated for size increase / decrease statistics.
- *
- *		JRM - 3/20/06
- *		Updated for pin / unpin related statistics.
- *
- *		JRM - 8/9/06
- *		Further updates for pin related statistics.
- *
- *		JRM 8/23/06
- *		Added initialization code for new flush related statistics.
- *
- *		JRM 2/16/07
- *		Added conditional compile code to avoid unused parameter
- *		warning in the production build.
- *
- *		JRM 3/31/07
- *		Added initialization for the new write_protects,
- *		read_protects, and max_read_protects fields.
- *
  *		JRM 11/13/08
  *		Added initialization for the new max_clean_index_size and
  *		max_dirty_index_size fields.
@@ -4968,7 +4401,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 void
 #ifndef NDEBUG
 H5C_stats__reset(H5C_t * cache_ptr)
@@ -5000,9 +4432,9 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
         cache_ptr->clears[i]			= 0;
         cache_ptr->flushes[i]			= 0;
         cache_ptr->evictions[i]	 		= 0;
-        cache_ptr->renames[i]	 		= 0;
-        cache_ptr->entry_flush_renames[i]	= 0;
-        cache_ptr->cache_flush_renames[i]	= 0;
+        cache_ptr->moves[i]	 		= 0;
+        cache_ptr->entry_flush_moves[i]	= 0;
+        cache_ptr->cache_flush_moves[i]	= 0;
         cache_ptr->pins[i]	 		= 0;
         cache_ptr->unpins[i]	 		= 0;
         cache_ptr->dirty_pins[i]	 	= 0;
@@ -5186,85 +4618,6 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated the function for the addition of the hash table.
- *		In particular, we now add dirty entries to the tree if
- *		they aren't in the tree already.
- *
- *		JRM -- 1/6/05
- *		Added the flags parameter, and code supporting
- *		H5C__SET_FLUSH_MARKER_FLAG.  Note that this flag is
- *		ignored unless the new entry is dirty.  Also note that
- *		once the flush_marker field of an entry is set, the
- *		only way it can be reset is by being flushed.
- *
- *		JRM -- 6/3/05
- *		Added the dirtied parameter and supporting code.  This
- *		is part of an effort to move management of the is_dirty
- *		field into the cache code.  This has become necessary
- *		to repair a cache coherency bug in PHDF5.
- *
- *		JRM -- 7/5/05
- *		Added code supporting the new clear_on_unprotect field
- *		of H5C_cache_entry_t.  This change is also part of the
- *		above mentioned cache coherency bug fix in PHDF5.
- *
- *		JRM -- 9/8/05
- *		Added the size_changed and new_size parameters and the
- *		supporting code.  Since the metadata cache synchronizes
- *		on dirty bytes creation in the PHDF5 case, we must now
- *		track changes in entry size.
- *
- *		Note that the new_size parameter is ignored unless the
- *		size_changed parameter is TRUE.  In this case, the new_size
- *		must be positive.
- *
- *		Also observe that if size_changed is TRUE, dirtied must be
- *		TRUE.
- *
- *		JRM -- 9/23/05
- *		Moved the size_changed parameter into flags.
- *
- *		JRM -- 3/21/06
- *		Unpdated function to pin and unpin entries as directed via
- *		the new H5C__PIN_ENTRY_FLAG and H5C__UNPIN_ENTRY_FLAG flags.
- *
- *		JRM -- 5/3/06
- *		Added code to make use of the new dirtied field in
- *		H5C_cache_entry_t.  If this field is TRUE, it is the
- *		equivalent of setting the H5C__DIRTIED_FLAG.
- *
- *		JRM -- 3/29/07
- *		Modified function to allow a entry to be protected
- *		more than once if the entry is protected read only.
- *
- *		Also added sanity checks using the new is_read_only and
- *		ro_ref_count parameters.
- *
- *		JRM -- 12/31/07
- *		Modified function to support flash cache resizes.
- *
- *		QAK -- 1/31/08
- *		Modified function to support freeing file space in client's
- *              'dest' callback routine.
- *
- *		QAK -- 2/07/08
- *		Separated "destroy entry" concept from "remove entry from
- *              cache" concept, by adding the 'take_ownership' flag.
- *
- *              JRM -- 11/5/08
- *              Added code to update the clean_index_size and
- *              dirty_index_size fields of H5C_t in cases where the
- *              the entry was clean on protect, was marked dirty on
- *              unprotect, and did not change its size.  Do this via
- *              a call to H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY().
- *
- *              If the size changed, this case is already dealt with by
- *              by the pre-existing call to
- *              H5C__UPDATE_INDEX_FOR_SIZE_CHANGE().
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5274,14 +4627,12 @@ H5C_unprotect(H5F_t *		  f,
               const H5C_class_t * type,
               haddr_t		  addr,
               void *		  thing,
-              unsigned int        flags,
-              size_t              new_size)
+              unsigned int        flags)
 {
     H5C_t *		cache_ptr;
     hbool_t		deleted;
     hbool_t		dirtied;
     hbool_t             set_flush_marker;
-    hbool_t		size_changed;
     hbool_t		pin_entry;
     hbool_t		unpin_entry;
     hbool_t		free_file_space;
@@ -5290,8 +4641,6 @@ H5C_unprotect(H5F_t *		  f,
 #ifdef H5_HAVE_PARALLEL
     hbool_t		clear_entry = FALSE;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t              result;
-    size_t              size_increase = 0;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
     herr_t              ret_value = SUCCEED;    /* Return value */
@@ -5301,17 +4650,10 @@ H5C_unprotect(H5F_t *		  f,
     deleted          = ( (flags & H5C__DELETED_FLAG) != 0 );
     dirtied          = ( (flags & H5C__DIRTIED_FLAG) != 0 );
     set_flush_marker = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
-    size_changed     = ( (flags & H5C__SIZE_CHANGED_FLAG) != 0 );
     pin_entry        = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     unpin_entry      = ( (flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
     free_file_space  = ( (flags & H5C__FREE_FILE_SPACE_FLAG) != 0 );
     take_ownership   = ( (flags & H5C__TAKE_OWNERSHIP_FLAG) != 0 );
-
-    /* Changing the size of an entry dirties it.  Thus, set the
-     * dirtied flag if the size_changed flag is set.
-     */
-
-    dirtied |= size_changed;
 
     HDassert( f );
     HDassert( f->shared );
@@ -5326,9 +4668,6 @@ H5C_unprotect(H5F_t *		  f,
     HDassert( type->flush );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
-    HDassert( ( size_changed == TRUE ) || ( size_changed == FALSE ) );
-    HDassert( ( ! size_changed ) || ( dirtied ) );
-    HDassert( ( ! size_changed ) || ( new_size > 0 ) );
     HDassert( ! ( pin_entry && unpin_entry ) );
     HDassert( ( ! free_file_space ) || ( deleted ) );   /* deleted flag must accompany free_file_space */
     HDassert( ( ! take_ownership ) || ( deleted ) );    /* deleted flag must accompany take_ownership */
@@ -5440,58 +4779,7 @@ H5C_unprotect(H5F_t *		  f,
         /* mark the entry as dirty if appropriate */
         entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
 
-        /* update for change in entry size if necessary */
-        if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
-
-            /* do a flash cache size increase if appropriate */
-            if ( cache_ptr->flash_size_increase_possible ) {
-
-                if ( new_size > entry_ptr->size ) {
-
-                    size_increase = new_size - entry_ptr->size;
-
-                    if ( size_increase >=
-                         cache_ptr->flash_size_increase_threshold ) {
-
-                        result = H5C__flash_increase_cache_size(cache_ptr,
-                                                              entry_ptr->size,
-                                                              new_size);
-
-                        if ( result < 0 ) {
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                                     "H5C__flash_increase_cache_size failed.")
-                        }
-                    }
-                }
-            }
-
-            /* update the protected list */
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
-                                            (cache_ptr->pl_size), \
-                                            (entry_ptr->size), (new_size));
-
-            /* update the hash table */
-	    H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size), \
-                                              (new_size), (entry_ptr), \
-					      (was_clean));
-
-            /* if the entry is in the skip list, update that too */
-            if ( entry_ptr->in_slist ) {
-
-	        H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), \
-				                  (entry_ptr->size),\
-                                                  (new_size));
-            }
-
-            /* update statistics just before changing the entry size */
-	    H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
-                                                    (new_size));
-
-	    /* finally, update the entry size proper */
-	    entry_ptr->size = new_size;
-
-        } else if ( ( was_clean ) && ( entry_ptr->is_dirty ) ) {
+        if ( ( was_clean ) && ( entry_ptr->is_dirty ) ) {
 
 	    H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
 	}
@@ -5511,8 +4799,8 @@ H5C_unprotect(H5F_t *		  f,
 
         }
 
-        /* H5C__UPDATE_RP_FOR_UNPROTECT will places the unprotected entry on
-         * the pinned entry list if entry_ptr->is_pined is TRUE.
+        /* H5C__UPDATE_RP_FOR_UNPROTECT will place the unprotected entry on
+         * the pinned entry list if entry_ptr->is_pinned is TRUE.
          */
         H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 
@@ -5663,15 +4951,8 @@ done:
  * Programmer:  John Mainzer
  *              3/23/05
  *
- * Modifications:
- *
- *		Added validation for the flash increment fields.
- *
- *                                              JRM -- 12/31/07
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
                            unsigned int tests)
@@ -6281,16 +5562,6 @@ done:
  *
  * Programmer:  John Mainzer, 10/7/04
  *
- * Modifications:
- *
- *		JRM -- 11/18/04
- *		Major re-write to support ageout method of cache size
- *		reduction, and to adjust to changes in the
- *		H5C_auto_size_ctl_t structure.
- *
- *		JRM -- 1/5/08
- *              Added support for flash cache size increases.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6644,10 +5915,6 @@ done:
  *
  * Programmer:  John Mainzer, 11/18/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6770,13 +6037,8 @@ done:
  *
  * Programmer:  John Mainzer, 11/22/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t * cache_ptr)
 {
@@ -6901,23 +6163,6 @@ done:
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 11/22/04
- *
- * Modifications:
- *
- *              JRM -- 10/13/07
- *              Added code to detect and manage the case in which a
- *              flush callback changes the LRU-list out from under
- *              the function.  The only way I can think of in which this
- *              can happen is if a flush function loads an entry
- *              into the cache that isn't there already.  Quincey tells
- *              me that this will never happen, but I'm not sure I
- *              believe him.
- *
- *              Note that this is a pretty bad scenario if it ever
- *              happens.  The code I have added should allow us to
- *              handle the situation under all but the worst conditions,
- *              but one can argue that I should just scream and die if I
- *              ever detect the condidtion.
  *
  *-------------------------------------------------------------------------
  */
@@ -7137,13 +6382,8 @@ done:
  *
  * Programmer:  John Mainzer, 11/19/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5C__autoadjust__ageout__insert_new_marker(H5C_t * cache_ptr)
 {
@@ -7219,13 +6459,8 @@ done:
  *
  * Programmer:  John Mainzer, 11/22/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5C__autoadjust__ageout__remove_all_markers(H5C_t * cache_ptr)
 {
@@ -7305,13 +6540,8 @@ done:
  *
  * Programmer:  John Mainzer, 11/19/04
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
 H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr)
 {
@@ -7398,10 +6628,6 @@ done:
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 12/31/07
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -7588,30 +6814,6 @@ done:
  * Programmer:  John Mainzer
  *		3/24/065
  *
- * Modifications:
- *
- *		To support the fractal heap, the cache must now deal with
- *		entries being dirtied, resized, and/or renamed inside
- *		flush callbacks.  Updated function to support this.
- *
- *		                                     -- JRM 8/27/06
- *
- *              Added code to detect and manage the case in which a
- *              flush callback changes the s-list out from under
- *              the function.  The only way I can think of in which this
- *              can happen is if a flush function loads an entry
- *              into the cache that isn't there already.  Quincey tells
- *              me that this will never happen, but I'm not sure I
- *              believe him.
- *
- *              Note that this is a pretty bad scenario if it ever
- *              happens.  The code I have added should allow us to
- *              handle the situation under all but the worst conditions,
- *              but one can argue that I should just scream and die if I
- *              ever detect the condidtion.
- *
- *                                                      -- JRM 10/13/07
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7672,14 +6874,14 @@ H5C_flush_invalidate_cache(H5F_t * f,
      * unpin themselves, or until the number of pinned entries stops
      * declining.  In this later case, we scream and die.
      *
-     * Since the fractal heap can dirty, resize, and/or rename entries
+     * Since the fractal heap can dirty, resize, and/or move entries
      * in is flush callback, it is possible that the cache will still
      * contain dirty entries at this point.  If so, we must make up to
      * H5C__MAX_PASSES_ON_FLUSH more passes through the skip list
      * to allow it to empty.  If is is not empty at this point, we again
      * scream and die.
      *
-     * Further, since clean entries can be dirtied, resized, and/or renamed
+     * Further, since clean entries can be dirtied, resized, and/or moved
      * as the result of a flush call back (either the entries own, or that
      * for some other cache entry), we can no longer promise to flush
      * the cache entries in increasing address order.
@@ -7748,7 +6950,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
             initial_slist_size = cache_ptr->slist_size;
 
             /* There is also the possibility that entries will be
-             * dirtied, resized, and/or renamed as the result of
+             * dirtied, resized, and/or moved as the result of
              * calls to the flush callbacks.  We use the slist_len_increase
              * and slist_size_increase increase fields in struct H5C_t
              * to track these changes for purpose of sanity checking.
@@ -8167,58 +7369,6 @@ done:
  *
  * Programmer:  John Mainzer, 5/5/04
  *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		QAK -- 11/26/04
- *		Updated function for the switch from TBBTs to skip lists.
- *
- *		JRM -- 1/6/05
- *		Updated function to reset the flush_marker field.
- *		Also replace references to H5F_FLUSH_INVALIDATE and
- *		H5F_FLUSH_CLEAR_ONLY with references to
- *		H5C__FLUSH_INVALIDATE_FLAG and H5C__FLUSH_CLEAR_ONLY_FLAG
- *		respectively.
- *
- *		JRM -- 6/24/05
- *		Added code to remove dirty entries from the slist after
- *		they have been flushed.  Also added a sanity check that
- *		will scream if we attempt a write when writes are
- *		completely disabled.
- *
- *		JRM -- 7/5/05
- *		Added code to call the new log_flush callback whenever
- *		a dirty entry is written to disk.  Note that the callback
- *		is not called if the H5C__FLUSH_CLEAR_ONLY_FLAG is set,
- *		as there is no write to file in this case.
- *
- *		JRM -- 8/21/06
- *		Added code maintaining the flush_in_progress and
- *		destroy_in_progress fields in H5C_cache_entry_t.
- *
- *		Also added flush_flags parameter to the call to
- *		type_ptr->flush() so that the flush routine can report
- *		whether the entry has been resized or renamed.  Added
- *		code using the flush_flags variable to detect the case
- *		in which the target entry is resized during flush, and
- *		update the caches data structures accordingly.
- *
- *		JRM -- 3/29/07
- *		Added sanity checks on the new is_read_only and
- *		ro_ref_count fields.
- *
- *		QAK -- 2/07/08
- *		Separated "destroy entry" concept from "remove entry from
- *              cache" concept, by adding the 'take_ownership' flag and
- *              the "destroy_entry" variable.
- *
- *              JRM -- 11/5/08
- *              Added call to H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN() to
- *              maintain the new clean_index_size and clean_index_size
- *              fields of H5C_t.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8397,8 +7547,8 @@ H5C_flush_single_entry(H5F_t *	   	   f,
          * We must do deletions now as the callback routines will free the
          * entry if destroy is true.
 	 *
-	 * Note that it is possible that the entry will be renamed during
-	 * its call to flush.  This will upset H5C_rename_entry() if we
+	 * Note that it is possible that the entry will be moved during
+	 * its call to flush.  This will upset H5C_move_entry() if we
 	 * don't tell it that it doesn't have to worry about updating the
 	 * index and SLIST.  Use the destroy_in_progress field for this
 	 * purpose.
@@ -8641,9 +7791,9 @@ H5C_flush_single_entry(H5F_t *	   	   f,
 		 * change this test accordingly.
 		 *
 		 * NB: While this test detects entryies that attempt
-		 *     to resize or rename themselves during a flush
+		 *     to resize or move themselves during a flush
 		 *     in the parallel case, it will not detect an
-		 *     entry that dirties, resizes, and/or renames
+		 *     entry that dirties, resizes, and/or moves
 		 *     other entries during its flush.
 		 *
 		 *     From what Quincey tells me, this test is
@@ -8656,7 +7806,7 @@ H5C_flush_single_entry(H5F_t *	   	   f,
 		if ( cache_ptr->aux_ptr != NULL ) {
 
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		        "resize/rename in serialize occured in parallel case.")
+		        "resize/move in serialize occured in parallel case.")
 
 		}
 	    }
@@ -8741,9 +7891,9 @@ H5C_flush_single_entry(H5F_t *	   	   f,
 		}
 	    }
 
-	    if ( (flush_flags & H5C_CALLBACK__RENAMED_FLAG) != 0 ) {
+	    if ( (flush_flags & H5C_CALLBACK__MOVED_FLAG) != 0 ) {
 
-		/* The entry was renamed as the result of the flush.
+		/* The entry was moved as the result of the flush.
 		 *
 		 * Most likely, the entry was compressed, and the
 		 * new version is larger than the old and thus had
@@ -8795,25 +7945,6 @@ done:
  *
  * Programmer:  John Mainzer, 5/18/04
  *
- * Modifications:
- *
- *		JRM - 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM - 6/23/06
- *		Deleted assertion that verified that a newly loaded
- *		entry is clean.  Due to a bug fix, this need not be
- *		the case, as our code will attempt to repair errors
- *		on load.
- *
- *		JRM - 8/21/06
- *		Added initialization for the new flush_in_progress and
- *		destroy in progress fields.
- *
- *		JRM - 3/29/07
- *		Added initialization for the new is_read_only and
- *		ro_ref_count fields.
- *
  *		QAK -- 1/31/08
  *		Added initialization for the new free_file_space_on_destroy
  *		field.
@@ -8832,29 +7963,28 @@ H5C_load_entry(H5F_t *             f,
                hbool_t UNUSED	   skip_file_checks)
 #endif /* NDEBUG */
 {
-    void *		thing = NULL;
-    H5C_cache_entry_t *	entry_ptr = NULL;
-    unsigned            u;                      /* Local index variable */
-    void *		ret_value = NULL;       /* Return value */
+    void *		thing = NULL;   /* Pointer to thing loaded */
+    H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
+    unsigned            u;              /* Local index variable */
+    void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
 
-    HDassert( f );
-    HDassert( f->shared );
-    HDassert( f->shared->cache );
-    HDassert( skip_file_checks || f );
-    HDassert( type );
-    HDassert( type->load );
-    HDassert( type->size );
-    HDassert( H5F_addr_defined(addr) );
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert(skip_file_checks || f);
+    HDassert(type);
+    HDassert(type->load);
+    HDassert(type->size);
+    HDassert(H5F_addr_defined(addr));
 
-    if ( NULL == (thing = (type->load)(f, dxpl_id, addr, udata)) ) {
+    if(NULL == (thing = (type->load)(f, dxpl_id, addr, udata)))
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load entry")
 
-    }
 
-    entry_ptr = (H5C_cache_entry_t *)thing;
+    entry = (H5C_cache_entry_t *)thing;
 
     /* In general, an entry should be clean just after it is loaded.
      *
@@ -8865,11 +7995,11 @@ H5C_load_entry(H5F_t *             f,
      *
      * To support this bug fix, I have replace the old assert:
      *
-     * 	HDassert( entry_ptr->is_dirty == FALSE );
+     * 	HDassert( entry->is_dirty == FALSE );
      *
      * with:
      *
-     * 	HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
+     * 	HDassert( ( entry->is_dirty == FALSE ) || ( type->id == 5 ) );
      *
      * Note that type id 5 is associated with object headers in the metadata
      * cache.
@@ -8879,56 +8009,52 @@ H5C_load_entry(H5F_t *             f,
      * metadata cache.
      */
 
-    HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 5 ) );
+    HDassert( ( entry->is_dirty == FALSE ) || ( type->id == 5 ) );
 #ifndef NDEBUG
-    entry_ptr->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
+    entry->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
-    entry_ptr->cache_ptr            = f->shared->cache;
-    entry_ptr->addr                 = addr;
-    entry_ptr->type                 = type;
-    entry_ptr->is_protected         = FALSE;
-    entry_ptr->is_read_only         = FALSE;
-    entry_ptr->ro_ref_count         = 0;
-    entry_ptr->in_slist             = FALSE;
-    entry_ptr->flush_marker         = FALSE;
+    entry->cache_ptr            = f->shared->cache;
+    entry->addr                 = addr;
+    entry->type                 = type;
+    entry->is_protected         = FALSE;
+    entry->is_read_only         = FALSE;
+    entry->ro_ref_count         = 0;
+    entry->in_slist             = FALSE;
+    entry->flush_marker         = FALSE;
 #ifdef H5_HAVE_PARALLEL
-    entry_ptr->clear_on_unprotect   = FALSE;
+    entry->clear_on_unprotect   = FALSE;
 #endif /* H5_HAVE_PARALLEL */
-    entry_ptr->flush_in_progress    = FALSE;
-    entry_ptr->destroy_in_progress  = FALSE;
-    entry_ptr->free_file_space_on_destroy = FALSE;
+    entry->flush_in_progress    = FALSE;
+    entry->destroy_in_progress  = FALSE;
+    entry->free_file_space_on_destroy = FALSE;
 
-    if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
+    if((type->size)(f, thing, &(entry->size)) < 0)
 
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, \
-                    "Can't get size of thing")
-    }
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, NULL, "Can't get size of thing")
 
-    HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+    HDassert( entry->size < H5C_MAX_ENTRY_SIZE );
 
     /* Initialize flush dependency height fields */
-    entry_ptr->flush_dep_parent = NULL;
+    entry->flush_dep_parent = NULL;
     for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++)
-        entry_ptr->child_flush_dep_height_rc[u] = 0;
-    entry_ptr->flush_dep_height = 0;
+        entry->child_flush_dep_height_rc[u] = 0;
+    entry->flush_dep_height = 0;
+    entry->ht_next              = NULL;
+    entry->ht_prev              = NULL;
 
-    entry_ptr->ht_next = NULL;
-    entry_ptr->ht_prev = NULL;
+    entry->next                 = NULL;
+    entry->prev                 = NULL;
 
-    entry_ptr->next                 = NULL;
-    entry_ptr->prev                 = NULL;
+    entry->aux_next             = NULL;
+    entry->aux_prev             = NULL;
 
-    entry_ptr->aux_next             = NULL;
-    entry_ptr->aux_prev             = NULL;
-
-    H5C__RESET_CACHE_ENTRY_STATS(entry_ptr);
+    H5C__RESET_CACHE_ENTRY_STATS(entry);
 
     ret_value = thing;
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_load_entry() */
 
 
@@ -8964,44 +8090,6 @@ done:
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 5/14/04
- *
- * Modifications:
- *
- *		JRM --7/21/04
- *		Minor modifications in support of the addition of a hash
- *		table to facilitate lookups.
- *
- *		JRM -- 11/22/04
- *		Added the first_flush_ptr parameter, which replaces the
- *		old first_flush local variable.  This allows the function
- *		to coordinate on the first flush issue with other functions.
- *
- *		JRM -- 12/13/04
- *		Added code to skip over epoch markers if present.
- *
- *		JRM -- 1/3/06
- *		Modified function to work correctly when the the cache
- *		is not full.  This case occurs when we need to flush to
- *		min clean size before the cache has filled.
- *
- *		JRM -- 3/29/07
- *		Added sanity checks using the new is_read_only and
- *		ro_ref_count fields.
- *
- *              JRM -- 10/13/07
- *              Added code to detect and manage the case in which a
- *              flush callback changes the LRU-list out from under
- *              the function.  The only way I can think of in which this
- *              can happen is if a flush function loads an entry
- *              into the cache that isn't there already.  Quincey tells
- *              me that this will never happen, but I'm not sure I
- *              believe him.
- *
- *              Note that this is a pretty bad scenario if it ever
- *              happens.  The code I have added should allow us to
- *              handle the situation under all but the worst conditions,
- *              but one can argue that I should just scream and die if I
- *              ever detect the condidtion.
  *
  *              JRM -- 11/13/08
  *              Modified function to always observe the min_clean_size
@@ -9335,11 +8423,8 @@ done:
  *
  * Programmer:  John Mainzer, 7/14/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 #if H5C_DO_EXTREME_SANITY_CHECKS
 
 static herr_t
@@ -9458,11 +8543,8 @@ done:
  *
  * Programmer:  John Mainzer, 7/14/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 #if H5C_DO_EXTREME_SANITY_CHECKS
 
 static herr_t

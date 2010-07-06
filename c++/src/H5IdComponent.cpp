@@ -161,6 +161,10 @@ H5I_type_t IdComponent::getHDFObjType(const hid_t obj_id)
 //		copy the id from rhs to this object, and increment the
 //		reference counter of the id to indicate that another object
 //		is referencing that id.
+// Modification
+//	2010/5/9 - BMR
+//		Removed close() and incRefCount() because setId/p_setId takes
+//		care of close() and setId takes care incRefCount().
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
@@ -169,16 +173,13 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
     {
 	// handling references to this id
   	try {
-	    close();
+	    setId(rhs.getId());
+	    // Note: a = b, so there are two objects with the same hdf5 id
+	    // that's why incRefCount is needed, and it is called by setId
 	}
 	catch (Exception close_error) {
 	    throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
 	}
-
-	// copy the data members from the rhs object
-	p_setId(rhs.getId());
-	incRefCount(getId()); // a = b, so there are two objects with the same
-			      // hdf5 id
     }
     return *this;
 }
@@ -190,9 +191,8 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///		object fails
 // Description:
-//		The underlaying reference counting in the C library ensures
-//		that the current valid id of this object is properly closed.
-//		Then the object's id is reset to the new id.
+//		p_setId ensures that the current valid id of this object is
+//		properly closed before resetting the object's id to the new id.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //	2008/7/23 - BMR

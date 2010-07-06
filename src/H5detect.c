@@ -119,9 +119,9 @@ static volatile int	nd_g = 0, na_g = 0;
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
 static int byte_cmp(int, const void *, const void *);
-static int bit_cmp(int, int *, void *, void *);
+static int bit_cmp(int, int *, volatile void *, volatile void *);
 static void fix_order(int, int, int, int *, const char **);
-static int imp_bit(int, int *, void *, void *);
+static int imp_bit(int, int *, volatile void *, volatile void *);
 static unsigned long find_bias(int, int, int *, void *);
 static void precision (detected_t*);
 static void print_header(void);
@@ -278,6 +278,9 @@ precision (detected_t *d)
  *		location, exponent location, sign bit location, presence or
  *		absence of implicit mantissa bit, and exponent bias and
  *		initializes a detected_t structure with those properties.
+ *
+ * Note:	'volatile' is used for the variables below to prevent the
+ *		compiler from optimizing them away.
  *
  * Return:	void
  *
@@ -927,11 +930,11 @@ byte_cmp(int n, const void *_a, const void *_b)
  *-------------------------------------------------------------------------
  */
 static int
-bit_cmp(int nbytes, int *perm, void *_a, void *_b)
+bit_cmp(int nbytes, int *perm, volatile void *_a, volatile void *_b)
 {
     int			i, j;
-    unsigned char	*a = (unsigned char *) _a;
-    unsigned char	*b = (unsigned char *) _b;
+    volatile unsigned char	*a = (volatile unsigned char *) _a;
+    volatile unsigned char	*b = (volatile unsigned char *) _b;
     unsigned char	aa, bb;
 
     for (i = 0; i < nbytes; i++) {
@@ -1048,10 +1051,10 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
  *-------------------------------------------------------------------------
  */
 static int
-imp_bit(int n, int *perm, void *_a, void *_b)
+imp_bit(int n, int *perm, volatile void *_a, volatile void *_b)
 {
-    unsigned char	*a = (unsigned char *) _a;
-    unsigned char	*b = (unsigned char *) _b;
+    volatile unsigned char	*a = (volatile unsigned char *) _a;
+    volatile unsigned char	*b = (volatile unsigned char *) _b;
     int			changed, major, minor;
     int			msmb;	/*most significant mantissa bit */
 
