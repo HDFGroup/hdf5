@@ -186,6 +186,17 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (textlinksrc-6-old 0 -w80 -E textlinksrc.h5)
   ADD_H5_TEST (textlinksrc-7-old 0 -w80 -E textlinksrc.h5/ext_link1)
 
+  # tests for no-dangling-links 
+  # if this option is given on dangling link, h5ls should return exit code 1
+  # when used alone , expect to print out help and return exit code 1
+  ADD_H5_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)
+  # external dangling link - expected exit code 1
+  ADD_H5_TEST (textlinksrc-nodangle-2 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
+  # soft dangling link - expected exit code 1
+  ADD_H5_TEST (tsoftlinks-nodangle-1 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5)
+  # when used file with no dangling links - expected exit code 0
+  ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
+
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
 

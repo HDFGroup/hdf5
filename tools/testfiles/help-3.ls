@@ -3,28 +3,38 @@
 #############################
 usage: h5ls [OPTIONS] [OBJECTS...]
   OPTIONS
-   -h, -?, --help     Print a usage message and exit
-   -a, --address      Print addresses for raw data
-   -d, --data         Print the values of datasets
-   -e, --errors       Show all HDF5 error reporting
-   --follow-symlinks  Follow symbolic links (soft links and external links)
-                      to display target object information.
-                      Without this option, h5ls identifies a symbolic link
-                      as a soft link or external link and prints the value
-                      assigned to the symbolic link; it does not provide any
-                      information regarding the target object or determine
-                      whether the link is a dangling link.
-   -f, --full         Print full path names instead of base names
-   -g, --group        Show information about a group, not its contents
-   -l, --label        Label members of compound datasets
-   -r, --recursive    List all groups recursively, avoiding cycles
-   -s, --string       Print 1-byte integer datasets as ASCII
-   -S, --simple       Use a machine-readable output format
-   -wN, --width=N     Set the number of columns of output
-   -v, --verbose      Generate more verbose output
-   -V, --version      Print version number and exit
-   --vfd=DRIVER       Use the specified virtual file driver
-   -x, --hexdump      Show raw data in hexadecimal format
+   -h, -?, --help  Print a usage message and exit
+   -a, --address   Print addresses for raw data
+   -d, --data      Print the values of datasets
+   -e, --errors    Show all HDF5 error reporting
+   --follow-symlinks
+                   Follow symbolic links (soft links and external links)
+                   to display target object information.
+                   Without this option, h5ls identifies a symbolic link
+                   as a soft link or external link and prints the value
+                   assigned to the symbolic link; it does not provide any
+                   information regarding the target object or determine
+                   whether the link is a dangling link.
+   --no-dangling-links
+                   Must be used with --follow-symlinks option;
+                   otherwise, h5ls shows error message and returns an exit
+                   code of 1. 
+                   Check for any symbolic links (soft links or external links)
+                   that do not resolve to an existing object (dataset, group,
+                   or named datatype).
+                   If any dangling link is found, this situation is treated
+                   as an error and h5ls returns an exit code of 1.
+   -f, --full      Print full path names instead of base names
+   -g, --group     Show information about a group, not its contents
+   -l, --label     Label members of compound datasets
+   -r, --recursive List all groups recursively, avoiding cycles
+   -s, --string    Print 1-byte integer datasets as ASCII
+   -S, --simple    Use a machine-readable output format
+   -wN, --width=N  Set the number of columns of output
+   -v, --verbose   Generate more verbose output
+   -V, --version   Print version number and exit
+   --vfd=DRIVER    Use the specified virtual file driver
+   -x, --hexdump   Show raw data in hexadecimal format
 
   OBJECTS
     Each object consists of an HDF5 file name optionally followed by a
