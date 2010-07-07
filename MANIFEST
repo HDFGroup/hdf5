@@ -1368,6 +1368,7 @@
 ./tools/testfiles/tdataregbe.ls
 ./tools/testfiles/tarray1.ls
 ./tools/testfiles/tempty.ls
+./tools/testfiles/thlink-1.ls
 ./tools/testfiles/tslink-1.ls
 ./tools/testfiles/textlink-1.ls
 ./tools/testfiles/textlinksrc-1.ls
