@@ -199,6 +199,17 @@ rem ############################################################################
     call :tooltest textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
     call :tooltest textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
 
+    rem tests for no-dangling-links 
+    rem if this option is given on dangling link, h5ls should return exit code 1
+    rem when used alone , expect to print out help and return exit code 1
+    call :tooltest textlinksrc-nodangle-1.ls 1 -w80 --no-dangling-links textlinksrc.h5
+    rem external dangling link - expected exit code 1
+    call :tooltest textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5
+    rem soft dangling link - expected exit code 1
+    call :tooltest tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
+    rem when used file with no dangling links - expected exit code 0
+    call :tooltest thlinks-nodangle-1.ls 0 -w80 --follow-symlinks --no-dangling-links thlink.h5
+
     rem tests for hard links
     call :tooltest thlink-1.ls 0 -w80 thlink.h5
 

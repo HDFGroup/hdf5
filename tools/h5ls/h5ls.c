@@ -43,6 +43,7 @@ typedef struct symlink_trav_t {
         char *file;
         char *path;
     } *objs;
+    hbool_t dangle_link;
 } symlink_trav_t;
 
 /* Struct to pass through to visitors */
@@ -66,6 +67,7 @@ static hbool_t  string_g = FALSE;         /* print 1-byte numbers as ASCII? */
 static hbool_t  fullname_g = FALSE;       /* print full path names */
 static hbool_t  recursive_g = FALSE;      /* recursive descent listing */
 static hbool_t  follow_symlink_g = FALSE; /* follow symbolic links */
+static hbool_t  no_dangling_link_g = FALSE; /* treat dangling link is error */
 static hbool_t  follow_elink_g = FALSE;   /* follow external links */
 static hbool_t  grp_literal_g = FALSE;    /* list group, not contents */
 static hbool_t  hexdump_g = FALSE;        /* show data as raw hexadecimal */
@@ -114,28 +116,38 @@ usage (void)
     fprintf(stderr, "\
 usage: %s [OPTIONS] [OBJECTS...]\n\
   OPTIONS\n\
-   -h, -?, --help     Print a usage message and exit\n\
-   -a, --address      Print addresses for raw data\n\
-   -d, --data         Print the values of datasets\n\
-   -e, --errors       Show all HDF5 error reporting\n\
-   --follow-symlinks  Follow symbolic links (soft links and external links)\n\
-                      to display target object information.\n\
-                      Without this option, h5ls identifies a symbolic link\n\
-                      as a soft link or external link and prints the value\n\
-                      assigned to the symbolic link; it does not provide any\n\
-                      information regarding the target object or determine\n\
-                      whether the link is a dangling link.\n\
-   -f, --full         Print full path names instead of base names\n\
-   -g, --group        Show information about a group, not its contents\n\
-   -l, --label        Label members of compound datasets\n\
-   -r, --recursive    List all groups recursively, avoiding cycles\n\
-   -s, --string       Print 1-byte integer datasets as ASCII\n\
-   -S, --simple       Use a machine-readable output format\n\
-   -wN, --width=N     Set the number of columns of output\n\
-   -v, --verbose      Generate more verbose output\n\
-   -V, --version      Print version number and exit\n\
-   --vfd=DRIVER       Use the specified virtual file driver\n\
-   -x, --hexdump      Show raw data in hexadecimal format\n\
+   -h, -?, --help  Print a usage message and exit\n\
+   -a, --address   Print addresses for raw data\n\
+   -d, --data      Print the values of datasets\n\
+   -e, --errors    Show all HDF5 error reporting\n\
+   --follow-symlinks\n\
+                   Follow symbolic links (soft links and external links)\n\
+                   to display target object information.\n\
+                   Without this option, h5ls identifies a symbolic link\n\
+                   as a soft link or external link and prints the value\n\
+                   assigned to the symbolic link; it does not provide any\n\
+                   information regarding the target object or determine\n\
+                   whether the link is a dangling link.\n\
+   --no-dangling-links\n\
+                   Must be used with --follow-symlinks option;\n\
+                   otherwise, h5ls shows error message and returns an exit\n\
+                   code of 1. \n\
+                   Check for any symbolic links (soft links or external links)\n\
+                   that do not resolve to an existing object (dataset, group,\n\
+                   or named datatype).\n\
+                   If any dangling link is found, this situation is treated\n\
+                   as an error and h5ls returns an exit code of 1.\n\
+   -f, --full      Print full path names instead of base names\n\
+   -g, --group     Show information about a group, not its contents\n\
+   -l, --label     Label members of compound datasets\n\
+   -r, --recursive List all groups recursively, avoiding cycles\n\
+   -s, --string    Print 1-byte integer datasets as ASCII\n\
+   -S, --simple    Use a machine-readable output format\n\
+   -wN, --width=N  Set the number of columns of output\n\
+   -v, --verbose   Generate more verbose output\n\
+   -V, --version   Print version number and exit\n\
+   --vfd=DRIVER    Use the specified virtual file driver\n\
+   -x, --hexdump   Show raw data in hexadecimal format\n\
 \n\
   OBJECTS\n\
     Each object consists of an HDF5 file name optionally followed by a\n\
@@ -170,8 +182,6 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
  *              Thursday, November  5, 1998
  *
  * Modifications:
- *   Add _H5LS_CONVERT_SPECIAL_CHAR_ #ifdef section and make it not to
- *   convert special chars to visible chars. (Jonathan Kim  06/24/2010)
  *
  *-------------------------------------------------------------------------
  */
@@ -180,27 +190,6 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
 {
     int  nprint=0;
 
-#ifdef _H5LS_CONVERT_SPECIAL_CHAR_
-    /*-------------------------------------------------------------------
-     * _H5LS_CONVERT_SPECIAL_CHAR_ is not defined, so this code section 
-     * will not be compiled. 
-     * This code section is due to be removed after verifying no problem 
-     * at customer sites. (However we may keep it just for the future
-     * reference as it survived over ten years)
-     *
-     * Reason for Obsolete: 
-     *  This portion of code converts special characters or '\' to string, 
-     *  so when those characters are in object or attribute name, h5ls display
-     *  as visible characters.     
-     *  However if a user come up with object or attribute name with special 
-     *  character in programming, this code takes away control over '\' 
-     *  (escape character) from the user and causes confusion for the output, 
-     *  also it’s not possible to handle all the cases in this way. 
-     *  This also causes discrepancy from how the string data saved in 
-     *  HDF5 file.
-     *  Also other HDF tools don’t convert characters like this, so this 
-     *  causes inconsistent output among tools.
-     *-------------------------------------------------------------/
     for (/*void*/; s && *s; s++) {
         switch (*s) {
             case '"':
@@ -253,17 +242,6 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
                 break;
         }
     }
-#else
-    if (stream)
-    {
-        nprint = fprintf(stream,s);
-    }
-    else
-    {
-        nprint = strlen(s);
-    }
-#endif /* _H5LS_CONVERT_SPECIAL_CHAR_ */
-
     return nprint;
 }
 
@@ -1999,18 +1977,31 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
 {
     char *buf=NULL;
     iter_t *iter = (iter_t*)_iter;
+    int ret;
+    h5tool_link_info_t lnk_info;
+
+    /* init linkinfo struct */
+    memset(&lnk_info, 0, sizeof(h5tool_link_info_t));
+
+    /* if verbose, make H5tools_get_link_info() display more */
+    if (verbose_g)
+        lnk_info.opt.msg_mode=1;
 
     /* Print the link's name, either full name or base name */
     display_obj_name(stdout, iter, name, "");
 
     switch(linfo->type) {
         case H5L_TYPE_SOFT:
-            if((buf = (char*)HDmalloc(linfo->u.val_size)) == NULL)
+            ret = H5tools_get_link_info(iter->fid, name, &lnk_info);
+            /* lnk_info.trg_path is malloced in H5tools_get_link_info()
+             * so it will be freed via buf later */
+            buf = lnk_info.trg_path;
+            /* error */
+            if (ret < 0)
                 goto done;
-
-            if(H5Lget_val(iter->fid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
-                goto done;
-            } /* end if */
+            /* no dangling link option given and detect dangling link */
+            else if (no_dangling_link_g && ret == 0)
+                iter->symlink_list->dangle_link = TRUE;
 
             HDfputs("Soft Link {", stdout);
             HDfputs(buf, stdout);
@@ -2058,10 +2049,16 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             const char *filename;
             const char *path;
 
-            if((buf = (char*)HDmalloc(linfo->u.val_size)) == NULL)
+            ret = H5tools_get_link_info(iter->fid, name, &lnk_info);
+            /* lnk_info.trg_path is malloced in H5tools_get_link_info()
+             * so it will be freed via buf later */
+            buf = lnk_info.trg_path;
+            /* error */
+            if (ret < 0)
                 goto done;
-            if(H5Lget_val(iter->fid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) 
-                goto done;
+            /* no dangling link option given and detect dangling link */
+            else if (no_dangling_link_g && ret == 0)
+                iter->symlink_list->dangle_link = TRUE;
 
             if(H5Lunpack_elink_val(buf, linfo->u.val_size, NULL, &filename, &path) < 0) 
                 goto done;
@@ -2134,9 +2131,9 @@ done:
  *
  * Purpose: Begins iteration on an object
  *
- * Return: Success: EXIT_SUCCESS(0)
- *
- * Failure: EXIT_FAILURE(1)
+ * Return: 
+ *  Success: 0
+ *  Failure: -1
  *
  * Programmer: Neil Fortner
  *              Wednesday, August 21, 2008
@@ -2272,6 +2269,42 @@ get_width(void)
     return width;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: is_valid_args
+ *
+ * Purpose: check if command line arguments are valid
+ *
+ * Return: 
+ *  Success: TRUE (1)
+ *  Failure: FALSE (0)
+ *
+ * Programmer:
+ *  Jonathan Kim  (06/15/2010)
+ *
+ *-------------------------------------------------------------------------*/
+static hbool_t 
+is_valid_args(void)
+{
+    herr_t ret = TRUE;
+
+    if(recursive_g && grp_literal_g) 
+    {
+        fprintf(stderr, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
+        ret = FALSE;
+        goto out;
+    }
+
+    if(no_dangling_link_g && !follow_symlink_g) 
+    {
+        fprintf(stderr, "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
+        ret = FALSE;
+        goto out;
+    }
+
+out:
+    return ret;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: leave
@@ -2323,7 +2356,7 @@ main(int argc, const char *argv[])
     static char root_name[] = "/";
     char        drivername[50];
     const char *preferred_driver = NULL;
-    int err_openfile = 0;
+    int err_exit = 0;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -2356,6 +2389,8 @@ main(int argc, const char *argv[])
             show_errors_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--follow-symlinks")) {
             follow_symlink_g = TRUE;
+        } else if(!HDstrcmp(argv[argno], "--no-dangling-links")) {
+            no_dangling_link_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--external")) {
             follow_elink_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--full")) {
@@ -2499,11 +2534,11 @@ main(int argc, const char *argv[])
     } /* end if */
 
     /* Check for conflicting arguments */
-    if(recursive_g && grp_literal_g) {
-        fprintf(stderr, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
+    if (!is_valid_args())
+    {
         usage();
         leave(EXIT_FAILURE);
-    } /* end if */
+    }
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
     if(!show_errors_g)
@@ -2555,7 +2590,7 @@ main(int argc, const char *argv[])
         if(file < 0) {
             fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             HDfree(fname);
-            err_openfile = 1;
+            err_exit = 1;
             continue;
         } /* end if */
         if(oname) {
@@ -2590,6 +2625,7 @@ main(int argc, const char *argv[])
         iter.gid = -1;
         iter.symlink_target = FALSE;
         iter.symlink_list = &symlink_list;
+        iter.symlink_list->dangle_link = FALSE;
 
         /* Initialize list of visited symbolic links */
         symlink_list.nused = symlink_list.nalloc = 0;
@@ -2630,9 +2666,13 @@ main(int argc, const char *argv[])
             HDfree(symlink_list.objs[u].path);
         }
         HDfree(symlink_list.objs);
+        
+        /* if no-dangling-links option specified and dangling link found */
+        if (no_dangling_link_g && iter.symlink_list->dangle_link)
+            err_exit = 1;
     } /* end while */
 
-    if (err_openfile)
+    if (err_exit)
         leave(EXIT_FAILURE);
     else
         leave(EXIT_SUCCESS);

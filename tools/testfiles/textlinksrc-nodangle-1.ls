@@ -1,7 +1,7 @@
 #############################
- output for 'h5ls -w80 -r -g tgroup.h5'
+ output for 'h5ls -w80 --no-dangling-links textlinksrc.h5'
 #############################
-Error: 'recursive' option not compatible with 'group info' option!
+Error: --no-dangling-links must be used along with --follow-symlinks option!
 
 usage: h5ls [OPTIONS] [OBJECTS...]
   OPTIONS

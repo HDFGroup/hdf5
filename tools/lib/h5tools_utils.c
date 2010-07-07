@@ -638,7 +638,6 @@ tmpfile(void)
  * Patameters:
  *  - [IN]  fileid : link file id
  *  - [IN]  linkpath : link path
- *  - [OUT] h5li : link's info (H5L_info_t)
  *  - [OUT] link_info: returning target object info (h5tool_link_info_t)
  *
  * Return: 
@@ -656,7 +655,7 @@ tmpfile(void)
  *-------------------------------------------------------------------------*/
 int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info_t *link_info)
 {
-    int Ret = -1; /* init to fail */
+    int ret = -1; /* init to fail */
     htri_t l_ret;
     H5O_info_t trg_oinfo;
     hid_t fapl;
@@ -684,7 +683,7 @@ int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info
     /* given path is hard link (object) */
     if (link_info->linfo.type == H5L_TYPE_HARD)
     {
-        Ret = 2;
+        ret = 2;
         goto out;
     }
 
@@ -721,7 +720,7 @@ int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info
     /* detect dangling link */
     if(l_ret == FALSE) 
     {
-            Ret = 0;
+            ret = 0;
             goto out;
     }
     /* function failed */
@@ -750,7 +749,7 @@ int H5tools_get_link_info(hid_t file_id, const char * linkpath, h5tool_link_info
     link_info->trg_type = trg_oinfo.type;
 
     /* succeed */
-    Ret = 1;
+    ret = 1;
 out:
     if (link_info->linfo.type == H5L_TYPE_EXTERNAL)
     {
@@ -758,7 +757,7 @@ out:
         H5Pclose(lapl);
     }
 
-    return Ret;
+    return ret;
 }
 
 /*-------------------------------------------------------------------------
