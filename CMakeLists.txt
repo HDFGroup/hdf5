@@ -78,11 +78,6 @@ PROJECT (HDF5 C CXX)
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
 #-----------------------------------------------------------------------------
-SET (H5_VERS_MAJOR 1)
-SET (H5_VERS_MINOR 8)
-SET (H5_VERS_RELEASE 5)
-SET (H5_VERS_SUBRELEASE "snap2")
-#-----------------------------------------------------------------------------
 SET (HDF5_PACKAGE "hdf5")
 SET (HDF5_PACKAGE_NAME "HDF5")
 SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
@@ -346,6 +341,20 @@ ENDIF (CMAKE_COMPILER_IS_GNUCC)
 IF (CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+#-----------------------------------------------------------------------------
+# parse the full version number from H5public.h and include in H5_VERS_INFO
+#-----------------------------------------------------------------------------
+FILE (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_MINOR ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z.]*)\".*$"
+    "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+#MESSAGE (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
