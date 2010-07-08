@@ -63,6 +63,10 @@ IF (BUILD_TESTING)
       tsoftlinks-3.ls
       tsoftlinks-4.ls
       tsoftlinks-5.ls
+      textlinksrc-nodangle-1.ls
+      textlinksrc-nodangle-2.ls
+      tsoftlinks-nodangle-1.ls
+      thlinks-nodangle-1.ls
       tgroup.ls
       tgroup-1.ls
       tgroup-2.ls
