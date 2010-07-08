@@ -551,7 +551,7 @@ ENDIF (INLINE_TEST___inline__)
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
-SET (H5_H5_PRINTF_LL_WIDTH "H5_PRINTF_LL_WIDTH")
+SET (H5_PRINTF_LL_WIDTH "H5_PRINTF_LL_WIDTH")
 IF (H5_PRINTF_LL_WIDTH MATCHES "^H5_PRINTF_LL_WIDTH$")
   SET (PRINT_LL_FOUND 0)
   MESSAGE (STATUS "Checking for appropriate format for 64 bit long:")
