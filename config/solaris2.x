@@ -111,3 +111,43 @@ if test -z "$cxx_flags_set"; then
   PROFILE_CPPFLAGS=
   cxx_flags_set=yes
 fi
+
+# compiler version strings
+case $CC in
+    *cc*)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS -V 2>&1 | grep 'Sun' |\
+            sed 's/.*\(Sun.*\)/\1 /'`
+        ;;
+
+    *)
+        echo "No match to get cc_version_info for $CC"
+        ;;
+esac
+echo "C compiler '$CC' is $cc_version_info"
+
+case $FC in
+    # The PGI and Intel compilers are automatically detected below
+    *f90*)
+        fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 | grep 'Sun' |\
+            sed 's/.*\(Sun.*\)/\1 /'`
+        ;;
+
+     *)
+        echo "No match to get fc_version_info for $FC"
+        ;;
+esac
+echo "Fortran compiler '$FC' is $fc_version_info"
+
+# get c++ version info
+case $CXX in
+    *CC*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Sun' |\
+            sed 's/.*\(Sun.*\)/\1 /'`
+        ;;
+
+    *)
+        echo "No match to get cxx_version_info for $CXX"
+        ;;
+esac
+
+

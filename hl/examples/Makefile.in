@@ -55,7 +55,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/run-hlc-ex.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
 TESTS =
@@ -66,7 +66,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = run-hlc-ex.sh
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -111,6 +111,7 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
+CXX_VERSION = @CXX_VERSION@
 CYGPATH_W = @CYGPATH_W@
 DEBUG_PKG = @DEBUG_PKG@
 DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
@@ -136,6 +137,7 @@ FC = @FC@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
+FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
@@ -333,7 +335,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = 
 
 # Example directory
-EXAMPLEDIR = $(docdir)/hdf5/examples/hl/c
+EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/c
+EXAMPLETOPDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -349,7 +352,15 @@ TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = ptExampleFL.c ptExampleVL.c
+INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c ptExampleVL.c \
+                ex_image1.c ex_image2.c \
+                ex_table_01.c ex_table_02.c ex_table_03.c ex_table_04.c      \
+                ex_table_05.c ex_table_06.c ex_table_07.c ex_table_08.c      \
+                ex_table_09.c ex_table_10.c ex_table_11.c ex_table_12.c      \
+                ex_ds1.c image24pixel.txt image8.txt pal_rgb.h
+
+INSTALL_SCRIPT_FILES = run-hlc-ex.sh
+INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -408,6 +419,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+run-hlc-ex.sh: $(top_builddir)/config.status $(srcdir)/run-hlc-ex.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -617,6 +630,8 @@ ex_table12: $(srcdir)/ex_table12.c
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
+$(EXAMPLETOPDIR):
+	-$(top_srcdir)/bin/mkdirs $@
 
 # Install and uninstall rules.  We install the source files, not the
 # example programs themselves.
@@ -631,10 +646,26 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
+	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
+	  fi;                                                                \
+	done
 
 uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
+        fi
+	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+        fi
+	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
         fi
 
 installcheck-local:

@@ -3799,8 +3799,46 @@ else
     fi
   done
 fi
-if test -n "$cc_vendor" && test -n "$cc_version"; then
-  CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
+if test -n "$cc_version_info"; then
+  CC_VERSION="$CC_VERSION ( $cc_version_info)"
+fi
+
+AC_SUBST([FC_VERSION])
+dnl Strip anything that looks like a flag off of $CC
+FC_NOFLAGS=`echo $FC | sed 's/ -.*//'`
+
+if `echo $FC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
+  FC_VERSION="$FC"
+else
+  FC_VERSION="$FC";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$FC_NOFLAGS; then
+      FC_VERSION="$x/$FC"
+      break
+    fi
+  done
+fi
+if test -n "$fc_version_info"; then
+  FC_VERSION="$FC_VERSION ( $fc_version_info)"
+fi
+
+AC_SUBST([CXX_VERSION])
+dnl Strip anything that looks like a flag off of $CC
+CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
+
+if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
+  CXX_VERSION="$CXX"
+else
+  CXX_VERSION="$FC";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$CXX_NOFLAGS; then
+      CXX_VERSION="$x/$CXX"
+      break
+    fi
+  done
+fi
+if test -n "$cxx_version_info"; then
+  CXX_VERSION="$CXX_VERSION ( $cxx_version_info)"
 fi
 
 dnl ----------------------------------------------------------------------
@@ -4158,6 +4196,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
                  examples/Makefile
+                 examples/run-c-ex.sh
                  examples/testh5cc.sh
                  c++/Makefile
                  c++/src/Makefile
@@ -4165,6 +4204,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  c++/test/Makefile
                  c++/test/H5srcdir_str.h
                  c++/examples/Makefile
+                 c++/examples/run-c++-ex.sh
                  c++/examples/testh5c++.sh
                  fortran/Makefile
                  fortran/src/h5fc
@@ -4172,6 +4212,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/test/Makefile
                  fortran/testpar/Makefile
                  fortran/examples/Makefile
+                 fortran/examples/run-fortran-ex.sh
                  fortran/examples/testh5fc.sh
                  hl/Makefile
                  hl/src/Makefile
@@ -4180,14 +4221,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/examples/Makefile
+                 hl/examples/run-hlc-ex.sh
                  hl/c++/Makefile
                  hl/c++/src/Makefile
                  hl/c++/test/Makefile
                  hl/c++/examples/Makefile
+                 hl/c++/examples/run-hlc++-ex.sh
                  hl/fortran/Makefile
                  hl/fortran/src/Makefile
                  hl/fortran/test/Makefile
-                 hl/fortran/examples/Makefile])
+                 hl/fortran/examples/Makefile
+                 hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
 no_create=$saved_no_create

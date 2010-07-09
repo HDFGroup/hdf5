@@ -162,6 +162,7 @@
 ./fortran/examples/ph5example.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
+./fortran/examples/run-fortran-ex.sh.in
 ./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
 ./fortran/examples/testh5fc.sh.in
@@ -274,6 +275,7 @@
 ./c++/examples/writedata.cpp
 ./c++/examples/Makefile.am
 ./c++/examples/Makefile.in
+./c++/examples/run-c++-ex.sh.in
 
 ./c++/src/H5AbstractDs.cpp
 ./c++/src/H5AbstractDs.h
@@ -1707,6 +1709,8 @@
 ./hl/examples/pal_rgb.h
 ./hl/examples/ptExampleFL.c
 ./hl/examples/ptExampleVL.c
+./hl/examples/run-hl-ex.sh
+./hl/examples/run-hlc-ex.sh.in
 ./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
@@ -1788,6 +1792,7 @@
 ./hl/fortran/examples/Makefile.am
 ./hl/fortran/examples/Makefile.in
 ./hl/fortran/examples/exlite.f90
+./hl/fortran/examples/run-hlfortran-ex.sh.in
 ./hl/fortran/src/H5IMcc.c
 ./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
@@ -1813,6 +1818,7 @@
 ./hl/c++/examples/Makefile.in
 ./hl/c++/examples/ptExampleFL.cpp
 ./hl/c++/examples/ptExampleVL.cpp
+./hl/c++/examples/run-hlc++-ex.sh.in
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp
 ./hl/c++/src/Makefile.am
@@ -1896,6 +1902,8 @@
 ./c++/src/CMakeLists.txt
 ./c++/test/CMakeLists.txt
 ./examples/CMakeLists.txt
+./examples/run-all-ex.sh
+./examples/run-c-ex.sh.in
 ./fortran/CMakeLists.txt
 ./fortran/examples/CMakeLists.txt
 ./fortran/src/CMakeLists.txt
