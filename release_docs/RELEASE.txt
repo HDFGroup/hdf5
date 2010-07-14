@@ -100,6 +100,9 @@ Bug Fixes since HDF5-1.8.5
 
     Configuration
     -------------
+    - Removed recognition of the parallel compilers of LAM(hcc) and
+      ChMPIon(cmpicc) since we have no access to these two MPI implementations
+      and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
       4.1. (AKC - 2010/6/11 - Bug 1921)

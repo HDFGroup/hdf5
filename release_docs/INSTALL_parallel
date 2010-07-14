@@ -229,10 +229,10 @@ For example,
 If a parallel library is being built then configure attempts to determine how
 to run a parallel application on one processor and on many processors. If the
 compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
-RUNPARALLEL then configure chooses `mpirun' from the same directory as `mpicc':
+RUNPARALLEL then configure chooses `mpiexec' from the same directory as `mpicc':
 
-    RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
-    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=3}
+    RUNSERIAL:    /usr/local/mpi/bin/mpiexec -np 1
+    RUNPARALLEL:  /usr/local/mpi/bin/mpiexec -np $${NPROCS:=3}
 
 The `$${NPROCS:=3}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 3).
@@ -278,7 +278,7 @@ Appendix A. Sample programs
 ---------------------------
 Here are sample MPI-IO C and Fortran programs.  You may use them to run simple
 tests of your MPI compilers and the parallel file system.  The MPI commands
-used here are mpicc, mpif90 and mpirun.  Replace them with the commands of
+used here are mpicc, mpif90 and mpiexec.  Replace them with the commands of
 your system.
 
 The programs assume they run in the parallel file system. Thus they create
@@ -289,10 +289,10 @@ programs to use a different file name.
 Example compiling and running:
 
 % mpicc Sample_mpio.c -o c.out
-% mpirun -np 4 c.out
+% mpiexec -np 4 c.out
 
 % mpif90 Sample_mpio.f90 -o f.out
-% mpirun -np 4 f.out
+% mpiexec -np 4 f.out
 
 
 ==> Sample_mpio.c <==
