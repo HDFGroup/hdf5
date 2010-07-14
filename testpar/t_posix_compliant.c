@@ -37,7 +37,7 @@
  * macro STANDALONE. E.g.,
  *     mpicc -DSTANDALONE t_posix_compliant.c -o t_posix_compliant
  * then run it as an MPI application.  E.g.,
- *     mpirun -np 3 ./t_posix_compliant
+ *     mpiexec -np 3 ./t_posix_compliant
  */
 
 #include <unistd.h>
