@@ -382,6 +382,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed recognition of the parallel compilers of LAM(hcc) and
+      ChMPIon(cmpicc) since we have no access to these two MPI implementations
+      and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
     - Removed the following config files, as we no longer support them:
         config/dec-osf*, config/hpux11.00, config/irix5.x, 
         config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
