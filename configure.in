@@ -741,63 +741,9 @@ case "$CC_BASENAME" in
     fi
     ;;
 
-  hcc)
-    dnl The LAM compiler. Use mpirun_lam or mpirun from the same directory
-    dnl if it exists.
-    PARALLEL=hcc
-    AC_MSG_CHECKING([for mpirun_lam or mpirun])
-
-    dnl Find the path where hcc is located
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | ${TR} ":" " "`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    dnl Is there an mpirun_lam or mpirun at that path?
-    if test -x $path/mpirun_lam -o -x $path/mpirun; then
-      if test -x $path/mpirun_lam; then
-        cmd=mpirun_lam
-      else
-        cmd=mpirun
-      fi
-      AC_MSG_RESULT([$path/$cmd])
-      RUNSERIAL="${RUNSERIAL:-none}"
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
-    ;;
-
   mpcc|mpcc_r)
     dnl The IBM compiler
     PARALLEL="$CC_BASENAME"
-    ;;
-
-  cmpicc)
-    dnl The ChaMPIon compiler on NCSA tungsten. The cmpirun command on tungsten 
-    dnl isn't in the same path as cmpicc.
-    PARALLEL=cmpicc
-    AC_MSG_CHECKING([for cmpirun])
-
-    dnl Is there an cmpirun?
-    if test -x cmpirun; then
-      AC_MSG_RESULT([cmpirun])
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="cmpirun -np \$\${NPROCS:=3}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
     ;;
 
   *)
