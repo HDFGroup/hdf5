@@ -234,6 +234,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that could cause file corruption when using non-default
+            sizes of addresses and/or lengths.  This bug could also cause
+            uncorrupted files with this property to be unreadable.  This bug
+            was introduced in 1.8.5. (NAF - 2010/07/16 - 1951)
       - Fixed a file corruption bug that could happen when shrinking a
             compressed dataset. (NAF - 2010/05/20)
       - Fixed some memory leaks in VL datatype conversion when strings are
