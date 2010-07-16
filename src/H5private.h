@@ -1700,7 +1700,7 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 /* Include required function stack header */
 #include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC(func_name) H5CS_push(#func_name)
+#define H5_PUSH_FUNC(func_name) H5CS_push(#func_name);
 #define H5_POP_FUNC             H5CS_pop();
 #else /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC(func_name) /* void */
@@ -1827,7 +1827,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {{                                   \
     FUNC_ENTER_API_COMMON(func_name)                                          \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(func_name)                                                  \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
@@ -1881,7 +1881,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT(func_name) {                                  \
     FUNC_ENTER_COMMON(func_name, !H5_IS_API(#func_name));                     \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(func_name)                                                  \
     {
 
 /*
@@ -1912,7 +1912,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOFUNC(func_name) {                           \
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(func_name)                                                  \
     {
 
 /*
