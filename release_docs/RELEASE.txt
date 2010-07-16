@@ -109,7 +109,10 @@ Bug Fixes since HDF5-1.8.5
 
     Library
     -------
-    - None
+    - Fixed a bug that could cause file corruption when using non-default sizes
+      of addresses and/or lengths.  This bug could also cause uncorrupted files
+      with this property to be unreadable.  This bug was introduced in 1.8.5.
+      (NAF - 2010/07/16 - 1951)
 
     Parallel Library
     ----------------

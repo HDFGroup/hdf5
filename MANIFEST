@@ -827,6 +827,7 @@
 ./test/gen_old_group.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c			_DO_NOT_DISTRIBUTE_
+./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
 ./test/gen_udlinks.c			_DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
@@ -887,6 +888,7 @@
 ./test/trefer.c
 ./test/trefstr.c
 ./test/tselect.c
+./test/tsizeslheap.h5
 ./test/tskiplist.c
 ./test/tsohm.c
 ./test/ttst.c
