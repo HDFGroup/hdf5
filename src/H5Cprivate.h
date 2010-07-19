@@ -368,6 +368,14 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		the unprotect, the entry's is_dirty flag is reset by flushing
  *		it with the H5C__FLUSH_CLEAR_ONLY_FLAG.
  *
+ * flush_immediately:  Boolean flag used only in Phdf5 -- and then only 
+ *		for H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED.
+ *
+ *		When a destributed metadata write is triggered at a 
+ *		sync point, this field is used to mark entries that 
+ *		must be flushed before leaving the sync point.  At all
+ *		other times, this field should be set to FALSE.
+ *
  * flush_in_progress:  Boolean flag that is set to true iff the entry
  * 		is in the process of being flushed.  This allows the cache
  * 		to detect when a call is the result of a flush callback.
@@ -534,6 +542,7 @@ typedef struct H5C_cache_entry_t
     hbool_t			flush_marker;
 #ifdef H5_HAVE_PARALLEL
     hbool_t			clear_on_unprotect;
+    hbool_t		flush_immediately;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
@@ -978,6 +987,21 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__READ_ONLY_FLAG			0x0200
 #define H5C__FREE_FILE_SPACE_FLAG		0x0800
 #define H5C__TAKE_OWNERSHIP_FLAG		0x1000
+
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5C_apply_candidate_list(H5F_t * f,
+                                       hid_t primary_dxpl_id,
+                                       hid_t secondary_dxpl_id,
+                                       H5C_t * cache_ptr,
+                                       int num_candidates,
+                                       haddr_t * candidates_list_ptr,
+                                       int mpi_rank,
+                                       int mpi_size);
+
+H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr);
+
+H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t * cache_ptr);
+#endif /* H5_HAVE_PARALLEL */
 
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
                           size_t                     min_clean_size,

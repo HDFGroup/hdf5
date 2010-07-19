@@ -383,38 +383,40 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 
 /* Macros used in H5AC level tests */
 
-#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)       \
-  ( ( (a).version                == (b).version ) &&                 \
-    ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&         \
-    ( (a).open_trace_file        == (b).open_trace_file ) &&         \
-    ( (a).close_trace_file       == (b).close_trace_file ) &&        \
-    ( ( (a).open_trace_file == FALSE ) ||                            \
-      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) && \
-    ( (a).evictions_enabled      == (b).evictions_enabled ) &&       \
-    ( ( ! cmp_set_init ) ||                                          \
-      ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
-    ( ( ! cmp_init_size ) ||                                         \
-      ( (a).initial_size         == (b).initial_size ) ) &&          \
-    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&      \
-    ( (a).max_size               == (b).max_size ) &&                \
-    ( (a).min_size               == (b).min_size ) &&                \
-    ( (a).epoch_length           == (b).epoch_length ) &&            \
-    ( (a).incr_mode              == (b).incr_mode ) &&               \
-    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&      \
-    ( (a).increment              == (b).increment ) &&               \
-    ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
-    ( (a).max_increment          == (b).max_increment ) &&           \
-    ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
-    ( (a).flash_multiple         == (b).flash_multiple ) &&          \
-    ( (a).flash_threshold        == (b).flash_threshold ) &&         \
-    ( (a).decr_mode              == (b).decr_mode ) &&               \
-    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
-    ( (a).decrement              == (b).decrement ) &&               \
-    ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
-    ( (a).max_decrement          == (b).max_decrement ) &&           \
-    ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
-    ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
-    ( (a).empty_reserve          == (b).empty_reserve ) )
+#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)        \
+  ( ( (a).version                 == (b).version ) &&                 \
+    ( (a).rpt_fcn_enabled         == (b).rpt_fcn_enabled ) &&         \
+    ( (a).open_trace_file         == (b).open_trace_file ) &&         \
+    ( (a).close_trace_file        == (b).close_trace_file ) &&        \
+    ( ( (a).open_trace_file == FALSE ) ||                             \
+      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) &&  \
+    ( (a).evictions_enabled       == (b).evictions_enabled ) &&       \
+    ( ( ! cmp_set_init ) ||                                           \
+      ( (a).set_initial_size      == (b).set_initial_size ) ) &&      \
+    ( ( ! cmp_init_size ) ||                                          \
+      ( (a).initial_size          == (b).initial_size ) ) &&          \
+    ( (a).min_clean_fraction      == (b).min_clean_fraction ) &&      \
+    ( (a).max_size                == (b).max_size ) &&                \
+    ( (a).min_size                == (b).min_size ) &&                \
+    ( (a).epoch_length            == (b).epoch_length ) &&            \
+    ( (a).incr_mode               == (b).incr_mode ) &&               \
+    ( (a).lower_hr_threshold      == (b).lower_hr_threshold ) &&      \
+    ( (a).increment               == (b).increment ) &&               \
+    ( (a).apply_max_increment     == (b).apply_max_increment ) &&     \
+    ( (a).max_increment           == (b).max_increment ) &&           \
+    ( (a).flash_incr_mode         == (b).flash_incr_mode ) &&         \
+    ( (a).flash_multiple          == (b).flash_multiple ) &&          \
+    ( (a).flash_threshold         == (b).flash_threshold ) &&         \
+    ( (a).decr_mode               == (b).decr_mode ) &&               \
+    ( (a).upper_hr_threshold      == (b).upper_hr_threshold ) &&      \
+    ( (a).decrement               == (b).decrement ) &&               \
+    ( (a).apply_max_decrement     == (b).apply_max_decrement ) &&     \
+    ( (a).max_decrement           == (b).max_decrement ) &&           \
+    ( (a).epochs_before_eviction  == (b).epochs_before_eviction ) &&  \
+    ( (a).apply_empty_reserve     == (b).apply_empty_reserve ) &&     \
+    ( (a).empty_reserve           == (b).empty_reserve ) &&           \
+    ( (a).dirty_bytes_threshold   == (b).dirty_bytes_threshold ) &&   \
+    ( (a).metadata_write_strategy == (b).metadata_write_strategy ) )
 
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
 {                                                                   \

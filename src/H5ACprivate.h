@@ -193,6 +193,9 @@ extern hid_t H5AC_ind_dxpl_id;
 
 /* Default cache configuration. */
 
+#define H5AC__DEFAULT_METADATA_WRITE_STRATEGY   \
+                                H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
+
 #ifdef H5_HAVE_PARALLEL
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
 {                                                                             \
@@ -225,7 +228,9 @@ extern hid_t H5AC_ind_dxpl_id;
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1,                             \
-  /* int	 dirty_bytes_threshold  = */ (256 * 1024)                     \
+  /* int	 dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int	metadata_write_strategy = */                                  \
+				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #else /* H5_HAVE_PARALLEL */
 #define H5AC__DEFAULT_CACHE_CONFIG                                            \
@@ -259,7 +264,9 @@ extern hid_t H5AC_ind_dxpl_id;
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1,                             \
-  /* int	 dirty_bytes_threshold  = */ (256 * 1024)                     \
+  /* int	 dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int	metadata_write_strategy = */                                  \
+				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -325,6 +332,9 @@ H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
                                  const H5AC_class_t *type, haddr_t addr,
                                  unsigned flags);
 
+H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
+    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
+
 H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
                                            void (* write_done)(void));
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
@@ -352,6 +362,10 @@ H5_DLL herr_t H5AC_close_trace_file( H5AC_t * cache_ptr);
 
 H5_DLL herr_t H5AC_open_trace_file(H5AC_t * cache_ptr,
 		                   const char * trace_file_name);
+
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
+#endif /* H5_HAVE_PARALLEL */
 
 #endif /* !_H5ACprivate_H */
 

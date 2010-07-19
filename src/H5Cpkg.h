@@ -1874,7 +1874,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( ( !( was_clean ) ||                                              \
 	    ( (cache_ptr)->clean_index_size < (old_size) ) ) &&         \
 	  ( ( (was_clean) ) ||                                          \
-	    ( (cache_ptr)->dirty_index_size < (old_size) ) ) )          \
+	    ( (cache_ptr)->dirty_index_size < (old_size) ) ) ) ||       \
      ( (entry_ptr) == NULL ) ) {                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                            \
                 "Pre HT entry size change SC failed")                   \
@@ -1892,7 +1892,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      ( ( !((entry_ptr)->is_dirty ) ||                                     \
 	    ( (cache_ptr)->dirty_index_size < (new_size) ) ) &&           \
 	  ( ( ((entry_ptr)->is_dirty)  ) ||                               \
-	    ( (cache_ptr)->clean_index_size < (new_size) ) ) )            \
+	    ( (cache_ptr)->clean_index_size < (new_size) ) ) ) ||         \
      ( ( (cache_ptr)->index_len == 1 ) &&                                 \
        ( (cache_ptr)->index_size != (new_size) ) ) ) {                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                              \
@@ -2097,24 +2097,25 @@ if ( (cache_ptr)->index_size !=                                             \
     H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr); \
 }
 
-#define H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size,      \
-		                          entry_ptr, was_clean)               \
-{                                                                             \
-    H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,           \
-		                     entry_ptr, was_clean)                    \
-    (cache_ptr)->index_size -= (old_size);                                    \
-    (cache_ptr)->index_size += (new_size);                                    \
-    if ( was_clean ) {                                                        \
-        (cache_ptr)->clean_index_size -= (old_size);                          \
-    } else {                                                                  \
-	(cache_ptr)->dirty_index_size -= (old_size);                          \
-    }                                                                         \
-    if ( (entry_ptr)->is_dirty ) {                                            \
-        (cache_ptr)->dirty_index_size += (new_size);                          \
-    } else {                                                                  \
-	(cache_ptr)->clean_index_size += (new_size);                          \
-    }                                                                         \
-    H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, entry_ptr) \
+#define H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size, \
+		                          entry_ptr, was_clean)          \
+{                                                                        \
+    H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,      \
+		                     entry_ptr, was_clean)               \
+    (cache_ptr)->index_size -= (old_size);                               \
+    (cache_ptr)->index_size += (new_size);                               \
+    if ( was_clean ) {                                                   \
+        (cache_ptr)->clean_index_size -= (old_size);                     \
+    } else {                                                             \
+	(cache_ptr)->dirty_index_size -= (old_size);                     \
+    }                                                                    \
+    if ( (entry_ptr)->is_dirty ) {                                       \
+        (cache_ptr)->dirty_index_size += (new_size);                     \
+    } else {                                                             \
+	(cache_ptr)->clean_index_size += (new_size);                     \
+    }                                                                    \
+    H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,     \
+                                      entry_ptr)                         \
 }
 
 
