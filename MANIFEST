@@ -960,6 +960,7 @@
 ./testpar/t_filter_read.c
 ./testpar/t_span_tree.c
 ./testpar/t_posix_compliant.c
+./testpar/t_rank_projection.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h

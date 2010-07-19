@@ -2665,7 +2665,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     H5D_rdcc_t		*rdcc = &(dset->shared->cache.chunk);   /*raw data chunk cache*/
     H5D_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
-    hbool_t		found = FALSE;		/*already in cache?	*/
     haddr_t             chunk_addr = HADDR_UNDEF; /* Address of chunk on disk */
     size_t		chunk_size;		/*size of a chunk	*/
     void		*chunk = NULL;		/*the file chunk	*/
@@ -2797,7 +2796,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             rdcc->stats.ninits++;
         } /* end else */
     } /* end else */
-    HDassert(found || chunk_size > 0);
+    HDassert(chunk_size > 0);
 
     if(ent) {
         /*
