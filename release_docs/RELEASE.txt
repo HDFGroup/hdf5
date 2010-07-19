@@ -59,10 +59,15 @@ New Features
     - Changed configure default setting to --disable-production (was
       --enable-production). This affects all unoffical releases such as
       snapshot releases. It will be set to --enable-production for all
-      official releases. AKC 2010/5/28
+      official releases.  (AKC  - 2010/05/28)
 
     Library
     -------
+    - Improved performance of metadata I/O by changing the default algorithm
+      to perform I/O from all processes (instead of just process 0) when using
+      parallel I/O drivers. (QAK - 2010/07/19)
+    - Improved performance of I/O on datasets with the same shape, but
+      different rank. (QAK - 2010/07/19)
     - Improved performance of the chunk cache by avoiding unnecessary b-tree
       lookups of chunks already in cache. (NAF - 2010/06/15) 
 
@@ -73,9 +78,9 @@ New Features
     Tools
     -----
     - h5ls: Add new flag --no-dangling-links. (refer to --help for details)
-               (JKM - 2010/06/15)
+      (JKM - 2010/06/15)
     - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
-               (JKM - 2010/05/25)
+      (JKM - 2010/05/25)
 
     High-Level APIs
     ---------------
@@ -105,14 +110,17 @@ Bug Fixes since HDF5-1.8.5
       and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
     - PHDF5 changed to use "mpiexec", instead of mpirun, as the default MPI
       applications startup command as defined in the MPI-2 definition, section
-      4.1. (AKC - 2010/6/11 - Bug 1921)
+      4.1. (AKC - 2010/06/11 - Bug 1921)
 
     Library
     -------
+    - Corrected various issues in the MPI datatype creation code which could
+      cause resource leaks or incorrect behavior (and may improve the
+      performance as well).  (QAK - 2010/07/19)
     - Fixed a bug that could cause file corruption when using non-default sizes
       of addresses and/or lengths.  This bug could also cause uncorrupted files
       with this property to be unreadable.  This bug was introduced in 1.8.5.
-      (NAF - 2010/07/16 - 1951)
+      (NAF - 2010/07/16 - Bug 1951)
 
     Parallel Library
     ----------------
@@ -121,7 +129,7 @@ Bug Fixes since HDF5-1.8.5
     Tools
     -----
     - Change h5ls not to manipulate special characters in object name or 
-      attribute name for smart display.  bug#1784 (JKM 2010/06/28)
+      attribute name for smart display. (JKM 2010/06/28 - Bug 1784)
 
 
     F90 API
