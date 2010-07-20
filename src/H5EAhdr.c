@@ -435,7 +435,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array header")
 
     /* Cache the new extensible array header */
-    if(H5AC_set(f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array header to cache")
 
     /* Set address of array header to return */
