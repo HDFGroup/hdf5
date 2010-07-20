@@ -1897,8 +1897,8 @@
 ./config/cmake/cacheinit.cmake
 ./config/cmake/runTest.cmake
 ./config/cmake/CTestCustom.ctest
+./config/cmake/ConfigureChecks.cmake
 ./CMakeLists.txt
-./ConfigureChecks.cmake
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt
 ./c++/examples/CMakeLists.txt
