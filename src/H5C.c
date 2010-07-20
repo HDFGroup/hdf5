@@ -150,8 +150,7 @@ static void * H5C_load_entry(H5F_t *             f,
                              hid_t               dxpl_id,
                              const H5C_class_t * type,
                              haddr_t             addr,
-                             void *              udata,
-                             hbool_t             skip_file_checks);
+                             void *              udata);
 
 static herr_t H5C_make_space_in_cache(H5F_t * f,
                                       hid_t   primary_dxpl_id,
@@ -513,8 +512,6 @@ H5C_create(size_t		      max_cache_size,
 
     H5C_stats__reset(cache_ptr);
 
-    cache_ptr->skip_file_checks			= FALSE;
-    cache_ptr->skip_dxpl_id_checks		= FALSE;
     cache_ptr->prefix[0]			= '\0';  /* empty string */
 
     /* Set return value */
@@ -757,7 +754,6 @@ H5C_dest(H5F_t * f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
 
     if ( H5C_flush_cache(f, primary_dxpl_id, secondary_dxpl_id,
                          H5C__FLUSH_INVALIDATE_FLAG) < 0 ) {
@@ -994,7 +990,6 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f);
     HDassert( cache_ptr->slist_ptr );
 
     ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
@@ -1361,7 +1356,6 @@ H5C_flush_to_min_clean(H5F_t * f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
 
     if ( cache_ptr->check_write_permitted != NULL ) {
 
@@ -1919,7 +1913,6 @@ H5C_insert_entry(H5F_t *             f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( type->flush );
     HDassert( type->size );
@@ -2205,7 +2198,6 @@ H5C_mark_entries_as_clean(H5F_t *  f,
     cache_ptr = f->shared->cache;
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
 
     HDassert( ce_array_len > 0 );
     HDassert( ce_array_ptr != NULL );
@@ -2883,7 +2875,6 @@ H5C_protect(H5F_t *		f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( type->flush );
     HDassert( type->load );
@@ -2917,7 +2908,7 @@ H5C_protect(H5F_t *		f,
 
         hit = FALSE;
 
-        thing = H5C_load_entry(f, primary_dxpl_id, type, addr, udata, cache_ptr->skip_file_checks);
+        thing = H5C_load_entry(f, primary_dxpl_id, type, addr, udata);
 
         if ( thing == NULL ) {
 
@@ -3592,48 +3583,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_set_skip_flags
- *
- * Purpose:     Set the values of the skip sanity check flags.
- *
- *		This function and the skip sanity check flags were created
- *		for the convenience of the test bed.  However it is
- *		possible that there may be other uses for the flags.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/11/04
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_set_skip_flags(H5C_t * cache_ptr,
-                   hbool_t skip_file_checks,
-                   hbool_t skip_dxpl_id_checks)
-{
-    herr_t		ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_set_skip_flags, FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
-    }
-
-    cache_ptr->skip_file_checks    = skip_file_checks;
-    cache_ptr->skip_dxpl_id_checks = skip_dxpl_id_checks;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_set_skip_flags() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_set_trace_file_ptr
  *
  * Purpose:     Set the trace_file_ptr field for the cache.
@@ -4295,7 +4244,6 @@ H5C_unprotect(H5F_t *		  f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( type->clear );
     HDassert( type->flush );
@@ -6137,7 +6085,6 @@ H5C_flush_invalidate_cache(const H5F_t * f,
     HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( cache_ptr->slist_ptr );
 
     /* Filter out the flags that are not relevant to the flush/invalidate.
@@ -6671,7 +6618,6 @@ H5C_flush_single_entry(const H5F_t *	   f,
     HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( H5F_addr_defined(addr) );
     HDassert( first_flush_ptr );
 
@@ -6743,14 +6689,8 @@ H5C_flush_single_entry(const H5F_t *	   f,
          * Note that we only do these sanity checks when the clear_only flag
          * is not set, and the entry to be flushed is dirty.  Don't bother
          * otherwise as no file I/O can result.
-         *
-         * There are also cases (testing for instance) where it is convenient
-         * to pass in dummy dxpl_ids.  Since we don't use the dxpl_ids directly,
-         * this isn't a problem -- but we do have to turn off sanity checks
-         * involving them.  We use cache_ptr->skip_dxpl_id_checks to do this.
          */
-        if ( ( ! cache_ptr->skip_dxpl_id_checks ) &&
-             ( ! clear_only ) &&
+        if ( ( ! clear_only ) &&
              ( entry_ptr->is_dirty ) &&
              ( IS_H5FD_MPI(f) ) ) {
 
@@ -7191,12 +7131,7 @@ H5C_load_entry(H5F_t *             f,
                hid_t               dxpl_id,
                const H5C_class_t * type,
                haddr_t             addr,
-               void *              udata,
-#ifndef NDEBUG
-               hbool_t		   skip_file_checks)
-#else /* NDEBUG */
-               hbool_t UNUSED	   skip_file_checks)
-#endif /* NDEBUG */
+               void *              udata)
 {
     void *		thing = NULL;   /* Pointer to thing loaded */
     H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
@@ -7207,7 +7142,6 @@ H5C_load_entry(H5F_t *             f,
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
-    HDassert(skip_file_checks || f);
     HDassert(type);
     HDassert(type->load);
     HDassert(type->size);
