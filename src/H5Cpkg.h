@@ -832,25 +832,6 @@
  *
  * Fields supporting testing:
  *
- * For test purposes, it is useful to turn off some asserts and sanity
- * checks.  The following flags support this.
- *
- * skip_file_checks:  Boolean flag used to skip sanity checks on file
- *		parameters passed to the cache.  In the test bed, there
- *		is no reason to have a file open, as the cache proper
- *		just passes these parameters through without using them.
- *
- *		When this flag is set, all sanity checks on the file
- *		parameters are skipped.  The field defaults to FALSE.
- *
- * skip_dxpl_id_checks:  Boolean flag used to skip sanity checks on the
- *		dxpl_id parameters passed to the cache.  These are not
- *		used directly by the cache, so skipping the checks
- *		simplifies the test bed.
- *
- *		When this flag is set, all sanity checks on the dxpl_id
- *		parameters are skipped.  The field defaults to FALSE.
- *
  * prefix	Array of char used to prefix debugging output.  The
  *		field is intended to allow marking of output of with
  *		the processes mpi rank.
@@ -1013,8 +994,6 @@ struct H5C_t
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    hbool_t			skip_file_checks;
-    hbool_t			skip_dxpl_id_checks;
     char			prefix[H5C__PREFIX_LEN];
 };
 
