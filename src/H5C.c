@@ -573,8 +573,6 @@ H5C_create(size_t		      max_cache_size,
 
     H5C_stats__reset(cache_ptr);
 
-    cache_ptr->skip_file_checks			= FALSE;
-    cache_ptr->skip_dxpl_id_checks		= FALSE;
     cache_ptr->prefix[0]			= '\0';  /* empty string */
 
     /* We used to check for journaling here, but the super block hasn't
@@ -1103,7 +1101,6 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f);
     HDassert( cache_ptr->slist_ptr );
 
     ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
@@ -1486,7 +1483,6 @@ H5C_flush_to_min_clean(H5F_t * f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
 
     if ( cache_ptr->check_write_permitted != NULL ) {
 
@@ -2040,7 +2036,6 @@ H5C_insert_entry(H5F_t *             f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( ( ! ( cache_ptr->mdj_enabled ) ) ||
               ( cache_ptr->trans_in_progress ) );
     HDassert( type );
@@ -3047,7 +3042,6 @@ H5C_protect(H5F_t *		f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
 
@@ -3769,48 +3763,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_set_skip_flags
- *
- * Purpose:     Set the values of the skip sanity check flags.
- *
- *		This function and the skip sanity check flags were created
- *		for the convenience of the test bed.  However it is
- *		possible that there may be other uses for the flags.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              6/11/04
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_set_skip_flags(H5C_t * cache_ptr,
-                   hbool_t skip_file_checks,
-                   hbool_t skip_dxpl_id_checks)
-{
-    herr_t		ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_set_skip_flags, FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
-    }
-
-    cache_ptr->skip_file_checks    = skip_file_checks;
-    cache_ptr->skip_dxpl_id_checks = skip_dxpl_id_checks;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_set_skip_flags() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_set_trace_file_ptr
  *
  * Purpose:     Set the trace_file_ptr field for the cache.
@@ -4471,7 +4423,6 @@ H5C_unprotect(H5F_t *		  f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
@@ -6316,7 +6267,6 @@ H5C_flush_invalidate_cache(const H5F_t * f,
     HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( cache_ptr->slist_ptr );
 
     /* Filter out the flags that are not relevant to the flush/invalidate.

@@ -136,7 +136,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     fspace->max_sect_size = fs_create->max_sect_size;
 
     /* Cache the new free space header (pinned) */
-    if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache")
 
     /* Set the return value */

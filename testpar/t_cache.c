@@ -2286,7 +2286,7 @@ insert_entry(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC_set(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
+        result = H5AC_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, &(types[0]),
                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -2296,7 +2296,7 @@ insert_entry(H5C_t * cache_ptr,
 
             nerrors++;
             if ( verbose ) {
-	        HDfprintf(stdout, "%d:%s: Error in H5AC_set().\n",
+	        HDfprintf(stdout, "%d:%s: Error in H5AC_insert_entry().\n",
 	                  world_mpi_rank, fcn_name);
             }
         }
@@ -3207,9 +3207,6 @@ setup_cache_for_test(hid_t * fid_ptr,
         *fid_ptr = fid;
         *file_ptr_ptr = file_ptr;
         *cache_ptr_ptr = cache_ptr;
-#if 0 /* delete this eventually */
-        H5C_set_skip_flags(cache_ptr, TRUE, TRUE);
-#endif /* JRM */
         H5C_stats__reset(cache_ptr);
         success = TRUE;
     }
@@ -5137,7 +5134,7 @@ smoke_check_5(void)
  *              functions:
  *
  *                    - H5AC_flush()
- *                    - H5AC_set()
+ *                    - H5AC_insert_entry()
  *                    - H5AC_mark_entry_dirty()
  *                      H5AC_move_entry()
  *                    - H5AC_pin_protected_entry()
@@ -5180,10 +5177,10 @@ trace_file_check(void)
     {
       "### HDF5 metadata cache trace file version 2 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
-      "H5AC_set 0x400 2 0x0 2 0\n",
-      "H5AC_set 0x402 2 0x0 2 0\n",
-      "H5AC_set 0x404 4 0x0 4 0\n",
-      "H5AC_set 0x408 6 0x0 6 0\n",
+      "H5AC_insert_entry 0x400 2 0x0 2 0\n",
+      "H5AC_insert_entry 0x402 2 0x0 2 0\n",
+      "H5AC_insert_entry 0x404 4 0x0 4 0\n",
+      "H5AC_insert_entry 0x408 6 0x0 6 0\n",
       "H5AC_protect 0x400 2 H5AC_WRITE 2 1\n",
       "H5AC_mark_entry_dirty 0x400 0\n",
       "H5AC_unprotect 0x400 16 2 0 0\n",

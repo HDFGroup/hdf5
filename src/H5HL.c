@@ -163,7 +163,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
     /* Add to cache */
-    if(H5AC_set(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to cache local heap prefix")
 
     /* Set address to return */
@@ -270,7 +270,7 @@ H5HL_dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize heap prefix in cache")
 
             /* Insert data block into cache (pinned) */
-            if(H5AC_set(f, dxpl_id, H5AC_LHEAP_DBLK, new_addr, dblk, H5AC__PIN_ENTRY_FLAG) < 0)
+            if(H5AC_insert_entry(f, dxpl_id, H5AC_LHEAP_DBLK, new_addr, dblk, H5AC__PIN_ENTRY_FLAG) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to cache local heap data block")
             dblk = NULL;
 

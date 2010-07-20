@@ -222,7 +222,7 @@ HDfprintf(stderr, "%s: New section info, addr = %a, size = %Hu\n", FUNC, fspace-
 #endif /* QAK */
 
         /* Cache the new free space section info (pinned) */
-        if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__PIN_ENTRY_FLAG) < 0)
+        if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__PIN_ENTRY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space sections to cache")
 
         /* Mark free space header as dirty */

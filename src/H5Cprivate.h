@@ -1474,10 +1474,6 @@ H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr,
 
 H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
 
-H5_DLL herr_t H5C_set_skip_flags(H5C_t * cache_ptr,
-                                 hbool_t skip_file_checks,
-                                 hbool_t skip_dxpl_id_checks);
-
 H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t * cache_ptr,
 		                     FILE * trace_file_ptr);
 

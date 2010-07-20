@@ -286,7 +286,7 @@ H5_DLL herr_t H5AC_end_transaction(hbool_t do_transaction,
 
 H5_DLL herr_t H5AC_get_entry_status(const H5F_t *f, haddr_t addr,
 				    unsigned * status_ptr);
-H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
+H5_DLL herr_t H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                        haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,

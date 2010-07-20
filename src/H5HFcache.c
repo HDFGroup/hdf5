@@ -595,7 +595,7 @@ H5HF_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)image) == size);
 
-    /* Reset the cache flags for this operation (metadata not resized or renamed) */
+    /* Reset the cache flags for this operation (metadata not resized or moved) */
     *flags = 0;
 
     /* Sanity check */
@@ -991,7 +991,7 @@ H5HF_cache_iblock_serialize(const H5F_t *f, hid_t UNUSED dxpl_id,
     /* Metadata checksum */
     UINT32ENCODE(p, metadata_chksum);
 
-    /* Reset the cache flags for this operation (metadata not resized or renamed) */
+    /* Reset the cache flags for this operation (metadata not resized or moved) */
     *flags = 0;
 
     /* Sanity check */
@@ -1512,14 +1512,12 @@ H5HF_cache_dblock_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	    H5MM_xfree(write_buf);
     } /* end if */
     else {
-	/* on disk image has been resized, and possibly renamed -- *flags,
-	 * *new_len, and *new_addr should all be setup by now.
-	 * Thus all we need to do here is the old image, and allocate
+	/* On disk image has been resized, and possibly moved -- *flags,
+	 * *new_len, and *new_addr should all be set up by now.
+	 * Thus all we need to do here is free the old image, and assign the
 	 * space for the new image.
 	 */
-	HDassert(*flags != 0);
 	HDassert(write_buf != NULL);
-	HDassert(*new_len = write_size);
 	HDassert(write_buf != dblock->blk);
 
 	H5MM_xfree(image);
