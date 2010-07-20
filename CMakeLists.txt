@@ -67,7 +67,7 @@ PROJECT (HDF5 C CXX)
 #   
 #   # Add the sub project
 #   ADD_SUBDIRECTORY(Utilities/hdf5-1.8)
-#   # Add the HDf5 dirs to our include path
+#   # Add the HDF5 dirs to our include path
 #   SET(HDF5_INCLUDE_DIR 
 #     ${ParaView_SOURCE_DIR}/Utilities/hdf5-1.8/src
 #     ${ParaView_BINARY_DIR}/Utilities/hdf5-1.8
@@ -85,7 +85,7 @@ SET (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
 SET (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
 SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
 SET (HDF5_PACKAGE_TARNAME "hdf5")
-SET (HDF5_PACKAGE_URL "htt://www.hdfgroup.org")
+SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
 SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ SET (HDF5_HL_F90_C_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_HL_F90_C_LIB_
 #-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
-SET (HDF5_RESOURCES_DIR      ${HDF5_SOURCE_DIR}/Resources)
+SET (HDF5_RESOURCES_DIR      ${HDF5_SOURCE_DIR}/config/cmake)
 SET (HDF5_SRC_DIR            ${HDF5_SOURCE_DIR}/src)
 SET (HDF5_TEST_SOURCE_DIR    ${HDF5_SOURCE_DIR}/test)
 SET (HDF5_CPP_SOURCE_DIR     ${HDF5_SOURCE_DIR}/c++)
@@ -175,12 +175,12 @@ ENDIF (NOT HDF5_EXPORTED_TARGETS)
 # add it to this variable. This is NOT used by Make Install, but for projects
 # which include hdf5 as a sub-project within their build tree
 #-----------------------------------------------------------------------------
-SET_GLOBAL_VARIABLE(HDF5_LIBRARIES_TO_EXPORT "")
+SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "")
 
 #-----------------------------------------------------------------------------
 # Run all the CMake configuration tests for our build environment
 #-----------------------------------------------------------------------------
-INCLUDE (${HDF5_SOURCE_DIR}/ConfigureChecks.cmake)
+INCLUDE (${HDF5_RESOURCES_DIR}/ConfigureChecks.cmake)
 
 #-----------------------------------------------------------------------------
 # Option to use legacy naming for windows libs/programs, default is legacy
@@ -212,7 +212,7 @@ IF (BUILD_SHARED_LIBS)
 ELSE (BUILD_SHARED_LIBS)
   IF (NOT WIN32)
     # should this be a user setting : Everyone uses it anyway ?
-    ADD_DEFINITIONS(-DPIC)
+    ADD_DEFINITIONS (-DPIC)
   ENDIF (NOT WIN32)
   IF (MSVC)
     SET (CMAKE_MFC_FLAG 0)
@@ -316,9 +316,9 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
         CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
   ENDIF (MSVC)
-  IF(WIN32)
+  IF (WIN32)
     ADD_DEFINITIONS (-D_CRT_SECURE_NO_WARNINGS)
-  ENDIF(WIN32)
+  ENDIF (WIN32)
   # Borland uses -w- to suppress warnings.
   IF (BORLAND)
     SET (HDF5_WARNINGS_BLOCKED 1)
@@ -438,7 +438,7 @@ IF (HDF5_ENABLE_Z_LIB_SUPPORT)
     SET (H5_HAVE_ZLIB_H 1)
     SET (H5_HAVE_LIBZ 1)
   ENDIF (NOT H5_ZLIB_HEADER)
-  CONFIGURE_FILE (${HDF5_SOURCE_DIR}/Resources/hdf5_zlib.h.in ${HDF5_BINARY_DIR}/hdf5_zlib.h @ONLY)
+  CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/hdf5_zlib.h.in ${HDF5_BINARY_DIR}/hdf5_zlib.h @ONLY)
   SET (LINK_LIBS ${LINK_LIBS} ${ZLIB_LIBRARIES})
   INCLUDE_DIRECTORIES (${ZLIB_INCLUDE_DIRS})
   MESSAGE (STATUS "Filter ZLIB is ON")
@@ -447,7 +447,7 @@ ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT)
 #-----------------------------------------------------------------------------
 # Option for SzLib support
 #-----------------------------------------------------------------------------
-SET (CMAKE_MODULE_PATH ${HDF5_SOURCE_DIR}/Resources/CMake ${CMAKE_MODULE_PATH})
+SET (CMAKE_MODULE_PATH ${HDF5_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 OPTION (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 IF (HDF5_ENABLE_SZIP_SUPPORT)
   FIND_PACKAGE (SZIP REQUIRED)
@@ -488,7 +488,7 @@ ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/src ${PROJECT_BINARY_DIR}/src)
 #-----------------------------------------------------------------------------
 IF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
   SET (XLATE_UTILITY "xlatefile")
-  ADD_EXECUTABLE(${XLATE_UTILITY} ${HDF5_SOURCE_DIR}/Resources/xlatefile.c)
+  ADD_EXECUTABLE(${XLATE_UTILITY} ${HDF5_RESOURCES_DIR}/xlatefile.c)
 ENDIF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
@@ -496,8 +496,10 @@ ENDIF (HDF5_BUILD_TOOLS AND BUILD_TESTING)
 #-----------------------------------------------------------------------------
 OPTION (BUILD_TESTING "Build HDF5 Unit Testing" OFF)
 IF (BUILD_TESTING)
-  SET (DART_TESTING_TIMEOUT 1200 CACHE INTEGER
-       "Timeout in seconds for each test (default 1200=20minutes)")
+  SET (DART_TESTING_TIMEOUT 1200
+      CACHE INTEGER
+      "Timeout in seconds for each test (default 1200=20minutes)"
+  )
   ENABLE_TESTING ()
   INCLUDE (CTest)
   IF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -560,7 +562,7 @@ ENDIF (HDF5_BUILD_HL_LIB)
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
-CONFIGURE_FILE (${HDF5_SOURCE_DIR}/Resources/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
+CONFIGURE_FILE (${HDF5_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -608,7 +610,7 @@ SET (HDF5_VERSION_MAJOR  @HDF5_PACKAGE_VERSION_MAJOR@)
 SET (HDF5_VERSION_MINOR  @HDF5_PACKAGE_VERSION_MINOR@)
 
 CONFIGURE_FILE (
-    ${HDF5_SOURCE_DIR}/Resources/HDF5-config.cmake.build.in 
+    ${HDF5_RESOURCES_DIR}/HDF5-config.cmake.build.in 
     ${HDF5_BINARY_DIR}/HDF5-config.cmake @ONLY
 )
 
@@ -619,7 +621,7 @@ INSTALL (CODE
     "SET (HDF5_INSTALL_SKIP_TARGETS 1)
      INCLUDE (${HDF5_BINARY_DIR}/HDF5-config.cmake) 
      CONFIGURE_FILE (
-         \"${HDF5_SOURCE_DIR}/Resources/HDF5-config.cmake.install.in\" 
+         \"${HDF5_RESOURCES_DIR}/HDF5-config.cmake.install.in\" 
          \"${CMAKE_INSTALL_PREFIX}/lib/HDF5-config.cmake\" @ONLY
      )
     "
