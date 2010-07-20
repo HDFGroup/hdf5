@@ -55,7 +55,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testh5cc.sh.in $(top_srcdir)/config/commence.am \
+	$(srcdir)/run-c-ex.sh.in $(srcdir)/testh5cc.sh.in \
+	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
 TESTS =
@@ -66,7 +67,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testh5cc.sh
+CONFIG_CLEAN_FILES = run-c-ex.sh testh5cc.sh
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -111,6 +112,7 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
+CXX_VERSION = @CXX_VERSION@
 CYGPATH_W = @CYGPATH_W@
 DEBUG_PKG = @DEBUG_PKG@
 DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
@@ -136,6 +138,7 @@ FC = @FC@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
+FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
 FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
@@ -349,13 +352,16 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c
 
+INSTALL_SCRIPT_FILES = run-c-ex.sh
+INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
 
 # The external link examples demonstrate how to use paths; they need
 # directories to be created to do this.
 EXTLINK_DIRS = red blue u2w
 
 # Example directory
-EXAMPLEDIR = $(docdir)/hdf5/examples/c
+EXAMPLEDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples/c
+EXAMPLETOPDIR = ${DESTDIR}/$(exec_prefix)/share/hdf5_examples
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
@@ -414,6 +420,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+run-c-ex.sh: $(top_builddir)/config.status $(srcdir)/run-c-ex.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testh5cc.sh: $(top_builddir)/config.status $(srcdir)/testh5cc.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
@@ -628,6 +636,8 @@ h5_shared_mesg: $(srcdir)/h5_shared_mesg.c
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
 	-$(top_srcdir)/bin/mkdirs $@
+$(EXAMPLETOPDIR):
+	-$(top_srcdir)/bin/mkdirs $@
 
 # Install and uninstall rules.  We install the source files, not the
 # example programs themselves.
@@ -642,10 +652,26 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;                                                                \
 	done
+	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
+	  fi;                                                                \
+	done
 
 uninstall-examples:
-	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then                                 \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);              \
+	@if test -n "$(INSTALL_FILES)" -a -d $(EXAMPLEDIR); then             \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_FILES);                \
+        fi
+	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+        fi
+	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \
         fi
 
 installcheck-local:

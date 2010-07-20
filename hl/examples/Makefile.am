@@ -26,7 +26,8 @@ if BUILD_PARALLEL_CONDITIONAL
 endif
 
 # Example directory
-EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c
+EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl/c
+EXAMPLETOPDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/hl
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -41,7 +42,15 @@ TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = ptExampleFL.c ptExampleVL.c
+INSTALL_FILES = ex_lite1.c ex_lite2.c ex_lite3.c ptExampleFL.c ptExampleVL.c \
+                ex_image1.c ex_image2.c \
+                ex_table_01.c ex_table_02.c ex_table_03.c ex_table_04.c      \
+                ex_table_05.c ex_table_06.c ex_table_07.c ex_table_08.c      \
+                ex_table_09.c ex_table_10.c ex_table_11.c ex_table_12.c      \
+                ex_ds1.c image24pixel.txt image8.txt pal_rgb.h
+
+INSTALL_SCRIPT_FILES = run-hlc-ex.sh
+INSTALL_TOP_SCRIPT_FILES = run-hl-ex.sh
 
 # Additional dependencies for each program are listed below.
 if BUILD_PARALLEL_CONDITIONAL

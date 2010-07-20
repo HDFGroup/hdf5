@@ -462,7 +462,6 @@ int main(int argc, char **argv)
 	coll_irregular_complex_chunk_read,NULL,
 	"collective irregular complex chunk read",PARATESTFILE);
 
-
     AddTest("null", null_dataset, NULL,
 	    "null dataset test", PARATESTFILE);
 
@@ -472,6 +471,26 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL,
 	    "I/O mode confusion test -- hangs quickly on failure",
             &io_mode_confusion_params);
+
+    AddTest("tldsc",
+            lower_dim_size_comp_test, NULL,
+            "test lower dim size comp in span tree to mpi derived type", 
+            PARATESTFILE);
+
+    AddTest("lccio",
+            link_chunk_collective_io_test, NULL,
+            "test mpi derived type management", 
+            PARATESTFILE);
+
+    /* rank projections / shape same tests */
+
+    AddTest("chsssdrpio",
+	contig_hyperslab_dr_pio_test, NULL,
+	"contiguous hyperslab shape same different rank PIO",PARATESTFILE);
+
+    AddTest("cbhsssdrpio",
+	checker_board_hyperslab_dr_pio_test, NULL,
+	"checker board hyperslab shape same different rank PIO",PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);

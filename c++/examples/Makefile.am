@@ -27,8 +27,9 @@ TEST_PROG=create readdata writedata compound extend_ds chunks h5group
 TEST_SCRIPT=testh5c++.sh
 
 # These are the example files to be installed
-INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \
+INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp \
               extend_ds.cpp chunks.cpp h5group.cpp
+INSTALL_SCRIPT_FILES = run-c++-ex.sh
 
 # Some of the examples depend on files created by running other examples
 readdata.chkexe_: create.chkexe_
@@ -38,7 +39,7 @@ chunks.chkexe_: extend_ds.chkexe_
 CXX_API=yes
 
 # Where to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/c++
+EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/c++
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

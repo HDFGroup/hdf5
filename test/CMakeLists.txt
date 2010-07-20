@@ -301,6 +301,7 @@ IF (CREATE_GENERATORS)
       space_overflow
       gen_filespace
       gen_specmetaread
+      gen_sizes_lheap
   )
 
   FOREACH (gen ${H5_GENERATORS})

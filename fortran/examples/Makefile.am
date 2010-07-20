@@ -41,6 +41,7 @@ INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
        hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
        refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
+INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
@@ -64,7 +65,7 @@ $(EXTRA_PROG): $(H5FC)
 endif
 
 # Tell automake how to install examples
-EXAMPLEDIR=$(docdir)/hdf5/examples/fortran
+EXAMPLEDIR=${DESTDIR}/$(exec_prefix)/share/hdf5_examples/fortran
 
 # List dependencies for each example.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it

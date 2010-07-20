@@ -1,4 +1,4 @@
-HDF5 version 1.9.73-FA_a4 currently under development
+HDF5 version 1.9.75-FA_a4 currently under development
 ================================================================================
 
 
@@ -164,6 +164,8 @@ New Features
 
     Tools:
     ------
+     - h5ls: Add new flag --no-dangling-links. (refer to --help for details)
+               (JKM - 2010/06/15) 
      - h5ls: Add new flag --follow-symlinks. (refer to --help for details)
                (JKM - 2010/05/25)
      - h5diff: Add new flag --no-dangling-links. (refer to --help for details)
@@ -232,6 +234,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that could cause file corruption when using non-default
+            sizes of addresses and/or lengths.  This bug could also cause
+            uncorrupted files with this property to be unreadable.  This bug
+            was introduced in 1.8.5. (NAF - 2010/07/16 - 1951)
       - Fixed a file corruption bug that could happen when shrinking a
             compressed dataset. (NAF - 2010/05/20)
       - Fixed some memory leaks in VL datatype conversion when strings are
@@ -380,6 +386,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Removed recognition of the parallel compilers of LAM(hcc) and
+      ChMPIon(cmpicc) since we have no access to these two MPI implementations
+      and cannot verify their correctness. (AKC - 2010/7/14 - Bug 1921)
     - Removed the following config files, as we no longer support them:
         config/dec-osf*, config/hpux11.00, config/irix5.x, 
         config/powerpc-ibm-aix4.x config/rs6000-ibm-aix5.x config/unicos*
