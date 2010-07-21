@@ -1385,7 +1385,7 @@ H5S_hyper_copy_span(H5S_hyper_span_info_t *spans)
 
     /* Copy the hyperslab span tree */
     if(NULL == (ret_value = H5S_hyper_copy_span_helper(spans)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy hyperslab span tree")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy hyperslab span tree")
 
     /* Reset the scratch pointers for the next routine which needs them */
     H5S_hyper_span_scratch(spans, NULL);
