@@ -76,19 +76,6 @@ PROJECT (HDF5 C CXX)
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-# Basic HDF5 stuff here
-#-----------------------------------------------------------------------------
-SET (HDF5_PACKAGE "hdf5")
-SET (HDF5_PACKAGE_NAME "HDF5")
-SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
-SET (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
-SET (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
-SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
-SET (HDF5_PACKAGE_TARNAME "hdf5")
-SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
-SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
-
-#-----------------------------------------------------------------------------
 # Set the core names of all the libraries
 #-----------------------------------------------------------------------------
 SET (HDF5_LIB_CORENAME              "hdf5")
@@ -121,6 +108,22 @@ SET (HDF5_HL_F90_LIB_NAME       "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_HL_F90_LIB_CO
 SET (HDF5_HL_F90_C_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_HL_F90_C_LIB_CORENAME}")
 
 #-----------------------------------------------------------------------------
+# Set the target names of all the libraries
+#-----------------------------------------------------------------------------
+SET (HDF5_LIB_TARGET              ${HDF5_LIB_CORENAME})
+SET (HDF5_TEST_LIB_TARGET         ${HDF5_TEST_LIB_CORENAME})
+SET (HDF5_CPP_LIB_TARGET          ${HDF5_CPP_LIB_CORENAME})
+SET (HDF5_HL_LIB_TARGET           ${HDF5_HL_LIB_CORENAME})
+SET (HDF5_HL_CPP_LIB_TARGET       ${HDF5_HL_CPP_LIB_CORENAME})
+SET (HDF5_TOOLS_LIB_TARGET        ${HDF5_TOOLS_LIB_CORENAME})
+SET (HDF5_F90_LIB_TARGET          ${HDF5_F90_LIB_CORENAME})
+SET (HDF5_F90_C_LIB_TARGET        ${HDF5_F90_C_LIB_CORENAME})
+SET (HDF5_F90_TEST_LIB_TARGET     ${HDF5_F90_TEST_LIB_CORENAME})
+SET (HDF5_F90_C_TEST_LIB_TARGET   ${HDF5_F90_C_TEST_LIB_CORENAME})
+SET (HDF5_HL_F90_LIB_TARGET       ${HDF5_HL_F90_LIB_CORENAME})
+SET (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_CORENAME})
+
+#-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
 #-----------------------------------------------------------------------------
 SET (HDF5_RESOURCES_DIR      ${HDF5_SOURCE_DIR}/config/cmake)
@@ -132,6 +135,33 @@ SET (HDF5_HL_SOURCE_DIR      ${HDF5_SOURCE_DIR}/hl)
 SET (HDF5_TOOLS_SOURCE_DIR   ${HDF5_SOURCE_DIR}/tools)
 SET (HDF5_PERFORM_SOURCE_DIR ${HDF5_SOURCE_DIR}/perform)
 SET (HDF5_F90_SOURCE_DIR     ${HDF5_SOURCE_DIR}/fortran)
+
+#-----------------------------------------------------------------------------
+# parse the full version number from H5public.h and include in H5_VERS_INFO
+#-----------------------------------------------------------------------------
+FILE (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_MINOR ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
+    "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z.]*)\".*$"
+    "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
+#MESSAGE (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
+
+#-----------------------------------------------------------------------------
+# Basic HDF5 stuff here
+#-----------------------------------------------------------------------------
+SET (HDF5_PACKAGE "hdf5")
+SET (HDF5_PACKAGE_NAME "HDF5")
+SET (HDF5_PACKAGE_VERSION "${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}")
+SET (HDF5_PACKAGE_VERSION_MAJOR "${H5_VERS_MAJOR}.${H5_VERS_MINOR}")
+SET (HDF5_PACKAGE_VERSION_MINOR "${H5_VERS_RELEASE}")
+SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION}-${H5_VERS_SUBRELEASE}")
+SET (HDF5_PACKAGE_TARNAME "hdf5")
+SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
+SET (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
@@ -239,22 +269,6 @@ IF (HDF5_ENABLE_COVERAGE)
 ENDIF (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
-# Set the target names of all the libraries
-#-----------------------------------------------------------------------------
-SET (HDF5_LIB_TARGET              ${HDF5_LIB_CORENAME})
-SET (HDF5_TEST_LIB_TARGET         ${HDF5_TEST_LIB_CORENAME})
-SET (HDF5_CPP_LIB_TARGET          ${HDF5_CPP_LIB_CORENAME})
-SET (HDF5_HL_LIB_TARGET           ${HDF5_HL_LIB_CORENAME})
-SET (HDF5_HL_CPP_LIB_TARGET       ${HDF5_HL_CPP_LIB_CORENAME})
-SET (HDF5_TOOLS_LIB_TARGET        ${HDF5_TOOLS_LIB_CORENAME})
-SET (HDF5_F90_LIB_TARGET          ${HDF5_F90_LIB_CORENAME})
-SET (HDF5_F90_C_LIB_TARGET        ${HDF5_F90_C_LIB_CORENAME})
-SET (HDF5_F90_TEST_LIB_TARGET     ${HDF5_F90_TEST_LIB_CORENAME})
-SET (HDF5_F90_C_TEST_LIB_TARGET   ${HDF5_F90_C_TEST_LIB_CORENAME})
-SET (HDF5_HL_F90_LIB_TARGET       ${HDF5_HL_F90_LIB_CORENAME})
-SET (HDF5_HL_F90_C_LIB_TARGET     ${HDF5_HL_F90_C_LIB_CORENAME})
-
-#-----------------------------------------------------------------------------
 # When building utility executables that generate other (source) files :
 # we make use of the following variables defined in the root CMakeLists.
 # Certain systems may add /Debug or /Release to output paths
@@ -341,20 +355,6 @@ ENDIF (CMAKE_COMPILER_IS_GNUCC)
 IF (CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
-
-#-----------------------------------------------------------------------------
-# parse the full version number from H5public.h and include in H5_VERS_INFO
-#-----------------------------------------------------------------------------
-FILE (READ ${HDF5_SRC_DIR}/H5public.h _h5public_h_contents)
-STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MAJOR[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_MAJOR ${_h5public_h_contents})
-STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_MINOR ${_h5public_h_contents})
-STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
-    "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z.]*)\".*$"
-    "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
-#MESSAGE (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
